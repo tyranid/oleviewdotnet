@@ -1,0 +1,1 @@
+﻿Add host in WebBrowser mode. Perhaps implement a simple local web server, point WebBrowser at that and then inspect the document and pull out of object parameter.
