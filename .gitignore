@@ -1,0 +1,8 @@
+Win32/
+x64/
+*/obj/
+*/bin/
+*.suo
+*.user
+*.sdf
+*.opensdf
