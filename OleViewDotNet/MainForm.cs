@@ -28,8 +28,8 @@ namespace OleViewDotNet
         }
 
         private void MainForm_Load(object sender, EventArgs e)
-        {            
-            if (IntPtr.Size == 4)
+        {
+            if (!Environment.Is64BitProcess)
             {
                 Text += " 32bit";
             }
