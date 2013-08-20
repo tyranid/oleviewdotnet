@@ -90,6 +90,7 @@ namespace OleViewDotNet
 
                 CreateConsoleWindow();
                 RunspaceConfiguration config = RunspaceConfiguration.Create();
+                
                 config.Assemblies.Append(new AssemblyConfigurationEntry(asm.FullName, asm.Location));
 
                 /* Load all cmdlets from the assembly */

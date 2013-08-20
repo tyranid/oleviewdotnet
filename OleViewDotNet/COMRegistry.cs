@@ -285,8 +285,8 @@ namespace OleViewDotNet
         /// <param name="rootKey">The root registry key, e.g. HKEY_CLASSES_ROOT</param>
         private void LoadCLSIDs(RegistryKey rootKey)
         {
-            m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>();
-            m_clsidbyserver = new SortedDictionary<string, List<COMCLSIDEntry>>();
+            Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
+            Dictionary<string, List<COMCLSIDEntry>> clsidbyserver = new Dictionary<string, List<COMCLSIDEntry>>();
             m_categories = new Dictionary<Guid, List<COMCLSIDEntry>>();
 
             RegistryKey clsidKey = rootKey.OpenSubKey("CLSID");
@@ -299,25 +299,25 @@ namespace OleViewDotNet
                     {
                         Guid clsid = new Guid(key);
 
-                        if (!m_clsids.ContainsKey(clsid))
+                        if (!clsids.ContainsKey(clsid))
                         {
                             RegistryKey regKey = clsidKey.OpenSubKey(key);
                             if (regKey != null)
                             {
                                 COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
-                                m_clsids.Add(clsid, ent);
+                                clsids.Add(clsid, ent);
                                 if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
                                 {
                                     List<COMCLSIDEntry> list = null;
                                     string strServer = ent.Server.ToLower();
-                                    if (m_clsidbyserver.ContainsKey(strServer))
+                                    if (clsidbyserver.ContainsKey(strServer))
                                     {
-                                        list = m_clsidbyserver[strServer];
+                                        list = clsidbyserver[strServer];
                                     }
                                     else
                                     {
                                         list = new List<COMCLSIDEntry>();
-                                        m_clsidbyserver[strServer] = list;
+                                        clsidbyserver[strServer] = list;
                                     }
                                     list.Add(ent);
                                 }
@@ -352,12 +352,15 @@ namespace OleViewDotNet
             }
 
             int pos = 0;
-            m_clsidbyname = new COMCLSIDEntry[m_clsids.Count];
-            foreach (COMCLSIDEntry ent in m_clsids.Values)
+            m_clsidbyname = new COMCLSIDEntry[clsids.Count];
+            foreach (COMCLSIDEntry ent in clsids.Values)
             {
                 m_clsidbyname[pos++] = ent;
             }
             Array.Sort(m_clsidbyname);
+
+            m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
+            m_clsidbyserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbyserver);
         }
 
         private void LoadProgIDs(RegistryKey rootKey)
@@ -400,11 +403,11 @@ namespace OleViewDotNet
         /// <param name="rootKey">Root key of registry</param>
         private void LoadInterfaces(RegistryKey rootKey)
         {
-            m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>();
+            Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
             COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown);
-            m_interfaces.Add(unk.Iid, unk);
+            interfaces.Add(unk.Iid, unk);
             unk = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IMarshal);
-            m_interfaces.Add(unk.Iid, unk);
+            interfaces.Add(unk.Iid, unk);
             RegistryKey iidKey = rootKey.OpenSubKey("Interface");
             if (iidKey != null)
             {
@@ -415,13 +418,13 @@ namespace OleViewDotNet
                     {
                         Guid iid = new Guid(key);
 
-                        if (!m_interfaces.ContainsKey(iid))
+                        if (!interfaces.ContainsKey(iid))
                         {
                             RegistryKey regKey = iidKey.OpenSubKey(key);
                             if (regKey != null)
                             {
                                 COMInterfaceEntry ent = new COMInterfaceEntry(iid, regKey);
-                                m_interfaces.Add(iid, ent);
+                                interfaces.Add(iid, ent);
                                 if (ent.ProxyClsid != Guid.Empty)
                                 {
                                     if (m_clsids.ContainsKey(ent.ProxyClsid))
@@ -440,12 +443,14 @@ namespace OleViewDotNet
             }
 
             int pos = 0;
-            m_interfacebyname = new COMInterfaceEntry[m_interfaces.Count];
-            foreach (COMInterfaceEntry ent in m_interfaces.Values)
+            m_interfacebyname = new COMInterfaceEntry[interfaces.Count];
+            foreach (COMInterfaceEntry ent in interfaces.Values)
             {
                 m_interfacebyname[pos++] = ent;
             }
             Array.Sort(m_interfacebyname);
+
+            m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
         void LoadPreApproved()

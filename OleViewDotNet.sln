@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OleViewDotNet", "OleViewDotNet\OleViewDotNet.csproj", "{81F5C6AA-AC60-4F6E-9467-426997BB9D80}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnumerateInterfaces", "EnumerateInterfaces\EnumerateInterfaces.vcxproj", "{39EA6147-9029-444E-AF23-9C841D3DEB9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{877F606D-20A0-40A5-BDC6-1EEA64F7BC0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
