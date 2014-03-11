@@ -102,11 +102,13 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
         private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
         private Dictionary<Guid, COMInterfaceEntry[]> m_supportediids;
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
         private List<COMCLSIDEntry> m_preapproved;
+        private List<COMIELowRightsElevationPolicy> m_lowrights;
 
         #endregion
 
@@ -144,6 +146,14 @@ namespace OleViewDotNet
             }
         }
 
+        public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsByLocalServer
+        {
+            get
+            {
+                return m_clsidbylocalserver;
+            }
+        }
+
         public COMCLSIDEntry[] ClsidsByName
         {
             get 
@@ -170,6 +180,11 @@ namespace OleViewDotNet
             get { return m_preapproved.ToArray(); }
         }
 
+        public COMIELowRightsElevationPolicy[] LowRights
+        {
+            get { return m_lowrights.ToArray(); }
+        }
+
         #endregion
 
         #region Public Methods
@@ -183,6 +198,7 @@ namespace OleViewDotNet
             LoadProgIDs(rootKey);
             LoadInterfaces(rootKey);
             LoadPreApproved();
+            LoadLowRights();
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
         }
@@ -279,6 +295,22 @@ namespace OleViewDotNet
 
         #region Private Methods
 
+        private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
+        {
+            List<COMCLSIDEntry> list = null;
+            string strServer = entry.Server.ToLower();
+            if (dict.ContainsKey(strServer))
+            {
+                list = dict[strServer];
+            }
+            else
+            {
+                list = new List<COMCLSIDEntry>();
+                dict[strServer] = list;
+            }
+            list.Add(entry);
+        }
+
         /// <summary>
         /// Load CLSID information from the registry key
         /// </summary>
@@ -287,6 +319,7 @@ namespace OleViewDotNet
         {
             Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
             Dictionary<string, List<COMCLSIDEntry>> clsidbyserver = new Dictionary<string, List<COMCLSIDEntry>>();
+            Dictionary<string, List<COMCLSIDEntry>> clsidbylocalserver = new Dictionary<string, List<COMCLSIDEntry>>();  
             m_categories = new Dictionary<Guid, List<COMCLSIDEntry>>();
 
             RegistryKey clsidKey = rootKey.OpenSubKey("CLSID");
@@ -308,18 +341,11 @@ namespace OleViewDotNet
                                 clsids.Add(clsid, ent);
                                 if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
                                 {
-                                    List<COMCLSIDEntry> list = null;
-                                    string strServer = ent.Server.ToLower();
-                                    if (clsidbyserver.ContainsKey(strServer))
+                                    AddEntryToDictionary(clsidbyserver, ent);
+                                    if (ent.Type == COMCLSIDEntry.ServerType.LocalServer32)
                                     {
-                                        list = clsidbyserver[strServer];
+                                        AddEntryToDictionary(clsidbylocalserver, ent);
                                     }
-                                    else
-                                    {
-                                        list = new List<COMCLSIDEntry>();
-                                        clsidbyserver[strServer] = list;
-                                    }
-                                    list.Add(ent);
                                 }
 
                                 if (ent.Categories.Length > 0)
@@ -361,6 +387,7 @@ namespace OleViewDotNet
 
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
             m_clsidbyserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbyserver);
+            m_clsidbylocalserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbylocalserver);
         }
 
         private void LoadProgIDs(RegistryKey rootKey)
@@ -476,6 +503,41 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
+
+        private void LoadLowRightsKey(RegistryKey rootKey)
+        {
+            RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy");
+            if (key != null)
+            {
+                string[] subkeys = key.GetSubKeyNames();
+                foreach (string s in subkeys)
+                {
+                    try
+                    {
+                        Guid g = new Guid(s);
+
+                        RegistryKey rightsKey = key.OpenSubKey(s);
+
+                        COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, m_clsids, m_clsidbyserver, rightsKey);
+                        if (entry.Clsids.Length > 0)
+                        {
+                            m_lowrights.Add(entry);
+                        }
+                    }
+                    catch (FormatException)
+                    {
+                    }
+                }
+            }
+        }
+
+        void LoadLowRights()
+        {
+            m_lowrights = new List<COMIELowRightsElevationPolicy>();
+            LoadLowRightsKey(Registry.LocalMachine);
+            LoadLowRightsKey(Registry.CurrentUser);
+            m_lowrights.Sort();
         }
 
         #endregion

@@ -30,14 +30,7 @@ namespace OleViewDotNet
         {
             m_formCount--;
             if (m_formCount == 0)
-            {
-                try
-                {
-                    PowerShellInstance.Close();
-                }
-                catch (Exception)
-                {
-                }
+            {                
                 ExitThread();
             }
         }

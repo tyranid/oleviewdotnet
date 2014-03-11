@@ -19,7 +19,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
+using System.Text.RegularExpressions;
 
 namespace OleViewDotNet
 {
@@ -33,6 +35,8 @@ namespace OleViewDotNet
         /// </summary>
         COMRegistry m_reg;
 
+        TreeNode[] m_originalNodes;
+
         /// <summary>
         /// Enumeration to indicate what to display
         /// </summary>
@@ -42,10 +46,12 @@ namespace OleViewDotNet
             ProgIDs,
             CLSIDsByName,
             CLSIDsByServer,
+            CLSIDsByLocalServer,
             Interfaces,
             InterfacesByName,
             ImplementedCategories,
-            PreApproved
+            PreApproved,
+            IELowRights,
         }        
 
         /// <summary>
@@ -70,6 +76,59 @@ namespace OleViewDotNet
             InitializeComponent();
             m_reg = reg;
             m_mode = mode;
+            comboBoxMode.SelectedIndex = 0;
+            SetupTree();
+        }
+
+        private void SetupTree()
+        {
+            Cursor currCursor = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                switch (m_mode)
+                {
+                    case DisplayMode.CLSIDsByName:
+                        LoadCLSIDsByNames();
+                        break;
+                    case DisplayMode.CLSIDs:
+                        LoadCLSIDs();
+                        break;
+                    case DisplayMode.ProgIDs:
+                        LoadProgIDs();
+                        break;
+                    case DisplayMode.CLSIDsByServer:
+                        LoadCLSIDByServer(false);
+                        break;
+                    case DisplayMode.CLSIDsByLocalServer:
+                        LoadCLSIDByServer(true);
+                        break;
+                    case DisplayMode.Interfaces:
+                        LoadInterfaces();
+                        break;
+                    case DisplayMode.InterfacesByName:
+                        LoadInterfacesByName();
+                        break;
+                    case DisplayMode.ImplementedCategories:
+                        LoadImplementedCategories();
+                        break;
+                    case DisplayMode.PreApproved:
+                        LoadPreApproved();
+                        break;
+                    case DisplayMode.IELowRights:
+                        LoadIELowRights();
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            Cursor.Current = currCursor;
+            m_originalNodes = treeComRegistry.Nodes.Cast<TreeNode>().ToArray();
         }
 
         /// <summary>
@@ -150,7 +209,7 @@ namespace OleViewDotNet
         }
 
         private TreeNode CreateCLSIDNode(COMCLSIDEntry ent)
-        {
+        {            
             TreeNode nodeRet = new TreeNode(String.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassIcon, ClassIcon);
             nodeRet.ToolTipText = BuildCLSIDToolTip(ent);
             nodeRet.Tag = ent;
@@ -186,8 +245,8 @@ namespace OleViewDotNet
                 clsidNodes[i] = CreateCLSIDNode(ent);                
                 i++;
             }
-            TreeNode clsidRoot = treeComRegistry.Nodes.Add("CLSID");
-            clsidRoot.Nodes.AddRange(clsidNodes);
+            
+            treeComRegistry.Nodes.AddRange(clsidNodes);
             TabText = "CLSIDs";            
         }
 
@@ -206,8 +265,8 @@ namespace OleViewDotNet
                 }
                 i++;
             }
-            TreeNode progidRoot = treeComRegistry.Nodes.Add("ProgID");
-            progidRoot.Nodes.AddRange(progidNodes);
+            
+            treeComRegistry.Nodes.AddRange(progidNodes);
             TabText = "ProgIDs";
         }
 
@@ -223,19 +282,20 @@ namespace OleViewDotNet
                 clsidNameNodes[i].Nodes.Add("IUnknown");
                 i++;
             }
-            TreeNode clsidNameRoot = treeComRegistry.Nodes.Add("CLSID Names");
-            clsidNameRoot.Nodes.AddRange(clsidNameNodes);
+            
+            treeComRegistry.Nodes.AddRange(clsidNameNodes);
+
             TabText = "CLSIDs by Name";
         }
 
-        private void LoadCLSIDByServer()
+        private void LoadCLSIDByServer(bool localServer)
         {            
             int i = 0;
-            SortedDictionary<string, List<COMCLSIDEntry>> dict = m_reg.ClsidsByServer;            
+            SortedDictionary<string, List<COMCLSIDEntry>> dict = localServer ? m_reg.ClsidsByLocalServer : m_reg.ClsidsByServer;            
             
             TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
             foreach (KeyValuePair<string, List<COMCLSIDEntry>> pair in dict)
-            {                
+            {                                
                 serverNodes[i] = new TreeNode(pair.Key);
                 serverNodes[i].ToolTipText = pair.Key;
             
@@ -259,9 +319,8 @@ namespace OleViewDotNet
                 
                 i++;
             }
-            
-            TreeNode clsidRoot = treeComRegistry.Nodes.Add("CLSID By Server");
-            clsidRoot.Nodes.AddRange(serverNodes);
+
+            treeComRegistry.Nodes.AddRange(serverNodes);
             TabText = "CLSIDs by Server";
         }
 
@@ -274,8 +333,7 @@ namespace OleViewDotNet
                 iidNodes[i] = CreateInterfaceNode(ent);
                 i++;
             }
-            TreeNode clsidRoot = treeComRegistry.Nodes.Add("Interfaces");
-            clsidRoot.Nodes.AddRange(iidNodes);
+            treeComRegistry.Nodes.AddRange(iidNodes);
             TabText = "Interfaces";
         }
 
@@ -288,8 +346,7 @@ namespace OleViewDotNet
                 iidNameNodes[i] = CreateInterfaceNameNode(ent);                
                 i++;
             }
-            TreeNode clsidNameRoot = treeComRegistry.Nodes.Add("Interface Names");
-            clsidNameRoot.Nodes.AddRange(iidNameNodes);
+            treeComRegistry.Nodes.AddRange(iidNameNodes);
             TabText = "Interfaces by Name";        
         }
 
@@ -321,15 +378,15 @@ namespace OleViewDotNet
                 currNode.Nodes.AddRange(clsidNodes);
             }
 
-            TreeNode clsidRoot = treeComRegistry.Nodes.Add("Implemented Categories");
+
             TreeNode[] catNodes = new TreeNode[sortedNodes.Count];
             i = 0;
             foreach (KeyValuePair<string, TreeNode> pair in sortedNodes)
             {
                 catNodes[i++] = pair.Value;
-            }
+            }            
 
-            clsidRoot.Nodes.AddRange(catNodes);
+            treeComRegistry.Nodes.AddRange(catNodes);
             TabText = "Implemented Categories";            
         }
 
@@ -342,57 +399,27 @@ namespace OleViewDotNet
                 clsidNodes[i] = CreateCLSIDNode(ent);
                 i++;
             }
-            TreeNode clsidRoot = treeComRegistry.Nodes.Add("PreApproved");
-            clsidRoot.Nodes.AddRange(clsidNodes);
+            
+            treeComRegistry.Nodes.AddRange(clsidNodes);
             TabText = "Explorer PreApproved";   
         }
 
-        private void COMRegisterViewer_Load(object sender, EventArgs e)
+        private void LoadIELowRights()
         {
-            Cursor currCursor = Cursor.Current;
-            Cursor.Current = Cursors.WaitCursor;
-            try
+            int i = 0;
+            TreeNode[] clsidNodes = new TreeNode[m_reg.LowRights.Length];
+            foreach (COMIELowRightsElevationPolicy ent in m_reg.LowRights)
             {
-                switch (m_mode)
+                clsidNodes[i] = new TreeNode(ent.Name);
+                foreach (COMCLSIDEntry cls in ent.Clsids)
                 {
-                    case DisplayMode.CLSIDsByName:
-                        LoadCLSIDsByNames();
-                        break;
-                    case DisplayMode.CLSIDs:
-                        LoadCLSIDs();
-                        break;
-                    case DisplayMode.ProgIDs:
-                        LoadProgIDs();
-                        break;
-                    case DisplayMode.CLSIDsByServer:
-                        LoadCLSIDByServer();
-                        break;
-                    case DisplayMode.Interfaces:
-                        LoadInterfaces();
-                        break;
-                    case DisplayMode.InterfacesByName:
-                        LoadInterfacesByName();
-                        break;
-                    case DisplayMode.ImplementedCategories:
-                        LoadImplementedCategories();
-                        break;
-                    case DisplayMode.PreApproved:
-                        LoadPreApproved();
-                        break;
-                    default:
-                        break;
+                    clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
                 }
-                if (treeComRegistry.TopNode != null)
-                {
-                    treeComRegistry.TopNode.Expand();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                i++;
             }
 
-            Cursor.Current = currCursor;
+            treeComRegistry.Nodes.AddRange(clsidNodes);
+            TabText = "IE Low Rights Elevation Policy"; 
         }
 
         private void SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
@@ -696,5 +723,146 @@ namespace OleViewDotNet
                 SetupCLSIDNodeTree(node, true);
             }
         }
+
+        /// <summary>
+        /// Convert a basic Glob to a regular expression
+        /// </summary>
+        /// <param name="glob">The glob string</param>
+        /// <param name="ignoreCase">Indicates that match should ignore case</param>
+        /// <returns>The regular expression</returns>
+        private static Regex GlobToRegex(string glob, bool ignoreCase)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append("^");
+
+            foreach (char ch in glob)
+            {
+                if (ch == '*')
+                {
+                    builder.Append(".*");
+                }
+                else if (ch == '?')
+                {
+                    builder.Append(".");
+                }
+                else
+                {
+                    builder.Append(Regex.Escape(new String(ch, 1)));
+                }
+            }
+
+            builder.Append("$");
+
+            return new Regex(builder.ToString(), ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
+        }
+
+        private static Func<TreeNode, bool> CreateFilter(string filter, int mode, bool caseSensitive)
+        {                        
+            StringComparison comp;
+
+            if(caseSensitive)
+            {
+                comp = StringComparison.CurrentCulture;
+            }
+            else
+            {
+                comp = StringComparison.CurrentCultureIgnoreCase;
+            }
+
+            switch (mode)
+            {
+                case 0:
+                    if (caseSensitive)
+                    {
+                        return n => n.Text.Contains(filter);
+                    }
+                    else
+                    {
+                        filter = filter.ToLower();
+                        return n => n.Text.ToLower().Contains(filter.ToLower());
+                    }
+                case 1:
+                    return n => n.Text.StartsWith(filter, comp);
+                case 2:
+                    return n => n.Text.EndsWith(filter, comp);
+                case 3:
+                    return n => n.Text.Equals(filter, comp);
+                case 4:
+                    {
+                        Regex r = GlobToRegex(filter, caseSensitive);
+
+                        return n => r.IsMatch(n.Text);
+                    }
+                case 5:
+                    {
+                        Regex r = new Regex(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+
+                        return n => r.IsMatch(n.Text);
+                    }
+                default:
+                    throw new ArgumentException("Invalid mode value");
+            }
+
+        }
+
+        // Check if top node or one of its subnodes matches the filter
+        private static bool FilterNode(TreeNode n, Func<TreeNode, bool> filterFunc)
+        {
+            bool result = filterFunc(n);
+
+            if (!result)
+            {
+                foreach (TreeNode node in n.Nodes)
+                {
+                    result = filterFunc(node);
+                    if (result)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void btnApply_Click(object sender, EventArgs e)
+        {
+            try
+            {                
+                string filter = textBoxFilter.Text.Trim();
+                TreeNode[] nodes;
+
+                if (filter.Length > 0)
+                {
+                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);
+                    
+
+                    nodes = m_originalNodes.Where(n => FilterNode(n, filterFunc)).ToArray();
+                }
+                else
+                {
+                    nodes = m_originalNodes;
+                }
+
+                treeComRegistry.SuspendLayout();
+                treeComRegistry.Nodes.Clear();
+                treeComRegistry.Nodes.AddRange(nodes);
+                treeComRegistry.ResumeLayout();
+            }
+            catch(ArgumentException ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void textBoxFilter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
+            {
+                btnApply.PerformClick();
+            }
+        }
+
     }
 }

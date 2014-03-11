@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using System.IO;
+using System.Security;
 
 namespace OleViewDotNet
 {
@@ -26,6 +28,7 @@ namespace OleViewDotNet
         private Guid m_clsid;
         private string m_name;
         private string m_server;
+        private string m_cmdline;
         private Guid m_appid;
         private Guid m_typelib;
         private List<string> m_progids;
@@ -52,6 +55,53 @@ namespace OleViewDotNet
         public int CompareTo(COMCLSIDEntry right)
         {
             return String.Compare(m_name, right.m_name);
+        }
+
+        private static bool IsInvalidFileName(string filename)
+        {                        
+            return filename.IndexOfAny(Path.GetInvalidPathChars()) >= 0;                
+        }
+
+        private static string ProcessFileName(string filename, bool localServer)
+        {
+            string temp = filename.Trim();
+
+            if (temp.StartsWith("\""))
+            {
+                int lastIndex = temp.IndexOf('"', 1);
+                if (lastIndex >= 1)
+                {
+                    filename = temp.Substring(1, lastIndex - 1);
+                }
+            }
+            else if (localServer && temp.Contains(" "))
+            {
+                if (!File.Exists(temp))
+                {
+                    int index = temp.IndexOf(' ');
+                    while (index > 0)
+                    {
+                        string name = temp.Substring(0, index);
+
+                        if (File.Exists(name) || (Path.GetExtension(name) == String.Empty && File.Exists(name + ".exe")))
+                        {
+                            filename = name;
+                            break;
+                        }
+
+                        index = temp.IndexOf(' ', index + 1);
+                    }
+
+
+                    if (index < 0)
+                    {
+                        // We've run out of options, just take the first string
+                        filename = temp.Split(' ')[0];
+                    }
+                }
+            }
+
+            return filename;
         }
 
         private void LoadFromKey(RegistryKey key)
@@ -83,8 +133,28 @@ namespace OleViewDotNet
 
             if ((serverKey != null) && (serverKey.GetValue(null) != null))
             {
-                m_server = serverKey.GetValue(null).ToString();
-                serverKey.Close();
+                m_cmdline = serverKey.GetValue(null).ToString();
+                m_server = ProcessFileName(m_cmdline, m_servertype == ServerType.LocalServer32);
+
+                try
+                {
+                    // Expand out any short filenames
+                    if (m_server.Contains("~") && !IsInvalidFileName(m_server))
+                    {
+                        m_server = Path.GetFullPath(m_server);
+                    }
+                }
+                catch (IOException)
+                {
+                }
+                catch (SecurityException)
+                {
+                }
+                catch (ArgumentException)
+                {
+                }
+                
+                serverKey.Close();                
             }
             else
             {
@@ -189,13 +259,26 @@ namespace OleViewDotNet
             m_proxies.Add(ent);
         }
 
-        public COMCLSIDEntry(Guid clsid, RegistryKey rootKey)
+        public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
+        {            
+            LoadFromKey(rootKey);
+        }
+
+        private COMCLSIDEntry(Guid clsid)
         {
             m_clsid = clsid;
             m_progids = new List<string>();
             m_proxies = new List<COMInterfaceEntry>();
             m_categories = new Dictionary<Guid, bool>();
-            LoadFromKey(rootKey);
+            m_server = String.Empty;
+            m_cmdline = String.Empty;
+            m_servertype = ServerType.UnknownServer;
+        }
+
+        public COMCLSIDEntry(Guid clsid, ServerType type)
+            : this(clsid)
+        {
+            m_servertype = type;
         }
 
         public Guid Clsid
@@ -211,6 +294,11 @@ namespace OleViewDotNet
         public string Server
         {
             get { return m_server; }
+        }
+
+        public string CmdLine
+        {
+            get { return m_cmdline; }
         }
 
         public ServerType Type

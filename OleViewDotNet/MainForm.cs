@@ -171,16 +171,15 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuFileOpenPSWindow_Click(object sender, EventArgs e)
+        private void menuViewCLSIDsByLocalServer_Click(object sender, EventArgs e)
         {
-            try
-            {
-                PowerShellInstance.Open();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
+            OpenView(COMRegistryViewer.DisplayMode.CLSIDsByLocalServer);
         }
+
+        private void menuViewIELowRights_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.IELowRights);
+        }
+
     }
 }

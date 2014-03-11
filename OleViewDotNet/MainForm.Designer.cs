@@ -39,16 +39,17 @@
             this.menuViewCLSIDs = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByName = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByServer = new System.Windows.Forms.MenuItem();
+            this.menuViewCLSIDsByLocalServer = new System.Windows.Forms.MenuItem();
             this.menuViewProgIDs = new System.Windows.Forms.MenuItem();
             this.menuViewPreApproved = new System.Windows.Forms.MenuItem();
             this.menuViewImplementedCategories = new System.Windows.Forms.MenuItem();
+            this.menuViewIELowRights = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
-            this.menuFileOpenPSWindow = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -63,7 +64,6 @@
             this.menuFile.Index = 0;
             this.menuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuFileNewWindow,
-            this.menuFileOpenPSWindow,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
@@ -76,12 +76,12 @@
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 2;
+            this.menuItem2.Index = 1;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 3;
+            this.menuFileExit.Index = 2;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
             // 
@@ -92,9 +92,11 @@
             this.menuViewCLSIDs,
             this.menuViewCLSIDsByName,
             this.menuViewCLSIDsByServer,
+            this.menuViewCLSIDsByLocalServer,
             this.menuViewProgIDs,
             this.menuViewPreApproved,
             this.menuViewImplementedCategories,
+            this.menuViewIELowRights,
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName});
@@ -118,38 +120,50 @@
             this.menuViewCLSIDsByServer.Text = "CLSIDs By Server";
             this.menuViewCLSIDsByServer.Click += new System.EventHandler(this.menuViewCLSIDsByServer_Click);
             // 
+            // menuViewCLSIDsByLocalServer
+            // 
+            this.menuViewCLSIDsByLocalServer.Index = 3;
+            this.menuViewCLSIDsByLocalServer.Text = "CLSIDs By Local Server";
+            this.menuViewCLSIDsByLocalServer.Click += new System.EventHandler(this.menuViewCLSIDsByLocalServer_Click);
+            // 
             // menuViewProgIDs
             // 
-            this.menuViewProgIDs.Index = 3;
+            this.menuViewProgIDs.Index = 4;
             this.menuViewProgIDs.Text = "ProgIDs";
             this.menuViewProgIDs.Click += new System.EventHandler(this.menuViewProgIDs_Click);
             // 
             // menuViewPreApproved
             // 
-            this.menuViewPreApproved.Index = 4;
+            this.menuViewPreApproved.Index = 5;
             this.menuViewPreApproved.Text = "Explorer PreApproved";
             this.menuViewPreApproved.Click += new System.EventHandler(this.menuViewPreApproved_Click);
             // 
             // menuViewImplementedCategories
             // 
-            this.menuViewImplementedCategories.Index = 5;
+            this.menuViewImplementedCategories.Index = 6;
             this.menuViewImplementedCategories.Text = "Implemented Categories";
             this.menuViewImplementedCategories.Click += new System.EventHandler(this.menuViewImplementedCategories_Click);
             // 
+            // menuViewIELowRights
+            // 
+            this.menuViewIELowRights.Index = 7;
+            this.menuViewIELowRights.Text = "IE Low RIghts Elevation Policy";
+            this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
+            // 
             // menuItem1
             // 
-            this.menuItem1.Index = 6;
+            this.menuItem1.Index = 8;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 7;
+            this.menuViewInterfaces.Index = 9;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 8;
+            this.menuViewInterfacesByName.Index = 10;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
@@ -172,12 +186,6 @@
             this.menuObjectCreateInstanceFromCLSID.Index = 1;
             this.menuObjectCreateInstanceFromCLSID.Text = "Create Instance from CLSID";
             this.menuObjectCreateInstanceFromCLSID.Click += new System.EventHandler(this.menuViewCreateInstanceFromCLSID_Click);
-            // 
-            // menuFileOpenPSWindow
-            // 
-            this.menuFileOpenPSWindow.Index = 1;
-            this.menuFileOpenPSWindow.Text = "Open PS Window";
-            this.menuFileOpenPSWindow.Click += new System.EventHandler(this.menuFileOpenPSWindow_Click);
             // 
             // MainForm
             // 
@@ -214,7 +222,8 @@
         private System.Windows.Forms.MenuItem menuObjectCreateInstanceFromCLSID;
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem menuItem4;
-        private System.Windows.Forms.MenuItem menuFileOpenPSWindow;
+        private System.Windows.Forms.MenuItem menuViewCLSIDsByLocalServer;
+        private System.Windows.Forms.MenuItem menuViewIELowRights;
     }
 }
 

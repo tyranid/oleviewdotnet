@@ -229,8 +229,14 @@ namespace OleViewDotNet
                 RefreshParameters();
             }
             catch (Exception ex)
-            {                
-                MessageBox.Show(ex.InnerException.Message, "Invoke Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            {
+                Exception printEx = ex;
+                if (printEx.InnerException != null)
+                {
+                    printEx = printEx.InnerException;
+                }
+
+                MessageBox.Show(printEx.Message, "Invoke Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

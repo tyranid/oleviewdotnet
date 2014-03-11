@@ -85,7 +85,8 @@ namespace OleViewDotNet
 
             if (m_data != null)
             {
-                comboBoxValue.Text = m_data.ToString();
+                comboBoxValue.Items.Add(m_data.ToString());
+                comboBoxValue.SelectedIndex = 0;
             }
 
             comboBoxTypes.SelectedIndex = 0;
