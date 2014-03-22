@@ -42,6 +42,12 @@ namespace OleViewDotNet
             m_objName = strObjName;
             m_dispType = dispType;
             InitializeComponent();
+
+            if (m_dispType != null)
+            {
+                LoadDispatch();
+                TabText = String.Format("{0} {1}", m_objName, m_dispType.Name);
+            }
         }
 
         private void LoadDispatch()
@@ -223,11 +229,7 @@ namespace OleViewDotNet
 
         private void TypedObjectViewer_Load(object sender, EventArgs e)
         {
-            if (m_dispType != null)
-            {
-                LoadDispatch();
-                TabText = String.Format("{0} {1}", m_objName, m_dispType.Name);
-            }
+
         }
 
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)

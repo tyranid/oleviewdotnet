@@ -143,6 +143,10 @@ namespace OleViewDotNet
             strRet.AppendFormat("CLSID: {0}\n", ent.Clsid.ToString("B"));
             strRet.AppendFormat("Name: {0}\n", ent.Name);
             strRet.AppendFormat("{0}: {1}\n", ent.Type.ToString(), ent.Server);
+            if (ent.Server != ent.CmdLine)
+            {
+                strRet.AppendFormat("Cmommand Line: {0}\n", ent.CmdLine);
+            }
             string[] progids = ent.ProgIDs;
             if (progids.Length > 0)
             {
@@ -411,6 +415,7 @@ namespace OleViewDotNet
             foreach (COMIELowRightsElevationPolicy ent in m_reg.LowRights)
             {
                 clsidNodes[i] = new TreeNode(ent.Name);
+                clsidNodes[i].ToolTipText = String.Format("Elevation Policy: {0}", ent.Policy); 
                 foreach (COMCLSIDEntry cls in ent.Clsids)
                 {
                     clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
