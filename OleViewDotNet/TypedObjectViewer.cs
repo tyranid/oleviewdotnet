@@ -175,8 +175,11 @@ namespace OleViewDotNet
         {
             if (listViewMethods.SelectedItems.Count > 0)
             {
-                InvokeForm frm = new InvokeForm((MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject);
-                frm.ShowDialog();
+                using (InvokeForm frm = new InvokeForm((MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject))
+                {
+                    frm.ShowDialog();
+                }
+
                 UpdateProperties();
             }
         }
@@ -204,18 +207,20 @@ namespace OleViewDotNet
                         val = null;
                     }
 
-                    GetTypeForm frm = new GetTypeForm(pi.PropertyType, val);
-                    if (frm.ShowDialog() == DialogResult.OK)
+                    using (GetTypeForm frm = new GetTypeForm(pi.PropertyType, val))
                     {
-                        try
+                        if (frm.ShowDialog() == DialogResult.OK)
                         {
-                            pi.SetValue(m_pObject, frm.Data, null);
+                            try
+                            {
+                                pi.SetValue(m_pObject, frm.Data, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine(ex.ToString());
+                            }
+                            UpdateProperties();
                         }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine(ex.ToString());
-                        }
-                        UpdateProperties();
                     }
                 }
             }

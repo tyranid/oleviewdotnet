@@ -180,18 +180,22 @@ namespace OleViewDotNet
 
                 if(baseType == typeof(IStream))
                 {
-                    CreateIStreamForm frm = new CreateIStreamForm();
-                    if (frm.ShowDialog() == DialogResult.OK)
+                    using (CreateIStreamForm frm = new CreateIStreamForm())
                     {
-                        data.data = frm.Stream;
+                        if (frm.ShowDialog() == DialogResult.OK)
+                        {
+                            data.data = frm.Stream;
+                        }
                     }
                 }
                 else
                 {
-                    GetTypeForm frm = new GetTypeForm(data.pi.ParameterType, data.data);                
-                    if (frm.ShowDialog() == DialogResult.OK)
+                    using (GetTypeForm frm = new GetTypeForm(data.pi.ParameterType, data.data))
                     {
-                        data.data = frm.Data;
+                        if (frm.ShowDialog() == DialogResult.OK)
+                        {
+                            data.data = frm.Data;
+                        }
                     }
                 }
 

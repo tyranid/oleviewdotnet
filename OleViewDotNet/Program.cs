@@ -64,12 +64,14 @@ namespace OleViewDotNet
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
-            LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot);
-            if (loader.ShowDialog() == DialogResult.OK)
-            {                
-                m_appContext = new AppContextImpl(loader.LoadedReg);
-                Application.Run(m_appContext);
+
+            using (LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot))
+            {
+                if (loader.ShowDialog() == DialogResult.OK)
+                {
+                    m_appContext = new AppContextImpl(loader.LoadedReg);
+                    Application.Run(m_appContext);
+                }
             }
         }
     }

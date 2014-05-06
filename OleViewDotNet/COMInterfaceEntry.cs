@@ -44,8 +44,7 @@ namespace OleViewDotNet
             }
 
             try
-            {
-                //m_proxyclsid = new Guid(COMUtilities.ReadStringFromKey(key, "ProxyStubCLSID32", null));
+            {                
                 m_proxyclsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
             }
             catch (FormatException e)
@@ -71,14 +70,24 @@ namespace OleViewDotNet
         {
         }
 
-        public COMInterfaceEntry(Guid iid, RegistryKey rootKey)
+        private COMInterfaceEntry(Guid iid, Guid proxyclsid, int nummethods, string baseName, string name)
         {
             m_iid = iid;
-            m_proxyclsid = Guid.Empty;
-            m_nummethods = 3;
-            m_base = "IUnknown";
-            m_name = "";
+            m_proxyclsid = proxyclsid;
+            m_nummethods = nummethods;
+            m_base = baseName;
+            m_name = name;
+        }
+
+        public COMInterfaceEntry(Guid iid, RegistryKey rootKey) 
+            : this(iid, Guid.Empty, 3, "IUnknown", "")
+        {            
             LoadFromKey(rootKey);
+        }
+
+        public COMInterfaceEntry(Guid iid)
+            : this(iid, Guid.Empty, 3, "IUnknown", iid.ToString("B"))
+        {            
         }
 
         public enum KnownInterfaces

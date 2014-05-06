@@ -91,33 +91,68 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			int iExtras;
 
-			/* Query for any extra interface IIDs */
-			for(iExtras = 4; iExtras < argc; iExtras++)
+			IInspectable* pInspect;
+
+			hr = pObj->QueryInterface(&pInspect);
+			if (SUCCEEDED(hr))
 			{
-				if(QueryForInterface(pObj, argv[iExtras]))
+				IID* pIids;
+				ULONG iidCount;
+
+				hr = pInspect->GetIids(&iidCount, &pIids);
+				if (SUCCEEDED(hr))
+				{
+					for (ULONG i = 0; i < iidCount; ++i)
+					{
+						IUnknown* pUnk;
+						hr = pObj->QueryInterface(pIids[i], (void**)&pUnk);
+						if (SUCCEEDED(hr))
+						{
+							LPOLESTR iidString;
+							hr = StringFromIID(pIids[i], &iidString);
+							if (SUCCEEDED(hr))
+							{
+								_tprintf(_T("%ls\n"), iidString);
+								CoTaskMemFree(iidString);
+							}
+							pUnk->Release();
+						}
+					}
+				}
+
+				CoTaskMemFree(pIids);
+
+				pInspect->Release();
+			}
+
+			/* Query for any extra interface IIDs */
+			for (iExtras = 4; iExtras < argc; iExtras++)
+			{
+				if (QueryForInterface(pObj, argv[iExtras]))
 				{
 					_tprintf(_T("%ls\n"), argv[iExtras]);
 				}
 			}
 
-			if(RegOpenKeyEx(HKEY_CLASSES_ROOT, _T("Interface"), 0, KEY_ENUMERATE_SUB_KEYS, &hKey) == ERROR_SUCCESS)
+			if (RegOpenKeyEx(HKEY_CLASSES_ROOT, _T("Interface"), 0, KEY_ENUMERATE_SUB_KEYS, &hKey) == ERROR_SUCCESS)
 			{
 				TCHAR szName[MAX_PATH];
 				DWORD dwNameSize = MAX_PATH;
 				DWORD dwIndex = 0;
 
-				while(RegEnumKeyEx(hKey, dwIndex, szName, &dwNameSize, NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
+				while (RegEnumKeyEx(hKey, dwIndex, szName, &dwNameSize, NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
 				{
-					if(QueryForInterface(pObj, szName))
+					if (QueryForInterface(pObj, szName))
 					{
 						_tprintf(_T("%ls\n"), szName);
 					}
-					
+
 					dwNameSize = MAX_PATH;
 					dwIndex++;
 				}
 				iRet = 0;
-			}	
+			}
+			
 			pObj->Release();
 		}
 		else

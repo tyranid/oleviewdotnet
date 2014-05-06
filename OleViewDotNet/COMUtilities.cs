@@ -75,6 +75,7 @@ namespace OleViewDotNet
    
     public class COMUtilities
     {
+        [Flags]
         public enum CLSCTX {
             CLSCTX_INPROC_SERVER        = 0x1, 
             CLSCTX_INPROC_HANDLER       = 0x2, 
@@ -100,6 +101,7 @@ namespace OleViewDotNet
             CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
         }
 
+        [Flags]
         public enum STGM
         {
             STGM_READ = 0x00000000, 

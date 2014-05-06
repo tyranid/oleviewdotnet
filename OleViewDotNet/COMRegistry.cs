@@ -109,6 +109,7 @@ namespace OleViewDotNet
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
         private List<COMCLSIDEntry> m_preapproved;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
+        private SortedDictionary<Guid, COMAppIDEntry> m_appid;
 
         #endregion
 
@@ -271,6 +272,10 @@ namespace OleViewDotNet
                         if (m_interfaces.ContainsKey(g))
                         {
                             ents.Add(m_interfaces[g]);
+                        }
+                        else
+                        {
+                            ents.Add(new COMInterfaceEntry(g));
                         }
                     }
 

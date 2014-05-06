@@ -130,9 +130,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppContextImpl.cs" />
+    <Compile Include="COMAppIDEntry.cs" />
     <Compile Include="COMCLSIDEntry.cs" />
     <Compile Include="COMIELowRightsElevationPolicy.cs" />
     <Compile Include="COMInterfaceEntry.cs" />
+    <Compile Include="CreateCLSIDForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateCLSIDForm.Designer.cs">
+      <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ObjectCache.cs" />
     <Compile Include="COMProgIDEntry.cs" />
     <Compile Include="COMRegistryViewer.cs">
@@ -204,6 +211,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateCLSIDForm.resx">
+      <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CreateIStreamForm.resx">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>

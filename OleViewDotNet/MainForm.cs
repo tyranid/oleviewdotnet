@@ -116,57 +116,59 @@ namespace OleViewDotNet
 
         private void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
         {
-            GetTextForm frm = new GetTextForm("");
-            if (frm.ShowDialog() == DialogResult.OK)
+            using (CreateCLSIDForm frm = new CreateCLSIDForm())
             {
-                try
+                if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    Guid g = new Guid(frm.Data);
-                    Dictionary<string, string> props = new Dictionary<string,string>();
-                    object comObj = null;
-                    string strObjName = "";
-                    COMInterfaceEntry[] ints = null;
-
-                    if (m_comRegistry.Clsids.ContainsKey(g))
+                    try
                     {
-                        COMCLSIDEntry ent = m_comRegistry.Clsids[g];
-                        strObjName = ent.Name;
-                        props.Add("CLSID", ent.Clsid.ToString("B"));
-                        props.Add("Name", ent.Name);
-                        props.Add("Server", ent.Server);
+                        Guid g = frm.Clsid;
+                        Dictionary<string, string> props = new Dictionary<string, string>();
+                        object comObj = null;
+                        string strObjName = "";
+                        COMInterfaceEntry[] ints = null;
 
-                        comObj = ent.CreateInstanceAsObject();
-                        ints = m_comRegistry.GetSupportedInterfaces(ent, false);
-                    }
-                    else
-                    {
-                        Guid unk = COMInterfaceEntry.IID_IUnknown;
-                        IntPtr pObj;
-
-                        if (COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, COMUtilities.CLSCTX.CLSCTX_SERVER,
-                            ref unk, out pObj) == 0)
+                        if (m_comRegistry.Clsids.ContainsKey(g))
                         {
-                            ints = m_comRegistry.GetInterfacesForIUnknown(pObj);
-                            comObj = Marshal.GetObjectForIUnknown(pObj);                            
-                            strObjName = g.ToString("B");
-                            props.Add("CLSID", g.ToString("B"));
-                            Marshal.Release(pObj);
+                            COMCLSIDEntry ent = m_comRegistry.Clsids[g];
+                            strObjName = ent.Name;
+                            props.Add("CLSID", ent.Clsid.ToString("B"));
+                            props.Add("Name", ent.Name);
+                            props.Add("Server", ent.Server);
+
+                            comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
+                            ints = m_comRegistry.GetSupportedInterfaces(ent, false);
+                        }
+                        else
+                        {
+                            Guid unk = COMInterfaceEntry.IID_IUnknown;
+                            IntPtr pObj;
+
+                            if (COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
+                                ref unk, out pObj) == 0)
+                            {
+                                ints = m_comRegistry.GetInterfacesForIUnknown(pObj);
+                                comObj = Marshal.GetObjectForIUnknown(pObj);
+                                strObjName = g.ToString("B");
+                                props.Add("CLSID", g.ToString("B"));
+                                Marshal.Release(pObj);
+                            }
+                        }
+
+                        if (comObj != null)
+                        {
+                            /* Need to implement a type library reader */
+                            Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+
+                            ObjectInformation view = new ObjectInformation(strObjName, comObj, props, ints);
+                            view.ShowHint = DockState.Document;
+                            view.Show(m_dockPanel);
                         }
                     }
-
-                    if (comObj != null)
+                    catch (Exception ex)
                     {
-                        /* Need to implement a type library reader */
-                        Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-
-                        ObjectInformation view = new ObjectInformation(strObjName, comObj, props, ints);
-                        view.ShowHint = DockState.Document;
-                        view.Show(m_dockPanel);
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

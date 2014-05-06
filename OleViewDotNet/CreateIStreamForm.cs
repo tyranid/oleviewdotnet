@@ -29,19 +29,21 @@ namespace OleViewDotNet
 
         private void btnCreateRead_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "All Files (*.*)|*.*";
-            dlg.ShowReadOnly = false;
-            this.DialogResult = dlg.ShowDialog();
-            if (this.DialogResult == DialogResult.OK)
+            using (OpenFileDialog dlg = new OpenFileDialog())
             {
-                try
+                dlg.Filter = "All Files (*.*)|*.*";
+                dlg.ShowReadOnly = false;
+                this.DialogResult = dlg.ShowDialog();
+                if (this.DialogResult == DialogResult.OK)
                 {
-                    Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);                    
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
             
@@ -50,22 +52,25 @@ namespace OleViewDotNet
 
         private void btnCreateWrite_Click(object sender, EventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "All Files (*.*)|*.*";
-
-            this.DialogResult = dlg.ShowDialog();
-
-            if (this.DialogResult == DialogResult.OK)
+            using (SaveFileDialog dlg = new SaveFileDialog())
             {
-                try
+                dlg.Filter = "All Files (*.*)|*.*";
+
+                this.DialogResult = dlg.ShowDialog();
+
+                if (this.DialogResult == DialogResult.OK)
                 {
-                    Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.CreateNew, System.IO.FileAccess.ReadWrite, System.IO.FileShare.Read);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.CreateNew, System.IO.FileAccess.ReadWrite, System.IO.FileShare.Read);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
+
             Close();
         }
     }

@@ -347,7 +347,7 @@ namespace OleViewDotNet
                 i++;
             }
             treeComRegistry.Nodes.AddRange(iidNameNodes);
-            TabText = "Interfaces by Name";        
+            TabText = "Interfaces by Name";
         }
 
         private void LoadImplementedCategories()
@@ -669,7 +669,7 @@ namespace OleViewDotNet
                     Dictionary<string, string> props = new Dictionary<string,string>();
                     try
                     {
-                        object comObj = ent.CreateInstanceAsObject();
+                        object comObj = ent.CreateInstanceAsObject(COMUtilities.CLSCTX.CLSCTX_ALL);
                         if (comObj != null)
                         {                            
                             props.Add("CLSID", ent.Clsid.ToString("B"));

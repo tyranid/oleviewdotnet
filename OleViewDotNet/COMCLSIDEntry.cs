@@ -355,20 +355,27 @@ namespace OleViewDotNet
             }           
         }
 
-        public IntPtr CreateInstance()
+        public IntPtr CreateInstance(COMUtilities.CLSCTX dwContext)
         {
             IntPtr pInterface = IntPtr.Zero;
-            COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
+            //COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
             bool blValid = false;
 
-            if (m_servertype == COMCLSIDEntry.ServerType.InProcServer32)
+            if (dwContext == COMUtilities.CLSCTX.CLSCTX_ALL)
             {
-                dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;
-                blValid = true;
+                if (m_servertype == COMCLSIDEntry.ServerType.InProcServer32)
+                {
+                    dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;
+                    blValid = true;
+                }
+                else if (m_servertype == COMCLSIDEntry.ServerType.LocalServer32)
+                {
+                    dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;
+                    blValid = true;
+                }
             }
-            else if (m_servertype == COMCLSIDEntry.ServerType.LocalServer32)
+            else
             {
-                dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;
                 blValid = true;
             }
 
@@ -387,9 +394,9 @@ namespace OleViewDotNet
             return pInterface;
         }
 
-        public object CreateInstanceAsObject()
+        public object CreateInstanceAsObject(COMUtilities.CLSCTX dwContext)
         {
-            IntPtr pObject = CreateInstance();
+            IntPtr pObject = CreateInstance(dwContext);
             object ret = null;
 
             if (pObject != IntPtr.Zero)
