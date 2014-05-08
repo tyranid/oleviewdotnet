@@ -19,7 +19,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// Unhandled exception event handler
@@ -30,29 +30,14 @@ namespace OleViewDotNet
         {
             MessageBox.Show("Unhandled Exception: " + e.ExceptionObject.ToString(),
                 "Unhandled Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            System.Diagnostics.Process.GetCurrentProcess().Kill();
+            Environment.Exit(1);
         }
 
-        static AppContextImpl m_appContext;        
+        private static MainForm _mainForm;
 
-        static public void CreateNewMainForm()
+        static public MainForm GetMainForm()
         {
-            if (m_appContext != null)
-            {
-                m_appContext.CreateNewMainForm();
-            }
-        }
-
-        static public COMRegistry GetCOMRegistry()
-        {
-            if (m_appContext != null)
-            {
-                return m_appContext.GetCOMRegistry();
-            }
-            else
-            {
-                return null;
-            }
+            return _mainForm;
         }
 
         /// <summary>
@@ -60,7 +45,7 @@ namespace OleViewDotNet
         /// </summary>
         [STAThread]
         static void Main()
-        {
+        {            
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -68,9 +53,11 @@ namespace OleViewDotNet
             using (LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot))
             {
                 if (loader.ShowDialog() == DialogResult.OK)
-                {
-                    m_appContext = new AppContextImpl(loader.LoadedReg);
-                    Application.Run(m_appContext);
+                {                    
+                    using (_mainForm = new MainForm())
+                    {
+                        Application.Run(_mainForm);                        
+                    }                    
                 }
             }
         }

@@ -15,6 +15,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -23,8 +26,9 @@ namespace OleViewDotNet
     /// <summary>
     /// Form to display basic information about an object
     /// </summary>
-    public partial class ObjectInformation : DockContent
+    public partial class ObjectInformation : DocumentForm
     {
+        private ObjectEntry m_pEntry;
         private Object m_pObject;
         private Dictionary<string, string> m_properties;
         private COMInterfaceEntry[] m_interfaces;        
@@ -39,12 +43,16 @@ namespace OleViewDotNet
         /// <param name="interfaces">List of available interfaces</param>
         public ObjectInformation(string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
         {
-            ObjectCache.Add(objName, pObject, interfaces);
+            m_pEntry = ObjectCache.Add(objName, pObject, interfaces);
             m_pObject = pObject;
             m_properties = properties;
             m_interfaces = interfaces;            
             m_objName = objName;
-            InitializeComponent();         
+            InitializeComponent();
+
+            LoadProperties();
+            LoadInterfaces();
+            TabText = m_objName;
         }
 
         /// <summary>
@@ -120,17 +128,14 @@ namespace OleViewDotNet
                 {
                     btnOleContainer.Enabled = true;
                 }
+                else if (ent.IsPersistStream)
+                {
+                    btnSaveStream.Enabled = true;
+                }
             }
 
             listViewInterfaces.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewInterfaces.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-        }
-
-        private void ObjectInformation_Load(object sender, EventArgs e)
-        {
-            LoadProperties();
-            LoadInterfaces();
-            TabText = m_objName;
         }
 
         private void listViewInterfaces_DoubleClick(object sender, EventArgs e)
@@ -144,7 +149,7 @@ namespace OleViewDotNet
                 {
                     if (factory != null)
                     {
-                        DockContent frm = factory.CreateInstance(m_objName, m_pObject);
+                        DockContent frm = factory.CreateInstance(m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
                             frm.ShowHint = DockState.Document;
@@ -171,7 +176,7 @@ namespace OleViewDotNet
 
         private void btnDispatch_Click(object sender, EventArgs e)
         {
-            DockContent frm = new TypedObjectViewer(m_objName, m_pObject, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
+            DockContent frm = new TypedObjectViewer(m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
             if ((frm != null) && !frm.IsDisposed)
             {
                 frm.ShowHint = DockState.Document;
@@ -181,7 +186,51 @@ namespace OleViewDotNet
 
         private void ObjectInformation_FormClosed(object sender, FormClosedEventArgs e)
         {
-            ObjectCache.Remove(m_pObject);
+            ObjectCache.Remove(m_pEntry);
         }
+
+        private void btnSaveStream_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "All Files (*.*)|*.*";
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (Stream stm = File.Open(dlg.FileName, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            COMUtilities.OleSaveToStream(m_pObject, stm);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void btnMarshal_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "All Files (*.*)|*.*";
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.WriteAllBytes(dlg.FileName, COMUtilities.MarshalObject(m_pObject));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -22,13 +22,14 @@ using System.Windows.Forms;
 using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Text.RegularExpressions;
+using System.ServiceProcess;
 
 namespace OleViewDotNet
 {
     /// <summary>
     /// Form to view the COM registration information
     /// </summary>
-    public partial class COMRegistryViewer : DockContent
+    public partial class COMRegistryViewer : DocumentForm
     {
         /// <summary>
         /// Current registry
@@ -52,6 +53,8 @@ namespace OleViewDotNet
             ImplementedCategories,
             PreApproved,
             IELowRights,
+            LocalServices,
+            AppIDs,
         }        
 
         /// <summary>
@@ -118,6 +121,12 @@ namespace OleViewDotNet
                     case DisplayMode.IELowRights:
                         LoadIELowRights();
                         break;
+                    case DisplayMode.LocalServices:
+                        LoadLocalServices();
+                        break;
+                    case DisplayMode.AppIDs:
+                        LoadAppIDs();
+                        break;
                     default:
                         break;
                 }
@@ -136,38 +145,38 @@ namespace OleViewDotNet
         /// </summary>
         /// <param name="ent">The CLSID entry to build the tool tip from</param>
         /// <returns>A string tooltip</returns>
-        private string BuildCLSIDToolTip(COMCLSIDEntry ent)
+        private static string BuildCLSIDToolTip(COMCLSIDEntry ent)
         {
             StringBuilder strRet = new StringBuilder();
 
-            strRet.AppendFormat("CLSID: {0}\n", ent.Clsid.ToString("B"));
-            strRet.AppendFormat("Name: {0}\n", ent.Name);
-            strRet.AppendFormat("{0}: {1}\n", ent.Type.ToString(), ent.Server);
+            AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.ToString("B"));
+            AppendFormatLine(strRet, "Name: {0}", ent.Name);
+            AppendFormatLine(strRet, "{0}: {1}", ent.Type.ToString(), ent.Server);
             string[] progids = ent.ProgIDs;
             if (progids.Length > 0)
             {
-                strRet.Append("ProgIDs:\n");
+                strRet.AppendLine("ProgIDs:");
                 foreach (string progid in progids)
                 {
-                    strRet.AppendFormat("{0}\n", progid);
+                    AppendFormatLine(strRet, "{0}", progid);
                 }
             }
             if (ent.AppID != Guid.Empty)
             {
-                strRet.AppendFormat("AppID: {0}\n", ent.AppID.ToString("B"));            
+                AppendFormatLine(strRet, "AppID: {0}", ent.AppID.ToString("B"));            
             }
             if (ent.TypeLib != Guid.Empty)
             {
-                strRet.AppendFormat("TypeLib: {0}\n", ent.TypeLib.ToString("B"));
+                AppendFormatLine(strRet, "TypeLib: {0}", ent.TypeLib.ToString("B"));
             }
             
             COMInterfaceEntry[] proxies = ent.Proxies;
             if (proxies.Length > 0)
             {
-                strRet.Append("Interface Proxies:\n");
+                strRet.AppendLine("Interface Proxies:");
                 foreach (COMInterfaceEntry intEnt in proxies)
                 {
-                    strRet.AppendFormat("{0} - {1}\n", intEnt.Iid.ToString(), intEnt.Name);
+                    AppendFormatLine(strRet, "{0} - {1}\n", intEnt.Iid.ToString(), intEnt.Name);
                 }
             } 
 
@@ -195,17 +204,17 @@ namespace OleViewDotNet
         }
 
         private string BuildInterfaceToolTip(COMInterfaceEntry ent)
-        {
-            string strRet;
+        {            
+            StringBuilder builder = new StringBuilder();
 
-            strRet = String.Format("Name: {0}\n", ent.Name);
-            strRet += String.Format("IID: {0}\n", ent.Iid.ToString("B"));
+            AppendFormatLine(builder, "Name: {0}", ent.Name);
+            AppendFormatLine(builder, "IID: {0}", ent.Iid.ToString("B"));
             if (ent.ProxyClsid != Guid.Empty)
             {
-                strRet += String.Format("ProxyCLSID: {0}\n", ent.ProxyClsid.ToString("B"));
+                AppendFormatLine(builder, "ProxyCLSID: {0}", ent.ProxyClsid.ToString("B"));
             }
 
-            return strRet;
+            return builder.ToString();
         }
 
         private TreeNode CreateCLSIDNode(COMCLSIDEntry ent)
@@ -304,12 +313,8 @@ namespace OleViewDotNet
                 int j = 0;
 
                 foreach(COMCLSIDEntry ent in pair.Value)
-                {
-                    TreeNode currNode = new TreeNode(ent.Name, ClassIcon, ClassIcon);
-                    currNode.ToolTipText = BuildCLSIDToolTip(ent);
-                    currNode.Tag = ent;
-                    currNode.Nodes.Add("IUnknown");
-                    clsidNodes[j] = currNode;
+                {                    
+                    clsidNodes[j] = CreateClsidNode(ent); ;
                     nodeNames[j] = ent.Name;
                     j++;
                 }
@@ -350,6 +355,153 @@ namespace OleViewDotNet
             TabText = "Interfaces by Name";
         }
 
+        private static StringBuilder AppendFormatLine(StringBuilder builder, string format, params object[] ps)
+        {
+            return builder.AppendFormat(format, ps).AppendLine();
+        }
+
+        private static TreeNode CreateClsidNode(COMCLSIDEntry ent)
+        {
+            TreeNode currNode = new TreeNode(ent.Name, ClassIcon, ClassIcon);
+            currNode.ToolTipText = BuildCLSIDToolTip(ent);
+            currNode.Tag = ent;
+            currNode.Nodes.Add("IUnknown");
+
+            return currNode;
+        }
+
+        private void LoadLocalServices()
+        {
+            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
+            IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;
+            Dictionary<string, ServiceController> services;
+
+            try
+            {
+                services = ServiceController.GetServices().ToDictionary(s => s.ServiceName.ToLower());
+            }
+            catch (Win32Exception)
+            {
+                services = new Dictionary<string,ServiceController>();
+            }
+
+            List<TreeNode> serverNodes = new List<TreeNode>();
+            foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
+            {   
+                if(appids.ContainsKey(pair.Key) && !String.IsNullOrWhiteSpace(appids[pair.Key].LocalService))
+                {
+                    COMAppIDEntry appidEnt = appids[pair.Key];                    
+
+                    string name = appidEnt.LocalService;
+                    //string serviceAccount = null;
+
+                    if (services.ContainsKey(name.ToLower()))
+                    {                       
+                        try
+                        {
+                            ServiceController sc = services[name.ToLower()];
+
+                            string displayName = sc.DisplayName;
+                            if (!String.IsNullOrWhiteSpace(displayName))
+                            {
+                                name = displayName;
+                            }                            
+                        }
+                        catch (Win32Exception)
+                        {                            
+                        }                        
+                    }
+                    
+                    TreeNode node = new TreeNode(name);
+
+                    StringBuilder builder = new StringBuilder();
+
+                    AppendFormatLine(builder, "AppID: {0}", pair.Key);
+                    if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
+                    {
+                        AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
+                    }
+
+                    node.ToolTipText = builder.ToString();
+                    
+                    int count = pair.Count();
+
+                    TreeNode[] clsidNodes = new TreeNode[count];
+                    string[] nodeNames = new string[count];
+                    int j = 0;
+
+                    foreach(COMCLSIDEntry ent in pair)
+                    {                        
+                        clsidNodes[j] = CreateClsidNode(ent);
+                        nodeNames[j] = ent.Name;
+                        j++;
+                    }
+
+                    Array.Sort(nodeNames, clsidNodes);
+                    node.Nodes.AddRange(clsidNodes);
+
+                    serverNodes.Add(node);
+                }
+            }
+
+            treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
+            TabText = "Local Services";
+        }
+
+        private void LoadAppIDs()
+        {
+            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
+            IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;            
+
+            List<TreeNode> serverNodes = new List<TreeNode>();
+            foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
+            {
+                if (appids.ContainsKey(pair.Key))
+                {
+                    COMAppIDEntry appidEnt = appids[pair.Key];                    
+
+                    TreeNode node = new TreeNode(appidEnt.Name);
+                    node.Tag = appidEnt;
+
+                    StringBuilder builder = new StringBuilder();
+
+                    AppendFormatLine(builder, "AppID: {0}", pair.Key);
+                    if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
+                    {
+                        AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
+                    }
+
+                    if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
+                    {
+                        AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
+                    }
+
+                    node.ToolTipText = builder.ToString();
+
+                    int count = pair.Count();
+
+                    TreeNode[] clsidNodes = new TreeNode[count];
+                    string[] nodeNames = new string[count];
+                    int j = 0;
+
+                    foreach (COMCLSIDEntry ent in pair)
+                    {
+                        clsidNodes[j] = CreateClsidNode(ent);
+                        nodeNames[j] = ent.Name;
+                        j++;
+                    }
+
+                    Array.Sort(nodeNames, clsidNodes);
+                    node.Nodes.AddRange(clsidNodes);
+
+                    serverNodes.Add(node);
+                }
+            }
+
+            treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
+            TabText = "AppIDs";
+        }
+
         private void LoadImplementedCategories()
         {
             int i = 0;
@@ -369,10 +521,7 @@ namespace OleViewDotNet
                 i = 0;
                 foreach (COMCLSIDEntry ent in entries)
                 {
-                    clsidNodes[i] = new TreeNode(ent.Name, ClassIcon, ClassIcon);
-                    clsidNodes[i].ToolTipText = BuildCLSIDToolTip(ent);
-                    clsidNodes[i].Tag = ent;
-                    clsidNodes[i].Nodes.Add("IUnknown");
+                    clsidNodes[i] = CreateClsidNode(ent);                    
                     i++;
                 }
                 currNode.Nodes.AddRange(clsidNodes);
@@ -861,6 +1010,19 @@ namespace OleViewDotNet
             if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
             {
                 btnApply.PerformClick();
+            }
+        }
+
+        private void treeComRegistry_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            {
+                TreeNode node = treeComRegistry.GetNodeAt(e.X, e.Y);
+
+                if (node != null)
+                {
+                    treeComRegistry.SelectedNode = node;
+                }
             }
         }
 

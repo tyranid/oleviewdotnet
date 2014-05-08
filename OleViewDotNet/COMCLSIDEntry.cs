@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using System.IO;
 using System.Security;
+using System.Linq;
 
 namespace OleViewDotNet
 {
@@ -32,7 +33,7 @@ namespace OleViewDotNet
         private Guid m_appid;
         private Guid m_typelib;
         private List<string> m_progids;
-        private Dictionary<Guid, bool> m_categories;
+        private HashSet<Guid> m_categories;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
@@ -169,12 +170,14 @@ namespace OleViewDotNet
                 object appid = key.GetValue("AppID");
                 if ((appid != null) && (appid.ToString().Length > 0))
                 {
-                    m_appid = new Guid(appid.ToString());
-                    if (m_appid != Guid.Empty)
+                    if (Guid.TryParse(appid.ToString(), out m_appid))
                     {
-                        if (m_servertype == ServerType.UnknownServer)
+                        if (m_appid != Guid.Empty)
                         {
-                            m_servertype = ServerType.LocalServer32;
+                            if (m_servertype == ServerType.UnknownServer)
+                            {
+                                m_servertype = ServerType.LocalServer32;
+                            }
                         }
                     }
                 }
@@ -188,14 +191,7 @@ namespace OleViewDotNet
             string typelib = COMUtilities.ReadStringFromKey(key, "TypeLib", null);
             if (!String.IsNullOrEmpty(typelib))
             {
-                try
-                {
-                    m_typelib = new Guid(typelib);
-                }
-                catch (FormatException e)
-                {                    
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
-                }
+                Guid.TryParse(typelib, out m_typelib);
             }
 
             string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
@@ -211,17 +207,17 @@ namespace OleViewDotNet
 
             if (key.OpenSubKey("Control") != null)
             {
-                m_categories.Add(ControlCategory, true);
+                m_categories.Add(ControlCategory);
             }
 
             if (key.OpenSubKey("Insertable") != null)
             {
-                m_categories.Add(InsertableCategory, true);
+                m_categories.Add(InsertableCategory);
             }
 
             if (key.OpenSubKey("DocObject") != null)
             {
-                m_categories.Add(DocumentCategory, true);
+                m_categories.Add(DocumentCategory);
             }
 
             RegistryKey categories = key.OpenSubKey("Implemented Categories");
@@ -230,17 +226,11 @@ namespace OleViewDotNet
                 string[] subKeys = categories.GetSubKeyNames();
                 foreach(string s in subKeys)
                 {
-                    try
+                    Guid g;
+
+                    if (Guid.TryParse(s, out g))
                     {
-                        Guid g = new Guid(s);
-                        if (!m_categories.ContainsKey(g))
-                        {
-                            m_categories.Add(new Guid(s), true);
-                        }
-                    }
-                    catch (FormatException ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine(ex.ToString());
+                        m_categories.Add(g);
                     }
                 }
             }
@@ -269,7 +259,7 @@ namespace OleViewDotNet
             m_clsid = clsid;
             m_progids = new List<string>();
             m_proxies = new List<COMInterfaceEntry>();
-            m_categories = new Dictionary<Guid, bool>();
+            m_categories = new HashSet<Guid>();
             m_server = String.Empty;
             m_cmdline = String.Empty;
             m_servertype = ServerType.UnknownServer;
@@ -329,10 +319,8 @@ namespace OleViewDotNet
         public Guid[] Categories
         {
             get 
-            { 
-                Guid[] cat = new Guid[m_categories.Keys.Count];
-                m_categories.Keys.CopyTo(cat, 0);
-                return cat;
+            {
+                return m_categories.ToArray();
             }
         }
 
@@ -387,7 +375,7 @@ namespace OleViewDotNet
 
                 if (iError != 0)
                 {
-                    throw new Win32Exception(iError);
+                    Marshal.ThrowExceptionForHR(iError);
                 }
             }
 

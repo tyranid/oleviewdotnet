@@ -20,6 +20,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using System.Security.AccessControl;
+using System.Linq;
 
 namespace OleViewDotNet
 {
@@ -70,18 +72,20 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    try
+                    Guid g;
+
+                    if (Guid.TryParse(line, out g))
                     {
-                        guids.Add(new Guid(line));
-                    }
-                    catch (FormatException ex)
-                    {
-                        Debug.WriteLine(ex.ToString());
-                    }
+                        guids.Add(g);
+                    }                    
                 }
             }
 
-            if (proc.ExitCode == 0)
+            int exitCode = proc.ExitCode;
+
+            proc.Close();
+
+            if (exitCode == 0)
             {
                 return guids.ToArray();
             }
@@ -102,14 +106,14 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;        
         private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
         private Dictionary<Guid, COMInterfaceEntry[]> m_supportediids;
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
         private List<COMCLSIDEntry> m_preapproved;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
-        private SortedDictionary<Guid, COMAppIDEntry> m_appid;
+        private SortedDictionary<Guid, COMAppIDEntry> m_appid;        
 
         #endregion
 
@@ -186,13 +190,27 @@ namespace OleViewDotNet
             get { return m_lowrights.ToArray(); }
         }
 
+        public IDictionary<Guid, COMAppIDEntry> AppIDs
+        {
+            get { return m_appid; }
+        }
+
+
+        public IEnumerable<IGrouping<Guid, COMCLSIDEntry>> ClsidsByAppId
+        {
+            get
+            {
+                return m_clsids.Values.Where(c => c.AppID != Guid.Empty).GroupBy(c => c.AppID);
+            }
+        }
+
         #endregion
 
         #region Public Methods
         /// <summary>
         /// Default constructor
         /// </summary>
-        public COMRegistry(RegistryKey rootKey)
+        private COMRegistry(RegistryKey rootKey)
         {
             m_supportediids = new Dictionary<Guid, COMInterfaceEntry[]>();
             LoadCLSIDs(rootKey);
@@ -200,8 +218,22 @@ namespace OleViewDotNet
             LoadInterfaces(rootKey);
             LoadPreApproved();
             LoadLowRights();
+            LoadAppIDs(rootKey);
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
+        }
+
+        private static COMRegistry _instance;
+
+
+        public static void Load(RegistryKey rootKey)
+        {
+            _instance = new COMRegistry(rootKey);
+        }
+
+        public static COMRegistry Instance
+        {
+            get { return _instance; }
         }
 
         /// <summary>
@@ -327,59 +359,57 @@ namespace OleViewDotNet
             Dictionary<string, List<COMCLSIDEntry>> clsidbylocalserver = new Dictionary<string, List<COMCLSIDEntry>>();  
             m_categories = new Dictionary<Guid, List<COMCLSIDEntry>>();
 
-            RegistryKey clsidKey = rootKey.OpenSubKey("CLSID");
-            if (clsidKey != null)
+            using (RegistryKey clsidKey = rootKey.OpenSubKey("CLSID"))
             {
-                string[] subkeys = clsidKey.GetSubKeyNames();
-                foreach (string key in subkeys)
+                if (clsidKey != null)
                 {
-                    try
-                    {
-                        Guid clsid = new Guid(key);
+                    string[] subkeys = clsidKey.GetSubKeyNames();
+                    foreach (string key in subkeys)
+                    {              
+                        Guid clsid;
 
-                        if (!clsids.ContainsKey(clsid))
+                        if(Guid.TryParse(key, out clsid))
                         {
-                            RegistryKey regKey = clsidKey.OpenSubKey(key);
-                            if (regKey != null)
+                            if (!clsids.ContainsKey(clsid))
                             {
-                                COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
-                                clsids.Add(clsid, ent);
-                                if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
+                                using (RegistryKey regKey = clsidKey.OpenSubKey(key))
                                 {
-                                    AddEntryToDictionary(clsidbyserver, ent);
-                                    if (ent.Type == COMCLSIDEntry.ServerType.LocalServer32)
+                                    if (regKey != null)
                                     {
-                                        AddEntryToDictionary(clsidbylocalserver, ent);
-                                    }
-                                }
+                                        COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
+                                        clsids.Add(clsid, ent);
+                                        if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
+                                        {
+                                            AddEntryToDictionary(clsidbyserver, ent);
+                                            if (ent.Type == COMCLSIDEntry.ServerType.LocalServer32)
+                                            {
+                                                AddEntryToDictionary(clsidbylocalserver, ent);
+                                            }
+                                        }
 
-                                if (ent.Categories.Length > 0)
-                                {
-                                    foreach (Guid catid in ent.Categories)
-                                    {
-                                        List<COMCLSIDEntry> list = null;
-                                        if (m_categories.ContainsKey(catid))
+                                        if (ent.Categories.Length > 0)
                                         {
-                                            list = m_categories[catid];
+                                            foreach (Guid catid in ent.Categories)
+                                            {
+                                                List<COMCLSIDEntry> list = null;
+                                                if (m_categories.ContainsKey(catid))
+                                                {
+                                                    list = m_categories[catid];
+                                                }
+                                                else
+                                                {
+                                                    list = new List<COMCLSIDEntry>();
+                                                    m_categories[catid] = list;
+                                                }
+                                                list.Add(ent);
+                                            }
                                         }
-                                        else
-                                        {
-                                            list = new List<COMCLSIDEntry>();
-                                            m_categories[catid] = list;
-                                        }
-                                        list.Add(ent);
                                     }
                                 }
-                                regKey.Close();
                             }
                         }
-                    }
-                    catch (FormatException e)
-                    {
-                        System.Diagnostics.Debug.WriteLine(e.ToString());
-                    }
+                    }                    
                 }
-                clsidKey.Close();
             }
 
             int pos = 0;
@@ -404,21 +434,25 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    RegistryKey regKey = rootKey.OpenSubKey(key);
-                    RegistryKey clsidKey = regKey.OpenSubKey("CLSID");
-                    if (clsidKey != null)
+                    using (RegistryKey regKey = rootKey.OpenSubKey(key))
                     {
-                        Guid clsid;
-                        object clsidString = clsidKey.GetValue(null);
-                        if (clsidString != null)
+                        using (RegistryKey clsidKey = regKey.OpenSubKey("CLSID"))
                         {
-                            COMCLSIDEntry entry = null;
-                            clsid = new Guid(clsidString.ToString());
-                            if (m_clsids.ContainsKey(clsid))
+                            if (clsidKey != null)
                             {
-                                entry = m_clsids[clsid];
+                                Guid clsid;
+                                object clsidString = clsidKey.GetValue(null);
+                                if (clsidString != null)
+                                {
+                                    COMCLSIDEntry entry = null;
+                                    clsid = new Guid(clsidString.ToString());
+                                    if (m_clsids.ContainsKey(clsid))
+                                    {
+                                        entry = m_clsids[clsid];
+                                    }
+                                    m_progids.Add(key, new COMProgIDEntry(key, clsid, entry, regKey));
+                                }
                             }
-                            m_progids.Add(key, new COMProgIDEntry(key, clsid, entry, regKey));
                         }
                     }
                 }
@@ -440,36 +474,37 @@ namespace OleViewDotNet
             interfaces.Add(unk.Iid, unk);
             unk = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IMarshal);
             interfaces.Add(unk.Iid, unk);
-            RegistryKey iidKey = rootKey.OpenSubKey("Interface");
-            if (iidKey != null)
+            using (RegistryKey iidKey = rootKey.OpenSubKey("Interface"))
             {
-                string[] subkeys = iidKey.GetSubKeyNames();
-                foreach (string key in subkeys)
+                if (iidKey != null)
                 {
-                    try
+                    string[] subkeys = iidKey.GetSubKeyNames();
+                    foreach (string key in subkeys)
                     {
-                        Guid iid = new Guid(key);
+                        Guid iid;
 
-                        if (!interfaces.ContainsKey(iid))
+                        if (Guid.TryParse(key, out iid))
                         {
-                            RegistryKey regKey = iidKey.OpenSubKey(key);
-                            if (regKey != null)
+                            if (!interfaces.ContainsKey(iid))
                             {
-                                COMInterfaceEntry ent = new COMInterfaceEntry(iid, regKey);
-                                interfaces.Add(iid, ent);
-                                if (ent.ProxyClsid != Guid.Empty)
+                                using (RegistryKey regKey = iidKey.OpenSubKey(key))
                                 {
-                                    if (m_clsids.ContainsKey(ent.ProxyClsid))
+                                    if (regKey != null)
                                     {
-                                        m_clsids[ent.ProxyClsid].AddProxy(ent);
+                                        COMInterfaceEntry ent = new COMInterfaceEntry(iid, regKey);
+                                        interfaces.Add(iid, ent);
+                                        if (ent.ProxyClsid != Guid.Empty)
+                                        {
+                                            if (m_clsids.ContainsKey(ent.ProxyClsid))
+                                            {
+                                                m_clsids[ent.ProxyClsid].AddProxy(ent);
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    catch (FormatException e)
-                    {
-                        System.Diagnostics.Debug.WriteLine(e.ToString());
+
                     }
                 }
             }
@@ -488,23 +523,22 @@ namespace OleViewDotNet
         void LoadPreApproved()
         {
             m_preapproved = new List<COMCLSIDEntry>();
-            RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved");
-
-            if(key != null)
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
             {
-                string[] subkeys = key.GetSubKeyNames();
-                foreach(string s in subkeys)
+                if (key != null)
                 {
-                    try
+                    string[] subkeys = key.GetSubKeyNames();
+                    foreach (string s in subkeys)
                     {
-                        Guid g = new Guid(s);
-                        if(m_clsids.ContainsKey(g))
+                        Guid g;
+
+                        if(Guid.TryParse(s, out g))
                         {
-                            m_preapproved.Add(m_clsids[g]);
+                            if (m_clsids.ContainsKey(g))
+                            {
+                                m_preapproved.Add(m_clsids[g]);
+                            }
                         }
-                    }
-                    catch(FormatException)
-                    {
                     }
                 }
             }
@@ -512,26 +546,26 @@ namespace OleViewDotNet
 
         private void LoadLowRightsKey(RegistryKey rootKey)
         {
-            RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy");
-            if (key != null)
+            using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy"))
             {
-                string[] subkeys = key.GetSubKeyNames();
-                foreach (string s in subkeys)
+                if (key != null)
                 {
-                    try
+                    string[] subkeys = key.GetSubKeyNames();
+                    foreach (string s in subkeys)
                     {
-                        Guid g = new Guid(s);
+                        Guid g;
 
-                        RegistryKey rightsKey = key.OpenSubKey(s);
-
-                        COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, m_clsids, m_clsidbyserver, rightsKey);
-                        if (entry.Clsids.Length > 0)
+                        if (Guid.TryParse(s, out g))
                         {
-                            m_lowrights.Add(entry);
+                            using (RegistryKey rightsKey = key.OpenSubKey(s))
+                            {
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, m_clsids, m_clsidbyserver, rightsKey);
+                                if (entry.Clsids.Length > 0)
+                                {
+                                    m_lowrights.Add(entry);
+                                }
+                            }
                         }
-                    }
-                    catch (FormatException)
-                    {
                     }
                 }
             }
@@ -543,6 +577,39 @@ namespace OleViewDotNet
             LoadLowRightsKey(Registry.LocalMachine);
             LoadLowRightsKey(Registry.CurrentUser);
             m_lowrights.Sort();
+        }
+
+        private void LoadAppIDs(RegistryKey rootKey)
+        {
+            m_appid = new SortedDictionary<Guid, COMAppIDEntry>();
+
+            using (RegistryKey appIdKey = rootKey.OpenSubKey("AppID"))
+            {
+                if (appIdKey != null)
+                {
+                    string[] subkeys = appIdKey.GetSubKeyNames();
+                    foreach (string key in subkeys)
+                    {
+                        Guid appid;
+
+                        if (Guid.TryParse(key, out appid))
+                        {
+                            if (!m_appid.ContainsKey(appid))
+                            {
+                                using (RegistryKey regKey = appIdKey.OpenSubKey(key))
+                                {
+                                    if (regKey != null)
+                                    {
+                                        COMAppIDEntry ent = new COMAppIDEntry(appid, regKey);
+
+                                        m_appid.Add(appid, ent);
+                                    }
+                                }
+                            }
+                        }
+                    }             
+                }
+            }
         }
 
         #endregion

@@ -35,16 +35,19 @@ namespace OleViewDotNet
 
             if (clsid != null)
             {
-                Guid cls = Guid.Parse(clsid);
+                Guid cls;
 
-                if (clsids.ContainsKey(cls))
+                if (Guid.TryParse(clsid, out cls))
                 {
-                    clsidList.Add(clsids[cls]);
-                }
-                else
-                {
-                    // Add dummy entry
-                    clsidList.Add(new COMCLSIDEntry(cls, COMCLSIDEntry.ServerType.LocalServer32));
+                    if (clsids.ContainsKey(cls))
+                    {
+                        clsidList.Add(clsids[cls]);
+                    }
+                    else
+                    {
+                        // Add dummy entry
+                        clsidList.Add(new COMCLSIDEntry(cls, COMCLSIDEntry.ServerType.LocalServer32));
+                    }
                 }
             }
             else

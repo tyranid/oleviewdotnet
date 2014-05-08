@@ -1,4 +1,19 @@
-﻿using System;
+﻿//    This file is part of OleViewDotNet.
+//
+//    OleViewDotNet is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    OleViewDotNet is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.ComTypes;
@@ -15,8 +30,14 @@ namespace OleViewDotNet.InterfaceViewers
     {
     }
 
-    [Guid("00000109-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    interface IPersistStream
+    [ComImport, Guid("0000010C-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IPersist
+    {
+        void GetClassID(out Guid clsid);
+    }
+
+    [ComImport, Guid("00000109-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IPersistStream
     {
         void GetClassID(out Guid clsid);
         int IsDirty();
@@ -25,8 +46,8 @@ namespace OleViewDotNet.InterfaceViewers
         void GetSizeMax(out ulong pcbSize);
     }
 
-    [Guid("7FD52380-4E07-101B-AE2D-08002B2EC713"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    interface IPersistStreamInit
+    [ComImport, Guid("7FD52380-4E07-101B-AE2D-08002B2EC713"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IPersistStreamInit
     {
         void GetClassID(out Guid clsid);
         int IsDirty();
@@ -130,14 +151,6 @@ namespace OleViewDotNet.InterfaceViewers
         void SaveCompleted(IMoniker pimkName, IBindCtx pibc);        
     }
 
-    class PersistStreamViewerFactory : GenericTypeViewerFactory<IPersistStream>
-    {
-    }
-
-    class PersistStreamInitViewerFactory : GenericTypeViewerFactory<IPersistStreamInit>
-    {
-    }
-
     class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
     {
     }
@@ -148,5 +161,41 @@ namespace OleViewDotNet.InterfaceViewers
 
     class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
     {
+    }
+
+    class PersistStreamViewerFactory : ITypeViewerFactory
+    {
+        public Guid Iid
+        {
+            get { return COMInterfaceEntry.IID_IPersistStream; }
+        }
+
+        public string IidName
+        {
+            get { return "IPersistStream"; }
+        }
+
+        public DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        {
+            return new PersistStreamTypeViewer(strObjName, pObject.Instance);
+        }
+    }
+
+    class PersistStreamInitViewerFactory : ITypeViewerFactory
+    {
+        public Guid Iid
+        {
+            get { return COMInterfaceEntry.IID_IPersistStreamInit; }
+        }
+
+        public string IidName
+        {
+            get { return "IPersistStreamInit"; }
+        }
+
+        public DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        {
+            return new PersistStreamTypeViewer(strObjName, pObject.Instance);
+        }
     }
 }

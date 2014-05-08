@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet
 {    
@@ -25,6 +26,17 @@ namespace OleViewDotNet
         public object Instance { get; private set; }
         public Guid Id { get; private set; }
         public KeyValuePair<Guid, string>[] Interfaces { get; private set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
+        public ObjectEntry(string name, object instance)
+            : this(name, instance, COMRegistry.Instance.GetInterfacesForObject(instance))
+        {
+
+        }
 
         public ObjectEntry(string name, object instance, COMInterfaceEntry[] interfaces)
         {
@@ -40,7 +52,7 @@ namespace OleViewDotNet
             }
         }        
      
-        public object QueryInterface(string name)
+        public dynamic QueryInterface(string name)
         {
             Guid iid = Guid.Empty;
             object o = null;
@@ -62,29 +74,27 @@ namespace OleViewDotNet
 
             Type type = COMUtilities.GetInterfaceType(iid);
             if (type != null)
-            {
-                DynamicMethod method = new DynamicMethod("CastTypeInstance", type, new Type[] { typeof(object) });
-                ILGenerator gen = method.GetILGenerator(256);
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Castclass, type);
-                gen.Emit(OpCodes.Ret);
-                o = method.Invoke(null, new object[] { Instance });                
+            {                
+                o = new DynamicComObjectWrapper(type, Instance);
             }
 
             return o;
         }
     }
 
-    class ObjectCache
+    static class ObjectCache
     {
-        private static Dictionary<object, ObjectEntry> m_objects = new Dictionary<object, ObjectEntry>();
+        private static List<ObjectEntry> m_objects = new List<ObjectEntry>();
 
-        public static void Add(string name, object instance, COMInterfaceEntry[] interfaces)
+        public static ObjectEntry Add(string name, object instance, COMInterfaceEntry[] interfaces)
         {
-            m_objects.Add(instance, new ObjectEntry(name, instance, interfaces));
+            ObjectEntry ret = new ObjectEntry(name, instance, interfaces);
+            m_objects.Add(ret);
+
+            return ret;
         }
 
-        public static void Remove(object instance)
+        public static void Remove(ObjectEntry instance)
         {
             m_objects.Remove(instance);
         }
@@ -93,41 +103,18 @@ namespace OleViewDotNet
         {
             get
             {
-                int pos = 0;
-                ObjectEntry[] o = new ObjectEntry[m_objects.Count];
-                foreach (KeyValuePair<object, ObjectEntry> pair in m_objects)
-                {
-                    o[pos++] = pair.Value;
-                }
-
-                return o;
+                return m_objects.ToArray();
             }
         }
 
         public static ObjectEntry GetObjectByName(string name)
-        {                
-            foreach (KeyValuePair<object, ObjectEntry> pair in m_objects)
-            {
-                if (String.Compare(pair.Value.Name, name, true) == 0)
-                {
-                    return pair.Value;
-                }
-            }
-            
-            return null;
+        {
+            return m_objects.Find(o => String.Equals(name, o.Name, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public static ObjectEntry GetObjectByGuid(Guid id)
         {
-            foreach (KeyValuePair<object, ObjectEntry> pair in m_objects)
-            {
-                if (pair.Value.Id == id)
-                {
-                    return pair.Value;
-                }
-            }
-
-            return null;
+            return m_objects.Find(o => o.Id == id);
         }
     }
 }

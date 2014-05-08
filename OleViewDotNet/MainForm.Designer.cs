@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuFile = new System.Windows.Forms.MenuItem();
-            this.menuFileNewWindow = new System.Windows.Forms.MenuItem();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuView = new System.Windows.Forms.MenuItem();
@@ -44,12 +44,16 @@
             this.menuViewPreApproved = new System.Windows.Forms.MenuItem();
             this.menuViewImplementedCategories = new System.Windows.Forms.MenuItem();
             this.menuViewIELowRights = new System.Windows.Forms.MenuItem();
+            this.menuViewAppIDs = new System.Windows.Forms.MenuItem();
+            this.menuViewLocalServices = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
+            this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
+            this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -63,16 +67,16 @@
             // 
             this.menuFile.Index = 0;
             this.menuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuFileNewWindow,
+            this.menuItem3,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
             // 
-            // menuFileNewWindow
+            // menuItem3
             // 
-            this.menuFileNewWindow.Index = 0;
-            this.menuFileNewWindow.Text = "New Window";
-            this.menuFileNewWindow.Click += new System.EventHandler(this.menuViewNewWindow_Click);
+            this.menuItem3.Index = 0;
+            this.menuItem3.Text = "Python Console";
+            this.menuItem3.Click += new System.EventHandler(this.menuFilePythonConsole_Click);
             // 
             // menuItem2
             // 
@@ -97,6 +101,8 @@
             this.menuViewPreApproved,
             this.menuViewImplementedCategories,
             this.menuViewIELowRights,
+            this.menuViewAppIDs,
+            this.menuViewLocalServices,
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName});
@@ -150,20 +156,32 @@
             this.menuViewIELowRights.Text = "IE Low RIghts Elevation Policy";
             this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
             // 
+            // menuViewAppIDs
+            // 
+            this.menuViewAppIDs.Index = 8;
+            this.menuViewAppIDs.Text = "App IDs";
+            this.menuViewAppIDs.Click += new System.EventHandler(this.menuViewAppIDs_Click);
+            // 
+            // menuViewLocalServices
+            // 
+            this.menuViewLocalServices.Index = 9;
+            this.menuViewLocalServices.Text = "Local Services";
+            this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
+            // 
             // menuItem1
             // 
-            this.menuItem1.Index = 8;
+            this.menuItem1.Index = 10;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 9;
+            this.menuViewInterfaces.Index = 11;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 10;
+            this.menuViewInterfacesByName.Index = 12;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
@@ -172,7 +190,9 @@
             this.menuItem4.Index = 2;
             this.menuItem4.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuObjectROT,
-            this.menuObjectCreateInstanceFromCLSID});
+            this.menuObjectCreateInstanceFromCLSID,
+            this.menuObjectFromMarshalledStream,
+            this.menuObjectFromSerializedStream});
             this.menuItem4.Text = "&Object";
             // 
             // menuObjectROT
@@ -186,6 +206,18 @@
             this.menuObjectCreateInstanceFromCLSID.Index = 1;
             this.menuObjectCreateInstanceFromCLSID.Text = "Create Instance from CLSID";
             this.menuObjectCreateInstanceFromCLSID.Click += new System.EventHandler(this.menuViewCreateInstanceFromCLSID_Click);
+            // 
+            // menuObjectFromMarshalledStream
+            // 
+            this.menuObjectFromMarshalledStream.Index = 2;
+            this.menuObjectFromMarshalledStream.Text = "From Marshalled Stream";
+            this.menuObjectFromMarshalledStream.Click += new System.EventHandler(this.menuObjectFromMarshalledStream_Click);
+            // 
+            // menuObjectFromSerializedStream
+            // 
+            this.menuObjectFromSerializedStream.Index = 3;
+            this.menuObjectFromSerializedStream.Text = "From Serialized Stream";
+            this.menuObjectFromSerializedStream.Click += new System.EventHandler(this.menuObjectFromSerializedStream_Click);
             // 
             // MainForm
             // 
@@ -218,12 +250,16 @@
         private System.Windows.Forms.MenuItem menuViewImplementedCategories;
         private System.Windows.Forms.MenuItem menuViewPreApproved;
         private System.Windows.Forms.MenuItem menuItem1;
-        private System.Windows.Forms.MenuItem menuFileNewWindow;
         private System.Windows.Forms.MenuItem menuObjectCreateInstanceFromCLSID;
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem menuItem4;
         private System.Windows.Forms.MenuItem menuViewCLSIDsByLocalServer;
         private System.Windows.Forms.MenuItem menuViewIELowRights;
+        private System.Windows.Forms.MenuItem menuViewLocalServices;
+        private System.Windows.Forms.MenuItem menuViewAppIDs;
+        private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem menuObjectFromMarshalledStream;
+        private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
     }
 }
 

@@ -92,6 +92,12 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Be.Windows.Forms.HexBox">
+      <HintPath>.\Be.Windows.Forms.HexBox.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.TextEditor">
+      <HintPath>..\packages\ICSharpCode.TextEditor.3.2.1.6466\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
+    </Reference>
     <Reference Include="IronPython">
       <HintPath>..\packages\IronPython.2.7.4\lib\Net40\IronPython.dll</HintPath>
     </Reference>
@@ -121,6 +127,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.9.0.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
@@ -129,17 +136,40 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppContextImpl.cs" />
     <Compile Include="COMAppIDEntry.cs" />
     <Compile Include="COMCLSIDEntry.cs" />
     <Compile Include="COMIELowRightsElevationPolicy.cs" />
     <Compile Include="COMInterfaceEntry.cs" />
+    <Compile Include="ConsoleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ConsoleControl.designer.cs">
+      <DependentUpon>ConsoleControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="CreateCLSIDForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CreateCLSIDForm.Designer.cs">
       <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DocumentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DocumentForm.Designer.cs">
+      <DependentUpon>DocumentForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicComFunctionWrapper.cs" />
+    <Compile Include="DynamicComObjectWrapper.cs" />
+    <Compile Include="HexEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HexEditor.Designer.cs">
+      <DependentUpon>HexEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InputTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />
     <Compile Include="COMProgIDEntry.cs" />
     <Compile Include="COMRegistryViewer.cs">
@@ -195,6 +225,19 @@
     <Compile Include="ObjectContainer.Designer.cs">
       <DependentUpon>ObjectContainer.cs</DependentUpon>
     </Compile>
+    <Compile Include="PersistStreamTypeViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PersistStreamTypeViewer.Designer.cs">
+      <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PythonConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PythonConsole.Designer.cs">
+      <DependentUpon>PythonConsole.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SimpleSyntaxModeProvider.cs" />
     <Compile Include="TypedObjectViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -212,17 +255,26 @@
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ConsoleControl.resx">
+      <DependentUpon>ConsoleControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CreateCLSIDForm.resx">
       <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CreateIStreamForm.resx">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DocumentForm.resx">
+      <DependentUpon>DocumentForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GetTextForm.resx">
       <DependentUpon>GetTextForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GetTypeForm.resx">
       <DependentUpon>GetTypeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HexEditor.resx">
+      <DependentUpon>HexEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
@@ -235,6 +287,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ObjectContainer.resx">
       <DependentUpon>ObjectContainer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PersistStreamTypeViewer.resx">
+      <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PythonConsole.resx">
+      <DependentUpon>PythonConsole.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TypedObjectViewer.resx">
       <DependentUpon>TypedObjectViewer.cs</DependentUpon>
@@ -769,6 +827,16 @@
     <Content Include="license.txt" />
     <Content Include="oleview.ico" />
     <Content Include="Notes.txt" />
+    <Content Include="PythonLib\oleviewdotnet\registry.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PythonLib\oleviewdotnet\types.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PythonLib\oleviewdotnet\__init__.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\PythonHighlightingRules.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -811,7 +879,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /I /Y /Q /E "$(ProjectDir)Lib" "$(TargetDir)PythonLib"</PostBuildEvent>
   </PropertyGroup>
 </Project>

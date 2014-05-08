@@ -7,17 +7,17 @@ using System.IO;
 
 namespace OleViewDotNet.InterfaceViewers
 {
-    public interface ITypeViewerFactory
+    interface ITypeViewerFactory
     {
         Guid Iid { get; }
         string IidName { get; }        
-        DockContent CreateInstance(string strObjName, object pObject);
+        DockContent CreateInstance(string strObjName, ObjectEntry pObject);
     }
 
     /// <summary>
     /// Simple base implementation to reduce the amount of code to write
     /// </summary>
-    public abstract class BaseTypeViewerFactory : ITypeViewerFactory
+    abstract class BaseTypeViewerFactory : ITypeViewerFactory
     {        
         public BaseTypeViewerFactory(string strName, Guid iid)
         {
@@ -33,20 +33,20 @@ namespace OleViewDotNet.InterfaceViewers
 
         public string IidName { get; private set; }
         public Guid Iid { get; private set; }
-        abstract public DockContent CreateInstance(string strObjName, object pObject);            
+        abstract public DockContent CreateInstance(string strObjName, ObjectEntry pObject);            
     }
 
     /// <summary>
     /// Generic factory implementation for use if we have a predefined type
     /// </summary>
     /// <typeparam name="T">The interface type to create the factory for</typeparam>
-    public class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
+    class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
     {        
         public GenericTypeViewerFactory() : base(typeof(T))
         {
         }
 
-        public override DockContent CreateInstance(string strObjName, object pObject)
+        public override DockContent CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new TypedObjectViewer(strObjName, pObject, typeof(T));
         }
@@ -55,7 +55,7 @@ namespace OleViewDotNet.InterfaceViewers
     /// <summary>
     /// Generic factory implementation for use when we have a instantiated type object
     /// </summary>
-    public class InstanceTypeViewerFactory : BaseTypeViewerFactory
+    class InstanceTypeViewerFactory : BaseTypeViewerFactory
     {
         Type m_type;
         public InstanceTypeViewerFactory(Type t)
@@ -64,7 +64,7 @@ namespace OleViewDotNet.InterfaceViewers
             m_type = t;
         }
 
-        public override DockContent CreateInstance(string strObjName, object pObject)
+        public override DockContent CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new TypedObjectViewer(strObjName, pObject, m_type);
         }

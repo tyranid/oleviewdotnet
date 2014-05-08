@@ -22,6 +22,13 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
+using System.Security.AccessControl;
+using System.CodeDom;
+using System.Text;
+using System.CodeDom.Compiler;
+using System.Linq;
+using Microsoft.CSharp;
+using OleViewDotNet.InterfaceViewers;
 
 namespace OleViewDotNet
 {
@@ -50,7 +57,7 @@ namespace OleViewDotNet
         INTERFACE_USES_SECURITY_MANAGER = 0x00000008
     }
 
-    [Guid("CB5BDC81-93C1-11CF-8F20-00805F2CD064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport, Guid("CB5BDC81-93C1-11CF-8F20-00805F2CD064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IObjectSafety
     {
         void GetInterfaceSafetyOptions(ref Guid riid, out uint pdwSupportedOptions, out uint pdwEnabledOptions);
@@ -143,12 +150,36 @@ namespace OleViewDotNet
         [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
         public static extern IBindCtx CreateBindCtx([In] uint reserved);
 
+        [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
+        public static extern IMoniker CreateObjrefMoniker([MarshalAs(UnmanagedType.Interface)] object punk);
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public extern static void SHCreateStreamOnFile(string pszFile, COMUtilities.STGM grfMode, out IntPtr ppStm);
 
         private static Dictionary<Guid, Assembly> m_typelibs;
+        private static Dictionary<string, Assembly> m_typelibsname;
         private static Dictionary<Guid, Type> m_iidtypes;
+
+        static COMUtilities()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
+        static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (m_typelibsname != null)
+            {
+                lock (m_typelibsname)
+                {
+                    if (m_typelibsname.ContainsKey(args.Name))
+                    {
+                        return m_typelibsname[args.Name];
+                    }
+                }
+            }
+
+            return null;
+        }
 
         public static string ReadStringFromKey(RegistryKey rootKey, string keyName, string valueName)
         {
@@ -210,7 +241,7 @@ namespace OleViewDotNet
                 }
                 catch(COMException ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    System.Diagnostics.Trace.WriteLine(ex.ToString());
                 }
 
                 Marshal.ReleaseComObject(catInfo);
@@ -269,11 +300,23 @@ namespace OleViewDotNet
             }
         }
 
+        private static void LoadBuiltinTypes(Assembly asm)
+        {
+            foreach(Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
+            {
+                if (!m_iidtypes.ContainsKey(t.GUID))
+                {
+                    m_iidtypes.Add(t.GUID, t);
+                }
+            }            
+        }
+
         public static Type GetInterfaceType(Guid iid)
         {
             if (m_iidtypes == null)
             {
                 LoadTypeLibAssemblies();
+
             }
 
             if (m_iidtypes.ContainsKey(iid))
@@ -295,6 +338,7 @@ namespace OleViewDotNet
 
                     m_typelibs = new Dictionary<Guid, Assembly>();
                     m_iidtypes = new Dictionary<Guid, Type>();
+                    m_typelibsname = new Dictionary<string, Assembly>();
 
                     foreach (string f in files)
                     {
@@ -304,19 +348,28 @@ namespace OleViewDotNet
                             if (!m_typelibs.ContainsKey(Marshal.GetTypeLibGuidForAssembly(a)))
                             {
                                 m_typelibs.Add(Marshal.GetTypeLibGuidForAssembly(a), a);
+
+                                lock (m_typelibsname)
+                                {
+                                    m_typelibsname[a.FullName] = a;
+                                }
+
                                 RegisterTypeInterfaces(a);
                             }
                         }
                         catch (Exception e)
                         {
-                            System.Diagnostics.Debug.WriteLine(e.ToString());
+                            System.Diagnostics.Trace.WriteLine(e.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
+                    System.Diagnostics.Trace.WriteLine(e.ToString());
                 }
+
+                LoadBuiltinTypes(Assembly.GetExecutingAssembly());
+                LoadBuiltinTypes(typeof(int).Assembly);
             }
         }
 
@@ -345,6 +398,12 @@ namespace OleViewDotNet
                 Assembly a = Assembly.LoadFile(strAssemblyPath);
 
                 m_typelibs[Marshal.GetTypeLibGuid(typeLib)] = a;
+
+                lock (m_typelibsname)
+                {
+                    m_typelibsname[a.FullName] = a;
+                }
+
                 RegisterTypeInterfaces(a);
 
                 return a;
@@ -362,49 +421,424 @@ namespace OleViewDotNet
                     ret = comObj.GetType();
                 }
                 else
-                {
-                    if (ret == null)
-                    {                        
-                        IntPtr typeInfo = IntPtr.Zero;
+                {                     
+                    IntPtr typeInfo = IntPtr.Zero;
 
-                        try
+                    try
+                    {
+                        IDispatch disp = (IDispatch)comObj;
+
+                        disp.GetTypeInfo(0, 0x409, out typeInfo);
+                        ITypeInfo ti = (ITypeInfo)Marshal.GetObjectForIUnknown(typeInfo);
+                        ITypeLib tl = null;
+                        int iIndex = 0;
+                        ti.GetContainingTypeLib(out tl, out iIndex);
+
+                        Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
+                        Assembly asm = ConvertTypeLibToAssembly(tl);
+
+                        if (asm != null)
                         {
-                            IDispatch disp = (IDispatch)comObj;
-
-                            disp.GetTypeInfo(0, 0x409, out typeInfo);
-                            ITypeInfo ti = (ITypeInfo)Marshal.GetObjectForIUnknown(typeInfo);
-                            ITypeLib tl = null;
-                            int iIndex = 0;
-                            ti.GetContainingTypeLib(out tl, out iIndex);
-
-                            Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
-                            Assembly asm = ConvertTypeLibToAssembly(tl);
-
-                            if (asm != null)
-                            {
-                                ret = asm.GetType(Marshal.GetTypeLibName(tl) + "." + Marshal.GetTypeInfoName(ti));
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine(ex.ToString());
-                        }
-                        finally
-                        {
-                            if(typeInfo != IntPtr.Zero)
-                            {
-                                Marshal.Release(typeInfo);
-                            }
+                            ret = asm.GetType(Marshal.GetTypeLibName(tl) + "." + Marshal.GetTypeInfoName(ti));
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    }
+                    finally
+                    {
+                        if(typeInfo != IntPtr.Zero)
+                        {
+                            Marshal.Release(typeInfo);
+                        }
+                    }                
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
+                System.Diagnostics.Trace.WriteLine(ex.ToString());
             }
 
             return ret;
+        }
+
+        public static RawSecurityDescriptor ReadSecurityDescriptorFromKey(RegistryKey key, string value)
+        {
+            byte[] data = (byte[])key.GetValue(value);
+
+            if (data != null)
+            {
+                return new RawSecurityDescriptor(data, 0);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static bool IsComImport(Type t)
+        {
+            return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0;
+        }
+
+        private static Dictionary<Type, Type> _wrappers = new Dictionary<Type, Type>();        
+
+        private static CodeParameterDeclarationExpression GetParameter(ParameterInfo pi)
+        {
+            Type baseType = pi.ParameterType;
+
+            if (baseType.IsByRef)
+            {
+                string name = baseType.FullName.TrimEnd('&');
+
+                baseType = baseType.Assembly.GetType(name);
+            }
+
+            CodeParameterDeclarationExpression p = new CodeParameterDeclarationExpression(baseType, pi.Name);
+            FieldDirection d = FieldDirection.In;
+
+            if ((pi.Attributes & ParameterAttributes.Out) == ParameterAttributes.Out)
+            {
+                d = FieldDirection.Out;
+            }
+
+            if ((pi.Attributes & ParameterAttributes.In) == ParameterAttributes.In)
+            {
+                if (d == FieldDirection.Out)
+                {
+                    d = FieldDirection.Ref;
+                }
+                else
+                {
+                    d = FieldDirection.In;
+                }
+            }
+
+            p.Direction = d;
+
+            return p;
+        }
+
+        private static CodeMemberMethod CreateForwardingMethod(MethodInfo mi)
+        {
+            CodeMemberMethod method = new CodeMemberMethod();
+            method.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+            method.Name = mi.Name;
+            method.ReturnType = new CodeTypeReference(mi.ReturnType);
+
+            List<CodeExpression> parameters = new List<CodeExpression>();
+
+            foreach (ParameterInfo pi in mi.GetParameters())
+            {
+                CodeParameterDeclarationExpression p = GetParameter(pi);
+                method.Parameters.Add(p);
+                //parameters.Add(new CodeVariableReferenceExpression(pi.Name));
+                parameters.Add(new CodeDirectionExpression(p.Direction, new CodeVariableReferenceExpression(pi.Name)));
+            }
+
+            CodeMethodInvokeExpression invokeExpr = new CodeMethodInvokeExpression(
+                new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"),
+                mi.Name, parameters.ToArray());
+
+            if (mi.ReturnType != typeof(void))
+            {
+                method.Statements.Add(new CodeMethodReturnStatement(invokeExpr));
+            }
+            else
+            {
+                method.Statements.Add(invokeExpr);
+            }
+
+            return method;
+        }
+
+        private static CodeMemberProperty CreateForwardingProperty(PropertyInfo pi)
+        {
+            CodeMemberProperty prop = new CodeMemberProperty();
+            prop.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+            prop.Name = pi.Name;
+            prop.Type = new CodeTypeReference(pi.PropertyType);
+
+            CodePropertyReferenceExpression propExpr = new CodePropertyReferenceExpression(
+                new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"),
+                pi.Name);
+
+            if (pi.CanRead)
+            {
+                prop.GetStatements.Add(new CodeMethodReturnStatement(propExpr));
+            }
+
+            if (pi.CanWrite)
+            {
+                prop.SetStatements.Add(new CodeAssignStatement(propExpr, new CodeVariableReferenceExpression("value")));
+            }
+
+            return prop;
+        }
+
+        private static CodeTypeDeclaration CreateWrapperTypeDeclaration(Type t)
+        {
+            CodeTypeDeclaration type = new CodeTypeDeclaration(t.Name + "Wrapper");
+            CodeTypeReference typeRef = new CodeTypeReference(t);
+
+            type.IsClass = true;
+            type.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+            type.BaseTypes.Add(typeRef);
+
+            type.Members.Add(new CodeMemberField(typeRef, "_target"));
+
+            CodeConstructor defaultConstructor = new CodeConstructor();
+            defaultConstructor.Attributes = MemberAttributes.Public;
+            defaultConstructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "target"));
+            defaultConstructor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"), new CodeCastExpression(typeRef, new CodeVariableReferenceExpression("target"))));
+            type.Members.Add(defaultConstructor);
+
+            foreach (MethodInfo mi in t.GetMethods())
+            {
+                if (!mi.IsSpecialName)
+                {
+                    type.Members.Add(CreateForwardingMethod(mi));
+                }
+            }
+
+            foreach(PropertyInfo pi in t.GetProperties())
+            {
+                type.Members.Add(CreateForwardingProperty(pi));                
+            }
+
+            return type;
+        }
+
+
+        private static Type CreateWrapper(Type t)
+        {
+            Type ret = null;
+            CodeCompileUnit unit = new CodeCompileUnit();
+            CodeNamespace ns = new CodeNamespace();
+
+            CSharpCodeProvider provider = new CSharpCodeProvider();
+
+            CodeTypeDeclaration type = CreateWrapperTypeDeclaration(t);
+
+            ns.Types.Add(type);
+            unit.Namespaces.Add(ns);
+
+            StringBuilder builder = new StringBuilder();
+            CodeGeneratorOptions options = new CodeGeneratorOptions();
+            options.IndentString = "    ";
+            options.BlankLinesBetweenMembers = false;
+   
+            TextWriter writer = new StringWriter(builder);
+
+            provider.GenerateCodeFromCompileUnit(unit, writer, options);
+
+
+            writer.Close();
+
+            File.WriteAllText("dump.cs", builder.ToString());           
+
+            try
+            {
+                CompilerParameters compileParams = new CompilerParameters();
+                TempFileCollection tempFiles = new TempFileCollection(Path.GetTempPath(), false);
+
+                compileParams.GenerateExecutable = false;
+                compileParams.GenerateInMemory = true;
+                compileParams.IncludeDebugInformation = true;
+                compileParams.TempFiles = tempFiles;
+                compileParams.ReferencedAssemblies.Add("System.dll");
+                compileParams.ReferencedAssemblies.Add("Microsoft.CSharp.dll");
+                compileParams.ReferencedAssemblies.Add("System.Core.dll");                
+                compileParams.ReferencedAssemblies.Add(t.Assembly.Location);
+
+                CompilerResults results = provider.CompileAssemblyFromDom(compileParams, unit);
+
+                if (results.Errors.HasErrors)
+                {
+                    foreach (CompilerError e in results.Errors)
+                    {
+                        System.Diagnostics.Debug.WriteLine(e.ToString());                        
+                    }
+                }
+                else
+                {
+                    ret = results.CompiledAssembly.GetType(t.Name + "Wrapper");
+                    if (ret != null)
+                    {
+                        lock (_wrappers)
+                        {
+                            _wrappers[t] = ret;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception)
+            {                
+            }
+
+            return ret;
+        }
+
+        public static dynamic CreateDynamicCallWrapper(object target, Type t)
+        {
+            Type instanceType = null;
+
+            lock (_wrappers)
+            {
+                if (_wrappers.ContainsKey(t))
+                {
+                    instanceType = _wrappers[t];
+                }
+            }
+
+            if (instanceType == null)
+            {
+                instanceType = CreateWrapper(t);
+            }
+
+            if (instanceType != null)
+            {
+                return Activator.CreateInstance(instanceType, target);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static void SaveObjectToStream(object obj, Stream stm)
+        {
+            IStreamImpl istm = new IStreamImpl(stm);
+
+            IPersistStream ps = obj as IPersistStream;
+
+            if (ps != null)
+            {
+                ps.Save(istm, false);
+            }
+            else
+            {
+                IPersistStreamInit psi = (IPersistStreamInit)obj;
+
+                psi.Save(istm, false);
+            }
+        }
+
+        public static void LoadObjectFromStream(object obj, Stream stm)
+        {
+            IStreamImpl istm = new IStreamImpl(stm);
+
+            IPersistStream ps = obj as IPersistStream;
+
+            if (ps != null)
+            {                
+                ps.Load(istm);
+            }
+            else
+            {
+                IPersistStreamInit psi = (IPersistStreamInit)obj;
+
+                psi.InitNew();
+                psi.Load(istm);
+            }
+        }
+
+        public static void OleSaveToStream(object obj, Stream stm)
+        {
+            using (BinaryWriter writer = new BinaryWriter(stm))
+            {
+                Guid clsid = GetObjectClass(obj);
+
+                writer.Write(clsid.ToByteArray());
+
+                SaveObjectToStream(obj, stm);
+            }
+        }
+
+        public static object OleLoadFromStream(Stream stm)
+        {
+            using (BinaryReader reader = new BinaryReader(stm))
+            {
+                Guid clsid = new Guid(reader.ReadBytes(16));
+
+                Guid unk = COMInterfaceEntry.IID_IUnknown;
+                IntPtr pObj;
+                object ret;
+
+                int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.CLSCTX_SERVER,
+                    ref unk, out pObj);
+
+                if (iError != 0)
+                {
+                    Marshal.ThrowExceptionForHR(iError);
+                }
+
+                ret = Marshal.GetObjectForIUnknown(pObj);
+                Marshal.Release(pObj);
+
+                LoadObjectFromStream(ret, stm);
+
+                return ret;
+            }
+        }
+
+        public static Guid GetObjectClass(object p)
+        {
+            Guid ret = Guid.Empty;
+            
+            if (p is IPersist)
+            {
+                ((IPersist)p).GetClassID(out ret);
+            }
+            else if(p is IPersistStream)
+            {
+                ((IPersistStream)p).GetClassID(out ret);
+            }
+            else if (p is IPersistStreamInit)
+            {
+                ((IPersistStreamInit)p).GetClassID(out ret);
+            }
+            else if (p is IPersistFile)
+            {
+                ((IPersistFile)p).GetClassID(out ret);
+            }
+            else if (p is IPersistMoniker)
+            {
+                ((IPersistMoniker)p).GetClassID(out ret);
+            }
+            else if (p is IPersistStorage)
+            {
+                ((IPersistStorage)p).GetClassID(out ret);
+            }
+
+            return ret;
+        }
+
+        public static string GetMonikerDisplayName(IMoniker pmk)
+        {
+            string strDisplayName;
+            IBindCtx bindCtx = CreateBindCtx(0);
+
+            pmk.GetDisplayName(bindCtx, null, out strDisplayName);
+
+            Marshal.ReleaseComObject(bindCtx);
+
+            return strDisplayName;
+        }
+
+        public static byte[] MarshalObject(object obj)
+        {
+            IMoniker mk;
+
+            mk = COMUtilities.CreateObjrefMoniker(obj);
+
+            string name = COMUtilities.GetMonikerDisplayName(mk).Substring(7).TrimEnd(':');
+
+            Marshal.ReleaseComObject(mk);
+
+            return Convert.FromBase64String(name);
         }
     }    
 }

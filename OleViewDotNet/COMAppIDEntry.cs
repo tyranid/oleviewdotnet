@@ -1,48 +1,66 @@
-﻿using Microsoft.Win32;
+﻿//    This file is part of OleViewDotNet.
+//
+//    OleViewDotNet is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    OleViewDotNet is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
+
+using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Security.AccessControl;
 
 namespace OleViewDotNet
 {
     public class COMAppIDEntry : IComparable<COMAppIDEntry>
     {
         private Guid m_appId;
+        private string m_service;
+        private string m_runas;
+        private string m_name;
+        private byte[] m_access;
+        private byte[] m_launch;
+
+        public COMAppIDEntry(Guid appId, RegistryKey key)
+        {
+            m_appId = appId;
+            LoadFromKey(key);
+        }
 
         private void LoadFromKey(RegistryKey key)
         {
-            //object name = key.GetValue(null);
-            //if ((name != null) && (name.ToString().Length > 0))
-            //{
-            //    m_name = name.ToString();
-            //}
-            //else
-            //{
-            //    m_name = String.Format("{{{0}}}", m_iid.ToString());
-            //}
+            m_service = key.GetValue("LocalService") as string;
+            m_runas = key.GetValue("RunAs") as string;
+            string name = key.GetValue(null) as string;
+            if (!String.IsNullOrWhiteSpace(name))
+            {
+                m_name = name.ToString();
+            }
+            else
+            {
+                m_name = m_appId.ToString("B");
+            }
 
-            //try
-            //{
-            //    m_proxyclsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
-            //}
-            //catch (FormatException e)
-            //{
-            //    System.Diagnostics.Debug.WriteLine(e.ToString());
-            //}
+            m_access = key.GetValue("AccessPermission") as byte[];
+            m_launch = key.GetValue("LaunchPermission") as byte[];
 
-            //string nummethods = COMUtilities.ReadStringFromKey(key, "NumMethods", null);
-
-            //if (!int.TryParse(nummethods, out m_nummethods) || m_nummethods < 3)
-            //{
-            //    m_nummethods = 3;
-            //}
-
-            //m_base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
-            //if (m_base.Length == 0)
-            //{
-            //    m_base = "IUnknown";
-            //}
+            if (String.IsNullOrWhiteSpace(m_runas) && !String.IsNullOrWhiteSpace(m_service))
+            {
+                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\" + m_service))
+                {
+                    if (serviceKey != null)
+                    {
+                        m_runas = serviceKey.GetValue("ObjectName") as string;
+                    }
+                }
+            }
         }
 
         public int CompareTo(COMAppIDEntry other)
@@ -56,6 +74,31 @@ namespace OleViewDotNet
             {
                 return m_appId;
             }
+        }
+
+        public string LocalService
+        {
+            get { return m_service; }
+        }
+
+        public string RunAs
+        {
+            get { return m_runas; }
+        }
+
+        public string Name
+        {
+            get { return m_name; }
+        }
+
+        public byte[] LaunchPermission
+        {
+            get { return m_launch; }
+        }
+
+        public byte[] AccessPermission
+        {
+            get { return m_access; }
         }
     }
 }

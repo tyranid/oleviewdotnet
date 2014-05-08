@@ -33,8 +33,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.btnMarshal = new System.Windows.Forms.Button();
+            this.btnSaveStream = new System.Windows.Forms.Button();
             this.btnDispatch = new System.Windows.Forms.Button();
             this.btnOleContainer = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
@@ -51,9 +54,9 @@
             // 
             // listViewProperties
             // 
-            this.listViewProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewProperties.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewProperties.FullRowSelect = true;
             this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
@@ -75,9 +78,9 @@
             // 
             // listViewInterfaces
             // 
-            this.listViewInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewInterfaces.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.Location = new System.Drawing.Point(14, 27);
@@ -103,6 +106,8 @@
             // 
             // splitContainer.Panel2
             // 
+            this.splitContainer.Panel2.Controls.Add(this.btnMarshal);
+            this.splitContainer.Panel2.Controls.Add(this.btnSaveStream);
             this.splitContainer.Panel2.Controls.Add(this.btnDispatch);
             this.splitContainer.Panel2.Controls.Add(this.btnOleContainer);
             this.splitContainer.Panel2.Controls.Add(this.label2);
@@ -110,6 +115,29 @@
             this.splitContainer.Size = new System.Drawing.Size(1036, 495);
             this.splitContainer.SplitterDistance = 220;
             this.splitContainer.TabIndex = 4;
+            // 
+            // btnMarshal
+            // 
+            this.btnMarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnMarshal.Location = new System.Drawing.Point(257, 235);
+            this.btnMarshal.Name = "btnMarshal";
+            this.btnMarshal.Size = new System.Drawing.Size(75, 23);
+            this.btnMarshal.TabIndex = 7;
+            this.btnMarshal.Text = "Marshal";
+            this.btnMarshal.UseVisualStyleBackColor = true;
+            this.btnMarshal.Click += new System.EventHandler(this.btnMarshal_Click);
+            // 
+            // btnSaveStream
+            // 
+            this.btnSaveStream.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSaveStream.Enabled = false;
+            this.btnSaveStream.Location = new System.Drawing.Point(176, 235);
+            this.btnSaveStream.Name = "btnSaveStream";
+            this.btnSaveStream.Size = new System.Drawing.Size(75, 23);
+            this.btnSaveStream.TabIndex = 6;
+            this.btnSaveStream.Text = "Save Strm";
+            this.btnSaveStream.UseVisualStyleBackColor = true;
+            this.btnSaveStream.Click += new System.EventHandler(this.btnSaveStream_Click);
             // 
             // btnDispatch
             // 
@@ -141,15 +169,16 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1036, 495);
             this.Controls.Add(this.splitContainer);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "ObjectInformation";
             this.TabText = "ObjectInformation";
             this.Text = "ObjectInformation";
-            this.Load += new System.EventHandler(this.ObjectInformation_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ObjectInformation_FormClosed);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel1.PerformLayout();
             this.splitContainer.Panel2.ResumeLayout(false);
             this.splitContainer.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -164,5 +193,7 @@
         private System.Windows.Forms.SplitContainer splitContainer;
         private System.Windows.Forms.Button btnOleContainer;
         private System.Windows.Forms.Button btnDispatch;
+        private System.Windows.Forms.Button btnSaveStream;
+        private System.Windows.Forms.Button btnMarshal;
     }
 }

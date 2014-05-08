@@ -25,9 +25,6 @@ namespace OleViewDotNet
         private BackgroundWorker m_worker;
         private RegistryKey m_rootKey;
 
-        public COMRegistry LoadedReg { get; private set; }
-
-
         public LoadingDialog(RegistryKey rootKey)
         {
             m_rootKey = rootKey;
@@ -44,7 +41,7 @@ namespace OleViewDotNet
 
         private void DoWorkEntry(object sender, DoWorkEventArgs e)
         {
-            LoadedReg = new COMRegistry(m_rootKey);
+            COMRegistry.Load(m_rootKey);
         }
 
         private void RunWorkerCompletedCallback(object sender, RunWorkerCompletedEventArgs e)

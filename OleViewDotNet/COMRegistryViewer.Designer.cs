@@ -86,6 +86,7 @@
             this.treeComRegistry.Size = new System.Drawing.Size(699, 383);
             this.treeComRegistry.TabIndex = 0;
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
+            this.treeComRegistry.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeComRegistry_MouseDown);
             // 
             // contextMenuStrip
             // 

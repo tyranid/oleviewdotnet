@@ -13,8 +13,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.InterfaceViewers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
@@ -23,12 +25,10 @@ namespace OleViewDotNet
 {
     public partial class MainForm : Form
     {
-        private DockPanel   m_dockPanel;
-        private COMRegistry m_comRegistry;        
+        private DockPanel   m_dockPanel;      
 
-        public MainForm(COMRegistry comRegistry)
-        {            
-            m_comRegistry = comRegistry;
+        public MainForm()
+        {                        
             InitializeComponent();
             m_dockPanel = new DockPanel();
             m_dockPanel.ActiveAutoHideContent = null;
@@ -57,7 +57,7 @@ namespace OleViewDotNet
 
         private void OpenView(COMRegistryViewer.DisplayMode mode)
         {            
-            COMRegistryViewer view = new COMRegistryViewer(m_comRegistry, mode);
+            COMRegistryViewer view = new COMRegistryViewer(COMRegistry.Instance, mode);
             view.ShowHint = DockState.Document;
             view.Show(m_dockPanel);            
         }
@@ -94,7 +94,7 @@ namespace OleViewDotNet
 
         private void menuViewROT_Click(object sender, EventArgs e)
         {
-            ROTViewer view = new ROTViewer(m_comRegistry);
+            ROTViewer view = new ROTViewer(COMRegistry.Instance);
             view.ShowHint = DockState.Document;
             view.Show(m_dockPanel);
         }
@@ -107,11 +107,6 @@ namespace OleViewDotNet
         private void menuViewPreApproved_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.PreApproved);
-        }
-
-        private void menuViewNewWindow_Click(object sender, EventArgs e)
-        {
-            Program.CreateNewMainForm();            
         }
 
         private void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
@@ -128,16 +123,16 @@ namespace OleViewDotNet
                         string strObjName = "";
                         COMInterfaceEntry[] ints = null;
 
-                        if (m_comRegistry.Clsids.ContainsKey(g))
+                        if (COMRegistry.Instance.Clsids.ContainsKey(g))
                         {
-                            COMCLSIDEntry ent = m_comRegistry.Clsids[g];
+                            COMCLSIDEntry ent = COMRegistry.Instance.Clsids[g];
                             strObjName = ent.Name;
                             props.Add("CLSID", ent.Clsid.ToString("B"));
                             props.Add("Name", ent.Name);
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            ints = m_comRegistry.GetSupportedInterfaces(ent, false);
+                            ints = COMRegistry.Instance.GetSupportedInterfaces(ent, false);
                         }
                         else
                         {
@@ -147,7 +142,7 @@ namespace OleViewDotNet
                             if (COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
                                 ref unk, out pObj) == 0)
                             {
-                                ints = m_comRegistry.GetInterfacesForIUnknown(pObj);
+                                ints = COMRegistry.Instance.GetInterfacesForIUnknown(pObj);
                                 comObj = Marshal.GetObjectForIUnknown(pObj);
                                 strObjName = g.ToString("B");
                                 props.Add("CLSID", g.ToString("B"));
@@ -183,5 +178,101 @@ namespace OleViewDotNet
             OpenView(COMRegistryViewer.DisplayMode.IELowRights);
         }
 
+        private void menuViewLocalServices_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.LocalServices);
+        }
+
+        private void menuViewAppIDs_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.AppIDs);
+        }
+
+        private void menuFilePythonConsole_Click(object sender, EventArgs e)
+        {
+            PythonConsole view = new PythonConsole();
+            view.ShowHint = DockState.Document;
+            view.Show(m_dockPanel);
+        }
+
+        private void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "All Files (*.*)|*.*";
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        byte[] data = File.ReadAllBytes(dlg.FileName);
+
+                        string objref = String.Format("objref:{0}:", Convert.ToBase64String(data));
+                        object comObj = Marshal.BindToMoniker(objref);
+
+                        OpenObjectInformation(comObj, "Marshalled Object");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void OpenObjectInformation(object comObj, string defaultName)
+        {
+            if (comObj != null)
+            {
+                Dictionary<string, string> props = new Dictionary<string, string>();
+                string strObjName = "";
+                COMInterfaceEntry[] ints = null;
+                Guid clsid = COMUtilities.GetObjectClass(comObj);
+
+                if (COMRegistry.Instance.Clsids.ContainsKey(clsid))
+                {
+                    COMCLSIDEntry ent = COMRegistry.Instance.Clsids[clsid];
+                    strObjName = ent.Name;
+                    props.Add("CLSID", ent.Clsid.ToString("B"));
+                    props.Add("Name", ent.Name);
+                    props.Add("Server", ent.Server);
+                    ints = COMRegistry.Instance.GetSupportedInterfaces(ent, false);
+                }
+                else
+                {
+                    ints = COMRegistry.Instance.GetInterfacesForObject(comObj);
+                    strObjName = defaultName != null ? defaultName : clsid.ToString("B");
+                    props.Add("CLSID", clsid.ToString("B"));
+                }
+
+                Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+                ObjectInformation view = new ObjectInformation(strObjName, comObj, props, ints);
+                view.ShowHint = DockState.Document;
+                view.Show(m_dockPanel);
+            }
+        }
+
+        private void menuObjectFromSerializedStream_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "All Files (*.*)|*.*";
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (Stream stm = dlg.OpenFile())
+                        {
+                            OpenObjectInformation(COMUtilities.OleLoadFromStream(stm), null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
     }
 }

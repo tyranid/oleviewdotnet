@@ -15,6 +15,7 @@
 
 using System;
 using Microsoft.Win32;
+using OleViewDotNet.InterfaceViewers;
 
 namespace OleViewDotNet
 {
@@ -116,6 +117,16 @@ namespace OleViewDotNet
             get { return new Guid("{b196b288-bab4-101a-b69c-00aa00341d07}"); }
         }
 
+        public static Guid IID_IPersistStream
+        {
+            get { return typeof(IPersistStream).GUID; }
+        }
+
+        public static Guid IID_IPersistStreamInit
+        {
+            get { return typeof(IPersistStreamInit).GUID; }
+        }
+
         public bool IsOleControl
         {
             get { return (m_iid == IID_IOleControl); }
@@ -124,6 +135,16 @@ namespace OleViewDotNet
         public bool IsDispatch
         {
             get { return (m_iid == IID_IDispatch); }
+        }
+
+        public bool IsMarshal
+        {
+            get { return (m_iid == IID_IMarshal); }
+        }
+
+        public bool IsPersistStream
+        {
+            get { return (m_iid == IID_IPersistStream) || (m_iid == IID_IPersistStreamInit); }
         }
 
         public static COMInterfaceEntry CreateKnownInterface(KnownInterfaces known)

@@ -19,7 +19,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
-    public partial class ObjectContainer : DockContent
+    public partial class ObjectContainer : DocumentForm
     {
         private string m_objName;
         private object m_pObject;
