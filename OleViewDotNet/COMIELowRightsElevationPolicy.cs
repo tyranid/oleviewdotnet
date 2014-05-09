@@ -9,10 +9,17 @@ namespace OleViewDotNet
 {
     public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>
     {
+        public enum ElevationPolicy
+        {
+            NoRun = 0,
+            RunAtCurrent = 1,
+            RunAtMedium = 3,
+        }
+
         public string Name { get; private set; }
         public Guid Uuid { get; private set; }
         public COMCLSIDEntry[] Clsids { get; private set; }
-        public int Policy { get; private set; }
+        public ElevationPolicy Policy { get; private set; }
 
         private static string HandleNulTerminate(string s)
         {
@@ -30,7 +37,7 @@ namespace OleViewDotNet
         private void LoadFromRegistry(SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
         {
             List<COMCLSIDEntry> clsidList = new List<COMCLSIDEntry>();
-            Policy = (int)key.GetValue("Policy", 0);
+            Policy = (ElevationPolicy)key.GetValue("Policy", 0);
             string clsid = (string)key.GetValue("CLSID");            
 
             if (clsid != null)
