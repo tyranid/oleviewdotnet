@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ using System.Text;
 using System.Runtime.InteropServices.ComTypes;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers
 {
@@ -175,7 +177,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStream"; }
         }
 
-        public DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }
@@ -193,7 +195,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStreamInit"; }
         }
 
-        public DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }

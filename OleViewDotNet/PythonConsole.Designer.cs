@@ -40,9 +40,7 @@
             this.consoleControl.TabIndex = 0;
             // 
             // PythonConsole
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            //             
             this.ClientSize = new System.Drawing.Size(747, 418);
             this.Controls.Add(this.consoleControl);
             this.Name = "PythonConsole";

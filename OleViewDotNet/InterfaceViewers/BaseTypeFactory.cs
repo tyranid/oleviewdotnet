@@ -4,6 +4,7 @@ using System.Text;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Reflection;
 using System.IO;
+using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers
 {
@@ -11,7 +12,7 @@ namespace OleViewDotNet.InterfaceViewers
     {
         Guid Iid { get; }
         string IidName { get; }        
-        DockContent CreateInstance(string strObjName, ObjectEntry pObject);
+        Control CreateInstance(string strObjName, ObjectEntry pObject);
     }
 
     /// <summary>
@@ -33,7 +34,7 @@ namespace OleViewDotNet.InterfaceViewers
 
         public string IidName { get; private set; }
         public Guid Iid { get; private set; }
-        abstract public DockContent CreateInstance(string strObjName, ObjectEntry pObject);            
+        abstract public Control CreateInstance(string strObjName, ObjectEntry pObject);            
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ namespace OleViewDotNet.InterfaceViewers
         {
         }
 
-        public override DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        public override Control CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new TypedObjectViewer(strObjName, pObject, typeof(T));
         }
@@ -64,7 +65,7 @@ namespace OleViewDotNet.InterfaceViewers
             m_type = t;
         }
 
-        public override DockContent CreateInstance(string strObjName, ObjectEntry pObject)
+        public override Control CreateInstance(string strObjName, ObjectEntry pObject)
         {
             return new TypedObjectViewer(strObjName, pObject, m_type);
         }

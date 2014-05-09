@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -70,7 +71,7 @@ namespace OleViewDotNet
         {
             System.Diagnostics.Debug.WriteLine(tl.ToString());
 
-            return null;
+            return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl);            
         }
 
         public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
@@ -373,7 +374,7 @@ namespace OleViewDotNet
             }
         }
 
-        private static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib)
+        public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib)
         {
             if (m_typelibs == null)
             {

@@ -77,8 +77,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(867, 486);
             this.Controls.Add(this.listViewROT);
-            this.Name = "ROTViewer";
-            this.TabText = "ROTViewer";
+            this.Name = "ROTViewer";            
             this.Text = "ROTViewer";
             this.Load += new System.EventHandler(this.ROTViewer_Load);
             this.contextMenuStrip.ResumeLayout(false);

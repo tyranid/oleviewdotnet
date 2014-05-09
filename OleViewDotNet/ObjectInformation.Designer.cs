@@ -164,16 +164,12 @@
             this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
             // ObjectInformation
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            //             
             this.ClientSize = new System.Drawing.Size(1036, 495);
             this.Controls.Add(this.splitContainer);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "ObjectInformation";
-            this.TabText = "ObjectInformation";
-            this.Text = "ObjectInformation";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ObjectInformation_FormClosed);
+            this.Name = "ObjectInformation";            
+            this.Text = "ObjectInformation";            
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel1.PerformLayout();
             this.splitContainer.Panel2.ResumeLayout(false);

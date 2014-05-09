@@ -354,15 +354,11 @@
             // 
             // TypedObjectViewer
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1052, 505);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "TypedObjectViewer";
-            this.TabText = "ObjectDispatch";
-            this.Text = "ObjectDispatch";
-            this.Load += new System.EventHandler(this.TypedObjectViewer_Load);
+            this.Name = "TypedObjectViewer";            
+            this.Text = "ObjectDispatch";            
             this.contextMenuProperties.ResumeLayout(false);
             this.contextMenuMethods.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);

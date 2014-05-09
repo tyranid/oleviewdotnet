@@ -54,6 +54,8 @@
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
             this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
+            this.menuHelp = new System.Windows.Forms.MenuItem();
+            this.menuHelpAbout = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -61,7 +63,8 @@
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuFile,
             this.menuView,
-            this.menuItem4});
+            this.menuItem4,
+            this.menuHelp});
             // 
             // menuFile
             // 
@@ -219,6 +222,19 @@
             this.menuObjectFromSerializedStream.Text = "From Serialized Stream";
             this.menuObjectFromSerializedStream.Click += new System.EventHandler(this.menuObjectFromSerializedStream_Click);
             // 
+            // menuHelp
+            // 
+            this.menuHelp.Index = 3;
+            this.menuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuHelpAbout});
+            this.menuHelp.Text = "&Help";
+            // 
+            // menuHelpAbout
+            // 
+            this.menuHelpAbout.Index = 0;
+            this.menuHelpAbout.Text = "&About";
+            this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -260,6 +276,8 @@
         private System.Windows.Forms.MenuItem menuItem3;
         private System.Windows.Forms.MenuItem menuObjectFromMarshalledStream;
         private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
+        private System.Windows.Forms.MenuItem menuHelp;
+        private System.Windows.Forms.MenuItem menuHelpAbout;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
-    public partial class ObjectContainer : DocumentForm
+    public partial class ObjectContainer : UserControl
     {
         private string m_objName;
         private object m_pObject;
@@ -47,17 +48,12 @@ namespace OleViewDotNet
                 Controls.Add(m_axControl);
                 ((System.ComponentModel.ISupportInitialize)(m_axControl)).EndInit();
                 ResumeLayout(false);
+                Text = String.Format("{0} Container", m_objName);
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.ToString());
-                Close();
+                MessageBox.Show(e.ToString());                
             }
-        }
-
-        private void ObjectContainer_Load(object sender, EventArgs e)
-        {
-            TabText = String.Format("{0} Container", m_objName);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
-    public partial class PersistStreamTypeViewer : DocumentForm
+    public partial class PersistStreamTypeViewer : UserControl
     {
         private object _obj;
 

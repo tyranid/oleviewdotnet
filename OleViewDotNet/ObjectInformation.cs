@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@ namespace OleViewDotNet
     /// <summary>
     /// Form to display basic information about an object
     /// </summary>
-    public partial class ObjectInformation : DocumentForm
+    public partial class ObjectInformation : UserControl
     {
         private ObjectEntry m_pEntry;
         private Object m_pObject;
@@ -52,7 +53,7 @@ namespace OleViewDotNet
 
             LoadProperties();
             LoadInterfaces();
-            TabText = m_objName;
+            Text = m_objName;
         }
 
         /// <summary>
@@ -149,11 +150,10 @@ namespace OleViewDotNet
                 {
                     if (factory != null)
                     {
-                        DockContent frm = factory.CreateInstance(m_objName, m_pEntry);
+                        Control frm = factory.CreateInstance(m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
-                            frm.ShowHint = DockState.Document;
-                            frm.Show(this.DockPanel);
+                            Program.GetMainForm().HostControl(frm);                            
                         }
                     }
                 }
@@ -166,27 +166,20 @@ namespace OleViewDotNet
 
         private void btnOleContainer_Click(object sender, EventArgs e)
         {
-            DockContent frm = new ObjectContainer(m_objName, m_pObject);
+            Control frm = new ObjectContainer(m_objName, m_pObject);
             if ((frm != null) && !frm.IsDisposed)
             {
-                frm.ShowHint = DockState.Document;
-                frm.Show(this.DockPanel);
+                Program.GetMainForm().HostControl(frm);
             }
         }
 
         private void btnDispatch_Click(object sender, EventArgs e)
         {
-            DockContent frm = new TypedObjectViewer(m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
+            Control frm = new TypedObjectViewer(m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
             if ((frm != null) && !frm.IsDisposed)
             {
-                frm.ShowHint = DockState.Document;
-                frm.Show(this.DockPanel);
+                Program.GetMainForm().HostControl(frm);
             }
-        }
-
-        private void ObjectInformation_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            ObjectCache.Remove(m_pEntry);
         }
 
         private void btnSaveStream_Click(object sender, EventArgs e)

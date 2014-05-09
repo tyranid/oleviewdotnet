@@ -31,14 +31,10 @@
             this.SuspendLayout();
             // 
             // ObjectContainer
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            //             
             this.ClientSize = new System.Drawing.Size(811, 457);
-            this.Name = "ObjectContainer";
-            this.TabText = "ObjectContainer";
-            this.Text = "ObjectContainer";
-            this.Load += new System.EventHandler(this.ObjectContainer_Load);
+            this.Name = "ObjectContainer";            
+            this.Text = "ObjectContainer";            
             this.ResumeLayout(false);
 
         }

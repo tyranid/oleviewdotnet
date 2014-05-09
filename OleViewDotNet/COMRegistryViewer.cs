@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -29,7 +30,7 @@ namespace OleViewDotNet
     /// <summary>
     /// Form to view the COM registration information
     /// </summary>
-    public partial class COMRegistryViewer : DocumentForm
+    public partial class COMRegistryViewer : UserControl
     {
         /// <summary>
         /// Current registry
@@ -256,7 +257,7 @@ namespace OleViewDotNet
             }
             
             treeComRegistry.Nodes.AddRange(clsidNodes);
-            TabText = "CLSIDs";            
+            Text = "CLSIDs";            
         }
 
         private void LoadProgIDs()
@@ -276,7 +277,7 @@ namespace OleViewDotNet
             }
             
             treeComRegistry.Nodes.AddRange(progidNodes);
-            TabText = "ProgIDs";
+            Text = "ProgIDs";
         }
 
         private void LoadCLSIDsByNames()
@@ -294,7 +295,7 @@ namespace OleViewDotNet
             
             treeComRegistry.Nodes.AddRange(clsidNameNodes);
 
-            TabText = "CLSIDs by Name";
+            Text = "CLSIDs by Name";
         }
 
         private void LoadCLSIDByServer(bool localServer)
@@ -326,7 +327,7 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes);
-            TabText = "CLSIDs by Server";
+            Text = "CLSIDs by Server";
         }
 
         private void LoadInterfaces()
@@ -339,7 +340,7 @@ namespace OleViewDotNet
                 i++;
             }
             treeComRegistry.Nodes.AddRange(iidNodes);
-            TabText = "Interfaces";
+            Text = "Interfaces";
         }
 
         private void LoadInterfacesByName()
@@ -352,7 +353,7 @@ namespace OleViewDotNet
                 i++;
             }
             treeComRegistry.Nodes.AddRange(iidNameNodes);
-            TabText = "Interfaces by Name";
+            Text = "Interfaces by Name";
         }
 
         private static StringBuilder AppendFormatLine(StringBuilder builder, string format, params object[] ps)
@@ -445,7 +446,7 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
-            TabText = "Local Services";
+            Text = "Local Services";
         }
 
         private void LoadAppIDs()
@@ -499,7 +500,7 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
-            TabText = "AppIDs";
+            Text = "AppIDs";
         }
 
         private void LoadImplementedCategories()
@@ -536,7 +537,7 @@ namespace OleViewDotNet
             }            
 
             treeComRegistry.Nodes.AddRange(catNodes);
-            TabText = "Implemented Categories";            
+            Text = "Implemented Categories";            
         }
 
         private void LoadPreApproved()
@@ -550,7 +551,7 @@ namespace OleViewDotNet
             }
             
             treeComRegistry.Nodes.AddRange(clsidNodes);
-            TabText = "Explorer PreApproved";   
+            Text = "Explorer PreApproved";   
         }
 
         private void LoadIELowRights()
@@ -568,7 +569,7 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(clsidNodes);
-            TabText = "IE Low Rights Elevation Policy"; 
+            Text = "IE Low Rights Elevation Policy"; 
         }
 
         private void SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
@@ -829,8 +830,7 @@ namespace OleViewDotNet
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
                             ObjectInformation view = new ObjectInformation(ent.Name, comObj, props, m_reg.GetSupportedInterfaces(ent, false));
-                            view.ShowHint = DockState.Document;
-                            view.Show(this.DockPanel);
+                            Program.GetMainForm().HostControl(view);
                         }
                     }
                     catch (Exception ex)

@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -20,9 +21,21 @@ namespace OleViewDotNet
 {
     public partial class DocumentForm : DockContent
     {
-        public DocumentForm()
+        Control _control;
+
+        public DocumentForm(Control c)
         {
             InitializeComponent();
+            this.Controls.Add(c);
+            _control = c;
+            c.Dock = DockStyle.Fill;
+            TabText = c.Text;
+            c.TextChanged += control_TextChanged;
+        }
+
+        void control_TextChanged(object sender, System.EventArgs e)
+        {
+            TabText = _control.Text;
         }
 
         private void closeToolStripMenuItem_Click(object sender, System.EventArgs e)

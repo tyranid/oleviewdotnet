@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -33,7 +34,7 @@ namespace OleViewDotNet
     /// <summary>
     /// Generic interface viewer from a type
     /// </summary>
-    partial class TypedObjectViewer : DocumentForm
+    partial class TypedObjectViewer : UserControl
     {
         private enum ColumnSort
         {
@@ -90,6 +91,9 @@ namespace OleViewDotNet
             HighlightingManager.Manager.AddSyntaxModeFileProvider(new SimpleSyntaxModeProvider("Python.xshd", "Python", ".py", Properties.Resources.PythonHighlightingRules));
 
             textEditorControl.SetHighlighting("Python");
+
+            LoadDispatch();
+            Text = String.Format("{0} {1}", m_objName, m_dispType.Name);
         }
 
         public TypedObjectViewer(string strObjName, object pObject, Type dispType) 
@@ -238,15 +242,6 @@ namespace OleViewDotNet
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
-        private void TypedObjectViewer_Load(object sender, EventArgs e)
-        {
-            if (m_dispType != null)
-            {
-                LoadDispatch();
-                TabText = String.Format("{0} {1}", m_objName, m_dispType.Name);
-            }
-        }
-
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateProperties();
@@ -277,9 +272,7 @@ namespace OleViewDotNet
 
                     if (val != null)
                     {
-                        TypedObjectViewer view = new TypedObjectViewer(m_objName, val, pi.PropertyType);
-                        view.ShowHint = DockState.Document;
-                        view.Show(this.DockPanel);
+                        Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, val, pi.PropertyType));
                     }
                 }
             }

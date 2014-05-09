@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
-    public partial class ROTViewer : DockContent
+    public partial class ROTViewer : UserControl
     {
         private COMRegistry m_reg;
 
@@ -92,7 +93,7 @@ namespace OleViewDotNet
             listViewROT.Columns.Add("Display Name");
             listViewROT.Columns.Add("CLSID");
             LoadROT();
-            TabText = "ROT";
+            Text = "ROT";
         }
 
         private void menuROT_Click(object sender, EventArgs e)
@@ -125,8 +126,7 @@ namespace OleViewDotNet
                     info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
                     dispType = COMUtilities.GetDispatchTypeInfo(comObj);
                     ObjectInformation view = new ObjectInformation(info.strDisplayName, comObj, props, m_reg.GetInterfacesForObject(comObj));
-                    view.ShowHint = DockState.Document;
-                    view.Show(this.DockPanel);
+                    Program.GetMainForm().HostControl(view);
                 }
                 catch (Exception ex)
                 {

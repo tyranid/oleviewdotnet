@@ -136,6 +136,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutForm.Designer.cs">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="COMAppIDEntry.cs" />
     <Compile Include="COMCLSIDEntry.cs" />
     <Compile Include="COMIELowRightsElevationPolicy.cs" />
@@ -173,7 +179,7 @@
     <Compile Include="ObjectCache.cs" />
     <Compile Include="COMProgIDEntry.cs" />
     <Compile Include="COMRegistryViewer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="COMRegistryViewer.Designer.cs">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
@@ -220,38 +226,41 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ObjectContainer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="ObjectContainer.Designer.cs">
       <DependentUpon>ObjectContainer.cs</DependentUpon>
     </Compile>
     <Compile Include="PersistStreamTypeViewer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PersistStreamTypeViewer.Designer.cs">
       <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="PythonConsole.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PythonConsole.Designer.cs">
       <DependentUpon>PythonConsole.cs</DependentUpon>
     </Compile>
     <Compile Include="SimpleSyntaxModeProvider.cs" />
     <Compile Include="TypedObjectViewer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TypedObjectViewer.Designer.cs">
       <DependentUpon>TypedObjectViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="ObjectInformation.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="ObjectInformation.Designer.cs">
       <DependentUpon>ObjectInformation.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AboutForm.resx">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </EmbeddedResource>
@@ -325,7 +334,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ROTViewer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="ROTViewer.Designer.cs">
       <DependentUpon>ROTViewer.cs</DependentUpon>
@@ -825,6 +834,7 @@
     <Content Include="Lib\__future__.py" />
     <Content Include="Lib\__phello__.foo.py" />
     <Content Include="license.txt" />
+    <Content Include="logo.ico" />
     <Content Include="oleview.ico" />
     <Content Include="Notes.txt" />
     <Content Include="PythonLib\oleviewdotnet\registry.py">

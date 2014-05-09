@@ -1,4 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -55,11 +56,17 @@ namespace OleViewDotNet
             Close();
         }
 
+        public void HostControl(Control c)
+        {
+            DocumentForm frm = new DocumentForm(c);
+
+            frm.ShowHint = DockState.Document;
+            frm.Show(m_dockPanel);
+        }
+
         private void OpenView(COMRegistryViewer.DisplayMode mode)
-        {            
-            COMRegistryViewer view = new COMRegistryViewer(COMRegistry.Instance, mode);
-            view.ShowHint = DockState.Document;
-            view.Show(m_dockPanel);            
+        {
+            HostControl(new COMRegistryViewer(COMRegistry.Instance, mode));                
         }
 
         private void menuViewCLSIDs_Click(object sender, EventArgs e)
@@ -94,9 +101,7 @@ namespace OleViewDotNet
 
         private void menuViewROT_Click(object sender, EventArgs e)
         {
-            ROTViewer view = new ROTViewer(COMRegistry.Instance);
-            view.ShowHint = DockState.Document;
-            view.Show(m_dockPanel);
+            HostControl(new ROTViewer(COMRegistry.Instance));
         }
 
         private void menuViewImplementedCategories_Click(object sender, EventArgs e)
@@ -155,9 +160,7 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            ObjectInformation view = new ObjectInformation(strObjName, comObj, props, ints);
-                            view.ShowHint = DockState.Document;
-                            view.Show(m_dockPanel);
+                            HostControl(new ObjectInformation(strObjName, comObj, props, ints));                            
                         }
                     }
                     catch (Exception ex)
@@ -190,9 +193,7 @@ namespace OleViewDotNet
 
         private void menuFilePythonConsole_Click(object sender, EventArgs e)
         {
-            PythonConsole view = new PythonConsole();
-            view.ShowHint = DockState.Document;
-            view.Show(m_dockPanel);
+            HostControl(new PythonConsole());
         }
 
         private void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
@@ -246,9 +247,7 @@ namespace OleViewDotNet
                 }
 
                 Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-                ObjectInformation view = new ObjectInformation(strObjName, comObj, props, ints);
-                view.ShowHint = DockState.Document;
-                view.Show(m_dockPanel);
+                HostControl(new ObjectInformation(strObjName, comObj, props, ints));
             }
         }
 
@@ -272,6 +271,14 @@ namespace OleViewDotNet
                         MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+        }
+
+        private void menuHelpAbout_Click(object sender, EventArgs e)
+        {
+            using (AboutForm frm = new AboutForm())
+            {
+                frm.ShowDialog(this);
             }
         }
     }
