@@ -836,7 +836,6 @@
     <Content Include="Lib\__future__.py" />
     <Content Include="Lib\__phello__.foo.py" />
     <Content Include="license.txt" />
-    <Content Include="logo.ico" />
     <Content Include="oleview.ico" />
     <Content Include="Notes.txt" />
     <Content Include="PythonLib\oleviewdotnet\registry.py">

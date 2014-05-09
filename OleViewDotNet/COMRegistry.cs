@@ -32,7 +32,15 @@ namespace OleViewDotNet
         {            
             string strProcess;
 
-            strProcess = Path.Combine(COMUtilities.GetAppDirectory(), "EnumerateInterfaces.exe");           
+            string appDirectory = COMUtilities.GetAppDirectory();
+
+            // Try sepecific bit version first
+            strProcess = Path.Combine(appDirectory, Environment.Is64BitProcess ? "EnumerateInterfaces64.exe" : "EnumerateInterfaces32.exe");
+            if (!File.Exists(strProcess))
+            {
+                strProcess = Path.Combine(appDirectory, "EnumerateInterfaces.exe");
+            }
+
             Process proc = new Process();
             ProcessStartInfo info = new ProcessStartInfo(strProcess, String.Format("{0} s {1} {2}",
                 ent.Clsid.ToString("B"), (int)ent.CreateContext, COMInterfaceEntry.IID_IMarshal.ToString("B")));
