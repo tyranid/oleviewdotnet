@@ -89,6 +89,7 @@
             this.listViewInterfaces.TabIndex = 3;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewInterfaces_ColumnClick);
             this.listViewInterfaces.DoubleClick += new System.EventHandler(this.listViewInterfaces_DoubleClick);
             // 
             // splitContainer
@@ -164,12 +165,11 @@
             this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
             // ObjectInformation
-            //             
-            this.ClientSize = new System.Drawing.Size(1036, 495);
+            // 
             this.Controls.Add(this.splitContainer);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "ObjectInformation";            
-            this.Text = "ObjectInformation";            
+            this.Name = "ObjectInformation";
+            this.Size = new System.Drawing.Size(1036, 495);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel1.PerformLayout();
             this.splitContainer.Panel2.ResumeLayout(false);

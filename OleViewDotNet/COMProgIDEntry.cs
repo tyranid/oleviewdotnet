@@ -62,5 +62,10 @@ namespace OleViewDotNet
         {
             get { return m_name; }
         }
+
+        public override string ToString()
+        {
+            return String.Format("COMProgIDEntry: {0}", m_name);
+        }
     }
 }

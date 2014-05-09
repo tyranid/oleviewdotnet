@@ -54,6 +54,7 @@ namespace OleViewDotNet
             LoadProperties();
             LoadInterfaces();
             Text = m_objName;
+            listViewInterfaces.ListViewItemSorter = new ListItemComparer(0);
         }
 
         /// <summary>
@@ -73,24 +74,26 @@ namespace OleViewDotNet
             try
             {
                 /* Also add IObjectSafety information if available */
-                IObjectSafety objSafety = (IObjectSafety)m_pObject;
-                uint supportedOptions;
-                uint enabledOptions;
-                Guid iid = COMInterfaceEntry.IID_IDispatch;
-
-                objSafety.GetInterfaceSafetyOptions(ref iid, out supportedOptions, out enabledOptions);
-                for (int i = 0; i < 4; i++)
+                IObjectSafety objSafety = m_pObject as IObjectSafety;
+                if (objSafety != null)
                 {
-                    int val = 1 << i;
-                    if ((val & supportedOptions) != 0)
+                    uint supportedOptions;
+                    uint enabledOptions;
+                    Guid iid = COMInterfaceEntry.IID_IDispatch;
+
+                    objSafety.GetInterfaceSafetyOptions(ref iid, out supportedOptions, out enabledOptions);
+                    for (int i = 0; i < 4; i++)
                     {
-                        ListViewItem item = listViewProperties.Items.Add(Enum.GetName(typeof(ObjectSafetyFlags), val));
+                        int val = 1 << i;
+                        if ((val & supportedOptions) != 0)
+                        {
+                            ListViewItem item = listViewProperties.Items.Add(Enum.GetName(typeof(ObjectSafetyFlags), val));
+                        }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            catch 
+            {                
             }
 
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -159,7 +162,7 @@ namespace OleViewDotNet
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -199,7 +202,7 @@ namespace OleViewDotNet
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -219,8 +222,33 @@ namespace OleViewDotNet
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+            }
+        }
+
+        private void listViewInterfaces_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListView view = sender as ListView;
+
+            if (view != null)
+            {
+                ListItemComparer comparer = view.ListViewItemSorter as ListItemComparer;
+
+                if (comparer != null)
+                {
+                    if (e.Column != comparer.Column)
+                    {
+                        comparer.Column = e.Column;
+                        comparer.Ascending = true;
+                    }
+                    else
+                    {
+                        comparer.Ascending = !comparer.Ascending;
+                    }
+
+                    view.Sort();
                 }
             }
         }

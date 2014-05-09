@@ -1,5 +1,5 @@
 ﻿def get():
 	import OleViewDotNet
 
-	return OleViewDotNet.Program.GetCOMRegistry()
+	return OleViewDotNet.COMRegistry.Instance
 	

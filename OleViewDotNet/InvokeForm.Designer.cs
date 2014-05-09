@@ -34,6 +34,7 @@
             this.textBoxReturn = new System.Windows.Forms.TextBox();
             this.btnInvoke = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.btnOpenObject = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // listViewParameters
@@ -93,6 +94,17 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // btnOpenObject
+            // 
+            this.btnOpenObject.Enabled = false;
+            this.btnOpenObject.Location = new System.Drawing.Point(697, 239);
+            this.btnOpenObject.Name = "btnOpenObject";
+            this.btnOpenObject.Size = new System.Drawing.Size(75, 23);
+            this.btnOpenObject.TabIndex = 7;
+            this.btnOpenObject.Text = "Open Object";
+            this.btnOpenObject.UseVisualStyleBackColor = true;
+            this.btnOpenObject.Click += new System.EventHandler(this.btnOpenObject_Click);
+            // 
             // InvokeForm
             // 
             this.AcceptButton = this.btnInvoke;
@@ -100,6 +112,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(784, 270);
+            this.Controls.Add(this.btnOpenObject);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnInvoke);
             this.Controls.Add(this.textBoxReturn);
@@ -111,8 +124,8 @@
             this.MinimizeBox = false;
             this.Name = "InvokeForm";
             this.Text = "InvokeForm";
-            this.Load += new System.EventHandler(this.InvokeForm_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.InvokeForm_FormClosed);
+            this.Load += new System.EventHandler(this.InvokeForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -126,5 +139,6 @@
         private System.Windows.Forms.TextBox textBoxReturn;
         private System.Windows.Forms.Button btnInvoke;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button btnOpenObject;
     }
 }

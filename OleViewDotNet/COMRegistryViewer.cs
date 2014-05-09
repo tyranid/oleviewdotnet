@@ -18,12 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Text;
-using System.Windows.Forms;
 using System.Linq;
-using WeifenLuo.WinFormsUI.Docking;
-using System.Text.RegularExpressions;
 using System.ServiceProcess;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace OleViewDotNet
 {

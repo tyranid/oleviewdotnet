@@ -204,6 +204,10 @@ namespace OleViewDotNet
                 return m_clsids.Values.Where(c => c.AppID != Guid.Empty).GroupBy(c => c.AppID);
             }
         }
+        public static COMRegistry Instance
+        {
+            get { return _instance; }
+        }
 
         #endregion
 
@@ -232,10 +236,6 @@ namespace OleViewDotNet
             _instance = new COMRegistry(rootKey);
         }
 
-        public static COMRegistry Instance
-        {
-            get { return _instance; }
-        }
 
         /// <summary>
         /// Get the list of supported interfaces from an IUnknown pointer

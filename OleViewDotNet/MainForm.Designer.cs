@@ -35,7 +35,7 @@
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
-            this.menuView = new System.Windows.Forms.MenuItem();
+            this.menuRegistry = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDs = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByName = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByServer = new System.Windows.Forms.MenuItem();
@@ -49,7 +49,7 @@
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
+            this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
             this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
@@ -62,8 +62,8 @@
             // 
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuFile,
-            this.menuView,
-            this.menuItem4,
+            this.menuRegistry,
+            this.menuObject,
             this.menuHelp});
             // 
             // menuFile
@@ -89,13 +89,14 @@
             // menuFileExit
             // 
             this.menuFileExit.Index = 2;
+            this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
             // 
-            // menuView
+            // menuRegistry
             // 
-            this.menuView.Index = 1;
-            this.menuView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuRegistry.Index = 1;
+            this.menuRegistry.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuViewCLSIDs,
             this.menuViewCLSIDsByName,
             this.menuViewCLSIDsByServer,
@@ -109,7 +110,7 @@
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName});
-            this.menuView.Text = "&View";
+            this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
             // 
@@ -188,15 +189,15 @@
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
-            // menuItem4
+            // menuObject
             // 
-            this.menuItem4.Index = 2;
-            this.menuItem4.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuObject.Index = 2;
+            this.menuObject.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuObjectROT,
             this.menuObjectCreateInstanceFromCLSID,
             this.menuObjectFromMarshalledStream,
             this.menuObjectFromSerializedStream});
-            this.menuItem4.Text = "&Object";
+            this.menuObject.Text = "&Object";
             // 
             // menuObjectROT
             // 
@@ -255,7 +256,7 @@
         private System.Windows.Forms.MainMenu mainMenu;
         private System.Windows.Forms.MenuItem menuFile;
         private System.Windows.Forms.MenuItem menuFileExit;
-        private System.Windows.Forms.MenuItem menuView;
+        private System.Windows.Forms.MenuItem menuRegistry;
         private System.Windows.Forms.MenuItem menuViewCLSIDs;
         private System.Windows.Forms.MenuItem menuViewCLSIDsByName;
         private System.Windows.Forms.MenuItem menuViewProgIDs;
@@ -268,7 +269,7 @@
         private System.Windows.Forms.MenuItem menuItem1;
         private System.Windows.Forms.MenuItem menuObjectCreateInstanceFromCLSID;
         private System.Windows.Forms.MenuItem menuItem2;
-        private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.MenuItem menuObject;
         private System.Windows.Forms.MenuItem menuViewCLSIDsByLocalServer;
         private System.Windows.Forms.MenuItem menuViewIELowRights;
         private System.Windows.Forms.MenuItem menuViewLocalServices;

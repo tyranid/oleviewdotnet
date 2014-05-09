@@ -101,5 +101,10 @@ namespace OleViewDotNet
         {
             get { return m_access; }
         }
+
+        public override string ToString()
+        {
+            return String.Format("COMAppIDEntry: {0}", m_name);
+        }
     }
 }

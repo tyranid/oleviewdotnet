@@ -198,5 +198,10 @@ namespace OleViewDotNet
         {
             get { return m_base; }
         }
+
+        public override string ToString()
+        {
+            return String.Format("COMInterfaceEntry: {0}", m_name);
+        }
     }
 }

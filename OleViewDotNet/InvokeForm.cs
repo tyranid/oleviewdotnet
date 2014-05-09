@@ -26,6 +26,8 @@ namespace OleViewDotNet
     {
         private MethodInfo m_mi;
         private object m_pObject;
+        private object m_ret;
+        private string m_objName;
 
         class ParamData
         {
@@ -35,10 +37,11 @@ namespace OleViewDotNet
 
         private ParamData[] m_paramdata;        
 
-        public InvokeForm(MethodInfo mi, object pObject)
+        public InvokeForm(MethodInfo mi, object pObject, string objName)
         {
             m_mi = mi;
             m_pObject = pObject;
+            m_objName = objName;
             LoadParameters();
 
             InitializeComponent(); 
@@ -77,11 +80,10 @@ namespace OleViewDotNet
                 {
                     t = t.GetElementType();
                 }
-
-                /* No idea why on earth why strings cannot be activated */
+               
                 if (t == typeof(string))
                 {
-                    ret = "";
+                    ret = String.Empty;
                 }
                 else if (t == typeof(IBindCtx))
                 {
@@ -216,11 +218,16 @@ namespace OleViewDotNet
 
             try
             {
-                object ret = m_mi.Invoke(m_pObject, p);
-                if (ret != null)
+                m_ret = m_mi.Invoke(m_pObject, p);
+                if (m_ret != null)
                 {
-                    lblReturn.Text = "Return: " + ret.GetType().ToString();
-                    textBoxReturn.Text = ret.ToString();
+                    lblReturn.Text = "Return: " + m_ret.GetType().ToString();
+                    textBoxReturn.Text = m_ret.ToString();
+
+                    if (Marshal.IsComObject(m_ret))
+                    {
+                        btnOpenObject.Enabled = true;
+                    }
                 }
 
                 for (i = 0; i < m_paramdata.Length; i++)
@@ -269,6 +276,16 @@ namespace OleViewDotNet
                     {
                     }
                 }
+            }
+        }
+
+        private void btnOpenObject_Click(object sender, EventArgs e)
+        {
+            if (m_ret != null)
+            {
+                Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, m_ret, m_mi.ReturnType));
+                DialogResult = DialogResult.OK;
+                Close();
             }
         }
     }

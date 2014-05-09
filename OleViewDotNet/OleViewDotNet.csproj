@@ -110,6 +110,7 @@
     <Reference Include="IronPython.Wpf">
       <HintPath>..\packages\IronPython.2.7.4\lib\Net40\IronPython.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Dynamic">
       <HintPath>..\packages\IronPython.2.7.4\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
@@ -175,6 +176,7 @@
     <Compile Include="InputTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ListItemComparer.cs" />
     <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />
     <Compile Include="COMProgIDEntry.cs" />
@@ -838,9 +840,6 @@
     <Content Include="oleview.ico" />
     <Content Include="Notes.txt" />
     <Content Include="PythonLib\oleviewdotnet\registry.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="PythonLib\oleviewdotnet\types.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="PythonLib\oleviewdotnet\__init__.py">

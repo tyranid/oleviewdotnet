@@ -52,11 +52,11 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
             this.textEditorControl = new ICSharpCode.TextEditor.TextEditorControl();
+            this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.richTextBoxOutput = new System.Windows.Forms.RichTextBox();
             this.contextMenuStripOutput = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuProperties.SuspendLayout();
             this.contextMenuMethods.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -71,8 +71,8 @@
             this.splitContainerScript.Panel2.SuspendLayout();
             this.splitContainerScript.SuspendLayout();
             this.toolStrip.SuspendLayout();
-            this.contextMenuStripOutput.SuspendLayout();
             this.contextMenuStripScript.SuspendLayout();
+            this.contextMenuStripOutput.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuProperties
@@ -176,7 +176,7 @@
             this.listViewMethods.TabIndex = 1;
             this.listViewMethods.UseCompatibleStateImageBehavior = false;
             this.listViewMethods.View = System.Windows.Forms.View.Details;
-            this.listViewMethods.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewMethods_ColumnClick);
+            this.listViewMethods.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewMethods.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewMethods_MouseDoubleClick);
             // 
             // lblName
@@ -219,6 +219,7 @@
             this.listViewProperties.TabIndex = 4;
             this.listViewProperties.UseCompatibleStateImageBehavior = false;
             this.listViewProperties.View = System.Windows.Forms.View.Details;
+            this.listViewProperties.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewProperties.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewProperties_MouseDoubleClick);
             // 
             // tabPageScript
@@ -273,6 +274,7 @@
             this.toolStripButtonImport.Size = new System.Drawing.Size(23, 22);
             this.toolStripButtonImport.Text = "Import";
             this.toolStripButtonImport.ToolTipText = "Import a script";
+            this.toolStripButtonImport.Click += new System.EventHandler(this.toolStripButtonImport_Click);
             // 
             // toolStripButtonExport
             // 
@@ -283,6 +285,7 @@
             this.toolStripButtonExport.Size = new System.Drawing.Size(23, 22);
             this.toolStripButtonExport.Text = "Export";
             this.toolStripButtonExport.ToolTipText = "Export a script";
+            this.toolStripButtonExport.Click += new System.EventHandler(this.toolStripButtonExport_Click);
             // 
             // toolStripSeparator1
             // 
@@ -310,7 +313,23 @@
             this.textEditorControl.Name = "textEditorControl";
             this.textEditorControl.Size = new System.Drawing.Size(1035, 277);
             this.textEditorControl.TabIndex = 0;
-            this.textEditorControl.Text = "# Current object accessed through \'obj\'\r\nprint obj";
+            this.textEditorControl.Text = "# Current object accessed through \'obj\'\r\n# IDispatch object through \'disp\'\r\n# Ope" +
+    "n new view window using \'host.openobj\' passing the object to view\r\nprint obj";
+            // 
+            // contextMenuStripScript
+            // 
+            this.contextMenuStripScript.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.runToolStripMenuItem});
+            this.contextMenuStripScript.Name = "contextMenuStripScript";
+            this.contextMenuStripScript.Size = new System.Drawing.Size(115, 26);
+            // 
+            // runToolStripMenuItem
+            // 
+            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
+            this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.runToolStripMenuItem.Text = "Run";
+            this.runToolStripMenuItem.Click += new System.EventHandler(this.toolStripButtonRun_Click);
             // 
             // richTextBoxOutput
             // 
@@ -337,28 +356,12 @@
             this.clearOutputToolStripMenuItem.Text = "Clear Output";
             this.clearOutputToolStripMenuItem.Click += new System.EventHandler(this.clearOutputToolStripMenuItem_Click);
             // 
-            // contextMenuStripScript
-            // 
-            this.contextMenuStripScript.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.runToolStripMenuItem});
-            this.contextMenuStripScript.Name = "contextMenuStripScript";
-            this.contextMenuStripScript.Size = new System.Drawing.Size(153, 48);
-            // 
-            // runToolStripMenuItem
-            // 
-            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.runToolStripMenuItem.Text = "Run";
-            this.runToolStripMenuItem.Click += new System.EventHandler(this.toolStripButtonRun_Click);
-            // 
             // TypedObjectViewer
             // 
-            this.ClientSize = new System.Drawing.Size(1052, 505);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "TypedObjectViewer";            
-            this.Text = "ObjectDispatch";            
+            this.Name = "TypedObjectViewer";
+            this.Size = new System.Drawing.Size(1052, 505);
             this.contextMenuProperties.ResumeLayout(false);
             this.contextMenuMethods.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
@@ -377,8 +380,8 @@
             this.splitContainerScript.ResumeLayout(false);
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
-            this.contextMenuStripOutput.ResumeLayout(false);
             this.contextMenuStripScript.ResumeLayout(false);
+            this.contextMenuStripOutput.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

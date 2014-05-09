@@ -19,15 +19,14 @@ using IronPython.Hosting;
 using IronPython.Runtime;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Hosting.Providers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
@@ -35,40 +34,7 @@ namespace OleViewDotNet
     /// Generic interface viewer from a type
     /// </summary>
     partial class TypedObjectViewer : UserControl
-    {
-        private enum ColumnSort
-        {
-            None,
-            Ascending,
-            Descending,
-        }
-
-        private class ListItemComparer : IComparer
-        {
-            private int _column;
-            private ColumnSort _sort;
-
-            public ListItemComparer(int column, ColumnSort sort)
-            {
-                _column = column;
-                _sort = sort;
-            }
-
-            public int Compare(object x, object y)
-            {
-                ListViewItem xi = (ListViewItem)x;
-                ListViewItem yi = (ListViewItem)y;
-                if (_sort == ColumnSort.Ascending)
-                {
-                    return String.Compare(xi.SubItems[_column].Text, yi.SubItems[_column].Text);
-                }
-                else
-                {
-                    return String.Compare(yi.SubItems[_column].Text, xi.SubItems[_column].Text);
-                }
-            }
-        }
-
+    {        
         private string m_objName;
         private ObjectEntry m_pEntry;
         private object m_pObject;
@@ -202,9 +168,9 @@ namespace OleViewDotNet
             listViewMethods.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
 
-            listViewMethods.ListViewItemSorter = new ListItemComparer(0, ColumnSort.Ascending);
+            listViewMethods.ListViewItemSorter = new ListItemComparer(0);
             listViewMethods.Sort();
-            listViewProperties.ListViewItemSorter = new ListItemComparer(0, ColumnSort.Ascending);
+            listViewProperties.ListViewItemSorter = new ListItemComparer(0);
             listViewProperties.Sort();
         }
 
@@ -245,6 +211,11 @@ namespace OleViewDotNet
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateProperties();
+        }
+
+        private void OpenObjectViewer(DynamicComObjectWrapper wrapper)
+        {           
+            Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, wrapper.Instance, wrapper.InstanceType));
         }
 
         private void OpenObject(ListView lv)
@@ -392,7 +363,15 @@ namespace OleViewDotNet
                 {
                     // Just create the global scope, don't execute it yet
                     ScriptScope scope = engine.CreateScope();
-                    scope.SetVariable("obj", new DynamicComObjectWrapper(m_dispType, m_pObject));
+                   
+                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) ? new DynamicComObjectWrapper(m_dispType, m_pObject) : m_pObject);
+                    scope.SetVariable("disp", m_pObject);
+
+                    dynamic host = new ExpandoObject();
+
+                    host.openobj = new Action<DynamicComObjectWrapper>(o => { OpenObjectViewer(o); });
+
+                    scope.SetVariable("host", host);
 
                     code.Execute(scope);
                 }
@@ -414,7 +393,7 @@ namespace OleViewDotNet
         {
             if (listViewMethods.SelectedItems.Count > 0)
             {
-                using (InvokeForm frm = new InvokeForm((MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject))
+                using (InvokeForm frm = new InvokeForm((MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject, m_objName))
                 {
                     frm.ShowDialog();
                 }
@@ -465,14 +444,74 @@ namespace OleViewDotNet
             }
         }
 
-        private void listViewMethods_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-
-        }
-
         private void clearOutputToolStripMenuItem_Click(object sender, EventArgs e)
         {
             richTextBoxOutput.Clear();
+        }
+
+        private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListView view = sender as ListView;
+
+            if (view != null)
+            {
+                ListItemComparer comparer = view.ListViewItemSorter as ListItemComparer;
+
+                if (comparer != null)
+                {
+                    if (e.Column != comparer.Column)
+                    {
+                        comparer.Column = e.Column;
+                        comparer.Ascending = true;
+                    }
+                    else
+                    {
+                        comparer.Ascending = !comparer.Ascending;
+                    }
+
+                    view.Sort();
+                }
+            }
+        }
+
+        private void toolStripButtonExport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "Python Scripts (*.py)|*.py|All Files (*.*)|*.*";
+
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        File.WriteAllText(dlg.FileName, textEditorControl.Text);
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void toolStripButtonImport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Filter = "Python Scripts (*.py)|*.py|All Files (*.*)|*.*";
+
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        textEditorControl.Text = File.ReadAllText(dlg.FileName);
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

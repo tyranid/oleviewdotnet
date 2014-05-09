@@ -87,6 +87,7 @@ namespace OleViewDotNet
             this.textBoxCommand.TabIndex = 1;
             this.textBoxCommand.TextPasted += new System.EventHandler<OleViewDotNet.ClipboardEventArgs>(this.textBoxCommand_TextPasted);
             this.textBoxCommand.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxCommand_KeyDown);
+            this.textBoxCommand.AcceptsTab = true;
             // 
             // toolStrip
             // 

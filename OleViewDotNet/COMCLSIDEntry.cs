@@ -14,14 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
 using System.IO;
-using System.Security;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace OleViewDotNet
 {
@@ -395,6 +394,11 @@ namespace OleViewDotNet
             }
 
             return ret;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("COMCLSIDEntry: {0}", m_name);
         }
     }
 }

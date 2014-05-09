@@ -196,6 +196,16 @@ namespace OleViewDotNet
         public override IEnumerable<string> GetDynamicMemberNames()
         {
             return _methods.Keys.Union(_properties.Keys).Union(new string[] { "__instance__", "__interfaces__", "__qi__" });
-        }       
+        }
+
+        public object Instance
+        {
+            get { return _target; }
+        }
+
+        public Type InstanceType
+        {
+            get { return _instanceType; }
+        }
     }
 }
