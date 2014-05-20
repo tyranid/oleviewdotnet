@@ -37,7 +37,14 @@ namespace OleViewDotNet
         private void LoadFromRegistry(SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
         {
             List<COMCLSIDEntry> clsidList = new List<COMCLSIDEntry>();
-            Policy = (ElevationPolicy)key.GetValue("Policy", 0);
+
+            object policyValue = key.GetValue("Policy", 0);
+
+            if (policyValue != null)
+            {                
+                Policy = (ElevationPolicy)Enum.ToObject(typeof(ElevationPolicy), key.GetValue("Policy", 0));
+            }
+            
             string clsid = (string)key.GetValue("CLSID");            
 
             if (clsid != null)
