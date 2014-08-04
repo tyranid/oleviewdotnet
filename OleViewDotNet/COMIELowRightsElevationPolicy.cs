@@ -13,6 +13,7 @@ namespace OleViewDotNet
         {
             NoRun = 0,
             RunAtCurrent = 1,
+            RunAfterPrompt = 2,
             RunAtMedium = 3,
         }
 
