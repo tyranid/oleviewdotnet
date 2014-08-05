@@ -122,7 +122,8 @@ namespace OleViewDotNet
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
         private List<COMCLSIDEntry> m_preapproved;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
-        private SortedDictionary<Guid, COMAppIDEntry> m_appid;        
+        private SortedDictionary<Guid, COMAppIDEntry> m_appid;
+        private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
 
         #endregion
 
@@ -204,7 +205,6 @@ namespace OleViewDotNet
             get { return m_appid; }
         }
 
-
         public IEnumerable<IGrouping<Guid, COMCLSIDEntry>> ClsidsByAppId
         {
             get
@@ -212,9 +212,15 @@ namespace OleViewDotNet
                 return m_clsids.Values.Where(c => c.AppID != Guid.Empty).GroupBy(c => c.AppID);
             }
         }
+
         public static COMRegistry Instance
         {
             get { return _instance; }
+        }
+
+        public SortedDictionary<Guid, COMTypeLibEntry> Typelibs
+        {
+            get { return m_typelibs; }
         }
 
         #endregion
@@ -232,6 +238,7 @@ namespace OleViewDotNet
             LoadPreApproved();
             LoadLowRights();
             LoadAppIDs(rootKey);
+            LoadTypelibs(rootKey);
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
         }
@@ -551,6 +558,38 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
+
+        void LoadTypelibs(RegistryKey rootKey)
+        {
+            Dictionary<Guid, COMTypeLibEntry> typelibs = new Dictionary<Guid, COMTypeLibEntry>();
+
+            using (RegistryKey key = rootKey.OpenSubKey("TypeLib"))
+            {
+                if (key != null)
+                {
+                    string[] subkeys = key.GetSubKeyNames();
+                    foreach (string s in subkeys)
+                    {
+                        Guid g;
+
+                        if (Guid.TryParse(s, out g))
+                        {
+                            using (RegistryKey subKey = key.OpenSubKey(s))
+                            {
+                                if (subKey != null)
+                                {
+                                    COMTypeLibEntry typelib = new COMTypeLibEntry(g, subKey);
+
+                                    typelibs[g] = typelib;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            m_typelibs = new SortedDictionary<Guid, COMTypeLibEntry>(typelibs);
         }
 
         private void LoadLowRightsKey(RegistryKey rootKey)

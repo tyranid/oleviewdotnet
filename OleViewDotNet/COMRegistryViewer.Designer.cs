@@ -45,6 +45,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
+            this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -96,9 +97,10 @@
             this.copyGUIDHexStringToolStripMenuItem,
             this.copyObjectTagToolStripMenuItem,
             this.createInstanceToolStripMenuItem,
-            this.refreshInterfacesToolStripMenuItem});
+            this.refreshInterfacesToolStripMenuItem,
+            this.viewTypeLibraryToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(195, 136);
+            this.contextMenuStrip.Size = new System.Drawing.Size(195, 180);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
@@ -209,13 +211,19 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
+            // viewTypeLibraryToolStripMenuItem
+            // 
+            this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
+            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
+            this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
             // COMRegistryViewer
-            //             
-            this.ClientSize = new System.Drawing.Size(699, 416);
+            // 
             this.Controls.Add(this.splitContainer);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "COMRegistryViewer";            
-            this.Text = "COMRegisterViewer";
+            this.Name = "COMRegistryViewer";
+            this.Size = new System.Drawing.Size(699, 416);
             this.contextMenuStrip.ResumeLayout(false);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel1.PerformLayout();
@@ -241,5 +249,6 @@
         private System.Windows.Forms.Button btnApply;
         private System.Windows.Forms.TextBox textBoxFilter;
         private System.Windows.Forms.ComboBox comboBoxMode;
+        private System.Windows.Forms.ToolStripMenuItem viewTypeLibraryToolStripMenuItem;
     }
 }

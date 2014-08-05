@@ -56,6 +56,7 @@
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -109,7 +110,8 @@
             this.menuViewLocalServices,
             this.menuItem1,
             this.menuViewInterfaces,
-            this.menuViewInterfacesByName});
+            this.menuViewInterfacesByName,
+            this.menuItem4});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -236,6 +238,12 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 13;
+            this.menuItem4.Text = "Type Libraries";
+            this.menuItem4.Click += new System.EventHandler(this.menuItem4_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -279,6 +287,7 @@
         private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
         private System.Windows.Forms.MenuItem menuHelp;
         private System.Windows.Forms.MenuItem menuHelpAbout;
+        private System.Windows.Forms.MenuItem menuItem4;
     }
 }
 

@@ -281,5 +281,10 @@ namespace OleViewDotNet
                 frm.ShowDialog(this);
             }
         }
+
+        private void menuItem4_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.Typelibs);
+        }
     }
 }

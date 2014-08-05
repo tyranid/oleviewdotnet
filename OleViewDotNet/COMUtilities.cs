@@ -374,6 +374,25 @@ namespace OleViewDotNet
             }
         }
 
+        public static Assembly LoadTypeLib(string path)
+        {
+            ITypeLib typeLib = null;
+
+            try
+            {
+                LoadTypeLibEx(path, RegKind.RegKind_Default, out typeLib);
+
+                return ConvertTypeLibToAssembly(typeLib);
+            }
+            finally
+            {
+                if (typeLib != null)
+                {
+                    Marshal.ReleaseComObject(typeLib);
+                }
+            }
+        }
+
         public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib)
         {
             if (m_typelibs == null)
@@ -840,6 +859,60 @@ namespace OleViewDotNet
             Marshal.ReleaseComObject(mk);
 
             return Convert.FromBase64String(name);
+        }
+
+        public static string MemberInfoToString(MemberInfo member)
+        {
+            MethodInfo mi = member as MethodInfo;
+            PropertyInfo prop = member as PropertyInfo;
+
+            if (mi != null)
+            {
+                List<string> pars = new List<string>();
+                ParameterInfo[] pis = mi.GetParameters();
+
+                foreach (ParameterInfo pi in pis)
+                {
+                    string strDir = "";
+
+                    if (pi.IsIn)
+                    {
+                        strDir += "in";
+                    }
+
+                    if (pi.IsOut)
+                    {
+                        strDir += "out";
+                    }
+
+                    if (strDir.Length == 0)
+                    {
+                        strDir = "in";
+                    }
+
+                    if (pi.IsRetval)
+                    {
+                        strDir += " retval";
+                    }
+
+                    if (pi.IsOptional)
+                    {
+                        strDir += " optional";
+                    }
+
+                    pars.Add(String.Format("[{0}] {1} {2}", strDir, pi.ParameterType.Name, pi.Name));
+                }
+
+                return String.Format("{0} {1}({2});", mi.ReturnType.Name, mi.Name, String.Join(", ", pars));
+            }
+            else if (prop != null)
+            {
+                return String.Format("{0} {1}", prop.PropertyType, prop.Name);
+            }
+            else
+            {
+                return null;
+            }
         }
     }    
 }

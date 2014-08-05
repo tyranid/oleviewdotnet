@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -55,6 +56,7 @@ namespace OleViewDotNet
             IELowRights,
             LocalServices,
             AppIDs,
+            Typelibs,
         }        
 
         /// <summary>
@@ -126,6 +128,9 @@ namespace OleViewDotNet
                         break;
                     case DisplayMode.AppIDs:
                         LoadAppIDs();
+                        break;
+                    case DisplayMode.Typelibs:
+                        LoadTypeLibs();
                         break;
                     default:
                         break;
@@ -393,7 +398,6 @@ namespace OleViewDotNet
                     COMAppIDEntry appidEnt = appids[pair.Key];                    
 
                     string name = appidEnt.LocalService;
-                    //string serviceAccount = null;
 
                     if (services.ContainsKey(name.ToLower()))
                     {                       
@@ -571,6 +575,44 @@ namespace OleViewDotNet
             Text = "IE Low Rights Elevation Policy"; 
         }
 
+        private TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
+        {
+            TreeNode node = new TreeNode(String.Format("{0} : Version {1}", entry.Name, entry.Version), 
+                ClassIcon, ClassIcon);
+
+            node.Tag = entry;
+            List<string> entries = new List<string>();
+            if(!String.IsNullOrWhiteSpace(entry.Win32Path))
+            {
+                entries.Add(String.Format("Win32: {0}", entry.Win32Path));
+            }
+            if(!String.IsNullOrWhiteSpace(entry.Win64Path))
+            {
+                entries.Add(String.Format("Win64: {0}", entry.Win64Path));
+            }
+            node.ToolTipText = String.Join("\r\n", entries);
+
+            return node;
+        }
+
+        private void LoadTypeLibs()
+        {
+            int i = 0;
+            TreeNode[] typelibNodes = new TreeNode[m_reg.Typelibs.Values.Count];
+            foreach (COMTypeLibEntry ent in m_reg.Typelibs.Values)
+            {
+                typelibNodes[i] = new TreeNode(ent.TypelibId.ToString());
+                foreach (COMTypeLibVersionEntry ver in ent.Versions)
+                {
+                    typelibNodes[i].Nodes.Add(CreateTypelibVersionNode(ver));
+                }
+                i++;
+            }
+
+            treeComRegistry.Nodes.AddRange(typelibNodes);
+            Text = "Type Libraries"; 
+        }
+
         private void SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
         {
             try
@@ -665,108 +707,68 @@ namespace OleViewDotNet
             }
         }
 
-        private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
+        private static Guid GetGuidFromType(TreeNode node)
         {
-            TreeNode node = treeComRegistry.SelectedNode;
             Guid guid = Guid.Empty;
-
             if (node != null)
             {
-                if (node.Tag is COMCLSIDEntry)
+                object tag = node.Tag;
+                if (tag is COMCLSIDEntry)
                 {
-                    guid = ((COMCLSIDEntry)node.Tag).Clsid;
+                    guid = ((COMCLSIDEntry)tag).Clsid;
                 }
-                else if (node.Tag is COMInterfaceEntry)
+                else if (tag is COMInterfaceEntry)
                 {
-                    guid = ((COMInterfaceEntry)node.Tag).Iid;
+                    guid = ((COMInterfaceEntry)tag).Iid;
                 }
-                else if (node.Tag is COMProgIDEntry)
+                else if (tag is COMProgIDEntry)
                 {
-                    COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
+                    COMProgIDEntry ent = (COMProgIDEntry)tag;
                     if (ent.Entry != null)
                     {
                         guid = ent.Entry.Clsid;
                     }
                 }
-                else if (node.Tag is Guid)
+                else if (tag is COMTypeLibEntry)
                 {
-                    guid = (Guid)node.Tag;
+                    guid = ((COMTypeLibEntry)tag).TypelibId;
                 }
+                else if (tag is Guid)
+                {
+                    guid = (Guid)tag;
+                }
+            }
 
-                if (guid != Guid.Empty)
-                {
-                    CopyGuidToClipboard(guid, CopyGuidType.CopyAsString);
-                }
+            return guid;
+        }
+
+        private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Guid guid = GetGuidFromType(treeComRegistry.SelectedNode);
+
+            if (guid != Guid.Empty)
+            {
+                CopyGuidToClipboard(guid, CopyGuidType.CopyAsString);
             }
         }
 
         private void copyGUIDCStructureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode node = treeComRegistry.SelectedNode;
-            Guid guid = Guid.Empty;
+            Guid guid = GetGuidFromType(treeComRegistry.SelectedNode);
 
-            if (node != null)
+            if (guid != Guid.Empty)
             {
-                if (node.Tag is COMCLSIDEntry)
-                {
-                    guid = ((COMCLSIDEntry)node.Tag).Clsid;
-                }
-                else if (node.Tag is COMInterfaceEntry)
-                {
-                    guid = ((COMInterfaceEntry)node.Tag).Iid;
-                }
-                else if (node.Tag is COMProgIDEntry)
-                {
-                    COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                    if (ent.Entry != null)
-                    {
-                        guid = ent.Entry.Clsid;
-                    }
-                }
-                else if (node.Tag is Guid)
-                {
-                    guid = (Guid)node.Tag;
-                }
-
-                if (guid != Guid.Empty)
-                {
-                    CopyGuidToClipboard(guid, CopyGuidType.CopyAsStructure);
-                }
+                CopyGuidToClipboard(guid, CopyGuidType.CopyAsStructure);
             }
         }
 
         private void copyGUIDHexStringToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode node = treeComRegistry.SelectedNode;
-            Guid guid = Guid.Empty;
+            Guid guid = GetGuidFromType(treeComRegistry.SelectedNode);
 
-            if (node != null)
+            if (guid != Guid.Empty)
             {
-                if (node.Tag is COMCLSIDEntry)
-                {
-                    guid = ((COMCLSIDEntry)node.Tag).Clsid;
-                }
-                else if (node.Tag is COMInterfaceEntry)
-                {
-                    guid = ((COMInterfaceEntry)node.Tag).Iid;
-                }
-                else if (node.Tag is COMProgIDEntry)
-                {
-                    COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                    if (ent.Entry != null)
-                    {
-                        guid = ent.Entry.Clsid;
-                    }
-                }
-                else if (node.Tag is Guid)
-                {
-                    guid = (Guid)node.Tag;
-                }
-
-                if (guid != Guid.Empty)
-                {
-                    CopyGuidToClipboard(guid, CopyGuidType.CopyAsHexString);
-                }
+                CopyGuidToClipboard(guid, CopyGuidType.CopyAsHexString);
             }
         }
 
@@ -855,6 +857,23 @@ namespace OleViewDotNet
                     contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                     contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
+                    COMProgIDEntry progid = node.Tag as COMProgIDEntry;
+                    COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+
+                    if (progid != null)
+                    {
+                        clsid = progid.Entry;
+                    }
+
+                    if (m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    {
+                        contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                    }
+                }
+
+                if (node.Tag is COMTypeLibVersionEntry)
+                {
+                    contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
             }
             else
@@ -1021,6 +1040,47 @@ namespace OleViewDotNet
                 if (node != null)
                 {
                     treeComRegistry.SelectedNode = node;
+                }
+            }
+        }
+
+        private void viewTypeLibraryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+
+            if (node != null)
+            {
+                COMTypeLibVersionEntry ent = node.Tag as COMTypeLibVersionEntry;
+
+                if (ent == null)
+                {
+                    COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                    COMProgIDEntry progid = node.Tag as COMProgIDEntry;
+                    if(progid != null)
+                    {
+                        clsid = progid.Entry;
+                    }
+
+                    if(m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    {
+                        ent = m_reg.Typelibs[clsid.TypeLib].Versions.First();
+                    }
+
+                }
+                
+                if(ent != null)
+                {
+                    try
+                    {
+                        Assembly typeLibary = COMUtilities.LoadTypeLib(ent.NativePath);
+                       
+                        TypeLibControl view = new TypeLibControl(ent, typeLibary);
+                        Program.GetMainForm().HostControl(view);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
