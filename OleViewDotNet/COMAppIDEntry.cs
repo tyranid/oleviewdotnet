@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.ComponentModel;
 using System.Security.AccessControl;
 
 namespace OleViewDotNet
@@ -100,6 +101,44 @@ namespace OleViewDotNet
         public byte[] AccessPermission
         {
             get { return m_access; }
+        }
+
+        public string LaunchPermissionString
+        {
+            get
+            {
+                if ((m_launch != null) && (m_launch.Length > 0))
+                {
+                    try
+                    {
+                        return COMUtilities.GetStringSDForSD(m_launch);
+                    }
+                    catch (Win32Exception)
+                    {
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        public string AccessPermissionString
+        {
+            get
+            {
+                if ((m_access != null) && (m_access.Length > 0))
+                {
+                    try
+                    {
+                        return COMUtilities.GetStringSDForSD(m_access);
+                    }
+                    catch (Win32Exception)
+                    {
+                    }
+                }
+
+                return null;
+            }
         }
 
         public override string ToString()

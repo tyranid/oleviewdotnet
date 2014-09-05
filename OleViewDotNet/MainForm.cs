@@ -208,10 +208,22 @@ namespace OleViewDotNet
                     {
                         byte[] data = File.ReadAllBytes(dlg.FileName);
 
-                        string objref = String.Format("objref:{0}:", Convert.ToBase64String(data));
-                        object comObj = Marshal.BindToMoniker(objref);
+                        IStreamImpl stm = new IStreamImpl(new MemoryStream(data));
+                        Guid iid = COMInterfaceEntry.IID_IUnknown;
+                        IntPtr pv;
 
-                        OpenObjectInformation(comObj, "Marshalled Object");
+                        int hr = COMUtilities.CoUnmarshalInterface(stm, ref iid, out pv);
+                        if (hr == 0)
+                        {
+                            object comObj = Marshal.GetObjectForIUnknown(pv);
+                            Marshal.Release(pv);
+
+                            OpenObjectInformation(comObj, "Marshalled Object");
+                        }
+                        else
+                        {
+                            Marshal.ThrowExceptionForHR(hr);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -282,9 +294,14 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuItem4_Click(object sender, EventArgs e)
+        private void menuRegistryTypeLibs_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.Typelibs);
+        }
+
+        private void menuRegistryAppIDsIL_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.AppIDsWithIL);
         }
     }
 }

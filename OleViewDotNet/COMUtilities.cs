@@ -30,6 +30,7 @@ using System.CodeDom.Compiler;
 using System.Linq;
 using Microsoft.CSharp;
 using OleViewDotNet.InterfaceViewers;
+using System.ComponentModel;
 
 namespace OleViewDotNet
 {
@@ -146,6 +147,8 @@ namespace OleViewDotNet
         public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
         [DllImport("ole32.dll", EntryPoint = "CoGetClassObject", CallingConvention = CallingConvention.StdCall)]
         public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, IntPtr pServerInfo, ref Guid riid, out IntPtr ppv);
+        [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall)]
+        public static extern int CoUnmarshalInterface(IStream stm, ref Guid riid, out IntPtr ppv);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
@@ -156,6 +159,72 @@ namespace OleViewDotNet
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public extern static void SHCreateStreamOnFile(string pszFile, COMUtilities.STGM grfMode, out IntPtr ppStm);
+
+        [Flags]
+        private enum SECURITY_INFORMATION 
+        {
+            OWNER_SECURITY_INFORMATION = 1,
+            GROUP_SECURITY_INFORMATION = 2,
+            DACL_SECURITY_INFORMATION = 4,
+            LABEL_SECURITY_INFORMATION = 0x10,
+        }
+
+        const uint SDDL_REVISION_1 = 1;
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError=true)]
+        private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SECURITY_INFORMATION secinfo, out IntPtr str, out int length);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
+        private extern static IntPtr LocalFree(IntPtr hMem);
+
+        public static string GetStringSDForSD(byte[] sd)
+        {
+            IntPtr sddl;
+            int length;
+
+            if(ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1, 
+                SECURITY_INFORMATION.DACL_SECURITY_INFORMATION | SECURITY_INFORMATION.OWNER_SECURITY_INFORMATION | SECURITY_INFORMATION.LABEL_SECURITY_INFORMATION,
+                out sddl, out length))
+            {
+                string ret = Marshal.PtrToStringUni(sddl, length);
+
+                LocalFree(sddl);
+
+                return ret;
+            }
+            else
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+        }
+
+        public static string GetILForSD(byte[] sd)
+        {
+            if ((sd != null) && (sd.Length > 0))
+            {
+                IntPtr sddl;
+                int length;
+
+                if (ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1,
+                    SECURITY_INFORMATION.LABEL_SECURITY_INFORMATION,
+                    out sddl, out length))
+                {
+                    string ret = Marshal.PtrToStringUni(sddl, length);
+
+                    LocalFree(sddl);
+
+                    return ret;
+                }
+                else
+                {
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;

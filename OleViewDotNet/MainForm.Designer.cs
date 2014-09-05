@@ -49,6 +49,7 @@
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
+            this.menuRegistryTypeLibraries = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
@@ -56,7 +57,7 @@
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
+            this.menuRegistryAppIDsIL = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -107,11 +108,12 @@
             this.menuViewImplementedCategories,
             this.menuViewIELowRights,
             this.menuViewAppIDs,
+            this.menuRegistryAppIDsIL,
             this.menuViewLocalServices,
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName,
-            this.menuItem4});
+            this.menuRegistryTypeLibraries});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -170,26 +172,32 @@
             // 
             // menuViewLocalServices
             // 
-            this.menuViewLocalServices.Index = 9;
+            this.menuViewLocalServices.Index = 10;
             this.menuViewLocalServices.Text = "Local Services";
             this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
             // 
             // menuItem1
             // 
-            this.menuItem1.Index = 10;
+            this.menuItem1.Index = 11;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 11;
+            this.menuViewInterfaces.Index = 12;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 12;
+            this.menuViewInterfacesByName.Index = 13;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
+            // 
+            // menuRegistryTypeLibraries
+            // 
+            this.menuRegistryTypeLibraries.Index = 14;
+            this.menuRegistryTypeLibraries.Text = "Type Libraries";
+            this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
             // menuObject
             // 
@@ -238,11 +246,11 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuItem4
+            // menuRegistryAppIDsIL
             // 
-            this.menuItem4.Index = 13;
-            this.menuItem4.Text = "Type Libraries";
-            this.menuItem4.Click += new System.EventHandler(this.menuItem4_Click);
+            this.menuRegistryAppIDsIL.Index = 9;
+            this.menuRegistryAppIDsIL.Text = "App IDs With IL";
+            this.menuRegistryAppIDsIL.Click += new System.EventHandler(this.menuRegistryAppIDsIL_Click);
             // 
             // MainForm
             // 
@@ -287,7 +295,8 @@
         private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
         private System.Windows.Forms.MenuItem menuHelp;
         private System.Windows.Forms.MenuItem menuHelpAbout;
-        private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.MenuItem menuRegistryTypeLibraries;
+        private System.Windows.Forms.MenuItem menuRegistryAppIDsIL;
     }
 }
 

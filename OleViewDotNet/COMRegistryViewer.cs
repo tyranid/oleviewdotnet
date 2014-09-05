@@ -57,6 +57,7 @@ namespace OleViewDotNet
             LocalServices,
             AppIDs,
             Typelibs,
+            AppIDsWithIL,
         }        
 
         /// <summary>
@@ -127,7 +128,10 @@ namespace OleViewDotNet
                         LoadLocalServices();
                         break;
                     case DisplayMode.AppIDs:
-                        LoadAppIDs();
+                        LoadAppIDs(false);
+                        break;
+                    case DisplayMode.AppIDsWithIL:
+                        LoadAppIDs(true);
                         break;
                     case DisplayMode.Typelibs:
                         LoadTypeLibs();
@@ -452,7 +456,7 @@ namespace OleViewDotNet
             Text = "Local Services";
         }
 
-        private void LoadAppIDs()
+        private void LoadAppIDs(bool filterIL)
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
             IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;            
@@ -462,7 +466,13 @@ namespace OleViewDotNet
             {
                 if (appids.ContainsKey(pair.Key))
                 {
-                    COMAppIDEntry appidEnt = appids[pair.Key];                    
+                    COMAppIDEntry appidEnt = appids[pair.Key];
+                    
+                    if (filterIL && String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.AccessPermission)) &&
+                        String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.LaunchPermission)))
+                    {
+                        continue;
+                    }
 
                     TreeNode node = new TreeNode(appidEnt.Name);
                     node.Tag = appidEnt;
@@ -478,6 +488,18 @@ namespace OleViewDotNet
                     if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
                     {
                         AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
+                    }
+
+                    string perm = appidEnt.LaunchPermissionString;
+                    if (perm != null)
+                    {
+                        AppendFormatLine(builder, "Launch: {0}", perm);
+                    }
+
+                    perm = appidEnt.AccessPermissionString;
+                    if (perm != null)
+                    {
+                        AppendFormatLine(builder, "Access: {0}", perm);
                     }
 
                     node.ToolTipText = builder.ToString();
@@ -568,10 +590,12 @@ namespace OleViewDotNet
                 {
                     clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
                 }
+                clsidNodes[i].ToolTipText = String.Format("Policy: {0}", ent.Policy);
                 i++;
             }
 
             treeComRegistry.Nodes.AddRange(clsidNodes);
+            
             Text = "IE Low Rights Elevation Policy"; 
         }
 
@@ -736,6 +760,10 @@ namespace OleViewDotNet
                 else if (tag is Guid)
                 {
                     guid = (Guid)tag;
+                }
+                else if (tag is COMAppIDEntry)
+                {
+                    guid = ((COMAppIDEntry)tag).AppId;
                 }
             }
 
