@@ -40,15 +40,18 @@
             this.menuViewCLSIDsByName = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByServer = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDsByLocalServer = new System.Windows.Forms.MenuItem();
+            this.menuViewCLSIDsWithSurrogate = new System.Windows.Forms.MenuItem();
             this.menuViewProgIDs = new System.Windows.Forms.MenuItem();
             this.menuViewPreApproved = new System.Windows.Forms.MenuItem();
             this.menuViewImplementedCategories = new System.Windows.Forms.MenuItem();
             this.menuViewIELowRights = new System.Windows.Forms.MenuItem();
             this.menuViewAppIDs = new System.Windows.Forms.MenuItem();
+            this.menuRegistryAppIDsIL = new System.Windows.Forms.MenuItem();
             this.menuViewLocalServices = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
+            this.menuRegistryTypeLibraries = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
@@ -56,7 +59,6 @@
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -102,16 +104,18 @@
             this.menuViewCLSIDsByName,
             this.menuViewCLSIDsByServer,
             this.menuViewCLSIDsByLocalServer,
+            this.menuViewCLSIDsWithSurrogate,
             this.menuViewProgIDs,
             this.menuViewPreApproved,
             this.menuViewImplementedCategories,
             this.menuViewIELowRights,
             this.menuViewAppIDs,
+            this.menuRegistryAppIDsIL,
             this.menuViewLocalServices,
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName,
-            this.menuItem4});
+            this.menuRegistryTypeLibraries});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -138,58 +142,76 @@
             this.menuViewCLSIDsByLocalServer.Text = "CLSIDs By Local Server";
             this.menuViewCLSIDsByLocalServer.Click += new System.EventHandler(this.menuViewCLSIDsByLocalServer_Click);
             // 
+            // menuViewCLSIDsWithSurrogate
+            // 
+            this.menuViewCLSIDsWithSurrogate.Index = 4;
+            this.menuViewCLSIDsWithSurrogate.Text = "CLSIDs with DLL Surrogate";
+            this.menuViewCLSIDsWithSurrogate.Click += new System.EventHandler(this.menuViewCLSIDsWithSurrogate_Click);
+            // 
             // menuViewProgIDs
             // 
-            this.menuViewProgIDs.Index = 4;
+            this.menuViewProgIDs.Index = 5;
             this.menuViewProgIDs.Text = "ProgIDs";
             this.menuViewProgIDs.Click += new System.EventHandler(this.menuViewProgIDs_Click);
             // 
             // menuViewPreApproved
             // 
-            this.menuViewPreApproved.Index = 5;
+            this.menuViewPreApproved.Index = 6;
             this.menuViewPreApproved.Text = "Explorer PreApproved";
             this.menuViewPreApproved.Click += new System.EventHandler(this.menuViewPreApproved_Click);
             // 
             // menuViewImplementedCategories
             // 
-            this.menuViewImplementedCategories.Index = 6;
+            this.menuViewImplementedCategories.Index = 7;
             this.menuViewImplementedCategories.Text = "Implemented Categories";
             this.menuViewImplementedCategories.Click += new System.EventHandler(this.menuViewImplementedCategories_Click);
             // 
             // menuViewIELowRights
             // 
-            this.menuViewIELowRights.Index = 7;
+            this.menuViewIELowRights.Index = 8;
             this.menuViewIELowRights.Text = "IE Low RIghts Elevation Policy";
             this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
             // 
             // menuViewAppIDs
             // 
-            this.menuViewAppIDs.Index = 8;
+            this.menuViewAppIDs.Index = 9;
             this.menuViewAppIDs.Text = "App IDs";
             this.menuViewAppIDs.Click += new System.EventHandler(this.menuViewAppIDs_Click);
             // 
+            // menuRegistryAppIDsIL
+            // 
+            this.menuRegistryAppIDsIL.Index = 10;
+            this.menuRegistryAppIDsIL.Text = "App IDs With IL";
+            this.menuRegistryAppIDsIL.Click += new System.EventHandler(this.menuRegistryAppIDsIL_Click);
+            // 
             // menuViewLocalServices
             // 
-            this.menuViewLocalServices.Index = 9;
+            this.menuViewLocalServices.Index = 11;
             this.menuViewLocalServices.Text = "Local Services";
             this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
             // 
             // menuItem1
             // 
-            this.menuItem1.Index = 10;
+            this.menuItem1.Index = 12;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 11;
+            this.menuViewInterfaces.Index = 13;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 12;
+            this.menuViewInterfacesByName.Index = 14;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
+            // 
+            // menuRegistryTypeLibraries
+            // 
+            this.menuRegistryTypeLibraries.Index = 15;
+            this.menuRegistryTypeLibraries.Text = "Type Libraries";
+            this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
             // menuObject
             // 
@@ -238,12 +260,6 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuItem4
-            // 
-            this.menuItem4.Index = 13;
-            this.menuItem4.Text = "Type Libraries";
-            this.menuItem4.Click += new System.EventHandler(this.menuItem4_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -287,7 +303,9 @@
         private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
         private System.Windows.Forms.MenuItem menuHelp;
         private System.Windows.Forms.MenuItem menuHelpAbout;
-        private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.MenuItem menuRegistryTypeLibraries;
+        private System.Windows.Forms.MenuItem menuRegistryAppIDsIL;
+        private System.Windows.Forms.MenuItem menuViewCLSIDsWithSurrogate;
     }
 }
 

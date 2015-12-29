@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OleViewDotNet", "OleViewDotNet\OleViewDotNet.csproj", "{81F5C6AA-AC60-4F6E-9467-426997BB9D80}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnumerateInterfaces", "EnumerateInterfaces\EnumerateInterfaces.vcxproj", "{39EA6147-9029-444E-AF23-9C841D3DEB9E}"

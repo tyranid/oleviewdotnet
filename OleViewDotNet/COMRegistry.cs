@@ -115,7 +115,8 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;        
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;  
         private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
         private Dictionary<Guid, COMInterfaceEntry[]> m_supportediids;
@@ -166,6 +167,14 @@ namespace OleViewDotNet
             get
             {
                 return m_clsidbylocalserver;
+            }
+        }
+
+        public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsWithSurrogate
+        {
+            get
+            {
+                return m_clsidwithsurrogate;
             }
         }
 
@@ -232,12 +241,12 @@ namespace OleViewDotNet
         private COMRegistry(RegistryKey rootKey)
         {
             m_supportediids = new Dictionary<Guid, COMInterfaceEntry[]>();
+            LoadAppIDs(rootKey);
             LoadCLSIDs(rootKey);
             LoadProgIDs(rootKey);
             LoadInterfaces(rootKey);
             LoadPreApproved();
-            LoadLowRights();
-            LoadAppIDs(rootKey);
+            LoadLowRights();            
             LoadTypelibs(rootKey);
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
@@ -372,7 +381,8 @@ namespace OleViewDotNet
         {
             Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
             Dictionary<string, List<COMCLSIDEntry>> clsidbyserver = new Dictionary<string, List<COMCLSIDEntry>>();
-            Dictionary<string, List<COMCLSIDEntry>> clsidbylocalserver = new Dictionary<string, List<COMCLSIDEntry>>();  
+            Dictionary<string, List<COMCLSIDEntry>> clsidbylocalserver = new Dictionary<string, List<COMCLSIDEntry>>();
+            Dictionary<string, List<COMCLSIDEntry>> clsidwithsurrogate = new Dictionary<string, List<COMCLSIDEntry>>();  
             m_categories = new Dictionary<Guid, List<COMCLSIDEntry>>();
 
             using (RegistryKey clsidKey = rootKey.OpenSubKey("CLSID"))
@@ -397,9 +407,15 @@ namespace OleViewDotNet
                                         if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
                                         {
                                             AddEntryToDictionary(clsidbyserver, ent);
+                                          
                                             if (ent.Type == COMCLSIDEntry.ServerType.LocalServer32)
                                             {
                                                 AddEntryToDictionary(clsidbylocalserver, ent);
+                                            }
+
+                                            if (m_appid.ContainsKey(ent.AppID) && m_appid[ent.AppID].DllSurrogate != null)
+                                            {
+                                                AddEntryToDictionary(clsidwithsurrogate, ent);
                                             }
                                         }
 
@@ -439,6 +455,7 @@ namespace OleViewDotNet
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
             m_clsidbyserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbyserver);
             m_clsidbylocalserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbylocalserver);
+            m_clsidwithsurrogate = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidwithsurrogate);
         }
 
         private void LoadProgIDs(RegistryKey rootKey)

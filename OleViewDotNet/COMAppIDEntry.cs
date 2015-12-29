@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.ComponentModel;
 using System.Security.AccessControl;
 
 namespace OleViewDotNet
@@ -26,6 +27,7 @@ namespace OleViewDotNet
         private string m_service;
         private string m_runas;
         private string m_name;
+        private string m_dllsurrogate;        
         private byte[] m_access;
         private byte[] m_launch;
 
@@ -51,6 +53,22 @@ namespace OleViewDotNet
 
             m_access = key.GetValue("AccessPermission") as byte[];
             m_launch = key.GetValue("LaunchPermission") as byte[];
+            m_dllsurrogate = key.GetValue("DllSurrogate") as string;
+            if (m_dllsurrogate != null)
+            {
+                if (String.IsNullOrWhiteSpace(m_dllsurrogate))
+                {
+                    m_dllsurrogate = "dllhost.exe";
+                }
+                else
+                {
+                    string dllexe = key.GetValue("DllSurrogateExecute") as string;
+                    if (!String.IsNullOrWhiteSpace(dllexe))
+                    {
+                        m_dllsurrogate = dllexe;
+                    }
+                }
+            }
 
             if (String.IsNullOrWhiteSpace(m_runas) && !String.IsNullOrWhiteSpace(m_service))
             {
@@ -77,6 +95,14 @@ namespace OleViewDotNet
             }
         }
 
+        public string DllSurrogate
+        {
+            get
+            {
+                return m_dllsurrogate;
+            }
+        }
+
         public string LocalService
         {
             get { return m_service; }
@@ -100,6 +126,44 @@ namespace OleViewDotNet
         public byte[] AccessPermission
         {
             get { return m_access; }
+        }
+
+        public string LaunchPermissionString
+        {
+            get
+            {
+                if ((m_launch != null) && (m_launch.Length > 0))
+                {
+                    try
+                    {
+                        return COMUtilities.GetStringSDForSD(m_launch);
+                    }
+                    catch (Win32Exception)
+                    {
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        public string AccessPermissionString
+        {
+            get
+            {
+                if ((m_access != null) && (m_access.Length > 0))
+                {
+                    try
+                    {
+                        return COMUtilities.GetStringSDForSD(m_access);
+                    }
+                    catch (Win32Exception)
+                    {
+                    }
+                }
+
+                return null;
+            }
         }
 
         public override string ToString()

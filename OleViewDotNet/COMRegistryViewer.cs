@@ -49,6 +49,7 @@ namespace OleViewDotNet
             CLSIDsByName,
             CLSIDsByServer,
             CLSIDsByLocalServer,
+            CLSIDsWithSurrogate,
             Interfaces,
             InterfacesByName,
             ImplementedCategories,
@@ -57,6 +58,7 @@ namespace OleViewDotNet
             LocalServices,
             AppIDs,
             Typelibs,
+            AppIDsWithIL,
         }        
 
         /// <summary>
@@ -103,10 +105,13 @@ namespace OleViewDotNet
                         LoadProgIDs();
                         break;
                     case DisplayMode.CLSIDsByServer:
-                        LoadCLSIDByServer(false);
+                        LoadCLSIDByServer(ServerType.None);
                         break;
                     case DisplayMode.CLSIDsByLocalServer:
-                        LoadCLSIDByServer(true);
+                        LoadCLSIDByServer(ServerType.Local);
+                        break;
+                    case DisplayMode.CLSIDsWithSurrogate:
+                        LoadCLSIDByServer(ServerType.Surrogate);
                         break;
                     case DisplayMode.Interfaces:
                         LoadInterfaces();
@@ -127,7 +132,10 @@ namespace OleViewDotNet
                         LoadLocalServices();
                         break;
                     case DisplayMode.AppIDs:
-                        LoadAppIDs();
+                        LoadAppIDs(false);
+                        break;
+                    case DisplayMode.AppIDsWithIL:
+                        LoadAppIDs(true);
                         break;
                     case DisplayMode.Typelibs:
                         LoadTypeLibs();
@@ -302,10 +310,34 @@ namespace OleViewDotNet
             Text = "CLSIDs by Name";
         }
 
-        private void LoadCLSIDByServer(bool localServer)
+        enum ServerType
+        {
+            None,
+            Local,
+            Surrogate
+        }
+
+        private void LoadCLSIDByServer(ServerType serverType)
         {            
             int i = 0;
-            SortedDictionary<string, List<COMCLSIDEntry>> dict = localServer ? m_reg.ClsidsByLocalServer : m_reg.ClsidsByServer;            
+            SortedDictionary<string, List<COMCLSIDEntry>> dict;
+            
+            
+            if(serverType == ServerType.Local)
+            {
+                Text = "CLSIDs by Local Server";
+                dict = m_reg.ClsidsByLocalServer;
+            }
+            else if (serverType == ServerType.Surrogate)
+            {
+                Text = "CLSIDs With Surrogate";
+                dict = m_reg.ClsidsWithSurrogate;
+            }
+            else
+            {
+                Text = "CLSIDs by Server";
+                dict = m_reg.ClsidsByServer;
+            }            
             
             TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
             foreach (KeyValuePair<string, List<COMCLSIDEntry>> pair in dict)
@@ -331,7 +363,8 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes);
-            Text = "CLSIDs by Server";
+
+            
         }
 
         private void LoadInterfaces()
@@ -452,7 +485,7 @@ namespace OleViewDotNet
             Text = "Local Services";
         }
 
-        private void LoadAppIDs()
+        private void LoadAppIDs(bool filterIL)
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
             IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;            
@@ -462,7 +495,13 @@ namespace OleViewDotNet
             {
                 if (appids.ContainsKey(pair.Key))
                 {
-                    COMAppIDEntry appidEnt = appids[pair.Key];                    
+                    COMAppIDEntry appidEnt = appids[pair.Key];
+                    
+                    if (filterIL && String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.AccessPermission)) &&
+                        String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.LaunchPermission)))
+                    {
+                        continue;
+                    }
 
                     TreeNode node = new TreeNode(appidEnt.Name);
                     node.Tag = appidEnt;
@@ -478,6 +517,18 @@ namespace OleViewDotNet
                     if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
                     {
                         AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
+                    }
+
+                    string perm = appidEnt.LaunchPermissionString;
+                    if (perm != null)
+                    {
+                        AppendFormatLine(builder, "Launch: {0}", perm);
+                    }
+
+                    perm = appidEnt.AccessPermissionString;
+                    if (perm != null)
+                    {
+                        AppendFormatLine(builder, "Access: {0}", perm);
                     }
 
                     node.ToolTipText = builder.ToString();
@@ -568,10 +619,12 @@ namespace OleViewDotNet
                 {
                     clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
                 }
+                clsidNodes[i].ToolTipText = String.Format("Policy: {0}", ent.Policy);
                 i++;
             }
 
             treeComRegistry.Nodes.AddRange(clsidNodes);
+            
             Text = "IE Low Rights Elevation Policy"; 
         }
 
@@ -661,7 +714,7 @@ namespace OleViewDotNet
             CopyAsString,
             CopyAsStructure,
             CopyAsObject,
-            CopyAsHexString
+            CopyAsHexString,            
         }
 
         private void CopyGuidToClipboard(Guid guid, CopyGuidType copyType)
@@ -692,13 +745,11 @@ namespace OleViewDotNet
                     }
                     break;
                 case CopyGuidType.CopyAsHexString:
-                    byte[] data = guid.ToByteArray();
-                    strCopy = "";
-                    foreach (byte b in data)
                     {
-                        strCopy += String.Format("{0:X02}", b);
+                        byte[] data = guid.ToByteArray();
+                        strCopy = String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));                        
                     }
-                    break;
+                    break;                
             }
 
             if (strCopy != null)
@@ -736,6 +787,10 @@ namespace OleViewDotNet
                 else if (tag is Guid)
                 {
                     guid = (Guid)tag;
+                }
+                else if (tag is COMAppIDEntry)
+                {
+                    guid = ((COMAppIDEntry)tag).AppId;
                 }
             }
 
