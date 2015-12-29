@@ -14,6 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using IronPython.Hosting;
+using Microsoft.Scripting;
+using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -363,8 +366,6 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes);
-
-            
         }
 
         private void LoadInterfaces()
@@ -979,6 +980,33 @@ namespace OleViewDotNet
             return new Regex(builder.ToString(), ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
         }
 
+        private static Func<object, bool> CreatePythonFilter(string filter)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("def run_filter(entry):");
+            builder.AppendFormat("  return {0}", filter);
+            builder.AppendLine();
+            
+            ScriptEngine engine = Python.CreateEngine();
+            ScriptSource source = engine.CreateScriptSourceFromString(builder.ToString(), SourceCodeKind.File);
+            ScriptScope scope = engine.CreateScope();
+            source.Execute(scope);
+            return scope.GetVariable<Func<object, bool>>("run_filter");            
+        }
+
+        private static bool RunPythonFilter(TreeNode node, Func<object, bool> python_filter)
+        {
+            try
+            {
+                return python_filter(node.Tag);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
         private static Func<TreeNode, bool> CreateFilter(string filter, int mode, bool caseSensitive)
         {                        
             StringComparison comp;
@@ -1022,10 +1050,15 @@ namespace OleViewDotNet
 
                         return n => r.IsMatch(n.Text);
                     }
+                case 6:
+                    {
+                        Func<object, bool> python_filter = CreatePythonFilter(filter);
+
+                        return n => RunPythonFilter(n, python_filter);
+                    }
                 default:
                     throw new ArgumentException("Invalid mode value");
             }
-
         }
 
         // Check if top node or one of its subnodes matches the filter
@@ -1037,7 +1070,7 @@ namespace OleViewDotNet
             {
                 foreach (TreeNode node in n.Nodes)
                 {
-                    result = filterFunc(node);
+                    result = FilterNode(node, filterFunc);
                     if (result)
                     {
                         break;
@@ -1057,9 +1090,7 @@ namespace OleViewDotNet
 
                 if (filter.Length > 0)
                 {
-                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);
-                    
-
+                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);                    
                     nodes = m_originalNodes.Where(n => FilterNode(n, filterFunc)).ToArray();
                 }
                 else
@@ -1072,7 +1103,7 @@ namespace OleViewDotNet
                 treeComRegistry.Nodes.AddRange(nodes);
                 treeComRegistry.ResumeLayout();
             }
-            catch(ArgumentException ex)
+            catch(Exception ex)
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

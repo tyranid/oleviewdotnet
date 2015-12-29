@@ -40,12 +40,12 @@
             this.copyObjectTagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -100,7 +100,7 @@
             this.refreshInterfacesToolStripMenuItem,
             this.viewTypeLibraryToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(195, 180);
+            this.contextMenuStrip.Size = new System.Drawing.Size(195, 158);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
@@ -145,6 +145,13 @@
             this.refreshInterfacesToolStripMenuItem.Text = "Refresh Interfaces";
             this.refreshInterfacesToolStripMenuItem.Click += new System.EventHandler(this.refreshInterfacesToolStripMenuItem_Click);
             // 
+            // viewTypeLibraryToolStripMenuItem
+            // 
+            this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
+            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
+            this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
             // treeImageList
             // 
             this.treeImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("treeImageList.ImageStream")));
@@ -187,7 +194,8 @@
             "Ends With",
             "Equals",
             "Glob",
-            "Regex"});
+            "Regex",
+            "Python"});
             this.comboBoxMode.Location = new System.Drawing.Point(458, 5);
             this.comboBoxMode.Name = "comboBoxMode";
             this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
@@ -210,13 +218,6 @@
             this.textBoxFilter.Size = new System.Drawing.Size(367, 20);
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
-            // 
-            // viewTypeLibraryToolStripMenuItem
-            // 
-            this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
-            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
-            this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
