@@ -27,6 +27,7 @@ namespace OleViewDotNet
         private string m_service;
         private string m_runas;
         private string m_name;
+        private string m_dllsurrogate;        
         private byte[] m_access;
         private byte[] m_launch;
 
@@ -52,6 +53,22 @@ namespace OleViewDotNet
 
             m_access = key.GetValue("AccessPermission") as byte[];
             m_launch = key.GetValue("LaunchPermission") as byte[];
+            m_dllsurrogate = key.GetValue("DllSurrogate") as string;
+            if (m_dllsurrogate != null)
+            {
+                if (String.IsNullOrWhiteSpace(m_dllsurrogate))
+                {
+                    m_dllsurrogate = "dllhost.exe";
+                }
+                else
+                {
+                    string dllexe = key.GetValue("DllSurrogateExecute") as string;
+                    if (!String.IsNullOrWhiteSpace(dllexe))
+                    {
+                        m_dllsurrogate = dllexe;
+                    }
+                }
+            }
 
             if (String.IsNullOrWhiteSpace(m_runas) && !String.IsNullOrWhiteSpace(m_service))
             {
@@ -75,6 +92,14 @@ namespace OleViewDotNet
             get
             {
                 return m_appId;
+            }
+        }
+
+        public string DllSurrogate
+        {
+            get
+            {
+                return m_dllsurrogate;
             }
         }
 

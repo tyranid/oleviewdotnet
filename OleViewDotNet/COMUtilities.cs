@@ -186,7 +186,7 @@ namespace OleViewDotNet
                 SECURITY_INFORMATION.DACL_SECURITY_INFORMATION | SECURITY_INFORMATION.OWNER_SECURITY_INFORMATION | SECURITY_INFORMATION.LABEL_SECURITY_INFORMATION,
                 out sddl, out length))
             {
-                string ret = Marshal.PtrToStringUni(sddl, length);
+                string ret = Marshal.PtrToStringUni(sddl);
 
                 LocalFree(sddl);
 

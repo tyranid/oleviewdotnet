@@ -303,5 +303,10 @@ namespace OleViewDotNet
         {
             OpenView(COMRegistryViewer.DisplayMode.AppIDsWithIL);
         }
+
+        private void menuViewCLSIDsWithSurrogate_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.CLSIDsWithSurrogate);
+        }
     }
 }
