@@ -77,8 +77,7 @@ namespace OleViewDotNet
 
         public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
         {
-            //System.Diagnostics.Debug.WriteLine(String.Format("{0} {1} {2}", eventKind.ToString(), eventCode,
-            //        eventMsg));
+
         }
     }
    
@@ -326,6 +325,15 @@ namespace OleViewDotNet
             return Path.GetDirectoryName(new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath);
         }
 
+        public static string Get32bitExePath()
+        {
+            return Path.Combine(GetAppDirectory(), "OleViewDotNet32.exe");
+        }
+
+        public static string GetExePath()
+        {
+            return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
+        }
         public static string GetAppDataDirectory()
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OleViewDotNet");

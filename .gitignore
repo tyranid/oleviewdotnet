@@ -7,4 +7,6 @@ packages/
 *.user
 *.sdf
 *.opensdf
+*.opendb
+*.db
 packages

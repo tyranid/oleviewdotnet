@@ -15,7 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -41,24 +44,76 @@ namespace OleViewDotNet
             return _mainForm;
         }
 
+        static int EnumInterfaces(string[] args)
+        {
+            using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args[0]))
+            {
+                using (StreamWriter writer = new StreamWriter(client))
+                {
+                    Guid clsid;
+                    if (!Guid.TryParse(args[1], out clsid))
+                    {
+                        return 1;
+                    }
+
+                    bool sta = args[2] == "s";
+
+                    COMUtilities.CLSCTX clsctx;
+                    if (!Enum.TryParse(args[3], true, out clsctx))
+                    {
+                        return 1;
+                    }
+
+                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta);
+                    if (intf.Exception != null)
+                    {
+                        writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
+                        return 1;
+                    }
+                    else
+                    {
+                        foreach (Guid guid in intf.Guids)
+                        {
+                            writer.WriteLine("{0}", guid);
+                        }
+                        return 0;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
-        {            
-            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            using (LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot))
+        public static void Main(string[] args)
+        {
+            if (args.Length > 3)
             {
-                if (loader.ShowDialog() == DialogResult.OK)
-                {                    
-                    using (_mainForm = new MainForm())
+                try
+                {
+                    Environment.Exit(EnumInterfaces(args));
+                }
+                catch
+                {
+                    Environment.Exit(42);
+                }
+            }
+            else
+            {
+                AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                using (LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot))
+                {
+                    if (loader.ShowDialog() == DialogResult.OK)
                     {
-                        Application.Run(_mainForm);                        
-                    }                    
+                        using (_mainForm = new MainForm())
+                        {
+                            Application.Run(_mainForm);
+                        }
+                    }
                 }
             }
         }

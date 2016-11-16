@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuFile = new System.Windows.Forms.MenuItem();
-            this.menuItem3 = new System.Windows.Forms.MenuItem();
+            this.menuFilePythonConsole = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuRegistry = new System.Windows.Forms.MenuItem();
@@ -59,6 +59,7 @@
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenViewer = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -73,25 +74,26 @@
             // 
             this.menuFile.Index = 0;
             this.menuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem3,
+            this.menuFilePythonConsole,
+            this.menuFileOpenViewer,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
             // 
-            // menuItem3
+            // menuFilePythonConsole
             // 
-            this.menuItem3.Index = 0;
-            this.menuItem3.Text = "Python Console";
-            this.menuItem3.Click += new System.EventHandler(this.menuFilePythonConsole_Click);
+            this.menuFilePythonConsole.Index = 0;
+            this.menuFilePythonConsole.Text = "Python Console";
+            this.menuFilePythonConsole.Click += new System.EventHandler(this.menuFilePythonConsole_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 1;
+            this.menuItem2.Index = 2;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 2;
+            this.menuFileExit.Index = 3;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -260,6 +262,12 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuFileOpenViewer
+            // 
+            this.menuFileOpenViewer.Index = 1;
+            this.menuFileOpenViewer.Text = "Open 32 Bit Viewer";
+            this.menuFileOpenViewer.Click += new System.EventHandler(this.menuFileOpenViewer_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -298,7 +306,7 @@
         private System.Windows.Forms.MenuItem menuViewIELowRights;
         private System.Windows.Forms.MenuItem menuViewLocalServices;
         private System.Windows.Forms.MenuItem menuViewAppIDs;
-        private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem menuFilePythonConsole;
         private System.Windows.Forms.MenuItem menuObjectFromMarshalledStream;
         private System.Windows.Forms.MenuItem menuObjectFromSerializedStream;
         private System.Windows.Forms.MenuItem menuHelp;
@@ -306,6 +314,7 @@
         private System.Windows.Forms.MenuItem menuRegistryTypeLibraries;
         private System.Windows.Forms.MenuItem menuRegistryAppIDsIL;
         private System.Windows.Forms.MenuItem menuViewCLSIDsWithSurrogate;
+        private System.Windows.Forms.MenuItem menuFileOpenViewer;
     }
 }
 

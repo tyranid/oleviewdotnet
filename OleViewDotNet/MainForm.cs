@@ -14,9 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.InterfaceViewers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -41,13 +41,22 @@ namespace OleViewDotNet
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            if (!Environment.Is64BitProcess)
+            if (!Environment.Is64BitOperatingSystem)
             {
-                Text += " 32bit";
+                menuFileOpenViewer.Visible = false;
             }
             else
             {
-                Text += " 64bit";
+                if (!Environment.Is64BitProcess)
+                {
+                    Text += " 32bit";
+                    menuFileOpenViewer.Text = "Open 64bit Viewer";
+                }
+                else
+                {
+                    Text += " 64bit";
+                    menuFileOpenViewer.Text = "Open 32bit Viewer";
+                }
             }
         }
 
@@ -307,6 +316,25 @@ namespace OleViewDotNet
         private void menuViewCLSIDsWithSurrogate_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.CLSIDsWithSurrogate);
+        }
+
+        private void menuFileOpenViewer_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Environment.Is64BitProcess)
+                {
+                    Process.Start(COMUtilities.Get32bitExePath()).Close();
+                }
+                else
+                {
+                    Process.Start(COMUtilities.GetExePath()).Close();
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

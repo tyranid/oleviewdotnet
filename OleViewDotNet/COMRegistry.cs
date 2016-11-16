@@ -14,97 +14,14 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using System.Security.AccessControl;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet
 {
-    class EnumerateInterfaces
-    {
-        static public Guid[] GetInterfaces(COMCLSIDEntry ent)
-        {            
-            string strProcess;
-
-            string appDirectory = COMUtilities.GetAppDirectory();
-
-            // Try sepecific bit version first
-            strProcess = Path.Combine(appDirectory, Environment.Is64BitProcess ? "EnumerateInterfaces64.exe" : "EnumerateInterfaces32.exe");
-            if (!File.Exists(strProcess))
-            {
-                strProcess = Path.Combine(appDirectory, "EnumerateInterfaces.exe");
-            }
-
-            Process proc = new Process();
-            ProcessStartInfo info = new ProcessStartInfo(strProcess, String.Format("{0} s {1} {2}",
-                ent.Clsid.ToString("B"), (int)ent.CreateContext, COMInterfaceEntry.IID_IMarshal.ToString("B")));
-            info.UseShellExecute = false;
-            info.CreateNoWindow = true;
-            info.RedirectStandardOutput = true;
-            proc.StartInfo = info;
-            
-            proc.Start();            
-            
-            string strOutput = proc.StandardOutput.ReadToEnd();
-            proc.WaitForExit();
-                        
-            List<Guid> guids = new List<Guid>();
-            TextReader reader = new StringReader(strOutput);
-            while (true)
-            {
-                string line = reader.ReadLine();
-                if (line == null)
-                {
-                    break;
-                }
-
-                if (line.StartsWith("ERROR:"))
-                {
-                    uint errorCode;
-                    try
-                    {
-                        errorCode = uint.Parse(line.Substring(6), System.Globalization.NumberStyles.AllowHexSpecifier);
-                    }
-                    catch (FormatException ex)
-                    {
-                        Debug.WriteLine(ex.ToString());
-                        errorCode = 0x80004005;
-                    }
-
-                    throw new Win32Exception((int)errorCode);
-                }
-                else
-                {
-                    Guid g;
-
-                    if (Guid.TryParse(line, out g))
-                    {
-                        guids.Add(g);
-                    }                    
-                }
-            }
-
-            int exitCode = proc.ExitCode;
-
-            proc.Close();
-
-            if (exitCode == 0)
-            {
-                return guids.ToArray();
-            }
-            else
-            {
-                return new Guid[] { COMInterfaceEntry.IID_IUnknown };
-            }            
-        }        
-    }
-
     /// <summary>
     /// Class to hold information about the current COM registration information
     /// </summary>
@@ -321,7 +238,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    Guid[] guids = EnumerateInterfaces.GetInterfaces(ent);
+                    Guid[] guids = COMEnumerateInterfaces.GetInterfacesOOP(ent);
                     List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
 
                     foreach (Guid g in guids)
