@@ -19,6 +19,7 @@ using Microsoft.Win32;
 
 namespace OleViewDotNet
 {
+    [Serializable]
     public class COMProgIDEntry : IComparable<COMProgIDEntry>
     {
         private string m_progid;

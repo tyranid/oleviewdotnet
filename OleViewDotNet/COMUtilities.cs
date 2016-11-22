@@ -630,7 +630,6 @@ namespace OleViewDotNet
             {
                 CodeParameterDeclarationExpression p = GetParameter(pi);
                 method.Parameters.Add(p);
-                //parameters.Add(new CodeVariableReferenceExpression(pi.Name));
                 parameters.Add(new CodeDirectionExpression(p.Direction, new CodeVariableReferenceExpression(pi.Name)));
             }
 

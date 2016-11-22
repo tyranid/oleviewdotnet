@@ -21,6 +21,7 @@ using System.Security.AccessControl;
 
 namespace OleViewDotNet
 {
+    [Serializable]
     public class COMAppIDEntry : IComparable<COMAppIDEntry>
     {
         private Guid m_appId;

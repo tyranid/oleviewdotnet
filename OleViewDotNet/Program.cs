@@ -14,11 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NDesk.Options;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -44,7 +44,7 @@ namespace OleViewDotNet
             return _mainForm;
         }
 
-        static int EnumInterfaces(string[] args)
+        static int EnumInterfaces(List<string> args)
         {
             using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args[0]))
             {
@@ -88,11 +88,38 @@ namespace OleViewDotNet
         [STAThread]
         public static void Main(string[] args)
         {
-            if (args.Length > 3)
+            string database_file = null;
+            string save_file = null;
+            bool enum_clsid = false;
+            bool show_help = false;
+            bool user_only = false;
+
+            OptionSet opts = new OptionSet() {
+                { "f|file=", "Open a database file.", v => database_file = v },
+                { "s|save=", "Save database and exit.", v => save_file = v },
+                { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
+                { "u|user",  "Use only current user registrations.", v => user_only = v != null },
+                { "h|help",  "Show this message and exit.", v => show_help = v != null },
+            };
+
+            List<string> additional_args = opts.Parse(args);
+
+            if (show_help || (enum_clsid && additional_args.Count < 4))
+            {
+                StringWriter writer = new StringWriter();
+                writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
+                writer.WriteLine();
+                writer.WriteLine("Options:");
+                opts.WriteOptionDescriptions(writer);
+                MessageBox.Show(writer.ToString(), "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Environment.Exit(1);
+            }
+
+            if (enum_clsid)
             {
                 try
                 {
-                    Environment.Exit(EnumInterfaces(args));
+                    Environment.Exit(EnumInterfaces(additional_args));
                 }
                 catch
                 {
@@ -101,19 +128,43 @@ namespace OleViewDotNet
             }
             else
             {
+                Exception error = null;
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                using (LoadingDialog loader = new LoadingDialog(Microsoft.Win32.Registry.ClassesRoot))
+                using (LoadingDialog loader = new LoadingDialog(user_only, database_file))
                 {
                     if (loader.ShowDialog() == DialogResult.OK)
                     {
-                        using (_mainForm = new MainForm())
+                        if (save_file != null)
                         {
-                            Application.Run(_mainForm);
+                            try
+                            {
+                                COMRegistry.Save(save_file);
+                            }
+                            catch (Exception ex)
+                            {
+                                error = ex;
+                            }
                         }
                     }
+                    else
+                    {
+                        error = loader.Error;
+                    }                    
+                }
+
+                if (error == null)
+                {
+                    using (_mainForm = new MainForm())
+                    {
+                        Application.Run(_mainForm);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

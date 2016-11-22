@@ -355,8 +355,45 @@ namespace OleViewDotNet
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+            }
+        }
+
+        private void menuFileSaveDatabase_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        COMRegistry.Save(dlg.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void menuFileOpenDatabase_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    using (LoadingDialog loader = new LoadingDialog(false, dlg.FileName))
+                    {
+                        if ((loader.ShowDialog() != DialogResult.OK) && (loader.Error != null))
+                        {
+                            MessageBox.Show(loader.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }                    
                 }
             }
         }

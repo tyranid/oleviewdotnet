@@ -20,6 +20,7 @@ using OleViewDotNet.InterfaceViewers;
 
 namespace OleViewDotNet
 {
+    [Serializable]
     public class COMInterfaceEntry : IComparable<COMInterfaceEntry>
     {
         private string m_name;

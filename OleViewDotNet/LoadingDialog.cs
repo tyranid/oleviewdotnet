@@ -18,6 +18,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.IO;
 
 namespace OleViewDotNet
 {
@@ -25,10 +26,14 @@ namespace OleViewDotNet
     {
         private BackgroundWorker m_worker;
         private RegistryKey m_rootKey;
+        private string m_keyPath;
+        private string m_dbpath;
 
-        public LoadingDialog(RegistryKey rootKey)
+        public LoadingDialog(bool user_only, string dbpath)
         {
-            m_rootKey = rootKey;
+            m_rootKey = user_only ? Registry.CurrentUser : Registry.ClassesRoot;
+            m_keyPath = user_only ? @"Software\Classes" : null;
+            m_dbpath = dbpath;
             m_worker = new BackgroundWorker();
             m_worker.DoWork += new DoWorkEventHandler(DoWorkEntry);
             m_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompletedCallback);
@@ -42,13 +47,40 @@ namespace OleViewDotNet
 
         private void DoWorkEntry(object sender, DoWorkEventArgs e)
         {
-            COMRegistry.Load(m_rootKey);
+            if (m_dbpath != null)
+            {
+                COMRegistry.Load(m_dbpath);
+            }
+            else
+            {
+                if (m_keyPath != null)
+                {
+                    using (RegistryKey key = m_rootKey.OpenSubKey(m_keyPath))
+                    {
+                        COMRegistry.Load(key);
+                    }
+                }
+                else
+                {
+                    COMRegistry.Load(m_rootKey);
+                }
+            }
         }
 
         private void RunWorkerCompletedCallback(object sender, RunWorkerCompletedEventArgs e)
         {
-            DialogResult = DialogResult.OK;
+            if (e.Error != null)
+            {
+                DialogResult = DialogResult.Cancel;
+                Error = e.Error;
+            }
+            else
+            {
+                DialogResult = DialogResult.OK;
+            }
             Close();
         }
+
+        public Exception Error { get; private set; }
     }
 }

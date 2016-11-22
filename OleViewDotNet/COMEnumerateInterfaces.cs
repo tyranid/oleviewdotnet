@@ -157,7 +157,7 @@ namespace OleViewDotNet
                 }
                 
                 Process proc = new Process();
-                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("{0} {1} s \"{2}\"",
+                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("-e {0} {1} s \"{2}\"",
                     server.GetClientHandleAsString(), ent.Clsid.ToString("B"), ent.CreateContext));
                 info.UseShellExecute = false;
                 info.CreateNoWindow = true;

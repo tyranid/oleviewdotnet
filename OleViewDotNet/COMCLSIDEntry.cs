@@ -24,6 +24,7 @@ using System.Security;
 
 namespace OleViewDotNet
 {
+    [Serializable]
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>
     {
         private Guid m_clsid;
@@ -346,7 +347,6 @@ namespace OleViewDotNet
         public IntPtr CreateInstance(COMUtilities.CLSCTX dwContext)
         {
             IntPtr pInterface = IntPtr.Zero;
-            //COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
             bool blValid = false;
 
             if (dwContext == COMUtilities.CLSCTX.CLSCTX_ALL)

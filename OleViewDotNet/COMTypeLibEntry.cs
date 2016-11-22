@@ -20,6 +20,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet
 {
+    [Serializable]
     public class COMTypeLibEntry : IComparable<COMTypeLibEntry>
     {
         Guid m_typelibid;
@@ -57,6 +58,7 @@ namespace OleViewDotNet
         }
     }
 
+    [Serializable]
     public class COMTypeLibVersionEntry
     {
         public string Version { get; private set; }

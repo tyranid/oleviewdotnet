@@ -17,14 +17,21 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security;
 
 namespace OleViewDotNet
 {
     /// <summary>
     /// Class to hold information about the current COM registration information
     /// </summary>
+    [Serializable]
     public class COMRegistry
     {
         #region Private Member Variables
@@ -149,6 +156,11 @@ namespace OleViewDotNet
             get { return m_typelibs; }
         }
 
+        public Version RegistryVersion
+        {
+            get { return new Version(1, 0); }
+        }
+
         #endregion
 
         #region Public Methods
@@ -177,6 +189,93 @@ namespace OleViewDotNet
             _instance = new COMRegistry(rootKey);
         }
 
+        // A small attempt to restrict what types can be accessed
+        sealed class SecurityBinder : SerializationBinder
+        {
+            SerializationBinder _delegateBinder;
+
+            internal SecurityBinder(SerializationBinder delegateBinder)
+            {
+                _delegateBinder = delegateBinder;
+            }
+
+            private bool AllowedTypeOrAssembly(Type type)
+            {
+                // "Safe" types I guess, just let them through
+                if (type.IsEnum || type.IsPrimitive || type == typeof(String))
+                {
+                    return true;
+                }
+
+                // Allow anything from this asssembly through.
+                if (type.Assembly == typeof(COMRegistry).Assembly)
+                {
+                    return true;
+                }
+
+                string typeNamespace = type.Namespace.ToLower();
+                switch (typeNamespace.ToLower())
+                {
+                    case "system":
+                    case "system.collections":
+                    case "system.collections.generic":
+                        return true;
+                }
+
+                return false;
+            }
+
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1}", assemblyName, typeName));
+                Type type = null;
+
+                if (_delegateBinder != null)
+                {
+                    type = _delegateBinder.BindToType(assemblyName, typeName);
+                }
+                else
+                {
+                    type = Type.GetType(String.Format("{0},{1}", typeName, assemblyName));
+                }
+
+                if (type != null)
+                {
+                    if (!AllowedTypeOrAssembly(type))
+                    {
+                        string name = type.FullName;
+                        if (type.IsGenericType)
+                        {
+                            name = type.GetGenericTypeDefinition().FullName;
+                        }
+
+                        throw new SecurityException(String.Format("Insecure Type in stream", name));
+                    }
+                }
+
+                return type;
+            }
+        }
+
+        public static void Load(string path)
+        {
+            using (FileStream stm = File.OpenRead(path))
+            {
+                BinaryFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File));
+                SerializationBinder binder = new SecurityBinder(null);
+                formatter.FilterLevel = TypeFilterLevel.Low;
+                _instance = (COMRegistry) formatter.Deserialize(stm);
+            }
+        }
+
+        public static void Save(string path)
+        {
+            using (FileStream stm = File.Open(path, FileMode.Create, FileAccess.Write))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stm, _instance);
+            }
+        }
 
         /// <summary>
         /// Get the list of supported interfaces from an IUnknown pointer
