@@ -75,6 +75,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "GetTextForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GetTextForm";
             this.Load += new System.EventHandler(this.GetTextForm_Load);
             this.ResumeLayout(false);

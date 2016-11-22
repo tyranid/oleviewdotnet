@@ -59,6 +59,7 @@
             this.menuObjectFromSerializedStream = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuObjectBindMoniker = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -220,7 +221,8 @@
             this.menuObjectROT,
             this.menuObjectCreateInstanceFromCLSID,
             this.menuObjectFromMarshalledStream,
-            this.menuObjectFromSerializedStream});
+            this.menuObjectFromSerializedStream,
+            this.menuObjectBindMoniker});
             this.menuObject.Text = "&Object";
             // 
             // menuObjectROT
@@ -259,6 +261,12 @@
             this.menuHelpAbout.Index = 0;
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
+            // 
+            // menuObjectBindMoniker
+            // 
+            this.menuObjectBindMoniker.Index = 4;
+            this.menuObjectBindMoniker.Text = "Bind Moniker";
+            this.menuObjectBindMoniker.Click += new System.EventHandler(this.menuObjectBindMoniker_Click);
             // 
             // MainForm
             // 
@@ -306,6 +314,7 @@
         private System.Windows.Forms.MenuItem menuRegistryTypeLibraries;
         private System.Windows.Forms.MenuItem menuRegistryAppIDsIL;
         private System.Windows.Forms.MenuItem menuViewCLSIDsWithSurrogate;
+        private System.Windows.Forms.MenuItem menuObjectBindMoniker;
     }
 }
 

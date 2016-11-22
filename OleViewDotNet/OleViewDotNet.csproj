@@ -98,10 +98,6 @@
     <Reference Include="Microsoft.Dynamic">
       <HintPath>..\packages\IronPython.2.7.4\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.PowerShell.ConsoleHost, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.PowerShell.ConsoleHost.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Scripting">
       <HintPath>..\packages\IronPython.2.7.4\lib\Net40\Microsoft.Scripting.dll</HintPath>
     </Reference>
