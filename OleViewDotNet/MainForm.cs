@@ -336,5 +336,29 @@ namespace OleViewDotNet
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
+        private void menuObjectBindMoniker_Click(object sender, EventArgs e)
+        {
+            using (GetTextForm frm = new GetTextForm("Specify Monker"))
+            {
+                frm.Text = "Specify Moniker";
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        object comObj = Marshal.BindToMoniker(frm.Data);
+
+                        if (comObj != null)
+                        {
+                            OpenObjectInformation(comObj, frm.Data);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
     }
 }
