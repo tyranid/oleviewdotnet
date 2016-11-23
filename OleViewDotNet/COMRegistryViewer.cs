@@ -26,6 +26,7 @@ using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -667,45 +668,54 @@ namespace OleViewDotNet
             Text = "Type Libraries"; 
         }
 
-        private void SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
+        private async Task SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
         {
-            try
+            COMCLSIDEntry clsid = null;
+
+            if (node.Tag is COMCLSIDEntry)
             {
-                COMCLSIDEntry clsid = null;
+                clsid = (COMCLSIDEntry)node.Tag;
 
-                if (node.Tag is COMCLSIDEntry)
+            }
+            else if (node.Tag is COMProgIDEntry)
+            {
+                clsid = ((COMProgIDEntry)node.Tag).Entry;
+            }
+
+            if (clsid != null)
+            {
+                node.Nodes.Clear();
+                TreeNode wait_node = new TreeNode("Please Wait, Populating Interfaces", InterfaceIcon, InterfaceIcon);
+                node.Nodes.Add(wait_node);
+                try
                 {
-                    clsid = (COMCLSIDEntry)node.Tag;
-
-                }
-                else if (node.Tag is COMProgIDEntry)
-                {
-                    clsid = ((COMProgIDEntry)node.Tag).Entry;
-                }
-
-                if (clsid != null)
-                {
-                    node.Nodes.Clear();
-                    COMInterfaceEntry[] intEntries = m_reg.GetSupportedInterfaces(clsid, bRefresh);
-
-                    foreach (COMInterfaceEntry ent in intEntries)
+                    COMInterfaceEntry[] intEntries = await m_reg.GetSupportedInterfaces(clsid, bRefresh);
+                    if (intEntries.Length > 0)
                     {
-                        node.Nodes.Add(CreateInterfaceNameNode(ent));
+                        node.Nodes.Remove(wait_node);
+                        foreach (COMInterfaceEntry ent in intEntries)
+                        {
+                            node.Nodes.Add(CreateInterfaceNameNode(ent));
+                        }
+                    }
+                    else
+                    {
+                        wait_node.Text = "Error querying COM interfaces - Timeout";
                     }
                 }
-            }
-            catch (Win32Exception ex)
-            {
-                MessageBox.Show(String.Format("Error querying COM interfaces\n{0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch (Win32Exception ex)
+                {
+                    wait_node.Text = String.Format("Error querying COM interfaces - {0}", ex.Message);
+                }
             }
         }
 
-        private void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        private async void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {            
             Cursor currCursor = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
 
-            SetupCLSIDNodeTree(e.Node, false);
+            await SetupCLSIDNodeTree(e.Node, false);
 
             Cursor.Current = currCursor;
         }
@@ -855,7 +865,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode node = treeComRegistry.SelectedNode;
 
@@ -886,7 +896,9 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            ObjectInformation view = new ObjectInformation(ent.Name, comObj, props, m_reg.GetSupportedInterfaces(ent, false));
+                            COMInterfaceEntry[] entries = await m_reg.GetSupportedInterfaces(ent, false);
+
+                            ObjectInformation view = new ObjectInformation(ent.Name, comObj, props, entries);
                             Program.GetMainForm().HostControl(view);
                         }
                     }
@@ -938,12 +950,12 @@ namespace OleViewDotNet
             }
         }
 
-        private void refreshInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void refreshInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode node = treeComRegistry.SelectedNode;
             if ((node != null) && (node.Tag != null))
             {
-                SetupCLSIDNodeTree(node, true);
+                await SetupCLSIDNodeTree(node, true);
             }
         }
 

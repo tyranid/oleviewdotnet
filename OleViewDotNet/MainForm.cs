@@ -123,7 +123,7 @@ namespace OleViewDotNet
             OpenView(COMRegistryViewer.DisplayMode.PreApproved);
         }
 
-        private void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
+        private async void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
         {
             using (CreateCLSIDForm frm = new CreateCLSIDForm())
             {
@@ -146,7 +146,7 @@ namespace OleViewDotNet
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            ints = COMRegistry.Instance.GetSupportedInterfaces(ent, false);
+                            ints = await COMRegistry.Instance.GetSupportedInterfaces(ent, false);
                         }
                         else
                         {
@@ -242,7 +242,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void OpenObjectInformation(object comObj, string defaultName)
+        private async void OpenObjectInformation(object comObj, string defaultName)
         {
             if (comObj != null)
             {
@@ -258,7 +258,7 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
-                    ints = COMRegistry.Instance.GetSupportedInterfaces(ent, false);
+                    ints = await COMRegistry.Instance.GetSupportedInterfaces(ent, false);
                 }
                 else
                 {

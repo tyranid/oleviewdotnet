@@ -25,6 +25,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
+using System.Threading.Tasks;
 
 namespace OleViewDotNet
 {
@@ -325,7 +326,7 @@ namespace OleViewDotNet
         /// <param name="ent">The entry to get the interfaces for</param>
         /// <param name="bRefresh">Force the supported interface list to refresh</param>
         /// <returns>An array of supported interfaces</returns>
-        public COMInterfaceEntry[] GetSupportedInterfaces(COMCLSIDEntry ent, bool bRefresh)
+        public async Task<COMInterfaceEntry[]> GetSupportedInterfaces(COMCLSIDEntry ent, bool bRefresh)
         {
             COMInterfaceEntry[] retList = null;
 
@@ -337,7 +338,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    Guid[] guids = COMEnumerateInterfaces.GetInterfacesOOP(ent);
+                    Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(ent);
                     List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
 
                     foreach (Guid g in guids)
@@ -363,10 +364,6 @@ namespace OleViewDotNet
             }
 
             return retList;
-        }
-
-        public void DoSerialization(string strFileName)
-        {
         }
 
 #endregion

@@ -64,7 +64,16 @@ namespace OleViewDotNet
                         return 1;
                     }
 
-                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta);
+                    int timeout = 10000;
+                    if (args.Count > 4)
+                    {
+                        if (!int.TryParse(args[4], out timeout) || timeout < 0)
+                        {
+                            return 1;
+                        }
+                    }
+
+                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta, timeout);
                     if (intf.Exception != null)
                     {
                         writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);

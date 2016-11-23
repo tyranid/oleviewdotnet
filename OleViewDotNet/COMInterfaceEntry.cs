@@ -90,7 +90,7 @@ namespace OleViewDotNet
 
         public COMInterfaceEntry(Guid iid)
             : this(iid, Guid.Empty, 3, "IUnknown", iid.ToString("B"))
-        {            
+        {
         }
 
         public enum KnownInterfaces

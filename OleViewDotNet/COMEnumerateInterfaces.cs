@@ -23,6 +23,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OleViewDotNet
 {
@@ -111,7 +112,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void GetInterfaces()
+        private void GetInterfaces(int timeout)
         {
             Thread th = null;
             if (_sta)
@@ -123,7 +124,7 @@ namespace OleViewDotNet
                 th = new Thread(MTAEnumThread);
             }
             th.Start();
-            if (!th.Join(10000))
+            if (!th.Join(timeout))
             {
                 th.Abort();
             }
@@ -132,16 +133,16 @@ namespace OleViewDotNet
         public IEnumerable<Guid> Guids { get { return _guids; } }
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, COMUtilities.CLSCTX clsctx, bool sta)
+        public COMEnumerateInterfaces(Guid clsid, COMUtilities.CLSCTX clsctx, bool sta, int timeout)
         {
             _guids = new List<Guid>();
             _clsid = clsid;
             _clsctx = clsctx;
             _sta = sta;
-            GetInterfaces();
+            GetInterfaces(timeout);
         }
 
-        public static Guid[] GetInterfacesOOP(COMCLSIDEntry ent)
+        public async static Task<Guid[]> GetInterfacesOOP(COMCLSIDEntry ent)
         {
             using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(System.IO.Pipes.PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
@@ -179,7 +180,7 @@ namespace OleViewDotNet
                         List<Guid> guids = new List<Guid>();
                         while (true)
                         {
-                            string line = reader.ReadLine();
+                            string line = await reader.ReadLineAsync();
                             if (line == null)
                             {
                                 break;
