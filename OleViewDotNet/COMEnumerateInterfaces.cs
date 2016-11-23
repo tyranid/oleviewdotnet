@@ -155,10 +155,17 @@ namespace OleViewDotNet
                 {
                     process = COMUtilities.Get32bitExePath();
                 }
-                
+
+                string apartment = "s";
+                if (ent.ThreadingModel == COMThreadingModel.Both 
+                    || ent.ThreadingModel == COMThreadingModel.Free)
+                {
+                    apartment = "m";
+                }
+
                 Process proc = new Process();
-                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("-e {0} {1} s \"{2}\"",
-                    server.GetClientHandleAsString(), ent.Clsid.ToString("B"), ent.CreateContext));
+                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("-e {0} {1} {2} \"{3}\"",
+                    server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
                 info.UseShellExecute = false;
                 info.CreateNoWindow = true;
                 proc.StartInfo = info;

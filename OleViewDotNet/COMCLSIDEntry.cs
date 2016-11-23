@@ -24,6 +24,22 @@ using System.Security;
 
 namespace OleViewDotNet
 {
+    public enum COMServerType
+    {
+        UnknownServer,
+        InProcServer32,
+        LocalServer32,
+    }
+
+    public enum COMThreadingModel
+    {
+        None,
+        Apartment,
+        Both,
+        Free,
+        Neutral
+    }
+
     [Serializable]
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>
     {
@@ -41,18 +57,11 @@ namespace OleViewDotNet
         private static Guid DocumentCategory = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 
         /// <summary>
-        /// List of the proxies this object implemented 
+        /// List of the proxies this object implements.
         /// </summary>
         private List<COMInterfaceEntry> m_proxies;
-
-        public enum ServerType
-        {
-            UnknownServer,
-            InProcServer32,
-            LocalServer32,
-        }
-
-        ServerType m_servertype;
+        private COMServerType m_servertype;
+        private COMThreadingModel m_threadingmodel;
 
         public int CompareTo(COMCLSIDEntry right)
         {
@@ -126,17 +135,41 @@ namespace OleViewDotNet
             }
 
             RegistryKey serverKey = key.OpenSubKey("InProcServer32");
-            m_servertype = ServerType.InProcServer32;
+            m_servertype = COMServerType.InProcServer32;
             if (serverKey == null)
             {
                 serverKey = key.OpenSubKey("LocalServer32");
-                m_servertype = ServerType.LocalServer32;
+                m_servertype = COMServerType.LocalServer32;
             }
 
             if ((serverKey != null) && (serverKey.GetValue(null) != null))
             {
                 m_cmdline = serverKey.GetValue(null).ToString();
-                m_server = ProcessFileName(m_cmdline, m_servertype == ServerType.LocalServer32);
+                m_server = ProcessFileName(m_cmdline, m_servertype == COMServerType.LocalServer32);
+                string threading_model = serverKey.GetValue("ThreadingModel") as string;
+                if (threading_model != null)
+                {
+                    switch (threading_model.ToLower())
+                    {
+                        case "both":
+                            m_threadingmodel = COMThreadingModel.Both;
+                            break;
+                        case "free":
+                            m_threadingmodel = COMThreadingModel.Free;
+                            break;
+                        case "neutral":
+                            m_threadingmodel = COMThreadingModel.Neutral;
+                            break;
+                        case "apartment":
+                        default:
+                            m_threadingmodel = COMThreadingModel.Apartment;
+                            break;
+                    }
+                }
+                else if (m_servertype == COMServerType.LocalServer32)
+                {
+                    m_threadingmodel = COMThreadingModel.Both;
+                }
 
                 try
                 {
@@ -161,7 +194,7 @@ namespace OleViewDotNet
             else
             {
                 m_server = "";
-                m_servertype = ServerType.UnknownServer;
+                m_servertype = COMServerType.UnknownServer;
             }
 
             m_appid = Guid.Empty;
@@ -175,9 +208,9 @@ namespace OleViewDotNet
                     {
                         if (m_appid != Guid.Empty)
                         {
-                            if (m_servertype == ServerType.UnknownServer)
+                            if (m_servertype == COMServerType.UnknownServer)
                             {
-                                m_servertype = ServerType.LocalServer32;
+                                m_servertype = COMServerType.LocalServer32;
                             }
                         }
                     }
@@ -263,10 +296,11 @@ namespace OleViewDotNet
             m_categories = new HashSet<Guid>();
             m_server = String.Empty;
             m_cmdline = String.Empty;
-            m_servertype = ServerType.UnknownServer;
+            m_servertype = COMServerType.UnknownServer;
+            m_threadingmodel = COMThreadingModel.Apartment;
         }
 
-        public COMCLSIDEntry(Guid clsid, ServerType type)
+        public COMCLSIDEntry(Guid clsid, COMServerType type)
             : this(clsid)
         {
             m_servertype = type;
@@ -292,7 +326,7 @@ namespace OleViewDotNet
             get { return m_cmdline; }
         }
 
-        public ServerType Type
+        public COMServerType Type
         {
             get { return m_servertype; }
         }
@@ -325,17 +359,25 @@ namespace OleViewDotNet
             }
         }
 
+        public COMThreadingModel ThreadingModel
+        {
+            get
+            {
+                return m_threadingmodel;
+            }
+        }
+
         public COMUtilities.CLSCTX CreateContext
         {
             get
             {
                 COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
 
-                if (m_servertype == COMCLSIDEntry.ServerType.InProcServer32)
+                if (m_servertype == COMServerType.InProcServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;             
                 }
-                else if (m_servertype == COMCLSIDEntry.ServerType.LocalServer32)
+                else if (m_servertype == COMServerType.LocalServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;             
                 }
@@ -351,12 +393,12 @@ namespace OleViewDotNet
 
             if (dwContext == COMUtilities.CLSCTX.CLSCTX_ALL)
             {
-                if (m_servertype == COMCLSIDEntry.ServerType.InProcServer32)
+                if (m_servertype == COMServerType.InProcServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;
                     blValid = true;
                 }
-                else if (m_servertype == COMCLSIDEntry.ServerType.LocalServer32)
+                else if (m_servertype == COMServerType.LocalServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;
                     blValid = true;

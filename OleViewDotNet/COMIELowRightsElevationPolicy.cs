@@ -76,7 +76,7 @@ namespace OleViewDotNet
                     else
                     {
                         // Add dummy entry
-                        clsidList.Add(new COMCLSIDEntry(cls, COMCLSIDEntry.ServerType.LocalServer32));
+                        clsidList.Add(new COMCLSIDEntry(cls, COMServerType.LocalServer32));
                     }
                 }
             }

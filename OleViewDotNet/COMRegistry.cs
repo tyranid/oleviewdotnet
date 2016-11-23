@@ -420,11 +420,11 @@ namespace OleViewDotNet
                                     {
                                         COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
                                         clsids.Add(clsid, ent);
-                                        if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMCLSIDEntry.ServerType.UnknownServer))
+                                        if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMServerType.UnknownServer))
                                         {
                                             AddEntryToDictionary(clsidbyserver, ent);
                                           
-                                            if (ent.Type == COMCLSIDEntry.ServerType.LocalServer32)
+                                            if (ent.Type == COMServerType.LocalServer32)
                                             {
                                                 AddEntryToDictionary(clsidbylocalserver, ent);
                                             }
