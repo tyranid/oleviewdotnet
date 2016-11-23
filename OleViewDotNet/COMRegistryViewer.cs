@@ -195,7 +195,7 @@ namespace OleViewDotNet
                 {
                     AppendFormatLine(strRet, "{0} - {1}\n", intEnt.Iid.ToString(), intEnt.Name);
                 }
-            } 
+            }
 
             return strRet.ToString();
         }
@@ -1093,7 +1093,7 @@ namespace OleViewDotNet
             return result;
         }
 
-        private void btnApply_Click(object sender, EventArgs e)
+        private async void btnApply_Click(object sender, EventArgs e)
         {
             try
             {                
@@ -1102,8 +1102,8 @@ namespace OleViewDotNet
 
                 if (filter.Length > 0)
                 {
-                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);                    
-                    nodes = m_originalNodes.Where(n => FilterNode(n, filterFunc)).ToArray();
+                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);
+                    nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc)).ToArray());
                 }
                 else
                 {
@@ -1163,7 +1163,6 @@ namespace OleViewDotNet
                     {
                         ent = m_reg.Typelibs[clsid.TypeLib].Versions.First();
                     }
-
                 }
                 
                 if(ent != null)
@@ -1182,6 +1181,5 @@ namespace OleViewDotNet
                 }
             }
         }
-
     }
 }
