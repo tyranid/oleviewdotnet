@@ -34,6 +34,7 @@ namespace OleViewDotNet
         private COMUtilities.CLSCTX _clsctx;
         private bool _sta;
         private Win32Exception _ex;
+        private bool _factory;
 
         private static bool QueryInterface(IntPtr punk, Guid iid)
         {
@@ -49,10 +50,20 @@ namespace OleViewDotNet
 
         private void GetInterfacesInternal()
         {
-            IntPtr punk;
+            IntPtr punk = IntPtr.Zero;            
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-            int hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, COMUtilities.CLSCTX.CLSCTX_SERVER,
-                ref IID_IUnknown, out punk);
+
+            int hr = 0;
+            if (_factory)
+            {
+                hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, IntPtr.Zero, ref IID_IUnknown, out punk);
+            }
+            else
+            {
+                hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, COMUtilities.CLSCTX.CLSCTX_SERVER,
+                    ref IID_IUnknown, out punk);
+            }
+            
             if (hr != 0)
             {
                 throw new Win32Exception(hr);
@@ -131,18 +142,21 @@ namespace OleViewDotNet
         }
 
         public IEnumerable<Guid> Guids { get { return _guids; } }
+        public IEnumerable<Guid> FactoryGuids { get { return _guids; } }
+
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, COMUtilities.CLSCTX clsctx, bool sta, int timeout)
+        public COMEnumerateInterfaces(Guid clsid, COMUtilities.CLSCTX clsctx, bool sta, int timeout, bool factory)
         {
             _guids = new List<Guid>();
             _clsid = clsid;
             _clsctx = clsctx;
             _sta = sta;
+            _factory = factory;
             GetInterfaces(timeout);
         }
 
-        public async static Task<Guid[]> GetInterfacesOOP(COMCLSIDEntry ent)
+        public async static Task<Guid[]> GetInterfacesOOP(COMCLSIDEntry ent, bool factory)
         {
             using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(System.IO.Pipes.PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
@@ -165,8 +179,8 @@ namespace OleViewDotNet
                 }
 
                 Process proc = new Process();
-                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("-e {0} {1} {2} \"{3}\"",
-                    server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
+                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("{0} {1} {2} {3} \"{4}\"",
+                    factory ? "-f" : "-e", server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
                 info.UseShellExecute = false;
                 info.CreateNoWindow = true;
                 proc.StartInfo = info;

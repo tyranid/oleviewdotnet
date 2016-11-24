@@ -338,7 +338,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(ent);
+                    Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(ent, false);
                     List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
 
                     foreach (Guid g in guids)
