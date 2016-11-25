@@ -34,6 +34,8 @@
             this.menuFile = new System.Windows.Forms.MenuItem();
             this.menuFilePythonConsole = new System.Windows.Forms.MenuItem();
             this.menuFileOpenViewer = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveDatabase = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuRegistry = new System.Windows.Forms.MenuItem();
@@ -61,8 +63,7 @@
             this.menuObjectBindMoniker = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuFileOpenDatabase = new System.Windows.Forms.MenuItem();
-            this.menuFileSaveDatabase = new System.Windows.Forms.MenuItem();
+            this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -97,6 +98,18 @@
             this.menuFileOpenViewer.Text = "Open 32 Bit Viewer";
             this.menuFileOpenViewer.Click += new System.EventHandler(this.menuFileOpenViewer_Click);
             // 
+            // menuFileOpenDatabase
+            // 
+            this.menuFileOpenDatabase.Index = 2;
+            this.menuFileOpenDatabase.Text = "Open Database";
+            this.menuFileOpenDatabase.Click += new System.EventHandler(this.menuFileOpenDatabase_Click);
+            // 
+            // menuFileSaveDatabase
+            // 
+            this.menuFileSaveDatabase.Index = 3;
+            this.menuFileSaveDatabase.Text = "Save Database";
+            this.menuFileSaveDatabase.Click += new System.EventHandler(this.menuFileSaveDatabase_Click);
+            // 
             // menuItem2
             // 
             this.menuItem2.Index = 4;
@@ -125,6 +138,7 @@
             this.menuViewAppIDs,
             this.menuRegistryAppIDsIL,
             this.menuViewLocalServices,
+            this.menuRegistryMimeTypes,
             this.menuItem1,
             this.menuViewInterfaces,
             this.menuViewInterfacesByName,
@@ -205,24 +219,24 @@
             // 
             // menuItem1
             // 
-            this.menuItem1.Index = 12;
+            this.menuItem1.Index = 13;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 13;
+            this.menuViewInterfaces.Index = 14;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 14;
+            this.menuViewInterfacesByName.Index = 15;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
             // menuRegistryTypeLibraries
             // 
-            this.menuRegistryTypeLibraries.Index = 15;
+            this.menuRegistryTypeLibraries.Index = 16;
             this.menuRegistryTypeLibraries.Text = "Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
@@ -280,17 +294,11 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuFileOpenDatabase
+            // menuRegistryMimeTypes
             // 
-            this.menuFileOpenDatabase.Index = 2;
-            this.menuFileOpenDatabase.Text = "Open Database";
-            this.menuFileOpenDatabase.Click += new System.EventHandler(this.menuFileOpenDatabase_Click);
-            // 
-            // menuFileSaveDatabase
-            // 
-            this.menuFileSaveDatabase.Index = 3;
-            this.menuFileSaveDatabase.Text = "Save Database";
-            this.menuFileSaveDatabase.Click += new System.EventHandler(this.menuFileSaveDatabase_Click);
+            this.menuRegistryMimeTypes.Index = 12;
+            this.menuRegistryMimeTypes.Text = "MIME Types";
+            this.menuRegistryMimeTypes.Click += new System.EventHandler(this.menuRegistryMimeTypes_Click);
             // 
             // MainForm
             // 
@@ -342,6 +350,7 @@
         private System.Windows.Forms.MenuItem menuObjectBindMoniker;
         private System.Windows.Forms.MenuItem menuFileOpenDatabase;
         private System.Windows.Forms.MenuItem menuFileSaveDatabase;
+        private System.Windows.Forms.MenuItem menuRegistryMimeTypes;
     }
 }
 

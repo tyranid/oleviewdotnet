@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
@@ -50,6 +49,7 @@ namespace OleViewDotNet
         private List<COMIELowRightsElevationPolicy> m_lowrights;
         private SortedDictionary<Guid, COMAppIDEntry> m_appid;
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
+        private List<COMMimeType> m_mimetypes;
 
         #endregion
 
@@ -157,6 +157,11 @@ namespace OleViewDotNet
             get { return m_typelibs; }
         }
 
+        public IEnumerable<COMMimeType> MimeTypes
+        {
+            get { return m_mimetypes; }
+        }
+
         public Version RegistryVersion
         {
             get { return new Version(1, 0); }
@@ -175,11 +180,35 @@ namespace OleViewDotNet
             LoadCLSIDs(rootKey);
             LoadProgIDs(rootKey);
             LoadInterfaces(rootKey);
+            LoadMimeTypes(rootKey);
             LoadPreApproved();
             LoadLowRights();            
             LoadTypelibs(rootKey);
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
+        }
+
+        private void LoadMimeTypes(RegistryKey rootKey)
+        {
+            m_mimetypes = new List<COMMimeType>();
+            RegistryKey key = rootKey.OpenSubKey(@"mime\database\content type");
+            if (key == null)
+            {
+                return;
+            }
+
+            foreach (string mime_type in key.GetSubKeyNames())
+            {
+                RegistryKey sub_key = key.OpenSubKey(mime_type);
+                if (sub_key != null)
+                {
+                    COMMimeType obj = new COMMimeType(mime_type, sub_key);
+                    if (obj.Clsid != Guid.Empty)
+                    {
+                        m_mimetypes.Add(obj);
+                    }
+                }
+            }
         }
 
         private static COMRegistry _instance;

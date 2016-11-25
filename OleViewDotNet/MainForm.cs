@@ -397,5 +397,10 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private void menuRegistryMimeTypes_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.MimeTypes);
+        }
     }
 }

@@ -118,6 +118,7 @@
     <Compile Include="COMEnumerateInterfaces.cs" />
     <Compile Include="COMIELowRightsElevationPolicy.cs" />
     <Compile Include="COMInterfaceEntry.cs" />
+    <Compile Include="COMMimeType.cs" />
     <Compile Include="COMTypeLibEntry.cs" />
     <Compile Include="ConsoleControl.cs">
       <SubType>UserControl</SubType>

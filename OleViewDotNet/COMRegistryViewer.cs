@@ -63,6 +63,7 @@ namespace OleViewDotNet
             AppIDs,
             Typelibs,
             AppIDsWithIL,
+            MimeTypes,
         }        
 
         /// <summary>
@@ -143,6 +144,9 @@ namespace OleViewDotNet
                         break;
                     case DisplayMode.Typelibs:
                         LoadTypeLibs();
+                        break;
+                    case DisplayMode.MimeTypes:
+                        LoadMimeTypes();
                         break;
                     default:
                         break;
@@ -628,6 +632,29 @@ namespace OleViewDotNet
             treeComRegistry.Nodes.AddRange(clsidNodes);
             
             Text = "IE Low Rights Elevation Policy"; 
+        }
+
+        private void LoadMimeTypes()
+        {
+            int i = 0;
+            List<TreeNode> nodes = new List<TreeNode>(m_reg.MimeTypes.Count());
+            foreach (COMMimeType ent in m_reg.MimeTypes)
+            {
+                TreeNode node = new TreeNode(ent.MimeType);
+                if (m_reg.Clsids.ContainsKey(ent.Clsid))
+                {
+                    node.Nodes.Add(CreateCLSIDNode(m_reg.Clsids[ent.Clsid]));
+                }
+
+                if (!String.IsNullOrWhiteSpace(ent.Extension))
+                {
+                    node.ToolTipText = String.Format("Extension {0}", ent.Extension);
+                }
+                nodes.Add(node);
+            }
+
+            treeComRegistry.Nodes.AddRange(nodes.ToArray());
+            Text = "MIME Types";
         }
 
         private TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
