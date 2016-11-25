@@ -168,9 +168,9 @@ namespace OleViewDotNet
 
             AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.ToString("B"));
             AppendFormatLine(strRet, "Name: {0}", ent.Name);
-            AppendFormatLine(strRet, "{0}: {1}", ent.Type.ToString(), ent.Server);
-            string[] progids = ent.ProgIDs;
-            if (progids.Length > 0)
+            AppendFormatLine(strRet, "{0}: {1}", ent.ServerType.ToString(), ent.Server);
+            IEnumerable<string> progids = ent.ProgIDs;
+            if (progids.Count() > 0)
             {
                 strRet.AppendLine("ProgIDs:");
                 foreach (string progid in progids)
@@ -187,8 +187,8 @@ namespace OleViewDotNet
                 AppendFormatLine(strRet, "TypeLib: {0}", ent.TypeLib.ToString("B"));
             }
             
-            COMInterfaceEntry[] proxies = ent.Proxies;
-            if (proxies.Length > 0)
+            IEnumerable<COMInterfaceEntry> proxies = ent.Proxies;
+            if (proxies.Count() > 0)
             {
                 strRet.AppendLine("Interface Proxies:");
                 foreach (COMInterfaceEntry intEnt in proxies)

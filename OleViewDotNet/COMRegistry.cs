@@ -417,11 +417,11 @@ namespace OleViewDotNet
                                     {
                                         COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
                                         clsids.Add(clsid, ent);
-                                        if (!String.IsNullOrEmpty(ent.Server) && ent.Type != (COMServerType.UnknownServer))
+                                        if (!String.IsNullOrEmpty(ent.Server) && ent.ServerType != (COMServerType.UnknownServer))
                                         {
                                             AddEntryToDictionary(clsidbyserver, ent);
                                           
-                                            if (ent.Type == COMServerType.LocalServer32)
+                                            if (ent.ServerType == COMServerType.LocalServer32)
                                             {
                                                 AddEntryToDictionary(clsidbylocalserver, ent);
                                             }

@@ -43,29 +43,17 @@ namespace OleViewDotNet
     [Serializable]
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>
     {
-        private Guid m_clsid;
-        private string m_name;
-        private string m_server;
-        private string m_cmdline;
-        private Guid m_appid;
-        private Guid m_typelib;
         private List<string> m_progids;
         private HashSet<Guid> m_categories;
+        private List<COMInterfaceEntry> m_proxies;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
         private static Guid DocumentCategory = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 
-        /// <summary>
-        /// List of the proxies this object implements.
-        /// </summary>
-        private List<COMInterfaceEntry> m_proxies;
-        private COMServerType m_servertype;
-        private COMThreadingModel m_threadingmodel;
-
         public int CompareTo(COMCLSIDEntry right)
         {
-            return String.Compare(m_name, right.m_name);
+            return String.Compare(Name, right.Name);
         }
 
         private static bool IsInvalidFileName(string filename)
@@ -118,65 +106,65 @@ namespace OleViewDotNet
         private void LoadFromKey(RegistryKey key)
         {
             object name = key.GetValue(null);
-            m_name = null;
+            Name = null;
             if (name != null)
             {
                 string s = name.ToString().Trim();
 
                 if (s.Length > 0)
                 {
-                    m_name = name.ToString();
+                    Name = name.ToString();
                 }
             }
 
-            if (m_name == null)
+            if (Name == null)
             {
-                m_name = m_clsid.ToString("B");
+                Name = Clsid.ToString("B");
             }
 
             RegistryKey serverKey = key.OpenSubKey("InProcServer32");
-            m_servertype = COMServerType.InProcServer32;
+            ServerType = COMServerType.InProcServer32;
             if (serverKey == null)
             {
                 serverKey = key.OpenSubKey("LocalServer32");
-                m_servertype = COMServerType.LocalServer32;
+                ServerType = COMServerType.LocalServer32;
             }
 
             if ((serverKey != null) && (serverKey.GetValue(null) != null))
             {
-                m_cmdline = serverKey.GetValue(null).ToString();
-                m_server = ProcessFileName(m_cmdline, m_servertype == COMServerType.LocalServer32);
+                CmdLine = serverKey.GetValue(null).ToString();
+                Server = ProcessFileName(CmdLine, ServerType == COMServerType.LocalServer32);
                 string threading_model = serverKey.GetValue("ThreadingModel") as string;
                 if (threading_model != null)
                 {
                     switch (threading_model.ToLower())
                     {
                         case "both":
-                            m_threadingmodel = COMThreadingModel.Both;
+                            ThreadingModel = COMThreadingModel.Both;
                             break;
                         case "free":
-                            m_threadingmodel = COMThreadingModel.Free;
+                            ThreadingModel = COMThreadingModel.Free;
                             break;
                         case "neutral":
-                            m_threadingmodel = COMThreadingModel.Neutral;
+                            ThreadingModel = COMThreadingModel.Neutral;
                             break;
                         case "apartment":
                         default:
-                            m_threadingmodel = COMThreadingModel.Apartment;
+                            ThreadingModel = COMThreadingModel.Apartment;
                             break;
                     }
                 }
-                else if (m_servertype == COMServerType.LocalServer32)
+                else if (ServerType == COMServerType.LocalServer32)
                 {
-                    m_threadingmodel = COMThreadingModel.Both;
+                    ThreadingModel = COMThreadingModel.Both;
                 }
 
                 try
                 {
                     // Expand out any short filenames
-                    if (m_server.Contains("~") && !IsInvalidFileName(m_server))
+                    if (Server.Contains("~") && !IsInvalidFileName(Server))
                     {
-                        m_server = Path.GetFullPath(m_server);
+                        Server = Path.GetFullPath(Server);
                     }
                 }
                 catch (IOException)
@@ -193,24 +181,25 @@ namespace OleViewDotNet
             }
             else
             {
-                m_server = "";
-                m_servertype = COMServerType.UnknownServer;
+                Server = String.Empty;
+                ServerType = COMServerType.UnknownServer;
             }
 
-            m_appid = Guid.Empty;
+            AppID = Guid.Empty;
 
             try
             {
                 object appid = key.GetValue("AppID");
                 if ((appid != null) && (appid.ToString().Length > 0))
                 {
-                    if (Guid.TryParse(appid.ToString(), out m_appid))
+                    Guid appid_guid;
+                    if (Guid.TryParse(appid.ToString(), out appid_guid))
                     {
-                        if (m_appid != Guid.Empty)
+                        if (appid_guid != Guid.Empty)
                         {
-                            if (m_servertype == COMServerType.UnknownServer)
+                            if (ServerType == COMServerType.UnknownServer)
                             {
-                                m_servertype = COMServerType.LocalServer32;
+                                ServerType = COMServerType.LocalServer32;
                             }
                         }
                     }
@@ -221,11 +210,15 @@ namespace OleViewDotNet
                 System.Diagnostics.Debug.WriteLine(e.ToString());
             }
 
-            m_typelib = Guid.Empty;
+            TypeLib = Guid.Empty;
             string typelib = COMUtilities.ReadStringFromKey(key, "TypeLib", null);
             if (!String.IsNullOrEmpty(typelib))
             {
-                Guid.TryParse(typelib, out m_typelib);
+                Guid typelib_guid;
+                if (Guid.TryParse(typelib, out typelib_guid))
+                {
+                    TypeLib = typelib_guid;
+                }
             }
 
             string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
@@ -290,66 +283,45 @@ namespace OleViewDotNet
 
         private COMCLSIDEntry(Guid clsid)
         {
-            m_clsid = clsid;
+            Clsid = clsid;
             m_progids = new List<string>();
             m_proxies = new List<COMInterfaceEntry>();
             m_categories = new HashSet<Guid>();
-            m_server = String.Empty;
-            m_cmdline = String.Empty;
-            m_servertype = COMServerType.UnknownServer;
-            m_threadingmodel = COMThreadingModel.Apartment;
+            Server = String.Empty;
+            CmdLine = String.Empty;
+            ServerType = COMServerType.UnknownServer;
+            ThreadingModel = COMThreadingModel.Apartment;
         }
 
         public COMCLSIDEntry(Guid clsid, COMServerType type)
             : this(clsid)
         {
-            m_servertype = type;
+            ServerType = type;
         }
 
-        public Guid Clsid
+        public Guid Clsid { get; private set; }
+
+        public string Name { get; private set; }
+
+        public string Server { get; private set; }
+
+        public string CmdLine { get; private set; }
+
+        public COMServerType ServerType { get; private set; }
+
+        public IEnumerable<string> ProgIDs
         {
-            get { return m_clsid; }
+            get { return m_progids.AsReadOnly(); }
         }
 
-        public string Name
+        public Guid AppID { get; private set; }
+
+        public IEnumerable<COMInterfaceEntry> Proxies
         {
-            get { return m_name; }
+            get { return m_proxies.AsReadOnly(); }
         }
 
-        public string Server
-        {
-            get { return m_server; }
-        }
-
-        public string CmdLine
-        {
-            get { return m_cmdline; }
-        }
-
-        public COMServerType Type
-        {
-            get { return m_servertype; }
-        }
-
-        public string[] ProgIDs
-        {
-            get { return m_progids.ToArray(); }
-        }
-
-        public Guid AppID
-        {
-            get { return m_appid; }
-        }
-
-        public COMInterfaceEntry[] Proxies
-        {
-            get { return m_proxies.ToArray(); }
-        }
-
-        public Guid TypeLib
-        {
-            get { return m_typelib; }
-        }
+        public Guid TypeLib { get; private set; }
 
         public Guid[] Categories
         {
@@ -359,13 +331,7 @@ namespace OleViewDotNet
             }
         }
 
-        public COMThreadingModel ThreadingModel
-        {
-            get
-            {
-                return m_threadingmodel;
-            }
-        }
+        public COMThreadingModel ThreadingModel { get; private set; }
 
         public COMUtilities.CLSCTX CreateContext
         {
@@ -373,11 +339,11 @@ namespace OleViewDotNet
             {
                 COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
 
-                if (m_servertype == COMServerType.InProcServer32)
+                if (ServerType == COMServerType.InProcServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;             
                 }
-                else if (m_servertype == COMServerType.LocalServer32)
+                else if (ServerType == COMServerType.LocalServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;             
                 }
@@ -393,12 +359,12 @@ namespace OleViewDotNet
 
             if (dwContext == COMUtilities.CLSCTX.CLSCTX_ALL)
             {
-                if (m_servertype == COMServerType.InProcServer32)
+                if (ServerType == COMServerType.InProcServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;
                     blValid = true;
                 }
-                else if (m_servertype == COMServerType.LocalServer32)
+                else if (ServerType == COMServerType.LocalServer32)
                 {
                     dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;
                     blValid = true;
@@ -412,8 +378,8 @@ namespace OleViewDotNet
             if (blValid)
             {
                 Guid iid = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
-
-                int iError = COMUtilities.CoCreateInstance(ref m_clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
+                Guid clsid = Clsid;
+                int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
 
                 if (iError != 0)
                 {
@@ -440,7 +406,7 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("COMCLSIDEntry: {0}", m_name);
+            return String.Format("COMCLSIDEntry: {0}", Name);
         }
     }
 }
