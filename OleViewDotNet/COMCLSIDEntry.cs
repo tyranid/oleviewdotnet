@@ -201,6 +201,7 @@ namespace OleViewDotNet
                             {
                                 ServerType = COMServerType.LocalServer32;
                             }
+                            AppID = appid_guid;
                         }
                     }
                 }

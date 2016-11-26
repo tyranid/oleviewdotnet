@@ -636,7 +636,6 @@ namespace OleViewDotNet
 
         private void LoadMimeTypes()
         {
-            int i = 0;
             List<TreeNode> nodes = new List<TreeNode>(m_reg.MimeTypes.Count());
             foreach (COMMimeType ent in m_reg.MimeTypes)
             {
