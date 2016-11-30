@@ -212,6 +212,12 @@
     <Compile Include="PersistStreamTypeViewer.Designer.cs">
       <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="PropertiesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PropertiesControl.Designer.cs">
+      <DependentUpon>PropertiesControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="PythonConsole.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -280,6 +286,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PersistStreamTypeViewer.resx">
       <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropertiesControl.resx">
+      <DependentUpon>PropertiesControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PythonConsole.resx">
       <DependentUpon>PythonConsole.cs</DependentUpon>

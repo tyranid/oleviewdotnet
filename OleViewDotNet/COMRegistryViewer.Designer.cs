@@ -46,6 +46,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
+            this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -98,9 +99,10 @@
             this.copyObjectTagToolStripMenuItem,
             this.createInstanceToolStripMenuItem,
             this.refreshInterfacesToolStripMenuItem,
-            this.viewTypeLibraryToolStripMenuItem});
+            this.viewTypeLibraryToolStripMenuItem,
+            this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(195, 158);
+            this.contextMenuStrip.Size = new System.Drawing.Size(195, 202);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
@@ -219,6 +221,13 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
+            // propertiesToolStripMenuItem
+            // 
+            this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
+            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.propertiesToolStripMenuItem.Text = "Properties";
+            this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
+            // 
             // COMRegistryViewer
             // 
             this.Controls.Add(this.splitContainer);
@@ -251,5 +260,6 @@
         private System.Windows.Forms.TextBox textBoxFilter;
         private System.Windows.Forms.ComboBox comboBoxMode;
         private System.Windows.Forms.ToolStripMenuItem viewTypeLibraryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
     }
 }

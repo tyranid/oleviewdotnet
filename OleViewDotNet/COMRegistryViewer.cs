@@ -194,11 +194,7 @@ namespace OleViewDotNet
             IEnumerable<COMInterfaceEntry> proxies = ent.Proxies;
             if (proxies.Count() > 0)
             {
-                strRet.AppendLine("Interface Proxies:");
-                foreach (COMInterfaceEntry intEnt in proxies)
-                {
-                    AppendFormatLine(strRet, "{0} - {1}\n", intEnt.Iid.ToString(), intEnt.Name);
-                }
+                AppendFormatLine(strRet, "Interface Proxies: {0}", proxies.Count());
             }
 
             return strRet.ToString();
@@ -969,6 +965,7 @@ namespace OleViewDotNet
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
+                contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
             }
             else
             {
@@ -1205,6 +1202,14 @@ namespace OleViewDotNet
                         MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+        }
+
+        private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeComRegistry.SelectedNode != null)
+            {
+                Program.GetMainForm().HostControl(new PropertiesControl(treeComRegistry.SelectedNode.Tag));
             }
         }
     }
