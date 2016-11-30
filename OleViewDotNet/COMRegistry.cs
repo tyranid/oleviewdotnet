@@ -213,7 +213,6 @@ namespace OleViewDotNet
 
         private static COMRegistry _instance;
 
-
         public static void Load(RegistryKey rootKey)
         {
             _instance = new COMRegistry(rootKey);

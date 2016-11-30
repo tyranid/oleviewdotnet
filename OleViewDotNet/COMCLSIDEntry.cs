@@ -123,66 +123,74 @@ namespace OleViewDotNet
             }
 
             RegistryKey serverKey = key.OpenSubKey("InProcServer32");
-            ServerType = COMServerType.InProcServer32;
-            if (serverKey == null)
+            try
             {
-                serverKey = key.OpenSubKey("LocalServer32");
-                ServerType = COMServerType.LocalServer32;
-            }
-
-            if ((serverKey != null) && (serverKey.GetValue(null) != null))
-            {
-                CmdLine = serverKey.GetValue(null).ToString();
-                Server = ProcessFileName(CmdLine, ServerType == COMServerType.LocalServer32);
-                string threading_model = serverKey.GetValue("ThreadingModel") as string;
-                if (threading_model != null)
+                ServerType = COMServerType.InProcServer32;
+                if (serverKey == null)
                 {
-                    switch (threading_model.ToLower())
-                    {
-                        case "both":
-                            ThreadingModel = COMThreadingModel.Both;
-                            break;
-                        case "free":
-                            ThreadingModel = COMThreadingModel.Free;
-                            break;
-                        case "neutral":
-                            ThreadingModel = COMThreadingModel.Neutral;
-                            break;
-                        case "apartment":
-                        default:
-                            ThreadingModel = COMThreadingModel.Apartment;
-                            break;
-                    }
-                }
-                else if (ServerType == COMServerType.LocalServer32)
-                {
-                    ThreadingModel = COMThreadingModel.Both;
+                    serverKey = key.OpenSubKey("LocalServer32");
+                    ServerType = COMServerType.LocalServer32;
                 }
 
-                try
+                if ((serverKey != null) && (serverKey.GetValue(null) != null))
                 {
-                    // Expand out any short filenames
-                    if (Server.Contains("~") && !IsInvalidFileName(Server))
+                    CmdLine = serverKey.GetValue(null).ToString();
+                    Server = ProcessFileName(CmdLine, ServerType == COMServerType.LocalServer32);
+                    string threading_model = serverKey.GetValue("ThreadingModel") as string;
+                    if (threading_model != null)
                     {
-                        Server = Path.GetFullPath(Server);
+                        switch (threading_model.ToLower())
+                        {
+                            case "both":
+                                ThreadingModel = COMThreadingModel.Both;
+                                break;
+                            case "free":
+                                ThreadingModel = COMThreadingModel.Free;
+                                break;
+                            case "neutral":
+                                ThreadingModel = COMThreadingModel.Neutral;
+                                break;
+                            case "apartment":
+                            default:
+                                ThreadingModel = COMThreadingModel.Apartment;
+                                break;
+                        }
+                    }
+                    else if (ServerType == COMServerType.LocalServer32)
+                    {
+                        ThreadingModel = COMThreadingModel.Both;
+                    }
+
+                    try
+                    {
+                        // Expand out any short filenames
+                        if (Server.Contains("~") && !IsInvalidFileName(Server))
+                        {
+                            Server = Path.GetFullPath(Server);
+                        }
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (SecurityException)
+                    {
+                    }
+                    catch (ArgumentException)
+                    {
                     }
                 }
-                catch (IOException)
+                else
                 {
+                    Server = String.Empty;
+                    ServerType = COMServerType.UnknownServer;
                 }
-                catch (SecurityException)
-                {
-                }
-                catch (ArgumentException)
-                {
-                }
-                
-                serverKey.Close();                
             }
-            else
+            finally
             {
-                Server = String.Empty;
-                ServerType = COMServerType.UnknownServer;
+                if (serverKey != null)
+                {
+                    serverKey.Close();
+                }
             }
 
             AppID = Guid.Empty;
@@ -233,35 +241,48 @@ namespace OleViewDotNet
                 AddProgID(progid);
             }
 
-            if (key.OpenSubKey("Control") != null)
+            if (key.HasSubkey("Control"))
             {
                 m_categories.Add(ControlCategory);
             }
 
-            if (key.OpenSubKey("Insertable") != null)
+            if (key.HasSubkey("Insertable"))
             {
                 m_categories.Add(InsertableCategory);
             }
 
-            if (key.OpenSubKey("DocObject") != null)
+            if (key.HasSubkey("DocObject"))
             {
                 m_categories.Add(DocumentCategory);
             }
 
-            RegistryKey categories = key.OpenSubKey("Implemented Categories");
-            if (categories != null)
+            using (RegistryKey categories = key.OpenSubKey("Implemented Categories"))
             {
-                string[] subKeys = categories.GetSubKeyNames();
-                foreach(string s in subKeys)
+                if (categories != null)
                 {
-                    Guid g;
-
-                    if (Guid.TryParse(s, out g))
+                    string[] subKeys = categories.GetSubKeyNames();
+                    foreach (string s in subKeys)
                     {
-                        m_categories.Add(g);
+                        Guid g;
+
+                        if (Guid.TryParse(s, out g))
+                        {
+                            m_categories.Add(g);
+                        }
                     }
                 }
             }
+
+            string treatas = COMUtilities.ReadStringFromKey(key, "TreatAs", null);
+            if (!String.IsNullOrEmpty(treatas))
+            {
+                Guid treatas_guid;
+                if (Guid.TryParse(typelib, out treatas_guid))
+                {
+                    TreatAs = treatas_guid;
+                }
+            }
+
         }
 
         public void AddProgID(string progid)
@@ -309,6 +330,8 @@ namespace OleViewDotNet
         public string CmdLine { get; private set; }
 
         public COMServerType ServerType { get; private set; }
+
+        public Guid TreatAs { get; private set; }
 
         public IEnumerable<string> ProgIDs
         {

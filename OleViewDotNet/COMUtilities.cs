@@ -81,7 +81,7 @@ namespace OleViewDotNet
         }
     }
    
-    public class COMUtilities
+    public static class COMUtilities
     {
         [Flags]
         public enum CLSCTX {
@@ -252,20 +252,21 @@ namespace OleViewDotNet
 
         public static string ReadStringFromKey(RegistryKey rootKey, string keyName, string valueName)
         {
-            RegistryKey key = rootKey.OpenSubKey(keyName);
-            string valueString = "";
-
-            if (key != null)
+            using (RegistryKey key = rootKey.OpenSubKey(keyName))
             {
-                object valueObject = key.GetValue(valueName);
-                if (valueObject != null)
-                {
-                    valueString = valueObject.ToString();        
-                }
-                key.Close();
-            }
+                string valueString = "";
 
-            return valueString;
+                if (key != null)
+                {
+                    object valueObject = key.GetValue(valueName);
+                    if (valueObject != null)
+                    {
+                        valueString = valueObject.ToString();
+                    }
+                }
+
+                return valueString;
+            }
         }
 
         public static Guid ReadGuidFromKey(RegistryKey rootKey, string keyName, string valueName)
@@ -988,6 +989,14 @@ namespace OleViewDotNet
             else
             {
                 return null;
+            }
+        }
+
+        public static bool HasSubkey(this RegistryKey key, string name)
+        {
+            using (RegistryKey subkey = key.OpenSubKey(name))
+            {
+                return subkey != null;
             }
         }
     }    
