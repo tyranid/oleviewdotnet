@@ -13,13 +13,15 @@ namespace OleViewDotNet
 {
     public partial class PropertiesControl : UserControl
     {
+        private COMRegistry _registry;
+
         private void SetupClsidEntry(COMCLSIDEntry entry)
         {
             textBoxClsidName.Text = entry.Name;
             textBoxClsid.Text = entry.Clsid.ToString("B");
             lblServerType.Text = "Server Type: " + entry.ServerType;
             lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
-            var progids = COMRegistry.Instance.Progids;
+            var progids = _registry.Progids;
 
             foreach (string progid in entry.ProgIDs)
             {
@@ -41,8 +43,9 @@ namespace OleViewDotNet
             }
         }
 
-        public PropertiesControl(object obj)
+        public PropertiesControl(COMRegistry registry, object obj)
         {
+            _registry = registry;
             InitializeComponent();
             tabControlProperties.TabPages.Clear();
             SetupProperties(obj);

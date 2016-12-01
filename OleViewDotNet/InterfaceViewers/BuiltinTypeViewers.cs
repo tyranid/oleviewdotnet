@@ -177,7 +177,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStream"; }
         }
 
-        public Control CreateInstance(string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }
@@ -195,7 +195,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStreamInit"; }
         }
 
-        public Control CreateInstance(string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }

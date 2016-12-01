@@ -34,6 +34,7 @@ namespace OleViewDotNet
         private Dictionary<string, string> m_properties;
         private COMInterfaceEntry[] m_interfaces;        
         private string m_objName;
+        private COMRegistry m_registry;
 
         /// <summary>
         /// Constructor
@@ -42,9 +43,10 @@ namespace OleViewDotNet
         /// <param name="pObject">Managed wrapper to the object</param>
         /// <param name="properties">List of textual properties to display</param>
         /// <param name="interfaces">List of available interfaces</param>
-        public ObjectInformation(string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
+        public ObjectInformation(COMRegistry registry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
         {
-            m_pEntry = ObjectCache.Add(objName, pObject, interfaces);
+            m_registry = registry;
+            m_pEntry = ObjectCache.Add(registry, objName, pObject, interfaces);
             m_pObject = pObject;
             m_properties = properties;
             m_interfaces = interfaces;            
@@ -153,7 +155,7 @@ namespace OleViewDotNet
                 {
                     if (factory != null)
                     {
-                        Control frm = factory.CreateInstance(m_objName, m_pEntry);
+                        Control frm = factory.CreateInstance(m_registry, m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
                             Program.GetMainForm().HostControl(frm);                            
@@ -178,7 +180,7 @@ namespace OleViewDotNet
 
         private void btnDispatch_Click(object sender, EventArgs e)
         {
-            Control frm = new TypedObjectViewer(m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
+            Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
             if ((frm != null) && !frm.IsDisposed)
             {
                 Program.GetMainForm().HostControl(frm);

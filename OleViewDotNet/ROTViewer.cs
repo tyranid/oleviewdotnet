@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
@@ -125,7 +124,7 @@ namespace OleViewDotNet
 
                     info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
                     dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-                    ObjectInformation view = new ObjectInformation(info.strDisplayName, comObj, props, m_reg.GetInterfacesForObject(comObj));
+                    ObjectInformation view = new ObjectInformation(m_reg, info.strDisplayName, comObj, props, m_reg.GetInterfacesForObject(comObj));
                     Program.GetMainForm().HostControl(view);
                 }
                 catch (Exception ex)

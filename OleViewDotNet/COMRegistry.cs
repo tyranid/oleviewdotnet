@@ -147,11 +147,6 @@ namespace OleViewDotNet
             }
         }
 
-        public static COMRegistry Instance
-        {
-            get { return _instance; }
-        }
-
         public SortedDictionary<Guid, COMTypeLibEntry> Typelibs
         {
             get { return m_typelibs; }
@@ -210,12 +205,10 @@ namespace OleViewDotNet
                 }
             }
         }
-
-        private static COMRegistry _instance;
-
-        public static void Load(RegistryKey rootKey)
+        
+        public static COMRegistry Load(RegistryKey rootKey)
         {
-            _instance = new COMRegistry(rootKey);
+            return new COMRegistry(rootKey);
         }
 
         // A small attempt to restrict what types can be accessed
@@ -286,23 +279,23 @@ namespace OleViewDotNet
             }
         }
 
-        public static void Load(string path)
+        public static COMRegistry Load(string path)
         {
             using (FileStream stm = File.OpenRead(path))
             {
                 BinaryFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File));
                 SerializationBinder binder = new SecurityBinder(null);
                 formatter.FilterLevel = TypeFilterLevel.Low;
-                _instance = (COMRegistry) formatter.Deserialize(stm);
+                return (COMRegistry) formatter.Deserialize(stm);
             }
         }
 
-        public static void Save(string path)
+        public void Save(string path)
         {
             using (FileStream stm = File.Open(path, FileMode.Create, FileAccess.Write))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stm, _instance);
+                formatter.Serialize(stm, this);
             }
         }
 
@@ -443,7 +436,7 @@ namespace OleViewDotNet
                                 {
                                     if (regKey != null)
                                     {
-                                        COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
+                                        COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
                                         clsids.Add(clsid, ent);
                                         if (!String.IsNullOrEmpty(ent.Server) && ent.ServerType != (COMServerType.UnknownServer))
                                         {
@@ -665,7 +658,7 @@ namespace OleViewDotNet
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
                             {
-                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, m_clsids, m_clsidbyserver, rightsKey);
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, m_clsids, m_clsidbyserver, rightsKey);
                                 if (entry.Clsids.Length > 0)
                                 {
                                     m_lowrights.Add(entry);

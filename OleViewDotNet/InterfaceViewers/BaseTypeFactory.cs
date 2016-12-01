@@ -12,7 +12,7 @@ namespace OleViewDotNet.InterfaceViewers
     {
         Guid Iid { get; }
         string IidName { get; }        
-        Control CreateInstance(string strObjName, ObjectEntry pObject);
+        Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ namespace OleViewDotNet.InterfaceViewers
 
         public string IidName { get; private set; }
         public Guid Iid { get; private set; }
-        abstract public Control CreateInstance(string strObjName, ObjectEntry pObject);            
+        abstract public Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject);            
     }
 
     /// <summary>
@@ -47,9 +47,9 @@ namespace OleViewDotNet.InterfaceViewers
         {
         }
 
-        public override Control CreateInstance(string strObjName, ObjectEntry pObject)
+        public override Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
         {
-            return new TypedObjectViewer(strObjName, pObject, typeof(T));
+            return new TypedObjectViewer(registry, strObjName, pObject, typeof(T));
         }
     }
 
@@ -65,9 +65,9 @@ namespace OleViewDotNet.InterfaceViewers
             m_type = t;
         }
 
-        public override Control CreateInstance(string strObjName, ObjectEntry pObject)
+        public override Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
         {
-            return new TypedObjectViewer(strObjName, pObject, m_type);
+            return new TypedObjectViewer(registry, strObjName, pObject, m_type);
         }
     }
 

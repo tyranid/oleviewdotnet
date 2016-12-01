@@ -11,11 +11,13 @@ namespace OleViewDotNet
     {
         private MethodInfo _mi;
         private object _target;
+        private COMRegistry _registry;
 
-        public DynamicComFunctionWrapper(MethodInfo mi, object target)
+        public DynamicComFunctionWrapper(COMRegistry registry, MethodInfo mi, object target)
         {
             _mi = mi;
             _target = target;
+            _registry = registry;
         }
 
         private static object[] UnwrapArray(object[] args, int outSize)
@@ -86,7 +88,7 @@ namespace OleViewDotNet
 
             if (_mi.ReturnType != typeof(void))
             {
-                returns.Add(DynamicComObjectWrapper.Wrap(ret, _mi.ReturnType));
+                returns.Add(DynamicComObjectWrapper.Wrap(_registry, ret, _mi.ReturnType));
             }
 
             // Promote out parameters
@@ -94,7 +96,7 @@ namespace OleViewDotNet
             {
                 for (int i = 0; i < outReturnTypes.Count; ++i)
                 {
-                    returns.Add(DynamicComObjectWrapper.Wrap(uargs[startIndex + i], outReturnTypes[i]));
+                    returns.Add(DynamicComObjectWrapper.Wrap(_registry, uargs[startIndex + i], outReturnTypes[i]));
                 }
             }
 

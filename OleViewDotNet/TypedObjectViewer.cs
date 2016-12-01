@@ -39,6 +39,7 @@ namespace OleViewDotNet
         private ObjectEntry m_pEntry;
         private object m_pObject;
         private Type m_dispType;
+        private COMRegistry m_registry;
 
         /// <summary>
         /// Constructor
@@ -46,12 +47,13 @@ namespace OleViewDotNet
         /// <param name="strObjName">Descriptive name of the object</param>
         /// <param name="pEntry">Instance of the object</param>
         /// <param name="dispType">Reflected type</param>
-        public TypedObjectViewer(string strObjName, ObjectEntry pEntry, Type dispType)
+        public TypedObjectViewer(COMRegistry registry, string strObjName, ObjectEntry pEntry, Type dispType)
         {
             m_pEntry = pEntry;
             m_pObject = pEntry.Instance;
             m_objName = strObjName;
             m_dispType = dispType;
+            m_registry = registry;
             InitializeComponent();
 
             HighlightingManager.Manager.AddSyntaxModeFileProvider(new SimpleSyntaxModeProvider("Python.xshd", "Python", ".py", Properties.Resources.PythonHighlightingRules));
@@ -62,8 +64,8 @@ namespace OleViewDotNet
             Text = String.Format("{0} {1}", m_objName, m_dispType.Name);
         }
 
-        public TypedObjectViewer(string strObjName, object pObject, Type dispType) 
-            : this(strObjName, new ObjectEntry(strObjName, pObject), dispType)
+        public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType) 
+            : this(registry, strObjName, new ObjectEntry(registry, strObjName, pObject), dispType)
         {
 
         }
@@ -215,7 +217,7 @@ namespace OleViewDotNet
 
         private void OpenObjectViewer(DynamicComObjectWrapper wrapper)
         {           
-            Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, wrapper.Instance, wrapper.InstanceType));
+            Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, wrapper.Instance, wrapper.InstanceType));
         }
 
         private void OpenObject(ListView lv)
@@ -243,7 +245,7 @@ namespace OleViewDotNet
 
                     if (val != null)
                     {
-                        Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, val, pi.PropertyType));
+                        Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, val, pi.PropertyType));
                     }
                 }
             }
@@ -364,7 +366,7 @@ namespace OleViewDotNet
                     // Just create the global scope, don't execute it yet
                     ScriptScope scope = engine.CreateScope();
                    
-                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) ? new DynamicComObjectWrapper(m_dispType, m_pObject) : m_pObject);
+                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) ? new DynamicComObjectWrapper(m_registry, m_dispType, m_pObject) : m_pObject);
                     scope.SetVariable("disp", m_pObject);
 
                     dynamic host = new ExpandoObject();
@@ -393,7 +395,7 @@ namespace OleViewDotNet
         {
             if (listViewMethods.SelectedItems.Count > 0)
             {
-                using (InvokeForm frm = new InvokeForm((MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject, m_objName))
+                using (InvokeForm frm = new InvokeForm(m_registry, (MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject, m_objName))
                 {
                     frm.ShowDialog();
                 }

@@ -16,13 +16,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 
 namespace OleViewDotNet
-{    
+{
     class ObjectEntry
     {
+        private COMRegistry m_registry;
+
         public string Name { get; private set; }
         public object Instance { get; private set; }
         public Guid Id { get; private set; }
@@ -33,14 +33,14 @@ namespace OleViewDotNet
             return Name;
         }
 
-        public ObjectEntry(string name, object instance)
-            : this(name, instance, COMRegistry.Instance.GetInterfacesForObject(instance))
+        public ObjectEntry(COMRegistry registry, string name, object instance)
+            : this(registry, name, instance, registry.GetInterfacesForObject(instance))
         {
-
         }
 
-        public ObjectEntry(string name, object instance, COMInterfaceEntry[] interfaces)
+        public ObjectEntry(COMRegistry registry, string name, object instance, COMInterfaceEntry[] interfaces)
         {
+            m_registry = registry;
             Name = name;
             Instance = instance;
             Id = Guid.NewGuid();
@@ -76,7 +76,7 @@ namespace OleViewDotNet
             Type type = COMUtilities.GetInterfaceType(iid);
             if (type != null)
             {                
-                o = new DynamicComObjectWrapper(type, Instance);
+                o = new DynamicComObjectWrapper(m_registry, type, Instance);
             }
 
             return o;
@@ -87,9 +87,9 @@ namespace OleViewDotNet
     {
         private static List<ObjectEntry> m_objects = new List<ObjectEntry>();
 
-        public static ObjectEntry Add(string name, object instance, COMInterfaceEntry[] interfaces)
+        public static ObjectEntry Add(COMRegistry registry, string name, object instance, COMInterfaceEntry[] interfaces)
         {
-            ObjectEntry ret = new ObjectEntry(name, instance, interfaces);
+            ObjectEntry ret = new ObjectEntry(registry, name, instance, interfaces);
             m_objects.Add(ret);
 
             return ret;

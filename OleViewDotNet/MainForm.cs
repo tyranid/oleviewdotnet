@@ -26,10 +26,12 @@ namespace OleViewDotNet
 {
     public partial class MainForm : Form
     {
-        private DockPanel   m_dockPanel;      
+        private DockPanel   m_dockPanel;
+        private COMRegistry m_registry;  
 
-        public MainForm()
-        {                        
+        public MainForm(COMRegistry registry)
+        {
+            m_registry = registry;
             InitializeComponent();
             m_dockPanel = new DockPanel();
             m_dockPanel.ActiveAutoHideContent = null;
@@ -75,7 +77,7 @@ namespace OleViewDotNet
 
         private void OpenView(COMRegistryViewer.DisplayMode mode)
         {
-            HostControl(new COMRegistryViewer(COMRegistry.Instance, mode));                
+            HostControl(new COMRegistryViewer(m_registry, mode));                
         }
 
         private void menuViewCLSIDs_Click(object sender, EventArgs e)
@@ -110,7 +112,7 @@ namespace OleViewDotNet
 
         private void menuViewROT_Click(object sender, EventArgs e)
         {
-            HostControl(new ROTViewer(COMRegistry.Instance));
+            HostControl(new ROTViewer(m_registry));
         }
 
         private void menuViewImplementedCategories_Click(object sender, EventArgs e)
@@ -137,16 +139,16 @@ namespace OleViewDotNet
                         string strObjName = "";
                         COMInterfaceEntry[] ints = null;
 
-                        if (COMRegistry.Instance.Clsids.ContainsKey(g))
+                        if (m_registry.Clsids.ContainsKey(g))
                         {
-                            COMCLSIDEntry ent = COMRegistry.Instance.Clsids[g];
+                            COMCLSIDEntry ent = m_registry.Clsids[g];
                             strObjName = ent.Name;
                             props.Add("CLSID", ent.Clsid.ToString("B"));
                             props.Add("Name", ent.Name);
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            ints = await COMRegistry.Instance.GetSupportedInterfaces(ent, false);
+                            ints = await m_registry.GetSupportedInterfaces(ent, false);
                         }
                         else
                         {
@@ -156,7 +158,7 @@ namespace OleViewDotNet
                             if (COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
                                 ref unk, out pObj) == 0)
                             {
-                                ints = COMRegistry.Instance.GetInterfacesForIUnknown(pObj);
+                                ints = m_registry.GetInterfacesForIUnknown(pObj);
                                 comObj = Marshal.GetObjectForIUnknown(pObj);
                                 strObjName = g.ToString("B");
                                 props.Add("CLSID", g.ToString("B"));
@@ -169,7 +171,7 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            HostControl(new ObjectInformation(strObjName, comObj, props, ints));                            
+                            HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints));                            
                         }
                     }
                     catch (Exception ex)
@@ -251,24 +253,24 @@ namespace OleViewDotNet
                 COMInterfaceEntry[] ints = null;
                 Guid clsid = COMUtilities.GetObjectClass(comObj);
 
-                if (COMRegistry.Instance.Clsids.ContainsKey(clsid))
+                if (m_registry.Clsids.ContainsKey(clsid))
                 {
-                    COMCLSIDEntry ent = COMRegistry.Instance.Clsids[clsid];
+                    COMCLSIDEntry ent = m_registry.Clsids[clsid];
                     strObjName = ent.Name;
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
-                    ints = await COMRegistry.Instance.GetSupportedInterfaces(ent, false);
+                    ints = await m_registry.GetSupportedInterfaces(ent, false);
                 }
                 else
                 {
-                    ints = COMRegistry.Instance.GetInterfacesForObject(comObj);
+                    ints = m_registry.GetInterfacesForObject(comObj);
                     strObjName = defaultName != null ? defaultName : clsid.ToString("B");
                     props.Add("CLSID", clsid.ToString("B"));
                 }
 
                 Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-                HostControl(new ObjectInformation(strObjName, comObj, props, ints));
+                HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints));
             }
         }
 
@@ -370,7 +372,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMRegistry.Save(dlg.FileName);
+                        m_registry.Save(dlg.FileName);
                     }
                     catch (Exception ex)
                     {

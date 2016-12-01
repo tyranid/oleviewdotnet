@@ -46,6 +46,7 @@ namespace OleViewDotNet
         private List<string> m_progids;
         private HashSet<Guid> m_categories;
         private List<COMInterfaceEntry> m_proxies;
+        private COMRegistry m_registry;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
@@ -298,14 +299,15 @@ namespace OleViewDotNet
             m_proxies.Add(ent);
         }
 
-        public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
-        {            
+        public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
+        {
             LoadFromKey(rootKey);
         }
 
-        private COMCLSIDEntry(Guid clsid)
+        private COMCLSIDEntry(COMRegistry registry, Guid clsid)
         {
             Clsid = clsid;
+            m_registry = registry;
             m_progids = new List<string>();
             m_proxies = new List<COMInterfaceEntry>();
             m_categories = new HashSet<Guid>();
@@ -315,8 +317,8 @@ namespace OleViewDotNet
             ThreadingModel = COMThreadingModel.Apartment;
         }
 
-        public COMCLSIDEntry(Guid clsid, COMServerType type)
-            : this(clsid)
+        public COMCLSIDEntry(COMRegistry m_registry, Guid clsid, COMServerType type)
+            : this(m_registry, clsid)
         {
             ServerType = type;
         }

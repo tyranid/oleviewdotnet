@@ -140,6 +140,7 @@ namespace OleViewDotNet
             else
             {
                 Exception error = null;
+                COMRegistry instance = null;
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -148,16 +149,18 @@ namespace OleViewDotNet
                 {
                     if (loader.ShowDialog() == DialogResult.OK)
                     {
+                        instance = loader.Instance;
                         if (save_file != null)
                         {
                             try
                             {
-                                COMRegistry.Save(save_file);
+                                instance.Save(save_file);
                             }
                             catch (Exception ex)
                             {
                                 error = ex;
                             }
+                            Environment.Exit(0);
                         }
                     }
                     else
@@ -168,7 +171,7 @@ namespace OleViewDotNet
 
                 if (error == null)
                 {
-                    using (_mainForm = new MainForm())
+                    using (_mainForm = new MainForm(instance))
                     {
                         Application.Run(_mainForm);
                     }

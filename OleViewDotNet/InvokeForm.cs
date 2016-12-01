@@ -28,6 +28,7 @@ namespace OleViewDotNet
         private object m_pObject;
         private object m_ret;
         private string m_objName;
+        private COMRegistry m_registry;
 
         class ParamData
         {
@@ -37,11 +38,12 @@ namespace OleViewDotNet
 
         private ParamData[] m_paramdata;        
 
-        public InvokeForm(MethodInfo mi, object pObject, string objName)
+        public InvokeForm(COMRegistry registry, MethodInfo mi, object pObject, string objName)
         {
             m_mi = mi;
             m_pObject = pObject;
             m_objName = objName;
+            m_registry = registry;
             LoadParameters();
 
             InitializeComponent(); 
@@ -283,7 +285,7 @@ namespace OleViewDotNet
         {
             if (m_ret != null)
             {
-                Program.GetMainForm().HostControl(new TypedObjectViewer(m_objName, m_ret, m_mi.ReturnType));
+                Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, m_ret, m_mi.ReturnType));
                 DialogResult = DialogResult.OK;
                 Close();
             }

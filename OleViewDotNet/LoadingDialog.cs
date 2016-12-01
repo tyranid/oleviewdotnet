@@ -49,7 +49,7 @@ namespace OleViewDotNet
         {
             if (m_dbpath != null)
             {
-                COMRegistry.Load(m_dbpath);
+                Instance = COMRegistry.Load(m_dbpath);
             }
             else
             {
@@ -57,12 +57,12 @@ namespace OleViewDotNet
                 {
                     using (RegistryKey key = m_rootKey.OpenSubKey(m_keyPath))
                     {
-                        COMRegistry.Load(key);
+                        Instance = COMRegistry.Load(key);
                     }
                 }
                 else
                 {
-                    COMRegistry.Load(m_rootKey);
+                    Instance = COMRegistry.Load(m_rootKey);
                 }
             }
         }
@@ -82,5 +82,6 @@ namespace OleViewDotNet
         }
 
         public Exception Error { get; private set; }
+        public COMRegistry Instance { get; private set; }
     }
 }

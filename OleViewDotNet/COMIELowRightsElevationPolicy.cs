@@ -24,6 +24,8 @@ namespace OleViewDotNet
     [Serializable]
     public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>
     {
+        private COMRegistry m_registry;
+
         public enum ElevationPolicy
         {
             NoRun = 0,
@@ -76,7 +78,7 @@ namespace OleViewDotNet
                     else
                     {
                         // Add dummy entry
-                        clsidList.Add(new COMCLSIDEntry(cls, COMServerType.LocalServer32));
+                        clsidList.Add(new COMCLSIDEntry(m_registry, cls, COMServerType.LocalServer32));
                     }
                 }
             }
@@ -107,8 +109,9 @@ namespace OleViewDotNet
             Clsids = clsidList.ToArray();
         }
 
-        public COMIELowRightsElevationPolicy(Guid guid, SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
+        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
         {
+            m_registry = registry;
             Uuid = guid;
             Name = Uuid.ToString("B");
             LoadFromRegistry(clsids, servers, key);

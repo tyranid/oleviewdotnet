@@ -920,7 +920,7 @@ namespace OleViewDotNet
 
                             COMInterfaceEntry[] entries = await m_reg.GetSupportedInterfaces(ent, false);
 
-                            ObjectInformation view = new ObjectInformation(ent.Name, comObj, props, entries);
+                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, entries);
                             Program.GetMainForm().HostControl(view);
                         }
                     }
@@ -1209,7 +1209,7 @@ namespace OleViewDotNet
         {
             if (treeComRegistry.SelectedNode != null)
             {
-                Program.GetMainForm().HostControl(new PropertiesControl(treeComRegistry.SelectedNode.Tag));
+                Program.GetMainForm().HostControl(new PropertiesControl(m_reg, treeComRegistry.SelectedNode.Tag));
             }
         }
     }

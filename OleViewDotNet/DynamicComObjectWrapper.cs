@@ -26,17 +26,20 @@ namespace OleViewDotNet
     class DynamicComObjectWrapper : DynamicObject
     {        
         private object _target;
-        Dictionary<string, MethodInfo> _methods;
-        Dictionary<string, PropertyInfo> _properties;
+        private Dictionary<string, MethodInfo> _methods;
+        private Dictionary<string, PropertyInfo> _properties;
         private Type _instanceType;
+        private COMRegistry _registry;
 
         public override string ToString()
         {
             return String.Format("COM Wrapper: {0}", _instanceType);
         }
 
-        public DynamicComObjectWrapper(Type instanceType, object entry)
+        public DynamicComObjectWrapper(COMRegistry registry, Type instanceType, object entry)
         {
+            _registry = registry;
+
             if (instanceType == null)
             {
                 throw new ArgumentNullException("instanceType");
@@ -65,11 +68,11 @@ namespace OleViewDotNet
         }
 
 
-        public static object Wrap(object o, Type objType)
+        public static object Wrap(COMRegistry registry, object o, Type objType)
         {
             if ((o != null) && !(o is DynamicComObjectWrapper) && COMUtilities.IsComImport(objType))
             {
-                return new DynamicComObjectWrapper(objType, o);
+                return new DynamicComObjectWrapper(registry, objType, o);
             }
 
             return o;
@@ -96,7 +99,7 @@ namespace OleViewDotNet
         {            
             if (_interfaces == null)
             {
-                _interfaces = COMRegistry.Instance.GetInterfacesForObject(_target);
+                _interfaces = _registry.GetInterfacesForObject(_target);
             }
 
             return _interfaces;    
@@ -125,7 +128,7 @@ namespace OleViewDotNet
             Type type = COMUtilities.GetInterfaceType(iid);
             if (type != null)
             {
-                o = new DynamicComObjectWrapper(type, _target);
+                o = new DynamicComObjectWrapper(_registry, type, _target);
             }
 
             return o;
@@ -137,7 +140,7 @@ namespace OleViewDotNet
                      
             if (getprop && _methods.ContainsKey(name))
             {
-                result = new DynamicComFunctionWrapper(_methods[name], _target);
+                result = new DynamicComFunctionWrapper(_registry, _methods[name], _target);
                 return true;
             }
             else if (getprop && name == "__qi__")
@@ -156,7 +159,7 @@ namespace OleViewDotNet
 
                 if (getprop && pi.CanRead)
                 {
-                    result = Wrap(pi.GetValue(_target, new object[0]), pi.PropertyType);
+                    result = Wrap(_registry, pi.GetValue(_target, new object[0]), pi.PropertyType);
                 }
                 else if (!getprop && pi.CanWrite)
                 {
