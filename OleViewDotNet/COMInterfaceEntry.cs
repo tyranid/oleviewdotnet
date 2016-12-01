@@ -26,6 +26,8 @@ namespace OleViewDotNet
         private string m_name;
         private Guid m_iid;
         private Guid m_proxyclsid;
+        private Guid m_typelib;
+        private string m_typelibversion;
         private int m_nummethods;
         private string m_base;
 
@@ -44,23 +46,16 @@ namespace OleViewDotNet
             else
             {
                 m_name = String.Format("{{{0}}}", m_iid.ToString());
-            }
-
-            try
-            {                
-                m_proxyclsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
-            }
-            catch (FormatException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
-            }
-
+            }           
+            m_proxyclsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
             string nummethods = COMUtilities.ReadStringFromKey(key, "NumMethods", null);
-
             if (!int.TryParse(nummethods, out m_nummethods) || m_nummethods < 3)
             {
                 m_nummethods = 3;
             }
+            
+            m_typelib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
+            m_typelibversion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
 
             m_base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
             if (m_base.Length == 0)

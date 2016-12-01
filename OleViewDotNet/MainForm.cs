@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
@@ -137,7 +138,7 @@ namespace OleViewDotNet
                         Dictionary<string, string> props = new Dictionary<string, string>();
                         object comObj = null;
                         string strObjName = "";
-                        COMInterfaceEntry[] ints = null;
+                        IEnumerable<COMInterfaceEntry> ints = null;
 
                         if (m_registry.Clsids.ContainsKey(g))
                         {
@@ -148,7 +149,7 @@ namespace OleViewDotNet
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            ints = await m_registry.GetSupportedInterfaces(ent, false);
+                            ints = await ent.GetSupportedInterfaces(false);
                         }
                         else
                         {
@@ -171,7 +172,7 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints));                            
+                            HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));                            
                         }
                     }
                     catch (Exception ex)
@@ -250,7 +251,7 @@ namespace OleViewDotNet
             {
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 string strObjName = "";
-                COMInterfaceEntry[] ints = null;
+                IEnumerable<COMInterfaceEntry> ints = null;
                 Guid clsid = COMUtilities.GetObjectClass(comObj);
 
                 if (m_registry.Clsids.ContainsKey(clsid))
@@ -260,7 +261,7 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
-                    ints = await m_registry.GetSupportedInterfaces(ent, false);
+                    ints = await ent.GetSupportedInterfaces(false);
                 }
                 else
                 {
@@ -270,7 +271,7 @@ namespace OleViewDotNet
                 }
 
                 Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-                HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints));
+                HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));
             }
         }
 

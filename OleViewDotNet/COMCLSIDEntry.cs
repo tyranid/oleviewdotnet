@@ -17,10 +17,12 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading.Tasks;
 
 namespace OleViewDotNet
 {
@@ -47,6 +49,8 @@ namespace OleViewDotNet
         private HashSet<Guid> m_categories;
         private List<COMInterfaceEntry> m_proxies;
         private COMRegistry m_registry;
+        private List<COMInterfaceEntry> m_interfaces;
+        private List<COMInterfaceEntry> m_factory_interfaces;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
@@ -220,17 +224,7 @@ namespace OleViewDotNet
                 System.Diagnostics.Debug.WriteLine(e.ToString());
             }
 
-            TypeLib = Guid.Empty;
-            string typelib = COMUtilities.ReadStringFromKey(key, "TypeLib", null);
-            if (!String.IsNullOrEmpty(typelib))
-            {
-                Guid typelib_guid;
-                if (Guid.TryParse(typelib, out typelib_guid))
-                {
-                    TypeLib = typelib_guid;
-                }
-            }
-
+            TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
             if (!String.IsNullOrEmpty(progid))
             {
@@ -339,6 +333,110 @@ namespace OleViewDotNet
         {
             get { return m_progids.AsReadOnly(); }
         }
+        
+        private async Task<List<COMInterfaceEntry>> GetSupportedInterfacesInternal(bool factory)
+        {
+            List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
+            try
+            {
+                Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(this, false);
+                foreach (Guid g in guids)
+                {
+                    if (m_registry.Interfaces.ContainsKey(g))
+                    {
+                        ents.Add(m_registry.Interfaces[g]);
+                    }
+                    else
+                    {
+                        ents.Add(new COMInterfaceEntry(g));
+                    }
+                }
+
+                ents.Sort();
+            }
+            catch (Win32Exception)
+            {
+                ents.Add(COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown));
+                throw;
+            }
+
+            return ents;
+        }
+
+        /// <summary>
+        /// Get list of supported Interface IIDs (that we know about)
+        /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
+        /// The returned array is cached so subsequent calls to this function return without calling into COM
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>An enumerable list of supported interfaces.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        public async Task<IEnumerable<COMInterfaceEntry>> GetSupportedInterfaces(bool refresh)
+        {
+            if (refresh || m_interfaces == null)
+            {
+                m_interfaces = await GetSupportedInterfacesInternal(false);
+            }
+
+            return m_interfaces.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Get list of supported Factory Interface IIDs (that we know about)
+        /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
+        /// The returned array is cached so subsequent calls to this function return without calling into COM
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>An enumerable list of supported interfaces.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        public async Task<IEnumerable<COMInterfaceEntry>> GetSupportedFactoryInterfaces(bool refresh)
+        {
+            if (refresh || m_factory_interfaces == null)
+            {
+                m_factory_interfaces = await GetSupportedInterfacesInternal(true);
+            }
+
+            return m_factory_interfaces.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Get list of interfaces synchronously.
+        /// </summary>
+        public IEnumerable<COMInterfaceEntry> Interfaces
+        {
+            get
+            {
+                try
+                {
+                    var task = GetSupportedInterfaces(false);
+                    task.Wait();
+                }
+                catch
+                {
+                }
+                return m_interfaces.AsReadOnly();
+            }
+        }
+
+        /// <summary>
+        /// Get list of factory interfaces synchronously.
+        /// </summary>
+        public IEnumerable<COMInterfaceEntry> FactoryInterfaces
+        {
+            get
+            {
+                try
+                {
+                    var task = GetSupportedFactoryInterfaces(false);
+                    task.Wait();
+                }
+                catch
+                {
+                }
+                return m_factory_interfaces.AsReadOnly();
+            }
+        }
+
 
         public Guid AppID { get; private set; }
 

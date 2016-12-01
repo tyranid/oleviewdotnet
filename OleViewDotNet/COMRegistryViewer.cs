@@ -711,8 +711,8 @@ namespace OleViewDotNet
                 node.Nodes.Add(wait_node);
                 try
                 {
-                    COMInterfaceEntry[] intEntries = await m_reg.GetSupportedInterfaces(clsid, bRefresh);
-                    if (intEntries.Length > 0)
+                    IEnumerable<COMInterfaceEntry> intEntries = await clsid.GetSupportedInterfaces(bRefresh);
+                    if (intEntries.Count() > 0)
                     {
                         node.Nodes.Remove(wait_node);
                         foreach (COMInterfaceEntry ent in intEntries)
@@ -918,9 +918,9 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            COMInterfaceEntry[] entries = await m_reg.GetSupportedInterfaces(ent, false);
+                            IEnumerable<COMInterfaceEntry> entries = await ent.GetSupportedInterfaces(false);
 
-                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, entries);
+                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, entries.ToArray());
                             Program.GetMainForm().HostControl(view);
                         }
                     }

@@ -77,7 +77,6 @@ namespace OleViewDotNet
 
         public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
         {
-
         }
     }
    
@@ -335,6 +334,7 @@ namespace OleViewDotNet
         {
             return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
         }
+
         public static string GetAppDataDirectory()
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OleViewDotNet");

@@ -24,7 +24,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
-using System.Threading.Tasks;
 
 namespace OleViewDotNet
 {
@@ -43,7 +42,6 @@ namespace OleViewDotNet
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;  
         private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
-        private Dictionary<Guid, COMInterfaceEntry[]> m_supportediids;
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
         private List<COMCLSIDEntry> m_preapproved;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
@@ -170,7 +168,6 @@ namespace OleViewDotNet
         /// </summary>
         private COMRegistry(RegistryKey rootKey)
         {
-            m_supportediids = new Dictionary<Guid, COMInterfaceEntry[]>();
             LoadAppIDs(rootKey);
             LoadCLSIDs(rootKey);
             LoadProgIDs(rootKey);
@@ -304,10 +301,9 @@ namespace OleViewDotNet
         /// </summary>
         /// <param name="pObject">The IUnknown pointer</param>
         /// <returns>List of interfaces supported</returns>
-        public COMInterfaceEntry[] GetInterfacesForIUnknown(IntPtr pObject)
+        public IEnumerable<COMInterfaceEntry> GetInterfacesForIUnknown(IntPtr pObject)
         {
-            List<COMInterfaceEntry> list = new List<COMInterfaceEntry>();
-
+            List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
             foreach (COMInterfaceEntry intEnt in m_interfacebyname)
             {
                 Guid currIID = intEnt.Iid;
@@ -315,12 +311,11 @@ namespace OleViewDotNet
 
                 if (Marshal.QueryInterface(pObject, ref currIID, out pRequested) == 0)
                 {
-                    list.Add(intEnt);
                     Marshal.Release(pRequested);
+                    ents.Add(intEnt);
                 }
             }
-
-            return list.ToArray();
+            return ents.AsReadOnly();
         }
 
         /// <summary>
@@ -333,60 +328,12 @@ namespace OleViewDotNet
             COMInterfaceEntry[] ret;
 
             IntPtr pObject = Marshal.GetIUnknownForObject(obj);
-            ret = GetInterfacesForIUnknown(pObject);
+            ret = GetInterfacesForIUnknown(pObject).ToArray();
             Marshal.Release(pObject);
 
             return ret;
         }
-
-        /// <summary>
-        /// Get list of supported Interface IIDs (that we know about)
-        /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
-        /// The returned array is cached so subsequent calls to this function return without calling into COM
-        /// </summary>
-        /// <param name="ent">The entry to get the interfaces for</param>
-        /// <param name="bRefresh">Force the supported interface list to refresh</param>
-        /// <returns>An array of supported interfaces</returns>
-        public async Task<COMInterfaceEntry[]> GetSupportedInterfaces(COMCLSIDEntry ent, bool bRefresh)
-        {
-            COMInterfaceEntry[] retList = null;
-
-            if (ent != null)
-            {
-                if (m_supportediids.ContainsKey(ent.Clsid))
-                {
-                    retList = m_supportediids[ent.Clsid];
-                }
-                else
-                {
-                    Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(ent, false);
-                    List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
-
-                    foreach (Guid g in guids)
-                    {
-                        if (m_interfaces.ContainsKey(g))
-                        {
-                            ents.Add(m_interfaces[g]);
-                        }
-                        else
-                        {
-                            ents.Add(new COMInterfaceEntry(g));
-                        }
-                    }
-
-                    ents.Sort();
-                    retList = ents.ToArray();
-                    m_supportediids[ent.Clsid] = retList;
-                }
-            }
-            else
-            {
-                retList = new COMInterfaceEntry[0];
-            }
-
-            return retList;
-        }
-
+        
 #endregion
 
         #region Private Methods
