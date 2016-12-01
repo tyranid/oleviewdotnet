@@ -18,7 +18,6 @@ using OleViewDotNet.InterfaceViewers;
 using System;
 using System.IO;
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {

@@ -268,16 +268,7 @@ namespace OleViewDotNet
                 }
             }
 
-            string treatas = COMUtilities.ReadStringFromKey(key, "TreatAs", null);
-            if (!String.IsNullOrEmpty(treatas))
-            {
-                Guid treatas_guid;
-                if (Guid.TryParse(typelib, out treatas_guid))
-                {
-                    TreatAs = treatas_guid;
-                }
-            }
-
+            TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
         }
 
         public void AddProgID(string progid)
@@ -371,7 +362,7 @@ namespace OleViewDotNet
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>An enumerable list of supported interfaces.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<IEnumerable<COMInterfaceEntry>> GetSupportedInterfaces(bool refresh)
+        public async Task<IEnumerable<COMInterfaceEntry>> LoadSupportedInterfaces(bool refresh)
         {
             if (refresh || m_interfaces == null)
             {
@@ -389,7 +380,7 @@ namespace OleViewDotNet
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>An enumerable list of supported interfaces.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<IEnumerable<COMInterfaceEntry>> GetSupportedFactoryInterfaces(bool refresh)
+        public async Task<IEnumerable<COMInterfaceEntry>> LoadSupportedFactoryInterfaces(bool refresh)
         {
             if (refresh || m_factory_interfaces == null)
             {
@@ -402,17 +393,14 @@ namespace OleViewDotNet
         /// <summary>
         /// Get list of interfaces synchronously.
         /// </summary>
+        /// <remarks>You must have called LoadSupportedInterfaces before this call to get any useful output.</remarks>
         public IEnumerable<COMInterfaceEntry> Interfaces
         {
             get
             {
-                try
+                if (m_interfaces == null)
                 {
-                    var task = GetSupportedInterfaces(false);
-                    task.Wait();
-                }
-                catch
-                {
+                    return new COMInterfaceEntry[0];
                 }
                 return m_interfaces.AsReadOnly();
             }
@@ -421,22 +409,18 @@ namespace OleViewDotNet
         /// <summary>
         /// Get list of factory interfaces synchronously.
         /// </summary>
+        /// <remarks>You must have called LoadSupportedFactoryInterfaces before this call to get any useful output.</remarks>
         public IEnumerable<COMInterfaceEntry> FactoryInterfaces
         {
             get
             {
-                try
+                if (m_factory_interfaces == null)
                 {
-                    var task = GetSupportedFactoryInterfaces(false);
-                    task.Wait();
-                }
-                catch
-                {
+                    return new COMInterfaceEntry[0];
                 }
                 return m_factory_interfaces.AsReadOnly();
             }
         }
-
 
         public Guid AppID { get; private set; }
 

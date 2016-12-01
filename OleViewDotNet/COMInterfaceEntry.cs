@@ -23,17 +23,9 @@ namespace OleViewDotNet
     [Serializable]
     public class COMInterfaceEntry : IComparable<COMInterfaceEntry>
     {
-        private string m_name;
-        private Guid m_iid;
-        private Guid m_proxyclsid;
-        private Guid m_typelib;
-        private string m_typelibversion;
-        private int m_nummethods;
-        private string m_base;
-
         public int CompareTo(COMInterfaceEntry right)
         {
-            return String.Compare(m_name, right.m_name);
+            return String.Compare(Name, right.Name);
         }
 
         private void LoadFromKey(RegistryKey key)
@@ -41,26 +33,28 @@ namespace OleViewDotNet
             object name = key.GetValue(null);
             if ((name != null) && (name.ToString().Length > 0))
             {
-                m_name = name.ToString();
+                Name = name.ToString();
             }
             else
             {
-                m_name = String.Format("{{{0}}}", m_iid.ToString());
-            }           
-            m_proxyclsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
-            string nummethods = COMUtilities.ReadStringFromKey(key, "NumMethods", null);
-            if (!int.TryParse(nummethods, out m_nummethods) || m_nummethods < 3)
+                Name = String.Format("{{{0}}}", Iid.ToString());
+            }         
+              
+            ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
+            NumMethods = COMUtilities.ReadIntFromKey(key, "NumMethods", null);
+            
+            if (NumMethods < 3)
             {
-                m_nummethods = 3;
+                NumMethods = 3;
             }
             
-            m_typelib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
-            m_typelibversion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
+            TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
+            TypeLibVersion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
 
-            m_base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
-            if (m_base.Length == 0)
+            Base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
+            if (Base.Length == 0)
             {
-                m_base = "IUnknown";
+                Base = "IUnknown";
             }
         }
 
@@ -70,11 +64,11 @@ namespace OleViewDotNet
 
         private COMInterfaceEntry(Guid iid, Guid proxyclsid, int nummethods, string baseName, string name)
         {
-            m_iid = iid;
-            m_proxyclsid = proxyclsid;
-            m_nummethods = nummethods;
-            m_base = baseName;
-            m_name = name;
+            Iid = iid;
+            ProxyClsid = proxyclsid;
+            NumMethods = nummethods;
+            Base = baseName;
+            Name = name;
         }
 
         public COMInterfaceEntry(Guid iid, RegistryKey rootKey) 
@@ -126,22 +120,22 @@ namespace OleViewDotNet
 
         public bool IsOleControl
         {
-            get { return (m_iid == IID_IOleControl); }
+            get { return (Iid == IID_IOleControl); }
         }
 
         public bool IsDispatch
         {
-            get { return (m_iid == IID_IDispatch); }
+            get { return (Iid == IID_IDispatch); }
         }
 
         public bool IsMarshal
         {
-            get { return (m_iid == IID_IMarshal); }
+            get { return (Iid == IID_IMarshal); }
         }
 
         public bool IsPersistStream
         {
-            get { return (m_iid == IID_IPersistStream) || (m_iid == IID_IPersistStreamInit); }
+            get { return (Iid == IID_IPersistStream) || (Iid == IID_IPersistStreamInit); }
         }
 
         public static COMInterfaceEntry CreateKnownInterface(KnownInterfaces known)
@@ -151,19 +145,19 @@ namespace OleViewDotNet
             {
                 case KnownInterfaces.IUnknown:
                     ent = new COMInterfaceEntry();
-                    ent.m_base = "";
-                    ent.m_iid = new Guid("{00000000-0000-0000-C000-000000000046}");
-                    ent.m_proxyclsid = Guid.Empty;
-                    ent.m_nummethods = 3;
-                    ent.m_name = "IUnknown";
+                    ent.Base = "";
+                    ent.Iid = new Guid("{00000000-0000-0000-C000-000000000046}");
+                    ent.ProxyClsid = Guid.Empty;
+                    ent.NumMethods = 3;
+                    ent.Name = "IUnknown";
                     break;
                 case KnownInterfaces.IMarshal:
                     ent = new COMInterfaceEntry();
-                    ent.m_base = "";
-                    ent.m_iid = new Guid("{00000003-0000-0000-C000-000000000046}");
-                    ent.m_proxyclsid = Guid.Empty;
-                    ent.m_nummethods = 9;
-                    ent.m_name = "IMarshal";
+                    ent.Base = "";
+                    ent.Iid = new Guid("{00000003-0000-0000-C000-000000000046}");
+                    ent.ProxyClsid = Guid.Empty;
+                    ent.NumMethods = 9;
+                    ent.Name = "IMarshal";
                     break;
             }
 
@@ -172,32 +166,42 @@ namespace OleViewDotNet
 
         public string Name
         {
-            get { return m_name; }
+            get; private set;
         }
 
         public Guid Iid
         {
-            get { return m_iid; }
+            get; private set;        
         }
 
         public Guid ProxyClsid
         {
-            get { return m_proxyclsid; }
+            get; private set;        
         }
 
         public int NumMethods
         {
-            get { return m_nummethods; }
+            get; private set;
         }
 
         public string Base
         {
-            get { return m_base; }
+            get; private set;
+        }
+
+        public Guid TypeLib
+        {
+            get; private set;
+        }
+
+        public string TypeLibVersion
+        {
+            get; private set;
         }
 
         public override string ToString()
         {
-            return String.Format("COMInterfaceEntry: {0}", m_name);
+            return String.Format("COMInterfaceEntry: {0}", Name);
         }
     }
 }

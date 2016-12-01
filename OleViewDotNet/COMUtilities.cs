@@ -268,26 +268,28 @@ namespace OleViewDotNet
             }
         }
 
+        public static int ReadIntFromKey(RegistryKey rootKey, string keyName, string valueName)
+        {
+            string value = ReadStringFromKey(rootKey, keyName, valueName);
+            if (value != null)
+            {
+                int ret;
+                if (int.TryParse(value, out ret))
+                {
+                    return ret;
+                }
+            }
+            return 0;
+        }
+
         public static Guid ReadGuidFromKey(RegistryKey rootKey, string keyName, string valueName)
         {
-            Guid ret = Guid.Empty;
-            RegistryKey key = rootKey.OpenSubKey(keyName);            
-
-            if (key != null)
+            string guid = ReadStringFromKey(rootKey, keyName, valueName);
+            if (guid != null && IsValidGUID(guid))
             {
-                object valueObject = key.GetValue(valueName);
-                if (valueObject != null)
-                {                    
-                    string valueString = valueObject.ToString();
-                    if (IsValidGUID(valueString))
-                    {
-                        ret = new Guid(valueString);
-                    }
-                }
-                key.Close();
+                return new Guid(guid);
             }
-
-            return ret;
+            return Guid.Empty;
         }
 
         public static string GetCategoryName(Guid catid)
