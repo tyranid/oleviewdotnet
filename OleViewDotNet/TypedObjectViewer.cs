@@ -16,11 +16,9 @@
 
 using ICSharpCode.TextEditor.Document;
 using IronPython.Hosting;
-using IronPython.Runtime;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;

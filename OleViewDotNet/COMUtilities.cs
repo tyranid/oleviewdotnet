@@ -886,30 +886,36 @@ namespace OleViewDotNet
         public static Guid GetObjectClass(object p)
         {
             Guid ret = Guid.Empty;
-            
-            if (p is IPersist)
+
+            try
             {
-                ((IPersist)p).GetClassID(out ret);
+                if (p is IPersist)
+                {
+                    ((IPersist)p).GetClassID(out ret);
+                }
+                else if (p is IPersistStream)
+                {
+                    ((IPersistStream)p).GetClassID(out ret);
+                }
+                else if (p is IPersistStreamInit)
+                {
+                    ((IPersistStreamInit)p).GetClassID(out ret);
+                }
+                else if (p is IPersistFile)
+                {
+                    ((IPersistFile)p).GetClassID(out ret);
+                }
+                else if (p is IPersistMoniker)
+                {
+                    ((IPersistMoniker)p).GetClassID(out ret);
+                }
+                else if (p is IPersistStorage)
+                {
+                    ((IPersistStorage)p).GetClassID(out ret);
+                }
             }
-            else if(p is IPersistStream)
+            catch
             {
-                ((IPersistStream)p).GetClassID(out ret);
-            }
-            else if (p is IPersistStreamInit)
-            {
-                ((IPersistStreamInit)p).GetClassID(out ret);
-            }
-            else if (p is IPersistFile)
-            {
-                ((IPersistFile)p).GetClassID(out ret);
-            }
-            else if (p is IPersistMoniker)
-            {
-                ((IPersistMoniker)p).GetClassID(out ret);
-            }
-            else if (p is IPersistStorage)
-            {
-                ((IPersistStorage)p).GetClassID(out ret);
             }
 
             return ret;
