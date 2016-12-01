@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using WeifenLuo.WinFormsUI.Docking;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers

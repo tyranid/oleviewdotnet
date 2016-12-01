@@ -113,6 +113,12 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ClassFactoryTypeViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ClassFactoryTypeViewer.Designer.cs">
+      <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="COMAppIDEntry.cs" />
     <Compile Include="COMCLSIDEntry.cs" />
     <Compile Include="COMEnumerateInterfaces.cs" />
@@ -247,6 +253,9 @@
     </Compile>
     <EmbeddedResource Include="AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClassFactoryTypeViewer.resx">
+      <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>

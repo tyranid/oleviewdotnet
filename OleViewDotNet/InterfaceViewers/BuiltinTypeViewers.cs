@@ -15,11 +15,8 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices.ComTypes;
-using WeifenLuo.WinFormsUI.Docking;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers
@@ -153,6 +150,14 @@ namespace OleViewDotNet.InterfaceViewers
         void SaveCompleted(IMoniker pimkName, IBindCtx pibc);        
     }
 
+    [ComImport, Guid("00000001-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IClassFactory
+    {
+        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter, 
+            ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
+        void LockServer(bool fLock);
+    }
+
     class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
     {
     }
@@ -163,6 +168,18 @@ namespace OleViewDotNet.InterfaceViewers
 
     class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
     {
+    }
+
+    class ClassFactoryViewerFactory : BaseTypeViewerFactory
+    {
+        public ClassFactoryViewerFactory() : base(typeof(IClassFactory))
+        {
+        }
+
+        public override Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
+        {
+            return new ClassFactoryTypeViewer(registry, strObjName, pObject.Instance);
+        }
     }
 
     class PersistStreamViewerFactory : ITypeViewerFactory
