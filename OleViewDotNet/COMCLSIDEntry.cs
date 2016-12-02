@@ -224,17 +224,6 @@ namespace OleViewDotNet
             }
 
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
-            //string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
-            //if (!String.IsNullOrEmpty(progid))
-            //{
-            //    AddProgID(progid);
-            //}
-            //progid = COMUtilities.ReadStringFromKey(key, "VersionIndependentProgID", null);
-            //if (!String.IsNullOrEmpty(progid))
-            //{
-            //    AddProgID(progid);
-            //}
-
             if (key.HasSubkey("Control"))
             {
                 m_categories.Add(ControlCategory);
