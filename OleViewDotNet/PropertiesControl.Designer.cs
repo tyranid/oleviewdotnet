@@ -35,6 +35,12 @@
             System.Windows.Forms.Label label4;
             System.Windows.Forms.Label label5;
             System.Windows.Forms.Label label6;
+            System.Windows.Forms.Label label7;
+            System.Windows.Forms.Label label8;
+            System.Windows.Forms.Label label9;
+            System.Windows.Forms.Label label10;
+            System.Windows.Forms.Label label11;
+            System.Windows.Forms.Label label12;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.listViewProgIDs = new System.Windows.Forms.ListView();
@@ -48,6 +54,15 @@
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.btnRefreshInterfaces = new System.Windows.Forms.Button();
+            this.textBoxServer = new System.Windows.Forms.TextBox();
+            this.tabPageAppID = new System.Windows.Forms.TabPage();
+            this.textBoxAppIdName = new System.Windows.Forms.TextBox();
+            this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
+            this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
+            this.textBoxAccessPermission = new System.Windows.Forms.TextBox();
+            this.lblAppIdRunAs = new System.Windows.Forms.Label();
+            this.lblService = new System.Windows.Forms.Label();
+            this.textBoxDllSurrogate = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -55,10 +70,17 @@
             label4 = new System.Windows.Forms.Label();
             label5 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
+            label7 = new System.Windows.Forms.Label();
+            label8 = new System.Windows.Forms.Label();
+            label9 = new System.Windows.Forms.Label();
+            label10 = new System.Windows.Forms.Label();
+            label11 = new System.Windows.Forms.Label();
+            label12 = new System.Windows.Forms.Label();
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.tabPageNoProperties.SuspendLayout();
             this.tabPageSupportedInterfaces.SuspendLayout();
+            this.tabPageAppID.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -91,7 +113,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(11, 128);
+            label3.Location = new System.Drawing.Point(11, 150);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(48, 13);
             label3.TabIndex = 7;
@@ -102,6 +124,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
             this.tabControlProperties.Controls.Add(this.tabPageNoProperties);
             this.tabControlProperties.Controls.Add(this.tabPageSupportedInterfaces);
+            this.tabControlProperties.Controls.Add(this.tabPageAppID);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Name = "tabControlProperties";
@@ -111,6 +134,8 @@
             // 
             // tabPageClsid
             // 
+            this.tabPageClsid.Controls.Add(this.textBoxServer);
+            this.tabPageClsid.Controls.Add(label7);
             this.tabPageClsid.Controls.Add(label4);
             this.tabPageClsid.Controls.Add(this.listViewCategories);
             this.tabPageClsid.Controls.Add(label3);
@@ -133,7 +158,7 @@
             // 
             this.listViewProgIDs.FullRowSelect = true;
             this.listViewProgIDs.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProgIDs.Location = new System.Drawing.Point(11, 144);
+            this.listViewProgIDs.Location = new System.Drawing.Point(11, 166);
             this.listViewProgIDs.MultiSelect = false;
             this.listViewProgIDs.Name = "listViewProgIDs";
             this.listViewProgIDs.Size = new System.Drawing.Size(379, 82);
@@ -152,7 +177,7 @@
             // lblThreadingModel
             // 
             this.lblThreadingModel.AutoSize = true;
-            this.lblThreadingModel.Location = new System.Drawing.Point(11, 103);
+            this.lblThreadingModel.Location = new System.Drawing.Point(11, 125);
             this.lblThreadingModel.Name = "lblThreadingModel";
             this.lblThreadingModel.Size = new System.Drawing.Size(90, 13);
             this.lblThreadingModel.TabIndex = 3;
@@ -189,7 +214,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(11, 229);
+            label4.Location = new System.Drawing.Point(11, 251);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(60, 13);
             label4.TabIndex = 9;
@@ -199,7 +224,7 @@
             // 
             this.listViewCategories.FullRowSelect = true;
             this.listViewCategories.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewCategories.Location = new System.Drawing.Point(11, 245);
+            this.listViewCategories.Location = new System.Drawing.Point(11, 267);
             this.listViewCategories.MultiSelect = false;
             this.listViewCategories.Name = "listViewCategories";
             this.listViewCategories.Size = new System.Drawing.Size(379, 82);
@@ -274,6 +299,148 @@
             this.btnRefreshInterfaces.UseVisualStyleBackColor = true;
             this.btnRefreshInterfaces.Click += new System.EventHandler(this.btnRefreshInterfaces_Click);
             // 
+            // textBoxServer
+            // 
+            this.textBoxServer.Location = new System.Drawing.Point(55, 96);
+            this.textBoxServer.Name = "textBoxServer";
+            this.textBoxServer.ReadOnly = true;
+            this.textBoxServer.Size = new System.Drawing.Size(335, 20);
+            this.textBoxServer.TabIndex = 11;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(11, 99);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(41, 13);
+            label7.TabIndex = 10;
+            label7.Text = "Server:";
+            // 
+            // tabPageAppID
+            // 
+            this.tabPageAppID.Controls.Add(this.textBoxDllSurrogate);
+            this.tabPageAppID.Controls.Add(label12);
+            this.tabPageAppID.Controls.Add(this.lblService);
+            this.tabPageAppID.Controls.Add(this.lblAppIdRunAs);
+            this.tabPageAppID.Controls.Add(this.textBoxAccessPermission);
+            this.tabPageAppID.Controls.Add(label11);
+            this.tabPageAppID.Controls.Add(this.textBoxLaunchPermission);
+            this.tabPageAppID.Controls.Add(label10);
+            this.tabPageAppID.Controls.Add(this.textBoxAppIdName);
+            this.tabPageAppID.Controls.Add(label8);
+            this.tabPageAppID.Controls.Add(this.textBoxAppIdGuid);
+            this.tabPageAppID.Controls.Add(label9);
+            this.tabPageAppID.Location = new System.Drawing.Point(4, 22);
+            this.tabPageAppID.Name = "tabPageAppID";
+            this.tabPageAppID.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageAppID.Size = new System.Drawing.Size(685, 433);
+            this.tabPageAppID.TabIndex = 3;
+            this.tabPageAppID.Text = "AppID";
+            this.tabPageAppID.UseVisualStyleBackColor = true;
+            // 
+            // textBoxAppIdName
+            // 
+            this.textBoxAppIdName.Location = new System.Drawing.Point(51, 6);
+            this.textBoxAppIdName.Name = "textBoxAppIdName";
+            this.textBoxAppIdName.ReadOnly = true;
+            this.textBoxAppIdName.Size = new System.Drawing.Size(335, 20);
+            this.textBoxAppIdName.TabIndex = 9;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(7, 9);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(38, 13);
+            label8.TabIndex = 8;
+            label8.Text = "Name:";
+            // 
+            // textBoxAppIdGuid
+            // 
+            this.textBoxAppIdGuid.Location = new System.Drawing.Point(51, 36);
+            this.textBoxAppIdGuid.Name = "textBoxAppIdGuid";
+            this.textBoxAppIdGuid.ReadOnly = true;
+            this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
+            this.textBoxAppIdGuid.TabIndex = 7;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new System.Drawing.Point(7, 39);
+            label9.Name = "label9";
+            label9.Size = new System.Drawing.Size(40, 13);
+            label9.TabIndex = 6;
+            label9.Text = "AppID:";
+            // 
+            // textBoxLaunchPermission
+            // 
+            this.textBoxLaunchPermission.Location = new System.Drawing.Point(5, 141);
+            this.textBoxLaunchPermission.Name = "textBoxLaunchPermission";
+            this.textBoxLaunchPermission.ReadOnly = true;
+            this.textBoxLaunchPermission.Size = new System.Drawing.Size(376, 20);
+            this.textBoxLaunchPermission.TabIndex = 11;
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new System.Drawing.Point(4, 125);
+            label10.Name = "label10";
+            label10.Size = new System.Drawing.Size(99, 13);
+            label10.TabIndex = 10;
+            label10.Text = "Launch Permission:";
+            // 
+            // textBoxAccessPermission
+            // 
+            this.textBoxAccessPermission.Location = new System.Drawing.Point(5, 185);
+            this.textBoxAccessPermission.Name = "textBoxAccessPermission";
+            this.textBoxAccessPermission.ReadOnly = true;
+            this.textBoxAccessPermission.Size = new System.Drawing.Size(376, 20);
+            this.textBoxAccessPermission.TabIndex = 13;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new System.Drawing.Point(4, 169);
+            label11.Name = "label11";
+            label11.Size = new System.Drawing.Size(98, 13);
+            label11.TabIndex = 12;
+            label11.Text = "Access Permission:";
+            // 
+            // lblAppIdRunAs
+            // 
+            this.lblAppIdRunAs.AutoSize = true;
+            this.lblAppIdRunAs.Location = new System.Drawing.Point(7, 72);
+            this.lblAppIdRunAs.Name = "lblAppIdRunAs";
+            this.lblAppIdRunAs.Size = new System.Drawing.Size(45, 13);
+            this.lblAppIdRunAs.TabIndex = 14;
+            this.lblAppIdRunAs.Text = "Run As:";
+            // 
+            // lblService
+            // 
+            this.lblService.AutoSize = true;
+            this.lblService.Location = new System.Drawing.Point(6, 99);
+            this.lblService.Name = "lblService";
+            this.lblService.Size = new System.Drawing.Size(46, 13);
+            this.lblService.TabIndex = 15;
+            this.lblService.Text = "Service:";
+            // 
+            // textBoxDllSurrogate
+            // 
+            this.textBoxDllSurrogate.Location = new System.Drawing.Point(5, 232);
+            this.textBoxDllSurrogate.Name = "textBoxDllSurrogate";
+            this.textBoxDllSurrogate.ReadOnly = true;
+            this.textBoxDllSurrogate.Size = new System.Drawing.Size(376, 20);
+            this.textBoxDllSurrogate.TabIndex = 17;
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new System.Drawing.Point(4, 216);
+            label12.Name = "label12";
+            label12.Size = new System.Drawing.Size(71, 13);
+            label12.TabIndex = 16;
+            label12.Text = "Dll Surrogate:";
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -289,6 +456,8 @@
             this.tabPageNoProperties.PerformLayout();
             this.tabPageSupportedInterfaces.ResumeLayout(false);
             this.tabPageSupportedInterfaces.PerformLayout();
+            this.tabPageAppID.ResumeLayout(false);
+            this.tabPageAppID.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -308,5 +477,14 @@
         private System.Windows.Forms.ListView listViewFactoryInterfaces;
         private System.Windows.Forms.ListView listViewInterfaces;
         private System.Windows.Forms.Button btnRefreshInterfaces;
+        private System.Windows.Forms.TextBox textBoxServer;
+        private System.Windows.Forms.TabPage tabPageAppID;
+        private System.Windows.Forms.TextBox textBoxAppIdName;
+        private System.Windows.Forms.TextBox textBoxAppIdGuid;
+        private System.Windows.Forms.TextBox textBoxAccessPermission;
+        private System.Windows.Forms.TextBox textBoxLaunchPermission;
+        private System.Windows.Forms.Label lblAppIdRunAs;
+        private System.Windows.Forms.Label lblService;
+        private System.Windows.Forms.TextBox textBoxDllSurrogate;
     }
 }

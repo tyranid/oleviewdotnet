@@ -22,17 +22,17 @@ namespace OleViewDotNet
     public partial class CreateCLSIDForm : Form
     {
         public Guid Clsid { get; private set; }
-        public COMUtilities.CLSCTX ClsCtx { get; private set; }
+        public CLSCTX ClsCtx { get; private set; }
 
         public CreateCLSIDForm()
         {
             InitializeComponent();            
-            ClsCtx = COMUtilities.CLSCTX.CLSCTX_SERVER;
-            comboBoxClsCtx.Items.Add(COMUtilities.CLSCTX.CLSCTX_SERVER);
-            comboBoxClsCtx.Items.Add(COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER);
-            comboBoxClsCtx.Items.Add(COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(COMUtilities.CLSCTX.CLSCTX_ACTIVATE_32_BIT_SERVER | COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(COMUtilities.CLSCTX.CLSCTX_ACTIVATE_64_BIT_SERVER | COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER);
+            ClsCtx = CLSCTX.CLSCTX_SERVER;
+            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_INPROC_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_LOCAL_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_ACTIVATE_32_BIT_SERVER | CLSCTX.CLSCTX_LOCAL_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_ACTIVATE_64_BIT_SERVER | CLSCTX.CLSCTX_LOCAL_SERVER);
             comboBoxClsCtx.SelectedIndex = 0;
         }
 
@@ -43,7 +43,7 @@ namespace OleViewDotNet
             if ((Guid.TryParse(textBoxCLSID.Text.Trim(), out clsid) && (comboBoxClsCtx.SelectedItem != null)))
             {
                 Clsid = clsid;
-                ClsCtx = (COMUtilities.CLSCTX)comboBoxClsCtx.SelectedItem;
+                ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;
 
                 DialogResult = DialogResult.OK;
                 Close();

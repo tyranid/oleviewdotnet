@@ -51,6 +51,7 @@
             this.menuViewAppIDs = new System.Windows.Forms.MenuItem();
             this.menuRegistryAppIDsIL = new System.Windows.Forms.MenuItem();
             this.menuViewLocalServices = new System.Windows.Forms.MenuItem();
+            this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
@@ -63,7 +64,7 @@
             this.menuObjectBindMoniker = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
+            this.menuRegistryAppIDsWithAC = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -137,6 +138,7 @@
             this.menuViewIELowRights,
             this.menuViewAppIDs,
             this.menuRegistryAppIDsIL,
+            this.menuRegistryAppIDsWithAC,
             this.menuViewLocalServices,
             this.menuRegistryMimeTypes,
             this.menuItem1,
@@ -213,30 +215,36 @@
             // 
             // menuViewLocalServices
             // 
-            this.menuViewLocalServices.Index = 11;
+            this.menuViewLocalServices.Index = 12;
             this.menuViewLocalServices.Text = "Local Services";
             this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
             // 
+            // menuRegistryMimeTypes
+            // 
+            this.menuRegistryMimeTypes.Index = 13;
+            this.menuRegistryMimeTypes.Text = "MIME Types";
+            this.menuRegistryMimeTypes.Click += new System.EventHandler(this.menuRegistryMimeTypes_Click);
+            // 
             // menuItem1
             // 
-            this.menuItem1.Index = 13;
+            this.menuItem1.Index = 14;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 14;
+            this.menuViewInterfaces.Index = 15;
             this.menuViewInterfaces.Text = "Interfaces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 15;
+            this.menuViewInterfacesByName.Index = 16;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
             // menuRegistryTypeLibraries
             // 
-            this.menuRegistryTypeLibraries.Index = 16;
+            this.menuRegistryTypeLibraries.Index = 17;
             this.menuRegistryTypeLibraries.Text = "Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
@@ -294,11 +302,11 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryMimeTypes
+            // menuRegistryAppIDsWithAC
             // 
-            this.menuRegistryMimeTypes.Index = 12;
-            this.menuRegistryMimeTypes.Text = "MIME Types";
-            this.menuRegistryMimeTypes.Click += new System.EventHandler(this.menuRegistryMimeTypes_Click);
+            this.menuRegistryAppIDsWithAC.Index = 11;
+            this.menuRegistryAppIDsWithAC.Text = "App IDs with AppContainer";
+            this.menuRegistryAppIDsWithAC.Click += new System.EventHandler(this.menuRegistryAppIDsWithAC_Click);
             // 
             // MainForm
             // 
@@ -351,6 +359,7 @@
         private System.Windows.Forms.MenuItem menuFileOpenDatabase;
         private System.Windows.Forms.MenuItem menuFileSaveDatabase;
         private System.Windows.Forms.MenuItem menuRegistryMimeTypes;
+        private System.Windows.Forms.MenuItem menuRegistryAppIDsWithAC;
     }
 }
 

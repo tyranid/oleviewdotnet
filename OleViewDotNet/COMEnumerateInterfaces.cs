@@ -30,19 +30,21 @@ namespace OleViewDotNet
     public class COMEnumerateInterfaces
     {
         private List<Guid> _guids;
+        private List<Guid> _factory_guids;
         private Guid _clsid;
-        private COMUtilities.CLSCTX _clsctx;
-        private bool _sta;
+        private CLSCTX _clsctx;
         private Win32Exception _ex;
-        private bool _factory;
 
         private static bool QueryInterface(IntPtr punk, Guid iid)
         {
-            IntPtr ppout;
-            if (Marshal.QueryInterface(punk, ref iid, out ppout) == 0)
+            if (punk != IntPtr.Zero)
             {
-                Marshal.Release(ppout);
-                return true;
+                IntPtr ppout;
+                if (Marshal.QueryInterface(punk, ref iid, out ppout) == 0)
+                {
+                    Marshal.Release(ppout);
+                    return true;
+                }
             }
             
             return false;
@@ -50,23 +52,23 @@ namespace OleViewDotNet
 
         private void GetInterfacesInternal()
         {
-            IntPtr punk = IntPtr.Zero;            
+            IntPtr punk = IntPtr.Zero;
+            IntPtr pfactory = IntPtr.Zero;           
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
 
             int hr = 0;
-            if (_factory)
-            {
-                hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, IntPtr.Zero, ref IID_IUnknown, out punk);
-            }
-            else
-            {
-                hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, COMUtilities.CLSCTX.CLSCTX_SERVER,
-                    ref IID_IUnknown, out punk);
-            }
-            
+            hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, IntPtr.Zero, ref IID_IUnknown, out pfactory);
+            // If we can't get class object, no chance we'll get object.
             if (hr != 0)
             {
                 throw new Win32Exception(hr);
+            }
+
+            hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, CLSCTX.CLSCTX_SERVER,
+                                               ref IID_IUnknown, out punk);
+            if (hr != 0)
+            {
+                punk = IntPtr.Zero;
             }
 
             try
@@ -74,6 +76,11 @@ namespace OleViewDotNet
                 if (QueryInterface(punk, COMInterfaceEntry.IID_IMarshal))
                 {
                     _guids.Add(COMInterfaceEntry.IID_IMarshal);
+                }
+
+                if (QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal))
+                {
+                    _factory_guids.Add(COMInterfaceEntry.IID_IMarshal);
                 }
 
                 using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
@@ -86,6 +93,10 @@ namespace OleViewDotNet
                             if (QueryInterface(punk, iid))
                             {
                                 _guids.Add(iid);
+                            }
+                            if (QueryInterface(pfactory, iid))
+                            {
+                                _factory_guids.Add(iid);
                             }
                         }
                     }
@@ -123,10 +134,10 @@ namespace OleViewDotNet
             }
         }
 
-        private void GetInterfaces(int timeout)
+        private void GetInterfaces(bool sta, int timeout)
         {
             Thread th = null;
-            if (_sta)
+            if (sta)
             {
                 th = new Thread(STAEnumThread);
             }
@@ -142,21 +153,24 @@ namespace OleViewDotNet
         }
 
         public IEnumerable<Guid> Guids { get { return _guids; } }
-        public IEnumerable<Guid> FactoryGuids { get { return _guids; } }
-
+        public IEnumerable<Guid> FactoryGuids { get { return _factory_guids; } }
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, COMUtilities.CLSCTX clsctx, bool sta, int timeout, bool factory)
+        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, bool sta, int timeout) 
+            : this(clsid, clsctx, new List<Guid>(), new List<Guid>())
         {
-            _guids = new List<Guid>();
-            _clsid = clsid;
-            _clsctx = clsctx;
-            _sta = sta;
-            _factory = factory;
-            GetInterfaces(timeout);
+            GetInterfaces(sta, timeout);
         }
 
-        public async static Task<Guid[]> GetInterfacesOOP(COMCLSIDEntry ent, bool factory)
+        private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, List<Guid> guids, List<Guid> factory_guids)
+        {
+            _guids = guids;
+            _factory_guids = factory_guids;
+            _clsid = clsid;
+            _clsctx = clsctx;
+        }
+
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent)
         {
             using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(System.IO.Pipes.PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
@@ -180,7 +194,7 @@ namespace OleViewDotNet
 
                 Process proc = new Process();
                 ProcessStartInfo info = new ProcessStartInfo(process, String.Format("{0} {1} {2} {3} \"{4}\"",
-                    factory ? "-f" : "-e", server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
+                    "-e", server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
                 info.UseShellExecute = false;
                 info.CreateNoWindow = true;
                 proc.StartInfo = info;
@@ -192,6 +206,7 @@ namespace OleViewDotNet
                     using (StreamReader reader = new StreamReader(server))
                     {
                         List<Guid> guids = new List<Guid>();
+                        List<Guid> factory_guids = new List<Guid>();
                         while (true)
                         {
                             string line = await reader.ReadLineAsync();
@@ -218,10 +233,24 @@ namespace OleViewDotNet
                             else
                             {
                                 Guid g;
+                                bool factory = false;
+
+                                if (line.StartsWith("*"))
+                                {
+                                    factory = true;
+                                    line = line.Substring(1);
+                                }
 
                                 if (Guid.TryParse(line, out g))
                                 {
-                                    guids.Add(g);
+                                    if (factory)
+                                    {
+                                        factory_guids.Add(g);
+                                    }
+                                    else
+                                    {
+                                        guids.Add(g);
+                                    }
                                 }
                             }
                         }
@@ -231,14 +260,13 @@ namespace OleViewDotNet
                             proc.Kill();
                         }
                         int exitCode = proc.ExitCode;
-                        if (exitCode == 0)
+                        if (exitCode != 0)
                         {
-                            return guids.ToArray();
+                            guids = new List<Guid>(new Guid[] { COMInterfaceEntry.IID_IUnknown });
+                            factory_guids = new List<Guid>(new Guid[] { COMInterfaceEntry.IID_IUnknown });
                         }
-                        else
-                        {
-                            return new Guid[] { COMInterfaceEntry.IID_IUnknown };
-                        }
+
+                        return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, guids, factory_guids);
                     }
                 }
                 finally

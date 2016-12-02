@@ -79,58 +79,68 @@ namespace OleViewDotNet
         {
         }
     }
-   
+
+    public enum SecurityIntegrityLevel
+    {
+        Untrusted = 0,
+        Low = 0x1000,
+        Medium = 0x2000,
+        High = 0x3000,
+        System = 0x4000,
+    }
+
+    [Flags]
+    public enum CLSCTX
+    {
+        CLSCTX_INPROC_SERVER = 0x1,
+        CLSCTX_INPROC_HANDLER = 0x2,
+        CLSCTX_LOCAL_SERVER = 0x4,
+        CLSCTX_INPROC_SERVER16 = 0x8,
+        CLSCTX_REMOTE_SERVER = 0x10,
+        CLSCTX_INPROC_HANDLER16 = 0x20,
+        CLSCTX_RESERVED1 = 0x40,
+        CLSCTX_RESERVED2 = 0x80,
+        CLSCTX_RESERVED3 = 0x100,
+        CLSCTX_RESERVED4 = 0x200,
+        CLSCTX_NO_CODE_DOWNLOAD = 0x400,
+        CLSCTX_RESERVED5 = 0x800,
+        CLSCTX_NO_CUSTOM_MARSHAL = 0x1000,
+        CLSCTX_ENABLE_CODE_DOWNLOAD = 0x2000,
+        CLSCTX_NO_FAILURE_LOG = 0x4000,
+        CLSCTX_DISABLE_AAA = 0x8000,
+        CLSCTX_ENABLE_AAA = 0x10000,
+        CLSCTX_FROM_DEFAULT_CONTEXT = 0x20000,
+        CLSCTX_ACTIVATE_32_BIT_SERVER = 0x40000,
+        CLSCTX_ACTIVATE_64_BIT_SERVER = 0x80000,
+        CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+        CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
+    }
+
+    [Flags]
+    public enum STGM
+    {
+        STGM_READ = 0x00000000,
+        STGM_WRITE = 0x00000001,
+        STGM_READWRITE = 0x00000002,
+        STGM_SHARE_DENY_NONE = 0x00000040,
+        STGM_SHARE_DENY_READ = 0x00000030,
+        STGM_SHARE_DENY_WRITE = 0x00000020,
+        STGM_SHARE_EXCLUSIVE = 0x00000010,
+        STGM_PRIORITY = 0x00040000,
+        STGM_CREATE = 0x00001000,
+        STGM_CONVERT = 0x00020000,
+        STGM_FAILIFTHERE = STGM_READ,
+        STGM_DIRECT = STGM_READ,
+        STGM_TRANSACTED = 0x00010000,
+        STGM_NOSCRATCH = 0x00100000,
+        STGM_NOSNAPSHOT = 0x00200000,
+        STGM_SIMPLE = 0x08000000,
+        STGM_DIRECT_SWMR = 0x00400000,
+        STGM_DELETEONRELEASE = 0x04000000
+    }
+
     public static class COMUtilities
     {
-        [Flags]
-        public enum CLSCTX {
-            CLSCTX_INPROC_SERVER        = 0x1, 
-            CLSCTX_INPROC_HANDLER       = 0x2, 
-            CLSCTX_LOCAL_SERVER         = 0x4, 
-            CLSCTX_INPROC_SERVER16      = 0x8,
-            CLSCTX_REMOTE_SERVER        = 0x10,
-            CLSCTX_INPROC_HANDLER16     = 0x20,
-            CLSCTX_RESERVED1            = 0x40,
-            CLSCTX_RESERVED2            = 0x80,
-            CLSCTX_RESERVED3            = 0x100,
-            CLSCTX_RESERVED4            = 0x200,
-            CLSCTX_NO_CODE_DOWNLOAD     = 0x400,
-            CLSCTX_RESERVED5            = 0x800,
-            CLSCTX_NO_CUSTOM_MARSHAL    = 0x1000,
-            CLSCTX_ENABLE_CODE_DOWNLOAD = 0x2000,
-            CLSCTX_NO_FAILURE_LOG       = 0x4000,
-            CLSCTX_DISABLE_AAA          = 0x8000,
-            CLSCTX_ENABLE_AAA           = 0x10000,
-            CLSCTX_FROM_DEFAULT_CONTEXT = 0x20000,
-            CLSCTX_ACTIVATE_32_BIT_SERVER = 0x40000,
-            CLSCTX_ACTIVATE_64_BIT_SERVER = 0x80000,
-            CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
-            CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
-        }
-
-        [Flags]
-        public enum STGM
-        {
-            STGM_READ = 0x00000000, 
-            STGM_WRITE = 0x00000001,
-            STGM_READWRITE = 0x00000002,
-            STGM_SHARE_DENY_NONE = 0x00000040,
-            STGM_SHARE_DENY_READ = 0x00000030,
-            STGM_SHARE_DENY_WRITE = 0x00000020,
-            STGM_SHARE_EXCLUSIVE = 0x00000010,
-            STGM_PRIORITY = 0x00040000,
-            STGM_CREATE = 0x00001000,
-            STGM_CONVERT = 0x00020000,
-            STGM_FAILIFTHERE = STGM_READ,
-            STGM_DIRECT = STGM_READ,
-            STGM_TRANSACTED = 0x00010000,
-            STGM_NOSCRATCH = 0x00100000,
-            STGM_NOSNAPSHOT = 0x00200000,
-            STGM_SIMPLE = 0x08000000,
-            STGM_DIRECT_SWMR = 0x00400000,
-            STGM_DELETEONRELEASE = 0x04000000
-        }
-
         private enum RegKind
         {
             RegKind_Default = 0,
@@ -156,7 +166,7 @@ namespace OleViewDotNet
         public static extern IMoniker CreateObjrefMoniker([MarshalAs(UnmanagedType.Interface)] object punk);
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-        public extern static void SHCreateStreamOnFile(string pszFile, COMUtilities.STGM grfMode, out IntPtr ppStm);
+        public extern static void SHCreateStreamOnFile(string pszFile, STGM grfMode, out IntPtr ppStm);
 
         [Flags]
         private enum SECURITY_INFORMATION 
@@ -222,6 +232,17 @@ namespace OleViewDotNet
             {
                 return null;
             }
+        }
+
+        public static bool SDHasAC(byte[] sd)
+        {
+            if (sd == null || sd.Length == 0)
+            {
+                return false;
+            }
+
+            string sddl = GetStringSDForSD(sd);
+            return sddl.Contains("S-1-15-") || sddl.Contains(";AC)");
         }
 
         private static Dictionary<Guid, Assembly> m_typelibs;

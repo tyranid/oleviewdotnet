@@ -324,34 +324,29 @@ namespace OleViewDotNet
         {
             get { return m_progids.AsReadOnly(); }
         }
-        
-        private async Task<List<COMInterfaceEntry>> GetSupportedInterfacesInternal(bool factory)
+
+        private COMInterfaceEntry MapGuidToInterface(Guid g)
         {
-            List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
+            if (m_registry.Interfaces.ContainsKey(g))
+            {
+                return m_registry.Interfaces[g];
+            }
+            else
+            {
+                return new COMInterfaceEntry(g);
+            }
+        }
+        
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
+        {
             try
             {
-                Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(this, factory);
-                foreach (Guid g in guids)
-                {
-                    if (m_registry.Interfaces.ContainsKey(g))
-                    {
-                        ents.Add(m_registry.Interfaces[g]);
-                    }
-                    else
-                    {
-                        ents.Add(new COMInterfaceEntry(g));
-                    }
-                }
-
-                ents.Sort();
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this);
             }
             catch (Win32Exception)
             {
-                ents.Add(COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown));
                 throw;
             }
-
-            return ents;
         }
 
         /// <summary>
@@ -360,34 +355,18 @@ namespace OleViewDotNet
         /// The returned array is cached so subsequent calls to this function return without calling into COM
         /// </summary>        
         /// <param name="refresh">Force the supported interface list to refresh</param>
-        /// <returns>An enumerable list of supported interfaces.</returns>
+        /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<IEnumerable<COMInterfaceEntry>> LoadSupportedInterfaces(bool refresh)
+        public async Task<bool> LoadSupportedInterfaces(bool refresh)
         {
             if (refresh || m_interfaces == null)
             {
-                m_interfaces = await GetSupportedInterfacesInternal(false);
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
+                m_interfaces = new List<COMInterfaceEntry>(enum_int.Guids.Select(g => MapGuidToInterface(g)));
+                m_factory_interfaces = new List<COMInterfaceEntry>(enum_int.FactoryGuids.Select(g => MapGuidToInterface(g)));
+                return true;
             }
-
-            return m_interfaces.AsReadOnly();
-        }
-
-        /// <summary>
-        /// Get list of supported Factory Interface IIDs (that we know about)
-        /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
-        /// The returned array is cached so subsequent calls to this function return without calling into COM
-        /// </summary>        
-        /// <param name="refresh">Force the supported interface list to refresh</param>
-        /// <returns>An enumerable list of supported interfaces.</returns>
-        /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<IEnumerable<COMInterfaceEntry>> LoadSupportedFactoryInterfaces(bool refresh)
-        {
-            if (refresh || m_factory_interfaces == null)
-            {
-                m_factory_interfaces = await GetSupportedInterfacesInternal(true);
-            }
-
-            return m_factory_interfaces.AsReadOnly();
+            return false;
         }
 
         /// <summary>
@@ -441,40 +420,40 @@ namespace OleViewDotNet
 
         public COMThreadingModel ThreadingModel { get; private set; }
 
-        public COMUtilities.CLSCTX CreateContext
+        public CLSCTX CreateContext
         {
             get
             {
-                COMUtilities.CLSCTX dwContext = COMUtilities.CLSCTX.CLSCTX_ALL;
+                CLSCTX dwContext = CLSCTX.CLSCTX_ALL;
 
                 if (ServerType == COMServerType.InProcServer32)
                 {
-                    dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;             
+                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;             
                 }
                 else if (ServerType == COMServerType.LocalServer32)
                 {
-                    dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;             
+                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;             
                 }
 
                 return dwContext;
             }           
         }
 
-        public IntPtr CreateInstance(COMUtilities.CLSCTX dwContext)
+        public IntPtr CreateInstance(CLSCTX dwContext)
         {
             IntPtr pInterface = IntPtr.Zero;
             bool blValid = false;
 
-            if (dwContext == COMUtilities.CLSCTX.CLSCTX_ALL)
+            if (dwContext == CLSCTX.CLSCTX_ALL)
             {
                 if (ServerType == COMServerType.InProcServer32)
                 {
-                    dwContext = COMUtilities.CLSCTX.CLSCTX_INPROC_SERVER;
+                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;
                     blValid = true;
                 }
                 else if (ServerType == COMServerType.LocalServer32)
                 {
-                    dwContext = COMUtilities.CLSCTX.CLSCTX_LOCAL_SERVER;
+                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
                     blValid = true;
                 }
             }
@@ -498,7 +477,7 @@ namespace OleViewDotNet
             return pInterface;
         }
 
-        public object CreateInstanceAsObject(COMUtilities.CLSCTX dwContext)
+        public object CreateInstanceAsObject(CLSCTX dwContext)
         {
             IntPtr pObject = CreateInstance(dwContext);
             object ret = null;

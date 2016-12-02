@@ -17,67 +17,61 @@
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
-using System.Security.AccessControl;
 
 namespace OleViewDotNet
 {
     [Serializable]
     public class COMAppIDEntry : IComparable<COMAppIDEntry>
-    {
-        private Guid m_appId;
-        private string m_service;
-        private string m_runas;
-        private string m_name;
-        private string m_dllsurrogate;        
+    {     
         private byte[] m_access;
         private byte[] m_launch;
 
         public COMAppIDEntry(Guid appId, RegistryKey key)
         {
-            m_appId = appId;
+            AppId = appId;
             LoadFromKey(key);
         }
 
         private void LoadFromKey(RegistryKey key)
         {
-            m_service = key.GetValue("LocalService") as string;
-            m_runas = key.GetValue("RunAs") as string;
+            LocalService = key.GetValue("LocalService") as string;
+            RunAs = key.GetValue("RunAs") as string;
             string name = key.GetValue(null) as string;
             if (!String.IsNullOrWhiteSpace(name))
             {
-                m_name = name.ToString();
+                Name = name.ToString();
             }
             else
             {
-                m_name = m_appId.ToString("B");
+                Name = AppId.ToString("B");
             }
 
             m_access = key.GetValue("AccessPermission") as byte[];
             m_launch = key.GetValue("LaunchPermission") as byte[];
-            m_dllsurrogate = key.GetValue("DllSurrogate") as string;
-            if (m_dllsurrogate != null)
+            DllSurrogate = key.GetValue("DllSurrogate") as string;
+            if (DllSurrogate != null)
             {
-                if (String.IsNullOrWhiteSpace(m_dllsurrogate))
+                if (String.IsNullOrWhiteSpace(DllSurrogate))
                 {
-                    m_dllsurrogate = "dllhost.exe";
+                    DllSurrogate = "dllhost.exe";
                 }
                 else
                 {
-                    string dllexe = key.GetValue("DllSurrogateExecute") as string;
+                    string dllexe = key.GetValue("DllSurrogateExecutable") as string;
                     if (!String.IsNullOrWhiteSpace(dllexe))
                     {
-                        m_dllsurrogate = dllexe;
+                        DllSurrogate = dllexe;
                     }
                 }
             }
 
-            if (String.IsNullOrWhiteSpace(m_runas) && !String.IsNullOrWhiteSpace(m_service))
+            if (String.IsNullOrWhiteSpace(RunAs) && !String.IsNullOrWhiteSpace(LocalService))
             {
-                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\" + m_service))
+                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\" + LocalService))
                 {
                     if (serviceKey != null)
                     {
-                        m_runas = serviceKey.GetValue("ObjectName") as string;
+                        RunAs = serviceKey.GetValue("ObjectName") as string;
                     }
                 }
             }
@@ -85,39 +79,18 @@ namespace OleViewDotNet
 
         public int CompareTo(COMAppIDEntry other)
         {
-            return m_appId.CompareTo(other.m_appId);
+            return AppId.CompareTo(other.AppId);
         }
 
-        public Guid AppId
-        {
-            get
-            {
-                return m_appId;
-            }
-        }
+        public Guid AppId { get; private set; }        
 
-        public string DllSurrogate
-        {
-            get
-            {
-                return m_dllsurrogate;
-            }
-        }
+        public string DllSurrogate { get; private set; }
 
-        public string LocalService
-        {
-            get { return m_service; }
-        }
+        public string LocalService { get; private set; }
 
-        public string RunAs
-        {
-            get { return m_runas; }
-        }
+        public string RunAs { get; private set; }
 
-        public string Name
-        {
-            get { return m_name; }
-        }
+        public string Name { get; private set; }
 
         public byte[] LaunchPermission
         {
@@ -169,7 +142,7 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("COMAppIDEntry: {0}", m_name);
+            return String.Format("COMAppIDEntry: {0}", Name);
         }
     }
 }

@@ -145,7 +145,7 @@ namespace OleViewDotNet.InterfaceViewers
         void GetCurMoniker(out IMoniker pMoniker);        
         [PreserveSig]
         int IsDirty();
-        void Load(bool fFullyAvailable, IMoniker pimkName, IBindCtx pibc, COMUtilities.STGM grfMode);
+        void Load(bool fFullyAvailable, IMoniker pimkName, IBindCtx pibc, STGM grfMode);
         void Save(IMoniker pimkName, IBindCtx pibc, bool fRemember);
         void SaveCompleted(IMoniker pimkName, IBindCtx pibc);        
     }

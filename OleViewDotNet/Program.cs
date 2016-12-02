@@ -44,7 +44,7 @@ namespace OleViewDotNet
             return _mainForm;
         }
 
-        static int EnumInterfaces(bool enum_factory, List<string> args)
+        static int EnumInterfaces(List<string> args)
         {
             using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args[0]))
             {
@@ -58,7 +58,7 @@ namespace OleViewDotNet
 
                     bool sta = args[2] == "s";
 
-                    COMUtilities.CLSCTX clsctx;
+                    CLSCTX clsctx;
                     if (!Enum.TryParse(args[3], true, out clsctx))
                     {
                         return 1;
@@ -73,7 +73,7 @@ namespace OleViewDotNet
                         }
                     }
 
-                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta, timeout, enum_factory);
+                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta, timeout);
                     if (intf.Exception != null)
                     {
                         writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
@@ -84,6 +84,10 @@ namespace OleViewDotNet
                         foreach (Guid guid in intf.Guids)
                         {
                             writer.WriteLine("{0}", guid);
+                        }
+                        foreach (Guid guid in intf.FactoryGuids)
+                        {
+                            writer.WriteLine("*{0}", guid);
                         }
                         return 0;
                     }
@@ -100,7 +104,6 @@ namespace OleViewDotNet
             string database_file = null;
             string save_file = null;
             bool enum_clsid = false;
-            bool enum_factory = false;
             bool show_help = false;
             bool user_only = false;
 
@@ -108,7 +111,6 @@ namespace OleViewDotNet
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },
                 { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
-                { "f|fact",  "Enumerate the provided CLSID factory.", v => enum_clsid = enum_factory = v != null },
                 { "u|user",  "Use only current user registrations.", v => user_only = v != null },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
@@ -130,7 +132,7 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    Environment.Exit(EnumInterfaces(enum_factory, additional_args));
+                    Environment.Exit(EnumInterfaces(additional_args));
                 }
                 catch
                 {

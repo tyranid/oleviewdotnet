@@ -64,6 +64,7 @@ namespace OleViewDotNet
             Typelibs,
             AppIDsWithIL,
             MimeTypes,
+            AppIDsWithAC,
         }        
 
         /// <summary>
@@ -137,10 +138,13 @@ namespace OleViewDotNet
                         LoadLocalServices();
                         break;
                     case DisplayMode.AppIDs:
-                        LoadAppIDs(false);
+                        LoadAppIDs(false, false);
                         break;
                     case DisplayMode.AppIDsWithIL:
-                        LoadAppIDs(true);
+                        LoadAppIDs(true, false);
+                        break;
+                    case DisplayMode.AppIDsWithAC:
+                        LoadAppIDs(false, true);
                         break;
                     case DisplayMode.Typelibs:
                         LoadTypeLibs();
@@ -462,6 +466,7 @@ namespace OleViewDotNet
                     }
 
                     node.ToolTipText = builder.ToString();
+                    node.Tag = appidEnt;
                     
                     int count = pair.Count();
 
@@ -487,7 +492,16 @@ namespace OleViewDotNet
             Text = "Local Services";
         }
 
-        private void LoadAppIDs(bool filterIL)
+        static string LimitString(string s, int max)
+        {
+            if (s.Length > max)
+            {
+                return s.Substring(0, max) + "...";
+            }
+            return s;
+        }
+
+        private void LoadAppIDs(bool filterIL, bool filterAC)
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
             IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;            
@@ -501,6 +515,11 @@ namespace OleViewDotNet
                     
                     if (filterIL && String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.AccessPermission)) &&
                         String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.LaunchPermission)))
+                    {
+                        continue;
+                    }
+
+                    if (filterAC && !COMUtilities.SDHasAC(appidEnt.AccessPermission) && !COMUtilities.SDHasAC(appidEnt.LaunchPermission))
                     {
                         continue;
                     }
@@ -524,13 +543,13 @@ namespace OleViewDotNet
                     string perm = appidEnt.LaunchPermissionString;
                     if (perm != null)
                     {
-                        AppendFormatLine(builder, "Launch: {0}", perm);
+                        AppendFormatLine(builder, "Launch: {0}", LimitString(perm, 64));
                     }
 
                     perm = appidEnt.AccessPermissionString;
                     if (perm != null)
                     {
-                        AppendFormatLine(builder, "Access: {0}", perm);
+                        AppendFormatLine(builder, "Access: {0}", LimitString(perm, 64));
                     }
 
                     node.ToolTipText = builder.ToString();
@@ -711,11 +730,11 @@ namespace OleViewDotNet
                 node.Nodes.Add(wait_node);
                 try
                 {
-                    IEnumerable<COMInterfaceEntry> intEntries = await clsid.LoadSupportedInterfaces(bRefresh);
-                    if (intEntries.Count() > 0)
+                    await clsid.LoadSupportedInterfaces(bRefresh);
+                    if (clsid.Interfaces.Count() > 0)
                     {
                         node.Nodes.Remove(wait_node);
-                        foreach (COMInterfaceEntry ent in intEntries)
+                        foreach (COMInterfaceEntry ent in clsid.Interfaces)
                         {
                             node.Nodes.Add(CreateInterfaceNameNode(ent));
                         }
@@ -908,7 +927,7 @@ namespace OleViewDotNet
                     Dictionary<string, string> props = new Dictionary<string,string>();
                     try
                     {
-                        object comObj = ent.CreateInstanceAsObject(COMUtilities.CLSCTX.CLSCTX_ALL);
+                        object comObj = ent.CreateInstanceAsObject(CLSCTX.CLSCTX_ALL);
                         if (comObj != null)
                         {                            
                             props.Add("CLSID", ent.Clsid.ToString("B"));
@@ -918,9 +937,9 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            IEnumerable<COMInterfaceEntry> entries = await ent.LoadSupportedInterfaces(false);
+                            await ent.LoadSupportedInterfaces(false);
 
-                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, entries.ToArray());
+                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, ent.Interfaces.ToArray());
                             Program.GetMainForm().HostControl(view);
                         }
                     }
@@ -965,7 +984,10 @@ namespace OleViewDotNet
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
-                contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
+                if (PropertiesControl.SupportsProperties(node.Tag))
+                {
+                    contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
+                }
             }
             else
             {

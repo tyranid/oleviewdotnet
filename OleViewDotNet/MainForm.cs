@@ -149,7 +149,7 @@ namespace OleViewDotNet
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            ints = await ent.LoadSupportedInterfaces(false);
+                            await ent.LoadSupportedInterfaces(false);
                         }
                         else
                         {
@@ -261,7 +261,8 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
-                    ints = await ent.LoadSupportedInterfaces(false);
+                    await ent.LoadSupportedInterfaces(false);
+                    ints = ent.Interfaces;
                 }
                 else
                 {
@@ -339,21 +340,24 @@ namespace OleViewDotNet
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private string _last_moniker = "Specify Moniker";
         
         private void menuObjectBindMoniker_Click(object sender, EventArgs e)
         {
-            using (GetTextForm frm = new GetTextForm("Specify Monker"))
+            using (GetTextForm frm = new GetTextForm(_last_moniker))
             {
                 frm.Text = "Specify Moniker";
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
                     try
                     {
-                        object comObj = Marshal.BindToMoniker(frm.Data);
+                        _last_moniker = frm.Data;
+                        object comObj = Marshal.BindToMoniker(_last_moniker);
 
                         if (comObj != null)
                         {
-                            OpenObjectInformation(comObj, frm.Data);
+                            OpenObjectInformation(comObj, _last_moniker);
                         }
                     }
                     catch (Exception ex)
@@ -404,6 +408,11 @@ namespace OleViewDotNet
         private void menuRegistryMimeTypes_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.MimeTypes);
+        }
+
+        private void menuRegistryAppIDsWithAC_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.AppIDsWithAC);
         }
     }
 }

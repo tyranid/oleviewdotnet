@@ -18,12 +18,25 @@ namespace OleViewDotNet
             }
         }
 
+        private void SetupAppIdEntry(COMAppIDEntry entry)
+        {
+            textBoxAppIdName.Text = entry.Name;
+            textBoxAppIdGuid.Text = entry.AppId.ToString("B");
+            textBoxLaunchPermission.Text = entry.LaunchPermissionString ?? String.Empty;
+            textBoxAccessPermission.Text = entry.AccessPermissionString ?? String.Empty;
+            lblAppIdRunAs.Text = String.Format("Run As: {0}", entry.RunAs ?? "N/A");
+            lblService.Text = String.Format("Service: {0}", entry.LocalService ?? "N/A");
+            textBoxDllSurrogate.Text = entry.DllSurrogate ?? "N/A";
+            tabControlProperties.TabPages.Add(tabPageAppID);
+        }
+
         private void SetupClsidEntry(COMCLSIDEntry entry)
         {
             textBoxClsidName.Text = entry.Name;
             textBoxClsid.Text = entry.Clsid.ToString("B");
             lblServerType.Text = "Server Type: " + entry.ServerType;
             lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
+            textBoxServer.Text = entry.Server;
             var progids = _registry.Progids;
 
             foreach (string progid in entry.ProgIDs)
@@ -47,6 +60,10 @@ namespace OleViewDotNet
 
             tabControlProperties.TabPages.Add(tabPageClsid);
             tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
+            if (_registry.AppIDs.ContainsKey(entry.AppID))
+            {
+                SetupAppIdEntry(_registry.AppIDs[entry.AppID]);
+            }
         }
 
         private void SetupProperties(object obj)
@@ -55,6 +72,25 @@ namespace OleViewDotNet
             {
                 SetupClsidEntry((COMCLSIDEntry)obj);
             }
+
+            if (obj is COMProgIDEntry)
+            {
+                COMProgIDEntry entry = (COMProgIDEntry)obj;
+                if (entry.Entry != null)
+                {
+                    SetupClsidEntry(entry.Entry);
+                }
+            }
+
+            if (obj is COMAppIDEntry)
+            {
+                SetupAppIdEntry((COMAppIDEntry)obj);
+            }
+        }
+
+        public static bool SupportsProperties(object obj)
+        {
+            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
@@ -72,11 +108,17 @@ namespace OleViewDotNet
 
         private async void btnRefreshInterfaces_Click(object sender, EventArgs e)
         {
-            COMCLSIDEntry entry = (COMCLSIDEntry)tabPageSupportedInterfaces.Tag;
-            await entry.LoadSupportedInterfaces(true);
-            LoadInterfaceList(entry.Interfaces, listViewInterfaces);
-            await entry.LoadSupportedFactoryInterfaces(true);
-            LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
+            try
+            {
+                COMCLSIDEntry entry = (COMCLSIDEntry)tabPageSupportedInterfaces.Tag;
+                await entry.LoadSupportedInterfaces(true);
+                LoadInterfaceList(entry.Interfaces, listViewInterfaces);                
+                LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
