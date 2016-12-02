@@ -839,7 +839,6 @@
     <Content Include="Lib\__phello__.foo.py" />
     <Content Include="license.txt" />
     <Content Include="oleview.ico" />
-    <Content Include="Notes.txt" />
     <Content Include="PythonLib\oleviewdotnet\registry.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

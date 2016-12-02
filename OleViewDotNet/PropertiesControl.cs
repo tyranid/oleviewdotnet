@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
     public partial class PropertiesControl : UserControl
     {
         private COMRegistry _registry;
+
+        private void LoadInterfaceList(IEnumerable<COMInterfaceEntry> entries, ListView view)
+        {
+            view.Items.Clear();
+            foreach (COMInterfaceEntry entry in entries)
+            {
+                ListViewItem item = view.Items.Add(entry.Name);
+                item.Tag = entry;
+            }
+        }
 
         private void SetupClsidEntry(COMCLSIDEntry entry)
         {
@@ -32,7 +35,18 @@ namespace OleViewDotNet
                 }
             }
 
+            foreach (Guid catid in entry.Categories)
+            {
+                ListViewItem item = listViewCategories.Items.Add(COMUtilities.GetCategoryName(catid));
+                item.Tag = catid;
+            }
+
+            LoadInterfaceList(entry.Interfaces, listViewInterfaces);
+            LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
+            tabPageSupportedInterfaces.Tag = entry;
+
             tabControlProperties.TabPages.Add(tabPageClsid);
+            tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
         }
 
         private void SetupProperties(object obj)
@@ -43,7 +57,7 @@ namespace OleViewDotNet
             }
         }
 
-        public PropertiesControl(COMRegistry registry, object obj)
+        public PropertiesControl(COMRegistry registry, string name, object obj)
         {
             _registry = registry;
             InitializeComponent();
@@ -53,6 +67,16 @@ namespace OleViewDotNet
             {
                 tabControlProperties.TabPages.Add(tabPageNoProperties);
             }
+            this.Text = String.Format("{0} Properties", name);
+        }
+
+        private async void btnRefreshInterfaces_Click(object sender, EventArgs e)
+        {
+            COMCLSIDEntry entry = (COMCLSIDEntry)tabPageSupportedInterfaces.Tag;
+            await entry.LoadSupportedInterfaces(true);
+            LoadInterfaceList(entry.Interfaces, listViewInterfaces);
+            await entry.LoadSupportedFactoryInterfaces(true);
+            LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
         }
     }
 }

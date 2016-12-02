@@ -1207,9 +1207,10 @@ namespace OleViewDotNet
 
         private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (treeComRegistry.SelectedNode != null)
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null)
             {
-                Program.GetMainForm().HostControl(new PropertiesControl(m_reg, treeComRegistry.SelectedNode.Tag));
+                Program.GetMainForm().HostControl(new PropertiesControl(m_reg, node.Text, node.Tag));
             }
         }
     }

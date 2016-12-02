@@ -330,7 +330,7 @@ namespace OleViewDotNet
             List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
             try
             {
-                Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(this, false);
+                Guid[] guids = await COMEnumerateInterfaces.GetInterfacesOOP(this, factory);
                 foreach (Guid g in guids)
                 {
                     if (m_registry.Interfaces.ContainsKey(g))
