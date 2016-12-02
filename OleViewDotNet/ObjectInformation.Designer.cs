@@ -37,6 +37,7 @@
             this.btnSaveStream = new System.Windows.Forms.Button();
             this.btnDispatch = new System.Windows.Forms.Button();
             this.btnOleContainer = new System.Windows.Forms.Button();
+            this.btnCreate = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -107,6 +108,7 @@
             // 
             // splitContainer.Panel2
             // 
+            this.splitContainer.Panel2.Controls.Add(this.btnCreate);
             this.splitContainer.Panel2.Controls.Add(this.btnMarshal);
             this.splitContainer.Panel2.Controls.Add(this.btnSaveStream);
             this.splitContainer.Panel2.Controls.Add(this.btnDispatch);
@@ -120,6 +122,7 @@
             // btnMarshal
             // 
             this.btnMarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnMarshal.Enabled = false;
             this.btnMarshal.Location = new System.Drawing.Point(257, 235);
             this.btnMarshal.Name = "btnMarshal";
             this.btnMarshal.Size = new System.Drawing.Size(75, 23);
@@ -164,6 +167,18 @@
             this.btnOleContainer.UseVisualStyleBackColor = true;
             this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
+            // btnCreate
+            // 
+            this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCreate.Enabled = false;
+            this.btnCreate.Location = new System.Drawing.Point(338, 235);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(75, 23);
+            this.btnCreate.TabIndex = 8;
+            this.btnCreate.Text = "Create";
+            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
             // ObjectInformation
             // 
             this.Controls.Add(this.splitContainer);
@@ -191,5 +206,6 @@
         private System.Windows.Forms.Button btnDispatch;
         private System.Windows.Forms.Button btnSaveStream;
         private System.Windows.Forms.Button btnMarshal;
+        private System.Windows.Forms.Button btnCreate;
     }
 }

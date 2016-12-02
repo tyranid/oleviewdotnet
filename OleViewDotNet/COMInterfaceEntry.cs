@@ -138,6 +138,11 @@ namespace OleViewDotNet
             get { return (Iid == IID_IPersistStream) || (Iid == IID_IPersistStreamInit); }
         }
 
+        public bool IsClassFactory
+        {
+            get { return Iid == typeof(IClassFactory).GUID; }
+        }
+
         public static COMInterfaceEntry CreateKnownInterface(KnownInterfaces known)
         {
             COMInterfaceEntry ent = null;

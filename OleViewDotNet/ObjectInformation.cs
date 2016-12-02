@@ -14,13 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.InterfaceViewers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
@@ -137,6 +135,14 @@ namespace OleViewDotNet
                 else if (ent.IsPersistStream)
                 {
                     btnSaveStream.Enabled = true;
+                }
+                else if (ent.IsMarshal)
+                {
+                    btnMarshal.Enabled = true;
+                }
+                else if (ent.IsClassFactory)
+                {
+                    btnCreate.Enabled = true;
                 }
             }
 
@@ -255,5 +261,24 @@ namespace OleViewDotNet
             }
         }
 
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IClassFactory factory = (IClassFactory)m_pObject;
+                object new_object;
+                Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
+                Dictionary<string, string> props = new Dictionary<string, string>();
+                props.Add("Name", m_objName);
+                factory.CreateInstance(null, ref IID_IUnknown, out new_object);
+                ObjectInformation view = new ObjectInformation(m_registry, m_objName, new_object,
+                    props, m_registry.GetInterfacesForObject(new_object));
+                Program.GetMainForm().HostControl(view);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

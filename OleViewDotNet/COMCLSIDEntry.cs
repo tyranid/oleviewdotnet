@@ -49,8 +49,8 @@ namespace OleViewDotNet
         private HashSet<Guid> m_categories;
         private List<COMInterfaceEntry> m_proxies;
         private COMRegistry m_registry;
-        private List<COMInterfaceEntry> m_interfaces;
-        private List<COMInterfaceEntry> m_factory_interfaces;
+        private List<COMInterfaceInstance> m_interfaces;
+        private List<COMInterfaceInstance> m_factory_interfaces;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
@@ -324,18 +324,6 @@ namespace OleViewDotNet
         {
             get { return m_progids.AsReadOnly(); }
         }
-
-        private COMInterfaceEntry MapGuidToInterface(Guid g)
-        {
-            if (m_registry.Interfaces.ContainsKey(g))
-            {
-                return m_registry.Interfaces[g];
-            }
-            else
-            {
-                return new COMInterfaceEntry(g);
-            }
-        }
         
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
         {
@@ -357,45 +345,62 @@ namespace OleViewDotNet
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<bool> LoadSupportedInterfaces(bool refresh)
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
         {
             if (refresh || m_interfaces == null)
             {
                 COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
-                m_interfaces = new List<COMInterfaceEntry>(enum_int.Guids.Select(g => MapGuidToInterface(g)));
-                m_factory_interfaces = new List<COMInterfaceEntry>(enum_int.FactoryGuids.Select(g => MapGuidToInterface(g)));
+                m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
+                m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
                 return true;
             }
             return false;
         }
 
         /// <summary>
-        /// Get list of interfaces synchronously.
+        /// Get list of supported Interface IIDs Synchronously
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>Returns true if supported interfaces were refreshed.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        public bool LoadSupportedInterfaces(bool refresh)
+        {
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh);
+            result.Wait();
+            if (result.IsFaulted)
+            {
+                throw result.Exception.InnerException;
+            }
+            return result.Result;
+        }
+
+        /// <summary>
+        /// Get list of interfaces.
         /// </summary>
         /// <remarks>You must have called LoadSupportedInterfaces before this call to get any useful output.</remarks>
-        public IEnumerable<COMInterfaceEntry> Interfaces
+        public IEnumerable<COMInterfaceInstance> Interfaces
         {
             get
             {
                 if (m_interfaces == null)
                 {
-                    return new COMInterfaceEntry[0];
+                    return new COMInterfaceInstance[0];
                 }
                 return m_interfaces.AsReadOnly();
             }
         }
 
         /// <summary>
-        /// Get list of factory interfaces synchronously.
+        /// Get list of factory interfaces.
         /// </summary>
         /// <remarks>You must have called LoadSupportedFactoryInterfaces before this call to get any useful output.</remarks>
-        public IEnumerable<COMInterfaceEntry> FactoryInterfaces
+        public IEnumerable<COMInterfaceInstance> FactoryInterfaces
         {
             get
             {
                 if (m_factory_interfaces == null)
                 {
-                    return new COMInterfaceEntry[0];
+                    return new COMInterfaceInstance[0];
                 }
                 return m_factory_interfaces.AsReadOnly();
             }

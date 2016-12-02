@@ -22,32 +22,117 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace OleViewDotNet
 {
+    [Serializable]
+    public class COMInterfaceInstance
+    {
+        public Guid Iid { get; private set; }
+        public string ModulePath { get; private set; }
+        public long VTableOffset { get; private set; }
+
+        public COMInterfaceInstance(Guid iid, string module_path, long vtable_offset)
+        {
+            Iid = iid;
+            ModulePath = module_path;
+            VTableOffset = vtable_offset;
+        }
+
+        public COMInterfaceInstance(Guid iid) : this(iid, null, 0)
+        {
+        }
+
+
+        public COMInterfaceEntry MapToRegistryEntry(COMRegistry registry)
+        {
+            if (registry.Interfaces.ContainsKey(Iid))
+            {
+                return registry.Interfaces[Iid];
+            }
+            else
+            {
+                return new COMInterfaceEntry(Iid);
+            }
+        }
+
+        public override string ToString()
+        {
+            if (!String.IsNullOrWhiteSpace(ModulePath))
+            {
+                return String.Format("{0},{1},{2}", Iid, ModulePath, VTableOffset);
+            }
+            return String.Format("{0}", Iid);
+        }
+    }
+
     public class COMEnumerateInterfaces
     {
-        private List<Guid> _guids;
-        private List<Guid> _factory_guids;
+        private List<COMInterfaceInstance> _interfaces;
+        private List<COMInterfaceInstance> _factory_interfaces;
         private Guid _clsid;
         private CLSCTX _clsctx;
         private Win32Exception _ex;
 
-        private static bool QueryInterface(IntPtr punk, Guid iid)
+        const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool GetModuleHandleEx(int dwFlags, IntPtr lpModuleName, out IntPtr phModule);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
+
+        static string GetModuleFileName(IntPtr hModule)
+        {
+            StringBuilder builder = new StringBuilder(260);
+            int result = GetModuleFileName(hModule, builder, builder.Capacity);
+            if (result > 0)
+            {
+                string path = builder.ToString();
+                int index = path.LastIndexOf('\\');
+                if (index < 0)
+                    index = path.LastIndexOf('/');
+                if (index < 0)
+                {
+                    return path;
+                }
+                return path.Substring(index + 1);
+            }
+            return "Unknown";
+        }
+        
+        private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, List<COMInterfaceInstance> list)
         {
             if (punk != IntPtr.Zero)
             {
                 IntPtr ppout;
                 if (Marshal.QueryInterface(punk, ref iid, out ppout) == 0)
                 {
+                    IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
+                    IntPtr module;
+                    COMInterfaceInstance intf;
+
+                    if (_clsctx == CLSCTX.CLSCTX_INPROC_SERVER && GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, vtable, out module))
+                    {
+                        if (!module_names.ContainsKey(module))
+                        {
+                            module_names[module] = GetModuleFileName(module);
+                        }
+                        intf = new COMInterfaceInstance(iid, module_names[module], vtable.ToInt64() - module.ToInt64());
+                    }
+                    else
+                    {
+                        intf = new COMInterfaceInstance(iid);
+                    }
+
+
+                    list.Add(intf);
                     Marshal.Release(ppout);
-                    return true;
                 }
             }
-            
-            return false;
         }
 
         private void GetInterfacesInternal()
@@ -64,7 +149,7 @@ namespace OleViewDotNet
                 throw new Win32Exception(hr);
             }
 
-            hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, CLSCTX.CLSCTX_SERVER,
+            hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, _clsctx,
                                                ref IID_IUnknown, out punk);
             if (hr != 0)
             {
@@ -73,15 +158,9 @@ namespace OleViewDotNet
 
             try
             {
-                if (QueryInterface(punk, COMInterfaceEntry.IID_IMarshal))
-                {
-                    _guids.Add(COMInterfaceEntry.IID_IMarshal);
-                }
-
-                if (QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal))
-                {
-                    _factory_guids.Add(COMInterfaceEntry.IID_IMarshal);
-                }
+                Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
+                QueryInterface(punk, COMInterfaceEntry.IID_IMarshal, module_names, _interfaces);
+                QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal, module_names, _factory_interfaces);
 
                 using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
                 {
@@ -90,14 +169,8 @@ namespace OleViewDotNet
                         Guid iid;
                         if (Guid.TryParse(iid_string, out iid))
                         {
-                            if (QueryInterface(punk, iid))
-                            {
-                                _guids.Add(iid);
-                            }
-                            if (QueryInterface(pfactory, iid))
-                            {
-                                _factory_guids.Add(iid);
-                            }
+                            QueryInterface(punk, iid, module_names, _interfaces);
+                            QueryInterface(pfactory, iid, module_names, _factory_interfaces);
                         }
                     }
                 }
@@ -108,8 +181,7 @@ namespace OleViewDotNet
             }
         }
 
-        [MTAThread]
-        private void MTAEnumThread()
+        private void RunGetInterfaces()
         {
             try
             {
@@ -121,51 +193,49 @@ namespace OleViewDotNet
             }
         }
 
-        [STAThread]
-        private void STAEnumThread()
+        [MTAThread]
+        private void MTAEnumThread()
         {
-            try
-            {
-                GetInterfacesInternal();
-            }
-            catch (Win32Exception ex)
-            {
-                _ex = ex;
-            }
+            RunGetInterfaces();
+        }
+
+        private void ExitProcessThread(object timeout)
+        {
+            Thread.Sleep((int)timeout);
+            Environment.Exit(1);
         }
 
         private void GetInterfaces(bool sta, int timeout)
         {
-            Thread th = null;
+            Thread timeout_thread = new Thread(ExitProcessThread);
+            timeout_thread.Start(timeout);
             if (sta)
             {
-                th = new Thread(STAEnumThread);
+                RunGetInterfaces();
             }
             else
             {
+                Thread th = null;
                 th = new Thread(MTAEnumThread);
-            }
-            th.Start();
-            if (!th.Join(timeout))
-            {
-                th.Abort();
+                th.Start();
+                th.Join();
             }
         }
 
-        public IEnumerable<Guid> Guids { get { return _guids; } }
-        public IEnumerable<Guid> FactoryGuids { get { return _factory_guids; } }
+        public IEnumerable<COMInterfaceInstance> Interfaces { get { return _interfaces; } }
+        public IEnumerable<COMInterfaceInstance> FactoryInterfaces { get { return _factory_interfaces; } }
         public Win32Exception Exception { get { return _ex; } }
 
         public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, bool sta, int timeout) 
-            : this(clsid, clsctx, new List<Guid>(), new List<Guid>())
+            : this(clsid, clsctx, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
         {
             GetInterfaces(sta, timeout);
         }
 
-        private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, List<Guid> guids, List<Guid> factory_guids)
+        private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, List<COMInterfaceInstance> interfaces, List<COMInterfaceInstance> factory_interfaces)
         {
-            _guids = guids;
-            _factory_guids = factory_guids;
+            _interfaces = interfaces;
+            _factory_interfaces = factory_interfaces;
             _clsid = clsid;
             _clsctx = clsctx;
         }
@@ -205,8 +275,8 @@ namespace OleViewDotNet
 
                     using (StreamReader reader = new StreamReader(server))
                     {
-                        List<Guid> guids = new List<Guid>();
-                        List<Guid> factory_guids = new List<Guid>();
+                        List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
+                        List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
                         while (true)
                         {
                             string line = await reader.ReadLineAsync();
@@ -241,15 +311,24 @@ namespace OleViewDotNet
                                     line = line.Substring(1);
                                 }
 
-                                if (Guid.TryParse(line, out g))
+                                string[] parts = line.Split(new char[] { ',' }, 3);
+                                if (Guid.TryParse(parts[0], out g))
                                 {
+                                    string module_path = null;
+                                    long vtable_offset = 0;
+                                    if (parts.Length == 3)
+                                    {
+                                        module_path = parts[1];
+                                        long.TryParse(parts[2], out vtable_offset);
+                                    }
+
                                     if (factory)
                                     {
-                                        factory_guids.Add(g);
+                                        factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset));
                                     }
                                     else
                                     {
-                                        guids.Add(g);
+                                        interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset));
                                     }
                                 }
                             }
@@ -262,11 +341,11 @@ namespace OleViewDotNet
                         int exitCode = proc.ExitCode;
                         if (exitCode != 0)
                         {
-                            guids = new List<Guid>(new Guid[] { COMInterfaceEntry.IID_IUnknown });
-                            factory_guids = new List<Guid>(new Guid[] { COMInterfaceEntry.IID_IUnknown });
+                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
+                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
                         }
 
-                        return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, guids, factory_guids);
+                        return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, interfaces, factory_interfaces);
                     }
                 }
                 finally

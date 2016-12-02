@@ -149,7 +149,7 @@ namespace OleViewDotNet
                             props.Add("Server", ent.Server);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
-                            await ent.LoadSupportedInterfaces(false);
+                            await ent.LoadSupportedInterfacesAsync(false);
                         }
                         else
                         {
@@ -261,8 +261,8 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
-                    await ent.LoadSupportedInterfaces(false);
-                    ints = ent.Interfaces;
+                    await ent.LoadSupportedInterfacesAsync(false);
+                    ints = ent.Interfaces.Select(i => i.MapToRegistryEntry(m_registry));
                 }
                 else
                 {

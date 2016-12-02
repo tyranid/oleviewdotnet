@@ -224,7 +224,7 @@ namespace OleViewDotNet
             return strRet;
         }
 
-        private string BuildInterfaceToolTip(COMInterfaceEntry ent)
+        private string BuildInterfaceToolTip(COMInterfaceEntry ent, COMInterfaceInstance instance)
         {            
             StringBuilder builder = new StringBuilder();
 
@@ -233,6 +233,10 @@ namespace OleViewDotNet
             if (ent.ProxyClsid != Guid.Empty)
             {
                 AppendFormatLine(builder, "ProxyCLSID: {0}", ent.ProxyClsid.ToString("B"));
+            }
+            if (instance != null && instance.ModulePath != null)
+            {
+                AppendFormatLine(builder, "VTable Address: {0}+0x{1:X}", instance.ModulePath, instance.VTableOffset);
             }
 
             return builder.ToString();
@@ -251,16 +255,16 @@ namespace OleViewDotNet
         private TreeNode CreateInterfaceNode(COMInterfaceEntry ent)
         {
             TreeNode nodeRet = new TreeNode(String.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceIcon, InterfaceIcon);
-            nodeRet.ToolTipText = BuildInterfaceToolTip(ent);
+            nodeRet.ToolTipText = BuildInterfaceToolTip(ent, null);
             nodeRet.Tag = ent;
 
             return nodeRet;
         }
 
-        private TreeNode CreateInterfaceNameNode(COMInterfaceEntry ent)
+        private TreeNode CreateInterfaceNameNode(COMInterfaceEntry ent, COMInterfaceInstance instance)
         {
             TreeNode nodeRet = new TreeNode(ent.Name, InterfaceIcon, InterfaceIcon);
-            nodeRet.ToolTipText = BuildInterfaceToolTip(ent);
+            nodeRet.ToolTipText = BuildInterfaceToolTip(ent, instance);
             nodeRet.Tag = ent;
 
             return nodeRet;
@@ -392,7 +396,7 @@ namespace OleViewDotNet
             TreeNode[] iidNameNodes = new TreeNode[m_reg.InterfacesByName.Length];
             foreach (COMInterfaceEntry ent in m_reg.InterfacesByName)
             {
-                iidNameNodes[i] = CreateInterfaceNameNode(ent);                
+                iidNameNodes[i] = CreateInterfaceNameNode(ent, null);                
                 i++;
             }
             treeComRegistry.Nodes.AddRange(iidNameNodes);
@@ -730,13 +734,13 @@ namespace OleViewDotNet
                 node.Nodes.Add(wait_node);
                 try
                 {
-                    await clsid.LoadSupportedInterfaces(bRefresh);
+                    await clsid.LoadSupportedInterfacesAsync(bRefresh);
                     if (clsid.Interfaces.Count() > 0)
                     {
                         node.Nodes.Remove(wait_node);
-                        foreach (COMInterfaceEntry ent in clsid.Interfaces)
+                        foreach (COMInterfaceInstance ent in clsid.Interfaces)
                         {
-                            node.Nodes.Add(CreateInterfaceNameNode(ent));
+                            node.Nodes.Add(CreateInterfaceNameNode(ent.MapToRegistryEntry(m_reg), ent));
                         }
                     }
                     else
@@ -937,9 +941,10 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
 
-                            await ent.LoadSupportedInterfaces(false);
+                            await ent.LoadSupportedInterfacesAsync(false);
 
-                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, props, ent.Interfaces.ToArray());
+                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, 
+                                props, ent.Interfaces.Select(i => i.MapToRegistryEntry(m_reg)).ToArray());
                             Program.GetMainForm().HostControl(view);
                         }
                     }

@@ -81,13 +81,13 @@ namespace OleViewDotNet
                     }
                     else
                     {
-                        foreach (Guid guid in intf.Guids)
+                        foreach (COMInterfaceInstance entry in intf.Interfaces)
                         {
-                            writer.WriteLine("{0}", guid);
+                            writer.WriteLine("{0}", entry);
                         }
-                        foreach (Guid guid in intf.FactoryGuids)
+                        foreach (COMInterfaceInstance entry in intf.FactoryInterfaces)
                         {
-                            writer.WriteLine("*{0}", guid);
+                            writer.WriteLine("*{0}", entry);
                         }
                         return 0;
                     }

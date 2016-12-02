@@ -1,4 +1,20 @@
-﻿using System;
+﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014, 2016
+//
+//    OleViewDotNet is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    OleViewDotNet is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
+
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -8,14 +24,20 @@ namespace OleViewDotNet
     {
         private COMRegistry _registry;
 
-        private void LoadInterfaceList(IEnumerable<COMInterfaceEntry> entries, ListView view)
+        private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
             view.Items.Clear();
-            foreach (COMInterfaceEntry entry in entries)
+            foreach (COMInterfaceInstance entry in entries)
             {
-                ListViewItem item = view.Items.Add(entry.Name);
+                ListViewItem item = view.Items.Add(entry.MapToRegistryEntry(_registry).Name);
+                if (!String.IsNullOrWhiteSpace(entry.ModulePath))
+                {
+                    item.SubItems.Add(String.Format("{0}+0x{1:X}", entry.ModulePath, entry.VTableOffset));
+                }
                 item.Tag = entry;
             }
+            view.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            view.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
         private void SetupAppIdEntry(COMAppIDEntry entry)
@@ -47,12 +69,14 @@ namespace OleViewDotNet
                     item.Tag = progids[progid];
                 }
             }
+            listViewProgIDs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
             foreach (Guid catid in entry.Categories)
             {
                 ListViewItem item = listViewCategories.Items.Add(COMUtilities.GetCategoryName(catid));
                 item.Tag = catid;
             }
+            listViewCategories.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
             LoadInterfaceList(entry.Interfaces, listViewInterfaces);
             LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
@@ -97,13 +121,19 @@ namespace OleViewDotNet
         {
             _registry = registry;
             InitializeComponent();
+            listViewCategories.Columns.Add("Name", 100);
+            listViewProgIDs.Columns.Add("Name", 100);
+            listViewInterfaces.Columns.Add("Name", 100);
+            listViewInterfaces.Columns.Add("VTable Offset", 100);
+            listViewFactoryInterfaces.Columns.Add("Name", 100);
+            listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
             tabControlProperties.TabPages.Clear();
             SetupProperties(obj);
             if (tabControlProperties.TabCount == 0)
             {
                 tabControlProperties.TabPages.Add(tabPageNoProperties);
             }
-            this.Text = String.Format("{0} Properties", name);
+            this.Text = String.Format("{0} Properties", name.Replace("&", "&&"));
         }
 
         private async void btnRefreshInterfaces_Click(object sender, EventArgs e)
@@ -111,7 +141,7 @@ namespace OleViewDotNet
             try
             {
                 COMCLSIDEntry entry = (COMCLSIDEntry)tabPageSupportedInterfaces.Tag;
-                await entry.LoadSupportedInterfaces(true);
+                await entry.LoadSupportedInterfacesAsync(true);
                 LoadInterfaceList(entry.Interfaces, listViewInterfaces);                
                 LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
             }
