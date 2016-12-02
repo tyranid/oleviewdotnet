@@ -45,7 +45,6 @@ namespace OleViewDotNet
     [Serializable]
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>
     {
-        private List<string> m_progids;
         private HashSet<Guid> m_categories;
         private List<COMInterfaceEntry> m_proxies;
         private COMRegistry m_registry;
@@ -225,16 +224,16 @@ namespace OleViewDotNet
             }
 
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
-            string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
-            if (!String.IsNullOrEmpty(progid))
-            {
-                AddProgID(progid);
-            }
-            progid = COMUtilities.ReadStringFromKey(key, "VersionIndependentProgID", null);
-            if (!String.IsNullOrEmpty(progid))
-            {
-                AddProgID(progid);
-            }
+            //string progid = COMUtilities.ReadStringFromKey(key, "ProgID", null);
+            //if (!String.IsNullOrEmpty(progid))
+            //{
+            //    AddProgID(progid);
+            //}
+            //progid = COMUtilities.ReadStringFromKey(key, "VersionIndependentProgID", null);
+            //if (!String.IsNullOrEmpty(progid))
+            //{
+            //    AddProgID(progid);
+            //}
 
             if (key.HasSubkey("Control"))
             {
@@ -271,14 +270,6 @@ namespace OleViewDotNet
             TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
         }
 
-        public void AddProgID(string progid)
-        {
-            if (!m_progids.Contains(progid))
-            {
-                m_progids.Add(progid);
-            }
-        }
-
         public void AddProxy(COMInterfaceEntry ent)
         {
             m_proxies.Add(ent);
@@ -293,7 +284,6 @@ namespace OleViewDotNet
         {
             Clsid = clsid;
             m_registry = registry;
-            m_progids = new List<string>();
             m_proxies = new List<COMInterfaceEntry>();
             m_categories = new HashSet<Guid>();
             Server = String.Empty;
@@ -322,7 +312,10 @@ namespace OleViewDotNet
 
         public IEnumerable<string> ProgIDs
         {
-            get { return m_progids.AsReadOnly(); }
+            get
+            {
+                return m_registry.GetProgIdsForClsid(Clsid).Select(e => e.ProgID);
+            }
         }
         
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()

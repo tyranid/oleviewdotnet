@@ -25,18 +25,12 @@ namespace OleViewDotNet
         private string m_progid;
         private Guid m_clsid;
         private string m_name;
-        private COMCLSIDEntry m_entry;
 
-        public COMProgIDEntry(string progid, Guid clsid, COMCLSIDEntry entry, RegistryKey rootKey)
+        public COMProgIDEntry(string progid, Guid clsid, RegistryKey rootKey)
         {
             m_clsid = clsid;
             m_progid = progid;
-            m_entry = entry;
             m_name = "";
-            if (entry != null)
-            {
-                entry.AddProgID(progid);
-            }
         }
 
         public int CompareTo(COMProgIDEntry right)
@@ -52,11 +46,6 @@ namespace OleViewDotNet
         public Guid Clsid
         {
             get { return m_clsid; }
-        }
-
-        public COMCLSIDEntry Entry
-        {
-            get { return m_entry; }
         }
 
         public string Name

@@ -46,19 +46,6 @@ namespace OleViewDotNet
         {
         }
 
-
-        public COMInterfaceEntry MapToRegistryEntry(COMRegistry registry)
-        {
-            if (registry.Interfaces.ContainsKey(Iid))
-            {
-                return registry.Interfaces[Iid];
-            }
-            else
-            {
-                return new COMInterfaceEntry(Iid);
-            }
-        }
-
         public override string ToString()
         {
             if (!String.IsNullOrWhiteSpace(ModulePath))

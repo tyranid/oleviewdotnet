@@ -29,7 +29,7 @@ namespace OleViewDotNet
             view.Items.Clear();
             foreach (COMInterfaceInstance entry in entries)
             {
-                COMInterfaceEntry int_entry = entry.MapToRegistryEntry(_registry);
+                COMInterfaceEntry int_entry = _registry.MapIidToInterface(entry.Iid);
                 ListViewItem item = view.Items.Add(int_entry.Name);
                 item.SubItems.Add(int_entry.NumMethods.ToString());
                 if (!String.IsNullOrWhiteSpace(entry.ModulePath))
@@ -102,9 +102,10 @@ namespace OleViewDotNet
             if (obj is COMProgIDEntry)
             {
                 COMProgIDEntry entry = (COMProgIDEntry)obj;
-                if (entry.Entry != null)
+                COMCLSIDEntry clsid_entry = _registry.MapClsidToEntry(entry.Clsid);
+                if (clsid_entry != null)
                 {
-                    SetupClsidEntry(entry.Entry);
+                    SetupClsidEntry(clsid_entry);
                 }
             }
 

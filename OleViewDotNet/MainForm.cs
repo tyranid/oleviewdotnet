@@ -262,7 +262,7 @@ namespace OleViewDotNet
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.Server);
                     await ent.LoadSupportedInterfacesAsync(false);
-                    ints = ent.Interfaces.Select(i => i.MapToRegistryEntry(m_registry));
+                    ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                 }
                 else
                 {

@@ -212,9 +212,10 @@ namespace OleViewDotNet
         private string BuildProgIDToolTip(COMProgIDEntry ent)
         {
             string strRet;
-            if (ent.Entry != null)
+            COMCLSIDEntry entry = m_reg.MapClsidToEntry(ent.Clsid);
+            if (entry != null)
             {
-                strRet = BuildCLSIDToolTip(ent.Entry);
+                strRet = BuildCLSIDToolTip(entry);
             }
             else
             {
@@ -293,7 +294,7 @@ namespace OleViewDotNet
                 progidNodes[i] = new TreeNode(ent.ProgID, ClassIcon, ClassIcon);
                 progidNodes[i].ToolTipText = BuildProgIDToolTip(ent);
                 progidNodes[i].Tag = ent;
-                if (ent.Entry != null)
+                if (m_reg.MapClsidToEntry(ent.Clsid) != null)
                 {
                     progidNodes[i].Nodes.Add("IUnknown");
                 }
@@ -724,7 +725,7 @@ namespace OleViewDotNet
             }
             else if (node.Tag is COMProgIDEntry)
             {
-                clsid = ((COMProgIDEntry)node.Tag).Entry;
+                clsid = m_reg.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
             }
 
             if (clsid != null)
@@ -740,7 +741,7 @@ namespace OleViewDotNet
                         node.Nodes.Remove(wait_node);
                         foreach (COMInterfaceInstance ent in clsid.Interfaces)
                         {
-                            node.Nodes.Add(CreateInterfaceNameNode(ent.MapToRegistryEntry(m_reg), ent));
+                            node.Nodes.Add(CreateInterfaceNameNode(m_reg.MapIidToInterface(ent.Iid), ent));
                         }
                     }
                     else
@@ -814,7 +815,7 @@ namespace OleViewDotNet
             }
         }
 
-        private static Guid GetGuidFromType(TreeNode node)
+        private Guid GetGuidFromType(TreeNode node)
         {
             Guid guid = Guid.Empty;
             if (node != null)
@@ -831,9 +832,9 @@ namespace OleViewDotNet
                 else if (tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)tag;
-                    if (ent.Entry != null)
+                    if (m_reg.MapClsidToEntry(ent.Clsid) != null)
                     {
-                        guid = ent.Entry.Clsid;
+                        guid = ent.Clsid;
                     }
                 }
                 else if (tag is COMTypeLibEntry)
@@ -897,9 +898,9 @@ namespace OleViewDotNet
                 else if (node.Tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                    if (ent.Entry != null)
+                    if (m_reg.MapClsidToEntry(ent.Clsid) != null)
                     {
-                        guid = ent.Entry.Clsid;
+                        guid = ent.Clsid;
                     }
                 }
 
@@ -923,7 +924,7 @@ namespace OleViewDotNet
                 }
                 else if (node.Tag is COMProgIDEntry)
                 {
-                    ent = ((COMProgIDEntry)node.Tag).Entry;
+                    ent = m_reg.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
                 }
                 
                 if(ent != null)
@@ -944,7 +945,7 @@ namespace OleViewDotNet
                             await ent.LoadSupportedInterfacesAsync(false);
 
                             ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, 
-                                props, ent.Interfaces.Select(i => i.MapToRegistryEntry(m_reg)).ToArray());
+                                props, ent.Interfaces.Select(i => m_reg.MapIidToInterface(i.Iid)).ToArray());
                             Program.GetMainForm().HostControl(view);
                         }
                     }
@@ -976,10 +977,10 @@ namespace OleViewDotNet
 
                     if (progid != null)
                     {
-                        clsid = progid.Entry;
+                        clsid = m_reg.MapClsidToEntry(progid.Clsid);
                     }
 
-                    if (m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    if (clsid != null && m_reg.Typelibs.ContainsKey(clsid.TypeLib))
                     {
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                     }
@@ -1206,10 +1207,10 @@ namespace OleViewDotNet
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                     if(progid != null)
                     {
-                        clsid = progid.Entry;
+                        clsid = m_reg.MapClsidToEntry(progid.Clsid);
                     }
 
-                    if(m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    if(clsid != null && m_reg.Typelibs.ContainsKey(clsid.TypeLib))
                     {
                         ent = m_reg.Typelibs[clsid.TypeLib].Versions.First();
                     }

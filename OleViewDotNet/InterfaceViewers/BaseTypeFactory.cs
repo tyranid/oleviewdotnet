@@ -123,9 +123,8 @@ namespace OleViewDotNet.InterfaceViewers
                     /* See if we have any registered in the current assembly */
                     LoadInterfaceViewersFromAssembly(Assembly.GetExecutingAssembly());
                 }
-                catch (Exception e)
+                catch
                 {
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
                 }
 
                 try

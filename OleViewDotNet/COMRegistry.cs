@@ -39,7 +39,8 @@ namespace OleViewDotNet
         private SortedDictionary<string, COMProgIDEntry> m_progids;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;  
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
+        private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
         private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
         private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
@@ -180,28 +181,6 @@ namespace OleViewDotNet
             COMUtilities.LoadTypeLibAssemblies();
         }
 
-        private void LoadMimeTypes(RegistryKey rootKey)
-        {
-            m_mimetypes = new List<COMMimeType>();
-            RegistryKey key = rootKey.OpenSubKey(@"mime\database\content type");
-            if (key == null)
-            {
-                return;
-            }
-
-            foreach (string mime_type in key.GetSubKeyNames())
-            {
-                RegistryKey sub_key = key.OpenSubKey(mime_type);
-                if (sub_key != null)
-                {
-                    COMMimeType obj = new COMMimeType(mime_type, sub_key);
-                    if (obj.Clsid != Guid.Empty)
-                    {
-                        m_mimetypes.Add(obj);
-                    }
-                }
-            }
-        }
         
         public static COMRegistry Load(RegistryKey rootKey)
         {
@@ -333,6 +312,49 @@ namespace OleViewDotNet
 
             return ret;
         }
+
+        /// <summary>
+        /// Map an IID to an interface object.
+        /// </summary>
+        /// <param name="iid">The interface to map.</param>
+        /// <returns>The mapped interface.</returns>
+        public COMInterfaceEntry MapIidToInterface(Guid iid)
+        {
+            if (m_interfaces.ContainsKey(iid))
+            {
+                return m_interfaces[iid];
+            }
+            else
+            {
+                return new COMInterfaceEntry(iid);
+            }
+        }
+
+        /// <summary>
+        /// Map a CLSID to an object.
+        /// </summary>
+        /// <param name="clsid">The CLSID to map.</param>
+        /// <returns>The object or null if not available.</returns>
+        public COMCLSIDEntry MapClsidToEntry(Guid clsid)
+        {
+            if (m_clsids.ContainsKey(clsid))
+            {
+                return m_clsids[clsid];
+            }
+            return null;
+        }
+
+        public IEnumerable<COMProgIDEntry> GetProgIdsForClsid(Guid clsid)
+        {
+            if (m_progidsbyclsid.ContainsKey(clsid))
+            {
+                return m_progidsbyclsid[clsid].AsReadOnly();
+            }
+            else
+            {
+                return new COMProgIDEntry[0];
+            }
+        }
         
 #endregion
 
@@ -442,6 +464,7 @@ namespace OleViewDotNet
         private void LoadProgIDs(RegistryKey rootKey)
         {
             m_progids = new SortedDictionary<string, COMProgIDEntry>();
+            m_progidsbyclsid = new Dictionary<Guid, List<COMProgIDEntry>>();
 
             string[] subkeys = rootKey.GetSubKeyNames();
             foreach (string key in subkeys)
@@ -450,23 +473,17 @@ namespace OleViewDotNet
                 {
                     using (RegistryKey regKey = rootKey.OpenSubKey(key))
                     {
-                        using (RegistryKey clsidKey = regKey.OpenSubKey("CLSID"))
+                        Guid clsid = COMUtilities.ReadGuidFromKey(regKey, "CLSID", null);
+                        if (clsid != Guid.Empty)
                         {
-                            if (clsidKey != null)
+                            COMProgIDEntry entry = new COMProgIDEntry(key, clsid, regKey);
+                            m_progids.Add(key, entry);
+                            if (!m_progidsbyclsid.ContainsKey(clsid))
                             {
-                                Guid clsid;
-                                object clsidString = clsidKey.GetValue(null);
-                                if (clsidString != null)
-                                {
-                                    COMCLSIDEntry entry = null;
-                                    clsid = new Guid(clsidString.ToString());
-                                    if (m_clsids.ContainsKey(clsid))
-                                    {
-                                        entry = m_clsids[clsid];
-                                    }
-                                    m_progids.Add(key, new COMProgIDEntry(key, clsid, entry, regKey));
-                                }
+                                m_progidsbyclsid[clsid] = new List<COMProgIDEntry>();
                             }
+
+                            m_progidsbyclsid[clsid].Add(entry);
                         }
                     }
                 }
@@ -617,12 +634,35 @@ namespace OleViewDotNet
             }
         }
 
-        void LoadLowRights()
+        private void LoadLowRights()
         {
             m_lowrights = new List<COMIELowRightsElevationPolicy>();
             LoadLowRightsKey(Registry.LocalMachine);
             LoadLowRightsKey(Registry.CurrentUser);
             m_lowrights.Sort();
+        }
+
+        private void LoadMimeTypes(RegistryKey rootKey)
+        {
+            m_mimetypes = new List<COMMimeType>();
+            RegistryKey key = rootKey.OpenSubKey(@"mime\database\content type");
+            if (key == null)
+            {
+                return;
+            }
+
+            foreach (string mime_type in key.GetSubKeyNames())
+            {
+                RegistryKey sub_key = key.OpenSubKey(mime_type);
+                if (sub_key != null)
+                {
+                    COMMimeType obj = new COMMimeType(mime_type, sub_key);
+                    if (obj.Clsid != Guid.Empty)
+                    {
+                        m_mimetypes.Add(obj);
+                    }
+                }
+            }
         }
 
         private void LoadAppIDs(RegistryKey rootKey)
