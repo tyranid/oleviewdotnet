@@ -29,7 +29,9 @@ namespace OleViewDotNet
             view.Items.Clear();
             foreach (COMInterfaceInstance entry in entries)
             {
-                ListViewItem item = view.Items.Add(entry.MapToRegistryEntry(_registry).Name);
+                COMInterfaceEntry int_entry = entry.MapToRegistryEntry(_registry);
+                ListViewItem item = view.Items.Add(int_entry.Name);
+                item.SubItems.Add(int_entry.NumMethods.ToString());
                 if (!String.IsNullOrWhiteSpace(entry.ModulePath))
                 {
                     item.SubItems.Add(String.Format("{0}+0x{1:X}", entry.ModulePath, entry.VTableOffset));
@@ -124,8 +126,10 @@ namespace OleViewDotNet
             listViewCategories.Columns.Add("Name", 100);
             listViewProgIDs.Columns.Add("Name", 100);
             listViewInterfaces.Columns.Add("Name", 100);
+            listViewInterfaces.Columns.Add("Methods", 100);
             listViewInterfaces.Columns.Add("VTable Offset", 100);
             listViewFactoryInterfaces.Columns.Add("Name", 100);
+            listViewFactoryInterfaces.Columns.Add("Methods", 100);
             listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
             tabControlProperties.TabPages.Clear();
             SetupProperties(obj);
