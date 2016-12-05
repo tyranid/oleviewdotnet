@@ -139,6 +139,16 @@ namespace OleViewDotNet
         STGM_DELETEONRELEASE = 0x04000000
     }
 
+    [Flags]
+    public enum ComAccessRights
+    {
+        Execute = 1,
+        ExecuteLocal = 2,
+        ExecuteRemote = 4,
+        ActivateLocal = 8,
+        ActivateRemote = 16,
+    }
+
     public static class COMUtilities
     {
         private enum RegKind
@@ -184,6 +194,65 @@ namespace OleViewDotNet
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         private extern static IntPtr LocalFree(IntPtr hMem);
+
+        enum COMSD
+        {
+            SD_LAUNCHPERMISSIONS = 0,       // Machine wide launch permissions
+            SD_ACCESSPERMISSIONS = 1,       // Machine wide acesss permissions
+            SD_LAUNCHRESTRICTIONS = 2,      // Machine wide launch limits
+            SD_ACCESSRESTRICTIONS = 3       // Machine wide access limits
+
+        }
+
+        [DllImport("ole32.dll")]
+        private extern static int CoGetSystemSecurityPermissions(COMSD comSDType, out IntPtr ppSD);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
+        private extern static int GetSecurityDescriptorLength(IntPtr sd);
+
+        private static byte[] GetSecurityPermissions(COMSD sdtype)
+        {
+            IntPtr sd = IntPtr.Zero;
+            try
+            {
+                int hr = CoGetSystemSecurityPermissions(sdtype, out sd);
+                if (hr != 0)
+                {
+                    throw new Win32Exception(hr);
+                }
+                int length = GetSecurityDescriptorLength(sd);
+                byte[] ret = new byte[length];
+                Marshal.Copy(sd, ret, 0, length);
+                return ret;
+            }
+            finally
+            {
+                if (sd != IntPtr.Zero)
+                {
+                    LocalFree(sd);
+                }
+            }
+        }
+
+        public static byte[] GetDefaultLaunchPermissions()
+        {
+            return GetSecurityPermissions(COMSD.SD_LAUNCHPERMISSIONS);
+        }
+
+        public static byte[] GetDefaultAccessPermissions()
+        {
+            return GetSecurityPermissions(COMSD.SD_ACCESSPERMISSIONS);
+        }
+
+        public static byte[] GetDefaultLaunchRestrictions()
+        {
+            return GetSecurityPermissions(COMSD.SD_LAUNCHRESTRICTIONS);
+        }
+
+        public static byte[] GetDefaultAccessRestrictions()
+        {
+            return GetSecurityPermissions(COMSD.SD_ACCESSRESTRICTIONS);
+        }
 
         public static string GetStringSDForSD(byte[] sd)
         {
