@@ -990,6 +990,20 @@ namespace OleViewDotNet
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
+
+                if (node.Tag is COMAppIDEntry)
+                {
+                    COMAppIDEntry appid = (COMAppIDEntry)node.Tag;
+                    if (appid.AccessPermission != null)
+                    {
+                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+                    }
+                    if (appid.LaunchPermission != null)
+                    {
+                        contextMenuStrip.Items.Add(viewLaunchPermissionsToolStripMenuItem);
+                    }
+                }
+
                 if (PropertiesControl.SupportsProperties(node.Tag))
                 {
                     contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
@@ -1240,6 +1254,25 @@ namespace OleViewDotNet
             {
                 Program.GetMainForm().HostControl(new PropertiesControl(m_reg, node.Text, node.Tag));
             }
+        }
+
+        private void ViewPermissions(bool access)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null && node.Tag is COMAppIDEntry)
+            {
+                COMSecurity.ViewSecurity(this, (COMAppIDEntry)node.Tag, access);
+            }
+        }
+
+        private void viewLaunchPermissionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ViewPermissions(false);
+        }
+
+        private void viewAccessPermissionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ViewPermissions(true);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace OleViewDotNet
     public partial class PropertiesControl : UserControl
     {
         private COMRegistry _registry;
+        private COMAppIDEntry _appid;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -51,7 +52,10 @@ namespace OleViewDotNet
             lblAppIdRunAs.Text = String.Format("Run As: {0}", entry.RunAs ?? "N/A");
             lblService.Text = String.Format("Service: {0}", entry.LocalService ?? "N/A");
             textBoxDllSurrogate.Text = entry.DllSurrogate ?? "N/A";
+            btnViewAccessPermissions.Enabled = entry.AccessPermission != null;
+            btnViewLaunchPermissions.Enabled = entry.LaunchPermission != null;
             tabControlProperties.TabPages.Add(tabPageAppID);
+            _appid = entry;
         }
 
         private void SetupClsidEntry(COMCLSIDEntry entry)
@@ -154,6 +158,16 @@ namespace OleViewDotNet
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void btnViewLaunchPermissions_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, _appid, false);
+        }
+
+        private void btnViewAccessPermissions_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, _appid, false);
         }
     }
 }

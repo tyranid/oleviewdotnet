@@ -192,7 +192,7 @@ namespace OleViewDotNet
         public void GetObjectInformation(IntPtr pObjectInfo)
         {
             SiObjectInfo object_info = new SiObjectInfo();
-            object_info.dwFlags = SiObjectInfoFlags.SI_READONLY | SiObjectInfoFlags.SI_ADVANCED | SiObjectInfoFlags.SI_EDIT_AUDITS 
+            object_info.dwFlags = SiObjectInfoFlags.SI_READONLY | SiObjectInfoFlags.SI_ADVANCED 
                 | SiObjectInfoFlags.SI_EDIT_OWNER | SiObjectInfoFlags.SI_EDIT_PROPERTIES | SiObjectInfoFlags.SI_NO_ADDITIONAL_PERMISSION;
             object_info.pszObjectName = _obj_name;
             Marshal.StructureToPtr(object_info, pObjectInfo, false);
@@ -289,6 +289,12 @@ namespace OleViewDotNet
             {
                 EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, si);
             }
+        }
+
+        public static void ViewSecurity(IWin32Window parent, COMAppIDEntry appid, bool access)
+        {
+            ViewSecurity(parent, String.Format("{0} {1} Permissions", appid.Name, access ? "Access" : "Launch"),
+                    access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
 
         const uint SDDL_REVISION_1 = 1;

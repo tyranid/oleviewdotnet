@@ -52,9 +52,10 @@
             this.textBoxClsid = new System.Windows.Forms.TextBox();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
             this.tabPageSupportedInterfaces = new System.Windows.Forms.TabPage();
+            this.splitContainerInterfaces = new System.Windows.Forms.SplitContainer();
             this.btnRefreshInterfaces = new System.Windows.Forms.Button();
-            this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.listViewInterfaces = new System.Windows.Forms.ListView();
+            this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.tabPageAppID = new System.Windows.Forms.TabPage();
             this.textBoxDllSurrogate = new System.Windows.Forms.TextBox();
             this.lblService = new System.Windows.Forms.Label();
@@ -63,7 +64,8 @@
             this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdName = new System.Windows.Forms.TextBox();
             this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
-            this.splitContainerInterfaces = new System.Windows.Forms.SplitContainer();
+            this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
+            this.btnViewAccessPermissions = new System.Windows.Forms.Button();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -81,11 +83,11 @@
             this.tabPageClsid.SuspendLayout();
             this.tabPageNoProperties.SuspendLayout();
             this.tabPageSupportedInterfaces.SuspendLayout();
-            this.tabPageAppID.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerInterfaces)).BeginInit();
             this.splitContainerInterfaces.Panel1.SuspendLayout();
             this.splitContainerInterfaces.Panel2.SuspendLayout();
             this.splitContainerInterfaces.SuspendLayout();
+            this.tabPageAppID.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -328,6 +330,27 @@
             this.tabPageSupportedInterfaces.Text = "Supported Interfaces";
             this.tabPageSupportedInterfaces.UseVisualStyleBackColor = true;
             // 
+            // splitContainerInterfaces
+            // 
+            this.splitContainerInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerInterfaces.Location = new System.Drawing.Point(3, 3);
+            this.splitContainerInterfaces.Name = "splitContainerInterfaces";
+            this.splitContainerInterfaces.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainerInterfaces.Panel1
+            // 
+            this.splitContainerInterfaces.Panel1.Controls.Add(label5);
+            this.splitContainerInterfaces.Panel1.Controls.Add(this.btnRefreshInterfaces);
+            this.splitContainerInterfaces.Panel1.Controls.Add(this.listViewInterfaces);
+            // 
+            // splitContainerInterfaces.Panel2
+            // 
+            this.splitContainerInterfaces.Panel2.Controls.Add(label6);
+            this.splitContainerInterfaces.Panel2.Controls.Add(this.listViewFactoryInterfaces);
+            this.splitContainerInterfaces.Size = new System.Drawing.Size(679, 427);
+            this.splitContainerInterfaces.SplitterDistance = 207;
+            this.splitContainerInterfaces.TabIndex = 13;
+            // 
             // btnRefreshInterfaces
             // 
             this.btnRefreshInterfaces.Location = new System.Drawing.Point(66, 6);
@@ -337,21 +360,6 @@
             this.btnRefreshInterfaces.Text = "Refresh";
             this.btnRefreshInterfaces.UseVisualStyleBackColor = true;
             this.btnRefreshInterfaces.Click += new System.EventHandler(this.btnRefreshInterfaces_Click);
-            // 
-            // listViewFactoryInterfaces
-            // 
-            this.listViewFactoryInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewFactoryInterfaces.FullRowSelect = true;
-            this.listViewFactoryInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(3, 34);
-            this.listViewFactoryInterfaces.MultiSelect = false;
-            this.listViewFactoryInterfaces.Name = "listViewFactoryInterfaces";
-            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(673, 179);
-            this.listViewFactoryInterfaces.TabIndex = 10;
-            this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
-            this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
             // 
             // listViewInterfaces
             // 
@@ -368,8 +376,25 @@
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
             // 
+            // listViewFactoryInterfaces
+            // 
+            this.listViewFactoryInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewFactoryInterfaces.FullRowSelect = true;
+            this.listViewFactoryInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(3, 34);
+            this.listViewFactoryInterfaces.MultiSelect = false;
+            this.listViewFactoryInterfaces.Name = "listViewFactoryInterfaces";
+            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(673, 179);
+            this.listViewFactoryInterfaces.TabIndex = 10;
+            this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
+            this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
+            // 
             // tabPageAppID
             // 
+            this.tabPageAppID.Controls.Add(this.btnViewAccessPermissions);
+            this.tabPageAppID.Controls.Add(this.btnViewLaunchPermissions);
             this.tabPageAppID.Controls.Add(this.textBoxDllSurrogate);
             this.tabPageAppID.Controls.Add(label12);
             this.tabPageAppID.Controls.Add(this.lblService);
@@ -421,7 +446,7 @@
             this.textBoxAccessPermission.Location = new System.Drawing.Point(5, 185);
             this.textBoxAccessPermission.Name = "textBoxAccessPermission";
             this.textBoxAccessPermission.ReadOnly = true;
-            this.textBoxAccessPermission.Size = new System.Drawing.Size(376, 20);
+            this.textBoxAccessPermission.Size = new System.Drawing.Size(295, 20);
             this.textBoxAccessPermission.TabIndex = 13;
             // 
             // textBoxLaunchPermission
@@ -429,7 +454,7 @@
             this.textBoxLaunchPermission.Location = new System.Drawing.Point(5, 141);
             this.textBoxLaunchPermission.Name = "textBoxLaunchPermission";
             this.textBoxLaunchPermission.ReadOnly = true;
-            this.textBoxLaunchPermission.Size = new System.Drawing.Size(376, 20);
+            this.textBoxLaunchPermission.Size = new System.Drawing.Size(295, 20);
             this.textBoxLaunchPermission.TabIndex = 11;
             // 
             // textBoxAppIdName
@@ -448,26 +473,25 @@
             this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
-            // splitContainerInterfaces
+            // btnViewLaunchPermissions
             // 
-            this.splitContainerInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerInterfaces.Location = new System.Drawing.Point(3, 3);
-            this.splitContainerInterfaces.Name = "splitContainerInterfaces";
-            this.splitContainerInterfaces.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.btnViewLaunchPermissions.Location = new System.Drawing.Point(306, 138);
+            this.btnViewLaunchPermissions.Name = "btnViewLaunchPermissions";
+            this.btnViewLaunchPermissions.Size = new System.Drawing.Size(75, 23);
+            this.btnViewLaunchPermissions.TabIndex = 18;
+            this.btnViewLaunchPermissions.Text = "View";
+            this.btnViewLaunchPermissions.UseVisualStyleBackColor = true;
+            this.btnViewLaunchPermissions.Click += new System.EventHandler(this.btnViewLaunchPermissions_Click);
             // 
-            // splitContainerInterfaces.Panel1
+            // btnViewAccessPermissions
             // 
-            this.splitContainerInterfaces.Panel1.Controls.Add(label5);
-            this.splitContainerInterfaces.Panel1.Controls.Add(this.btnRefreshInterfaces);
-            this.splitContainerInterfaces.Panel1.Controls.Add(this.listViewInterfaces);
-            // 
-            // splitContainerInterfaces.Panel2
-            // 
-            this.splitContainerInterfaces.Panel2.Controls.Add(label6);
-            this.splitContainerInterfaces.Panel2.Controls.Add(this.listViewFactoryInterfaces);
-            this.splitContainerInterfaces.Size = new System.Drawing.Size(679, 427);
-            this.splitContainerInterfaces.SplitterDistance = 207;
-            this.splitContainerInterfaces.TabIndex = 13;
+            this.btnViewAccessPermissions.Location = new System.Drawing.Point(306, 185);
+            this.btnViewAccessPermissions.Name = "btnViewAccessPermissions";
+            this.btnViewAccessPermissions.Size = new System.Drawing.Size(75, 23);
+            this.btnViewAccessPermissions.TabIndex = 19;
+            this.btnViewAccessPermissions.Text = "View";
+            this.btnViewAccessPermissions.UseVisualStyleBackColor = true;
+            this.btnViewAccessPermissions.Click += new System.EventHandler(this.btnViewAccessPermissions_Click);
             // 
             // PropertiesControl
             // 
@@ -483,14 +507,14 @@
             this.tabPageNoProperties.ResumeLayout(false);
             this.tabPageNoProperties.PerformLayout();
             this.tabPageSupportedInterfaces.ResumeLayout(false);
-            this.tabPageAppID.ResumeLayout(false);
-            this.tabPageAppID.PerformLayout();
             this.splitContainerInterfaces.Panel1.ResumeLayout(false);
             this.splitContainerInterfaces.Panel1.PerformLayout();
             this.splitContainerInterfaces.Panel2.ResumeLayout(false);
             this.splitContainerInterfaces.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerInterfaces)).EndInit();
             this.splitContainerInterfaces.ResumeLayout(false);
+            this.tabPageAppID.ResumeLayout(false);
+            this.tabPageAppID.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -520,5 +544,7 @@
         private System.Windows.Forms.Label lblService;
         private System.Windows.Forms.TextBox textBoxDllSurrogate;
         private System.Windows.Forms.SplitContainer splitContainerInterfaces;
+        private System.Windows.Forms.Button btnViewLaunchPermissions;
+        private System.Windows.Forms.Button btnViewAccessPermissions;
     }
 }

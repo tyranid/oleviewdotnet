@@ -41,12 +41,14 @@
             this.createInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -100,59 +102,68 @@
             this.createInstanceToolStripMenuItem,
             this.refreshInterfacesToolStripMenuItem,
             this.viewTypeLibraryToolStripMenuItem,
+            this.viewLaunchPermissionsToolStripMenuItem,
+            this.viewAccessPermissionsToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(195, 202);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 246);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
             // 
             this.copyGUIDToolStripMenuItem.Name = "copyGUIDToolStripMenuItem";
-            this.copyGUIDToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGUIDToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.copyGUIDToolStripMenuItem.Text = "Copy GUID";
             this.copyGUIDToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDToolStripMenuItem_Click);
             // 
             // copyGUIDCStructureToolStripMenuItem
             // 
             this.copyGUIDCStructureToolStripMenuItem.Name = "copyGUIDCStructureToolStripMenuItem";
-            this.copyGUIDCStructureToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGUIDCStructureToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.copyGUIDCStructureToolStripMenuItem.Text = "Copy GUID C Structure";
             this.copyGUIDCStructureToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDCStructureToolStripMenuItem_Click);
             // 
             // copyGUIDHexStringToolStripMenuItem
             // 
             this.copyGUIDHexStringToolStripMenuItem.Name = "copyGUIDHexStringToolStripMenuItem";
-            this.copyGUIDHexStringToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGUIDHexStringToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.copyGUIDHexStringToolStripMenuItem.Text = "Copy GUID Hex String";
             this.copyGUIDHexStringToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDHexStringToolStripMenuItem_Click);
             // 
             // copyObjectTagToolStripMenuItem
             // 
             this.copyObjectTagToolStripMenuItem.Name = "copyObjectTagToolStripMenuItem";
-            this.copyObjectTagToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyObjectTagToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.copyObjectTagToolStripMenuItem.Text = "Copy Object Tag";
             this.copyObjectTagToolStripMenuItem.Click += new System.EventHandler(this.copyObjectTagToolStripMenuItem_Click);
             // 
             // createInstanceToolStripMenuItem
             // 
             this.createInstanceToolStripMenuItem.Name = "createInstanceToolStripMenuItem";
-            this.createInstanceToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.createInstanceToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.createInstanceToolStripMenuItem.Text = "Create Instance";
             this.createInstanceToolStripMenuItem.Click += new System.EventHandler(this.createInstanceToolStripMenuItem_Click);
             // 
             // refreshInterfacesToolStripMenuItem
             // 
             this.refreshInterfacesToolStripMenuItem.Name = "refreshInterfacesToolStripMenuItem";
-            this.refreshInterfacesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.refreshInterfacesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.refreshInterfacesToolStripMenuItem.Text = "Refresh Interfaces";
             this.refreshInterfacesToolStripMenuItem.Click += new System.EventHandler(this.refreshInterfacesToolStripMenuItem_Click);
             // 
             // viewTypeLibraryToolStripMenuItem
             // 
             this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
-            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
             this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
+            // propertiesToolStripMenuItem
+            // 
+            this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
+            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.propertiesToolStripMenuItem.Text = "Properties";
+            this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
             // treeImageList
             // 
@@ -221,12 +232,19 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // propertiesToolStripMenuItem
+            // viewLaunchPermissionsToolStripMenuItem
             // 
-            this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
-            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.propertiesToolStripMenuItem.Text = "Properties";
-            this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
+            this.viewLaunchPermissionsToolStripMenuItem.Name = "viewLaunchPermissionsToolStripMenuItem";
+            this.viewLaunchPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewLaunchPermissionsToolStripMenuItem.Text = "View Launch Permissions";
+            this.viewLaunchPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewLaunchPermissionsToolStripMenuItem_Click);
+            // 
+            // viewAccessPermissionsToolStripMenuItem
+            // 
+            this.viewAccessPermissionsToolStripMenuItem.Name = "viewAccessPermissionsToolStripMenuItem";
+            this.viewAccessPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewAccessPermissionsToolStripMenuItem.Text = "View Access Permissions";
+            this.viewAccessPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewAccessPermissionsToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -261,5 +279,7 @@
         private System.Windows.Forms.ComboBox comboBoxMode;
         private System.Windows.Forms.ToolStripMenuItem viewTypeLibraryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewLaunchPermissionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewAccessPermissionsToolStripMenuItem;
     }
 }
