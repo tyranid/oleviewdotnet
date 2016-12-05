@@ -518,13 +518,13 @@ namespace OleViewDotNet
                 {
                     COMAppIDEntry appidEnt = appids[pair.Key];
                     
-                    if (filterIL && String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.AccessPermission)) &&
-                        String.IsNullOrWhiteSpace(COMUtilities.GetILForSD(appidEnt.LaunchPermission)))
+                    if (filterIL && String.IsNullOrWhiteSpace(COMSecurity.GetILForSD(appidEnt.AccessPermission)) &&
+                        String.IsNullOrWhiteSpace(COMSecurity.GetILForSD(appidEnt.LaunchPermission)))
                     {
                         continue;
                     }
 
-                    if (filterAC && !COMUtilities.SDHasAC(appidEnt.AccessPermission) && !COMUtilities.SDHasAC(appidEnt.LaunchPermission))
+                    if (filterAC && !COMSecurity.SDHasAC(appidEnt.AccessPermission) && !COMSecurity.SDHasAC(appidEnt.LaunchPermission))
                     {
                         continue;
                     }

@@ -110,7 +110,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        return COMUtilities.GetStringSDForSD(m_launch);
+                        return COMSecurity.GetStringSDForSD(m_launch);
                     }
                     catch (Win32Exception)
                     {
@@ -129,7 +129,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        return COMUtilities.GetStringSDForSD(m_access);
+                        return COMSecurity.GetStringSDForSD(m_access);
                     }
                     catch (Win32Exception)
                     {

@@ -230,6 +230,7 @@
     <Compile Include="PythonConsole.Designer.cs">
       <DependentUpon>PythonConsole.cs</DependentUpon>
     </Compile>
+    <Compile Include="COMSecurity.cs" />
     <Compile Include="SimpleSyntaxModeProvider.cs" />
     <Compile Include="TypedObjectViewer.cs">
       <SubType>UserControl</SubType>

@@ -414,5 +414,25 @@ namespace OleViewDotNet
         {
             OpenView(COMRegistryViewer.DisplayMode.AppIDsWithAC);
         }
+
+        private void menuSecurityDefaultAccess_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, "Default Access", COMSecurity.GetDefaultAccessPermissions(), true);
+        }
+
+        private void menuSecurityDefaultAccessRestriction_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, "Default Access Restrictions", COMSecurity.GetDefaultAccessRestrictions(), true);
+        }
+
+        private void menuSecurityDefaultLaunch_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, "Default Launch", COMSecurity.GetDefaultLaunchPermissions(), false);
+        }
+
+        private void menuSecurityDefaultLaunchRestriction_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, "Default Launch Restrictions", COMSecurity.GetDefaultLaunchRestrictions(), false);
+        }
     }
 }

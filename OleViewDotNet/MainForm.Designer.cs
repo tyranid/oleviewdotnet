@@ -50,6 +50,7 @@
             this.menuViewIELowRights = new System.Windows.Forms.MenuItem();
             this.menuViewAppIDs = new System.Windows.Forms.MenuItem();
             this.menuRegistryAppIDsIL = new System.Windows.Forms.MenuItem();
+            this.menuRegistryAppIDsWithAC = new System.Windows.Forms.MenuItem();
             this.menuViewLocalServices = new System.Windows.Forms.MenuItem();
             this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
@@ -64,7 +65,11 @@
             this.menuObjectBindMoniker = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryAppIDsWithAC = new System.Windows.Forms.MenuItem();
+            this.menuSecurity = new System.Windows.Forms.MenuItem();
+            this.menuSecurityDefaultAccess = new System.Windows.Forms.MenuItem();
+            this.menuSecurityDefaultAccessRestriction = new System.Windows.Forms.MenuItem();
+            this.menuSecurityDefaultLaunch = new System.Windows.Forms.MenuItem();
+            this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -73,7 +78,8 @@
             this.menuFile,
             this.menuRegistry,
             this.menuObject,
-            this.menuHelp});
+            this.menuHelp,
+            this.menuSecurity});
             // 
             // menuFile
             // 
@@ -213,6 +219,12 @@
             this.menuRegistryAppIDsIL.Text = "App IDs With IL";
             this.menuRegistryAppIDsIL.Click += new System.EventHandler(this.menuRegistryAppIDsIL_Click);
             // 
+            // menuRegistryAppIDsWithAC
+            // 
+            this.menuRegistryAppIDsWithAC.Index = 11;
+            this.menuRegistryAppIDsWithAC.Text = "App IDs with AppContainer";
+            this.menuRegistryAppIDsWithAC.Click += new System.EventHandler(this.menuRegistryAppIDsWithAC_Click);
+            // 
             // menuViewLocalServices
             // 
             this.menuViewLocalServices.Index = 12;
@@ -302,11 +314,39 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryAppIDsWithAC
+            // menuSecurity
             // 
-            this.menuRegistryAppIDsWithAC.Index = 11;
-            this.menuRegistryAppIDsWithAC.Text = "App IDs with AppContainer";
-            this.menuRegistryAppIDsWithAC.Click += new System.EventHandler(this.menuRegistryAppIDsWithAC_Click);
+            this.menuSecurity.Index = 4;
+            this.menuSecurity.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuSecurityDefaultAccess,
+            this.menuSecurityDefaultAccessRestriction,
+            this.menuSecurityDefaultLaunch,
+            this.menuSecurityDefaultLaunchRestriction});
+            this.menuSecurity.Text = "&Security";
+            // 
+            // menuSecurityDefaultAccess
+            // 
+            this.menuSecurityDefaultAccess.Index = 0;
+            this.menuSecurityDefaultAccess.Text = "View Default Access";
+            this.menuSecurityDefaultAccess.Click += new System.EventHandler(this.menuSecurityDefaultAccess_Click);
+            // 
+            // menuSecurityDefaultAccessRestriction
+            // 
+            this.menuSecurityDefaultAccessRestriction.Index = 1;
+            this.menuSecurityDefaultAccessRestriction.Text = "View Default Access Restriction";
+            this.menuSecurityDefaultAccessRestriction.Click += new System.EventHandler(this.menuSecurityDefaultAccessRestriction_Click);
+            // 
+            // menuSecurityDefaultLaunch
+            // 
+            this.menuSecurityDefaultLaunch.Index = 2;
+            this.menuSecurityDefaultLaunch.Text = "View Default Launch";
+            this.menuSecurityDefaultLaunch.Click += new System.EventHandler(this.menuSecurityDefaultLaunch_Click);
+            // 
+            // menuSecurityDefaultLaunchRestriction
+            // 
+            this.menuSecurityDefaultLaunchRestriction.Index = 3;
+            this.menuSecurityDefaultLaunchRestriction.Text = "View Default Launch Restriction";
+            this.menuSecurityDefaultLaunchRestriction.Click += new System.EventHandler(this.menuSecurityDefaultLaunchRestriction_Click);
             // 
             // MainForm
             // 
@@ -360,6 +400,11 @@
         private System.Windows.Forms.MenuItem menuFileSaveDatabase;
         private System.Windows.Forms.MenuItem menuRegistryMimeTypes;
         private System.Windows.Forms.MenuItem menuRegistryAppIDsWithAC;
+        private System.Windows.Forms.MenuItem menuSecurity;
+        private System.Windows.Forms.MenuItem menuSecurityDefaultAccess;
+        private System.Windows.Forms.MenuItem menuSecurityDefaultAccessRestriction;
+        private System.Windows.Forms.MenuItem menuSecurityDefaultLaunch;
+        private System.Windows.Forms.MenuItem menuSecurityDefaultLaunchRestriction;
     }
 }
 
