@@ -23,38 +23,34 @@ namespace OleViewDotNet
     [Serializable]
     public class COMTypeLibEntry : IComparable<COMTypeLibEntry>
     {
-        Guid m_typelibid;
-        List<COMTypeLibVersionEntry> m_versions;
-
-        private void LoadFromKey(RegistryKey key)
+        private List<COMTypeLibVersionEntry> LoadFromKey(RegistryKey key)
         {
+            List<COMTypeLibVersionEntry> ret = new List<COMTypeLibVersionEntry>();
             foreach (string version in key.GetSubKeyNames())
             {
                 using (RegistryKey subKey = key.OpenSubKey(version))
                 {
                     if (subKey != null)
                     {
-                        COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(version, m_typelibid, subKey);
-                        m_versions.Add(entry);
+                        ret.Add(new COMTypeLibVersionEntry(version, TypelibId, subKey));
                     }
                 }
             }
-
+            return ret;
         }
 
-        public Guid TypelibId { get { return m_typelibid; } }
-        public IEnumerable<COMTypeLibVersionEntry> Versions { get { return m_versions.AsReadOnly(); } }
+        public Guid TypelibId { get; private set; }
+        public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
 
         public COMTypeLibEntry(Guid typelibid, RegistryKey rootKey)
         {
-            m_typelibid = typelibid;
-            m_versions = new List<COMTypeLibVersionEntry>();
-            LoadFromKey(rootKey);
+            TypelibId = typelibid;
+            Versions = LoadFromKey(rootKey).AsReadOnly();
         }
 
         public int CompareTo(COMTypeLibEntry other)
         {
-            return m_typelibid.CompareTo(other.m_typelibid);
+            return TypelibId.CompareTo(other.TypelibId);
         }
     }
 

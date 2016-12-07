@@ -17,6 +17,7 @@
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
+using System.Xml;
 
 namespace OleViewDotNet
 {
@@ -35,7 +36,7 @@ namespace OleViewDotNet
     }
 
     [Serializable]
-    public class COMAppIDEntry : IComparable<COMAppIDEntry>
+    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerialize
     {     
         public COMAppIDEntry(Guid appId, RegistryKey key)
         {
@@ -55,7 +56,7 @@ namespace OleViewDotNet
                 {
                 }
             }
-            return null;
+            return String.Empty;
         }
 
         private void LoadFromKey(RegistryKey key)
@@ -174,6 +175,49 @@ namespace OleViewDotNet
             return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() ^ LocalService.GetSafeHashCode() 
                 ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
                 LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode();
+        }
+
+        public COMAppIDEntry(XmlReader reader)
+        {
+            AppId = new Guid(reader.GetAttribute("appid"));
+            DllSurrogate = reader.GetAttribute("dllsurrogate");
+            LocalService = reader.GetAttribute("localservice");
+            RunAs = reader.GetAttribute("runas");
+            Name = reader.GetAttribute("name");
+            Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.GetAttribute("flags"), true);
+            LaunchPermission = reader.GetAttribute("launchperm");
+            AccessPermission = reader.GetAttribute("accessperm");
+        }
+
+        void IXmlSerialize.Serialize(XmlWriter writer)
+        {
+            writer.WriteAttributeString("appid", AppId.ToString());
+            if (DllSurrogate != null)
+            {
+                writer.WriteAttributeString("dllsurrogate", DllSurrogate);
+            }
+            if (LocalService != null)
+            {
+                writer.WriteAttributeString("localservice", LocalService);
+            }
+            if (RunAs != null)
+            {
+                writer.WriteAttributeString("runas", RunAs);
+            }
+            if (Name != null)
+            {
+                writer.WriteAttributeString("name", Name);
+            }
+            writer.WriteAttributeString("flags", Flags.ToString());
+            if (LaunchPermission != null)
+            {
+                writer.WriteAttributeString("launchperm", LaunchPermission);
+            }
+
+            if (AccessPermission != null)
+            {
+                writer.WriteAttributeString("accessperm", AccessPermission);
+            }
         }
     }
 }

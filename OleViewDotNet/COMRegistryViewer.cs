@@ -334,7 +334,6 @@ namespace OleViewDotNet
             int i = 0;
             SortedDictionary<string, List<COMCLSIDEntry>> dict;
             
-            
             if(serverType == ServerType.Local)
             {
                 Text = "CLSIDs by Local Server";
@@ -349,7 +348,7 @@ namespace OleViewDotNet
             {
                 Text = "CLSIDs by Server";
                 dict = m_registry.ClsidsByServer;
-            }            
+            } 
             
             TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
             foreach (KeyValuePair<string, List<COMCLSIDEntry>> pair in dict)
@@ -511,16 +510,14 @@ namespace OleViewDotNet
                 AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
             }
 
-            string perm = appidEnt.LaunchPermission;
-            if (perm != null)
+            if (appidEnt.HasLaunchPermission)
             {
-                AppendFormatLine(builder, "Launch: {0}", LimitString(perm, 64));
+                AppendFormatLine(builder, "Launch: {0}", LimitString(appidEnt.LaunchPermission, 64));
             }
 
-            perm = appidEnt.AccessPermission;
-            if (perm != null)
+            if (appidEnt.HasAccessPermission)
             {
-                AppendFormatLine(builder, "Access: {0}", LimitString(perm, 64));
+                AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermission, 64));
             }
             return builder.ToString();
         }
@@ -814,7 +811,20 @@ namespace OleViewDotNet
 
             if (strCopy != null)
             {
-                Clipboard.SetText(strCopy);
+                int tries = 10;
+                while (tries > 0)
+                {
+                    try
+                    {
+                        Clipboard.SetText(strCopy);
+                        break;
+                    }
+                    catch (ExternalException)
+                    {
+                    }
+                    System.Threading.Thread.Sleep(100);
+                    tries--;
+                }
             }
         }
 

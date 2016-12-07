@@ -15,47 +15,77 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Xml;
 using Microsoft.Win32;
 
 namespace OleViewDotNet
 {
     [Serializable]
-    public class COMProgIDEntry : IComparable<COMProgIDEntry>
+    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerialize
     {
-        private string m_progid;
-        private Guid m_clsid;
-        private string m_name;
-
         public COMProgIDEntry(string progid, Guid clsid, RegistryKey rootKey)
         {
-            m_clsid = clsid;
-            m_progid = progid;
-            m_name = "";
+            Clsid = clsid;
+            ProgID = progid;
+            Name = rootKey.GetValue(null, String.Empty).ToString();
         }
 
         public int CompareTo(COMProgIDEntry right)
         {
-            return String.Compare(m_progid, right.m_progid);
+            return String.Compare(ProgID, right.ProgID);
         }
 
-        public string ProgID
-        {
-            get { return m_progid; }
-        }
+        public string ProgID { get; private set; }
 
-        public Guid Clsid
-        {
-            get { return m_clsid; }
-        }
+        public Guid Clsid { get; private set; }
 
-        public string Name
-        {
-            get { return m_name; }
-        }
+        public string Name { get; private set; }
 
         public override string ToString()
         {
-            return String.Format("COMProgIDEntry: {0}", m_name);
+            return String.Format("COMProgIDEntry: {0}", Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMProgIDEntry right = obj as COMProgIDEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return ProgID == right.ProgID && Name == right.Name && Clsid == right.Clsid;
+        }
+
+        public override int GetHashCode()
+        {
+            return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode();
+        }
+
+        public COMProgIDEntry(XmlReader reader)
+        {
+            ProgID = reader.GetAttribute("progid");
+            Clsid = new Guid(reader.GetAttribute("clsid"));
+            string name = reader.GetAttribute("name");
+            if (name != null)
+            {
+                Name = name;
+            }
+        }
+
+        void IXmlSerialize.Serialize(XmlWriter writer)
+        {            
+            writer.WriteAttributeString("progid", ProgID);
+            writer.WriteAttributeString("clsid", Clsid.ToString());
+            if (Name != null)
+            {
+                writer.WriteAttributeString("name", Name);
+            }
         }
     }
 }

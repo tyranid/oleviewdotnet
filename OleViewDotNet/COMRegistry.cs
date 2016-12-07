@@ -24,6 +24,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
+using System.Xml;
 
 namespace OleViewDotNet
 {
@@ -180,7 +181,6 @@ namespace OleViewDotNet
             InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
             COMUtilities.LoadTypeLibAssemblies();
         }
-
         
         public static COMRegistry Load(RegistryKey rootKey)
         {
@@ -272,6 +272,20 @@ namespace OleViewDotNet
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(stm, this);
+            }
+        }
+
+        private void WriteProgIds()
+        {
+            
+        }
+
+        public void SaveXml(string path)
+        {
+            using (XmlWriter writer = XmlWriter.Create(path))
+            {
+                writer.WriteStartElement("comregistry");
+                writer.WriteEndElement();
             }
         }
 
