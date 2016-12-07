@@ -150,6 +150,7 @@ namespace OleViewDotNet
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
                             await ent.LoadSupportedInterfacesAsync(false);
+                            ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                         }
                         else
                         {
