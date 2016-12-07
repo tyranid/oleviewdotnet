@@ -57,6 +57,8 @@
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.tabPageAppID = new System.Windows.Forms.TabPage();
+            this.btnViewAccessPermissions = new System.Windows.Forms.Button();
+            this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
             this.textBoxDllSurrogate = new System.Windows.Forms.TextBox();
             this.lblService = new System.Windows.Forms.Label();
             this.lblAppIdRunAs = new System.Windows.Forms.Label();
@@ -64,8 +66,7 @@
             this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdName = new System.Windows.Forms.TextBox();
             this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
-            this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
-            this.btnViewAccessPermissions = new System.Windows.Forms.Button();
+            this.lblAppIDFlags = new System.Windows.Forms.Label();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -183,7 +184,7 @@
             // label10
             // 
             label10.AutoSize = true;
-            label10.Location = new System.Drawing.Point(4, 125);
+            label10.Location = new System.Drawing.Point(5, 151);
             label10.Name = "label10";
             label10.Size = new System.Drawing.Size(99, 13);
             label10.TabIndex = 10;
@@ -192,7 +193,7 @@
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(4, 169);
+            label11.Location = new System.Drawing.Point(5, 195);
             label11.Name = "label11";
             label11.Size = new System.Drawing.Size(98, 13);
             label11.TabIndex = 12;
@@ -201,7 +202,7 @@
             // label12
             // 
             label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(4, 216);
+            label12.Location = new System.Drawing.Point(5, 242);
             label12.Name = "label12";
             label12.Size = new System.Drawing.Size(71, 13);
             label12.TabIndex = 16;
@@ -393,6 +394,7 @@
             // 
             // tabPageAppID
             // 
+            this.tabPageAppID.Controls.Add(this.lblAppIDFlags);
             this.tabPageAppID.Controls.Add(this.btnViewAccessPermissions);
             this.tabPageAppID.Controls.Add(this.btnViewLaunchPermissions);
             this.tabPageAppID.Controls.Add(this.textBoxDllSurrogate);
@@ -415,9 +417,29 @@
             this.tabPageAppID.Text = "AppID";
             this.tabPageAppID.UseVisualStyleBackColor = true;
             // 
+            // btnViewAccessPermissions
+            // 
+            this.btnViewAccessPermissions.Location = new System.Drawing.Point(307, 211);
+            this.btnViewAccessPermissions.Name = "btnViewAccessPermissions";
+            this.btnViewAccessPermissions.Size = new System.Drawing.Size(75, 23);
+            this.btnViewAccessPermissions.TabIndex = 19;
+            this.btnViewAccessPermissions.Text = "View";
+            this.btnViewAccessPermissions.UseVisualStyleBackColor = true;
+            this.btnViewAccessPermissions.Click += new System.EventHandler(this.btnViewAccessPermissions_Click);
+            // 
+            // btnViewLaunchPermissions
+            // 
+            this.btnViewLaunchPermissions.Location = new System.Drawing.Point(307, 164);
+            this.btnViewLaunchPermissions.Name = "btnViewLaunchPermissions";
+            this.btnViewLaunchPermissions.Size = new System.Drawing.Size(75, 23);
+            this.btnViewLaunchPermissions.TabIndex = 18;
+            this.btnViewLaunchPermissions.Text = "View";
+            this.btnViewLaunchPermissions.UseVisualStyleBackColor = true;
+            this.btnViewLaunchPermissions.Click += new System.EventHandler(this.btnViewLaunchPermissions_Click);
+            // 
             // textBoxDllSurrogate
             // 
-            this.textBoxDllSurrogate.Location = new System.Drawing.Point(5, 232);
+            this.textBoxDllSurrogate.Location = new System.Drawing.Point(6, 258);
             this.textBoxDllSurrogate.Name = "textBoxDllSurrogate";
             this.textBoxDllSurrogate.ReadOnly = true;
             this.textBoxDllSurrogate.Size = new System.Drawing.Size(376, 20);
@@ -443,7 +465,7 @@
             // 
             // textBoxAccessPermission
             // 
-            this.textBoxAccessPermission.Location = new System.Drawing.Point(5, 185);
+            this.textBoxAccessPermission.Location = new System.Drawing.Point(6, 211);
             this.textBoxAccessPermission.Name = "textBoxAccessPermission";
             this.textBoxAccessPermission.ReadOnly = true;
             this.textBoxAccessPermission.Size = new System.Drawing.Size(295, 20);
@@ -451,7 +473,7 @@
             // 
             // textBoxLaunchPermission
             // 
-            this.textBoxLaunchPermission.Location = new System.Drawing.Point(5, 141);
+            this.textBoxLaunchPermission.Location = new System.Drawing.Point(6, 167);
             this.textBoxLaunchPermission.Name = "textBoxLaunchPermission";
             this.textBoxLaunchPermission.ReadOnly = true;
             this.textBoxLaunchPermission.Size = new System.Drawing.Size(295, 20);
@@ -473,25 +495,14 @@
             this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
-            // btnViewLaunchPermissions
+            // lblAppIDFlags
             // 
-            this.btnViewLaunchPermissions.Location = new System.Drawing.Point(306, 138);
-            this.btnViewLaunchPermissions.Name = "btnViewLaunchPermissions";
-            this.btnViewLaunchPermissions.Size = new System.Drawing.Size(75, 23);
-            this.btnViewLaunchPermissions.TabIndex = 18;
-            this.btnViewLaunchPermissions.Text = "View";
-            this.btnViewLaunchPermissions.UseVisualStyleBackColor = true;
-            this.btnViewLaunchPermissions.Click += new System.EventHandler(this.btnViewLaunchPermissions_Click);
-            // 
-            // btnViewAccessPermissions
-            // 
-            this.btnViewAccessPermissions.Location = new System.Drawing.Point(306, 185);
-            this.btnViewAccessPermissions.Name = "btnViewAccessPermissions";
-            this.btnViewAccessPermissions.Size = new System.Drawing.Size(75, 23);
-            this.btnViewAccessPermissions.TabIndex = 19;
-            this.btnViewAccessPermissions.Text = "View";
-            this.btnViewAccessPermissions.UseVisualStyleBackColor = true;
-            this.btnViewAccessPermissions.Click += new System.EventHandler(this.btnViewAccessPermissions_Click);
+            this.lblAppIDFlags.AutoSize = true;
+            this.lblAppIDFlags.Location = new System.Drawing.Point(7, 123);
+            this.lblAppIDFlags.Name = "lblAppIDFlags";
+            this.lblAppIDFlags.Size = new System.Drawing.Size(35, 13);
+            this.lblAppIDFlags.TabIndex = 20;
+            this.lblAppIDFlags.Text = "Flags:";
             // 
             // PropertiesControl
             // 
@@ -546,5 +557,6 @@
         private System.Windows.Forms.SplitContainer splitContainerInterfaces;
         private System.Windows.Forms.Button btnViewLaunchPermissions;
         private System.Windows.Forms.Button btnViewAccessPermissions;
+        private System.Windows.Forms.Label lblAppIDFlags;
     }
 }

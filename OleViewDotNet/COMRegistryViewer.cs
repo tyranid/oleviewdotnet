@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -456,21 +457,12 @@ namespace OleViewDotNet
                             }                            
                         }
                         catch (Win32Exception)
-                        {                            
-                        }                        
+                        {
+                        } 
                     }
                     
                     TreeNode node = new TreeNode(name);
-
-                    StringBuilder builder = new StringBuilder();
-
-                    AppendFormatLine(builder, "AppID: {0}", pair.Key);
-                    if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
-                    {
-                        AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
-                    }
-
-                    node.ToolTipText = builder.ToString();
+                    node.ToolTipText = BuildAppIdTooltip(appidEnt);
                     node.Tag = appidEnt;
                     
                     int count = pair.Count();
@@ -506,6 +498,35 @@ namespace OleViewDotNet
             return s;
         }
 
+        private static string BuildAppIdTooltip(COMAppIDEntry appidEnt)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            AppendFormatLine(builder, "AppID: {0}", appidEnt.AppId);
+            if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
+            {
+                AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
+            }
+
+            if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
+            {
+                AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
+            }
+
+            string perm = appidEnt.LaunchPermissionString;
+            if (perm != null)
+            {
+                AppendFormatLine(builder, "Launch: {0}", LimitString(perm, 64));
+            }
+
+            perm = appidEnt.AccessPermissionString;
+            if (perm != null)
+            {
+                AppendFormatLine(builder, "Access: {0}", LimitString(perm, 64));
+            }
+            return builder.ToString();
+        }
+
         private void LoadAppIDs(bool filterIL, bool filterAC)
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
@@ -531,33 +552,8 @@ namespace OleViewDotNet
 
                     TreeNode node = new TreeNode(appidEnt.Name);
                     node.Tag = appidEnt;
-
-                    StringBuilder builder = new StringBuilder();
-
-                    AppendFormatLine(builder, "AppID: {0}", pair.Key);
-                    if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
-                    {
-                        AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
-                    }
-
-                    if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
-                    {
-                        AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
-                    }
-
-                    string perm = appidEnt.LaunchPermissionString;
-                    if (perm != null)
-                    {
-                        AppendFormatLine(builder, "Launch: {0}", LimitString(perm, 64));
-                    }
-
-                    perm = appidEnt.AccessPermissionString;
-                    if (perm != null)
-                    {
-                        AppendFormatLine(builder, "Access: {0}", LimitString(perm, 64));
-                    }
-
-                    node.ToolTipText = builder.ToString();
+                    
+                    node.ToolTipText = BuildAppIdTooltip(appidEnt);
 
                     int count = pair.Count();
 
@@ -911,13 +907,30 @@ namespace OleViewDotNet
             }
         }
 
-        private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+        private async Task SetupObjectView(COMCLSIDEntry ent, object obj)
         {
-            TreeNode node = treeComRegistry.SelectedNode;
+            Dictionary<string, string> props = new Dictionary<string, string>();
+            props.Add("CLSID", ent.Clsid.ToString("B"));
+            props.Add("Name", ent.Name);
+            props.Add("Server", ent.Server);
 
+            /* Need to implement a type library reader */
+            Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
+
+            await ent.LoadSupportedInterfacesAsync(false);
+
+            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, obj,
+                props, ent.Interfaces.Select(i => m_reg.MapIidToInterface(i.Iid)).ToArray());
+            Program.GetMainForm().HostControl(view);
+        }
+
+        private COMCLSIDEntry GetSelectedClsidEntry()
+        {
+            COMCLSIDEntry ent = null;
+            TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                COMCLSIDEntry ent = null;
+                
                 if (node.Tag is COMCLSIDEntry)
                 {
                     ent = (COMCLSIDEntry)node.Tag;
@@ -926,36 +939,59 @@ namespace OleViewDotNet
                 {
                     ent = m_reg.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
                 }
-                
-                if(ent != null)
-                {                    
-                    Dictionary<string, string> props = new Dictionary<string,string>();
-                    try
-                    {
-                        object comObj = ent.CreateInstanceAsObject(CLSCTX.CLSCTX_ALL);
-                        if (comObj != null)
-                        {                            
-                            props.Add("CLSID", ent.Clsid.ToString("B"));
-                            props.Add("Name", ent.Name);
-                            props.Add("Server", ent.Server);
-                            
-                            /* Need to implement a type library reader */
-                            Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+            }
+            return ent;
+        }
 
-                            await ent.LoadSupportedInterfacesAsync(false);
-
-                            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, comObj, 
-                                props, ent.Interfaces.Select(i => m_reg.MapIidToInterface(i.Iid)).ToArray());
-                            Program.GetMainForm().HostControl(view);
-                        }
-                    }
-                    catch (Exception ex)
+        private async Task CreateInstance(CLSCTX clsctx)
+        {
+            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            if (ent != null)
+            {
+                try
+                {
+                    object comObj = ent.CreateInstanceAsObject(clsctx);
+                    if (comObj != null)
                     {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        await SetupObjectView(ent, comObj);
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-        }    
+        }
+
+        private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(CLSCTX.CLSCTX_ALL);
+        }
+
+        private void EnableViewPermissions(COMAppIDEntry appid)
+        {
+            if (appid.AccessPermission != null)
+            {
+                contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+            }
+            if (appid.LaunchPermission != null)
+            {
+                contextMenuStrip.Items.Add(viewLaunchPermissionsToolStripMenuItem);
+            }
+        }
+
+        private void SetupCreateSpecialSessions()
+        {
+            createInSessionToolStripMenuItem.DropDownItems.Clear();
+            createInSessionToolStripMenuItem.DropDownItems.Add(consoleToolStripMenuItem);
+            foreach (int session_id in COMSecurity.GetSessionIds())
+            {
+                ToolStripMenuItem item = new ToolStripMenuItem(session_id.ToString());
+                item.Tag = session_id.ToString();
+                item.Click += consoleToolStripMenuItem_Click;
+                createInSessionToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
 
         private void contextMenuStrip_Opening(object sender, CancelEventArgs e)
         {
@@ -971,6 +1007,8 @@ namespace OleViewDotNet
                 {
                     contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                     contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
+                    SetupCreateSpecialSessions();
+                    contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
@@ -984,24 +1022,19 @@ namespace OleViewDotNet
                     {
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                     }
-                }
 
-                if (node.Tag is COMTypeLibVersionEntry)
+                    if (clsid != null && m_reg.AppIDs.ContainsKey(clsid.AppID))
+                    {
+                        EnableViewPermissions(m_reg.AppIDs[clsid.AppID]);
+                    }
+                }
+                else if (node.Tag is COMTypeLibVersionEntry)
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
-
-                if (node.Tag is COMAppIDEntry)
+                else if (node.Tag is COMAppIDEntry)
                 {
-                    COMAppIDEntry appid = (COMAppIDEntry)node.Tag;
-                    if (appid.AccessPermission != null)
-                    {
-                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
-                    }
-                    if (appid.LaunchPermission != null)
-                    {
-                        contextMenuStrip.Items.Add(viewLaunchPermissionsToolStripMenuItem);
-                    }
+                    EnableViewPermissions((COMAppIDEntry)node.Tag);
                 }
 
                 if (PropertiesControl.SupportsProperties(node.Tag))
@@ -1259,9 +1292,22 @@ namespace OleViewDotNet
         private void ViewPermissions(bool access)
         {
             TreeNode node = treeComRegistry.SelectedNode;
-            if (node != null && node.Tag is COMAppIDEntry)
+            if (node != null)
             {
-                COMSecurity.ViewSecurity(this, (COMAppIDEntry)node.Tag, access);
+                COMAppIDEntry appid = node.Tag as COMAppIDEntry;
+                if (appid == null)
+                {
+                    COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                    if (clsid != null && m_reg.AppIDs.ContainsKey(clsid.AppID))
+                    {
+                        appid = m_reg.AppIDs[clsid.AppID];
+                    }
+                }
+
+                if (appid != null)
+                {
+                    COMSecurity.ViewSecurity(this, appid, access);
+                }
             }
         }
 
@@ -1273,6 +1319,40 @@ namespace OleViewDotNet
         private void viewAccessPermissionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ViewPermissions(true);
+        }
+
+        private async void createLocalServerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(CLSCTX.CLSCTX_LOCAL_SERVER);
+        }
+
+        private async void createInProcServerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(CLSCTX.CLSCTX_INPROC_SERVER);
+        }
+
+        private async Task CreateInSession(COMCLSIDEntry ent, string session_id)
+        {
+            try
+            {
+                string moniker = String.Format("session:{0}!new:{1}", session_id, ent.Clsid);
+                object obj = Marshal.BindToMoniker(moniker);
+                await SetupObjectView(ent, obj);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            if (ent != null && item != null && item.Tag is string)
+            {
+                await CreateInSession(ent, (string)item.Tag);
+            }
         }
     }
 }

@@ -40,15 +40,20 @@
             this.copyObjectTagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createSpecialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createLocalServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createInProcServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -101,12 +106,13 @@
             this.copyObjectTagToolStripMenuItem,
             this.createInstanceToolStripMenuItem,
             this.refreshInterfacesToolStripMenuItem,
+            this.createSpecialToolStripMenuItem,
             this.viewTypeLibraryToolStripMenuItem,
             this.viewLaunchPermissionsToolStripMenuItem,
             this.viewAccessPermissionsToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 246);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 268);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
@@ -151,12 +157,58 @@
             this.refreshInterfacesToolStripMenuItem.Text = "Refresh Interfaces";
             this.refreshInterfacesToolStripMenuItem.Click += new System.EventHandler(this.refreshInterfacesToolStripMenuItem_Click);
             // 
+            // createSpecialToolStripMenuItem
+            // 
+            this.createSpecialToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.createLocalServerToolStripMenuItem,
+            this.createInProcServerToolStripMenuItem,
+            this.createInSessionToolStripMenuItem});
+            this.createSpecialToolStripMenuItem.Name = "createSpecialToolStripMenuItem";
+            this.createSpecialToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.createSpecialToolStripMenuItem.Text = "Create Special";
+            // 
+            // createLocalServerToolStripMenuItem
+            // 
+            this.createLocalServerToolStripMenuItem.Name = "createLocalServerToolStripMenuItem";
+            this.createLocalServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createLocalServerToolStripMenuItem.Text = "Create Local Server";
+            this.createLocalServerToolStripMenuItem.Click += new System.EventHandler(this.createLocalServerToolStripMenuItem_Click);
+            // 
+            // createInProcServerToolStripMenuItem
+            // 
+            this.createInProcServerToolStripMenuItem.Name = "createInProcServerToolStripMenuItem";
+            this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createInProcServerToolStripMenuItem.Text = "Create InProc Server";
+            this.createInProcServerToolStripMenuItem.Click += new System.EventHandler(this.createInProcServerToolStripMenuItem_Click);
+            // 
+            // createInSessionToolStripMenuItem
+            // 
+            this.createInSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.consoleToolStripMenuItem});
+            this.createInSessionToolStripMenuItem.Name = "createInSessionToolStripMenuItem";
+            this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createInSessionToolStripMenuItem.Text = "Create In Session";
+            // 
             // viewTypeLibraryToolStripMenuItem
             // 
             this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
             this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
             this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
+            // viewLaunchPermissionsToolStripMenuItem
+            // 
+            this.viewLaunchPermissionsToolStripMenuItem.Name = "viewLaunchPermissionsToolStripMenuItem";
+            this.viewLaunchPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewLaunchPermissionsToolStripMenuItem.Text = "View Launch Permissions";
+            this.viewLaunchPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewLaunchPermissionsToolStripMenuItem_Click);
+            // 
+            // viewAccessPermissionsToolStripMenuItem
+            // 
+            this.viewAccessPermissionsToolStripMenuItem.Name = "viewAccessPermissionsToolStripMenuItem";
+            this.viewAccessPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewAccessPermissionsToolStripMenuItem.Text = "View Access Permissions";
+            this.viewAccessPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewAccessPermissionsToolStripMenuItem_Click);
             // 
             // propertiesToolStripMenuItem
             // 
@@ -232,19 +284,13 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // viewLaunchPermissionsToolStripMenuItem
+            // consoleToolStripMenuItem
             // 
-            this.viewLaunchPermissionsToolStripMenuItem.Name = "viewLaunchPermissionsToolStripMenuItem";
-            this.viewLaunchPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.viewLaunchPermissionsToolStripMenuItem.Text = "View Launch Permissions";
-            this.viewLaunchPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewLaunchPermissionsToolStripMenuItem_Click);
-            // 
-            // viewAccessPermissionsToolStripMenuItem
-            // 
-            this.viewAccessPermissionsToolStripMenuItem.Name = "viewAccessPermissionsToolStripMenuItem";
-            this.viewAccessPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.viewAccessPermissionsToolStripMenuItem.Text = "View Access Permissions";
-            this.viewAccessPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewAccessPermissionsToolStripMenuItem_Click);
+            this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.consoleToolStripMenuItem.Tag = "Console";
+            this.consoleToolStripMenuItem.Text = "Console";
+            this.consoleToolStripMenuItem.Click += new System.EventHandler(this.consoleToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -281,5 +327,10 @@
         private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewLaunchPermissionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewAccessPermissionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createSpecialToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createLocalServerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createInProcServerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createInSessionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
     }
 }

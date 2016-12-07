@@ -155,6 +155,7 @@
     <Compile Include="InputTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="IXmlSerialize.cs" />
     <Compile Include="ListItemComparer.cs" />
     <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />

@@ -51,6 +51,7 @@ namespace OleViewDotNet
             textBoxAccessPermission.Text = entry.AccessPermissionString ?? String.Empty;
             lblAppIdRunAs.Text = String.Format("Run As: {0}", entry.RunAs ?? "N/A");
             lblService.Text = String.Format("Service: {0}", entry.LocalService ?? "N/A");
+            lblAppIDFlags.Text = String.Format("Flags: {0}", entry.Flags);
             textBoxDllSurrogate.Text = entry.DllSurrogate ?? "N/A";
             btnViewAccessPermissions.Enabled = entry.AccessPermission != null;
             btnViewLaunchPermissions.Enabled = entry.LaunchPermission != null;
@@ -167,7 +168,7 @@ namespace OleViewDotNet
 
         private void btnViewAccessPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, _appid, false);
+            COMSecurity.ViewSecurity(this, _appid, true);
         }
     }
 }

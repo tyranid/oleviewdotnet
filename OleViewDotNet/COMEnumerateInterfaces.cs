@@ -180,12 +180,6 @@ namespace OleViewDotNet
             }
         }
 
-        [MTAThread]
-        private void MTAEnumThread()
-        {
-            RunGetInterfaces();
-        }
-
         private void ExitProcessThread(object timeout)
         {
             Thread.Sleep((int)timeout);
@@ -203,7 +197,8 @@ namespace OleViewDotNet
             else
             {
                 Thread th = null;
-                th = new Thread(MTAEnumThread);
+                th = new Thread(RunGetInterfaces);
+                th.SetApartmentState(ApartmentState.MTA);
                 th.Start();
                 th.Join();
             }

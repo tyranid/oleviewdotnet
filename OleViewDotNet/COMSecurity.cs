@@ -17,10 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -285,9 +282,12 @@ namespace OleViewDotNet
 
         public static void ViewSecurity(IWin32Window parent, string name, byte[] sd, bool access)
         {
-            using (SecurityInformationImpl si = new SecurityInformationImpl(name, sd, access))
+            if (sd != null && sd.Length > 0)
             {
-                EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, si);
+                using (SecurityInformationImpl si = new SecurityInformationImpl(name, sd, access))
+                {
+                    EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, si);
+                }
             }
         }
 
@@ -423,6 +423,69 @@ namespace OleViewDotNet
 
             string sddl = GetStringSDForSD(sd);
             return sddl.Contains("S-1-15-") || sddl.Contains(";AC)");
+        }
+
+
+        enum WTS_CONNECTSTATE_CLASS
+        {
+            WTSActive,              // User logged on to WinStation
+            WTSConnected,           // WinStation connected to client
+            WTSConnectQuery,        // In the process of connecting to client
+            WTSShadow,              // Shadowing another WinStation
+            WTSDisconnected,        // WinStation logged on without client
+            WTSIdle,                // Waiting for client to connect
+            WTSListen,              // WinStation is listening for connection
+            WTSReset,               // WinStation is being reset
+            WTSDown,                // WinStation is down due to error
+            WTSInit,                // WinStation in initialization
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct WTS_SESSION_INFO
+        {
+            public int SessionId;
+            public IntPtr pWinStationName;
+            public WTS_CONNECTSTATE_CLASS State;
+        }
+
+        [DllImport("wtsapi32.dll", SetLastError = true)]
+        static extern bool WTSEnumerateSessions(
+                IntPtr hServer,
+                int Reserved,
+                int Version,
+                out IntPtr ppSessionInfo,
+                out int pCount);
+
+        [DllImport("wtsapi32.dll", SetLastError = true)]
+        static extern void WTSFreeMemory(IntPtr memory);
+
+        public static IEnumerable<int> GetSessionIds()
+        {
+            List<int> sids = new List<int>();
+            IntPtr pSessions = IntPtr.Zero;
+            int dwSessionCount = 0;
+            try
+            {
+                if (WTSEnumerateSessions(IntPtr.Zero, 0, 1, out pSessions, out dwSessionCount))
+                {
+                    IntPtr current = pSessions;
+                    for (int i = 0; i < dwSessionCount; ++i)
+                    {
+                        WTS_SESSION_INFO session_info = (WTS_SESSION_INFO)Marshal.PtrToStructure(current, typeof(WTS_SESSION_INFO));
+                        sids.Add(session_info.SessionId);
+                        current += Marshal.SizeOf(typeof(WTS_SESSION_INFO));
+                    }
+                }
+            }
+            finally
+            {
+                if (pSessions != IntPtr.Zero)
+                {
+                    WTSFreeMemory(pSessions);
+                }
+            }
+
+            return sids;
         }
     }
 }

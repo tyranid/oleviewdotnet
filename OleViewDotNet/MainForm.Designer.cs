@@ -78,8 +78,8 @@
             this.menuFile,
             this.menuRegistry,
             this.menuObject,
-            this.menuHelp,
-            this.menuSecurity});
+            this.menuSecurity,
+            this.menuHelp});
             // 
             // menuFile
             // 
@@ -204,7 +204,7 @@
             // menuViewIELowRights
             // 
             this.menuViewIELowRights.Index = 8;
-            this.menuViewIELowRights.Text = "IE Low RIghts Elevation Policy";
+            this.menuViewIELowRights.Text = "IE Low Rights Elevation Policy";
             this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
             // 
             // menuViewAppIDs
@@ -303,7 +303,7 @@
             // 
             // menuHelp
             // 
-            this.menuHelp.Index = 3;
+            this.menuHelp.Index = 4;
             this.menuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHelpAbout});
             this.menuHelp.Text = "&Help";
@@ -316,7 +316,7 @@
             // 
             // menuSecurity
             // 
-            this.menuSecurity.Index = 4;
+            this.menuSecurity.Index = 3;
             this.menuSecurity.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuSecurityDefaultAccess,
             this.menuSecurityDefaultAccessRestriction,
