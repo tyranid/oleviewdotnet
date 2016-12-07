@@ -37,13 +37,25 @@ namespace OleViewDotNet
     [Serializable]
     public class COMAppIDEntry : IComparable<COMAppIDEntry>
     {     
-        private byte[] m_access;
-        private byte[] m_launch;
-
         public COMAppIDEntry(Guid appId, RegistryKey key)
         {
             AppId = appId;
             LoadFromKey(key);
+        }
+
+        private static string ConvertSD(byte[] sd)
+        {
+            if (sd != null && sd.Length > 0)
+            {
+                try
+                {
+                    return COMSecurity.GetStringSDForSD(sd);
+                }
+                catch (Win32Exception)
+                {
+                }
+            }
+            return null;
         }
 
         private void LoadFromKey(RegistryKey key)
@@ -60,8 +72,9 @@ namespace OleViewDotNet
                 Name = AppId.ToString("B");
             }
 
-            m_access = key.GetValue("AccessPermission") as byte[];
-            m_launch = key.GetValue("LaunchPermission") as byte[];
+            AccessPermission = ConvertSD(key.GetValue("AccessPermission") as byte[]);
+            LaunchPermission = ConvertSD(key.GetValue("LaunchPermission") as byte[]);
+
             DllSurrogate = key.GetValue("DllSurrogate") as string;
             if (DllSurrogate != null)
             {
@@ -114,57 +127,53 @@ namespace OleViewDotNet
 
         public COMAppIDFlags Flags { get; private set; }
 
-        public byte[] LaunchPermission
+        public string LaunchPermission
         {
-            get { return m_launch; }
+            get; private set; 
         }
 
-        public byte[] AccessPermission
+        public string AccessPermission
         {
-            get { return m_access; }
+            get; private set; 
         }
 
-        public string LaunchPermissionString
-        {
-            get
-            {
-                if ((m_launch != null) && (m_launch.Length > 0))
-                {
-                    try
-                    {
-                        return COMSecurity.GetStringSDForSD(m_launch);
-                    }
-                    catch (Win32Exception)
-                    {
-                    }
-                }
-
-                return null;
-            }
+        public bool HasLaunchPermission
+        {        
+            get { return !String.IsNullOrWhiteSpace(LaunchPermission); }
         }
 
-        public string AccessPermissionString
+        public bool HasAccessPermission
         {
-            get
-            {
-                if ((m_access != null) && (m_access.Length > 0))
-                {
-                    try
-                    {
-                        return COMSecurity.GetStringSDForSD(m_access);
-                    }
-                    catch (Win32Exception)
-                    {
-                    }
-                }
-
-                return null;
-            }
+            get { return !String.IsNullOrWhiteSpace(AccessPermission); }
         }
 
         public override string ToString()
         {
             return String.Format("COMAppIDEntry: {0}", Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMAppIDEntry right = obj as COMAppIDEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return AppId == right.AppId && DllSurrogate == right.DllSurrogate && LocalService == right.LocalService && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
+                && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission;
+        }
+
+        public override int GetHashCode()
+        {
+            return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() ^ LocalService.GetSafeHashCode() 
+                ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
+                LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode();
         }
     }
 }

@@ -18,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -86,24 +88,34 @@ namespace OleViewDotNet
     }
 
     [Flags]
-    enum SECURITY_INFORMATION
+    public enum SecurityInformation
     {
-        OWNER_SECURITY_INFORMATION = 1,
-        GROUP_SECURITY_INFORMATION = 2,
-        DACL_SECURITY_INFORMATION = 4,
-        LABEL_SECURITY_INFORMATION = 0x10,
+        Owner = 1,
+        Group = 2,
+        Dacl = 4,
+        Label = 0x10,
+        All = Owner | Group | Dacl | Label
     }
-    
+
+    public enum SecurityIntegrityLevel
+    {
+        Untrusted = 0,
+        Low = 0x1000,
+        Medium = 0x2000,
+        High = 0x3000,
+        System = 0x4000,
+    }
+
     [Guid("965FC360-16FF-11d0-91CB-00AA00BBB723"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComVisible(true)]
     interface ISecurityInformation
     {
         // *** ISecurityInformation methods ***
         void GetObjectInformation(IntPtr pObjectInfo);
-        void GetSecurity(SECURITY_INFORMATION RequestedInformation,
+        void GetSecurity(SecurityInformation RequestedInformation,
                         out IntPtr ppSecurityDescriptor,
                         [MarshalAs(UnmanagedType.Bool)] bool fDefault);
 
-        void SetSecurity(SECURITY_INFORMATION SecurityInformation,
+        void SetSecurity(SecurityInformation SecurityInformation,
                         IntPtr pSecurityDescriptor);
 
         void GetAccessRights(ref Guid pguidObjectType,
@@ -144,10 +156,10 @@ namespace OleViewDotNet
             return names;
         }
 
-        public SecurityInformationImpl(string obj_name, byte[] sd, bool access)
+        public SecurityInformationImpl(string obj_name, string sddl, bool access)
         {
             Dictionary<uint, string> names = GetNames(access);
-            _sd = sd;
+            _sd = COMSecurity.GetSDForStringSD(sddl);
             _obj_name = Marshal.StringToBSTR(obj_name);
             _access_map = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SiAccess)) * names.Count);
             SiAccess[] sis = new SiAccess[names.Count];
@@ -198,7 +210,7 @@ namespace OleViewDotNet
         [DllImport("kernel32.dll")]
         private static extern IntPtr LocalAlloc(int flags, IntPtr size);
 
-        public void GetSecurity(SECURITY_INFORMATION RequestedInformation, out IntPtr ppSecurityDescriptor, [MarshalAs(UnmanagedType.Bool)] bool fDefault)
+        public void GetSecurity(SecurityInformation RequestedInformation, out IntPtr ppSecurityDescriptor, [MarshalAs(UnmanagedType.Bool)] bool fDefault)
         {
             IntPtr ret = LocalAlloc(0, new IntPtr(_sd.Length));
             Marshal.Copy(_sd, 0, ret, _sd.Length);
@@ -215,7 +227,7 @@ namespace OleViewDotNet
             // Do nothing.
         }
 
-        public void SetSecurity(SECURITY_INFORMATION SecurityInformation, IntPtr pSecurityDescriptor)
+        public void SetSecurity(SecurityInformation SecurityInformation, IntPtr pSecurityDescriptor)
         {
             throw new NotImplementedException();
         }
@@ -280,11 +292,11 @@ namespace OleViewDotNet
         [DllImport("aclui.dll")]
         static extern bool EditSecurity(IntPtr hwndOwner, ISecurityInformation psi);
 
-        public static void ViewSecurity(IWin32Window parent, string name, byte[] sd, bool access)
+        public static void ViewSecurity(IWin32Window parent, string name, string sddl, bool access)
         {
-            if (sd != null && sd.Length > 0)
+            if (!String.IsNullOrWhiteSpace(sddl))
             {
-                using (SecurityInformationImpl si = new SecurityInformationImpl(name, sd, access))
+                using (SecurityInformationImpl si = new SecurityInformationImpl(name, sddl, access))
                 {
                     EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, si);
                 }
@@ -300,7 +312,11 @@ namespace OleViewDotNet
         const uint SDDL_REVISION_1 = 1;
 
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-        private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SECURITY_INFORMATION secinfo, out IntPtr str, out int length);
+        private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
+        private extern static bool ConvertStringSecurityDescriptorToSecurityDescriptor(string StringSecurityDescriptor, 
+            uint StringSDRevision, out IntPtr SecurityDescriptor, out int SecurityDescriptorSize);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         private extern static IntPtr LocalFree(IntPtr hMem);
@@ -319,7 +335,7 @@ namespace OleViewDotNet
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
         private extern static int GetSecurityDescriptorLength(IntPtr sd);
 
-        private static byte[] GetSecurityPermissions(COMSD sdtype)
+        private static string GetSecurityPermissions(COMSD sdtype)
         {
             IntPtr sd = IntPtr.Zero;
             try
@@ -332,7 +348,7 @@ namespace OleViewDotNet
                 int length = GetSecurityDescriptorLength(sd);
                 byte[] ret = new byte[length];
                 Marshal.Copy(sd, ret, 0, length);
-                return ret;
+                return GetStringSDForSD(ret);
             }
             finally
             {
@@ -343,88 +359,140 @@ namespace OleViewDotNet
             }
         }
 
-        public static byte[] GetDefaultLaunchPermissions()
+        public static string GetDefaultLaunchPermissions()
         {
             return GetSecurityPermissions(COMSD.SD_LAUNCHPERMISSIONS);
         }
 
-        public static byte[] GetDefaultAccessPermissions()
+        public static string GetDefaultAccessPermissions()
         {
             return GetSecurityPermissions(COMSD.SD_ACCESSPERMISSIONS);
         }
 
-        public static byte[] GetDefaultLaunchRestrictions()
+        public static string GetDefaultLaunchRestrictions()
         {
             return GetSecurityPermissions(COMSD.SD_LAUNCHRESTRICTIONS);
         }
 
-        public static byte[] GetDefaultAccessRestrictions()
+        public static string GetDefaultAccessRestrictions()
         {
             return GetSecurityPermissions(COMSD.SD_ACCESSRESTRICTIONS);
         }
 
-        public static string GetStringSDForSD(byte[] sd)
+        public static string GetStringSDForSD(byte[] sd, SecurityInformation info)
         {
-            IntPtr sddl;
+            IntPtr sddl = IntPtr.Zero;
             int length;
 
-            if (ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1,
-                SECURITY_INFORMATION.DACL_SECURITY_INFORMATION 
-                | SECURITY_INFORMATION.OWNER_SECURITY_INFORMATION 
-                | SECURITY_INFORMATION.LABEL_SECURITY_INFORMATION,
-                out sddl, out length))
+            try
             {
-                string ret = Marshal.PtrToStringUni(sddl);
-
-                LocalFree(sddl);
-
-                return ret;
+                if (ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1,
+                    info,
+                    out sddl, out length))
+                {
+                    return Marshal.PtrToStringUni(sddl);
+                }
+                else
+                {
+                    throw new Win32Exception();
+                }
             }
-            else
+            finally
             {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+                if (sddl != IntPtr.Zero)
+                {
+                    LocalFree(sddl);
+                }
             }
         }
 
-        public static string GetILForSD(byte[] sd)
+        public static string GetStringSDForSD(byte[] sd)
         {
-            if ((sd != null) && (sd.Length > 0))
+            return GetStringSDForSD(sd, SecurityInformation.All);
+        }
+
+        public static byte[] GetSDForStringSD(string sddl)
+        {
+            IntPtr sd = IntPtr.Zero;
+            int length;
+
+            try
             {
-                IntPtr sddl;
-                int length;
-
-                if (ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1,
-                    SECURITY_INFORMATION.LABEL_SECURITY_INFORMATION,
-                    out sddl, out length))
+                if (ConvertStringSecurityDescriptorToSecurityDescriptor(sddl, SDDL_REVISION_1, out sd, out length))
                 {
-                    string ret = Marshal.PtrToStringUni(sddl, length);
-
-                    LocalFree(sddl);
-
+                    byte[] ret = new byte[length];
+                    Marshal.Copy(sd, ret, 0, length);
                     return ret;
                 }
                 else
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Win32Exception();
                 }
             }
-            else
+            finally
             {
-                return null;
+                if (sd != IntPtr.Zero)
+                {
+                    LocalFree(sd);
+                }
             }
         }
 
-        public static bool SDHasAC(byte[] sd)
+        public static SecurityIntegrityLevel GetILForSD(string sddl)
         {
-            if (sd == null || sd.Length == 0)
+            if (String.IsNullOrWhiteSpace(sddl))
+            {
+                return SecurityIntegrityLevel.Medium;
+            }
+
+            // Check for a SACL string.
+            int index = sddl.IndexOf("S:");
+            if (index < 0)
+            {
+                return SecurityIntegrityLevel.Medium;
+            }
+
+            Regex label_re = new Regex(@"\(ML;;[^;]*;;;([^)]+)\)");
+            Match m = label_re.Match(sddl);
+            if (!m.Success || m.Groups.Count < 2)
+            {
+                return SecurityIntegrityLevel.Medium;
+            }
+
+            System.Security.Principal.SecurityIdentifier sid = new System.Security.Principal.SecurityIdentifier(m.Groups[1].Value);
+            int last_index = sid.Value.LastIndexOf('-');
+            int il;
+            if (int.TryParse(sid.Value.Substring(last_index + 1), out il))
+            {
+                return (SecurityIntegrityLevel)il;
+            }
+
+            return SecurityIntegrityLevel.Medium;
+        }
+
+        public static bool SDHasAC(string sddl)
+        {
+            if (String.IsNullOrWhiteSpace(sddl))
             {
                 return false;
             }
 
-            string sddl = GetStringSDForSD(sd);
-            return sddl.Contains("S-1-15-") || sddl.Contains(";AC)");
-        }
+            RawSecurityDescriptor sd = new RawSecurityDescriptor(sddl);
 
+            foreach (var ace in sd.DiscretionaryAcl)
+            {
+                CommonAce common_ace = ace as CommonAce;
+                if (common_ace != null)
+                {
+                    if (common_ace.AceType == AceType.AccessAllowed 
+                        && common_ace.SecurityIdentifier.Value.StartsWith("S-1-15-"))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         enum WTS_CONNECTSTATE_CLASS
         {

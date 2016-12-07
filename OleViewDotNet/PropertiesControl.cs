@@ -47,14 +47,14 @@ namespace OleViewDotNet
         {
             textBoxAppIdName.Text = entry.Name;
             textBoxAppIdGuid.Text = entry.AppId.ToString("B");
-            textBoxLaunchPermission.Text = entry.LaunchPermissionString ?? String.Empty;
-            textBoxAccessPermission.Text = entry.AccessPermissionString ?? String.Empty;
+            textBoxLaunchPermission.Text = entry.LaunchPermission ?? String.Empty;
+            textBoxAccessPermission.Text = entry.AccessPermission ?? String.Empty;
             lblAppIdRunAs.Text = String.Format("Run As: {0}", entry.RunAs ?? "N/A");
             lblService.Text = String.Format("Service: {0}", entry.LocalService ?? "N/A");
             lblAppIDFlags.Text = String.Format("Flags: {0}", entry.Flags);
             textBoxDllSurrogate.Text = entry.DllSurrogate ?? "N/A";
-            btnViewAccessPermissions.Enabled = entry.AccessPermission != null;
-            btnViewLaunchPermissions.Enabled = entry.LaunchPermission != null;
+            btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
+            btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
             tabControlProperties.TabPages.Add(tabPageAppID);
             _appid = entry;
         }

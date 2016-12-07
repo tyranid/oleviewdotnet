@@ -80,15 +80,6 @@ namespace OleViewDotNet
         }
     }
 
-    public enum SecurityIntegrityLevel
-    {
-        Untrusted = 0,
-        Low = 0x1000,
-        Medium = 0x2000,
-        High = 0x3000,
-        System = 0x4000,
-    }
-
     [Flags]
     public enum CLSCTX
     {
@@ -950,6 +941,15 @@ namespace OleViewDotNet
             {
                 return subkey != null;
             }
+        }
+
+        internal static int GetSafeHashCode(this object obj)
+        {
+            if (obj == null)
+            {
+                return 0;
+            }
+            return obj.GetHashCode();
         }
     }    
 }

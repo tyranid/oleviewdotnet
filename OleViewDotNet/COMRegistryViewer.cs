@@ -40,8 +40,7 @@ namespace OleViewDotNet
         /// <summary>
         /// Current registry
         /// </summary>
-        COMRegistry m_reg;
-
+        COMRegistry m_registry;
         TreeNode[] m_originalNodes;
 
         /// <summary>
@@ -88,7 +87,7 @@ namespace OleViewDotNet
         public COMRegistryViewer(COMRegistry reg, DisplayMode mode)
         {
             InitializeComponent();
-            m_reg = reg;
+            m_registry = reg;
             m_mode = mode;
             comboBoxMode.SelectedIndex = 0;
             SetupTree();
@@ -213,7 +212,7 @@ namespace OleViewDotNet
         private string BuildProgIDToolTip(COMProgIDEntry ent)
         {
             string strRet;
-            COMCLSIDEntry entry = m_reg.MapClsidToEntry(ent.Clsid);
+            COMCLSIDEntry entry = m_registry.MapClsidToEntry(ent.Clsid);
             if (entry != null)
             {
                 strRet = BuildCLSIDToolTip(entry);
@@ -275,13 +274,13 @@ namespace OleViewDotNet
         private void LoadCLSIDs()
         {
             int i = 0;
-            TreeNode[] clsidNodes = new TreeNode[m_reg.Clsids.Count];
-            foreach (COMCLSIDEntry ent in m_reg.Clsids.Values)
+            TreeNode[] clsidNodes = new TreeNode[m_registry.Clsids.Count];
+            foreach (COMCLSIDEntry ent in m_registry.Clsids.Values)
             {
                 clsidNodes[i] = CreateCLSIDNode(ent);                
                 i++;
             }
-            
+
             treeComRegistry.Nodes.AddRange(clsidNodes);
             Text = "CLSIDs";            
         }
@@ -289,19 +288,19 @@ namespace OleViewDotNet
         private void LoadProgIDs()
         {
             int i = 0;
-            TreeNode[] progidNodes = new TreeNode[m_reg.Progids.Count];
-            foreach (COMProgIDEntry ent in m_reg.Progids.Values)
+            TreeNode[] progidNodes = new TreeNode[m_registry.Progids.Count];
+            foreach (COMProgIDEntry ent in m_registry.Progids.Values)
             {
                 progidNodes[i] = new TreeNode(ent.ProgID, ClassIcon, ClassIcon);
                 progidNodes[i].ToolTipText = BuildProgIDToolTip(ent);
                 progidNodes[i].Tag = ent;
-                if (m_reg.MapClsidToEntry(ent.Clsid) != null)
+                if (m_registry.MapClsidToEntry(ent.Clsid) != null)
                 {
                     progidNodes[i].Nodes.Add("IUnknown");
                 }
                 i++;
             }
-            
+
             treeComRegistry.Nodes.AddRange(progidNodes);
             Text = "ProgIDs";
         }
@@ -309,8 +308,8 @@ namespace OleViewDotNet
         private void LoadCLSIDsByNames()
         {
             int i = 0;
-            TreeNode[] clsidNameNodes = new TreeNode[m_reg.ClsidsByName.Length];
-            foreach (COMCLSIDEntry ent in m_reg.ClsidsByName)
+            TreeNode[] clsidNameNodes = new TreeNode[m_registry.ClsidsByName.Length];
+            foreach (COMCLSIDEntry ent in m_registry.ClsidsByName)
             {
                 clsidNameNodes[i] = new TreeNode(ent.Name, ClassIcon, ClassIcon);
                 clsidNameNodes[i].ToolTipText = BuildCLSIDToolTip(ent);
@@ -320,7 +319,6 @@ namespace OleViewDotNet
             }
             
             treeComRegistry.Nodes.AddRange(clsidNameNodes);
-
             Text = "CLSIDs by Name";
         }
 
@@ -340,17 +338,17 @@ namespace OleViewDotNet
             if(serverType == ServerType.Local)
             {
                 Text = "CLSIDs by Local Server";
-                dict = m_reg.ClsidsByLocalServer;
+                dict = m_registry.ClsidsByLocalServer;
             }
             else if (serverType == ServerType.Surrogate)
             {
                 Text = "CLSIDs With Surrogate";
-                dict = m_reg.ClsidsWithSurrogate;
+                dict = m_registry.ClsidsWithSurrogate;
             }
             else
             {
                 Text = "CLSIDs by Server";
-                dict = m_reg.ClsidsByServer;
+                dict = m_registry.ClsidsByServer;
             }            
             
             TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
@@ -382,8 +380,8 @@ namespace OleViewDotNet
         private void LoadInterfaces()
         {
             int i = 0;
-            TreeNode[] iidNodes = new TreeNode[m_reg.Interfaces.Count];
-            foreach (COMInterfaceEntry ent in m_reg.Interfaces.Values)
+            TreeNode[] iidNodes = new TreeNode[m_registry.Interfaces.Count];
+            foreach (COMInterfaceEntry ent in m_registry.Interfaces.Values)
             {
                 iidNodes[i] = CreateInterfaceNode(ent);
                 i++;
@@ -395,8 +393,8 @@ namespace OleViewDotNet
         private void LoadInterfacesByName()
         {                  
             int i = 0;
-            TreeNode[] iidNameNodes = new TreeNode[m_reg.InterfacesByName.Length];
-            foreach (COMInterfaceEntry ent in m_reg.InterfacesByName)
+            TreeNode[] iidNameNodes = new TreeNode[m_registry.InterfacesByName.Length];
+            foreach (COMInterfaceEntry ent in m_registry.InterfacesByName)
             {
                 iidNameNodes[i] = CreateInterfaceNameNode(ent, null);                
                 i++;
@@ -422,8 +420,8 @@ namespace OleViewDotNet
 
         private void LoadLocalServices()
         {
-            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
-            IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;
+            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToList();
+            IDictionary<Guid, COMAppIDEntry> appids = m_registry.AppIDs;
             Dictionary<string, ServiceController> services;
 
             try
@@ -513,13 +511,13 @@ namespace OleViewDotNet
                 AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
             }
 
-            string perm = appidEnt.LaunchPermissionString;
+            string perm = appidEnt.LaunchPermission;
             if (perm != null)
             {
                 AppendFormatLine(builder, "Launch: {0}", LimitString(perm, 64));
             }
 
-            perm = appidEnt.AccessPermissionString;
+            perm = appidEnt.AccessPermission;
             if (perm != null)
             {
                 AppendFormatLine(builder, "Access: {0}", LimitString(perm, 64));
@@ -529,8 +527,8 @@ namespace OleViewDotNet
 
         private void LoadAppIDs(bool filterIL, bool filterAC)
         {
-            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_reg.ClsidsByAppId.ToList();
-            IDictionary<Guid, COMAppIDEntry> appids = m_reg.AppIDs;            
+            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToList();
+            IDictionary<Guid, COMAppIDEntry> appids = m_registry.AppIDs;            
 
             List<TreeNode> serverNodes = new List<TreeNode>();
             foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
@@ -539,8 +537,8 @@ namespace OleViewDotNet
                 {
                     COMAppIDEntry appidEnt = appids[pair.Key];
                     
-                    if (filterIL && String.IsNullOrWhiteSpace(COMSecurity.GetILForSD(appidEnt.AccessPermission)) &&
-                        String.IsNullOrWhiteSpace(COMSecurity.GetILForSD(appidEnt.LaunchPermission)))
+                    if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == SecurityIntegrityLevel.Medium &&
+                        COMSecurity.GetILForSD(appidEnt.LaunchPermission) == SecurityIntegrityLevel.Medium)
                     {
                         continue;
                     }
@@ -576,13 +574,22 @@ namespace OleViewDotNet
             }
 
             treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
-            Text = "AppIDs";
+            string text = "AppIDs";
+            if (filterIL)
+            {
+                text += " with Low IL";
+            }
+            if (filterAC)
+            {
+                text += " with AC";
+            }
+            Text = text;
         }
 
         private void LoadImplementedCategories()
         {
             int i = 0;
-            Dictionary<Guid, List<COMCLSIDEntry>> dict = m_reg.ImplementedCategories;
+            Dictionary<Guid, List<COMCLSIDEntry>> dict = m_registry.ImplementedCategories;
             SortedDictionary<string, TreeNode> sortedNodes = new SortedDictionary<string, TreeNode>();
             
             foreach (KeyValuePair<Guid, List<COMCLSIDEntry>> pair in dict)
@@ -619,8 +626,8 @@ namespace OleViewDotNet
         private void LoadPreApproved()
         {
             int i = 0;
-            TreeNode[] clsidNodes = new TreeNode[m_reg.PreApproved.Length];
-            foreach (COMCLSIDEntry ent in m_reg.PreApproved)
+            TreeNode[] clsidNodes = new TreeNode[m_registry.PreApproved.Length];
+            foreach (COMCLSIDEntry ent in m_registry.PreApproved)
             {
                 clsidNodes[i] = CreateCLSIDNode(ent);
                 i++;
@@ -633,8 +640,8 @@ namespace OleViewDotNet
         private void LoadIELowRights()
         {
             int i = 0;
-            TreeNode[] clsidNodes = new TreeNode[m_reg.LowRights.Length];
-            foreach (COMIELowRightsElevationPolicy ent in m_reg.LowRights)
+            TreeNode[] clsidNodes = new TreeNode[m_registry.LowRights.Length];
+            foreach (COMIELowRightsElevationPolicy ent in m_registry.LowRights)
             {
                 clsidNodes[i] = new TreeNode(ent.Name);
                 foreach (COMCLSIDEntry cls in ent.Clsids)
@@ -652,13 +659,13 @@ namespace OleViewDotNet
 
         private void LoadMimeTypes()
         {
-            List<TreeNode> nodes = new List<TreeNode>(m_reg.MimeTypes.Count());
-            foreach (COMMimeType ent in m_reg.MimeTypes)
+            List<TreeNode> nodes = new List<TreeNode>(m_registry.MimeTypes.Count());
+            foreach (COMMimeType ent in m_registry.MimeTypes)
             {
                 TreeNode node = new TreeNode(ent.MimeType);
-                if (m_reg.Clsids.ContainsKey(ent.Clsid))
+                if (m_registry.Clsids.ContainsKey(ent.Clsid))
                 {
-                    node.Nodes.Add(CreateCLSIDNode(m_reg.Clsids[ent.Clsid]));
+                    node.Nodes.Add(CreateCLSIDNode(m_registry.Clsids[ent.Clsid]));
                 }
 
                 if (!String.IsNullOrWhiteSpace(ent.Extension))
@@ -695,8 +702,8 @@ namespace OleViewDotNet
         private void LoadTypeLibs()
         {
             int i = 0;
-            TreeNode[] typelibNodes = new TreeNode[m_reg.Typelibs.Values.Count];
-            foreach (COMTypeLibEntry ent in m_reg.Typelibs.Values)
+            TreeNode[] typelibNodes = new TreeNode[m_registry.Typelibs.Values.Count];
+            foreach (COMTypeLibEntry ent in m_registry.Typelibs.Values)
             {
                 typelibNodes[i] = new TreeNode(ent.TypelibId.ToString());
                 foreach (COMTypeLibVersionEntry ver in ent.Versions)
@@ -721,7 +728,7 @@ namespace OleViewDotNet
             }
             else if (node.Tag is COMProgIDEntry)
             {
-                clsid = m_reg.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
+                clsid = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
             }
 
             if (clsid != null)
@@ -737,7 +744,7 @@ namespace OleViewDotNet
                         node.Nodes.Remove(wait_node);
                         foreach (COMInterfaceInstance ent in clsid.Interfaces)
                         {
-                            node.Nodes.Add(CreateInterfaceNameNode(m_reg.MapIidToInterface(ent.Iid), ent));
+                            node.Nodes.Add(CreateInterfaceNameNode(m_registry.MapIidToInterface(ent.Iid), ent));
                         }
                     }
                     else
@@ -828,7 +835,7 @@ namespace OleViewDotNet
                 else if (tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)tag;
-                    if (m_reg.MapClsidToEntry(ent.Clsid) != null)
+                    if (m_registry.MapClsidToEntry(ent.Clsid) != null)
                     {
                         guid = ent.Clsid;
                     }
@@ -894,7 +901,7 @@ namespace OleViewDotNet
                 else if (node.Tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                    if (m_reg.MapClsidToEntry(ent.Clsid) != null)
+                    if (m_registry.MapClsidToEntry(ent.Clsid) != null)
                     {
                         guid = ent.Clsid;
                     }
@@ -919,8 +926,8 @@ namespace OleViewDotNet
 
             await ent.LoadSupportedInterfacesAsync(false);
 
-            ObjectInformation view = new ObjectInformation(m_reg, ent.Name, obj,
-                props, ent.Interfaces.Select(i => m_reg.MapIidToInterface(i.Iid)).ToArray());
+            ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
+                props, ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
             Program.GetMainForm().HostControl(view);
         }
 
@@ -937,7 +944,7 @@ namespace OleViewDotNet
                 }
                 else if (node.Tag is COMProgIDEntry)
                 {
-                    ent = m_reg.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
+                    ent = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
                 }
             }
             return ent;
@@ -970,11 +977,11 @@ namespace OleViewDotNet
 
         private void EnableViewPermissions(COMAppIDEntry appid)
         {
-            if (appid.AccessPermission != null)
+            if (appid.HasAccessPermission)
             {
                 contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
             }
-            if (appid.LaunchPermission != null)
+            if (appid.HasLaunchPermission)
             {
                 contextMenuStrip.Items.Add(viewLaunchPermissionsToolStripMenuItem);
             }
@@ -1015,17 +1022,17 @@ namespace OleViewDotNet
 
                     if (progid != null)
                     {
-                        clsid = m_reg.MapClsidToEntry(progid.Clsid);
+                        clsid = m_registry.MapClsidToEntry(progid.Clsid);
                     }
 
-                    if (clsid != null && m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                     {
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                     }
 
-                    if (clsid != null && m_reg.AppIDs.ContainsKey(clsid.AppID))
+                    if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                     {
-                        EnableViewPermissions(m_reg.AppIDs[clsid.AppID]);
+                        EnableViewPermissions(m_registry.AppIDs[clsid.AppID]);
                     }
                 }
                 else if (node.Tag is COMTypeLibVersionEntry)
@@ -1254,12 +1261,12 @@ namespace OleViewDotNet
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                     if(progid != null)
                     {
-                        clsid = m_reg.MapClsidToEntry(progid.Clsid);
+                        clsid = m_registry.MapClsidToEntry(progid.Clsid);
                     }
 
-                    if(clsid != null && m_reg.Typelibs.ContainsKey(clsid.TypeLib))
+                    if(clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                     {
-                        ent = m_reg.Typelibs[clsid.TypeLib].Versions.First();
+                        ent = m_registry.Typelibs[clsid.TypeLib].Versions.First();
                     }
                 }
                 
@@ -1285,7 +1292,7 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                Program.GetMainForm().HostControl(new PropertiesControl(m_reg, node.Text, node.Tag));
+                Program.GetMainForm().HostControl(new PropertiesControl(m_registry, node.Text, node.Tag));
             }
         }
 
@@ -1298,9 +1305,9 @@ namespace OleViewDotNet
                 if (appid == null)
                 {
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                    if (clsid != null && m_reg.AppIDs.ContainsKey(clsid.AppID))
+                    if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                     {
-                        appid = m_reg.AppIDs[clsid.AppID];
+                        appid = m_registry.AppIDs[clsid.AppID];
                     }
                 }
 
