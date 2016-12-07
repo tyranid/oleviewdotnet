@@ -23,15 +23,15 @@ namespace OleViewDotNet
     [Flags]
     public enum COMAppIDFlags
     {
-        NONE = 0,
-        ACTIVATE_IUSERVER_INDESKTOP = 0x1,
-        SECURE_SERVER_PROCESS_SD_AND_BIND = 0x2,
-        ISSUE_ACTIVATION_RPC_AT_IDENTIFY = 0x4,
-        IUSERVER_UNMODIFIED_LOGON_TOKEN = 0x8,
-        IUSERVER_SELF_SID_IN_LAUNCH_PERMISSION = 0x10,
-        IUSERVER_ACTIVATE_IN_CLIENT_SESSION_ONLY = 0x20,
-        RESERVED1 = 0x40,
-        RESERVED2 = 0x80,
+        None = 0,
+        ActivateIUServerInDesktop = 0x1,
+        SecureServerProcessSDAndBind = 0x2,
+        IssueActivationRpcAtIdentify = 0x4,
+        IUServerUnmodifiedLogonToken = 0x8,
+        IUServerSelfSidInLaunchPermission = 0x10,
+        IUServerActivateInClientSessionOnly = 0x20,
+        Reserved1 = 0x40,
+        Reserved2 = 0x80,
     }
 
     [Serializable]
