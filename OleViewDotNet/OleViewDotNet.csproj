@@ -114,6 +114,12 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMInterfaces.cs" />
+    <Compile Include="RegistryPropertiesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RegistryPropertiesControl.Designer.cs">
+      <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
@@ -287,6 +293,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RegistryPropertiesControl.resx">
+      <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WaitingDialog.resx">
       <DependentUpon>WaitingDialog.cs</DependentUpon>

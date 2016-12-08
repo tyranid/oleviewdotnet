@@ -58,13 +58,7 @@ namespace OleViewDotNet
                     menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
-
-            Text += String.Format(" ({0}", registry.LoadingMode);
-            if (registry.LoadingMode != COMRegistryMode.MachineOnly && registry.CreatedUser != null)
-            {
-                Text += String.Format(" - {0}", registry.CreatedUser);
-            }
-            Text += ")";
+            
             if (registry.FilePath != null)
             {
                 Text += String.Format(" - {0}", registry.FilePath);
@@ -73,6 +67,7 @@ namespace OleViewDotNet
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            HostControl(new RegistryPropertiesControl(m_registry));
         }
 
         private void menuFileExit_Click(object sender, EventArgs e)
@@ -400,6 +395,7 @@ namespace OleViewDotNet
             }
         }
 
+
         private void menuFileOpenDatabase_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
@@ -407,18 +403,7 @@ namespace OleViewDotNet
                 dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    using (WaitingDialog loader = new WaitingDialog(progress => COMRegistry.Load(dlg.FileName, progress)))
-                    {
-                        if ((loader.ShowDialog() != DialogResult.OK) && (loader.Error != null) && !(loader.Error is OperationCanceledException))
-                        {
-                            MessageBox.Show(loader.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        else
-                        {
-                            MainForm form = new MainForm((COMRegistry)loader.Result);
-                            form.Show();
-                        }
-                    }                    
+                    LoadRegistry(COMRegistryMode.Merged, dlg.FileName);
                 }
             }
         }
@@ -454,5 +439,35 @@ namespace OleViewDotNet
         }
 
         public COMRegistry Registry { get { return m_registry; } }
+
+        private void menuRegistryProperties_Click(object sender, EventArgs e)
+        {
+            HostControl(new RegistryPropertiesControl(m_registry));
+        }
+
+        private void LoadRegistry(COMRegistryMode mode, string database_file)
+        {
+            try
+            {
+                new MainForm(Program.LoadRegistry(this, mode, database_file)).Show();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void menuFileOpenMachineOnly_Click(object sender, EventArgs e)
+        {
+            LoadRegistry(COMRegistryMode.MachineOnly, null);
+        }
+
+        private void menuFileOpenUserOnly_Click(object sender, EventArgs e)
+        {
+            LoadRegistry(COMRegistryMode.UserOnly, null);
+        }
     }
 }

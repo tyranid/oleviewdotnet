@@ -125,6 +125,31 @@ namespace OleViewDotNet
             }
         }
 
+        internal static COMRegistry LoadRegistry(IWin32Window window, COMRegistryMode mode, string database_file)
+        {
+            Func<IProgress<string>, object> worker;
+            if (database_file != null)
+            {
+                worker = progress => COMRegistry.Load(database_file, progress);
+            }
+            else
+            {
+                worker = progress => COMRegistry.Load(mode, null, progress);
+            }
+
+            using (WaitingDialog loader = new WaitingDialog(worker))
+            {
+                if (loader.ShowDialog(window) == DialogResult.OK)
+                {
+                    return loader.Result as COMRegistry;
+                }
+                else
+                {
+                    throw loader.Error;
+                }
+            }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -172,56 +197,20 @@ namespace OleViewDotNet
             }
             else
             {
-                Exception error = null;
-                COMRegistry instance = null;
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                Func<IProgress<string>, object> worker;
-                if (database_file != null)
+                try
                 {
-                    worker = progress => COMRegistry.Load(database_file, progress);
-                }
-                else
-                {
-                    worker = progress => COMRegistry.Load(mode, null, progress);
-                }
-
-                using (WaitingDialog loader = new WaitingDialog(worker))
-                {
-                    if (loader.ShowDialog() == DialogResult.OK)
-                    {
-                        instance = loader.Result as COMRegistry;
-                        if (save_file != null)
-                        {
-                            try
-                            {
-                                instance.Save(save_file);
-                            }
-                            catch (Exception ex)
-                            {
-                                error = ex;
-                            }
-                            Environment.Exit(0);
-                        }
-                    }
-                    else
-                    {
-                        error = loader.Error;
-                    }                    
-                }
-
-                if (error == null)
-                {
-                    _appContext = new MultiApplicationContext(new MainForm(instance));
+                    _appContext = new MultiApplicationContext(new MainForm(LoadRegistry(null, mode, database_file)));
                     Application.Run(_appContext);
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (!(error is OperationCanceledException))
+                    if (!(ex is OperationCanceledException))
                     {
-                        MessageBox.Show(error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
