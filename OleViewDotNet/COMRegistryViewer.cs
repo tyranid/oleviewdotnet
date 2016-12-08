@@ -623,15 +623,11 @@ namespace OleViewDotNet
 
         private void LoadIELowRights()
         {
-            int i = 0;
-            TreeNode[] clsidNodes = new TreeNode[m_registry.LowRights.Length];
+            List<TreeNode> clsidNodes = new List<TreeNode>();
             foreach (COMIELowRightsElevationPolicy ent in m_registry.LowRights)
             {
-                StringBuilder tooltip = new StringBuilder();                    
-                clsidNodes[i] = new TreeNode(ent.Name);
-
+                StringBuilder tooltip = new StringBuilder();
                 List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
-
                 if (ent.Clsid != Guid.Empty)
                 {
                     clsids.Add(m_registry.MapClsidToEntry(ent.Clsid));
@@ -649,18 +645,20 @@ namespace OleViewDotNet
                     continue;
                 }
 
+                TreeNode currNode = new TreeNode(ent.Name);
+                clsidNodes.Add(currNode);
+
                 foreach (COMCLSIDEntry cls in clsids)
                 {
-                    clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
+                    currNode.Nodes.Add(CreateCLSIDNode(cls));
                 }
 
                 tooltip.AppendFormat("Policy: {0}", ent.Policy);
                 tooltip.AppendLine();
-                clsidNodes[i].ToolTipText = tooltip.ToString();
-                i++;
+                currNode.ToolTipText = tooltip.ToString();
             }
 
-            treeComRegistry.Nodes.AddRange(clsidNodes);
+            treeComRegistry.Nodes.AddRange(clsidNodes.ToArray());
             
             Text = "IE Low Rights Elevation Policy"; 
         }
@@ -943,7 +941,7 @@ namespace OleViewDotNet
 
             ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
                 props, ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
-            Program.GetMainForm().HostControl(view);
+            Program.GetMainForm(m_registry).HostControl(view);
         }
 
         private COMCLSIDEntry GetSelectedClsidEntry()
@@ -1292,7 +1290,7 @@ namespace OleViewDotNet
                         Assembly typeLibary = COMUtilities.LoadTypeLib(ent.NativePath);
                        
                         TypeLibControl view = new TypeLibControl(ent, typeLibary);
-                        Program.GetMainForm().HostControl(view);
+                        Program.GetMainForm(m_registry).HostControl(view);
                     }
                     catch (Exception ex)
                     {
@@ -1307,7 +1305,7 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                Program.GetMainForm().HostControl(new PropertiesControl(m_registry, node.Text, node.Tag));
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, node.Text, node.Tag));
             }
         }
 

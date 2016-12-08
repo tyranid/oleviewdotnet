@@ -48,7 +48,7 @@ namespace OleViewDotNet
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
                 ObjectInformation view = new ObjectInformation(_registry, _name, new_object,
                     props, _registry.GetInterfacesForObject(new_object));
-                Program.GetMainForm().HostControl(view);
+                Program.GetMainForm(_registry).HostControl(view);
             }
             catch (Exception ex)
             {

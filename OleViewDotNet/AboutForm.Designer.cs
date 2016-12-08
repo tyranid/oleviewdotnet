@@ -47,7 +47,7 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(188, 41);
+            this.btnOK.Location = new System.Drawing.Point(215, 41);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 1;
@@ -60,16 +60,16 @@
             this.labelText.AutoSize = true;
             this.labelText.Location = new System.Drawing.Point(50, 12);
             this.labelText.Name = "labelText";
-            this.labelText.Size = new System.Drawing.Size(216, 26);
+            this.labelText.Size = new System.Drawing.Size(246, 26);
             this.labelText.TabIndex = 2;
-            this.labelText.Text = "OleView .NET v1.2 (c) James Forshaw 2014\r\nLicensed under GPLv3";
+            this.labelText.Text = "OleView .NET v1.2 (c) James Forshaw 2014, 2016\r\nLicensed under GPLv3";
             // 
             // AboutForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 72);
+            this.ClientSize = new System.Drawing.Size(302, 72);
             this.Controls.Add(this.labelText);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.pictureBoxLogo);

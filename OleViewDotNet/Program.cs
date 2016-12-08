@@ -14,9 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.Win32;
 using NDesk.Options;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
@@ -38,11 +38,20 @@ namespace OleViewDotNet
             Environment.Exit(1);
         }
 
-        private static MainForm _mainForm;
+        private static ApplicationContext _appContext;
 
-        static public MainForm GetMainForm()
+        static public MainForm GetMainForm(COMRegistry registry)
         {
-            return _mainForm;
+            foreach (MainForm form in Application.OpenForms.OfType<MainForm>())
+            {
+                if (form.Registry == registry)
+                {
+                    return form;
+                }
+            }
+
+            // Fall back to the main form.
+            return (MainForm)_appContext.MainForm;
         }
 
         static int EnumInterfaces(List<string> args)
@@ -96,6 +105,26 @@ namespace OleViewDotNet
             }
         }
 
+        class MultiApplicationContext : ApplicationContext
+        {
+            public MultiApplicationContext(Form main_form) : base(main_form)
+            {
+            }
+
+            protected override void OnMainFormClosed(object sender, EventArgs e)
+            {
+                IEnumerable<MainForm> forms = Application.OpenForms.OfType<MainForm>();
+                if (forms.Count() == 0)
+                {
+                    base.OnMainFormClosed(sender, e);
+                }
+                else
+                {
+                    MainForm = forms.First();
+                }
+            }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -106,13 +135,14 @@ namespace OleViewDotNet
             string save_file = null;
             bool enum_clsid = false;
             bool show_help = false;
-            bool user_only = false;
+            COMRegistryMode mode = COMRegistryMode.Merged;
             
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },
                 { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
-                { "u|user",  "Use only current user registrations.", v => user_only = v != null },
+                { "m",  "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
+                { "u",  "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -155,20 +185,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    worker = progress =>
-                    {
-                        if (user_only)
-                        {
-                            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Classes"))
-                            {
-                                return COMRegistry.Load(key, progress);
-                            }
-                        }
-                        else
-                        {
-                            return COMRegistry.Load(Registry.ClassesRoot, progress);
-                        }
-                    };
+                    worker = progress => COMRegistry.Load(mode, null, progress);
                 }
 
                 using (WaitingDialog loader = new WaitingDialog(worker))
@@ -197,10 +214,8 @@ namespace OleViewDotNet
 
                 if (error == null)
                 {
-                    using (_mainForm = new MainForm(instance))
-                    {
-                        Application.Run(_mainForm);
-                    }
+                    _appContext = new MultiApplicationContext(new MainForm(instance));
+                    Application.Run(_appContext);
                 }
                 else
                 {

@@ -215,7 +215,7 @@ namespace OleViewDotNet
 
         private void OpenObjectViewer(DynamicComObjectWrapper wrapper)
         {           
-            Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, wrapper.Instance, wrapper.InstanceType));
+            Program.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, wrapper.Instance, wrapper.InstanceType));
         }
 
         private void OpenObject(ListView lv)
@@ -243,7 +243,7 @@ namespace OleViewDotNet
 
                     if (val != null)
                     {
-                        Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, val, pi.PropertyType));
+                        Program.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, val, pi.PropertyType));
                     }
                 }
             }

@@ -39,7 +39,6 @@ namespace OleViewDotNet
         public Guid Clsid { get; private set; }
         public string AppPath { get; private set; }
         public ElevationPolicy Policy { get; private set; }
-        public bool User { get; private set; }
 
         private static string HandleNulTerminate(string s)
         {
@@ -92,12 +91,10 @@ namespace OleViewDotNet
             }
         }
 
-        public COMIELowRightsElevationPolicy(Guid guid, 
-            bool user, RegistryKey key)
+        public COMIELowRightsElevationPolicy(Guid guid, RegistryKey key)
         {            
             Uuid = guid;
             Name = Uuid.ToString("B");
-            User = user;
             LoadFromRegistry(key);
         }
 
@@ -122,7 +119,6 @@ namespace OleViewDotNet
             Clsid = reader.ReadGuid("clsid");
             AppPath = reader.GetAttribute("path");
             Policy = reader.ReadEnum<ElevationPolicy>("policy");
-            User = reader.ReadBool("user");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -131,8 +127,7 @@ namespace OleViewDotNet
             writer.WriteGuid("uuid", Uuid);
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("path", AppPath);
-            writer.WriteEnum("policy", Policy);
-            writer.WriteBool("user", User);
+            writer.WriteEnum("policy", Policy);            
         }
     }
 }

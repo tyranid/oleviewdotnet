@@ -23,7 +23,7 @@ namespace OleViewDotNet
 {
     public partial class ROTViewer : UserControl
     {
-        private COMRegistry m_reg;
+        private COMRegistry m_registry;
 
         struct MonikerInfo
         {
@@ -41,7 +41,7 @@ namespace OleViewDotNet
 
         public ROTViewer(COMRegistry reg)
         {
-            m_reg = reg;
+            m_registry = reg;
             InitializeComponent();
         }
 
@@ -69,9 +69,9 @@ namespace OleViewDotNet
                     ListViewItem item = listViewROT.Items.Add(strDisplayName);
                     item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
                     
-                    if (m_reg.Clsids.ContainsKey(clsid))
+                    if (m_registry.Clsids.ContainsKey(clsid))
                     {
-                        item.SubItems.Add(m_reg.Clsids[clsid].Name);
+                        item.SubItems.Add(m_registry.Clsids[clsid].Name);
                     }
                     else
                     {
@@ -124,8 +124,8 @@ namespace OleViewDotNet
 
                     info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
                     dispType = COMUtilities.GetDispatchTypeInfo(comObj);
-                    ObjectInformation view = new ObjectInformation(m_reg, info.strDisplayName, comObj, props, m_reg.GetInterfacesForObject(comObj));
-                    Program.GetMainForm().HostControl(view);
+                    ObjectInformation view = new ObjectInformation(m_registry, info.strDisplayName, comObj, props, m_registry.GetInterfacesForObject(comObj));
+                    Program.GetMainForm(m_registry).HostControl(view);
                 }
                 catch (Exception ex)
                 {

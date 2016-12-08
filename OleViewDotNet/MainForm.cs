@@ -40,10 +40,7 @@ namespace OleViewDotNet
             m_dockPanel.Name = "dockPanel";
             Controls.Add(m_dockPanel);
             m_dockPanel.BringToFront();
-        }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
             if (!Environment.Is64BitOperatingSystem)
             {
                 menuFileOpenViewer.Visible = false;
@@ -61,6 +58,21 @@ namespace OleViewDotNet
                     menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
+
+            Text += String.Format(" ({0}", registry.LoadingMode);
+            if (registry.LoadingMode != COMRegistryMode.MachineOnly && registry.CreatedUser != null)
+            {
+                Text += String.Format(" - {0}", registry.CreatedUser);
+            }
+            Text += ")";
+            if (registry.FilePath != null)
+            {
+                Text += String.Format(" - {0}", registry.FilePath);
+            }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
         }
 
         private void menuFileExit_Click(object sender, EventArgs e)
@@ -401,6 +413,11 @@ namespace OleViewDotNet
                         {
                             MessageBox.Show(loader.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
+                        else
+                        {
+                            MainForm form = new MainForm((COMRegistry)loader.Result);
+                            form.Show();
+                        }
                     }                    
                 }
             }
@@ -435,5 +452,7 @@ namespace OleViewDotNet
         {
             COMSecurity.ViewSecurity(this, "Default Launch Restrictions", COMSecurity.GetDefaultLaunchRestrictions(), false);
         }
+
+        public COMRegistry Registry { get { return m_registry; } }
     }
 }

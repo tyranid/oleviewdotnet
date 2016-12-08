@@ -285,7 +285,7 @@ namespace OleViewDotNet
         {
             if (m_ret != null)
             {
-                Program.GetMainForm().HostControl(new TypedObjectViewer(m_registry, m_objName, m_ret, m_mi.ReturnType));
+                Program.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, m_ret, m_mi.ReturnType));
                 DialogResult = DialogResult.OK;
                 Close();
             }

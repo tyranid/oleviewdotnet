@@ -19,11 +19,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Xml;
 
 namespace OleViewDotNet
 {
+    public enum COMRegistryMode
+    {
+        Merged,
+        MachineOnly,
+        UserOnly,
+    }
+
     /// <summary>
     /// Class to hold information about the current COM registration information
     /// </summary>
@@ -201,7 +209,22 @@ namespace OleViewDotNet
             get; private set; 
         }
 
+        public COMRegistryMode LoadingMode
+        {
+            get; private set;
+        }
+
+        public string CreatedUser
+        {
+            get; private set;
+        }
+
         public bool SixtyFourBit
+        {
+            get; private set; 
+        }
+
+        public string FilePath
         {
             get; private set; 
         }
@@ -217,18 +240,27 @@ namespace OleViewDotNet
             }
         }
 
-        public static COMRegistry Load(RegistryKey rootKey, IProgress<string> progress)
+        public static COMRegistry Load(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress)
         {
             if (progress == null)
             {
                 throw new ArgumentNullException("progress");
             }
-            return new COMRegistry(rootKey, progress);
+
+            if (user == null)
+            {
+                using (WindowsIdentity id = WindowsIdentity.GetCurrent())
+                {
+                    user = id.User;
+                }
+            }
+
+            return new COMRegistry(mode, user, progress);
         }
 
-        public static COMRegistry Load(RegistryKey rootKey)
+        public static COMRegistry Load(COMRegistryMode mode)
         {
-            return Load(rootKey, new DummyProgress());
+            return Load(mode, null, new DummyProgress());
         }
 
         public void Save(string path)
@@ -252,6 +284,8 @@ namespace OleViewDotNet
                 writer.WriteAttributeString("created", CreatedDate);
                 writer.WriteAttributeString("machine", CreatedMachine);
                 writer.WriteBool("sixfour", SixtyFourBit);
+                writer.WriteEnum("mode", LoadingMode);
+                writer.WriteAttributeString("user", CreatedUser);
                 progress.Report("CLSIDs");
                 writer.WriteSerializableObjects("clsids", m_clsids.Values);
                 progress.Report("ProgIDs");
@@ -404,30 +438,64 @@ namespace OleViewDotNet
 
         #region Private Methods
 
+        private static RegistryKey OpenClassesKey(COMRegistryMode mode, SecurityIdentifier user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
+            switch (mode)
+            {
+                case COMRegistryMode.Merged:
+                    return Registry.ClassesRoot;
+                case COMRegistryMode.MachineOnly:
+                    return Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes");
+                case COMRegistryMode.UserOnly:
+                    return Registry.Users.OpenSubKey(String.Format(@"{0}\SOFTWARE\Classes", user.Value));
+                default:
+                    throw new ArgumentException("Invalid mode", "mode");
+            }
+        }
+
         /// <summary>
         /// Default constructor
         /// </summary>
-        private COMRegistry(RegistryKey rootKey, IProgress<string> progress)
+        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress)
         {
-            progress.Report("AppIDs");
-            LoadAppIDs(rootKey);
-            progress.Report("CLSIDs");
-            LoadCLSIDs(rootKey);
-            progress.Report("ProgIDs");
-            LoadProgIDs(rootKey);
-            progress.Report("Interfaces");
-            LoadInterfaces(rootKey);
-            progress.Report("MIME Types");
-            LoadMimeTypes(rootKey);
-            progress.Report("PreApproved");
-            LoadPreApproved();
-            progress.Report("LowRights");
-            LoadLowRights();
-            progress.Report("TypeLibs");
-            LoadTypelibs(rootKey);
+            using (RegistryKey classes_key = OpenClassesKey(mode, user))
+            {
+                progress.Report("AppIDs");
+                LoadAppIDs(classes_key);
+                progress.Report("CLSIDs");
+                LoadCLSIDs(classes_key);
+                progress.Report("ProgIDs");
+                LoadProgIDs(classes_key);
+                progress.Report("Interfaces");
+                LoadInterfaces(classes_key);
+                progress.Report("MIME Types");
+                LoadMimeTypes(classes_key);
+                progress.Report("PreApproved");
+                LoadPreApproved(mode, user);
+                progress.Report("LowRights");
+                LoadLowRights(mode, user);
+                progress.Report("TypeLibs");
+                LoadTypelibs(classes_key);
+            }
+            LoadingMode = mode;
             CreatedDate = DateTime.Now.ToLongDateString();
             CreatedMachine = Environment.MachineName;
             SixtyFourBit = Environment.Is64BitProcess;
+
+            try
+            {
+                NTAccount account = (NTAccount)user.Translate(typeof(NTAccount));
+                CreatedUser = account.Value;
+            }
+            catch
+            {
+                CreatedUser = user.Value;
+            }
         }
 
         private COMRegistry(string path, IProgress<string> progress)
@@ -439,10 +507,16 @@ namespace OleViewDotNet
             settings.IgnoreWhitespace = true;
             using (XmlReader reader = XmlReader.Create(path, settings))
             {
-                reader.ReadStartElement("comregistry");
+                if (!reader.IsStartElement("comregistry"))
+                {
+                    throw new XmlException("Invalid root node");
+                }
+
                 CreatedDate = reader.GetAttribute("created");
                 CreatedMachine = reader.GetAttribute("machine");
-                SixtyFourBit = reader.ReadBool("sizfour");
+                SixtyFourBit = reader.ReadBool("sixfour");
+                LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
+                CreatedUser = reader.GetAttribute("user");
                 progress.Report("CLSIDs");
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
                 progress.Report("ProgIDs");
@@ -467,6 +541,7 @@ namespace OleViewDotNet
                 }
                 reader.ReadEndElement();
             }
+            FilePath = path;
         }
 
         private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
@@ -599,10 +674,10 @@ namespace OleViewDotNet
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
-        void LoadPreApproved()
+        IEnumerable<Guid> ReadPreApproved(RegistryKey rootKey)
         {
-            m_preapproved = new List<Guid>();
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
+            List<Guid> ret = new List<Guid>();
+            using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
             {
                 if (key != null)
                 {
@@ -613,8 +688,29 @@ namespace OleViewDotNet
 
                         if(Guid.TryParse(s, out g))
                         {
-                            m_preapproved.Add(g);                            
+                            ret.Add(g);                            
                         }
+                    }
+                }
+            }
+            return ret;
+        }
+
+        void LoadPreApproved(COMRegistryMode mode, SecurityIdentifier user)
+        {
+            m_preapproved = new List<Guid>();
+            if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
+            {
+                m_preapproved.AddRange(ReadPreApproved(Registry.LocalMachine));
+            }
+
+            if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
+            {
+                using (RegistryKey key = Registry.Users.OpenSubKey(user.Value))
+                {
+                    if (key != null)
+                    {
+                        m_preapproved.AddRange(ReadPreApproved(key));
                     }
                 }
             }
@@ -652,9 +748,9 @@ namespace OleViewDotNet
             m_typelibs = new SortedDictionary<Guid, COMTypeLibEntry>(typelibs);
         }
 
-        private void LoadLowRightsKey(RegistryKey rootKey, bool user)
+        private void LoadLowRightsKey(RegistryKey rootKey)
         {
-            using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy"))
+            using (RegistryKey key = rootKey.OpenSubKey(@"SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy"))
             {
                 if (key != null)
                 {
@@ -667,7 +763,7 @@ namespace OleViewDotNet
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
                             {                                
-                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, user, rightsKey);
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, rightsKey);
                                 if (entry.Clsid != Guid.Empty || !String.IsNullOrWhiteSpace(entry.AppPath))
                                 {
                                     m_lowrights.Add(entry);
@@ -679,11 +775,26 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadLowRights()
+        private void LoadLowRights(COMRegistryMode mode, SecurityIdentifier user)
         {
             m_lowrights = new List<COMIELowRightsElevationPolicy>();
-            LoadLowRightsKey(Registry.LocalMachine, false);
-            LoadLowRightsKey(Registry.CurrentUser, true);
+
+            if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
+            {
+                LoadLowRightsKey(Registry.LocalMachine);
+            }
+
+            if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
+            {
+                using (RegistryKey key = Registry.Users.OpenSubKey(user.Value))
+                {
+                    if (key != null)
+                    {
+                        LoadLowRightsKey(key);
+                    }
+                }
+            }
+
             m_lowrights.Sort();
         }
 

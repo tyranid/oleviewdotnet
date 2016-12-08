@@ -164,7 +164,7 @@ namespace OleViewDotNet
                         Control frm = factory.CreateInstance(m_registry, m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
-                            Program.GetMainForm().HostControl(frm);                            
+                            Program.GetMainForm(m_registry).HostControl(frm);                            
                         }
                     }
                 }
@@ -180,7 +180,7 @@ namespace OleViewDotNet
             Control frm = new ObjectContainer(m_objName, m_pObject);
             if ((frm != null) && !frm.IsDisposed)
             {
-                Program.GetMainForm().HostControl(frm);
+                Program.GetMainForm(m_registry).HostControl(frm);
             }
         }
 
@@ -189,7 +189,7 @@ namespace OleViewDotNet
             Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
             if ((frm != null) && !frm.IsDisposed)
             {
-                Program.GetMainForm().HostControl(frm);
+                Program.GetMainForm(m_registry).HostControl(frm);
             }
         }
 
@@ -273,7 +273,7 @@ namespace OleViewDotNet
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
                 ObjectInformation view = new ObjectInformation(m_registry, m_objName, new_object,
                     props, m_registry.GetInterfacesForObject(new_object));
-                Program.GetMainForm().HostControl(view);
+                Program.GetMainForm(m_registry).HostControl(view);
             }
             catch (Exception ex)
             {
