@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Win32;
 using NDesk.Options;
 using System;
 using System.Collections.Generic;
@@ -147,11 +148,34 @@ namespace OleViewDotNet
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                using (LoadingDialog loader = new LoadingDialog(user_only, database_file))
+                Func<IProgress<string>, object> worker;
+                if (database_file != null)
+                {
+                    worker = progress => COMRegistry.Load(database_file, progress);
+                }
+                else
+                {
+                    worker = progress =>
+                    {
+                        if (user_only)
+                        {
+                            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Classes"))
+                            {
+                                return COMRegistry.Load(key, progress);
+                            }
+                        }
+                        else
+                        {
+                            return COMRegistry.Load(Registry.ClassesRoot, progress);
+                        }
+                    };
+                }
+
+                using (WaitingDialog loader = new WaitingDialog(worker))
                 {
                     if (loader.ShowDialog() == DialogResult.OK)
                     {
-                        instance = loader.Instance;
+                        instance = loader.Result as COMRegistry;
                         if (save_file != null)
                         {
                             try

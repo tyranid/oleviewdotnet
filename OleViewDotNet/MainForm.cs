@@ -395,7 +395,7 @@ namespace OleViewDotNet
                 dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    using (LoadingDialog loader = new LoadingDialog(false, dlg.FileName))
+                    using (WaitingDialog loader = new WaitingDialog(progress => COMRegistry.Load(dlg.FileName, progress)))
                     {
                         if ((loader.ShowDialog() != DialogResult.OK) && (loader.Error != null) && !(loader.Error is OperationCanceledException))
                         {

@@ -210,14 +210,14 @@ namespace OleViewDotNet
 
         #region Public Methods
 
-        private class DummyProgress : IProgressReporter
+        private class DummyProgress : IProgress<string>
         {
-            public void ReportEvent(string data)
+            public void Report(string data)
             {
             }
         }
 
-        public static COMRegistry Load(RegistryKey rootKey, IProgressReporter progress)
+        public static COMRegistry Load(RegistryKey rootKey, IProgress<string> progress)
         {
             if (progress == null)
             {
@@ -236,7 +236,7 @@ namespace OleViewDotNet
             Save(path, new DummyProgress());
         }
 
-        public void Save(string path, IProgressReporter progress)
+        public void Save(string path, IProgress<string> progress)
         {
             if (progress == null)
             {
@@ -252,23 +252,23 @@ namespace OleViewDotNet
                 writer.WriteAttributeString("created", CreatedDate);
                 writer.WriteAttributeString("machine", CreatedMachine);
                 writer.WriteBool("sixfour", SixtyFourBit);
-                progress.ReportEvent("CLSIDs");
+                progress.Report("CLSIDs");
                 writer.WriteSerializableObjects("clsids", m_clsids.Values);
-                progress.ReportEvent("ProgIDs");
+                progress.Report("ProgIDs");
                 writer.WriteSerializableObjects("progids", m_progids.Values);
-                progress.ReportEvent("MIME Types");
+                progress.Report("MIME Types");
                 writer.WriteSerializableObjects("mimetypes", m_mimetypes);
-                progress.ReportEvent("AppIDs");
+                progress.Report("AppIDs");
                 writer.WriteSerializableObjects("appids", m_appid.Values);
-                progress.ReportEvent("Interfaces");
+                progress.Report("Interfaces");
                 writer.WriteSerializableObjects("intfs", m_interfaces.Values);
-                progress.ReportEvent("Categories");
+                progress.Report("Categories");
                 writer.WriteSerializableObjects("catids", m_categories.Values);
-                progress.ReportEvent("LowRights");
+                progress.Report("LowRights");
                 writer.WriteSerializableObjects("lowies", m_lowrights);
-                progress.ReportEvent("TypeLibs");
+                progress.Report("TypeLibs");
                 writer.WriteSerializableObjects("typelibs", m_typelibs.Values);
-                progress.ReportEvent("PreApproved");
+                progress.Report("PreApproved");
                 writer.WriteStartElement("preapp");
                 writer.WriteGuids("clsids", m_preapproved);
                 writer.WriteEndElement();
@@ -276,7 +276,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static COMRegistry Load(string path, IProgressReporter progress)
+        public static COMRegistry Load(string path, IProgress<string> progress)
         {
             if (progress == null)
             {
@@ -407,30 +407,30 @@ namespace OleViewDotNet
         /// <summary>
         /// Default constructor
         /// </summary>
-        private COMRegistry(RegistryKey rootKey, IProgressReporter progress)
+        private COMRegistry(RegistryKey rootKey, IProgress<string> progress)
         {
-            progress.ReportEvent("AppIDs");
+            progress.Report("AppIDs");
             LoadAppIDs(rootKey);
-            progress.ReportEvent("CLSIDs");
+            progress.Report("CLSIDs");
             LoadCLSIDs(rootKey);
-            progress.ReportEvent("ProgIDs");
+            progress.Report("ProgIDs");
             LoadProgIDs(rootKey);
-            progress.ReportEvent("Interfaces");
+            progress.Report("Interfaces");
             LoadInterfaces(rootKey);
-            progress.ReportEvent("MIME Types");
+            progress.Report("MIME Types");
             LoadMimeTypes(rootKey);
-            progress.ReportEvent("PreApproved");
+            progress.Report("PreApproved");
             LoadPreApproved();
-            progress.ReportEvent("LowRights");
+            progress.Report("LowRights");
             LoadLowRights();
-            progress.ReportEvent("TypeLibs");
+            progress.Report("TypeLibs");
             LoadTypelibs(rootKey);
             CreatedDate = DateTime.Now.ToLongDateString();
             CreatedMachine = Environment.MachineName;
             SixtyFourBit = Environment.Is64BitProcess;
         }
 
-        private COMRegistry(string path, IProgressReporter progress)
+        private COMRegistry(string path, IProgress<string> progress)
         {
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.DtdProcessing = DtdProcessing.Prohibit;
@@ -443,23 +443,23 @@ namespace OleViewDotNet
                 CreatedDate = reader.GetAttribute("created");
                 CreatedMachine = reader.GetAttribute("machine");
                 SixtyFourBit = reader.ReadBool("sizfour");
-                progress.ReportEvent("CLSIDs");
+                progress.Report("CLSIDs");
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
-                progress.ReportEvent("ProgIDs");
+                progress.Report("ProgIDs");
                 m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry()).ToSortedDictionary(p => p.ProgID);
-                progress.ReportEvent("MIME Types");
+                progress.Report("MIME Types");
                 m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType()).ToList();
-                progress.ReportEvent("AppIDs");
+                progress.Report("AppIDs");
                 m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
-                progress.ReportEvent("Interfaces");
+                progress.Report("Interfaces");
                 m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
-                progress.ReportEvent("Categories");
+                progress.Report("Categories");
                 m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToDictionary(p => p.CategoryID);
-                progress.ReportEvent("LowRights");
+                progress.Report("LowRights");
                 m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
-                progress.ReportEvent("TypeLibs");
+                progress.Report("TypeLibs");
                 m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry()).ToSortedDictionary(p => p.TypelibId);
-                progress.ReportEvent("PreApproved");
+                progress.Report("PreApproved");
                 if (reader.IsStartElement("preapp"))
                 {
                     m_preapproved = reader.ReadGuids("clsids").ToList();
@@ -732,7 +732,6 @@ namespace OleViewDotNet
                                     if (regKey != null)
                                     {
                                         COMAppIDEntry ent = new COMAppIDEntry(appid, regKey);
-
                                         m_appid.Add(appid, ent);
                                     }
                                 }

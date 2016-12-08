@@ -113,7 +113,6 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="IProgressReporter.cs" />
     <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
@@ -197,11 +196,11 @@
       <DependentUpon>InvokeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IStreamImpl.cs" />
-    <Compile Include="LoadingDialog.cs">
+    <Compile Include="WaitingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoadingDialog.Designer.cs">
-      <DependentUpon>LoadingDialog.cs</DependentUpon>
+    <Compile Include="WaitingDialog.Designer.cs">
+      <DependentUpon>WaitingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -288,8 +287,8 @@
     <EmbeddedResource Include="InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoadingDialog.resx">
-      <DependentUpon>LoadingDialog.cs</DependentUpon>
+    <EmbeddedResource Include="WaitingDialog.resx">
+      <DependentUpon>WaitingDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
