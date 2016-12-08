@@ -397,7 +397,7 @@ namespace OleViewDotNet
                 {
                     using (LoadingDialog loader = new LoadingDialog(false, dlg.FileName))
                     {
-                        if ((loader.ShowDialog() != DialogResult.OK) && (loader.Error != null))
+                        if ((loader.ShowDialog() != DialogResult.OK) && (loader.Error != null) && !(loader.Error is OperationCanceledException))
                         {
                             MessageBox.Show(loader.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }

@@ -16,7 +16,7 @@
 
 namespace OleViewDotNet
 {
-    public interface ICOMRegistryProgress
+    public interface IProgressReporter
     {
         void ReportEvent(string data);
     }

@@ -180,7 +180,10 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    MessageBox.Show(error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    if (!(error is OperationCanceledException))
+                    {
+                        MessageBox.Show(error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }

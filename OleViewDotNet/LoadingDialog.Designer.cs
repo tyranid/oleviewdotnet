@@ -29,19 +29,20 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoadingDialog));
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblProgress = new System.Windows.Forms.Label();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // label1
+            // lblProgress
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(72, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(229, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Currently Loading. Please Wait.";
+            this.lblProgress.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblProgress.Location = new System.Drawing.Point(16, 9);
+            this.lblProgress.Name = "lblProgress";
+            this.lblProgress.Size = new System.Drawing.Size(345, 20);
+            this.lblProgress.TabIndex = 0;
+            this.lblProgress.Text = "Currently Loading. Please Wait.";
+            this.lblProgress.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // progressBar
             // 
@@ -52,13 +53,24 @@
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar.TabIndex = 1;
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(143, 71);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 3;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // LoadingDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(373, 89);
+            this.ClientSize = new System.Drawing.Size(373, 99);
+            this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblProgress);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -67,13 +79,13 @@
             this.Text = "Loading...";
             this.Load += new System.EventHandler(this.LoadingDialog_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblProgress;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Button btnCancel;
     }
 }

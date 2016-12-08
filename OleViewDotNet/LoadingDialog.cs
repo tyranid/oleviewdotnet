@@ -14,16 +14,42 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using System.IO;
 
 namespace OleViewDotNet
 {
     public partial class LoadingDialog : Form
     {
+        private class ReportProgress : IProgressReporter
+        {
+            private bool _cancel;
+            private Action<string> _report;
+
+            public void Cancel()
+            {
+                _cancel = true;
+            }
+
+            public void ReportEvent(string data)
+            {
+                if (_cancel)
+                {
+                    throw new OperationCanceledException();
+                }
+                _report(data);
+            }
+
+            public ReportProgress(Action<string> report)
+            {
+                _report = report;
+            }
+        }
+
+
+        private ReportProgress m_progress;
         private BackgroundWorker m_worker;
         private RegistryKey m_rootKey;
         private string m_keyPath;
@@ -31,6 +57,7 @@ namespace OleViewDotNet
 
         public LoadingDialog(bool user_only, string dbpath)
         {
+            m_progress = new ReportProgress(SetLabel);
             m_rootKey = user_only ? Registry.CurrentUser : Registry.ClassesRoot;
             m_keyPath = user_only ? @"Software\Classes" : null;
             m_dbpath = dbpath;
@@ -38,6 +65,19 @@ namespace OleViewDotNet
             m_worker.DoWork += new DoWorkEventHandler(DoWorkEntry);
             m_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompletedCallback);
             InitializeComponent();
+        }
+
+        private void SetLabel(string value)
+        {
+            Action set = () => SetLabel(value);
+            if (InvokeRequired)
+            {
+                Invoke(set);
+            }
+            else
+            {
+                lblProgress.Text = String.Format("Currently Loading {0}. Please Wait.", value);
+            }
         }
 
         private void LoadingDialog_Load(object sender, EventArgs e)
@@ -49,7 +89,7 @@ namespace OleViewDotNet
         {
             if (m_dbpath != null)
             {
-                Instance = COMRegistry.Load(m_dbpath);
+                Instance = COMRegistry.Load(m_dbpath, m_progress);
             }
             else
             {
@@ -57,12 +97,12 @@ namespace OleViewDotNet
                 {
                     using (RegistryKey key = m_rootKey.OpenSubKey(m_keyPath))
                     {
-                        Instance = COMRegistry.Load(key);
+                        Instance = COMRegistry.Load(key, m_progress);
                     }
                 }
                 else
                 {
-                    Instance = COMRegistry.Load(m_rootKey);
+                    Instance = COMRegistry.Load(m_rootKey, m_progress);
                 }
             }
         }
@@ -83,5 +123,10 @@ namespace OleViewDotNet
 
         public Exception Error { get; private set; }
         public COMRegistry Instance { get; private set; }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            m_progress.Cancel();
+        }
     }
 }
