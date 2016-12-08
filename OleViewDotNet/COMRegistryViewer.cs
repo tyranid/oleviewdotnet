@@ -170,14 +170,14 @@ namespace OleViewDotNet
         /// </summary>
         /// <param name="ent">The CLSID entry to build the tool tip from</param>
         /// <returns>A string tooltip</returns>
-        private static string BuildCLSIDToolTip(COMCLSIDEntry ent)
+        private string BuildCLSIDToolTip(COMCLSIDEntry ent)
         {
             StringBuilder strRet = new StringBuilder();
 
             AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.ToString("B"));
             AppendFormatLine(strRet, "Name: {0}", ent.Name);
             AppendFormatLine(strRet, "{0}: {1}", ent.ServerType.ToString(), ent.Server);
-            IEnumerable<string> progids = ent.ProgIDs;
+            IEnumerable<string> progids = m_registry.GetProgIdsForClsid(ent.Clsid).Select(p => p.ProgID);
             if (progids.Count() > 0)
             {
                 strRet.AppendLine("ProgIDs:");
@@ -194,11 +194,11 @@ namespace OleViewDotNet
             {
                 AppendFormatLine(strRet, "TypeLib: {0}", ent.TypeLib.ToString("B"));
             }
-            
-            IEnumerable<COMInterfaceEntry> proxies = ent.Proxies;
-            if (proxies.Count() > 0)
+
+            COMInterfaceEntry[] proxies = m_registry.GetProxiesForClsid(ent);
+            if (proxies.Length > 0)
             {
-                AppendFormatLine(strRet, "Interface Proxies: {0}", proxies.Count());
+                AppendFormatLine(strRet, "Interface Proxies: {0}", proxies.Length);
             }
 
             return strRet.ToString();
@@ -235,9 +235,9 @@ namespace OleViewDotNet
             {
                 AppendFormatLine(builder, "ProxyCLSID: {0}", ent.ProxyClsid.ToString("B"));
             }
-            if (instance != null && instance.ModulePath != null)
+            if (instance != null && instance.Module != null)
             {
-                AppendFormatLine(builder, "VTable Address: {0}+0x{1:X}", instance.ModulePath, instance.VTableOffset);
+                AppendFormatLine(builder, "VTable Address: {0}+0x{1:X}", instance.Module, instance.VTableOffset);
             }
 
             return builder.ToString();
@@ -307,18 +307,17 @@ namespace OleViewDotNet
 
         private void LoadCLSIDsByNames()
         {
-            int i = 0;
-            TreeNode[] clsidNameNodes = new TreeNode[m_registry.ClsidsByName.Length];
+            List<TreeNode> nodes = new List<TreeNode>(m_registry.Clsids.Count);
             foreach (COMCLSIDEntry ent in m_registry.ClsidsByName)
             {
-                clsidNameNodes[i] = new TreeNode(ent.Name, ClassIcon, ClassIcon);
-                clsidNameNodes[i].ToolTipText = BuildCLSIDToolTip(ent);
-                clsidNameNodes[i].Tag = ent;
-                clsidNameNodes[i].Nodes.Add("IUnknown");
-                i++;
+                TreeNode node = new TreeNode(ent.Name, ClassIcon, ClassIcon);
+                node.ToolTipText = BuildCLSIDToolTip(ent);
+                node.Tag = ent;
+                node.Nodes.Add("IUnknown");
+                nodes.Add(node);
             }
-            
-            treeComRegistry.Nodes.AddRange(clsidNameNodes);
+
+            treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "CLSIDs by Name";
         }
 
@@ -390,15 +389,13 @@ namespace OleViewDotNet
         }
 
         private void LoadInterfacesByName()
-        {                  
-            int i = 0;
-            TreeNode[] iidNameNodes = new TreeNode[m_registry.InterfacesByName.Length];
+        {
+            List<TreeNode> nodes = new List<TreeNode>(m_registry.Interfaces.Count);
             foreach (COMInterfaceEntry ent in m_registry.InterfacesByName)
             {
-                iidNameNodes[i] = CreateInterfaceNameNode(ent, null);                
-                i++;
+                nodes.Add(CreateInterfaceNameNode(ent, null));
             }
-            treeComRegistry.Nodes.AddRange(iidNameNodes);
+            treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "Interfaces by Name";
         }
 
@@ -407,7 +404,7 @@ namespace OleViewDotNet
             return builder.AppendFormat(format, ps).AppendLine();
         }
 
-        private static TreeNode CreateClsidNode(COMCLSIDEntry ent)
+        private TreeNode CreateClsidNode(COMCLSIDEntry ent)
         {
             TreeNode currNode = new TreeNode(ent.Name, ClassIcon, ClassIcon);
             currNode.ToolTipText = BuildCLSIDToolTip(ent);
@@ -586,51 +583,41 @@ namespace OleViewDotNet
         private void LoadImplementedCategories()
         {
             int i = 0;
-            Dictionary<Guid, List<COMCLSIDEntry>> dict = m_registry.ImplementedCategories;
             SortedDictionary<string, TreeNode> sortedNodes = new SortedDictionary<string, TreeNode>();
-            
-            foreach (KeyValuePair<Guid, List<COMCLSIDEntry>> pair in dict)
-            {               
-                TreeNode currNode = new TreeNode(COMUtilities.GetCategoryName(pair.Key));
-                currNode.Tag = pair.Key;
-                currNode.ToolTipText = String.Format("CATID: {0}", pair.Key.ToString("B"));
+
+            foreach (var pair in m_registry.ImplementedCategories.Values)
+            {
+                TreeNode currNode = new TreeNode(pair.Name);
+                currNode.Tag = pair;
+                currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.ToString("B"));
                 sortedNodes.Add(currNode.Text, currNode);
 
-                TreeNode[] clsidNodes = new TreeNode[pair.Value.Count];
-                COMCLSIDEntry[] entries = pair.Value.ToArray();
-                Array.Sort(entries);
-                i = 0;
-                foreach (COMCLSIDEntry ent in entries)
-                {
-                    clsidNodes[i] = CreateClsidNode(ent);                    
-                    i++;
-                }
-                currNode.Nodes.AddRange(clsidNodes);
-            }
+                IEnumerable<COMCLSIDEntry> clsids = pair.Clsids.Select(c => m_registry.MapClsidToEntry(c)).Where(c => c != null).OrderBy(c => c.Name);
 
+                IEnumerable<TreeNode> clsidNodes = clsids.Select(n => CreateClsidNode(n));
+                currNode.Nodes.AddRange(clsidNodes.ToArray());
+            }
 
             TreeNode[] catNodes = new TreeNode[sortedNodes.Count];
             i = 0;
             foreach (KeyValuePair<string, TreeNode> pair in sortedNodes)
             {
                 catNodes[i++] = pair.Value;
-            }            
+            }
 
             treeComRegistry.Nodes.AddRange(catNodes);
-            Text = "Implemented Categories";            
+            Text = "Implemented Categories";
         }
 
         private void LoadPreApproved()
         {
-            int i = 0;
-            TreeNode[] clsidNodes = new TreeNode[m_registry.PreApproved.Length];
+            List<TreeNode> nodes = new List<TreeNode>();
             foreach (COMCLSIDEntry ent in m_registry.PreApproved)
             {
-                clsidNodes[i] = CreateCLSIDNode(ent);
-                i++;
+                nodes.Add(CreateCLSIDNode(ent));
             }
             
-            treeComRegistry.Nodes.AddRange(clsidNodes);
+            treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "Explorer PreApproved";   
         }
 
@@ -640,12 +627,36 @@ namespace OleViewDotNet
             TreeNode[] clsidNodes = new TreeNode[m_registry.LowRights.Length];
             foreach (COMIELowRightsElevationPolicy ent in m_registry.LowRights)
             {
+                StringBuilder tooltip = new StringBuilder();                    
                 clsidNodes[i] = new TreeNode(ent.Name);
-                foreach (COMCLSIDEntry cls in ent.Clsids)
+
+                List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
+
+                if (ent.Clsid != Guid.Empty)
+                {
+                    clsids.Add(m_registry.MapClsidToEntry(ent.Clsid));
+                }
+
+                if (!String.IsNullOrWhiteSpace(ent.AppPath) && m_registry.ClsidsByServer.ContainsKey(ent.AppPath))
+                {
+                    clsids.AddRange(m_registry.ClsidsByServer[ent.AppPath]);
+                    tooltip.AppendFormat("{0}", ent.AppPath);
+                    tooltip.AppendLine();
+                }
+
+                if (clsids.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (COMCLSIDEntry cls in clsids)
                 {
                     clsidNodes[i].Nodes.Add(CreateCLSIDNode(cls));
                 }
-                clsidNodes[i].ToolTipText = String.Format("Policy: {0}", ent.Policy);
+
+                tooltip.AppendFormat("Policy: {0}", ent.Policy);
+                tooltip.AppendLine();
+                clsidNodes[i].ToolTipText = tooltip.ToString();
                 i++;
             }
 
@@ -844,11 +855,8 @@ namespace OleViewDotNet
                 }
                 else if (tag is COMProgIDEntry)
                 {
-                    COMProgIDEntry ent = (COMProgIDEntry)tag;
-                    if (m_registry.MapClsidToEntry(ent.Clsid) != null)
-                    {
-                        guid = ent.Clsid;
-                    }
+                    COMProgIDEntry ent = (COMProgIDEntry)tag;                    
+                    guid = ent.Clsid;
                 }
                 else if (tag is COMTypeLibEntry)
                 {
@@ -911,10 +919,7 @@ namespace OleViewDotNet
                 else if (node.Tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                    if (m_registry.MapClsidToEntry(ent.Clsid) != null)
-                    {
-                        guid = ent.Clsid;
-                    }
+                    guid = ent.Clsid;
                 }
 
                 if (guid != Guid.Empty)

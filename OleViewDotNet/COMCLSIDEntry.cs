@@ -23,6 +23,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
@@ -42,14 +45,11 @@ namespace OleViewDotNet
         Neutral
     }
 
-    [Serializable]
-    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>
+    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable
     {
-        private HashSet<Guid> m_categories;
-        private List<COMInterfaceEntry> m_proxies;
-        private COMRegistry m_registry;
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
+        private bool m_loaded_interfaces;
 
         private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
@@ -104,11 +104,12 @@ namespace OleViewDotNet
                 }
             }
 
-            return filename;
+            return filename.Trim();
         }
 
         private void LoadFromKey(RegistryKey key)
         {
+            HashSet<Guid> categories = new HashSet<Guid>();
             object name = key.GetValue(null);
             Name = null;
             if (name != null)
@@ -226,63 +227,56 @@ namespace OleViewDotNet
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             if (key.HasSubkey("Control"))
             {
-                m_categories.Add(ControlCategory);
+                categories.Add(ControlCategory);
             }
 
             if (key.HasSubkey("Insertable"))
             {
-                m_categories.Add(InsertableCategory);
+                categories.Add(InsertableCategory);
             }
 
             if (key.HasSubkey("DocObject"))
             {
-                m_categories.Add(DocumentCategory);
+                categories.Add(DocumentCategory);
             }
 
-            using (RegistryKey categories = key.OpenSubKey("Implemented Categories"))
+            using (RegistryKey catkey = key.OpenSubKey("Implemented Categories"))
             {
-                if (categories != null)
+                if (catkey != null)
                 {
-                    string[] subKeys = categories.GetSubKeyNames();
+                    string[] subKeys = catkey.GetSubKeyNames();
                     foreach (string s in subKeys)
                     {
                         Guid g;
 
                         if (Guid.TryParse(s, out g))
                         {
-                            m_categories.Add(g);
+                            categories.Add(g);
                         }
                     }
                 }
             }
 
+            Categories = categories.ToList().AsReadOnly();
             TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
         }
 
-        public void AddProxy(COMInterfaceEntry ent)
-        {
-            m_proxies.Add(ent);
-        }
-
-        public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
+        public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
         {
             LoadFromKey(rootKey);
         }
 
-        private COMCLSIDEntry(COMRegistry registry, Guid clsid)
+        private COMCLSIDEntry(Guid clsid)
         {
             Clsid = clsid;
-            m_registry = registry;
-            m_proxies = new List<COMInterfaceEntry>();
-            m_categories = new HashSet<Guid>();
             Server = String.Empty;
             CmdLine = String.Empty;
             ServerType = COMServerType.UnknownServer;
             ThreadingModel = COMThreadingModel.Apartment;
         }
 
-        public COMCLSIDEntry(COMRegistry m_registry, Guid clsid, COMServerType type)
-            : this(m_registry, clsid)
+        public COMCLSIDEntry(Guid clsid, COMServerType type)
+            : this(clsid)
         {
             ServerType = type;
         }
@@ -298,14 +292,6 @@ namespace OleViewDotNet
         public COMServerType ServerType { get; private set; }
 
         public Guid TreatAs { get; private set; }
-
-        public IEnumerable<string> ProgIDs
-        {
-            get
-            {
-                return m_registry.GetProgIdsForClsid(Clsid).Select(e => e.ProgID);
-            }
-        }
         
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
         {
@@ -329,11 +315,12 @@ namespace OleViewDotNet
         /// <exception cref="Win32Exception">Thrown on error.</exception>
         public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
         {
-            if (refresh || m_interfaces == null)
+            if (refresh || !m_loaded_interfaces)
             {
                 COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
+                m_loaded_interfaces = true;
                 return true;
             }
             return false;
@@ -364,11 +351,14 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_interfaces == null)
+                if (m_loaded_interfaces)
+                {
+                    return m_interfaces.AsReadOnly();
+                }
+                else
                 {
                     return new COMInterfaceInstance[0];
                 }
-                return m_interfaces.AsReadOnly();
             }
         }
 
@@ -380,29 +370,24 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_factory_interfaces == null)
+                if (m_loaded_interfaces)
+                {
+                    return m_factory_interfaces.AsReadOnly();
+                }
+                else
                 {
                     return new COMInterfaceInstance[0];
                 }
-                return m_factory_interfaces.AsReadOnly();
             }
         }
 
         public Guid AppID { get; private set; }
 
-        public IEnumerable<COMInterfaceEntry> Proxies
-        {
-            get { return m_proxies.AsReadOnly(); }
-        }
-
         public Guid TypeLib { get; private set; }
 
-        public Guid[] Categories
+        public IEnumerable<Guid> Categories
         {
-            get 
-            {
-                return m_categories.ToArray();
-            }
+            get; private set; 
         }
 
         public COMThreadingModel ThreadingModel { get; private set; }
@@ -481,6 +466,55 @@ namespace OleViewDotNet
         public override string ToString()
         {
             return String.Format("COMCLSIDEntry: {0}", Name);
+        }
+
+        internal COMCLSIDEntry()
+        {
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Clsid = reader.ReadGuid("clsid");
+            Server = reader.GetAttribute("server");
+            CmdLine = reader.GetAttribute("cmdline");
+            ServerType = reader.ReadEnum<COMServerType>("stype");
+            ThreadingModel = reader.ReadEnum<COMThreadingModel>("thmod");
+            AppID = reader.ReadGuid("appid");
+            TypeLib = reader.ReadGuid("tlib");
+            Categories = reader.ReadGuids("catids");
+            TreatAs = reader.ReadGuid("treatas");
+            m_loaded_interfaces = reader.ReadBool("loaded");
+            Name = reader.GetAttribute("name");
+            if (m_loaded_interfaces)
+            {
+                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance()).ToList();
+                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance()).ToList();
+            }
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteGuid("clsid", Clsid);
+            writer.WriteOptionalAttributeString("server", Server);
+            writer.WriteOptionalAttributeString("cmdline", CmdLine);
+            writer.WriteEnum("stype", ServerType);
+            writer.WriteEnum("thmod", ThreadingModel);
+            writer.WriteGuid("appid", AppID);
+            writer.WriteGuid("tlib", TypeLib);
+            writer.WriteGuids("catids", Categories);
+            writer.WriteGuid("treatas", TreatAs);
+            writer.WriteBool("loaded", m_loaded_interfaces);
+            writer.WriteAttributeString("name", Name);
+            if (m_loaded_interfaces)
+            {
+                writer.WriteSerializableObjects("ints", m_interfaces);
+                writer.WriteSerializableObjects("facts", m_factory_interfaces);
+            }
         }
     }
 }

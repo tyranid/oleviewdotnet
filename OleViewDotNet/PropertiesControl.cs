@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -22,20 +23,20 @@ namespace OleViewDotNet
 {
     public partial class PropertiesControl : UserControl
     {
-        private COMRegistry _registry;
-        private COMAppIDEntry _appid;
+        private COMRegistry m_registry;
+        private COMAppIDEntry m_appid;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
             view.Items.Clear();
             foreach (COMInterfaceInstance entry in entries)
             {
-                COMInterfaceEntry int_entry = _registry.MapIidToInterface(entry.Iid);
+                COMInterfaceEntry int_entry = m_registry.MapIidToInterface(entry.Iid);
                 ListViewItem item = view.Items.Add(int_entry.Name);
                 item.SubItems.Add(int_entry.NumMethods.ToString());
-                if (!String.IsNullOrWhiteSpace(entry.ModulePath))
+                if (!String.IsNullOrWhiteSpace(entry.Module))
                 {
-                    item.SubItems.Add(String.Format("{0}+0x{1:X}", entry.ModulePath, entry.VTableOffset));
+                    item.SubItems.Add(String.Format("{0}+0x{1:X}", entry.Module, entry.VTableOffset));
                 }
                 item.Tag = entry;
             }
@@ -56,7 +57,7 @@ namespace OleViewDotNet
             btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
             btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
             tabControlProperties.TabPages.Add(tabPageAppID);
-            _appid = entry;
+            m_appid = entry;
         }
 
         private void SetupClsidEntry(COMCLSIDEntry entry)
@@ -66,9 +67,9 @@ namespace OleViewDotNet
             lblServerType.Text = "Server Type: " + entry.ServerType;
             lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
             textBoxServer.Text = entry.Server;
-            var progids = _registry.Progids;
+            var progids = m_registry.Progids;
 
-            foreach (string progid in entry.ProgIDs)
+            foreach (string progid in m_registry.GetProgIdsForClsid(entry.Clsid).Select(p => p.ProgID))
             {
                 ListViewItem item = listViewProgIDs.Items.Add(progid);
                 if (progids.ContainsKey(progid))
@@ -91,9 +92,9 @@ namespace OleViewDotNet
 
             tabControlProperties.TabPages.Add(tabPageClsid);
             tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
-            if (_registry.AppIDs.ContainsKey(entry.AppID))
+            if (m_registry.AppIDs.ContainsKey(entry.AppID))
             {
-                SetupAppIdEntry(_registry.AppIDs[entry.AppID]);
+                SetupAppIdEntry(m_registry.AppIDs[entry.AppID]);
             }
         }
 
@@ -107,11 +108,8 @@ namespace OleViewDotNet
             if (obj is COMProgIDEntry)
             {
                 COMProgIDEntry entry = (COMProgIDEntry)obj;
-                COMCLSIDEntry clsid_entry = _registry.MapClsidToEntry(entry.Clsid);
-                if (clsid_entry != null)
-                {
-                    SetupClsidEntry(clsid_entry);
-                }
+                COMCLSIDEntry clsid_entry = m_registry.MapClsidToEntry(entry.Clsid);
+                SetupClsidEntry(clsid_entry);
             }
 
             if (obj is COMAppIDEntry)
@@ -127,7 +125,7 @@ namespace OleViewDotNet
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
         {
-            _registry = registry;
+            m_registry = registry;
             InitializeComponent();
             listViewCategories.Columns.Add("Name", 100);
             listViewProgIDs.Columns.Add("Name", 100);
@@ -163,12 +161,12 @@ namespace OleViewDotNet
 
         private void btnViewLaunchPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, _appid, false);
+            COMSecurity.ViewSecurity(this, m_appid, false);
         }
 
         private void btnViewAccessPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, _appid, true);
+            COMSecurity.ViewSecurity(this, m_appid, true);
         }
     }
 }

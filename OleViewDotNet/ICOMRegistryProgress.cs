@@ -14,12 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Xml;
-
 namespace OleViewDotNet
 {
-    interface IXmlSerialize
+    public interface ICOMRegistryProgress
     {
-        void Serialize(XmlWriter writer);
+        void ReportEvent(string data);
     }
 }

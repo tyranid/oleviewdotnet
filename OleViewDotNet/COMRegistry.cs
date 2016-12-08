@@ -17,13 +17,9 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security;
+using System.Text;
 using System.Xml;
 
 namespace OleViewDotNet
@@ -31,25 +27,29 @@ namespace OleViewDotNet
     /// <summary>
     /// Class to hold information about the current COM registration information
     /// </summary>
-    [Serializable]
     public class COMRegistry
     {
         #region Private Member Variables
+
+        // These are loaded from the registry.
         private SortedDictionary<Guid, COMCLSIDEntry> m_clsids;        
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
-        private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
-        private COMCLSIDEntry[] m_clsidbyname;
-        private COMInterfaceEntry[] m_interfacebyname;
-        private Dictionary<Guid, List<COMCLSIDEntry>> m_categories;
-        private List<COMCLSIDEntry> m_preapproved;
+        private Dictionary<Guid, COMCategory> m_categories;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
         private SortedDictionary<Guid, COMAppIDEntry> m_appid;
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
         private List<COMMimeType> m_mimetypes;
+        private List<Guid> m_preapproved;
+
+        // These are built on demand, just different views.
+        private COMCLSIDEntry[] m_clsidbyname;
+        private COMInterfaceEntry[] m_interfacebyname;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
+        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
+        private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
+        private Dictionary<Guid, List<COMInterfaceEntry>> m_proxiesbyclsid;
 
         #endregion
 
@@ -79,11 +79,24 @@ namespace OleViewDotNet
             }
         }
 
+        private SortedDictionary<string, List<COMCLSIDEntry>> GetClsidsByString(Func<COMCLSIDEntry, bool> filter, Func<COMCLSIDEntry, string> key_selector)
+        {
+            var grouping = m_clsids.Values.Where(filter).GroupBy(key_selector, StringComparer.OrdinalIgnoreCase);
+            return new SortedDictionary<string, List<COMCLSIDEntry>>(grouping.ToDictionary(e => e.Key, e => e.ToList(),
+                StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase);
+        }
+
         public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsByServer
         {
             get 
             {
-                return m_clsidbyserver; 
+                if (m_clsidbyserver == null)
+                {
+                    m_clsidbyserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.Server) && e.ServerType != COMServerType.UnknownServer,
+                        e => e.Server);
+                }
+
+                return m_clsidbyserver;
             }
         }
 
@@ -91,6 +104,12 @@ namespace OleViewDotNet
         {
             get
             {
+                if (m_clsidbylocalserver == null)
+                {
+                    m_clsidbylocalserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.Server) && e.ServerType == COMServerType.LocalServer32,
+                        e => e.Server);
+                }
+
                 return m_clsidbylocalserver;
             }
         }
@@ -99,34 +118,49 @@ namespace OleViewDotNet
         {
             get
             {
+                if (m_clsidwithsurrogate == null)
+                {
+                    m_clsidwithsurrogate = GetClsidsByString(e => m_appid.ContainsKey(e.AppID) && !String.IsNullOrWhiteSpace(m_appid[e.AppID].DllSurrogate),
+                                                             e => m_appid[e.AppID].DllSurrogate);
+                }
                 return m_clsidwithsurrogate;
             }
         }
 
-        public COMCLSIDEntry[] ClsidsByName
+        public IEnumerable<COMCLSIDEntry> ClsidsByName
         {
             get 
             {
+                if (m_clsidbyname == null)
+                {
+                    m_clsidbyname = m_clsids.Values.OrderBy(e => e.Name).ToArray();
+                }
+
                 return m_clsidbyname; 
             }
         }
 
-        public COMInterfaceEntry[] InterfacesByName
+        public IEnumerable<COMInterfaceEntry> InterfacesByName
         {
             get
             {
+                if (m_interfacebyname == null)
+                {
+                    m_interfacebyname = m_interfaces.Values.OrderBy(i => i.Name).ToArray();
+                }
+
                 return m_interfacebyname;
             }
         }
 
-        public Dictionary<Guid, List<COMCLSIDEntry>> ImplementedCategories
+        public Dictionary<Guid, COMCategory> ImplementedCategories
         {
             get { return m_categories; }
         }
 
-        public COMCLSIDEntry[] PreApproved
+        public IEnumerable<COMCLSIDEntry> PreApproved
         {
-            get { return m_preapproved.ToArray(); }
+            get { return m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e != null); }
         }
 
         public COMIELowRightsElevationPolicy[] LowRights
@@ -157,136 +191,96 @@ namespace OleViewDotNet
             get { return m_mimetypes; }
         }
 
-        public Version RegistryVersion
+        public string CreatedDate
         {
-            get { return new Version(1, 0); }
+            get; private set;
+        }
+
+        public string CreatedMachine
+        {
+            get; private set; 
+        }
+
+        public bool SixtyFourBit
+        {
+            get; private set; 
         }
 
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        private COMRegistry(RegistryKey rootKey)
+
+        private class DummyProgress : ICOMRegistryProgress
         {
-            LoadAppIDs(rootKey);
-            LoadCLSIDs(rootKey);
-            LoadProgIDs(rootKey);
-            LoadInterfaces(rootKey);
-            LoadMimeTypes(rootKey);
-            LoadPreApproved();
-            LoadLowRights();            
-            LoadTypelibs(rootKey);
-            InterfaceViewers.InterfaceViewers.LoadInterfaceViewers();
-            COMUtilities.LoadTypeLibAssemblies();
+            public void ReportEvent(string data)
+            {
+            }
         }
-        
+
+        public static COMRegistry Load(RegistryKey rootKey, ICOMRegistryProgress progress)
+        {
+            if (progress == null)
+            {
+                throw new ArgumentNullException("progress");
+            }
+            return new COMRegistry(rootKey, progress);
+        }
+
         public static COMRegistry Load(RegistryKey rootKey)
         {
-            return new COMRegistry(rootKey);
-        }
-
-        // A small attempt to restrict what types can be accessed
-        sealed class SecurityBinder : SerializationBinder
-        {
-            SerializationBinder _delegateBinder;
-
-            internal SecurityBinder(SerializationBinder delegateBinder)
-            {
-                _delegateBinder = delegateBinder;
-            }
-
-            private bool AllowedTypeOrAssembly(Type type)
-            {
-                // "Safe" types I guess, just let them through
-                if (type.IsEnum || type.IsPrimitive || type == typeof(String))
-                {
-                    return true;
-                }
-
-                // Allow anything from this asssembly through.
-                if (type.Assembly == typeof(COMRegistry).Assembly)
-                {
-                    return true;
-                }
-
-                string typeNamespace = type.Namespace.ToLower();
-                switch (typeNamespace.ToLower())
-                {
-                    case "system":
-                    case "system.collections":
-                    case "system.collections.generic":
-                        return true;
-                }
-
-                return false;
-            }
-
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1}", assemblyName, typeName));
-                Type type = null;
-
-                if (_delegateBinder != null)
-                {
-                    type = _delegateBinder.BindToType(assemblyName, typeName);
-                }
-                else
-                {
-                    type = Type.GetType(String.Format("{0},{1}", typeName, assemblyName));
-                }
-
-                if (type != null)
-                {
-                    if (!AllowedTypeOrAssembly(type))
-                    {
-                        string name = type.FullName;
-                        if (type.IsGenericType)
-                        {
-                            name = type.GetGenericTypeDefinition().FullName;
-                        }
-
-                        throw new SecurityException(String.Format("Insecure Type in stream", name));
-                    }
-                }
-
-                return type;
-            }
-        }
-
-        public static COMRegistry Load(string path)
-        {
-            using (FileStream stm = File.OpenRead(path))
-            {
-                BinaryFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File));
-                SerializationBinder binder = new SecurityBinder(null);
-                formatter.FilterLevel = TypeFilterLevel.Low;
-                return (COMRegistry) formatter.Deserialize(stm);
-            }
+            return Load(rootKey, new DummyProgress());
         }
 
         public void Save(string path)
         {
-            using (FileStream stm = File.Open(path, FileMode.Create, FileAccess.Write))
+            Save(path, new DummyProgress());
+        }
+
+        public void Save(string path, ICOMRegistryProgress progress)
+        {
+            if (progress == null)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stm, this);
+                throw new ArgumentNullException("progress");
             }
-        }
 
-        private void WriteProgIds()
-        {
-            
-        }
-
-        public void SaveXml(string path)
-        {
-            using (XmlWriter writer = XmlWriter.Create(path))
+            XmlWriterSettings settings = new XmlWriterSettings();
+            using (XmlTextWriter writer = new XmlTextWriter(path, Encoding.UTF8))
             {
-                writer.WriteStartElement("comregistry");
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+                writer.WriteStartElement("comregistry");                
+                writer.WriteAttributeString("created", CreatedDate);
+                writer.WriteAttributeString("machine", CreatedMachine);
+                writer.WriteBool("sixfour", SixtyFourBit);
+                progress.ReportEvent("Saving CLSIDs");
+                writer.WriteSerializableObjects("clsids", m_clsids.Values);
+                writer.WriteSerializableObjects("progids", m_progids.Values);
+                writer.WriteSerializableObjects("mimetypes", m_mimetypes);
+                writer.WriteSerializableObjects("appids", m_appid.Values);
+                writer.WriteSerializableObjects("intfs", m_interfaces.Values);
+                writer.WriteSerializableObjects("catids", m_categories.Values);
+                writer.WriteSerializableObjects("lowies", m_lowrights);
+                writer.WriteSerializableObjects("typelibs", m_typelibs.Values);
+                writer.WriteStartElement("preapp");
+                writer.WriteGuids("clsids", m_preapproved);
+                writer.WriteEndElement();
                 writer.WriteEndElement();
             }
+        }
+
+        public static COMRegistry Load(string path, ICOMRegistryProgress progress)
+        {
+            if (progress == null)
+            {
+                throw new ArgumentNullException("progress");
+            }
+
+            return new COMRegistry(path, progress);   
+        }
+
+        public static COMRegistry Load(string path)
+        {
+            return Load(path, new DummyProgress());
         }
 
         /// <summary>
@@ -297,7 +291,7 @@ namespace OleViewDotNet
         public IEnumerable<COMInterfaceEntry> GetInterfacesForIUnknown(IntPtr pObject)
         {
             List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
-            foreach (COMInterfaceEntry intEnt in m_interfacebyname)
+            foreach (COMInterfaceEntry intEnt in Interfaces.Values)
             {
                 Guid currIID = intEnt.Iid;
                 IntPtr pRequested;
@@ -308,7 +302,7 @@ namespace OleViewDotNet
                     ents.Add(intEnt);
                 }
             }
-            return ents.AsReadOnly();
+            return ents.OrderBy(i => i.Name);
         }
 
         /// <summary>
@@ -325,6 +319,23 @@ namespace OleViewDotNet
             Marshal.Release(pObject);
 
             return ret;
+        }
+
+        public COMInterfaceEntry[] GetProxiesForClsid(COMCLSIDEntry clsid)
+        {
+            if (m_proxiesbyclsid == null)
+            {
+                m_proxiesbyclsid = m_interfaces.Values.Where(i => i.ProxyClsid != Guid.Empty).GroupBy(i => i.ProxyClsid).ToDictionary(e => e.Key, e => e.ToList());
+            }
+
+            if (m_proxiesbyclsid.ContainsKey(clsid.Clsid))
+            {
+                return m_proxiesbyclsid[clsid.Clsid].ToArray();
+            }
+            else
+            {
+                return new COMInterfaceEntry[0];
+            }
         }
 
         /// <summary>
@@ -355,11 +366,22 @@ namespace OleViewDotNet
             {
                 return m_clsids[clsid];
             }
-            return null;
-        }
 
+            if (clsid == Guid.Empty)
+            {
+                return null;
+            }
+
+            return new COMCLSIDEntry(clsid, COMServerType.UnknownServer);
+        }
+        
         public IEnumerable<COMProgIDEntry> GetProgIdsForClsid(Guid clsid)
         {
+            if (m_progidsbyclsid == null)
+            {
+                m_progidsbyclsid = m_progids.Values.GroupBy(p => p.Clsid).ToDictionary(g => g.Key, g => g.ToList());
+            }
+
             if (m_progidsbyclsid.ContainsKey(clsid))
             {
                 return m_progidsbyclsid[clsid].AsReadOnly();
@@ -369,10 +391,75 @@ namespace OleViewDotNet
                 return new COMProgIDEntry[0];
             }
         }
-        
-#endregion
+
+        #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        private COMRegistry(RegistryKey rootKey, ICOMRegistryProgress progress)
+        {
+            progress.ReportEvent("Loading AppIDs");
+            LoadAppIDs(rootKey);
+            progress.ReportEvent("Loading CLSIDs");
+            LoadCLSIDs(rootKey);
+            progress.ReportEvent("Loading ProgIDs");
+            LoadProgIDs(rootKey);
+            progress.ReportEvent("Loading Interfacess");
+            LoadInterfaces(rootKey);
+            progress.ReportEvent("Loading MIME Types");
+            LoadMimeTypes(rootKey);
+            progress.ReportEvent("Loading PreApproved");
+            LoadPreApproved();
+            progress.ReportEvent("Loading LowRights Policy");
+            LoadLowRights();
+            progress.ReportEvent("Loading TypeLibs");
+            LoadTypelibs(rootKey);
+            CreatedDate = DateTime.Now.ToLongDateString();
+            CreatedMachine = Environment.MachineName;
+            SixtyFourBit = Environment.Is64BitProcess;
+        }
+
+        private COMRegistry(string path, ICOMRegistryProgress progress)
+        {
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.DtdProcessing = DtdProcessing.Prohibit;
+            settings.IgnoreComments = true;
+            settings.IgnoreProcessingInstructions = true;
+            settings.IgnoreWhitespace = true;
+            using (XmlReader reader = XmlReader.Create(path, settings))
+            {
+                reader.ReadStartElement("comregistry");
+                CreatedDate = reader.GetAttribute("created");
+                CreatedMachine = reader.GetAttribute("machine");
+                SixtyFourBit = reader.ReadBool("sizfour");
+                progress.ReportEvent("Loading CLSIDs");
+                m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
+                progress.ReportEvent("Loading ProgIDs");
+                m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry()).ToSortedDictionary(p => p.ProgID);
+                progress.ReportEvent("Loading MIME Types");
+                m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType()).ToList();
+                progress.ReportEvent("Loading AppIDs");
+                m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
+                progress.ReportEvent("Loading Interfaces");
+                m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
+                progress.ReportEvent("Loading Categories");
+                m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToDictionary(p => p.CategoryID);
+                progress.ReportEvent("Loading LowRights Policy");
+                m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
+                progress.ReportEvent("Loading TypeLibs");
+                m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry()).ToSortedDictionary(p => p.TypelibId);
+                progress.ReportEvent("Loading PreApproved");
+                if (reader.IsStartElement("preapp"))
+                {
+                    m_preapproved = reader.ReadGuids("clsids").ToList();
+                    reader.Read();
+                }
+                reader.ReadEndElement();
+            }
+        }
 
         private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
         {
@@ -397,10 +484,7 @@ namespace OleViewDotNet
         private void LoadCLSIDs(RegistryKey rootKey)
         {
             Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
-            Dictionary<string, List<COMCLSIDEntry>> clsidbyserver = new Dictionary<string, List<COMCLSIDEntry>>();
-            Dictionary<string, List<COMCLSIDEntry>> clsidbylocalserver = new Dictionary<string, List<COMCLSIDEntry>>();
-            Dictionary<string, List<COMCLSIDEntry>> clsidwithsurrogate = new Dictionary<string, List<COMCLSIDEntry>>();  
-            m_categories = new Dictionary<Guid, List<COMCLSIDEntry>>();
+            Dictionary<Guid, List<Guid>> categories = new Dictionary<Guid, List<Guid>>();
 
             using (RegistryKey clsidKey = rootKey.OpenSubKey("CLSID"))
             {
@@ -419,39 +503,15 @@ namespace OleViewDotNet
                                 {
                                     if (regKey != null)
                                     {
-                                        COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
+                                        COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
                                         clsids.Add(clsid, ent);
-                                        if (!String.IsNullOrEmpty(ent.Server) && ent.ServerType != (COMServerType.UnknownServer))
+                                        foreach (Guid catid in ent.Categories)
                                         {
-                                            AddEntryToDictionary(clsidbyserver, ent);
-                                          
-                                            if (ent.ServerType == COMServerType.LocalServer32)
+                                            if (!categories.ContainsKey(catid))
                                             {
-                                                AddEntryToDictionary(clsidbylocalserver, ent);
+                                                categories[catid] = new List<Guid>();
                                             }
-
-                                            if (m_appid.ContainsKey(ent.AppID) && m_appid[ent.AppID].DllSurrogate != null)
-                                            {
-                                                AddEntryToDictionary(clsidwithsurrogate, ent);
-                                            }
-                                        }
-
-                                        if (ent.Categories.Length > 0)
-                                        {
-                                            foreach (Guid catid in ent.Categories)
-                                            {
-                                                List<COMCLSIDEntry> list = null;
-                                                if (m_categories.ContainsKey(catid))
-                                                {
-                                                    list = m_categories[catid];
-                                                }
-                                                else
-                                                {
-                                                    list = new List<COMCLSIDEntry>();
-                                                    m_categories[catid] = list;
-                                                }
-                                                list.Add(ent);
-                                            }
+                                            categories[catid].Add(ent.Clsid);
                                         }
                                     }
                                 }
@@ -460,26 +520,14 @@ namespace OleViewDotNet
                     }                    
                 }
             }
-
-            int pos = 0;
-            m_clsidbyname = new COMCLSIDEntry[clsids.Count];
-            foreach (COMCLSIDEntry ent in clsids.Values)
-            {
-                m_clsidbyname[pos++] = ent;
-            }
-            Array.Sort(m_clsidbyname);
-
+            
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
-            m_clsidbyserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbyserver);
-            m_clsidbylocalserver = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidbylocalserver);
-            m_clsidwithsurrogate = new SortedDictionary<string, List<COMCLSIDEntry>>(clsidwithsurrogate);
+            m_categories = categories.ToDictionary(p => p.Key, p => new COMCategory(p.Key, p.Value));
         }
 
         private void LoadProgIDs(RegistryKey rootKey)
         {
             m_progids = new SortedDictionary<string, COMProgIDEntry>();
-            m_progidsbyclsid = new Dictionary<Guid, List<COMProgIDEntry>>();
-
             string[] subkeys = rootKey.GetSubKeyNames();
             foreach (string key in subkeys)
             {
@@ -492,18 +540,11 @@ namespace OleViewDotNet
                         {
                             COMProgIDEntry entry = new COMProgIDEntry(key, clsid, regKey);
                             m_progids.Add(key, entry);
-                            if (!m_progidsbyclsid.ContainsKey(clsid))
-                            {
-                                m_progidsbyclsid[clsid] = new List<COMProgIDEntry>();
-                            }
-
-                            m_progidsbyclsid[clsid].Add(entry);
                         }
                     }
                 }
-                catch (FormatException e)
-                {
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
+                catch (FormatException)
+                {                    
                 }
             }
         }
@@ -538,13 +579,6 @@ namespace OleViewDotNet
                                     {
                                         COMInterfaceEntry ent = new COMInterfaceEntry(iid, regKey);
                                         interfaces.Add(iid, ent);
-                                        if (ent.ProxyClsid != Guid.Empty)
-                                        {
-                                            if (m_clsids.ContainsKey(ent.ProxyClsid))
-                                            {
-                                                m_clsids[ent.ProxyClsid].AddProxy(ent);
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -553,21 +587,13 @@ namespace OleViewDotNet
                     }
                 }
             }
-
-            int pos = 0;
-            m_interfacebyname = new COMInterfaceEntry[interfaces.Count];
-            foreach (COMInterfaceEntry ent in interfaces.Values)
-            {
-                m_interfacebyname[pos++] = ent;
-            }
-            Array.Sort(m_interfacebyname);
-
+            
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
         void LoadPreApproved()
         {
-            m_preapproved = new List<COMCLSIDEntry>();
+            m_preapproved = new List<Guid>();
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
             {
                 if (key != null)
@@ -579,10 +605,7 @@ namespace OleViewDotNet
 
                         if(Guid.TryParse(s, out g))
                         {
-                            if (m_clsids.ContainsKey(g))
-                            {
-                                m_preapproved.Add(m_clsids[g]);
-                            }
+                            m_preapproved.Add(g);                            
                         }
                     }
                 }
@@ -621,7 +644,7 @@ namespace OleViewDotNet
             m_typelibs = new SortedDictionary<Guid, COMTypeLibEntry>(typelibs);
         }
 
-        private void LoadLowRightsKey(RegistryKey rootKey)
+        private void LoadLowRightsKey(RegistryKey rootKey, bool user)
         {
             using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy"))
             {
@@ -635,9 +658,9 @@ namespace OleViewDotNet
                         if (Guid.TryParse(s, out g))
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
-                            {
-                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, m_clsids, m_clsidbyserver, rightsKey);
-                                if (entry.Clsids.Length > 0)
+                            {                                
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, user, rightsKey);
+                                if (entry.Clsid != Guid.Empty || !String.IsNullOrWhiteSpace(entry.AppPath))
                                 {
                                     m_lowrights.Add(entry);
                                 }
@@ -651,8 +674,8 @@ namespace OleViewDotNet
         private void LoadLowRights()
         {
             m_lowrights = new List<COMIELowRightsElevationPolicy>();
-            LoadLowRightsKey(Registry.LocalMachine);
-            LoadLowRightsKey(Registry.CurrentUser);
+            LoadLowRightsKey(Registry.LocalMachine, false);
+            LoadLowRightsKey(Registry.CurrentUser, true);
             m_lowrights.Sort();
         }
 

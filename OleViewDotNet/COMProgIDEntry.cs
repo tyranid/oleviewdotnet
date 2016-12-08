@@ -17,11 +17,12 @@
 using System;
 using System.Xml;
 using Microsoft.Win32;
+using System.Xml.Serialization;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
-    [Serializable]
-    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerialize
+    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable
     {
         public COMProgIDEntry(string progid, Guid clsid, RegistryKey rootKey)
         {
@@ -67,25 +68,27 @@ namespace OleViewDotNet
             return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode();
         }
 
-        public COMProgIDEntry(XmlReader reader)
+        internal COMProgIDEntry()
         {
-            ProgID = reader.GetAttribute("progid");
-            Clsid = new Guid(reader.GetAttribute("clsid"));
-            string name = reader.GetAttribute("name");
-            if (name != null)
-            {
-                Name = name;
-            }
         }
 
-        void IXmlSerialize.Serialize(XmlWriter writer)
-        {            
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            ProgID = reader.GetAttribute("progid");
+            Clsid = reader.ReadGuid("clsid");
+            Name = reader.GetAttribute("name");            
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
             writer.WriteAttributeString("progid", ProgID);
-            writer.WriteAttributeString("clsid", Clsid.ToString());
-            if (Name != null)
-            {
-                writer.WriteAttributeString("name", Name);
-            }
+            writer.WriteGuid("clsid", Clsid);
+            writer.WriteOptionalAttributeString("name", Name);
         }
     }
 }

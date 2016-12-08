@@ -14,34 +14,29 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.Win32;
 using System;
-using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace OleViewDotNet
 {
-    public class COMMimeType : IXmlSerializable
+    public class COMCategory : IXmlSerializable
     {
-        public string MimeType { get; private set; }
-        public Guid Clsid { get; private set; }
-        public string Extension { get; private set; }
+        public Guid CategoryID { get; private set; }
+        public string Name { get; private set; }
+        public IEnumerable<Guid> Clsids { get; private set; }
 
-        public COMMimeType(string mime_type, RegistryKey key)
+        public COMCategory(Guid catid, IEnumerable<Guid> clsids)
         {
-            string clsid = key.GetValue("CLSID") as string;
-            string extension = key.GetValue("Extension") as string;
-
-            if ((clsid != null) && (COMUtilities.IsValidGUID(clsid)))
-            {
-                Clsid = Guid.Parse(clsid);
-            }
-            Extension = extension;
-            MimeType = mime_type;
+            CategoryID = catid;
+            Clsids = clsids.ToArray();
+            Name = COMUtilities.GetCategoryName(catid);
         }
 
-        internal COMMimeType()
+        internal COMCategory()
         {
         }
 
@@ -52,16 +47,16 @@ namespace OleViewDotNet
 
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
-            MimeType = reader.GetAttribute("mimetype");
-            Clsid = reader.ReadGuid("clsid");
-            Extension = reader.GetAttribute("ext");
+            Name = reader.GetAttribute("name");
+            CategoryID = reader.ReadGuid("catid");
+            Clsids = reader.ReadGuids("clsids").ToArray();
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("mimetype", MimeType);
-            writer.WriteGuid("clsid", Clsid);
-            writer.WriteOptionalAttributeString("ext", Extension);
+            writer.WriteAttributeString("name", Name);
+            writer.WriteGuid("catid", CategoryID);
+            writer.WriteGuids("clsids", Clsids);
         }
     }
 }

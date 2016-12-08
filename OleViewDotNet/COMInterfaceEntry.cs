@@ -17,11 +17,13 @@
 using System;
 using Microsoft.Win32;
 using OleViewDotNet.InterfaceViewers;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
-    [Serializable]
-    public class COMInterfaceEntry : IComparable<COMInterfaceEntry>
+    public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable
     {
         public int CompareTo(COMInterfaceEntry right)
         {
@@ -58,7 +60,7 @@ namespace OleViewDotNet
             }
         }
 
-        private COMInterfaceEntry()
+        internal COMInterfaceEntry()
         {
         }
 
@@ -207,6 +209,33 @@ namespace OleViewDotNet
         public override string ToString()
         {
             return String.Format("COMInterfaceEntry: {0}", Name);
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Name = reader.GetAttribute("name");
+            Iid = reader.ReadGuid("iid");
+            ProxyClsid = reader.ReadGuid("proxy");
+            NumMethods = reader.ReadInt("num");
+            Base = reader.GetAttribute("base");
+            TypeLibVersion = reader.GetAttribute("ver");
+            TypeLib = reader.ReadGuid("tlib");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("name", Name);
+            writer.WriteGuid("iid", Iid);
+            writer.WriteGuid("proxy", ProxyClsid);
+            writer.WriteInt("num", NumMethods);
+            writer.WriteOptionalAttributeString("base", Base);
+            writer.WriteOptionalAttributeString("ver", TypeLibVersion);
+            writer.WriteGuid("tlib", TypeLib);
         }
     }
 }

@@ -18,14 +18,14 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
-    [Serializable]
-    public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>
+    public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
     {
-        private COMRegistry m_registry;
-
         public enum ElevationPolicy
         {
             NoRun = 0,
@@ -36,8 +36,10 @@ namespace OleViewDotNet
 
         public string Name { get; private set; }
         public Guid Uuid { get; private set; }
-        public COMCLSIDEntry[] Clsids { get; private set; }
+        public Guid Clsid { get; private set; }
+        public string AppPath { get; private set; }
         public ElevationPolicy Policy { get; private set; }
+        public bool User { get; private set; }
 
         private static string HandleNulTerminate(string s)
         {
@@ -52,9 +54,9 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadFromRegistry(SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
+        private void LoadFromRegistry(RegistryKey key)
         {
-            List<COMCLSIDEntry> clsidList = new List<COMCLSIDEntry>();
+            List<Guid> clsidList = new List<Guid>();
 
             object policyValue = key.GetValue("Policy", 0);
 
@@ -63,63 +65,74 @@ namespace OleViewDotNet
                 Policy = (ElevationPolicy)Enum.ToObject(typeof(ElevationPolicy), key.GetValue("Policy", 0));
             }
             
-            string clsid = (string)key.GetValue("CLSID");            
-
+            string clsid = (string)key.GetValue("CLSID");
             if (clsid != null)
             {
                 Guid cls;
 
                 if (Guid.TryParse(clsid, out cls))
                 {
-                    if (clsids.ContainsKey(cls))
-                    {
-                        clsidList.Add(clsids[cls]);
-                    }
-                    else
-                    {
-                        // Add dummy entry
-                        clsidList.Add(new COMCLSIDEntry(m_registry, cls, COMServerType.LocalServer32));
-                    }
+                    Clsid = cls;
                 }
             }
-            else
-            {                
-                string appName = (string)key.GetValue("AppName", null);
-                string appPath = (string)key.GetValue("AppPath");
+            
+            string appName = (string)key.GetValue("AppName", null);
+            string appPath = (string)key.GetValue("AppPath");
 
-                if ((appName != null) && (appPath != null))
+            if ((appName != null) && (appPath != null))
+            {
+                try
                 {
-                    try
-                    {
-                        string path = Path.Combine(HandleNulTerminate(appPath), HandleNulTerminate(appName)).ToLower();
-
-                        if (servers.ContainsKey(path))
-                        {
-                            clsidList.AddRange(servers[path]);
-                        }
-
-                        Name = HandleNulTerminate(appName);
-                    }
-                    catch (ArgumentException)
-                    {
-                    }
+                    Name = HandleNulTerminate(appName);
+                    AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();   
+                }
+                catch (ArgumentException)
+                {
                 }
             }
-
-            Clsids = clsidList.ToArray();
         }
 
-        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, SortedDictionary<Guid, COMCLSIDEntry> clsids, SortedDictionary<string, List<COMCLSIDEntry>> servers, RegistryKey key)
-        {
-            m_registry = registry;
+        public COMIELowRightsElevationPolicy(Guid guid, 
+            bool user, RegistryKey key)
+        {            
             Uuid = guid;
             Name = Uuid.ToString("B");
-            LoadFromRegistry(clsids, servers, key);
+            User = user;
+            LoadFromRegistry(key);
+        }
+
+        internal COMIELowRightsElevationPolicy()
+        {
         }
 
         public int CompareTo(COMIELowRightsElevationPolicy other)
         {
             return Uuid.CompareTo(other.Uuid);
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Name = reader.GetAttribute("name");
+            Uuid = reader.ReadGuid("uuid");
+            Clsid = reader.ReadGuid("clsid");
+            AppPath = reader.GetAttribute("path");
+            Policy = reader.ReadEnum<ElevationPolicy>("policy");
+            User = reader.ReadBool("user");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("name", Name);
+            writer.WriteGuid("uuid", Uuid);
+            writer.WriteGuid("clsid", Clsid);
+            writer.WriteOptionalAttributeString("path", AppPath);
+            writer.WriteEnum("policy", Policy);
+            writer.WriteBool("user", User);
         }
     }
 }

@@ -106,7 +106,7 @@ namespace OleViewDotNet
             bool enum_clsid = false;
             bool show_help = false;
             bool user_only = false;
-
+            
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },

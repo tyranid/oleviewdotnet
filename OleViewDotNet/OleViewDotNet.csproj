@@ -113,6 +113,8 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ICOMRegistryProgress.cs" />
+    <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -120,6 +122,7 @@
       <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="COMAppIDEntry.cs" />
+    <Compile Include="COMCategory.cs" />
     <Compile Include="COMCLSIDEntry.cs" />
     <Compile Include="COMEnumerateInterfaces.cs" />
     <Compile Include="COMIELowRightsElevationPolicy.cs" />
@@ -155,7 +158,6 @@
     <Compile Include="InputTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="IXmlSerialize.cs" />
     <Compile Include="ListItemComparer.cs" />
     <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />

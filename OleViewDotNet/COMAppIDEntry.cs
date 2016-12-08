@@ -18,6 +18,8 @@ using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
@@ -35,8 +37,7 @@ namespace OleViewDotNet
         Reserved2 = 0x80,
     }
 
-    [Serializable]
-    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerialize
+    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable
     {     
         public COMAppIDEntry(Guid appId, RegistryKey key)
         {
@@ -177,9 +178,18 @@ namespace OleViewDotNet
                 LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode();
         }
 
-        public COMAppIDEntry(XmlReader reader)
+        internal COMAppIDEntry()
         {
-            AppId = new Guid(reader.GetAttribute("appid"));
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            AppId = reader.ReadGuid("appid");
             DllSurrogate = reader.GetAttribute("dllsurrogate");
             LocalService = reader.GetAttribute("localservice");
             RunAs = reader.GetAttribute("runas");
@@ -189,35 +199,16 @@ namespace OleViewDotNet
             AccessPermission = reader.GetAttribute("accessperm");
         }
 
-        void IXmlSerialize.Serialize(XmlWriter writer)
+        void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("appid", AppId.ToString());
-            if (DllSurrogate != null)
-            {
-                writer.WriteAttributeString("dllsurrogate", DllSurrogate);
-            }
-            if (LocalService != null)
-            {
-                writer.WriteAttributeString("localservice", LocalService);
-            }
-            if (RunAs != null)
-            {
-                writer.WriteAttributeString("runas", RunAs);
-            }
-            if (Name != null)
-            {
-                writer.WriteAttributeString("name", Name);
-            }
+            writer.WriteGuid("appid", AppId);
+            writer.WriteOptionalAttributeString("dllsurrogate", DllSurrogate);
+            writer.WriteOptionalAttributeString("localservice", LocalService);
+            writer.WriteOptionalAttributeString("runas", RunAs);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteAttributeString("flags", Flags.ToString());
-            if (LaunchPermission != null)
-            {
-                writer.WriteAttributeString("launchperm", LaunchPermission);
-            }
-
-            if (AccessPermission != null)
-            {
-                writer.WriteAttributeString("accessperm", AccessPermission);
-            }
+            writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
+            writer.WriteOptionalAttributeString("accessperm", AccessPermission);
         }
     }
 }

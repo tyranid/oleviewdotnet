@@ -25,20 +25,22 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
-    [Serializable]
-    public class COMInterfaceInstance
+    public class COMInterfaceInstance : IXmlSerializable
     {
         public Guid Iid { get; private set; }
-        public string ModulePath { get; private set; }
+        public string Module { get; private set; }
         public long VTableOffset { get; private set; }
 
-        public COMInterfaceInstance(Guid iid, string module_path, long vtable_offset)
+        public COMInterfaceInstance(Guid iid, string module, long vtable_offset)
         {
             Iid = iid;
-            ModulePath = module_path;
+            Module = module;
             VTableOffset = vtable_offset;
         }
 
@@ -46,13 +48,36 @@ namespace OleViewDotNet
         {
         }
 
+        public COMInterfaceInstance()
+        {
+        }
+
         public override string ToString()
         {
-            if (!String.IsNullOrWhiteSpace(ModulePath))
+            if (!String.IsNullOrWhiteSpace(Module))
             {
-                return String.Format("{0},{1},{2}", Iid, ModulePath, VTableOffset);
+                return String.Format("{0},{1},{2}", Iid, Module, VTableOffset);
             }
             return String.Format("{0}", Iid);
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Iid = reader.ReadGuid("iid");
+            Module = reader.GetAttribute("mod");
+            VTableOffset = reader.ReadLong("ofs");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteGuid("iid", Iid);
+            writer.WriteOptionalAttributeString("mod", Module);
+            writer.WriteLong("ofs", VTableOffset);
         }
     }
 

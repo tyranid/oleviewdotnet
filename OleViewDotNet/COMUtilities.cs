@@ -34,11 +34,64 @@ using System.ComponentModel;
 
 namespace OleViewDotNet
 {
-    [Guid("0002E013-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface ICatInformation
+    [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+    struct CATEGORYINFO
     {
-        int EnumCategories(int lcid, out IntPtr ppEnum);
-        void GetCategoryDesc(ref Guid refCatID, int lcid, out IntPtr strDesc);     
+        public Guid catid;
+        public int lcid;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string szDescription;
+    }
+    
+    [Guid("0002E011-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IEnumCATEGORYINFO
+    {
+        int Next(
+            int celt,
+            [Out] CATEGORYINFO[] rgelt,
+            out int pceltFetched);
+        int Skip(int celt);
+        int Reset();
+        int Clone(out IEnumCATEGORYINFO ppenum);
+    }
+
+    [Guid("0002E000-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IEnumGUID
+    {
+        int Next(
+            int celt,
+            [Out] Guid[] rgelt,
+            out int pceltFetched);
+        int Skip(int celt);
+        int Reset();
+        int Clone(out IEnumCATEGORYINFO ppenum);
+    }
+
+
+    [Guid("0002E013-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface ICatInformation
+    {
+        int EnumCategories(int lcid, out IEnumCATEGORYINFO ppenumCategoryInfo);
+        int GetCategoryDesc(ref Guid rcatid, int lcid, out IntPtr pszDesc);
+        void EnumClassesOfCategories(int cImplemented,
+            Guid[] rgcatidImpl,
+            int cRequired,
+            Guid[] rgcatidReq,
+            out IEnumGUID ppenumClsid);
+
+        void IsClassOfCategories(ref Guid rclsid,
+            int cImplemented,
+            Guid[] rgcatidImpl,
+            int cRequired,
+            Guid[] rgcatidReq);
+
+        void EnumImplCategoriesOfClass(
+            ref Guid rclsid,
+            out IEnumGUID ppenumCatid);
+        
+        void EnumReqCategoriesOfClass(
+            ref Guid rclsid,
+            out IEnumGUID ppenumCatid);
     }
 
     [Guid("00020400-0000-0000-c000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -199,7 +252,7 @@ namespace OleViewDotNet
                     }
                 }
 
-                return valueString;
+                return valueString.TrimEnd('\0');
             }
         }
 
@@ -232,7 +285,7 @@ namespace OleViewDotNet
             Guid clsid = new Guid("{0002E005-0000-0000-C000-000000000046}");
             Guid iid = typeof(ICatInformation).GUID;
             IntPtr pCatMgr;
-            string strDesc = catid.ToString("B");
+            string strDesc = String.Empty;
 
             if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.CLSCTX_INPROC_SERVER, ref iid, out pCatMgr) == 0)
             {
@@ -241,17 +294,28 @@ namespace OleViewDotNet
 
                 try
                 {
-                    catInfo.GetCategoryDesc(ref catid, 0, out pStrDesc);                
+                    catInfo.GetCategoryDesc(ref catid, 0, out pStrDesc);
                     strDesc = Marshal.PtrToStringUni(pStrDesc);
                     Marshal.FreeCoTaskMem(pStrDesc);
                 }
-                catch(COMException ex)
+                catch (COMException)
                 {
-                    System.Diagnostics.Trace.WriteLine(ex.ToString());
                 }
 
                 Marshal.ReleaseComObject(catInfo);
                 Marshal.Release(pCatMgr);
+            }
+
+            if (String.IsNullOrWhiteSpace(strDesc))
+            {
+                if (catid == new Guid("59fb2056-d625-48d0-a944-1a85b5ab2640"))
+                {
+                    strDesc = "AppContainer Compatible";
+                }
+                else
+                {
+                    strDesc = catid.ToString("B");
+                }
             }
 
             return strDesc;

@@ -17,11 +17,13 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
-    [Serializable]
-    public class COMTypeLibEntry : IComparable<COMTypeLibEntry>
+    public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable
     {
         private List<COMTypeLibVersionEntry> LoadFromKey(RegistryKey key)
         {
@@ -48,14 +50,35 @@ namespace OleViewDotNet
             Versions = LoadFromKey(rootKey).AsReadOnly();
         }
 
+        public COMTypeLibEntry()
+        {
+        }
+
         public int CompareTo(COMTypeLibEntry other)
         {
             return TypelibId.CompareTo(other.TypelibId);
         }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            TypelibId = reader.ReadGuid("libid");
+            reader.Read();
+            Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry());
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteGuid("libid", TypelibId);
+            writer.WriteSerializableObjects("libvers", Versions);
+        }
     }
 
-    [Serializable]
-    public class COMTypeLibVersionEntry
+    public class COMTypeLibVersionEntry : IXmlSerializable
     {
         public string Version { get; private set; }
         public string Name { get; private set; }
@@ -104,6 +127,31 @@ namespace OleViewDotNet
                     Win64Path = subKey.GetValue(null) as string;
                 }
             }
+        }
+
+        public COMTypeLibVersionEntry()
+        {
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Version = reader.GetAttribute("ver");
+            Name = reader.GetAttribute("name");
+            Win32Path = reader.GetAttribute("win32");
+            Win64Path = reader.GetAttribute("win64");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("ver", Version);
+            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("win32", Win32Path);
+            writer.WriteOptionalAttributeString("win64", Win64Path);
         }
     }
 }
