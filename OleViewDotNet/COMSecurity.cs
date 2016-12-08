@@ -106,32 +106,6 @@ namespace OleViewDotNet
         System = 0x4000,
     }
 
-    [Guid("965FC360-16FF-11d0-91CB-00AA00BBB723"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComVisible(true)]
-    interface ISecurityInformation
-    {
-        // *** ISecurityInformation methods ***
-        void GetObjectInformation(IntPtr pObjectInfo);
-        void GetSecurity(SecurityInformation RequestedInformation,
-                        out IntPtr ppSecurityDescriptor,
-                        [MarshalAs(UnmanagedType.Bool)] bool fDefault);
-
-        void SetSecurity(SecurityInformation SecurityInformation,
-                        IntPtr pSecurityDescriptor);
-
-        void GetAccessRights(ref Guid pguidObjectType,
-                            SiObjectInfoFlags dwFlags, // SI_EDIT_AUDITS, SI_EDIT_PROPERTIES
-                            out IntPtr ppAccess,
-                            out uint pcAccesses,
-                            out uint piDefaultAccess);
-
-        void MapGeneric(ref Guid pguidObjectType,
-                        IntPtr pAceFlags,
-                        ref uint pMask);
-
-        void GetInheritTypes(out IntPtr ppInheritTypes,
-                            out uint pcInheritTypes);
-        void PropertySheetPageCallback(IntPtr hwnd, uint uMsg, int uPage);
-    }
 
     [ClassInterface(ClassInterfaceType.None), ComVisible(true)]
     class SecurityInformationImpl : ISecurityInformation, IDisposable

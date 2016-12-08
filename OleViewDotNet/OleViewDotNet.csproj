@@ -113,6 +113,7 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="COMInterfaces.cs" />
     <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
@@ -328,9 +329,6 @@
       <DependentUpon>TypeLibControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="comregistry.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
