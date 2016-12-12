@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -24,6 +25,18 @@ namespace OleViewDotNet
 {
     public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable
     {
+        private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
+
+        private static string MapIidToName(Guid iid)
+        {
+            string ret;
+            if (m_iidtoname.TryGetValue(iid, out ret))
+            {
+                return ret;
+            }
+            return iid.ToString("B");
+        }
+
         public int CompareTo(COMInterfaceEntry right)
         {
             return String.Compare(Name, right.Name);
@@ -31,15 +44,16 @@ namespace OleViewDotNet
 
         private void LoadFromKey(RegistryKey key)
         {
-            object name = key.GetValue(null);
-            if ((name != null) && (name.ToString().Length > 0))
+            string name = key.GetValue(null) as string;
+            if (!String.IsNullOrWhiteSpace(name))
             {
                 Name = name.ToString();
+                m_iidtoname.TryAdd(Iid, Name);
             }
             else
             {
-                Name = String.Format("{{{0}}}", Iid.ToString());
-            }         
+                Name = Iid.ToString("B");
+            }
               
             ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
             NumMethods = COMUtilities.ReadIntFromKey(key, "NumMethods", null);
@@ -79,7 +93,7 @@ namespace OleViewDotNet
         }
 
         public COMInterfaceEntry(Guid iid)
-            : this(iid, Guid.Empty, 3, "IUnknown", iid.ToString("B"))
+            : this(iid, Guid.Empty, 3, "IUnknown", MapIidToName(iid))
         {
         }
 
@@ -249,6 +263,8 @@ namespace OleViewDotNet
             Base = reader.ReadString("base");
             TypeLibVersion = reader.ReadString("ver");
             TypeLib = reader.ReadGuid("tlib");
+
+            m_iidtoname.TryAdd(Iid, Name);
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)

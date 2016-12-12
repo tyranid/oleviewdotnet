@@ -137,10 +137,25 @@ namespace OleViewDotNet
                     ServerType = COMServerType.LocalServer32;
                 }
 
-                if ((serverKey != null) && (serverKey.GetValue(null) != null))
+                string server_value = null;
+                if (serverKey != null)
                 {
-                    CmdLine = serverKey.GetValue(null).ToString();
-                    Server = ProcessFileName(CmdLine, ServerType == COMServerType.LocalServer32);
+                    server_value = serverKey.GetValue(null) as string;
+                }
+
+                if (!String.IsNullOrWhiteSpace(server_value))
+                {
+                    Server = ProcessFileName(server_value, ServerType == COMServerType.LocalServer32);
+
+                    if (ServerType == COMServerType.LocalServer32)
+                    {
+                        CmdLine = server_value;
+                    }
+                    else
+                    {
+                        CmdLine = String.Empty;
+                    }
+
                     string threading_model = serverKey.GetValue("ThreadingModel") as string;
                     if (threading_model != null)
                     {
@@ -187,6 +202,7 @@ namespace OleViewDotNet
                 else
                 {
                     Server = String.Empty;
+                    CmdLine = String.Empty;
                     ServerType = COMServerType.UnknownServer;
                 }
             }
@@ -437,36 +453,30 @@ namespace OleViewDotNet
         public IntPtr CreateInstance(CLSCTX dwContext)
         {
             IntPtr pInterface = IntPtr.Zero;
-            bool blValid = false;
-
+            
             if (dwContext == CLSCTX.CLSCTX_ALL)
             {
                 if (ServerType == COMServerType.InProcServer32)
                 {
                     dwContext = CLSCTX.CLSCTX_INPROC_SERVER;
-                    blValid = true;
                 }
                 else if (ServerType == COMServerType.LocalServer32)
                 {
                     dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
-                    blValid = true;
                 }
-            }
-            else
-            {
-                blValid = true;
-            }
-
-            if (blValid)
-            {
-                Guid iid = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
-                Guid clsid = Clsid;
-                int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
-
-                if (iError != 0)
+                else
                 {
-                    Marshal.ThrowExceptionForHR(iError);
+                    dwContext = CLSCTX.CLSCTX_SERVER;
                 }
+            }
+            
+            Guid iid = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
+            Guid clsid = Clsid;
+            int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
+
+            if (iError != 0)
+            {
+                Marshal.ThrowExceptionForHR(iError);
             }
 
             return pInterface;

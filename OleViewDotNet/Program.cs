@@ -221,10 +221,15 @@ namespace OleViewDotNet
                 {
                     if (!(ex is OperationCanceledException))
                     {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowError(null, ex);
                     }
                 }
             }
+        }
+
+        public static void ShowError(IWin32Window window, Exception ex)
+        {
+            MessageBox.Show(window, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

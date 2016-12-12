@@ -189,7 +189,15 @@ namespace OleViewDotNet
             }
             finally
             {
-                Marshal.Release(punk);
+                if (pfactory != IntPtr.Zero)
+                {
+                    Marshal.Release(pfactory);
+                }
+
+                if (punk != IntPtr.Zero)
+                {
+                    Marshal.Release(punk);
+                }
             }
         }
 

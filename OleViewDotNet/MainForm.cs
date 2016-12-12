@@ -22,6 +22,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet
 {
@@ -81,6 +83,23 @@ namespace OleViewDotNet
 
             frm.ShowHint = DockState.Document;
             frm.Show(m_dockPanel);
+        }
+
+        public async Task HostObject(COMCLSIDEntry ent, object obj)
+        {
+            Dictionary<string, string> props = new Dictionary<string, string>();
+            props.Add("CLSID", ent.Clsid.ToString("B"));
+            props.Add("Name", ent.Name);
+            props.Add("Server", ent.Server);
+
+            /* Need to implement a type library reader */
+            Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
+
+            await ent.LoadSupportedInterfacesAsync(false);
+
+            ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
+                props, ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
+            HostControl(view);
         }
 
         private void OpenView(COMRegistryViewer.DisplayMode mode)
@@ -216,7 +235,7 @@ namespace OleViewDotNet
             HostControl(new PythonConsole());
         }
 
-        private void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
+        private async void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
@@ -227,23 +246,9 @@ namespace OleViewDotNet
                     try
                     {
                         byte[] data = File.ReadAllBytes(dlg.FileName);
-
-                        IStreamImpl stm = new IStreamImpl(new MemoryStream(data));
-                        Guid iid = COMInterfaceEntry.IID_IUnknown;
-                        IntPtr pv;
-
-                        int hr = COMUtilities.CoUnmarshalInterface(stm, ref iid, out pv);
-                        if (hr == 0)
-                        {
-                            object comObj = Marshal.GetObjectForIUnknown(pv);
-                            Marshal.Release(pv);
-
-                            OpenObjectInformation(comObj, "Marshalled Object");
-                        }
-                        else
-                        {
-                            Marshal.ThrowExceptionForHR(hr);
-                        }
+                        Guid clsid;
+                        object comObj = COMUtilities.UnmarshalObject(new MemoryStream(data), out clsid);
+                        await HostObject(m_registry.MapClsidToEntry(clsid), comObj);
                     }
                     catch (Exception ex)
                     {
@@ -284,7 +289,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuObjectFromSerializedStream_Click(object sender, EventArgs e)
+        private async void menuObjectFromSerializedStream_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
@@ -296,7 +301,10 @@ namespace OleViewDotNet
                     {
                         using (Stream stm = dlg.OpenFile())
                         {
-                            OpenObjectInformation(COMUtilities.OleLoadFromStream(stm), null);
+                            Guid clsid;
+                            object obj = COMUtilities.OleLoadFromStream(stm, out clsid);
+
+                            await HostObject(m_registry.MapClsidToEntry(clsid), obj);
                         }
                     }
                     catch (Exception ex)
@@ -350,8 +358,8 @@ namespace OleViewDotNet
         }
 
         private string _last_moniker = "Specify Moniker";
-        
-        private void menuObjectBindMoniker_Click(object sender, EventArgs e)
+
+        private void ParseOrBindMoniker(bool bind)
         {
             using (GetTextForm frm = new GetTextForm(_last_moniker))
             {
@@ -361,8 +369,18 @@ namespace OleViewDotNet
                     try
                     {
                         _last_moniker = frm.Data;
-                        object comObj = Marshal.BindToMoniker(_last_moniker);
+                        IBindCtx bc = COMUtilities.CreateBindCtx(0);
+                        int eaten = 0;
+                        IMoniker moniker = COMUtilities.MkParseDisplayName(bc, _last_moniker, out eaten);
 
+                        object comObj = moniker;
+
+                        if (bind)
+                        {
+                            Guid iid = COMInterfaceEntry.IID_IUnknown;
+                            moniker.BindToObject(bc, null, ref iid, out comObj);
+                        }
+                        
                         if (comObj != null)
                         {
                             OpenObjectInformation(comObj, _last_moniker);
@@ -374,6 +392,11 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
+        
+        private void menuObjectBindMoniker_Click(object sender, EventArgs e)
+        {
+            ParseOrBindMoniker(true);
         }
 
         private void menuFileSaveDatabase_Click(object sender, EventArgs e)
@@ -479,6 +502,66 @@ namespace OleViewDotNet
                     new MainForm(frm.DiffRegistry).Show();
                 }
             }
+        }
+
+        private async void menuObjectFromFile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        COMCLSIDEntry entry = m_registry.GetFileClass(dlg.FileName);
+                        if (entry != null)
+                        {
+                            IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext);
+                            ps.Load(dlg.FileName, (int)STGM.STGM_READ);
+                            await HostObject(entry, ps);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void menuObjectParseMoniker_Click(object sender, EventArgs e)
+        {
+            ParseOrBindMoniker(false);
+        }
+
+        private void OpenHexEditor(byte[] bytes)
+        {
+            ObjectHexEditor editor = new ObjectHexEditor(m_registry, bytes);
+            HostControl(editor);
+        }
+
+        private void menuHexEditorFromFile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        OpenHexEditor(File.ReadAllBytes(dlg.FileName));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void menuHexEditorEmpty_Click(object sender, EventArgs e)
+        {
+            OpenHexEditor(new byte[0]);
         }
     }
 }

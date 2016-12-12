@@ -84,5 +84,54 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private void copyToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanCopy())
+            {
+                hexBox.Copy();
+            }
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanPaste())
+            {
+                hexBox.Paste();
+            }
+        }
+
+        private void pasteHexToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanPasteHex())
+            {
+                hexBox.PasteHex();
+            }
+        }
+
+        private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            pasteToolStripMenuItem.Enabled = hexBox.CanPaste();
+            pasteHexToolStripMenuItem.Enabled = hexBox.CanPasteHex();
+            copyToolStripMenuItem.Enabled = hexBox.CanCopy();
+            copyHexToolStripMenuItem.Enabled = hexBox.CanCopy();
+            cutToolStripMenuItem.Enabled = hexBox.CanCut();
+        }
+
+        private void copyHexToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanCopy())
+            {
+                hexBox.CopyHex();
+            }
+        }
+
+        private void cutToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanCut())
+            {
+                hexBox.Cut();
+            }
+        }
     }
 }

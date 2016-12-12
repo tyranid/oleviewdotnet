@@ -112,6 +112,69 @@ namespace OleViewDotNet
         STGM_DELETEONRELEASE = 0x04000000
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct OptionalGuid : IDisposable
+    {
+        IntPtr pGuid;
+
+        void IDisposable.Dispose()
+        {
+            if (pGuid != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(pGuid);
+                pGuid = IntPtr.Zero;
+            }
+        }
+
+        public OptionalGuid(Guid guid)
+        {
+            pGuid = Marshal.AllocCoTaskMem(16);
+            Marshal.Copy(guid.ToByteArray(), 0, pGuid, 16);
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MULTI_QI : IDisposable
+    {
+        OptionalGuid pIID;
+        IntPtr pItf;
+        int hr;
+
+        public object GetObject()
+        {
+            if (pItf == IntPtr.Zero)
+            {
+                return null;
+            }
+            else
+            {
+                return Marshal.GetObjectForIUnknown(pItf);
+            }
+        }
+
+        public int HResult()
+        {
+            return hr;
+        }
+
+        void IDisposable.Dispose()
+        {
+            ((IDisposable)pIID).Dispose();
+            if (pItf != IntPtr.Zero)
+            {
+                Marshal.Release(pItf);
+                pItf = IntPtr.Zero;
+            }
+        }
+
+        public MULTI_QI(Guid iid)
+        {
+            pIID = new OptionalGuid(iid);
+            pItf = IntPtr.Zero;
+            hr = 0;
+        }
+    }
+
     public static class COMUtilities
     {
         private enum RegKind
@@ -128,8 +191,8 @@ namespace OleViewDotNet
         public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
         [DllImport("ole32.dll", EntryPoint = "CoGetClassObject", CallingConvention = CallingConvention.StdCall)]
         public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, IntPtr pServerInfo, ref Guid riid, out IntPtr ppv);
-        [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall)]
-        public static extern int CoUnmarshalInterface(IStream stm, ref Guid riid, out IntPtr ppv);
+        [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
+        public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
@@ -140,6 +203,24 @@ namespace OleViewDotNet
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public extern static void SHCreateStreamOnFile(string pszFile, STGM grfMode, out IntPtr ppStm);
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet=CharSet.Unicode)]
+        public static extern int CoGetInstanceFromFile(
+            IntPtr pServerInfo,
+            OptionalGuid pClsid,
+            IntPtr  punkOuter,
+            CLSCTX dwClsCtx,
+            STGM   grfMode,
+            string  pwszName,
+            int dwCount,
+            [In, Out] MULTI_QI[] pResults
+        );
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern void GetClassFile(string szFilename, out Guid clsid);
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern IMoniker MkParseDisplayName(IBindCtx pbc, string szUserName, out int pchEaten);
 
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
@@ -784,11 +865,11 @@ namespace OleViewDotNet
             }
         }
 
-        public static object OleLoadFromStream(Stream stm)
+        public static object OleLoadFromStream(Stream stm, out Guid clsid)
         {
             using (BinaryReader reader = new BinaryReader(stm))
             {
-                Guid clsid = new Guid(reader.ReadBytes(16));
+                clsid = new Guid(reader.ReadBytes(16));
 
                 Guid unk = COMInterfaceEntry.IID_IUnknown;
                 IntPtr pObj;
@@ -809,6 +890,16 @@ namespace OleViewDotNet
 
                 return ret;
             }
+        }
+
+        public static object UnmarshalObject(Stream stm, out Guid clsid)
+        {
+            clsid = Guid.Empty;
+            Guid iid = COMInterfaceEntry.IID_IUnknown;
+            object obj;
+            CoUnmarshalInterface(new IStreamImpl(stm), ref iid, out obj);
+            clsid = GetObjectClass(obj);
+            return obj;
         }
 
         public static Guid GetObjectClass(object p)

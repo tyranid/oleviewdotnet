@@ -44,6 +44,7 @@
             this.createLocalServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInProcServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +54,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -100,6 +101,7 @@
             // contextMenuStrip
             // 
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem,
             this.copyGUIDToolStripMenuItem,
             this.copyGUIDCStructureToolStripMenuItem,
             this.copyGUIDHexStringToolStripMenuItem,
@@ -112,7 +114,7 @@
             this.viewAccessPermissionsToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 268);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 290);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyGUIDToolStripMenuItem
@@ -188,6 +190,14 @@
             this.createInSessionToolStripMenuItem.Name = "createInSessionToolStripMenuItem";
             this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.createInSessionToolStripMenuItem.Text = "Create In Session";
+            // 
+            // consoleToolStripMenuItem
+            // 
+            this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.consoleToolStripMenuItem.Tag = "Console";
+            this.consoleToolStripMenuItem.Text = "Console";
+            this.consoleToolStripMenuItem.Click += new System.EventHandler(this.consoleToolStripMenuItem_Click);
             // 
             // viewTypeLibraryToolStripMenuItem
             // 
@@ -284,13 +294,12 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // consoleToolStripMenuItem
+            // copyToolStripMenuItem
             // 
-            this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.consoleToolStripMenuItem.Tag = "Console";
-            this.consoleToolStripMenuItem.Text = "Console";
-            this.consoleToolStripMenuItem.Click += new System.EventHandler(this.consoleToolStripMenuItem_Click);
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -332,5 +341,6 @@
         private System.Windows.Forms.ToolStripMenuItem createInProcServerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createInSessionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
     }
 }

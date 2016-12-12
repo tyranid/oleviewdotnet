@@ -163,6 +163,26 @@ namespace OleViewDotNet
             get { return !String.IsNullOrWhiteSpace(AccessPermission); }
         }
 
+        public bool HasLowILAccess
+        {
+            get { return COMSecurity.GetILForSD(AccessPermission) <= SecurityIntegrityLevel.Low; }
+        }
+
+        public bool HasLowILLaunch
+        {
+            get { return COMSecurity.GetILForSD(LaunchPermission) <= SecurityIntegrityLevel.Low; }
+        }
+
+        public bool HasACAccess
+        {
+            get { return COMSecurity.SDHasAC(AccessPermission); }
+        }
+
+        public bool HasACLaunch
+        {
+            get { return COMSecurity.SDHasAC(LaunchPermission); }
+        }
+
         public override string ToString()
         {
             return String.Format("COMAppIDEntry: {0}", Name);

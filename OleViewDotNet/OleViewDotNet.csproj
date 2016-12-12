@@ -120,6 +120,12 @@
     <Compile Include="DiffRegistryForm.Designer.cs">
       <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ObjectHexEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ObjectHexEditor.Designer.cs">
+      <DependentUpon>ObjectHexEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -302,6 +308,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ObjectHexEditor.resx">
+      <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="RegistryPropertiesControl.resx">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>

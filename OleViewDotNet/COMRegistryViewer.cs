@@ -755,7 +755,14 @@ namespace OleViewDotNet
                     }
                     else
                     {
-                        wait_node.Text = "Error querying COM interfaces - Timeout";
+                        if (clsid.FactoryInterfaces.Count() > 0)
+                        {
+                            wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
+                        }
+                        else
+                        {
+                            wait_node.Text = "Error querying COM interfaces - Timeout";
+                        }
                     }
                 }
                 catch (Win32Exception ex)
@@ -781,6 +788,24 @@ namespace OleViewDotNet
             CopyAsStructure,
             CopyAsObject,
             CopyAsHexString,            
+        }
+
+        public static void CopyTextToClipboard(string text)
+        {
+            int tries = 10;
+            while (tries > 0)
+            {
+                try
+                {
+                    Clipboard.SetText(text);
+                    break;
+                }
+                catch (ExternalException)
+                {
+                }
+                System.Threading.Thread.Sleep(100);
+                tries--;
+            }
         }
 
         private void CopyGuidToClipboard(Guid guid, CopyGuidType copyType)
@@ -820,20 +845,7 @@ namespace OleViewDotNet
 
             if (strCopy != null)
             {
-                int tries = 10;
-                while (tries > 0)
-                {
-                    try
-                    {
-                        Clipboard.SetText(strCopy);
-                        break;
-                    }
-                    catch (ExternalException)
-                    {
-                    }
-                    System.Threading.Thread.Sleep(100);
-                    tries--;
-                }
+                CopyTextToClipboard(strCopy);
             }
         }
 
@@ -929,19 +941,7 @@ namespace OleViewDotNet
 
         private async Task SetupObjectView(COMCLSIDEntry ent, object obj)
         {
-            Dictionary<string, string> props = new Dictionary<string, string>();
-            props.Add("CLSID", ent.Clsid.ToString("B"));
-            props.Add("Name", ent.Name);
-            props.Add("Server", ent.Server);
-
-            /* Need to implement a type library reader */
-            Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
-
-            await ent.LoadSupportedInterfacesAsync(false);
-
-            ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
-                props, ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
-            Program.GetMainForm(m_registry).HostControl(view);
+            await Program.GetMainForm(m_registry).HostObject(ent, obj);
         }
 
         private COMCLSIDEntry GetSelectedClsidEntry()
@@ -1020,6 +1020,7 @@ namespace OleViewDotNet
             if ((node != null) && (node.Tag != null))
             {
                 contextMenuStrip.Items.Clear();
+                contextMenuStrip.Items.Add(copyToolStripMenuItem);
                 contextMenuStrip.Items.Add(copyGUIDToolStripMenuItem);
                 contextMenuStrip.Items.Add(copyGUIDHexStringToolStripMenuItem);
                 contextMenuStrip.Items.Add(copyGUIDCStructureToolStripMenuItem);
@@ -1372,6 +1373,15 @@ namespace OleViewDotNet
             if (ent != null && item != null && item.Tag is string)
             {
                 await CreateInSession(ent, (string)item.Tag);
+            }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null)
+            {
+                CopyTextToClipboard(node.Text);
             }
         }
     }

@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace OleViewDotNet
 {
@@ -25,6 +26,7 @@ namespace OleViewDotNet
     {
         private COMRegistry m_registry;
         private COMAppIDEntry m_appid;
+        private COMCLSIDEntry m_clsid;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -44,16 +46,21 @@ namespace OleViewDotNet
             view.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
+        private static string GetStringValue(string value)
+        {
+            return String.IsNullOrWhiteSpace(value) ? "N/A" : value;
+        }
+
         private void SetupAppIdEntry(COMAppIDEntry entry)
         {
             textBoxAppIdName.Text = entry.Name;
             textBoxAppIdGuid.Text = entry.AppId.ToString("B");
-            textBoxLaunchPermission.Text = entry.LaunchPermission ?? String.Empty;
-            textBoxAccessPermission.Text = entry.AccessPermission ?? String.Empty;
-            lblAppIdRunAs.Text = String.Format("Run As: {0}", entry.RunAs ?? "N/A");
-            lblService.Text = String.Format("Service: {0}", entry.LocalService ?? "N/A");
+            textBoxLaunchPermission.Text = entry.LaunchPermission;
+            textBoxAccessPermission.Text = entry.AccessPermission;
+            lblAppIdRunAs.Text = String.Format("Run As: {0}", GetStringValue(entry.RunAs));
+            lblService.Text = String.Format("Service: {0}", GetStringValue(entry.LocalService));
             lblAppIDFlags.Text = String.Format("Flags: {0}", entry.Flags);
-            textBoxDllSurrogate.Text = entry.DllSurrogate ?? "N/A";
+            textBoxDllSurrogate.Text = GetStringValue(entry.DllSurrogate);
             btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
             btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
             tabControlProperties.TabPages.Add(tabPageAppID);
@@ -67,6 +74,20 @@ namespace OleViewDotNet
             lblServerType.Text = "Server Type: " + entry.ServerType;
             lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
             textBoxServer.Text = entry.Server;
+            textBoxCmdLine.Text = GetStringValue(entry.CmdLine);
+            if (entry.TreatAs != Guid.Empty)
+            {
+                textBoxTreatAs.Text = entry.TreatAs.ToString("B");
+                if (m_registry.Clsids.ContainsKey(entry.TreatAs))
+                {
+                    btnTreatAsProps.Enabled = true;
+                }
+            }
+            else
+            {
+                textBoxTreatAs.Text = "N/A";
+                btnTreatAsProps.Enabled = false;
+            }
             var progids = m_registry.Progids;
 
             foreach (string progid in m_registry.GetProgIdsForClsid(entry.Clsid).Select(p => p.ProgID))
@@ -96,6 +117,7 @@ namespace OleViewDotNet
             {
                 SetupAppIdEntry(m_registry.AppIDs[entry.AppID]);
             }
+            m_clsid = entry;
         }
 
         private void SetupProperties(object obj)
@@ -167,6 +189,40 @@ namespace OleViewDotNet
         private void btnViewAccessPermissions_Click(object sender, EventArgs e)
         {
             COMSecurity.ViewSecurity(this, m_appid, true);
+        }
+
+        private void copyProgIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewProgIDs.SelectedItems.Count > 0)
+            {
+                ListViewItem item = listViewProgIDs.SelectedItems[0];
+                COMRegistryViewer.CopyTextToClipboard(item.Text);
+            }
+        }
+
+        private void btnTreatAsProps_Click(object sender, EventArgs e)
+        {
+            if (m_registry.Clsids.ContainsKey(m_clsid.TreatAs))
+            {
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, 
+                    m_clsid.Name, m_registry.Clsids[m_clsid.TreatAs]));
+            }
+        }
+
+        private async void btnCreate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                object comObj = m_clsid.CreateInstanceAsObject(m_clsid.CreateContext);
+                if (comObj != null)
+                {
+                    await Program.GetMainForm(m_registry).HostObject(m_clsid, comObj);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

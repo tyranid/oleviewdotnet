@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.Label lblClsid;
             System.Windows.Forms.Label label1;
             System.Windows.Forms.Label label2;
@@ -41,11 +42,15 @@
             System.Windows.Forms.Label label10;
             System.Windows.Forms.Label label11;
             System.Windows.Forms.Label label12;
+            System.Windows.Forms.Label label13;
+            System.Windows.Forms.Label label14;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.textBoxServer = new System.Windows.Forms.TextBox();
             this.listViewCategories = new System.Windows.Forms.ListView();
             this.listViewProgIDs = new System.Windows.Forms.ListView();
+            this.contextMenuStripProgids = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyProgIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBoxClsidName = new System.Windows.Forms.TextBox();
             this.lblThreadingModel = new System.Windows.Forms.Label();
             this.lblServerType = new System.Windows.Forms.Label();
@@ -57,6 +62,7 @@
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.tabPageAppID = new System.Windows.Forms.TabPage();
+            this.lblAppIDFlags = new System.Windows.Forms.Label();
             this.btnViewAccessPermissions = new System.Windows.Forms.Button();
             this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
             this.textBoxDllSurrogate = new System.Windows.Forms.TextBox();
@@ -66,7 +72,10 @@
             this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdName = new System.Windows.Forms.TextBox();
             this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
-            this.lblAppIDFlags = new System.Windows.Forms.Label();
+            this.textBoxCmdLine = new System.Windows.Forms.TextBox();
+            this.textBoxTreatAs = new System.Windows.Forms.TextBox();
+            this.btnCreate = new System.Windows.Forms.Button();
+            this.btnTreatAsProps = new System.Windows.Forms.Button();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -80,8 +89,11 @@
             label10 = new System.Windows.Forms.Label();
             label11 = new System.Windows.Forms.Label();
             label12 = new System.Windows.Forms.Label();
+            label13 = new System.Windows.Forms.Label();
+            label14 = new System.Windows.Forms.Label();
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
+            this.contextMenuStripProgids.SuspendLayout();
             this.tabPageNoProperties.SuspendLayout();
             this.tabPageSupportedInterfaces.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerInterfaces)).BeginInit();
@@ -121,7 +133,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(11, 150);
+            label3.Location = new System.Drawing.Point(11, 201);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(48, 13);
             label3.TabIndex = 7;
@@ -130,7 +142,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(11, 251);
+            label4.Location = new System.Drawing.Point(11, 302);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(60, 13);
             label4.TabIndex = 9;
@@ -223,6 +235,12 @@
             // 
             // tabPageClsid
             // 
+            this.tabPageClsid.Controls.Add(this.btnTreatAsProps);
+            this.tabPageClsid.Controls.Add(this.btnCreate);
+            this.tabPageClsid.Controls.Add(this.textBoxTreatAs);
+            this.tabPageClsid.Controls.Add(label14);
+            this.tabPageClsid.Controls.Add(this.textBoxCmdLine);
+            this.tabPageClsid.Controls.Add(label13);
             this.tabPageClsid.Controls.Add(this.textBoxServer);
             this.tabPageClsid.Controls.Add(label7);
             this.tabPageClsid.Controls.Add(label4);
@@ -245,48 +263,63 @@
             // 
             // textBoxServer
             // 
-            this.textBoxServer.Location = new System.Drawing.Point(55, 96);
+            this.textBoxServer.Location = new System.Drawing.Point(64, 96);
             this.textBoxServer.Name = "textBoxServer";
             this.textBoxServer.ReadOnly = true;
-            this.textBoxServer.Size = new System.Drawing.Size(335, 20);
+            this.textBoxServer.Size = new System.Drawing.Size(341, 20);
             this.textBoxServer.TabIndex = 11;
             // 
             // listViewCategories
             // 
             this.listViewCategories.FullRowSelect = true;
             this.listViewCategories.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewCategories.Location = new System.Drawing.Point(11, 267);
+            this.listViewCategories.Location = new System.Drawing.Point(11, 318);
             this.listViewCategories.MultiSelect = false;
             this.listViewCategories.Name = "listViewCategories";
-            this.listViewCategories.Size = new System.Drawing.Size(379, 82);
+            this.listViewCategories.Size = new System.Drawing.Size(394, 82);
             this.listViewCategories.TabIndex = 8;
             this.listViewCategories.UseCompatibleStateImageBehavior = false;
             this.listViewCategories.View = System.Windows.Forms.View.Details;
             // 
             // listViewProgIDs
             // 
+            this.listViewProgIDs.ContextMenuStrip = this.contextMenuStripProgids;
             this.listViewProgIDs.FullRowSelect = true;
             this.listViewProgIDs.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProgIDs.Location = new System.Drawing.Point(11, 166);
+            this.listViewProgIDs.Location = new System.Drawing.Point(11, 217);
             this.listViewProgIDs.MultiSelect = false;
             this.listViewProgIDs.Name = "listViewProgIDs";
-            this.listViewProgIDs.Size = new System.Drawing.Size(379, 82);
+            this.listViewProgIDs.Size = new System.Drawing.Size(394, 82);
             this.listViewProgIDs.TabIndex = 6;
             this.listViewProgIDs.UseCompatibleStateImageBehavior = false;
             this.listViewProgIDs.View = System.Windows.Forms.View.Details;
             // 
+            // contextMenuStripProgids
+            // 
+            this.contextMenuStripProgids.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyProgIDToolStripMenuItem});
+            this.contextMenuStripProgids.Name = "contextMenuStripProgids";
+            this.contextMenuStripProgids.Size = new System.Drawing.Size(142, 26);
+            // 
+            // copyProgIDToolStripMenuItem
+            // 
+            this.copyProgIDToolStripMenuItem.Name = "copyProgIDToolStripMenuItem";
+            this.copyProgIDToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.copyProgIDToolStripMenuItem.Text = "Copy ProgID";
+            this.copyProgIDToolStripMenuItem.Click += new System.EventHandler(this.copyProgIDToolStripMenuItem_Click);
+            // 
             // textBoxClsidName
             // 
-            this.textBoxClsidName.Location = new System.Drawing.Point(55, 11);
+            this.textBoxClsidName.Location = new System.Drawing.Point(64, 11);
             this.textBoxClsidName.Name = "textBoxClsidName";
             this.textBoxClsidName.ReadOnly = true;
-            this.textBoxClsidName.Size = new System.Drawing.Size(335, 20);
+            this.textBoxClsidName.Size = new System.Drawing.Size(341, 20);
             this.textBoxClsidName.TabIndex = 5;
             // 
             // lblThreadingModel
             // 
             this.lblThreadingModel.AutoSize = true;
-            this.lblThreadingModel.Location = new System.Drawing.Point(11, 125);
+            this.lblThreadingModel.Location = new System.Drawing.Point(11, 176);
             this.lblThreadingModel.Name = "lblThreadingModel";
             this.lblThreadingModel.Size = new System.Drawing.Size(90, 13);
             this.lblThreadingModel.TabIndex = 3;
@@ -295,7 +328,7 @@
             // lblServerType
             // 
             this.lblServerType.AutoSize = true;
-            this.lblServerType.Location = new System.Drawing.Point(11, 75);
+            this.lblServerType.Location = new System.Drawing.Point(11, 73);
             this.lblServerType.Name = "lblServerType";
             this.lblServerType.Size = new System.Drawing.Size(68, 13);
             this.lblServerType.TabIndex = 2;
@@ -303,10 +336,10 @@
             // 
             // textBoxClsid
             // 
-            this.textBoxClsid.Location = new System.Drawing.Point(55, 41);
+            this.textBoxClsid.Location = new System.Drawing.Point(64, 41);
             this.textBoxClsid.Name = "textBoxClsid";
             this.textBoxClsid.ReadOnly = true;
-            this.textBoxClsid.Size = new System.Drawing.Size(335, 20);
+            this.textBoxClsid.Size = new System.Drawing.Size(260, 20);
             this.textBoxClsid.TabIndex = 1;
             // 
             // tabPageNoProperties
@@ -417,6 +450,15 @@
             this.tabPageAppID.Text = "AppID";
             this.tabPageAppID.UseVisualStyleBackColor = true;
             // 
+            // lblAppIDFlags
+            // 
+            this.lblAppIDFlags.AutoSize = true;
+            this.lblAppIDFlags.Location = new System.Drawing.Point(7, 123);
+            this.lblAppIDFlags.Name = "lblAppIDFlags";
+            this.lblAppIDFlags.Size = new System.Drawing.Size(35, 13);
+            this.lblAppIDFlags.TabIndex = 20;
+            this.lblAppIDFlags.Text = "Flags:";
+            // 
             // btnViewAccessPermissions
             // 
             this.btnViewAccessPermissions.Location = new System.Drawing.Point(307, 211);
@@ -495,14 +537,60 @@
             this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
-            // lblAppIDFlags
+            // textBoxCmdLine
             // 
-            this.lblAppIDFlags.AutoSize = true;
-            this.lblAppIDFlags.Location = new System.Drawing.Point(7, 123);
-            this.lblAppIDFlags.Name = "lblAppIDFlags";
-            this.lblAppIDFlags.Size = new System.Drawing.Size(35, 13);
-            this.lblAppIDFlags.TabIndex = 20;
-            this.lblAppIDFlags.Text = "Flags:";
+            this.textBoxCmdLine.Location = new System.Drawing.Point(64, 125);
+            this.textBoxCmdLine.Name = "textBoxCmdLine";
+            this.textBoxCmdLine.ReadOnly = true;
+            this.textBoxCmdLine.Size = new System.Drawing.Size(341, 20);
+            this.textBoxCmdLine.TabIndex = 13;
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Location = new System.Drawing.Point(11, 128);
+            label13.Name = "label13";
+            label13.Size = new System.Drawing.Size(51, 13);
+            label13.TabIndex = 12;
+            label13.Text = "CmdLine:";
+            // 
+            // textBoxTreatAs
+            // 
+            this.textBoxTreatAs.Location = new System.Drawing.Point(64, 152);
+            this.textBoxTreatAs.Name = "textBoxTreatAs";
+            this.textBoxTreatAs.ReadOnly = true;
+            this.textBoxTreatAs.Size = new System.Drawing.Size(260, 20);
+            this.textBoxTreatAs.TabIndex = 15;
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Location = new System.Drawing.Point(11, 155);
+            label14.Name = "label14";
+            label14.Size = new System.Drawing.Size(47, 13);
+            label14.TabIndex = 14;
+            label14.Text = "TreatAs:";
+            // 
+            // btnCreate
+            // 
+            this.btnCreate.Location = new System.Drawing.Point(330, 39);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(75, 23);
+            this.btnCreate.TabIndex = 16;
+            this.btnCreate.Text = "Create";
+            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
+            // btnTreatAsProps
+            // 
+            this.btnTreatAsProps.Enabled = false;
+            this.btnTreatAsProps.Location = new System.Drawing.Point(330, 151);
+            this.btnTreatAsProps.Name = "btnTreatAsProps";
+            this.btnTreatAsProps.Size = new System.Drawing.Size(75, 23);
+            this.btnTreatAsProps.TabIndex = 17;
+            this.btnTreatAsProps.Text = "Properties";
+            this.btnTreatAsProps.UseVisualStyleBackColor = true;
+            this.btnTreatAsProps.Click += new System.EventHandler(this.btnTreatAsProps_Click);
             // 
             // PropertiesControl
             // 
@@ -515,6 +603,7 @@
             this.tabControlProperties.ResumeLayout(false);
             this.tabPageClsid.ResumeLayout(false);
             this.tabPageClsid.PerformLayout();
+            this.contextMenuStripProgids.ResumeLayout(false);
             this.tabPageNoProperties.ResumeLayout(false);
             this.tabPageNoProperties.PerformLayout();
             this.tabPageSupportedInterfaces.ResumeLayout(false);
@@ -558,5 +647,11 @@
         private System.Windows.Forms.Button btnViewLaunchPermissions;
         private System.Windows.Forms.Button btnViewAccessPermissions;
         private System.Windows.Forms.Label lblAppIDFlags;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripProgids;
+        private System.Windows.Forms.ToolStripMenuItem copyProgIDToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxCmdLine;
+        private System.Windows.Forms.TextBox textBoxTreatAs;
+        private System.Windows.Forms.Button btnTreatAsProps;
+        private System.Windows.Forms.Button btnCreate;
     }
 }

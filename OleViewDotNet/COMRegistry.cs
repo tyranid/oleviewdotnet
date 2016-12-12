@@ -17,6 +17,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -480,6 +481,13 @@ namespace OleViewDotNet
 
             return new COMCLSIDEntry(clsid, COMServerType.UnknownServer);
         }
+
+        public COMCLSIDEntry GetFileClass(string filename)
+        {
+            Guid clsid;
+            COMUtilities.GetClassFile(filename, out clsid);
+            return MapClsidToEntry(clsid);
+        }
         
         public IEnumerable<COMProgIDEntry> GetProgIdsForClsid(Guid clsid)
         {
@@ -755,7 +763,7 @@ namespace OleViewDotNet
                     }
                 }
             }
-            
+
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
