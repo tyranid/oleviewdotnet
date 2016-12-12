@@ -14,12 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
 using Microsoft.Win32;
-using OleViewDotNet.InterfaceViewers;
-using System.Xml.Serialization;
+using System;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace OleViewDotNet
 {
@@ -52,7 +51,6 @@ namespace OleViewDotNet
             
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             TypeLibVersion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
-
             Base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
             if (Base.Length == 0)
             {
@@ -71,6 +69,7 @@ namespace OleViewDotNet
             NumMethods = nummethods;
             Base = baseName;
             Name = name;
+            TypeLibVersion = String.Empty;
         }
 
         public COMInterfaceEntry(Guid iid, RegistryKey rootKey) 
@@ -157,6 +156,7 @@ namespace OleViewDotNet
                     ent.ProxyClsid = Guid.Empty;
                     ent.NumMethods = 3;
                     ent.Name = "IUnknown";
+                    ent.TypeLibVersion = String.Empty;
                     break;
                 case KnownInterfaces.IMarshal:
                     ent = new COMInterfaceEntry();
@@ -165,6 +165,7 @@ namespace OleViewDotNet
                     ent.ProxyClsid = Guid.Empty;
                     ent.NumMethods = 9;
                     ent.Name = "IMarshal";
+                    ent.TypeLibVersion = String.Empty;
                     break;
             }
 
@@ -206,6 +207,29 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMInterfaceEntry right = obj as COMInterfaceEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return Name == right.Name && Iid == right.Iid && ProxyClsid == right.ProxyClsid 
+                && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib && TypeLibVersion == right.TypeLibVersion;
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
+                ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode();
+        }
+
         public override string ToString()
         {
             return String.Format("COMInterfaceEntry: {0}", Name);
@@ -218,12 +242,12 @@ namespace OleViewDotNet
 
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
-            Name = reader.GetAttribute("name");
+            Name = reader.ReadString("name");
             Iid = reader.ReadGuid("iid");
             ProxyClsid = reader.ReadGuid("proxy");
             NumMethods = reader.ReadInt("num");
-            Base = reader.GetAttribute("base");
-            TypeLibVersion = reader.GetAttribute("ver");
+            Base = reader.ReadString("base");
+            TypeLibVersion = reader.ReadString("ver");
             TypeLib = reader.ReadGuid("tlib");
         }
 

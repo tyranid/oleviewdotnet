@@ -32,6 +32,8 @@ namespace OleViewDotNet
             RunAtCurrent = 1,
             RunAfterPrompt = 2,
             RunAtMedium = 3,
+            BlockCOM = 0x10,
+            KillBit = 0x20,
         }
 
         public string Name { get; private set; }
@@ -39,6 +41,29 @@ namespace OleViewDotNet
         public Guid Clsid { get; private set; }
         public string AppPath { get; private set; }
         public ElevationPolicy Policy { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMIELowRightsElevationPolicy right = obj as COMIELowRightsElevationPolicy;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return Name == right.Name && Uuid == right.Uuid && Clsid == right.Clsid 
+                && AppPath == right.AppPath && Policy == right.Policy;
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetSafeHashCode() ^ Uuid.GetHashCode() 
+                ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode();
+        }
 
         private static string HandleNulTerminate(string s)
         {

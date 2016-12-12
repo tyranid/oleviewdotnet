@@ -331,7 +331,7 @@ namespace OleViewDotNet
         private void LoadCLSIDByServer(ServerType serverType)
         {            
             int i = 0;
-            SortedDictionary<string, List<COMCLSIDEntry>> dict;
+            IDictionary<string, List<COMCLSIDEntry>> dict;
             
             if(serverType == ServerType.Local)
             {

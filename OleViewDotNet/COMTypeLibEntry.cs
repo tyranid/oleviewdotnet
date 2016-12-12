@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Xml;
@@ -44,13 +45,34 @@ namespace OleViewDotNet
         public Guid TypelibId { get; private set; }
         public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
 
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMTypeLibEntry right = obj as COMTypeLibEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return TypelibId == right.TypelibId && Versions.SequenceEqual(right.Versions);
+        }
+
+        public override int GetHashCode()
+        {
+            return TypelibId.GetHashCode() ^ Versions.GetEnumHashCode();
+        }
+
         public COMTypeLibEntry(Guid typelibid, RegistryKey rootKey)
         {
             TypelibId = typelibid;
             Versions = LoadFromKey(rootKey).AsReadOnly();
         }
 
-        public COMTypeLibEntry()
+        internal COMTypeLibEntry()
         {
         }
 
@@ -84,6 +106,28 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public string Win32Path { get; private set; }
         public string Win64Path { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMTypeLibVersionEntry right = obj as COMTypeLibVersionEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return Version == right.Version && Name == right.Name 
+                && Win32Path == right.Win32Path && Win64Path == right.Win64Path;
+        }
+
+        public override int GetHashCode()
+        {
+            return Version.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Win32Path.GetSafeHashCode() ^ Win64Path.GetSafeHashCode();
+        }
 
         public string NativePath
         {

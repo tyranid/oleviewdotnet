@@ -28,6 +28,33 @@ namespace OleViewDotNet
         public Guid Clsid { get; private set; }
         public string Extension { get; private set; }
 
+        public override string ToString()
+        {
+            return String.Format("MIME Type: {0}", MimeType);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMMimeType right = obj as COMMimeType;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return MimeType == right.MimeType && 
+                Clsid == right.Clsid && Extension == right.Extension;
+        }
+
+        public override int GetHashCode()
+        {
+            return MimeType.GetSafeHashCode() ^ Clsid.GetHashCode() ^ Extension.GetSafeHashCode();
+        }
+
         public COMMimeType(string mime_type, RegistryKey key)
         {
             string clsid = key.GetValue("CLSID") as string;

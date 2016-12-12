@@ -54,6 +54,10 @@ namespace OleViewDotNet
 
         public WaitingDialog(Func<IProgress<string>, object> worker_func, Func<string, string> format_label)
         {
+            if (format_label == null)
+            {
+                format_label = s => String.Format("Currently Processing {0}. Please Wait.", s);
+            }
             m_progress = new ReportProgress(SetLabel, format_label);
             m_worker = new BackgroundWorker();
             m_worker.DoWork += (sender, e) => Result = worker_func(m_progress);
@@ -63,7 +67,7 @@ namespace OleViewDotNet
         }
 
         public WaitingDialog(Func<IProgress<string>, object> worker_func) 
-            : this(worker_func, s => String.Format("Currently Processing {0}. Please Wait.", s))
+            : this(worker_func, null)
         {
         }
 

@@ -170,7 +170,7 @@ namespace OleViewDotNet
         {
             using (RegistryKey key = rootKey.OpenSubKey(keyName))
             {
-                string valueString = "";
+                string valueString = String.Empty;
 
                 if (key != null)
                 {
@@ -936,13 +936,18 @@ namespace OleViewDotNet
             }
         }
 
-        internal static int GetSafeHashCode(this object obj)
+        internal static int GetSafeHashCode<T>(this T obj) where T : class
         {
             if (obj == null)
             {
                 return 0;
             }
             return obj.GetHashCode();
+        }
+
+        internal static int GetEnumHashCode<T>(this IEnumerable<T> e)
+        {
+            return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
         }
     }    
 }

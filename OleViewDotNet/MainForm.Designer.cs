@@ -76,6 +76,7 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuFileDiff = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -97,6 +98,7 @@
             this.menuFileSaveDatabase,
             this.menuFileOpenMachineOnly,
             this.menuFileOpenUserOnly,
+            this.menuFileDiff,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
@@ -139,12 +141,12 @@
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 6;
+            this.menuItem2.Index = 7;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 7;
+            this.menuFileExit.Index = 8;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -393,6 +395,12 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuFileDiff
+            // 
+            this.menuFileDiff.Index = 6;
+            this.menuFileDiff.Text = "Diff Registries";
+            this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -456,6 +464,7 @@
         private System.Windows.Forms.MenuItem menuRegistryProperties;
         private System.Windows.Forms.MenuItem menuFileOpenMachineOnly;
         private System.Windows.Forms.MenuItem menuFileOpenUserOnly;
+        private System.Windows.Forms.MenuItem menuFileDiff;
     }
 }
 

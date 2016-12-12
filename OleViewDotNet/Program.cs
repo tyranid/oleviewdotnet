@@ -125,18 +125,9 @@ namespace OleViewDotNet
             }
         }
 
-        internal static COMRegistry LoadRegistry(IWin32Window window, COMRegistryMode mode, string database_file)
+        internal static COMRegistry LoadRegistry(IWin32Window window, 
+            Func<IProgress<string>, object> worker)
         {
-            Func<IProgress<string>, object> worker;
-            if (database_file != null)
-            {
-                worker = progress => COMRegistry.Load(database_file, progress);
-            }
-            else
-            {
-                worker = progress => COMRegistry.Load(mode, null, progress);
-            }
-
             using (WaitingDialog loader = new WaitingDialog(worker))
             {
                 if (loader.ShowDialog(window) == DialogResult.OK)
@@ -148,6 +139,25 @@ namespace OleViewDotNet
                     throw loader.Error;
                 }
             }
+        }
+
+        internal static COMRegistry LoadRegistry(IWin32Window window, COMRegistryMode mode)
+        {
+            if (mode == COMRegistryMode.Diff)
+            {
+                throw new ArgumentException("Can't load a diff registry");
+            }
+            return LoadRegistry(window, progress => COMRegistry.Load(mode, null, progress));
+        }
+
+        internal static COMRegistry LoadRegistry(IWin32Window window, string database_file)
+        {
+            return LoadRegistry(window, progress => COMRegistry.Load(database_file, progress));
+        }
+
+        internal static COMRegistry DiffRegistry(IWin32Window window, COMRegistry left, COMRegistry right, COMRegistryDiffMode mode)
+        {
+            return LoadRegistry(window, progress => COMRegistry.Diff(left, right, mode, progress));
         }
 
         /// <summary>
@@ -203,7 +213,8 @@ namespace OleViewDotNet
 
                 try
                 {
-                    _appContext = new MultiApplicationContext(new MainForm(LoadRegistry(null, mode, database_file)));
+                    _appContext = new MultiApplicationContext(new MainForm(
+                        database_file != null ? LoadRegistry(null, database_file) : LoadRegistry(null, mode)));
                     Application.Run(_appContext);
                 }
                 catch (Exception ex)

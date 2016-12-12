@@ -114,6 +114,12 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMInterfaces.cs" />
+    <Compile Include="DiffRegistryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DiffRegistryForm.Designer.cs">
+      <DependentUpon>DiffRegistryForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -278,6 +284,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CreateIStreamForm.resx">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DiffRegistryForm.resx">
+      <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DocumentForm.resx">
       <DependentUpon>DocumentForm.cs</DependentUpon>

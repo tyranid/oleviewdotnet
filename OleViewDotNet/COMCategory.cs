@@ -47,7 +47,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
-            Name = reader.GetAttribute("name");
+            Name = reader.ReadString("name");
             CategoryID = reader.ReadGuid("catid");
             Clsids = reader.ReadGuids("clsids").ToArray();
         }
@@ -57,6 +57,28 @@ namespace OleViewDotNet
             writer.WriteAttributeString("name", Name);
             writer.WriteGuid("catid", CategoryID);
             writer.WriteGuids("clsids", Clsids);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMCategory right = obj as COMCategory;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            return CategoryID.GetHashCode() ^ Name.GetSafeHashCode() 
+                ^ Clsids.GetEnumHashCode();
         }
     }
 }

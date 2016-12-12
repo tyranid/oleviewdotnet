@@ -79,9 +79,9 @@ namespace OleViewDotNet
 
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
-            ProgID = reader.GetAttribute("progid");
+            ProgID = reader.ReadString("progid");
             Clsid = reader.ReadGuid("clsid");
-            Name = reader.GetAttribute("name");            
+            Name = reader.ReadString("name");            
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)

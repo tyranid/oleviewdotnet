@@ -403,7 +403,7 @@ namespace OleViewDotNet
                 dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    LoadRegistry(COMRegistryMode.Merged, dlg.FileName);
+                    LoadRegistry(() => Program.LoadRegistry(this, dlg.FileName));
                 }
             }
         }
@@ -445,11 +445,11 @@ namespace OleViewDotNet
             HostControl(new RegistryPropertiesControl(m_registry));
         }
 
-        private void LoadRegistry(COMRegistryMode mode, string database_file)
+        private void LoadRegistry(Func<COMRegistry> loader)
         {
             try
             {
-                new MainForm(Program.LoadRegistry(this, mode, database_file)).Show();
+                new MainForm(loader()).Show();
             }
             catch (OperationCanceledException)
             {
@@ -462,12 +462,23 @@ namespace OleViewDotNet
 
         private void menuFileOpenMachineOnly_Click(object sender, EventArgs e)
         {
-            LoadRegistry(COMRegistryMode.MachineOnly, null);
+            LoadRegistry(() => Program.LoadRegistry(this, COMRegistryMode.MachineOnly));
         }
 
         private void menuFileOpenUserOnly_Click(object sender, EventArgs e)
         {
-            LoadRegistry(COMRegistryMode.UserOnly, null);
+            LoadRegistry(() => Program.LoadRegistry(this, COMRegistryMode.UserOnly));
+        }
+
+        private void menuFileDiff_Click(object sender, EventArgs e)
+        {
+            using (DiffRegistryForm frm = new DiffRegistryForm(m_registry))
+            {
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    new MainForm(frm.DiffRegistry).Show();
+                }
+            }
         }
     }
 }

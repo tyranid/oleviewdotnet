@@ -194,9 +194,20 @@ namespace OleViewDotNet
             return bool.Parse(value);
         }
 
+        internal static string ReadString(this XmlReader reader, string name)
+        {
+            return reader.GetAttribute(name) ?? String.Empty;
+        }
+
         internal static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> key_selector)
         {
             return new SortedDictionary<TKey, TValue>(enumerable.ToDictionary(key_selector));
+        }
+
+        internal static SortedDictionary<TKey, TElement> ToSortedDictionary<TKey, TValue, TElement>(this IEnumerable<TValue> enumerable, 
+            Func<TValue, TKey> key_selector, Func<TValue, TElement> value_selector)
+        {
+            return new SortedDictionary<TKey, TElement>(enumerable.ToDictionary(key_selector, value_selector));
         }
     }
 }

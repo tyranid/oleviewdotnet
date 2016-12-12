@@ -219,9 +219,8 @@ namespace OleViewDotNet
                     }
                 }
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
             }
 
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
@@ -292,7 +291,42 @@ namespace OleViewDotNet
         public COMServerType ServerType { get; private set; }
 
         public Guid TreatAs { get; private set; }
-        
+
+        public Guid AppID { get; private set; }
+
+        public Guid TypeLib { get; private set; }
+
+        public IEnumerable<Guid> Categories
+        {
+            get; private set;
+        }
+
+        public COMThreadingModel ThreadingModel { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMCLSIDEntry right = obj as COMCLSIDEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            // We don't consider the loaded interfaces.
+            return Clsid == right.Clsid && Name == right.Name && Server == right.Server && CmdLine == right.CmdLine 
+                && ServerType == right.ServerType && TreatAs == right.TreatAs && AppID == right.AppID && TypeLib == right.TypeLib;
+        }
+
+        public override int GetHashCode()
+        {
+            return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ Server.GetSafeHashCode() ^ CmdLine.GetSafeHashCode() 
+                ^ ServerType.GetHashCode() ^ TreatAs.GetHashCode() ^ AppID.GetHashCode() ^ TypeLib.GetHashCode();
+        }
+
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
         {
             try
@@ -380,17 +414,6 @@ namespace OleViewDotNet
                 }
             }
         }
-
-        public Guid AppID { get; private set; }
-
-        public Guid TypeLib { get; private set; }
-
-        public IEnumerable<Guid> Categories
-        {
-            get; private set; 
-        }
-
-        public COMThreadingModel ThreadingModel { get; private set; }
 
         public CLSCTX CreateContext
         {
@@ -480,8 +503,8 @@ namespace OleViewDotNet
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
             Clsid = reader.ReadGuid("clsid");
-            Server = reader.GetAttribute("server");
-            CmdLine = reader.GetAttribute("cmdline");
+            Server = reader.ReadString("server");
+            CmdLine = reader.ReadString("cmdline");
             ServerType = reader.ReadEnum<COMServerType>("stype");
             ThreadingModel = reader.ReadEnum<COMThreadingModel>("thmod");
             AppID = reader.ReadGuid("appid");
@@ -489,7 +512,7 @@ namespace OleViewDotNet
             Categories = reader.ReadGuids("catids");
             TreatAs = reader.ReadGuid("treatas");
             m_loaded_interfaces = reader.ReadBool("loaded");
-            Name = reader.GetAttribute("name");
+            Name = reader.ReadString("name");
             if (m_loaded_interfaces)
             {
                 m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance()).ToList();

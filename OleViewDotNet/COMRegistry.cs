@@ -30,6 +30,13 @@ namespace OleViewDotNet
         Merged,
         MachineOnly,
         UserOnly,
+        Diff,
+    }
+
+    public enum COMRegistryDiffMode
+    {
+        LeftOnly,
+        RightOnly,        
     }
 
     /// <summary>
@@ -39,11 +46,13 @@ namespace OleViewDotNet
     {
         #region Private Member Variables
 
+        private string m_name;
+
         // These are loaded from the registry.
         private SortedDictionary<Guid, COMCLSIDEntry> m_clsids;        
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
-        private Dictionary<Guid, COMCategory> m_categories;
+        private SortedDictionary<Guid, COMCategory> m_categories;
         private List<COMIELowRightsElevationPolicy> m_lowrights;
         private SortedDictionary<Guid, COMAppIDEntry> m_appid;
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
@@ -94,7 +103,7 @@ namespace OleViewDotNet
                 StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase);
         }
 
-        public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsByServer
+        public IDictionary<string, List<COMCLSIDEntry>> ClsidsByServer
         {
             get 
             {
@@ -108,7 +117,7 @@ namespace OleViewDotNet
             }
         }
 
-        public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsByLocalServer
+        public IDictionary<string, List<COMCLSIDEntry>> ClsidsByLocalServer
         {
             get
             {
@@ -122,7 +131,7 @@ namespace OleViewDotNet
             }
         }
 
-        public SortedDictionary<string, List<COMCLSIDEntry>> ClsidsWithSurrogate
+        public IDictionary<string, List<COMCLSIDEntry>> ClsidsWithSurrogate
         {
             get
             {
@@ -161,7 +170,7 @@ namespace OleViewDotNet
             }
         }
 
-        public Dictionary<Guid, COMCategory> ImplementedCategories
+        public IDictionary<Guid, COMCategory> ImplementedCategories
         {
             get { return m_categories; }
         }
@@ -189,7 +198,7 @@ namespace OleViewDotNet
             }
         }
 
-        public SortedDictionary<Guid, COMTypeLibEntry> Typelibs
+        public IDictionary<Guid, COMTypeLibEntry> Typelibs
         {
             get { return m_typelibs; }
         }
@@ -227,6 +236,19 @@ namespace OleViewDotNet
         public string FilePath
         {
             get; private set; 
+        }
+
+        public string Name
+        {
+            get
+            {
+                return m_name;
+            }
+
+            set
+            {
+                m_name = value ?? String.Empty;
+            }
         }
 
         #endregion
@@ -323,6 +345,48 @@ namespace OleViewDotNet
         public static COMRegistry Load(string path)
         {
             return Load(path, new DummyProgress());
+        }
+
+        static IEnumerable<T> DiffLists<T>(IEnumerable<T> left, IEnumerable<T> right, COMRegistryDiffMode mode)
+        {
+            switch (mode)
+            {
+                case COMRegistryDiffMode.LeftOnly:
+                    return left.Except(right);
+                case COMRegistryDiffMode.RightOnly:
+                    return right.Except(left);
+                default:
+                    throw new ArgumentException(nameof(mode));
+            }
+        }
+
+        static SortedDictionary<S, T> DiffDicts<S, T>(IDictionary<S, T> left, IDictionary<S, T> right, COMRegistryDiffMode mode, Func<T, S> key_selector)
+        {
+            return DiffLists(left.Values, right.Values, mode).ToSortedDictionary(key_selector);
+        }
+
+        public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<string> progress)
+        {
+            COMRegistry ret = new COMRegistry(COMRegistryMode.Diff);
+            progress.Report("CLSIDs");
+            ret.m_clsids = DiffDicts(left.m_clsids, right.m_clsids, mode, p => p.Clsid);
+            progress.Report("ProgIDs");
+            ret.m_progids = DiffDicts(left.m_progids, right.m_progids, mode, p => p.ProgID);
+            progress.Report("MIME Types");
+            ret.m_mimetypes = DiffLists(left.m_mimetypes, right.m_mimetypes, mode).ToList();
+            progress.Report("AppIDs");
+            ret.m_appid = DiffDicts(left.m_appid, right.m_appid, mode, p => p.AppId);
+            progress.Report("Interfaces");
+            ret.m_interfaces = DiffDicts(left.m_interfaces, right.m_interfaces, mode, p => p.Iid);
+            progress.Report("Categories");
+            ret.m_categories = DiffDicts(left.m_categories, right.m_categories, mode, p => p.CategoryID);
+            progress.Report("LowRights");
+            ret.m_lowrights = DiffLists(left.m_lowrights, right.m_lowrights, mode).ToList();
+            progress.Report("TypeLibs");
+            ret.m_typelibs = DiffDicts(left.m_typelibs, right.m_typelibs, mode, p => p.TypelibId);
+            progress.Report("PreApproved");
+            ret.m_preapproved = DiffLists(left.m_preapproved, right.m_preapproved, mode).ToList();
+            return ret;
         }
 
         /// <summary>
@@ -434,6 +498,22 @@ namespace OleViewDotNet
             }
         }
 
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            if (!String.IsNullOrWhiteSpace(m_name))
+            {
+                builder.AppendFormat("{0} - ", m_name);
+            }
+
+            builder.AppendFormat("Created: {0}", CreatedDate);
+            if (!String.IsNullOrWhiteSpace(FilePath))
+            {
+                builder.AppendFormat(" Path: {0}", FilePath);
+            }
+            return builder.ToString();
+        }
+
         #endregion
 
         #region Private Methods
@@ -461,7 +541,8 @@ namespace OleViewDotNet
         /// <summary>
         /// Default constructor
         /// </summary>
-        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress)
+        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress) 
+            : this(mode)
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
             {
@@ -482,10 +563,6 @@ namespace OleViewDotNet
                 progress.Report("TypeLibs");
                 LoadTypelibs(classes_key);
             }
-            LoadingMode = mode;
-            CreatedDate = DateTime.Now.ToLongDateString();
-            CreatedMachine = Environment.MachineName;
-            SixtyFourBit = Environment.Is64BitProcess;
 
             try
             {
@@ -528,7 +605,7 @@ namespace OleViewDotNet
                 progress.Report("Interfaces");
                 m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
                 progress.Report("Categories");
-                m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToDictionary(p => p.CategoryID);
+                m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToSortedDictionary(p => p.CategoryID);
                 progress.Report("LowRights");
                 m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
                 progress.Report("TypeLibs");
@@ -542,6 +619,14 @@ namespace OleViewDotNet
                 reader.ReadEndElement();
             }
             FilePath = path;
+        }
+
+        private COMRegistry(COMRegistryMode mode)
+        {
+            LoadingMode = mode;
+            CreatedDate = DateTime.Now.ToLongDateString();
+            CreatedMachine = Environment.MachineName;
+            SixtyFourBit = Environment.Is64BitProcess;
         }
 
         private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
@@ -605,7 +690,7 @@ namespace OleViewDotNet
             }
             
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
-            m_categories = categories.ToDictionary(p => p.Key, p => new COMCategory(p.Key, p.Value));
+            m_categories = categories.ToSortedDictionary(p => p.Key, p => new COMCategory(p.Key, p.Value));
         }
 
         private void LoadProgIDs(RegistryKey rootKey)

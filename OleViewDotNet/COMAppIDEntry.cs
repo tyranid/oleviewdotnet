@@ -93,6 +93,10 @@ namespace OleViewDotNet
                     }
                 }
             }
+            else
+            {
+                DllSurrogate = String.Empty;
+            }
 
             object flags = key.GetValue("AppIDFlags");
             if (flags != null)
@@ -109,6 +113,16 @@ namespace OleViewDotNet
                         RunAs = serviceKey.GetValue("ObjectName") as string;
                     }
                 }
+            }
+
+            if (String.IsNullOrWhiteSpace(RunAs))
+            {
+                RunAs = String.Empty;
+            }
+
+            if (String.IsNullOrWhiteSpace(LocalService))
+            {
+                LocalService = String.Empty;
             }
         }
 
@@ -190,13 +204,13 @@ namespace OleViewDotNet
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
             AppId = reader.ReadGuid("appid");
-            DllSurrogate = reader.GetAttribute("dllsurrogate");
-            LocalService = reader.GetAttribute("localservice");
-            RunAs = reader.GetAttribute("runas");
-            Name = reader.GetAttribute("name");
-            Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.GetAttribute("flags"), true);
-            LaunchPermission = reader.GetAttribute("launchperm");
-            AccessPermission = reader.GetAttribute("accessperm");
+            DllSurrogate = reader.ReadString("dllsurrogate");
+            LocalService = reader.ReadString("localservice");
+            RunAs = reader.ReadString("runas");
+            Name = reader.ReadString("name");
+            Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.ReadString("flags"), true);
+            LaunchPermission = reader.ReadString("launchperm");
+            AccessPermission = reader.ReadString("accessperm");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
