@@ -415,7 +415,6 @@ namespace OleViewDotNet
             if (m_iidtypes == null)
             {
                 LoadTypeLibAssemblies();
-
             }
 
             if (m_iidtypes.ContainsKey(iid))
@@ -495,6 +494,10 @@ namespace OleViewDotNet
         {
             if (m_typelibs == null)
             {
+                if (progress != null)
+                {
+                    progress.Report("Initializing Global Libraries");
+                }
                 LoadTypeLibAssemblies();
             }
 
@@ -511,16 +514,13 @@ namespace OleViewDotNet
                 AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
                                         new TypeLibCallback(progress), null, null, null, null);
                 asm.Save(Path.GetFileName(strAssemblyPath));
-              
                 Assembly a = Assembly.LoadFile(strAssemblyPath);
 
                 m_typelibs[Marshal.GetTypeLibGuid(typeLib)] = a;
-
                 lock (m_typelibsname)
                 {
                     m_typelibsname[a.FullName] = a;
                 }
-
                 RegisterTypeInterfaces(a);
 
                 return a;
@@ -971,6 +971,60 @@ namespace OleViewDotNet
             return Convert.FromBase64String(name);
         }
 
+        private static string ConvertTypeToName(Type t)
+        {
+            if (t == typeof(string))
+            {
+                return "string";
+            }
+            else if (t == typeof(byte))
+            {
+                return "byte";
+            }
+            else if (t == typeof(sbyte))
+            {
+                return "sbyte";
+            }
+            else if (t == typeof(short))
+            {
+                return "short";
+            }
+            else if (t == typeof(ushort))
+            {
+                return "ushort";
+            }
+            else if (t == typeof(int))
+            {
+                return "int";
+            }
+            else if (t == typeof(uint))
+            {
+                return "uint";
+            }
+            else if (t == typeof(long))
+            {
+                return "long";
+            }
+            else if (t == typeof(ulong))
+            {
+                return "ulong";
+            }
+            else if (t == typeof(void))
+            {
+                return "void";
+            }
+            else if (t == typeof(object))
+            {
+                return "object";
+            }
+            else if (t == typeof(bool))
+            {
+                return "bool";
+            }
+
+            return t.Name;
+        }
+
         public static string MemberInfoToString(MemberInfo member)
         {
             MethodInfo mi = member as MethodInfo;
@@ -983,41 +1037,52 @@ namespace OleViewDotNet
 
                 foreach (ParameterInfo pi in pis)
                 {
-                    string strDir = "";
-
-                    if (pi.IsIn)
-                    {
-                        strDir += "in";
-                    }
-
+                    List<string> dirs = new List<string>();
+                    
                     if (pi.IsOut)
                     {
-                        strDir += "out";
-                    }
-
-                    if (strDir.Length == 0)
-                    {
-                        strDir = "in";
+                        dirs.Add("Out");
+                        if (pi.IsIn)
+                        {
+                            dirs.Add("In");
+                        }
                     }
 
                     if (pi.IsRetval)
                     {
-                        strDir += " retval";
+                        dirs.Add("Retval");
                     }
 
                     if (pi.IsOptional)
                     {
-                        strDir += " optional";
+                        dirs.Add("Optional");
                     }
 
-                    pars.Add(String.Format("[{0}] {1} {2}", strDir, pi.ParameterType.Name, pi.Name));
+                    string text = String.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
+
+                    if (dirs.Count > 0)
+                    {
+                        text = String.Format("[{0}] {1}", string.Join(",", dirs), text);
+                    }
+                    pars.Add(text);
                 }
 
-                return String.Format("{0} {1}({2});", mi.ReturnType.Name, mi.Name, String.Join(", ", pars));
+                return String.Format("{0} {1}({2});", ConvertTypeToName(mi.ReturnType), mi.Name, String.Join(", ", pars));
             }
             else if (prop != null)
             {
-                return String.Format("{0} {1}", prop.PropertyType, prop.Name);
+                List<string> propdirs = new List<string>();
+                if (prop.CanRead)
+                {
+                    propdirs.Add("get;");
+                }
+
+                if (prop.CanWrite)
+                {
+                    propdirs.Add("set;");
+                }
+
+                return String.Format("{0} {1} {{ {2} }}", ConvertTypeToName(prop.PropertyType), prop.Name, string.Join(" ", propdirs));
             }
             else
             {

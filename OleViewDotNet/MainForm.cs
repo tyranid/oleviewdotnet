@@ -24,6 +24,7 @@ using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
+using System.Reflection;
 
 namespace OleViewDotNet
 {
@@ -562,6 +563,22 @@ namespace OleViewDotNet
         private void menuHexEditorEmpty_Click(object sender, EventArgs e)
         {
             OpenHexEditor(new byte[0]);
+        }
+
+        private void menuFileOpenTypeLib_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    Assembly typelib = Program.LoadTypeLib(this, dlg.FileName);
+                    if (typelib != null)
+                    {
+                        HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib));
+                    }
+                }
+            }
         }
     }
 }

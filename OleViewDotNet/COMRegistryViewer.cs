@@ -1286,20 +1286,11 @@ namespace OleViewDotNet
                 
                 if(ent != null)
                 {
-                    using (WaitingDialog dlg = new WaitingDialog(p => COMUtilities.LoadTypeLib(ent.NativePath, p), s => s))
+                    Assembly typelib = Program.LoadTypeLib(this, ent.NativePath);
+                    if (typelib != null)
                     {
-                        dlg.Text = String.Format("Loading TypeLib {0}", ent.NativePath);
-                        dlg.CancelEnabled = false;
-                        if (dlg.ShowDialog(this) == DialogResult.OK)
-                        {
-                            TypeLibControl view = new TypeLibControl(ent, (Assembly)dlg.Result);
-                            Program.GetMainForm(m_registry).HostControl(view);
-                        }
-                        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
-                        {
-                            Program.ShowError(this, dlg.Error);
-                        }
-                    }   
+                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name, typelib));
+                    }
                 }
             }
         }

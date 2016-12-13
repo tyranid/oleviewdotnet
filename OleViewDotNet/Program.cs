@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace OleViewDotNet
 {
@@ -158,6 +159,24 @@ namespace OleViewDotNet
         internal static COMRegistry DiffRegistry(IWin32Window window, COMRegistry left, COMRegistry right, COMRegistryDiffMode mode)
         {
             return LoadRegistry(window, progress => COMRegistry.Diff(left, right, mode, progress));
+        }
+
+        internal static Assembly LoadTypeLib(IWin32Window window, string path)
+        {
+            using (WaitingDialog dlg = new WaitingDialog(p => COMUtilities.LoadTypeLib(path, p), s => s))
+            {
+                dlg.Text = String.Format("Loading TypeLib {0}", path);
+                dlg.CancelEnabled = false;
+                if (dlg.ShowDialog(window) == DialogResult.OK)
+                {
+                    return (Assembly)dlg.Result;
+                }
+                else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+                {
+                    Program.ShowError(window, dlg.Error);
+                }
+                return null;
+            }
         }
 
         /// <summary>

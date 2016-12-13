@@ -32,7 +32,7 @@
             System.Windows.Forms.ColumnHeader columnHeaderGuid;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listViewTypes = new System.Windows.Forms.ListView();
-            this.richTextBoxDump = new System.Windows.Forms.RichTextBox();
+            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -46,6 +46,10 @@
             columnHeaderName.Text = "Name";
             columnHeaderName.Width = 278;
             // 
+            // columnHeaderGuid
+            // 
+            columnHeaderGuid.Text = "IID";
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -58,7 +62,7 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.richTextBoxDump);
+            this.splitContainer1.Panel2.Controls.Add(this.textEditor);
             this.splitContainer1.Size = new System.Drawing.Size(699, 418);
             this.splitContainer1.SplitterDistance = 294;
             this.splitContainer1.TabIndex = 0;
@@ -79,19 +83,14 @@
             this.listViewTypes.View = System.Windows.Forms.View.Details;
             this.listViewTypes.SelectedIndexChanged += new System.EventHandler(this.listViewTypes_SelectedIndexChanged);
             // 
-            // richTextBoxDump
+            // textEditor
             // 
-            this.richTextBoxDump.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxDump.Location = new System.Drawing.Point(0, 0);
-            this.richTextBoxDump.Name = "richTextBoxDump";
-            this.richTextBoxDump.ReadOnly = true;
-            this.richTextBoxDump.Size = new System.Drawing.Size(401, 418);
-            this.richTextBoxDump.TabIndex = 0;
-            this.richTextBoxDump.Text = "";
-            // 
-            // columnHeaderGuid
-            // 
-            columnHeaderGuid.Text = "IID";
+            this.textEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textEditor.IsReadOnly = false;
+            this.textEditor.Location = new System.Drawing.Point(0, 0);
+            this.textEditor.Name = "textEditor";
+            this.textEditor.Size = new System.Drawing.Size(401, 418);
+            this.textEditor.TabIndex = 0;
             // 
             // TypeLibControl
             // 
@@ -112,6 +111,6 @@
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ListView listViewTypes;
-        private System.Windows.Forms.RichTextBox richTextBoxDump;
+        private ICSharpCode.TextEditor.TextEditorControl textEditor;
     }
 }

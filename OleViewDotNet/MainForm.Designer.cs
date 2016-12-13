@@ -82,6 +82,9 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
+            this.menuItem7 = new System.Windows.Forms.MenuItem();
+            this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -101,9 +104,12 @@
             this.menuFileOpenViewer,
             this.menuFileOpenDatabase,
             this.menuFileSaveDatabase,
+            this.menuItem7,
             this.menuFileOpenMachineOnly,
             this.menuFileOpenUserOnly,
             this.menuFileDiff,
+            this.menuItem8,
+            this.menuFileOpenTypeLib,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
@@ -134,30 +140,30 @@
             // 
             // menuFileOpenMachineOnly
             // 
-            this.menuFileOpenMachineOnly.Index = 4;
+            this.menuFileOpenMachineOnly.Index = 5;
             this.menuFileOpenMachineOnly.Text = "Open Machine Only";
             this.menuFileOpenMachineOnly.Click += new System.EventHandler(this.menuFileOpenMachineOnly_Click);
             // 
             // menuFileOpenUserOnly
             // 
-            this.menuFileOpenUserOnly.Index = 5;
+            this.menuFileOpenUserOnly.Index = 6;
             this.menuFileOpenUserOnly.Text = "Open User Only";
             this.menuFileOpenUserOnly.Click += new System.EventHandler(this.menuFileOpenUserOnly_Click);
             // 
             // menuFileDiff
             // 
-            this.menuFileDiff.Index = 6;
+            this.menuFileDiff.Index = 7;
             this.menuFileDiff.Text = "Diff Registries";
             this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 7;
+            this.menuItem2.Index = 10;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 8;
+            this.menuFileExit.Index = 11;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -441,6 +447,22 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuFileOpenTypeLib
+            // 
+            this.menuFileOpenTypeLib.Index = 9;
+            this.menuFileOpenTypeLib.Text = "Open TypeLib";
+            this.menuFileOpenTypeLib.Click += new System.EventHandler(this.menuFileOpenTypeLib_Click);
+            // 
+            // menuItem7
+            // 
+            this.menuItem7.Index = 4;
+            this.menuItem7.Text = "-";
+            // 
+            // menuItem8
+            // 
+            this.menuItem8.Index = 8;
+            this.menuItem8.Text = "-";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -510,6 +532,9 @@
         private System.Windows.Forms.MenuItem menuHexEditor;
         private System.Windows.Forms.MenuItem menuHexEditorFromFile;
         private System.Windows.Forms.MenuItem menuHexEditorEmpty;
+        private System.Windows.Forms.MenuItem menuItem7;
+        private System.Windows.Forms.MenuItem menuItem8;
+        private System.Windows.Forms.MenuItem menuFileOpenTypeLib;
     }
 }
 

@@ -26,28 +26,50 @@ namespace OleViewDotNet
 {
     public partial class TypeLibControl : UserControl
     {
+        static void EmitMember(StringBuilder builder, MemberInfo mi)
+        {
+            String name = COMUtilities.MemberInfoToString(mi);
+            if (!String.IsNullOrWhiteSpace(name))
+            {
+                builder.Append("   ");
+                builder.AppendLine(name);
+            }
+        }
+
         static string TypeToText(Type t)
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendFormat("Name: {0}", t.Name).AppendLine();
-            builder.AppendFormat("IID: {0}", t.GUID).AppendLine();
+            builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+            builder.AppendFormat("interface {0}", t.Name).AppendLine();
             builder.AppendLine("{");
-            foreach (MemberInfo mi in t.GetMembers())
+
+            IEnumerable<MethodInfo> methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0);
+            if (methods.Count() > 0)
             {
-                String name = COMUtilities.MemberInfoToString(mi);
-                if (!String.IsNullOrWhiteSpace(name))
+                builder.AppendLine("   /* Methods */");
+                foreach (MethodInfo mi in methods)
                 {
-                    builder.Append("   ");
-                    builder.AppendLine(name);
+                    EmitMember(builder, mi);
                 }
             }
+
+            PropertyInfo[] props = t.GetProperties();
+            if (props.Length > 0)
+            {
+                builder.AppendLine("   /* Properties */");
+                foreach (PropertyInfo pi in props)
+                {
+                    EmitMember(builder, pi);
+                }
+            }
+            
             builder.AppendLine("}");
 
             return builder.ToString();
         }
 
-        public TypeLibControl(COMTypeLibVersionEntry entry, Assembly typeLib)
+        public TypeLibControl(string name, Assembly typeLib)
         {
             InitializeComponent();
             List<ListViewItem> items = new List<ListViewItem>();
@@ -61,8 +83,9 @@ namespace OleViewDotNet
             
             listViewTypes.Items.AddRange(items.ToArray());
             listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-
-            Text = entry.Name;
+            textEditor.SetHighlighting("C#");
+            textEditor.IsReadOnly = true;
+            Text = name;
         }
 
         private void listViewTypes_SelectedIndexChanged(object sender, EventArgs e)
@@ -76,7 +99,8 @@ namespace OleViewDotNet
                 text = TypeToText((Type)item.Tag);
             }
 
-            richTextBoxDump.Text = text;
+            textEditor.Text = text;
+            textEditor.Refresh();
         }
     }
 }
