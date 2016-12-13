@@ -357,7 +357,7 @@ namespace OleViewDotNet
 
         public static string GetAppDataDirectory()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OleViewDotNet");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OleViewDotNet");
         }
 
         public static string GetTypeLibDirectory()
@@ -505,8 +505,7 @@ namespace OleViewDotNet
             else
             {
                 string strAssemblyPath = GetTypeLibDirectory();
-
-                strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibName(typeLib) + ".dll");
+                strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibGuid(typeLib).ToString() + ".dll");
 
                 TypeLibConverter conv = new TypeLibConverter();
                 AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
