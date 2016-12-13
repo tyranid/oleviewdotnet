@@ -106,6 +106,12 @@ namespace OleViewDotNet
         public Exception Error { get; private set; }
         public object Result { get; private set; }
 
+        public bool CancelEnabled
+        {
+            get { return btnCancel.Enabled; }
+            set { btnCancel.Enabled = value; }
+        }
+
         private void btnCancel_Click(object sender, EventArgs e)
         {
             m_progress.Cancel();

@@ -29,15 +29,22 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.ColumnHeader columnHeaderName;
+            System.Windows.Forms.ColumnHeader columnHeaderGuid;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listViewTypes = new System.Windows.Forms.ListView();
             this.richTextBoxDump = new System.Windows.Forms.RichTextBox();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // columnHeaderName
+            // 
+            columnHeaderName.Text = "Name";
+            columnHeaderName.Width = 278;
             // 
             // splitContainer1
             // 
@@ -59,7 +66,8 @@
             // listViewTypes
             // 
             this.listViewTypes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            columnHeaderName});
+            columnHeaderName,
+            columnHeaderGuid});
             this.listViewTypes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewTypes.FullRowSelect = true;
             this.listViewTypes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
@@ -81,10 +89,9 @@
             this.richTextBoxDump.TabIndex = 0;
             this.richTextBoxDump.Text = "";
             // 
-            // columnHeaderName
+            // columnHeaderGuid
             // 
-            columnHeaderName.Text = "Name";
-            columnHeaderName.Width = 278;
+            columnHeaderGuid.Text = "IID";
             // 
             // TypeLibControl
             // 

@@ -52,14 +52,23 @@ namespace OleViewDotNet
     {
         public Assembly ResolveRef(object tl)
         {
-            System.Diagnostics.Debug.WriteLine(tl.ToString());
-
-            return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl);            
+            return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);            
         }
 
         public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
         {
+            if ((eventKind == ImporterEventKind.NOTIF_TYPECONVERTED) && (_progress != null))
+            {
+                _progress.Report(eventMsg);
+            }
         }
+
+        public TypeLibCallback(IProgress<string> progress)
+        {
+            _progress = progress;
+        }
+
+        private IProgress<string> _progress;
     }
 
     [Flags]
@@ -463,7 +472,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static Assembly LoadTypeLib(string path)
+        public static Assembly LoadTypeLib(string path, IProgress<string> progress)
         {
             ITypeLib typeLib = null;
 
@@ -471,7 +480,7 @@ namespace OleViewDotNet
             {
                 LoadTypeLibEx(path, RegKind.RegKind_Default, out typeLib);
 
-                return ConvertTypeLibToAssembly(typeLib);
+                return ConvertTypeLibToAssembly(typeLib, progress);
             }
             finally
             {
@@ -482,7 +491,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib)
+        public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<string> progress)
         {
             if (m_typelibs == null)
             {
@@ -501,7 +510,7 @@ namespace OleViewDotNet
 
                 TypeLibConverter conv = new TypeLibConverter();
                 AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
-                                        new TypeLibCallback(), null, null, null, null);
+                                        new TypeLibCallback(progress), null, null, null, null);
                 asm.Save(Path.GetFileName(strAssemblyPath));
               
                 Assembly a = Assembly.LoadFile(strAssemblyPath);
@@ -544,16 +553,15 @@ namespace OleViewDotNet
                         ti.GetContainingTypeLib(out tl, out iIndex);
 
                         Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
-                        Assembly asm = ConvertTypeLibToAssembly(tl);
+                        Assembly asm = ConvertTypeLibToAssembly(tl, null);
 
                         if (asm != null)
                         {
                             ret = asm.GetType(Marshal.GetTypeLibName(tl) + "." + Marshal.GetTypeInfoName(ti));
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        System.Diagnostics.Debug.WriteLine(ex.ToString());
                     }
                     finally
                     {
@@ -564,9 +572,8 @@ namespace OleViewDotNet
                     }                
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Trace.WriteLine(ex.ToString());
             }
 
             return ret;

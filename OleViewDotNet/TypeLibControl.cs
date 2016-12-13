@@ -51,15 +51,18 @@ namespace OleViewDotNet
         {
             InitializeComponent();
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (Type t in typeLib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface))
+            foreach (Type t in typeLib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
             {
-                ListViewItem item = new ListViewItem(String.Format("{0} - {1}", t.Name, t.GUID));
+                ListViewItem item = new ListViewItem(t.Name);
+                item.SubItems.Add(t.GUID.ToString("B"));
                 item.Tag = t;
                 items.Add(item);
             }
-
+            
             listViewTypes.Items.AddRange(items.ToArray());
-            this.Text = entry.Name;
+            listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+
+            Text = entry.Name;
         }
 
         private void listViewTypes_SelectedIndexChanged(object sender, EventArgs e)
