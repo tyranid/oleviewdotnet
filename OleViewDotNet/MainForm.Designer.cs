@@ -85,6 +85,8 @@
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.menuItem8 = new System.Windows.Forms.MenuItem();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
+            this.menuItem9 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -333,8 +335,10 @@
             this.menuObjectFromMarshalledStream,
             this.menuObjectFromSerializedStream,
             this.menuObjectFromFile,
+            this.menuItem3,
             this.menuObjectParseMoniker,
             this.menuObjectBindMoniker,
+            this.menuItem9,
             this.menuHexEditor});
             this.menuObject.Text = "&Object";
             // 
@@ -370,19 +374,19 @@
             // 
             // menuObjectParseMoniker
             // 
-            this.menuObjectParseMoniker.Index = 5;
+            this.menuObjectParseMoniker.Index = 6;
             this.menuObjectParseMoniker.Text = "Parse Moniker";
             this.menuObjectParseMoniker.Click += new System.EventHandler(this.menuObjectParseMoniker_Click);
             // 
             // menuObjectBindMoniker
             // 
-            this.menuObjectBindMoniker.Index = 6;
+            this.menuObjectBindMoniker.Index = 7;
             this.menuObjectBindMoniker.Text = "Bind Moniker";
             this.menuObjectBindMoniker.Click += new System.EventHandler(this.menuObjectBindMoniker_Click);
             // 
             // menuHexEditor
             // 
-            this.menuHexEditor.Index = 7;
+            this.menuHexEditor.Index = 9;
             this.menuHexEditor.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHexEditorFromFile,
             this.menuHexEditorEmpty});
@@ -463,6 +467,16 @@
             this.menuItem8.Index = 8;
             this.menuItem8.Text = "-";
             // 
+            // menuItem3
+            // 
+            this.menuItem3.Index = 5;
+            this.menuItem3.Text = "-";
+            // 
+            // menuItem9
+            // 
+            this.menuItem9.Index = 8;
+            this.menuItem9.Text = "-";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -535,6 +549,8 @@
         private System.Windows.Forms.MenuItem menuItem7;
         private System.Windows.Forms.MenuItem menuItem8;
         private System.Windows.Forms.MenuItem menuFileOpenTypeLib;
+        private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem menuItem9;
     }
 }
 
