@@ -15,10 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
-using System.Threading;
 
 namespace OleViewDotNet
 {
@@ -27,6 +27,8 @@ namespace OleViewDotNet
         private COMRegistry m_registry;
         private COMAppIDEntry m_appid;
         private COMCLSIDEntry m_clsid;
+        private COMInterfaceEntry m_interface;
+        private COMTypeLibVersionEntry m_typelib;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -49,6 +51,11 @@ namespace OleViewDotNet
         private static string GetStringValue(string value)
         {
             return String.IsNullOrWhiteSpace(value) ? "N/A" : value;
+        }
+
+        private static string GetGuidValue(Guid guid)
+        {
+            return guid == Guid.Empty ? "N/A" : guid.ToString("B");
         }
 
         private void SetupAppIdEntry(COMAppIDEntry entry)
@@ -75,19 +82,8 @@ namespace OleViewDotNet
             lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
             textBoxServer.Text = entry.Server;
             textBoxCmdLine.Text = GetStringValue(entry.CmdLine);
-            if (entry.TreatAs != Guid.Empty)
-            {
-                textBoxTreatAs.Text = entry.TreatAs.ToString("B");
-                if (m_registry.Clsids.ContainsKey(entry.TreatAs))
-                {
-                    btnTreatAsProps.Enabled = true;
-                }
-            }
-            else
-            {
-                textBoxTreatAs.Text = "N/A";
-                btnTreatAsProps.Enabled = false;
-            }
+            textBoxTreatAs.Text = GetGuidValue(entry.TreatAs);
+            btnTreatAsProps.Enabled = m_registry.Clsids.ContainsKey(entry.TreatAs);
             var progids = m_registry.Progids;
 
             foreach (string progid in m_registry.GetProgIdsForClsid(entry.Clsid).Select(p => p.ProgID))
@@ -117,7 +113,35 @@ namespace OleViewDotNet
             {
                 SetupAppIdEntry(m_registry.AppIDs[entry.AppID]);
             }
+
+            IEnumerable<COMInterfaceEntry> proxies = m_registry.GetProxiesForClsid(entry);
+            if (proxies.Count() > 0)
+            {
+                foreach (COMInterfaceEntry intf in proxies.OrderBy(i => i.Name))
+                {
+                    ListViewItem item = listViewProxies.Items.Add(intf.Name);
+                    item.SubItems.Add(intf.Iid.ToString("B"));
+                }
+                listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                tabControlProperties.TabPages.Add(tabPageProxies);
+            }
+
             m_clsid = entry;
+        }
+
+        private void SetupInterfaceEntry(COMInterfaceEntry entry)
+        {
+            textBoxInterfaceName.Text = entry.Name;
+            textBoxIID.Text = GetGuidValue(entry.Iid);
+            textBoxInterfaceBase.Text = GetStringValue(entry.Base);
+            textBoxInterfaceProxy.Text = GetGuidValue(entry.ProxyClsid);
+            btnProxyProperties.Enabled = m_registry.Clsids.ContainsKey(entry.ProxyClsid);
+            textBoxTypeLib.Text = GetGuidValue(entry.TypeLib);
+            m_typelib = m_registry.GetTypeLibVersionEntry(entry.TypeLib, entry.TypeLibVersion);
+            btnOpenTypeLib.Enabled = m_typelib != null;            
+            tabControlProperties.TabPages.Add(tabPageInterface);
+            m_interface = entry;
         }
 
         private void SetupProperties(object obj)
@@ -138,11 +162,16 @@ namespace OleViewDotNet
             {
                 SetupAppIdEntry((COMAppIDEntry)obj);
             }
+
+            if (obj is COMInterfaceEntry)
+            {
+                SetupInterfaceEntry((COMInterfaceEntry)obj);
+            }
         }
 
         public static bool SupportsProperties(object obj)
         {
-            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry;
+            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry || obj is COMInterfaceEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
@@ -222,6 +251,27 @@ namespace OleViewDotNet
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnProxyProperties_Click(object sender, EventArgs e)
+        {
+            if (m_registry.Clsids.ContainsKey(m_interface.ProxyClsid))
+            {
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
+                    m_clsid.Name, m_registry.Clsids[m_clsid.TreatAs]));
+            }
+        }
+
+        private void btnOpenTypeLib_Click(object sender, EventArgs e)
+        {
+            if (m_typelib != null)
+            {
+                Assembly typelib = Program.LoadTypeLib(this, m_typelib.NativePath);
+                if (typelib != null)
+                {
+                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface.Iid));
+                }
             }
         }
     }

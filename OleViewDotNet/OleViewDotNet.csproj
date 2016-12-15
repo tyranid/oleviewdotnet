@@ -114,6 +114,7 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMInterfaces.cs" />
+    <Compile Include="COMProxyInstance.cs" />
     <Compile Include="DiffRegistryForm.cs">
       <SubType>Form</SubType>
     </Compile>

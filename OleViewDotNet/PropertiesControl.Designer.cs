@@ -44,8 +44,19 @@
             System.Windows.Forms.Label label12;
             System.Windows.Forms.Label label13;
             System.Windows.Forms.Label label14;
+            System.Windows.Forms.Label label15;
+            System.Windows.Forms.Label label16;
+            System.Windows.Forms.Label label17;
+            System.Windows.Forms.Label label18;
+            System.Windows.Forms.Label label19;
+            System.Windows.Forms.ColumnHeader columnHeaderName;
+            System.Windows.Forms.ColumnHeader columnHeaderIID;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
+            this.btnTreatAsProps = new System.Windows.Forms.Button();
+            this.btnCreate = new System.Windows.Forms.Button();
+            this.textBoxTreatAs = new System.Windows.Forms.TextBox();
+            this.textBoxCmdLine = new System.Windows.Forms.TextBox();
             this.textBoxServer = new System.Windows.Forms.TextBox();
             this.listViewCategories = new System.Windows.Forms.ListView();
             this.listViewProgIDs = new System.Windows.Forms.ListView();
@@ -72,10 +83,16 @@
             this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdName = new System.Windows.Forms.TextBox();
             this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
-            this.textBoxCmdLine = new System.Windows.Forms.TextBox();
-            this.textBoxTreatAs = new System.Windows.Forms.TextBox();
-            this.btnCreate = new System.Windows.Forms.Button();
-            this.btnTreatAsProps = new System.Windows.Forms.Button();
+            this.tabPageInterface = new System.Windows.Forms.TabPage();
+            this.btnOpenTypeLib = new System.Windows.Forms.Button();
+            this.textBoxTypeLib = new System.Windows.Forms.TextBox();
+            this.btnProxyProperties = new System.Windows.Forms.Button();
+            this.textBoxInterfaceProxy = new System.Windows.Forms.TextBox();
+            this.textBoxInterfaceBase = new System.Windows.Forms.TextBox();
+            this.textBoxInterfaceName = new System.Windows.Forms.TextBox();
+            this.textBoxIID = new System.Windows.Forms.TextBox();
+            this.tabPageProxies = new System.Windows.Forms.TabPage();
+            this.listViewProxies = new System.Windows.Forms.ListView();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -91,6 +108,13 @@
             label12 = new System.Windows.Forms.Label();
             label13 = new System.Windows.Forms.Label();
             label14 = new System.Windows.Forms.Label();
+            label15 = new System.Windows.Forms.Label();
+            label16 = new System.Windows.Forms.Label();
+            label17 = new System.Windows.Forms.Label();
+            label18 = new System.Windows.Forms.Label();
+            label19 = new System.Windows.Forms.Label();
+            columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderIID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.contextMenuStripProgids.SuspendLayout();
@@ -101,6 +125,8 @@
             this.splitContainerInterfaces.Panel2.SuspendLayout();
             this.splitContainerInterfaces.SuspendLayout();
             this.tabPageAppID.SuspendLayout();
+            this.tabPageInterface.SuspendLayout();
+            this.tabPageProxies.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -133,7 +159,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(11, 201);
+            label3.Location = new System.Drawing.Point(11, 194);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(48, 13);
             label3.TabIndex = 7;
@@ -142,7 +168,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(11, 302);
+            label4.Location = new System.Drawing.Point(11, 295);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(60, 13);
             label4.TabIndex = 9;
@@ -220,12 +246,77 @@
             label12.TabIndex = 16;
             label12.Text = "Dll Surrogate:";
             // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Location = new System.Drawing.Point(11, 128);
+            label13.Name = "label13";
+            label13.Size = new System.Drawing.Size(51, 13);
+            label13.TabIndex = 12;
+            label13.Text = "CmdLine:";
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Location = new System.Drawing.Point(11, 155);
+            label14.Name = "label14";
+            label14.Size = new System.Drawing.Size(47, 13);
+            label14.TabIndex = 14;
+            label14.Text = "TreatAs:";
+            // 
+            // label15
+            // 
+            label15.AutoSize = true;
+            label15.Location = new System.Drawing.Point(6, 14);
+            label15.Name = "label15";
+            label15.Size = new System.Drawing.Size(38, 13);
+            label15.TabIndex = 8;
+            label15.Text = "Name:";
+            // 
+            // label16
+            // 
+            label16.AutoSize = true;
+            label16.Location = new System.Drawing.Point(6, 47);
+            label16.Name = "label16";
+            label16.Size = new System.Drawing.Size(24, 13);
+            label16.TabIndex = 6;
+            label16.Text = "IID:";
+            // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Location = new System.Drawing.Point(6, 80);
+            label17.Name = "label17";
+            label17.Size = new System.Drawing.Size(34, 13);
+            label17.TabIndex = 10;
+            label17.Text = "Base:";
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Location = new System.Drawing.Point(6, 116);
+            label18.Name = "label18";
+            label18.Size = new System.Drawing.Size(36, 13);
+            label18.TabIndex = 12;
+            label18.Text = "Proxy:";
+            // 
+            // label19
+            // 
+            label19.AutoSize = true;
+            label19.Location = new System.Drawing.Point(6, 151);
+            label19.Name = "label19";
+            label19.Size = new System.Drawing.Size(48, 13);
+            label19.TabIndex = 19;
+            label19.Text = "TypeLib:";
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
             this.tabControlProperties.Controls.Add(this.tabPageNoProperties);
             this.tabControlProperties.Controls.Add(this.tabPageSupportedInterfaces);
             this.tabControlProperties.Controls.Add(this.tabPageAppID);
+            this.tabControlProperties.Controls.Add(this.tabPageInterface);
+            this.tabControlProperties.Controls.Add(this.tabPageProxies);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Name = "tabControlProperties";
@@ -261,6 +352,43 @@
             this.tabPageClsid.Text = "CLSID";
             this.tabPageClsid.UseVisualStyleBackColor = true;
             // 
+            // btnTreatAsProps
+            // 
+            this.btnTreatAsProps.Enabled = false;
+            this.btnTreatAsProps.Location = new System.Drawing.Point(330, 151);
+            this.btnTreatAsProps.Name = "btnTreatAsProps";
+            this.btnTreatAsProps.Size = new System.Drawing.Size(75, 23);
+            this.btnTreatAsProps.TabIndex = 17;
+            this.btnTreatAsProps.Text = "Properties";
+            this.btnTreatAsProps.UseVisualStyleBackColor = true;
+            this.btnTreatAsProps.Click += new System.EventHandler(this.btnTreatAsProps_Click);
+            // 
+            // btnCreate
+            // 
+            this.btnCreate.Location = new System.Drawing.Point(330, 39);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(75, 23);
+            this.btnCreate.TabIndex = 16;
+            this.btnCreate.Text = "Create";
+            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
+            // textBoxTreatAs
+            // 
+            this.textBoxTreatAs.Location = new System.Drawing.Point(64, 152);
+            this.textBoxTreatAs.Name = "textBoxTreatAs";
+            this.textBoxTreatAs.ReadOnly = true;
+            this.textBoxTreatAs.Size = new System.Drawing.Size(260, 20);
+            this.textBoxTreatAs.TabIndex = 15;
+            // 
+            // textBoxCmdLine
+            // 
+            this.textBoxCmdLine.Location = new System.Drawing.Point(64, 125);
+            this.textBoxCmdLine.Name = "textBoxCmdLine";
+            this.textBoxCmdLine.ReadOnly = true;
+            this.textBoxCmdLine.Size = new System.Drawing.Size(341, 20);
+            this.textBoxCmdLine.TabIndex = 13;
+            // 
             // textBoxServer
             // 
             this.textBoxServer.Location = new System.Drawing.Point(64, 96);
@@ -273,7 +401,7 @@
             // 
             this.listViewCategories.FullRowSelect = true;
             this.listViewCategories.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewCategories.Location = new System.Drawing.Point(11, 318);
+            this.listViewCategories.Location = new System.Drawing.Point(11, 311);
             this.listViewCategories.MultiSelect = false;
             this.listViewCategories.Name = "listViewCategories";
             this.listViewCategories.Size = new System.Drawing.Size(394, 82);
@@ -286,7 +414,7 @@
             this.listViewProgIDs.ContextMenuStrip = this.contextMenuStripProgids;
             this.listViewProgIDs.FullRowSelect = true;
             this.listViewProgIDs.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProgIDs.Location = new System.Drawing.Point(11, 217);
+            this.listViewProgIDs.Location = new System.Drawing.Point(11, 210);
             this.listViewProgIDs.MultiSelect = false;
             this.listViewProgIDs.Name = "listViewProgIDs";
             this.listViewProgIDs.Size = new System.Drawing.Size(394, 82);
@@ -537,60 +665,123 @@
             this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
-            // textBoxCmdLine
+            // tabPageInterface
             // 
-            this.textBoxCmdLine.Location = new System.Drawing.Point(64, 125);
-            this.textBoxCmdLine.Name = "textBoxCmdLine";
-            this.textBoxCmdLine.ReadOnly = true;
-            this.textBoxCmdLine.Size = new System.Drawing.Size(341, 20);
-            this.textBoxCmdLine.TabIndex = 13;
+            this.tabPageInterface.Controls.Add(this.btnOpenTypeLib);
+            this.tabPageInterface.Controls.Add(this.textBoxTypeLib);
+            this.tabPageInterface.Controls.Add(label19);
+            this.tabPageInterface.Controls.Add(this.btnProxyProperties);
+            this.tabPageInterface.Controls.Add(this.textBoxInterfaceProxy);
+            this.tabPageInterface.Controls.Add(label18);
+            this.tabPageInterface.Controls.Add(this.textBoxInterfaceBase);
+            this.tabPageInterface.Controls.Add(label17);
+            this.tabPageInterface.Controls.Add(this.textBoxInterfaceName);
+            this.tabPageInterface.Controls.Add(label15);
+            this.tabPageInterface.Controls.Add(this.textBoxIID);
+            this.tabPageInterface.Controls.Add(label16);
+            this.tabPageInterface.Location = new System.Drawing.Point(4, 22);
+            this.tabPageInterface.Name = "tabPageInterface";
+            this.tabPageInterface.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageInterface.Size = new System.Drawing.Size(685, 433);
+            this.tabPageInterface.TabIndex = 4;
+            this.tabPageInterface.Text = "Interface";
+            this.tabPageInterface.UseVisualStyleBackColor = true;
             // 
-            // label13
+            // btnOpenTypeLib
             // 
-            label13.AutoSize = true;
-            label13.Location = new System.Drawing.Point(11, 128);
-            label13.Name = "label13";
-            label13.Size = new System.Drawing.Size(51, 13);
-            label13.TabIndex = 12;
-            label13.Text = "CmdLine:";
+            this.btnOpenTypeLib.Enabled = false;
+            this.btnOpenTypeLib.Location = new System.Drawing.Point(325, 146);
+            this.btnOpenTypeLib.Name = "btnOpenTypeLib";
+            this.btnOpenTypeLib.Size = new System.Drawing.Size(75, 23);
+            this.btnOpenTypeLib.TabIndex = 21;
+            this.btnOpenTypeLib.Text = "Open";
+            this.btnOpenTypeLib.UseVisualStyleBackColor = true;
+            this.btnOpenTypeLib.Click += new System.EventHandler(this.btnOpenTypeLib_Click);
             // 
-            // textBoxTreatAs
+            // textBoxTypeLib
             // 
-            this.textBoxTreatAs.Location = new System.Drawing.Point(64, 152);
-            this.textBoxTreatAs.Name = "textBoxTreatAs";
-            this.textBoxTreatAs.ReadOnly = true;
-            this.textBoxTreatAs.Size = new System.Drawing.Size(260, 20);
-            this.textBoxTreatAs.TabIndex = 15;
+            this.textBoxTypeLib.Location = new System.Drawing.Point(59, 148);
+            this.textBoxTypeLib.Name = "textBoxTypeLib";
+            this.textBoxTypeLib.ReadOnly = true;
+            this.textBoxTypeLib.Size = new System.Drawing.Size(259, 20);
+            this.textBoxTypeLib.TabIndex = 20;
             // 
-            // label14
+            // btnProxyProperties
             // 
-            label14.AutoSize = true;
-            label14.Location = new System.Drawing.Point(11, 155);
-            label14.Name = "label14";
-            label14.Size = new System.Drawing.Size(47, 13);
-            label14.TabIndex = 14;
-            label14.Text = "TreatAs:";
+            this.btnProxyProperties.Enabled = false;
+            this.btnProxyProperties.Location = new System.Drawing.Point(325, 111);
+            this.btnProxyProperties.Name = "btnProxyProperties";
+            this.btnProxyProperties.Size = new System.Drawing.Size(75, 23);
+            this.btnProxyProperties.TabIndex = 18;
+            this.btnProxyProperties.Text = "Properties";
+            this.btnProxyProperties.UseVisualStyleBackColor = true;
+            this.btnProxyProperties.Click += new System.EventHandler(this.btnProxyProperties_Click);
             // 
-            // btnCreate
+            // textBoxInterfaceProxy
             // 
-            this.btnCreate.Location = new System.Drawing.Point(330, 39);
-            this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(75, 23);
-            this.btnCreate.TabIndex = 16;
-            this.btnCreate.Text = "Create";
-            this.btnCreate.UseVisualStyleBackColor = true;
-            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            this.textBoxInterfaceProxy.Location = new System.Drawing.Point(59, 113);
+            this.textBoxInterfaceProxy.Name = "textBoxInterfaceProxy";
+            this.textBoxInterfaceProxy.ReadOnly = true;
+            this.textBoxInterfaceProxy.Size = new System.Drawing.Size(259, 20);
+            this.textBoxInterfaceProxy.TabIndex = 13;
             // 
-            // btnTreatAsProps
+            // textBoxInterfaceBase
             // 
-            this.btnTreatAsProps.Enabled = false;
-            this.btnTreatAsProps.Location = new System.Drawing.Point(330, 151);
-            this.btnTreatAsProps.Name = "btnTreatAsProps";
-            this.btnTreatAsProps.Size = new System.Drawing.Size(75, 23);
-            this.btnTreatAsProps.TabIndex = 17;
-            this.btnTreatAsProps.Text = "Properties";
-            this.btnTreatAsProps.UseVisualStyleBackColor = true;
-            this.btnTreatAsProps.Click += new System.EventHandler(this.btnTreatAsProps_Click);
+            this.textBoxInterfaceBase.Location = new System.Drawing.Point(59, 77);
+            this.textBoxInterfaceBase.Name = "textBoxInterfaceBase";
+            this.textBoxInterfaceBase.ReadOnly = true;
+            this.textBoxInterfaceBase.Size = new System.Drawing.Size(341, 20);
+            this.textBoxInterfaceBase.TabIndex = 11;
+            // 
+            // textBoxInterfaceName
+            // 
+            this.textBoxInterfaceName.Location = new System.Drawing.Point(59, 11);
+            this.textBoxInterfaceName.Name = "textBoxInterfaceName";
+            this.textBoxInterfaceName.ReadOnly = true;
+            this.textBoxInterfaceName.Size = new System.Drawing.Size(341, 20);
+            this.textBoxInterfaceName.TabIndex = 9;
+            // 
+            // textBoxIID
+            // 
+            this.textBoxIID.Location = new System.Drawing.Point(59, 44);
+            this.textBoxIID.Name = "textBoxIID";
+            this.textBoxIID.ReadOnly = true;
+            this.textBoxIID.Size = new System.Drawing.Size(341, 20);
+            this.textBoxIID.TabIndex = 7;
+            // 
+            // tabPageProxies
+            // 
+            this.tabPageProxies.Controls.Add(this.listViewProxies);
+            this.tabPageProxies.Location = new System.Drawing.Point(4, 22);
+            this.tabPageProxies.Name = "tabPageProxies";
+            this.tabPageProxies.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageProxies.Size = new System.Drawing.Size(685, 433);
+            this.tabPageProxies.TabIndex = 5;
+            this.tabPageProxies.Text = "Proxies";
+            this.tabPageProxies.UseVisualStyleBackColor = true;
+            // 
+            // listViewProxies
+            // 
+            this.listViewProxies.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnHeaderName,
+            columnHeaderIID});
+            this.listViewProxies.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewProxies.Location = new System.Drawing.Point(3, 3);
+            this.listViewProxies.Name = "listViewProxies";
+            this.listViewProxies.Size = new System.Drawing.Size(679, 427);
+            this.listViewProxies.TabIndex = 0;
+            this.listViewProxies.UseCompatibleStateImageBehavior = false;
+            this.listViewProxies.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeaderName
+            // 
+            columnHeaderName.Text = "Name";
+            columnHeaderName.Width = 102;
+            // 
+            // columnHeaderIID
+            // 
+            columnHeaderIID.Text = "IID";
+            columnHeaderIID.Width = 290;
             // 
             // PropertiesControl
             // 
@@ -615,6 +806,9 @@
             this.splitContainerInterfaces.ResumeLayout(false);
             this.tabPageAppID.ResumeLayout(false);
             this.tabPageAppID.PerformLayout();
+            this.tabPageInterface.ResumeLayout(false);
+            this.tabPageInterface.PerformLayout();
+            this.tabPageProxies.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -653,5 +847,15 @@
         private System.Windows.Forms.TextBox textBoxTreatAs;
         private System.Windows.Forms.Button btnTreatAsProps;
         private System.Windows.Forms.Button btnCreate;
+        private System.Windows.Forms.TabPage tabPageInterface;
+        private System.Windows.Forms.TextBox textBoxInterfaceName;
+        private System.Windows.Forms.TextBox textBoxIID;
+        private System.Windows.Forms.TextBox textBoxInterfaceBase;
+        private System.Windows.Forms.TextBox textBoxInterfaceProxy;
+        private System.Windows.Forms.Button btnProxyProperties;
+        private System.Windows.Forms.Button btnOpenTypeLib;
+        private System.Windows.Forms.TextBox textBoxTypeLib;
+        private System.Windows.Forms.TabPage tabPageProxies;
+        private System.Windows.Forms.ListView listViewProxies;
     }
 }

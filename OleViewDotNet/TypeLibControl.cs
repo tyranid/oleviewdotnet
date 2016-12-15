@@ -69,13 +69,18 @@ namespace OleViewDotNet
             return builder.ToString();
         }
 
-        public TypeLibControl(string name, Assembly typeLib)
+        public TypeLibControl(string name, Assembly typeLib, Guid iid_to_view)
         {
             InitializeComponent();
             List<ListViewItem> items = new List<ListViewItem>();
+            ListViewItem selected_item = null;
             foreach (Type t in typeLib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
             {
                 ListViewItem item = new ListViewItem(t.Name);
+                if (t.GUID == iid_to_view)
+                {
+                    selected_item = item;
+                }
                 item.SubItems.Add(t.GUID.ToString("B"));
                 item.Tag = t;
                 items.Add(item);
@@ -83,6 +88,10 @@ namespace OleViewDotNet
             
             listViewTypes.Items.AddRange(items.ToArray());
             listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            if (selected_item != null)
+            {
+                selected_item.Selected = true;
+            }
             textEditor.SetHighlighting("C#");
             textEditor.IsReadOnly = true;
             Text = name;
@@ -101,6 +110,43 @@ namespace OleViewDotNet
 
             textEditor.Text = text;
             textEditor.Refresh();
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewTypes.SelectedItems.Count > 0)
+            {
+                ListViewItem item = listViewTypes.SelectedItems[0];
+                COMRegistryViewer.CopyTextToClipboard(item.Text);
+            }
+        }
+
+        private void CopyGuid(COMRegistryViewer.CopyGuidType copy_type)
+        {
+            if (listViewTypes.SelectedItems.Count > 0)
+            {
+                ListViewItem item = listViewTypes.SelectedItems[0];
+                Type t = item.Tag as Type;
+                if (t != null)
+                {
+                    COMRegistryViewer.CopyGuidToClipboard(t.GUID, copy_type);
+                }
+            }
+        }
+
+        private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsString);
+        }
+
+        private void copyGUIDCStructureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsStructure);
+        }
+
+        private void copyGIUDHexStringToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsHexString);
         }
     }
 }

@@ -16,6 +16,7 @@
 
 using Microsoft.CSharp;
 using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
@@ -750,7 +751,7 @@ namespace OleViewDotNet
 
             writer.Close();
 
-            File.WriteAllText("dump.cs", builder.ToString());           
+            File.WriteAllText("dump.cs", builder.ToString());
 
             try
             {
@@ -1111,5 +1112,9 @@ namespace OleViewDotNet
         {
             return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
         }
-    }    
+    }
+
+    internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+    }
 }

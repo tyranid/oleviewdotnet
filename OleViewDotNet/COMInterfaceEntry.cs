@@ -221,6 +221,11 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public bool HasTypeLib
+        {
+            get { return TypeLib != Guid.Empty; }
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))

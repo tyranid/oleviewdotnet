@@ -67,7 +67,7 @@ namespace OleViewDotNet
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
         private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
-        private Dictionary<Guid, List<COMInterfaceEntry>> m_proxiesbyclsid;
+        private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
 
         #endregion
 
@@ -202,6 +202,18 @@ namespace OleViewDotNet
         public IDictionary<Guid, COMTypeLibEntry> Typelibs
         {
             get { return m_typelibs; }
+        }
+
+        public IDictionary<Guid, IEnumerable<COMInterfaceEntry>> ProxiesByClsid
+        {
+            get
+            {
+                if (m_proxiesbyclsid == null)
+                {
+                    m_proxiesbyclsid = m_interfaces.Values.Where(i => i.ProxyClsid != Guid.Empty).GroupBy(i => i.ProxyClsid).ToDictionary(e => e.Key, e => e.AsEnumerable());
+                }
+                return m_proxiesbyclsid;
+            }
         }
 
         public IEnumerable<COMMimeType> MimeTypes
@@ -430,14 +442,9 @@ namespace OleViewDotNet
 
         public COMInterfaceEntry[] GetProxiesForClsid(COMCLSIDEntry clsid)
         {
-            if (m_proxiesbyclsid == null)
+            if (ProxiesByClsid.ContainsKey(clsid.Clsid))
             {
-                m_proxiesbyclsid = m_interfaces.Values.Where(i => i.ProxyClsid != Guid.Empty).GroupBy(i => i.ProxyClsid).ToDictionary(e => e.Key, e => e.ToList());
-            }
-
-            if (m_proxiesbyclsid.ContainsKey(clsid.Clsid))
-            {
-                return m_proxiesbyclsid[clsid.Clsid].ToArray();
+                return ProxiesByClsid[clsid.Clsid].ToArray();
             }
             else
             {
@@ -480,6 +487,25 @@ namespace OleViewDotNet
             }
 
             return new COMCLSIDEntry(clsid, COMServerType.UnknownServer);
+        }
+
+        public COMTypeLibVersionEntry GetTypeLibVersionEntry(Guid typelib, string version)
+        {
+            if (!m_typelibs.ContainsKey(typelib))
+            {
+                return null;
+            }
+
+            COMTypeLibEntry entry = m_typelibs[typelib];
+            foreach (var ver in entry.Versions)
+            {
+                if (ver.Version == version)
+                {
+                    return ver;
+                }
+            }
+
+            return null;
         }
 
         public COMCLSIDEntry GetFileClass(string filename)

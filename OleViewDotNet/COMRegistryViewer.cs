@@ -239,6 +239,10 @@ namespace OleViewDotNet
             {
                 AppendFormatLine(builder, "VTable Address: {0}+0x{1:X}", instance.Module, instance.VTableOffset);
             }
+            if (ent.HasTypeLib)
+            {
+                AppendFormatLine(builder, "TypeLib: {0}", ent.TypeLib.ToString("B"));
+            }
 
             return builder.ToString();
         }
@@ -782,7 +786,7 @@ namespace OleViewDotNet
             Cursor.Current = currCursor;
         }
 
-        enum CopyGuidType
+        public enum CopyGuidType
         {
             CopyAsString,
             CopyAsStructure,
@@ -808,7 +812,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void CopyGuidToClipboard(Guid guid, CopyGuidType copyType)
+        public static void CopyGuidToClipboard(Guid guid, CopyGuidType copyType)
         {
             string strCopy = null;
 
@@ -1057,6 +1061,13 @@ namespace OleViewDotNet
                 {
                     EnableViewPermissions((COMAppIDEntry)node.Tag);
                 }
+                else if (node.Tag is COMInterfaceEntry)
+                {
+                    if (((COMInterfaceEntry)node.Tag).HasTypeLib)
+                    {
+                        contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                    }
+                }
 
                 if (PropertiesControl.SupportsProperties(node.Tag))
                 {
@@ -1131,9 +1142,8 @@ namespace OleViewDotNet
             {
                 return python_filter(node.Tag);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
                 return false;
             }
         }
@@ -1268,11 +1278,13 @@ namespace OleViewDotNet
             if (node != null)
             {
                 COMTypeLibVersionEntry ent = node.Tag as COMTypeLibVersionEntry;
+                Guid selected_guid = Guid.Empty;
 
                 if (ent == null)
                 {
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
+                    COMInterfaceEntry intf = node.Tag as COMInterfaceEntry;
                     if(progid != null)
                     {
                         clsid = m_registry.MapClsidToEntry(progid.Clsid);
@@ -1281,6 +1293,13 @@ namespace OleViewDotNet
                     if(clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                     {
                         ent = m_registry.Typelibs[clsid.TypeLib].Versions.First();
+                        selected_guid = clsid.Clsid;
+                    }
+
+                    if (intf != null && m_registry.Typelibs.ContainsKey(intf.TypeLib))
+                    {
+                        ent = m_registry.GetTypeLibVersionEntry(intf.TypeLib, intf.TypeLibVersion);
+                        selected_guid = intf.Iid;
                     }
                 }
                 
@@ -1289,7 +1308,7 @@ namespace OleViewDotNet
                     Assembly typelib = Program.LoadTypeLib(this, ent.NativePath);
                     if (typelib != null)
                     {
-                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name, typelib));
+                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name, typelib, selected_guid));
                     }
                 }
             }

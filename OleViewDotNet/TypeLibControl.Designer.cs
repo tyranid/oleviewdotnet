@@ -28,17 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ColumnHeader columnHeaderName;
             System.Windows.Forms.ColumnHeader columnHeaderGuid;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listViewTypes = new System.Windows.Forms.ListView();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyGUIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyGUIDCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyGIUDHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // columnHeaderName
@@ -72,6 +79,7 @@
             this.listViewTypes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             columnHeaderName,
             columnHeaderGuid});
+            this.listViewTypes.ContextMenuStrip = this.contextMenuStrip;
             this.listViewTypes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewTypes.FullRowSelect = true;
             this.listViewTypes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
@@ -92,6 +100,45 @@
             this.textEditor.Size = new System.Drawing.Size(401, 418);
             this.textEditor.TabIndex = 0;
             // 
+            // contextMenuStrip
+            // 
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem,
+            this.copyGUIDToolStripMenuItem,
+            this.copyGUIDCStructureToolStripMenuItem,
+            this.copyGIUDHexStringToolStripMenuItem});
+            this.contextMenuStrip.Name = "contextMenuStrip";
+            this.contextMenuStrip.Size = new System.Drawing.Size(195, 92);
+            // 
+            // copyGUIDToolStripMenuItem
+            // 
+            this.copyGUIDToolStripMenuItem.Name = "copyGUIDToolStripMenuItem";
+            this.copyGUIDToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGUIDToolStripMenuItem.Text = "Copy GUID";
+            this.copyGUIDToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDToolStripMenuItem_Click);
+            // 
+            // copyToolStripMenuItem
+            // 
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
+            // 
+            // copyGUIDCStructureToolStripMenuItem
+            // 
+            this.copyGUIDCStructureToolStripMenuItem.Name = "copyGUIDCStructureToolStripMenuItem";
+            this.copyGUIDCStructureToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGUIDCStructureToolStripMenuItem.Text = "Copy GUID C Structure";
+            this.copyGUIDCStructureToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDCStructureToolStripMenuItem_Click);
+            // 
+            // copyGIUDHexStringToolStripMenuItem
+            // 
+            this.copyGIUDHexStringToolStripMenuItem.Name = "copyGIUDHexStringToolStripMenuItem";
+            this.copyGIUDHexStringToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.copyGIUDHexStringToolStripMenuItem.Text = "Copy GIUD Hex String";
+            this.copyGIUDHexStringToolStripMenuItem.Click += new System.EventHandler(this.copyGIUDHexStringToolStripMenuItem_Click);
+            // 
             // TypeLibControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -103,6 +150,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -112,5 +160,10 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ListView listViewTypes;
         private ICSharpCode.TextEditor.TextEditorControl textEditor;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyGUIDToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyGUIDCStructureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyGIUDHexStringToolStripMenuItem;
     }
 }

@@ -575,7 +575,7 @@ namespace OleViewDotNet
                     Assembly typelib = Program.LoadTypeLib(this, dlg.FileName);
                     if (typelib != null)
                     {
-                        HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib));
+                        HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty));
                     }
                 }
             }
