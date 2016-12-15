@@ -121,6 +121,7 @@
     <Compile Include="DiffRegistryForm.Designer.cs">
       <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="NdrParser.cs" />
     <Compile Include="ObjectHexEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>

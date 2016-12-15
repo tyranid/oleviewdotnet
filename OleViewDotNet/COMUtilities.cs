@@ -21,6 +21,7 @@ using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -1112,9 +1113,139 @@ namespace OleViewDotNet
         {
             return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
         }
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern SafeLibraryHandle LoadLibrary(string filename);
+
+        internal static SafeLibraryHandle SafeLoadLibrary(string filename)
+        {
+            SafeLibraryHandle lib = LoadLibrary(filename);
+            if (lib.IsInvalid)
+            {
+                throw new Win32Exception();
+            }
+            return lib;
+        }
+
+        internal static T[] EnumeratePointerList<T>(IntPtr p, Func<IntPtr, T> load_type)
+        {
+            List<T> ret = new List<T>();
+
+            if (p == IntPtr.Zero)
+            {
+                return new T[0];
+            }
+
+            IntPtr curr = p;
+            IntPtr value = IntPtr.Zero;
+            while ((value = Marshal.ReadIntPtr(curr)) != IntPtr.Zero)
+            {
+                ret.Add(load_type(value));
+                curr += IntPtr.Size;
+            }
+            return ret.ToArray();
+        }
+
+        internal static T[] EnumeratePointerList<T>(IntPtr p) where T : struct
+        {
+            return EnumeratePointerList(p, i => Marshal.PtrToStructure<T>(i));
+        }
+
+        internal static T[] ReadPointerArray<T>(IntPtr p, int count, Func<IntPtr, T> load_type)
+        {
+            T[] ret = new T[count];
+            if (p == IntPtr.Zero)
+            {
+                return ret;
+            }
+
+            for (int i = 0; i < count; ++i)
+            {
+                IntPtr curr = Marshal.ReadIntPtr(p, i * IntPtr.Size);
+                if (curr == IntPtr.Zero)
+                {
+                    ret[i] = default(T);
+                }
+                else
+                {
+                    ret[i] = load_type(curr);
+                }
+            }
+            return ret;
+        }
+
+        internal static T[] ReadPointerArray<T>(IntPtr p, int count) where T : struct
+        {
+            return ReadPointerArray(p, count, i => Marshal.PtrToStructure<T>(i));
+        }
+
+        internal static Guid ReadGuid(IntPtr p)
+        {
+            if (p == IntPtr.Zero)
+            {
+                return COMInterfaceEntry.IID_IUnknown;
+            }
+            byte[] guid = new byte[16];
+            Marshal.Copy(p, guid, 0, 16);
+            return new Guid(guid);
+        }
+
+        internal static Guid ReadGuidFromArray(IntPtr p, int index)
+        {
+            if (p == IntPtr.Zero)
+            {
+                return Guid.Empty;
+            }
+
+            IntPtr guid_ptr = Marshal.ReadIntPtr(p, index * IntPtr.Size);
+            return ReadGuid(guid_ptr);
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string name);
+
+        internal SafeLibraryHandle(IntPtr ptr, bool ownsHandle) : base(ownsHandle)
+        {
+        }
+
+        private SafeLibraryHandle() : base(true)
+        {
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            bool ret = true;
+            if (handle != IntPtr.Zero)
+            {
+                ret = FreeLibrary(handle);
+                handle = IntPtr.Zero;
+            }
+            return ret;
+        }
+
+        public TDelegate GetFunctionPointer<TDelegate>() where TDelegate : class
+        {
+            if (!typeof(TDelegate).IsSubclassOf(typeof(Delegate)) || 
+                typeof(TDelegate).GetCustomAttribute<UnmanagedFunctionPointerAttribute>() == null)
+            {
+                throw new ArgumentException("Invalid delegate type, must have an UnmanagedFunctionPointerAttribute annotation");
+            }
+
+            IntPtr proc = GetProcAddress(handle, typeof(TDelegate).Name);
+            if (proc == IntPtr.Zero)
+            {
+                throw new Win32Exception();
+            }
+
+            return Marshal.GetDelegateForFunctionPointer<TDelegate>(proc);
+        }
+
+
     }
 }
