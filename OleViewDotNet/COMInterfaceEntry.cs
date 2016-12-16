@@ -226,6 +226,11 @@ namespace OleViewDotNet
             get { return TypeLib != Guid.Empty; }
         }
 
+        public bool HasProxy
+        {
+            get { return ProxyClsid != Guid.Empty; }
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))

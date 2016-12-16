@@ -309,6 +309,16 @@
             label19.TabIndex = 19;
             label19.Text = "TypeLib:";
             // 
+            // columnHeaderName
+            // 
+            columnHeaderName.Text = "Name";
+            columnHeaderName.Width = 102;
+            // 
+            // columnHeaderIID
+            // 
+            columnHeaderIID.Text = "IID";
+            columnHeaderIID.Width = 290;
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
@@ -766,22 +776,14 @@
             columnHeaderName,
             columnHeaderIID});
             this.listViewProxies.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewProxies.FullRowSelect = true;
             this.listViewProxies.Location = new System.Drawing.Point(3, 3);
+            this.listViewProxies.MultiSelect = false;
             this.listViewProxies.Name = "listViewProxies";
             this.listViewProxies.Size = new System.Drawing.Size(679, 427);
             this.listViewProxies.TabIndex = 0;
             this.listViewProxies.UseCompatibleStateImageBehavior = false;
             this.listViewProxies.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeaderName
-            // 
-            columnHeaderName.Text = "Name";
-            columnHeaderName.Width = 102;
-            // 
-            // columnHeaderIID
-            // 
-            columnHeaderIID.Text = "IID";
-            columnHeaderIID.Width = 290;
             // 
             // PropertiesControl
             // 

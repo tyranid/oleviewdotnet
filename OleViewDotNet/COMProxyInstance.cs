@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace OleViewDotNet
 {
@@ -137,6 +138,21 @@ namespace OleViewDotNet
             DispatchCount = dispatch_count;
             Procs = procs;
         }
+
+        public string Format(IDictionary<Guid, string> iids_to_names)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("[Guid(\"{0}\")]", Iid).AppendLine();
+            string base_name = iids_to_names.ContainsKey(BaseIid) ? 
+                iids_to_names[BaseIid] : String.Format("/* Unknown IID {0} */ IUnknown", BaseIid);
+            builder.AppendFormat("interface {0} : {1} {{", Name, base_name).AppendLine();
+            foreach (NdrProcedureDefinition proc in Procs)
+            {
+                builder.AppendFormat("    {0}", proc.FormatProcedure(iids_to_names)).AppendLine();
+            }
+            builder.AppendLine("}").AppendLine();
+            return builder.ToString();
+        }
     }
 
     public class COMProxyInstance
@@ -163,7 +179,7 @@ namespace OleViewDotNet
                 int fmt_ofs = Marshal.ReadInt16(server_info.FmtStringOffset, start_ofs * 2);
                 if (fmt_ofs >= 0)
                 {
-                    procs.Add(new NdrProcedureDefinition(server_info.ProcString + fmt_ofs, type_desc));
+                    procs.Add(new NdrProcedureDefinition(stub_desc, server_info.ProcString + fmt_ofs, type_desc));
                 }
                 start_ofs++;
             }

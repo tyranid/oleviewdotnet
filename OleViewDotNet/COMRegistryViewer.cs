@@ -1048,6 +1048,11 @@ namespace OleViewDotNet
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                     }
 
+                    if (clsid != null && m_registry.GetProxiesForClsid(clsid).Length > 0)
+                    {
+                        contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                    }
+
                     if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                     {
                         EnableViewPermissions(m_registry.AppIDs[clsid.AppID]);
@@ -1063,9 +1068,15 @@ namespace OleViewDotNet
                 }
                 else if (node.Tag is COMInterfaceEntry)
                 {
-                    if (((COMInterfaceEntry)node.Tag).HasTypeLib)
+                    COMInterfaceEntry intf = (COMInterfaceEntry)node.Tag;
+                    if (intf.HasTypeLib)
                     {
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                    }
+
+                    if (intf.HasProxy && m_registry.Clsids.ContainsKey(intf.ProxyClsid))
+                    {
+                        contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                     }
                 }
 
@@ -1395,6 +1406,35 @@ namespace OleViewDotNet
             if (node != null)
             {
                 CopyTextToClipboard(node.Text);
+            }
+        }
+
+        private void viewProxyDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null)
+            {
+                COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                Guid selected_iid = Guid.Empty;
+                if (clsid == null && node.Tag is COMInterfaceEntry)
+                {
+                    COMInterfaceEntry intf = (COMInterfaceEntry)node.Tag;
+                    selected_iid = intf.Iid;
+                    clsid = m_registry.Clsids[intf.ProxyClsid];
+                }
+
+                if (clsid != null)
+                {
+                    try
+                    {
+                        COMProxyInstance proxy = new COMProxyInstance(clsid.Server);
+                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, clsid.Name, proxy, selected_iid));
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.ShowError(this, ex);
+                    }
+                }
             }
         }
     }

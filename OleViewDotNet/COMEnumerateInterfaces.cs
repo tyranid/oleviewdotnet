@@ -22,12 +22,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace OleViewDotNet
 {
@@ -91,31 +90,6 @@ namespace OleViewDotNet
 
         const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool GetModuleHandleEx(int dwFlags, IntPtr lpModuleName, out IntPtr phModule);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
-
-        static string GetModuleFileName(IntPtr hModule)
-        {
-            StringBuilder builder = new StringBuilder(260);
-            int result = GetModuleFileName(hModule, builder, builder.Capacity);
-            if (result > 0)
-            {
-                string path = builder.ToString();
-                int index = path.LastIndexOf('\\');
-                if (index < 0)
-                    index = path.LastIndexOf('/');
-                if (index < 0)
-                {
-                    return path;
-                }
-                return path.Substring(index + 1);
-            }
-            return "Unknown";
-        }
-        
         private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, List<COMInterfaceInstance> list)
         {
             if (punk != IntPtr.Zero)
@@ -124,20 +98,24 @@ namespace OleViewDotNet
                 if (Marshal.QueryInterface(punk, ref iid, out ppout) == 0)
                 {
                     IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
-                    IntPtr module;
                     COMInterfaceInstance intf;
 
-                    if (_clsctx == CLSCTX.CLSCTX_INPROC_SERVER && GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, vtable, out module))
+                    using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(vtable))
                     {
-                        if (!module_names.ContainsKey(module))
+                        if (_clsctx == CLSCTX.CLSCTX_INPROC_SERVER && module != null)
                         {
-                            module_names[module] = GetModuleFileName(module);
+                            if (!module_names.ContainsKey(module.DangerousGetHandle()))
+                            {
+                                module_names[module.DangerousGetHandle()] = module.GetModuleFileName();
+                            }
+                            intf = new COMInterfaceInstance(iid, 
+                                module_names[module.DangerousGetHandle()], 
+                                vtable.ToInt64() - module.DangerousGetHandle().ToInt64());
                         }
-                        intf = new COMInterfaceInstance(iid, module_names[module], vtable.ToInt64() - module.ToInt64());
-                    }
-                    else
-                    {
-                        intf = new COMInterfaceInstance(iid);
+                        else
+                        {
+                            intf = new COMInterfaceInstance(iid);
+                        }
                     }
 
 

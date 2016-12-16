@@ -34,6 +34,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(COMRegistryViewer));
             this.treeComRegistry = new System.Windows.Forms.TreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGUIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGUIDCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGUIDHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,7 +55,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -110,12 +111,20 @@
             this.refreshInterfacesToolStripMenuItem,
             this.createSpecialToolStripMenuItem,
             this.viewTypeLibraryToolStripMenuItem,
+            this.viewProxyDefinitionToolStripMenuItem,
             this.viewLaunchPermissionsToolStripMenuItem,
             this.viewAccessPermissionsToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 290);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 312);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
+            // 
+            // copyToolStripMenuItem
+            // 
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // copyGUIDToolStripMenuItem
             // 
@@ -294,12 +303,12 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // copyToolStripMenuItem
+            // viewProxyDefinitionToolStripMenuItem
             // 
-            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.copyToolStripMenuItem.Text = "Copy";
-            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
+            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
+            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
+            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -342,5 +351,6 @@
         private System.Windows.Forms.ToolStripMenuItem createInSessionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
     }
 }

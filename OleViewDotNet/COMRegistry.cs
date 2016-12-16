@@ -68,6 +68,7 @@ namespace OleViewDotNet
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
         private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
         private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
+        private Dictionary<Guid, string> m_iids_to_names;
 
         #endregion
 
@@ -168,6 +169,18 @@ namespace OleViewDotNet
                 }
 
                 return m_interfacebyname;
+            }
+        }
+
+        public IDictionary<Guid, string> InterfacesToNames
+        {
+            get
+            {
+                if (m_iids_to_names == null)
+                {
+                    m_iids_to_names = m_interfaces.ToDictionary(p => p.Key, p => p.Value.Name);
+                }
+                return m_iids_to_names;
             }
         }
 

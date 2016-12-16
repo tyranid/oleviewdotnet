@@ -26,6 +26,8 @@ namespace OleViewDotNet
 {
     public partial class TypeLibControl : UserControl
     {
+        private IDictionary<Guid, string> m_iids_to_names;
+
         static void EmitMember(StringBuilder builder, MemberInfo mi)
         {
             String name = COMUtilities.MemberInfoToString(mi);
@@ -63,38 +65,70 @@ namespace OleViewDotNet
                     EmitMember(builder, pi);
                 }
             }
-            
+
             builder.AppendLine("}");
 
             return builder.ToString();
         }
 
-        public TypeLibControl(string name, Assembly typeLib, Guid iid_to_view)
+        private class ListViewItemWithIid : ListViewItem
         {
-            InitializeComponent();
-            List<ListViewItem> items = new List<ListViewItem>();
-            ListViewItem selected_item = null;
-            foreach (Type t in typeLib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
+            public Guid Iid { get; private set; }
+            public ListViewItemWithIid(string name, Guid iid) : base(name)
             {
-                ListViewItem item = new ListViewItem(t.Name);
-                if (t.GUID == iid_to_view)
-                {
-                    selected_item = item;
-                }
+                Iid = iid;
+            }
+        }
+
+        private static IEnumerable<ListViewItemWithIid> FormatAssembly(Assembly typelib)
+        {
+            foreach (Type t in typelib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
+            {
+                ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.GUID);
                 item.SubItems.Add(t.GUID.ToString("B"));
                 item.Tag = t;
-                items.Add(item);
+                yield return item;
             }
-            
+        }
+
+        private static IEnumerable<ListViewItemWithIid> FormatProxyInstance(COMProxyInstance proxy)
+        {
+            foreach (COMProxyInstanceEntry t in proxy.Entries.OrderBy(t => t.Name))
+            {
+                ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.Iid);
+                item.SubItems.Add(t.Iid.ToString("B"));
+                item.Tag = t;
+                yield return item;
+            }
+        }
+
+        private TypeLibControl(IDictionary<Guid, string> iids_to_names, string name, Guid iid_to_view, IEnumerable<ListViewItemWithIid> items)
+        {
+            m_iids_to_names = iids_to_names;
+            InitializeComponent();
             listViewTypes.Items.AddRange(items.ToArray());
             listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            if (selected_item != null)
+            foreach (ListViewItemWithIid item in listViewTypes.Items)
             {
-                selected_item.Selected = true;
+                if (item.Iid == iid_to_view)
+                {
+                    item.Selected = true;
+                }
             }
+            
             textEditor.SetHighlighting("C#");
             textEditor.IsReadOnly = true;
             Text = name;
+        }
+
+        public TypeLibControl(string name, Assembly typelib, Guid iid_to_view) 
+            : this(null, name, iid_to_view, FormatAssembly(typelib))
+        {
+        }
+
+        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid iid_to_view) 
+            : this(registry.InterfacesToNames, name, iid_to_view, FormatProxyInstance(proxy))
+        {
         }
 
         private void listViewTypes_SelectedIndexChanged(object sender, EventArgs e)
@@ -104,8 +138,18 @@ namespace OleViewDotNet
             if (listViewTypes.SelectedItems.Count > 0)
             {
                 ListViewItem item = listViewTypes.SelectedItems[0];
+                Type type = item.Tag as Type;
+                COMProxyInstanceEntry proxy = item.Tag as COMProxyInstanceEntry;
 
-                text = TypeToText((Type)item.Tag);
+                if (type != null)
+                {
+                    text = TypeToText(type);
+                }
+                else if (proxy != null)
+                {
+
+                    text = proxy.Format(m_iids_to_names);
+                }
             }
 
             textEditor.Text = text;
@@ -125,12 +169,8 @@ namespace OleViewDotNet
         {
             if (listViewTypes.SelectedItems.Count > 0)
             {
-                ListViewItem item = listViewTypes.SelectedItems[0];
-                Type t = item.Tag as Type;
-                if (t != null)
-                {
-                    COMRegistryViewer.CopyGuidToClipboard(t.GUID, copy_type);
-                }
+                ListViewItemWithIid item = (ListViewItemWithIid) listViewTypes.SelectedItems[0];
+                COMRegistryViewer.CopyGuidToClipboard(item.Iid, copy_type);
             }
         }
 

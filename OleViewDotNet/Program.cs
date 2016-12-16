@@ -191,19 +191,6 @@ namespace OleViewDotNet
             bool show_help = false;
             COMRegistryMode mode = COMRegistryMode.Merged;
 
-            try
-            {
-                //COMProxyInstance proxy = new COMProxyInstance(@"C:\Windows\System32\actxprxy.dll");
-                COMProxyInstance proxy = new COMProxyInstance(@"C:\Windows\System32\mfps.dll");
-                //COMProxyInstance proxy = new COMProxyInstance(@"D:\dev\TypeLibBuild\x64\Debug\TypeLibBuildPS.dll");
-                System.Diagnostics.Debug.WriteLine(proxy.Entries.Count());
-            }
-            catch (Exception ex)
-            {
-                ShowError(null, ex);
-            }
-            return;
-            
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },

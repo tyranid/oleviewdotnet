@@ -1114,19 +1114,6 @@ namespace OleViewDotNet
             return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
         }
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern SafeLibraryHandle LoadLibrary(string filename);
-
-        internal static SafeLibraryHandle SafeLoadLibrary(string filename)
-        {
-            SafeLibraryHandle lib = LoadLibrary(filename);
-            if (lib.IsInvalid)
-            {
-                throw new Win32Exception();
-            }
-            return lib;
-        }
-
         internal static T[] EnumeratePointerList<T>(IntPtr p, Func<IntPtr, T> load_type)
         {
             List<T> ret = new List<T>();
@@ -1200,6 +1187,101 @@ namespace OleViewDotNet
             IntPtr guid_ptr = Marshal.ReadIntPtr(p, index * IntPtr.Size);
             return ReadGuid(guid_ptr);
         }
+
+        internal static byte[] ReadAll(this BinaryReader reader, int length)
+        {
+            byte[] ret = reader.ReadBytes(length);
+            if (ret.Length != length)
+            {
+                throw new EndOfStreamException();
+            }
+            return ret;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern SafeLibraryHandle LoadLibrary(string filename);
+
+        internal static SafeLibraryHandle SafeLoadLibrary(string filename)
+        {
+            SafeLibraryHandle lib = LoadLibrary(filename);
+            if (lib.IsInvalid)
+            {
+                throw new Win32Exception();
+            }
+            return lib;
+        }
+
+        const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool GetModuleHandleEx(int dwFlags, IntPtr lpModuleName, out SafeLibraryHandle phModule);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "GetModuleHandleExW")]
+        static extern bool GetModuleHandleExString(int dwFlags, string lpModuleName, out SafeLibraryHandle phModule);
+
+        internal static SafeLibraryHandle SafeGetModuleHandle(string name)
+        {
+            SafeLibraryHandle ret;
+            if (!GetModuleHandleExString(0, name, out ret))
+            {
+                throw new Win32Exception();
+            }
+            return ret;
+        }
+
+        internal static SafeLibraryHandle SafeGetModuleHandle(IntPtr handle)
+        {
+            SafeLibraryHandle ret;
+            if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, handle, out ret))
+            {
+                return null;
+            }
+            return ret;
+        }
+
+        // Walk series of jumps until we either find an address we don't know or we change modules.
+        internal static IntPtr GetTargetAddress(IntPtr curr_module, IntPtr ptr)
+        {
+            byte start_byte = Marshal.ReadByte(ptr);
+            switch (start_byte)
+            {
+                // TODO: We don't handle delay loaded DLLs atm.
+                // Absolute jump.
+                case 0xFF:
+                    if (Marshal.ReadByte(ptr + 1) != 0x25)
+                    {
+                        return ptr;
+                    }
+
+                    if (Environment.Is64BitProcess)
+                    {
+                        // RIP relative
+                        ptr = Marshal.ReadIntPtr(ptr + 6 + Marshal.ReadInt32(ptr + 2));
+                    }
+                    else
+                    {
+                        // Absolute
+                        ptr = Marshal.ReadIntPtr(new IntPtr(Marshal.ReadInt32(ptr + 2)));
+                    }
+                    break;
+                // Relative jump.
+                case 0xE9:
+                    ptr = ptr + 5 + Marshal.ReadInt32(ptr + 1);
+                    break;
+                default:
+                    return ptr;
+            }
+
+            using (SafeLibraryHandle lib = COMUtilities.SafeGetModuleHandle(ptr))
+            {
+                if (lib == null || lib.DangerousGetHandle() != curr_module)
+                {
+                    return ptr;
+                }
+            }
+
+            return GetTargetAddress(curr_module, ptr);
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
@@ -1237,15 +1319,40 @@ namespace OleViewDotNet
                 throw new ArgumentException("Invalid delegate type, must have an UnmanagedFunctionPointerAttribute annotation");
             }
 
-            IntPtr proc = GetProcAddress(handle, typeof(TDelegate).Name);
+            IntPtr proc = GetFunctionPointer(typeof(TDelegate).Name);
             if (proc == IntPtr.Zero)
             {
                 throw new Win32Exception();
             }
 
-            return Marshal.GetDelegateForFunctionPointer<TDelegate>(proc);
+            return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetFunctionPointer(typeof(TDelegate).Name));
         }
 
+        public IntPtr GetFunctionPointer(string name)
+        {
+            return GetProcAddress(handle, name);
+        }
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
+
+        internal string GetModuleFileName()
+        {
+            StringBuilder builder = new StringBuilder(260);
+            int result = GetModuleFileName(handle, builder, builder.Capacity);
+            if (result > 0)
+            {
+                string path = builder.ToString();
+                int index = path.LastIndexOf('\\');
+                if (index < 0)
+                    index = path.LastIndexOf('/');
+                if (index < 0)
+                {
+                    return path;
+                }
+                return path.Substring(index + 1);
+            }
+            return "Unknown";
+        }
     }
 }

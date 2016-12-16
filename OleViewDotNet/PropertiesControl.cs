@@ -258,8 +258,9 @@ namespace OleViewDotNet
         {
             if (m_registry.Clsids.ContainsKey(m_interface.ProxyClsid))
             {
+                COMCLSIDEntry entry = m_registry.Clsids[m_interface.ProxyClsid];
                 Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
-                    m_clsid.Name, m_registry.Clsids[m_clsid.TreatAs]));
+                    entry.Name, entry));
             }
         }
 
