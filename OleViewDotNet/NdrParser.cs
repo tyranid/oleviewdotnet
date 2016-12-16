@@ -363,7 +363,14 @@ namespace OleViewDotNet
 
         public override string FormatType(IDictionary<Guid, string> iids_to_names)
         {
-            return String.Format("{0}[{1}]", base.FormatType(iids_to_names), StringSize);
+            if (StringSize > 0)
+            {
+                return String.Format("{0}[{1}]", base.FormatType(iids_to_names), StringSize);
+            }
+            else
+            {
+                return String.Format("{0}", base.FormatType(iids_to_names));
+            }
         }
     }
 
@@ -467,7 +474,40 @@ namespace OleViewDotNet
         }
 
         public virtual string FormatType(IDictionary<Guid, string> iids_to_names)
-        {            
+        {
+            switch (Format)
+            {
+                case NdrFormatCharacter.FC_BYTE:
+                    return "byte";
+                case NdrFormatCharacter.FC_CHAR:
+                    return "sbyte";
+                case NdrFormatCharacter.FC_WCHAR:
+                    return "char";
+                case NdrFormatCharacter.FC_SHORT:
+                    return "short";
+                case NdrFormatCharacter.FC_USHORT:
+                    return "ushort";
+                case NdrFormatCharacter.FC_LONG:
+                    return "int";
+                case NdrFormatCharacter.FC_ULONG:
+                    return "uint";
+                case NdrFormatCharacter.FC_FLOAT:
+                    return "float";
+                case NdrFormatCharacter.FC_HYPER:
+                    return "long";
+                case NdrFormatCharacter.FC_DOUBLE:
+                    return "double";                
+                case NdrFormatCharacter.FC_INT3264:
+                    return "IntPtr";
+                case NdrFormatCharacter.FC_UINT3264:
+                    return "UIntPtr";
+                case NdrFormatCharacter.FC_C_WSTRING:
+                case NdrFormatCharacter.FC_C_CSTRING:
+                case NdrFormatCharacter.FC_WSTRING:
+                case NdrFormatCharacter.FC_CSTRING:
+                    return "string";
+            }
+
             return String.Format("{0}", Format);
         }
 
