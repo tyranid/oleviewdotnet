@@ -585,5 +585,25 @@ namespace OleViewDotNet
         {
             OpenView(COMRegistryViewer.DisplayMode.ProxyCLSIDs);
         }
+
+        private void menuFileOpenProxyDll_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "Executable Files (*.dll;*.ocx)|*.dll;*.ocx|All Files (*.*)|*.*";
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        COMProxyInstance proxy = new COMProxyInstance(dlg.FileName, new Guid[0]);
+                        HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.ShowError(this, ex);
+                    }
+                }
+            }
+        }
     }
 }

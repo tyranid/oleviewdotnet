@@ -65,6 +65,7 @@
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
             this.menuRegistryTypeLibraries = new System.Windows.Forms.MenuItem();
+            this.menuRegistryInterfaceProxies = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.menuRegistryProperties = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
@@ -87,7 +88,7 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryInterfaceProxies = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -113,6 +114,7 @@
             this.menuFileDiff,
             this.menuItem8,
             this.menuFileOpenTypeLib,
+            this.menuFileOpenProxyDll,
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
@@ -177,12 +179,12 @@
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 10;
+            this.menuItem2.Index = 11;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 11;
+            this.menuFileExit.Index = 12;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -333,6 +335,12 @@
             this.menuRegistryTypeLibraries.Text = "Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
+            // menuRegistryInterfaceProxies
+            // 
+            this.menuRegistryInterfaceProxies.Index = 20;
+            this.menuRegistryInterfaceProxies.Text = "Interface Proxies";
+            this.menuRegistryInterfaceProxies.Click += new System.EventHandler(this.menuRegistryInterfaceProxies_Click);
+            // 
             // menuItem6
             // 
             this.menuItem6.Index = 21;
@@ -479,11 +487,11 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryInterfaceProxies
+            // menuFileOpenProxyDll
             // 
-            this.menuRegistryInterfaceProxies.Index = 20;
-            this.menuRegistryInterfaceProxies.Text = "Interface Proxies";
-            this.menuRegistryInterfaceProxies.Click += new System.EventHandler(this.menuRegistryInterfaceProxies_Click);
+            this.menuFileOpenProxyDll.Index = 10;
+            this.menuFileOpenProxyDll.Text = "Open Proxy DLL";
+            this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
             // MainForm
             // 
@@ -560,6 +568,7 @@
         private System.Windows.Forms.MenuItem menuItem3;
         private System.Windows.Forms.MenuItem menuItem9;
         private System.Windows.Forms.MenuItem menuRegistryInterfaceProxies;
+        private System.Windows.Forms.MenuItem menuFileOpenProxyDll;
     }
 }
 

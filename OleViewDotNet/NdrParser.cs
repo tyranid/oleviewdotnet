@@ -408,6 +408,11 @@ namespace OleViewDotNet
                 return String.Format("{0}", base.FormatType(context));
             }
         }
+
+        public override int GetSize()
+        {
+            return StringSize;
+        }
     }
 
     public class NdrStructureStringTypeReferece : NdrBaseTypeReference
@@ -593,6 +598,11 @@ namespace OleViewDotNet
             builder.AppendLine("};");
             return builder.ToString();
         }
+
+        public override int GetSize()
+        {
+            return MemorySize;
+        }
     }    
 
     public class NdrSimpleStructureTypeReference : NdrBaseStructureTypeReference
@@ -611,7 +621,7 @@ namespace OleViewDotNet
         {
             NdrBaseTypeReference array = Read(context, ReadTypeOffset(reader));
             ReadMemberInfo(context, reader);
-            if (array.Format != NdrFormatCharacter.FC_ZERO)
+            if (array != null)
             {
                 _members.Add(array);
             }
@@ -624,18 +634,21 @@ namespace OleViewDotNet
             : base(NdrFormatCharacter.FC_BOGUS_STRUCT, reader)
         {
             NdrBaseTypeReference array = Read(context, ReadTypeOffset(reader));
-            BinaryReader pointer_reader = GetReader(context, ReadTypeOffset(reader));
+            int pointer_ofs = ReadTypeOffset(reader);
             ReadMemberInfo(context, reader);
-
-            for (int i = 0; i < _members.Count; ++i)
+            if (pointer_ofs >= 0)
             {
-                if (_members[i].Format == NdrFormatCharacter.FC_POINTER)
+                BinaryReader pointer_reader = GetReader(context, pointer_ofs);
+                for (int i = 0; i < _members.Count; ++i)
                 {
-                    _members[i] = Read(context, reader);
+                    if (_members[i].Format == NdrFormatCharacter.FC_POINTER)
+                    {
+                        _members[i] = Read(context, reader);
+                    }
                 }
             }
 
-            if (array.Format != NdrFormatCharacter.FC_ZERO)
+            if (array != null)
             {
                 _members.Add(array);
             }
@@ -679,6 +692,11 @@ namespace OleViewDotNet
             }
 
             ReadElementType(context, reader);
+        }
+
+        public override int GetSize()
+        {
+            return TotalSize;
         }
     }
 
@@ -828,7 +846,7 @@ namespace OleViewDotNet
             _ref_type = ref_type;
         }
 
-        internal NdrIndirectTypeReference() : base(NdrFormatCharacter.FC_POINTER)
+        internal NdrIndirectTypeReference() : base(NdrFormatCharacter.FC_ZERO)
         {
         }
 
@@ -1005,6 +1023,10 @@ namespace OleViewDotNet
         {
             long curr_ofs = reader.BaseStream.Position;
             int ofs = reader.ReadInt16();
+            if (ofs == 0)
+            {
+                return -1;
+            }
             return (int)(curr_ofs + ofs);
         }
 
@@ -1134,6 +1156,11 @@ namespace OleViewDotNet
 
         internal static NdrBaseTypeReference Read(NdrParseContext context, int ofs)
         {
+            if (ofs < 0)
+            {
+                return null;
+            }
+
             IntPtr type_ofs = context.TypeDesc + ofs;
             if (context.TypeCache.ContainsKey(type_ofs))
             {

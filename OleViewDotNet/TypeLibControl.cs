@@ -27,6 +27,7 @@ namespace OleViewDotNet
     public partial class TypeLibControl : UserControl
     {
         private IDictionary<Guid, string> m_iids_to_names;
+        private IDictionary<NdrBaseStructureTypeReference, string> m_structs_to_names;
 
         static void EmitMember(StringBuilder builder, MemberInfo mi)
         {
@@ -34,7 +35,14 @@ namespace OleViewDotNet
             if (!String.IsNullOrWhiteSpace(name))
             {
                 builder.Append("   ");
-                builder.AppendLine(name);
+                if (mi is FieldInfo)
+                {
+                    builder.AppendFormat("{0};", name).AppendLine();
+                }
+                else
+                {
+                    builder.AppendLine(name);
+                }
             }
         }
 
@@ -42,27 +50,49 @@ namespace OleViewDotNet
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
-            builder.AppendFormat("interface {0}", t.Name).AppendLine();
+            if (t.IsInterface)
+            {
+                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                builder.AppendFormat("interface {0}", t.Name).AppendLine();
+            }
+            else
+            {
+                builder.AppendFormat("struct {0}", t.Name).AppendLine();
+            }
             builder.AppendLine("{");
 
-            IEnumerable<MethodInfo> methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0);
-            if (methods.Count() > 0)
+            if (t.IsInterface)
             {
-                builder.AppendLine("   /* Methods */");
-                foreach (MethodInfo mi in methods)
+                IEnumerable<MethodInfo> methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0);
+                if (methods.Count() > 0)
                 {
-                    EmitMember(builder, mi);
+                    builder.AppendLine("   /* Methods */");
+                    foreach (MethodInfo mi in methods)
+                    {
+                        EmitMember(builder, mi);
+                    }
+                }
+
+                PropertyInfo[] props = t.GetProperties();
+                if (props.Length > 0)
+                {
+                    builder.AppendLine("   /* Properties */");
+                    foreach (PropertyInfo pi in props)
+                    {
+                        EmitMember(builder, pi);
+                    }
                 }
             }
-
-            PropertyInfo[] props = t.GetProperties();
-            if (props.Length > 0)
+            else
             {
-                builder.AppendLine("   /* Properties */");
-                foreach (PropertyInfo pi in props)
+                FieldInfo[] fields = t.GetFields();
+                if (fields.Length > 0)
                 {
-                    EmitMember(builder, pi);
+                    builder.AppendLine("   /* Fields */");
+                    foreach (FieldInfo fi in fields)
+                    {
+                        EmitMember(builder, fi);
+                    }
                 }
             }
 
@@ -102,9 +132,37 @@ namespace OleViewDotNet
             }
         }
 
-        private TypeLibControl(IDictionary<Guid, string> iids_to_names, string name, Guid iid_to_view, IEnumerable<ListViewItemWithIid> items)
+        private static IEnumerable<ListViewItem> FormatProxyInstanceStructs(COMProxyInstance proxy)
+        {
+            IDictionary<NdrBaseStructureTypeReference, string> structs_with_names = proxy.StructuresWithNames;
+
+            foreach (var pair in structs_with_names.OrderBy(p => p.Value))
+            {
+                ListViewItem item = new ListViewItem(pair.Value);
+                item.Tag = pair.Key;
+                yield return item;
+            }
+        }
+
+        private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib)
+        {
+            foreach (Type t in typelib.GetTypes().Where(t => t.IsValueType).OrderBy(t => t.Name))
+            {
+                ListViewItem item = new ListViewItem(t.Name);
+                item.Tag = t;
+                yield return item;
+            }
+        }
+
+        private TypeLibControl(IDictionary<Guid, string> iids_to_names, 
+            IDictionary<NdrBaseStructureTypeReference, string> structs_to_names,
+            string name, 
+            Guid iid_to_view, 
+            IEnumerable<ListViewItemWithIid> items, 
+            IEnumerable<ListViewItem> structs)
         {
             m_iids_to_names = iids_to_names;
+            m_structs_to_names = structs_to_names;
             InitializeComponent();
             listViewTypes.Items.AddRange(items.ToArray());
             listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -115,19 +173,21 @@ namespace OleViewDotNet
                     item.Selected = true;
                 }
             }
-            
+            listViewStructures.Items.AddRange(structs.ToArray());
+            listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+
             textEditor.SetHighlighting("C#");
             textEditor.IsReadOnly = true;
             Text = name;
         }
 
         public TypeLibControl(string name, Assembly typelib, Guid iid_to_view) 
-            : this(null, name, iid_to_view, FormatAssembly(typelib))
+            : this(null, null, name, iid_to_view, FormatAssembly(typelib), FormatAssemblyStructs(typelib))
         {
         }
 
         public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid iid_to_view) 
-            : this(registry.InterfacesToNames, name, iid_to_view, FormatProxyInstance(proxy))
+            : this(registry.InterfacesToNames, proxy.StructuresWithNames, name, iid_to_view, FormatProxyInstance(proxy), FormatProxyInstanceStructs(proxy))
         {
         }
 
@@ -186,6 +246,30 @@ namespace OleViewDotNet
         private void copyGIUDHexStringToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsHexString);
+        }
+
+        private void listViewStructures_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string text = String.Empty;
+
+            if (listViewStructures.SelectedItems.Count > 0)
+            {
+                ListViewItem item = listViewStructures.SelectedItems[0];
+                Type type = item.Tag as Type;
+                NdrBaseStructureTypeReference str = item.Tag as NdrBaseStructureTypeReference;
+
+                if (type != null)
+                {
+                    text = TypeToText(type);
+                }
+                else if (str != null)
+                {
+                    text = str.FormatStruct(new NdrFormatContext(m_iids_to_names, m_structs_to_names));
+                }
+            }
+
+            textEditor.Text = text;
+            textEditor.Refresh();
         }
     }
 }

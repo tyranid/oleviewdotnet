@@ -1031,6 +1031,7 @@ namespace OleViewDotNet
         {
             MethodInfo mi = member as MethodInfo;
             PropertyInfo prop = member as PropertyInfo;
+            FieldInfo fi = member as FieldInfo;
 
             if (mi != null)
             {
@@ -1040,7 +1041,7 @@ namespace OleViewDotNet
                 foreach (ParameterInfo pi in pis)
                 {
                     List<string> dirs = new List<string>();
-                    
+
                     if (pi.IsOut)
                     {
                         dirs.Add("Out");
@@ -1085,6 +1086,10 @@ namespace OleViewDotNet
                 }
 
                 return String.Format("{0} {1} {{ {2} }}", ConvertTypeToName(prop.PropertyType), prop.Name, string.Join(" ", propdirs));
+            }
+            else if (fi != null)
+            {
+                return String.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
             }
             else
             {
