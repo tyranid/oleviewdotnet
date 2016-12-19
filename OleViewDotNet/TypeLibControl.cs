@@ -147,7 +147,6 @@ namespace OleViewDotNet
                 }
                 else if (proxy != null)
                 {
-
                     text = proxy.Format(m_iids_to_names);
                 }
             }

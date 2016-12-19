@@ -126,14 +126,17 @@ namespace OleViewDotNet
 
     public class COMProxyInstanceEntry
     {
+        private COMProxyInstance _instance;
+
         public string Name { get; private set; }
         public Guid Iid { get; private set; }
         public Guid BaseIid { get; private set; }
         public int DispatchCount { get; private set; }
         public NdrProcedureDefinition[] Procs { get; private set; }
 
-        internal COMProxyInstanceEntry(string name, Guid iid, Guid base_iid, int dispatch_count, NdrProcedureDefinition[] procs)
+        internal COMProxyInstanceEntry(COMProxyInstance instance, string name, Guid iid, Guid base_iid, int dispatch_count, NdrProcedureDefinition[] procs)
         {
+            _instance = instance;
             Name = name;
             Iid = iid;
             BaseIid = base_iid == Guid.Empty ? COMInterfaceEntry.IID_IUnknown : base_iid;
@@ -141,19 +144,26 @@ namespace OleViewDotNet
             Procs = procs;
         }
 
-        public string Format(IDictionary<Guid, string> iids_to_names)
+        public string Format(NdrFormatContext context)
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("[Guid(\"{0}\")]", Iid).AppendLine();
-            string base_name = iids_to_names.ContainsKey(BaseIid) ? 
-                iids_to_names[BaseIid] : String.Format("/* Unknown IID {0} */ IUnknown", BaseIid);
+            string base_name = context.IidsToNames.ContainsKey(BaseIid) ? 
+                context.IidsToNames[BaseIid] : String.Format("/* Unknown IID {0} */ IUnknown", BaseIid);
             builder.AppendFormat("interface {0} : {1} {{", Name, base_name).AppendLine();
             foreach (NdrProcedureDefinition proc in Procs)
             {
-                builder.AppendFormat("    {0}", proc.FormatProcedure(iids_to_names)).AppendLine();
+                builder.AppendFormat("    {0}", proc.FormatProcedure(context)).AppendLine();
             }
             builder.AppendLine("}").AppendLine();
             return builder.ToString();
+        }
+
+        public string Format(IDictionary<Guid, string> iids_to_names)
+        {
+            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.Structures.Select((s, i) =>
+            new Tuple<NdrBaseStructureTypeReference, string>(s, String.Format("Struct_{0}", i))).ToDictionary(v => v.Item1, v => v.Item2));
+            return Format(context);
         }
     }
 
@@ -220,7 +230,7 @@ namespace OleViewDotNet
                 List<NdrBaseStructureTypeReference> structs = new List<NdrBaseStructureTypeReference>();
 
                 foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
-                {
+                {                    
                     string[] names = file_info.GetNames();
                     CInterfaceStubHeader[] stubs = file_info.GetStubs();
                     Guid[] base_iids = file_info.GetBaseIids();
@@ -228,7 +238,7 @@ namespace OleViewDotNet
                         = new Dictionary<IntPtr, NdrBaseTypeReference>();
                     for (int i = 0; i < names.Length; ++i)
                     {
-                        entries.Add(new COMProxyInstanceEntry(names[i], stubs[i].GetIid(),
+                        entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
                             base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
                     }
                     structs.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());

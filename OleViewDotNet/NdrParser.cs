@@ -78,13 +78,10 @@ namespace OleViewDotNet
         FC_AUTO_HANDLE,             // 0x33
         FC_CALLBACK_HANDLE,         // 0x34
         FC_UNUSED1,                 // 0x35
-
         FC_POINTER,                 // 0x36
-
         FC_ALIGNM2,                 // 0x37
         FC_ALIGNM4,                 // 0x38
         FC_ALIGNM8,                 // 0x39
-
         FC_UNUSED2,                 // 0x3a
         FC_UNUSED3,                 // 0x3b
         FC_UNUSED4,                 // 0x3c
@@ -247,6 +244,58 @@ namespace OleViewDotNet
         USER_MARSHAL_IID            = 0x20
     }
 
+    [Flags]
+    public enum NdrCorrelationType : byte
+    {
+        FC_NORMAL_CONFORMANCE = 0,
+        FC_POINTER_CONFORMANCE = 0x10,
+        FC_TOP_LEVEL_CONFORMANCE = 0x20,
+        FC_CONSTANT_CONFORMANCE = 0x40,
+        FC_TOP_LEVEL_MULTID_CONFORMANCE = 0x80,
+    }
+
+    [Flags]
+    public enum NdrCorrelationFlags : byte
+    {
+        Early = 0x1,
+        Split = 0x2,
+        IsIidIs = 0x4,
+        DontCheck = 0x8
+    }
+
+    public class NdrCorrelationDescriptor
+    {
+        public NdrCorrelationType CorrelationType { get; private set; }
+        public NdrFormatCharacter ValueType { get; private set; }
+        public NdrFormatCharacter Operator { get; private set; }
+        public int Offset { get; private set; }
+        public NdrCorrelationFlags Flags { get; private set; }
+        public bool IsValid { get; private set; }
+
+        internal NdrCorrelationDescriptor(NdrParseContext context, BinaryReader reader)
+        {
+            byte type_byte = reader.ReadByte();
+            byte op_byte = reader.ReadByte();
+            int offset = reader.ReadInt16();
+            byte flags = 0;
+            if (context.IsRobust)
+            {
+                flags = reader.ReadByte();
+                reader.ReadByte();
+            }
+
+            if (type_byte != 0xFF || op_byte != 0xFF || offset != -1)
+            {
+                IsValid = true;
+                CorrelationType = (NdrCorrelationType)(type_byte & 0xF0);
+                ValueType = (NdrFormatCharacter)(type_byte & 0xF);
+                Operator = (NdrFormatCharacter)op_byte;
+                Offset = offset;
+                Flags = (NdrCorrelationFlags)flags;
+            }
+        }
+    }
+
     class SafeBufferWrapper : SafeBuffer
     {
         public SafeBufferWrapper(IntPtr buffer) 
@@ -268,7 +317,9 @@ namespace OleViewDotNet
 
         public bool IsConstant { get; private set; }
 
-        internal NdrInterfacePointerTypeReference(BinaryReader reader) : base(NdrFormatCharacter.FC_IP)
+        public NdrCorrelationDescriptor IidIsDescriptor { get; private set; }
+
+        internal NdrInterfacePointerTypeReference(NdrParseContext context, BinaryReader reader) : base(NdrFormatCharacter.FC_IP)
         {
             NdrFormatCharacter type = ReadFormat(reader);
             if (type == NdrFormatCharacter.FC_CONSTANT_IID)
@@ -279,23 +330,23 @@ namespace OleViewDotNet
             else
             {
                 Iid = COMInterfaceEntry.IID_IUnknown;
-                // Ignore the additional conformance data.
+                IidIsDescriptor = new NdrCorrelationDescriptor(context, reader);
             }
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
             if (IsConstant)
             {
-                if (iids_to_names.ContainsKey(Iid))
+                if (context.IidsToNames.ContainsKey(Iid))
                 {
-                    return String.Format("{0}*", iids_to_names[Iid]);
+                    return String.Format("{0}*", context.IidsToNames[Iid]);
                 }
                 return String.Format("/* Unknown IID {0} */ IUnknown*", Iid);
             }
             else
             {
-                return String.Format("IUnknown*");
+                return String.Format("/* iis_is param offset: {0} */ IUnknown*", IidIsDescriptor.Offset);
             }
         }
     }
@@ -305,7 +356,7 @@ namespace OleViewDotNet
         public NdrBaseTypeReference Type { get; private set; }
         public NdrPointerFlags Flags { get; private set; }
 
-        internal NdrPointerTypeReference(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, NdrFormatCharacter format, BinaryReader reader, IntPtr type_desc) : base(format)
+        internal NdrPointerTypeReference(NdrParseContext context, NdrFormatCharacter format, BinaryReader reader) : base(format)
         {
             Flags = (NdrPointerFlags)reader.ReadByte();
             if ((Flags & NdrPointerFlags.FC_SIMPLE_POINTER) == NdrPointerFlags.FC_SIMPLE_POINTER)
@@ -314,13 +365,13 @@ namespace OleViewDotNet
             }
             else
             {
-                Type = NdrBaseTypeReference.Read(type_cache, stub_desc, type_desc, ReadTypeOffset(reader));
+                Type = NdrBaseTypeReference.Read(context, ReadTypeOffset(reader));
             }
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("{0}*", Type.FormatType(iids_to_names));
+            return String.Format("{0}*", Type.FormatType(context));
         }
 
         public override int GetSize()
@@ -345,15 +396,15 @@ namespace OleViewDotNet
             }
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
             if (StringSize > 0)
             {
-                return String.Format("{0}[{1}]", base.FormatType(iids_to_names), StringSize);
+                return String.Format("{0}[{1}]", base.FormatType(context), StringSize);
             }
             else
             {
-                return String.Format("{0}", base.FormatType(iids_to_names));
+                return String.Format("{0}", base.FormatType(context));
             }
         }
     }
@@ -371,9 +422,9 @@ namespace OleViewDotNet
             }
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("{0}<{1}>[{2}]", base.FormatType(iids_to_names), ElementSize, NumberOfElements);
+            return String.Format("{0}<{1}>[{2}]", base.FormatType(context), ElementSize, NumberOfElements);
         }
     }
 
@@ -385,23 +436,23 @@ namespace OleViewDotNet
         public int TransmittedTypeBufferSize { get; private set; }
         public NdrBaseTypeReference Type { get; private set; }
 
-        internal NdrUserMarshalTypeReference(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc) 
+        internal NdrUserMarshalTypeReference(NdrParseContext context, BinaryReader reader) 
             : base(NdrFormatCharacter.FC_USER_MARSHAL)
         {
             Flags = (NdrUserMarshalFlags)(reader.ReadByte() & 0xF0);
             QuadrupleIndex = reader.ReadUInt16();
             UserTypeMemorySite = reader.ReadUInt16();
             TransmittedTypeBufferSize = reader.ReadUInt16();
-            Type = NdrBaseTypeReference.Read(type_cache, stub_desc, type_desc, ReadTypeOffset(reader));
+            Type = NdrBaseTypeReference.Read(context, ReadTypeOffset(reader));
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
             if ((Flags & NdrUserMarshalFlags.USER_MARSHAL_POINTER) != 0)
             {
-                return String.Format("{0}*", base.FormatType(iids_to_names));
+                return String.Format("{0}*", base.FormatType(context));
             }
-            return base.FormatType(iids_to_names);
+            return base.FormatType(context);
         }
     }
 
@@ -424,7 +475,7 @@ namespace OleViewDotNet
             KnownType = type;
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
             return KnownType.ToString();
         }
@@ -458,9 +509,9 @@ namespace OleViewDotNet
             }
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("/* Unhandled */ {0}", base.FormatType(iids_to_names));
+            return String.Format("/* Unhandled */ {0}", base.FormatType(context));
         }
     }
 
@@ -499,7 +550,7 @@ namespace OleViewDotNet
 
         public IEnumerable<NdrStructureMember> Members { get { return GetMembers(); } }
 
-        internal NdrBaseStructureTypeReference(NdrFormatCharacter format, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc)
+        internal NdrBaseStructureTypeReference(NdrFormatCharacter format, BinaryReader reader)
             : base(format)
         {
             // Padding.
@@ -508,42 +559,71 @@ namespace OleViewDotNet
             _members = new List<NdrBaseTypeReference>();
         }
 
-        internal void ReadMemberInfo(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc)
+        internal void ReadMemberInfo(NdrParseContext context, BinaryReader reader)
         {
             NdrBaseTypeReference curr_type;
-            while ((curr_type = Read(type_cache, stub_desc, reader, type_desc)) != null)
+            while ((curr_type = Read(context, reader)) != null)
             {
                 _members.Add(curr_type);
             }
+        }
+
+        public override string FormatType(NdrFormatContext context)
+        {
+            if (context.StructsToNames.ContainsKey(this))
+            {
+                return String.Format("struct {0}", context.StructsToNames[this]);
+            }
+            return base.FormatType(context);
         }
     }    
 
     public class NdrSimpleStructureTypeReference : NdrBaseStructureTypeReference
     {
-        internal NdrSimpleStructureTypeReference(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc) 
-            : base(NdrFormatCharacter.FC_STRUCT, stub_desc, reader, type_desc)
+        internal NdrSimpleStructureTypeReference(NdrParseContext context, BinaryReader reader) 
+            : base(NdrFormatCharacter.FC_STRUCT, reader)
         {
-            ReadMemberInfo(type_cache, stub_desc, reader, type_desc);
+            ReadMemberInfo(context, reader);
         }
     }
 
     public class NdrConformantStructureTypeReference : NdrBaseStructureTypeReference
     {
-        internal NdrConformantStructureTypeReference(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc)
-            : base(NdrFormatCharacter.FC_STRUCT, stub_desc, reader, type_desc)
+        internal NdrConformantStructureTypeReference(NdrParseContext context, BinaryReader reader)
+            : base(NdrFormatCharacter.FC_STRUCT, reader)
         {
-            NdrBaseTypeReference array = NdrBaseTypeReference.Read(type_cache, stub_desc, type_desc, ReadTypeOffset(reader));
-            ReadMemberInfo(type_cache, stub_desc, reader, type_desc);
+            NdrBaseTypeReference array = NdrBaseTypeReference.Read(context, ReadTypeOffset(reader));
+            ReadMemberInfo(context, reader);
             _members.Add(array);
         }
     }
 
-    public class NdrSimpleArrayTypeReference : NdrBaseTypeReference
+    public class NdrBaseArrayTypeReference : NdrBaseTypeReference
+    {
+        public int Alignment { get; private set; }
+        public NdrBaseTypeReference ElementType { get; private set; }
+
+        internal NdrBaseArrayTypeReference(NdrParseContext context, NdrFormatCharacter format, BinaryReader reader) : base(format)
+        {
+            Alignment = reader.ReadByte();
+        }
+
+        internal void ReadElementType(NdrParseContext context, BinaryReader reader)
+        {
+            ElementType = Read(context, reader);
+        }
+
+        public override string FormatType(NdrFormatContext context)
+        {
+            return String.Format("{0}[]", ElementType.FormatType(context));
+        }
+    }
+
+    public class NdrSimpleArrayTypeReference : NdrBaseArrayTypeReference
     {
         public int TotalSize { get; private set; }
-        public NdrBaseTypeReference Type { get; private set; }
 
-        internal NdrSimpleArrayTypeReference(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, NdrFormatCharacter format, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc) : base(format)
+        internal NdrSimpleArrayTypeReference(NdrParseContext context, NdrFormatCharacter format, BinaryReader reader) : base(context, format, reader)
         {
             if (format == NdrFormatCharacter.FC_SMFARRAY)
             {
@@ -554,7 +634,21 @@ namespace OleViewDotNet
                 TotalSize = reader.ReadInt32();
             }
 
-            Type = Read(type_cache, stub_desc, reader, type_desc);
+            ReadElementType(context, reader);
+        }
+    }
+
+    public class NdrConformantArrayTypeReference : NdrBaseArrayTypeReference
+    {
+        public int ElementSize { get; private set; }
+        public NdrCorrelationDescriptor ConformanceDescriptor { get; private set; }
+
+        internal NdrConformantArrayTypeReference(NdrParseContext context, 
+            BinaryReader reader) : base(context, NdrFormatCharacter.FC_CARRAY, reader)
+        {
+            ElementSize = reader.ReadInt16();
+            ConformanceDescriptor = new NdrCorrelationDescriptor(context, reader);
+            ReadElementType(context, reader);
         }
     }
 
@@ -601,14 +695,43 @@ namespace OleViewDotNet
             MaxValue = reader.ReadInt32();
         }
 
-        public override string FormatType(IDictionary<Guid, string> iids_to_names)
+        public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("/* range: {0},{1} */ {2}", MinValue, MaxValue, RangeType.FormatType(iids_to_names));
+            return String.Format("/* range: {0},{1} */ {2}", MinValue, MaxValue, RangeType.FormatType(context));
         }
 
         public override int GetSize()
         {
             return RangeType.GetSize();
+        }
+    }
+
+    public class NdrIndirectTypeReference : NdrBaseTypeReference
+    {
+        NdrBaseTypeReference _ref_type;
+
+        internal void FixupType(NdrBaseTypeReference ref_type)
+        {
+            _ref_type = ref_type;
+        }
+
+        internal NdrIndirectTypeReference() : base(NdrFormatCharacter.FC_POINTER)
+        {
+        }
+
+        public override string FormatType(NdrFormatContext context)
+        {
+            return _ref_type.FormatType(context);
+        }
+
+        public override int GetSize()
+        {
+            return _ref_type.GetSize();
+        }
+
+        public override string ToString()
+        {
+            return _ref_type.ToString();
         }
     }
 
@@ -626,7 +749,7 @@ namespace OleViewDotNet
             return String.Format("{0} - {1}", Format, GetType().Name);
         }
 
-        public virtual string FormatType(IDictionary<Guid, string> iids_to_names)
+        public virtual string FormatType(NdrFormatContext context)
         {
             switch (Format)
             {
@@ -703,14 +826,14 @@ namespace OleViewDotNet
 
         private static StandardUserMarshalers m_marshalers;
 
-        private static NdrBaseTypeReference FixupUserMarshal(MIDL_STUB_DESC stub_desc, NdrUserMarshalTypeReference type)
+        private static NdrBaseTypeReference FixupUserMarshal(NdrParseContext context, NdrUserMarshalTypeReference type)
         {
-            if (stub_desc.aUserMarshalQuadruple == IntPtr.Zero)
+            if (context.StubDesc.aUserMarshalQuadruple == IntPtr.Zero)
             {
                 return type;
             }
 
-            using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(stub_desc.aUserMarshalQuadruple))
+            using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(context.StubDesc.aUserMarshalQuadruple))
             {
                 if (module == null)
                 {
@@ -722,7 +845,7 @@ namespace OleViewDotNet
                     m_marshalers = new StandardUserMarshalers();
                 }
 
-                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), Marshal.ReadIntPtr(stub_desc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
+                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), Marshal.ReadIntPtr(context.StubDesc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
                 if ((usersize_ptr == m_marshalers.BSTR_UserSizePtr) || (usersize_ptr == m_marshalers.BSTR_UserSize64Ptr))
                 {
                     return new NdrKnownTypeReference(NdrKnownTypes.BSTR);
@@ -755,7 +878,7 @@ namespace OleViewDotNet
                     && members[3] is NdrSimpleArrayTypeReference)
                 {
                     NdrSimpleArrayTypeReference array = members[3] as NdrSimpleArrayTypeReference;
-                    if (array.TotalSize == 8 && array.Type.Format == NdrFormatCharacter.FC_BYTE)
+                    if (array.TotalSize == 8 && array.ElementType.Format == NdrFormatCharacter.FC_BYTE)
                     {
                         return new NdrKnownTypeReference(NdrKnownTypes.GUID);
                     }
@@ -803,7 +926,7 @@ namespace OleViewDotNet
             }
         }
 
-        internal static NdrBaseTypeReference Read(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc)
+        internal static NdrBaseTypeReference Read(NdrParseContext context, BinaryReader reader)
         {
             NdrFormatCharacter format = (NdrFormatCharacter)reader.ReadByte();
             
@@ -836,9 +959,9 @@ namespace OleViewDotNet
                     case NdrFormatCharacter.FC_UP:
                     case NdrFormatCharacter.FC_RP:
                     case NdrFormatCharacter.FC_FP:
-                        return new NdrPointerTypeReference(type_cache, stub_desc, format, reader, type_desc);
+                        return new NdrPointerTypeReference(context, format, reader);
                     case NdrFormatCharacter.FC_IP:
-                        return new NdrInterfacePointerTypeReference(reader);
+                        return new NdrInterfacePointerTypeReference(context, reader);
                     case NdrFormatCharacter.FC_C_CSTRING:
                     case NdrFormatCharacter.FC_C_BSTRING:
                     case NdrFormatCharacter.FC_C_WSTRING:
@@ -850,20 +973,21 @@ namespace OleViewDotNet
                     case NdrFormatCharacter.FC_SSTRING:
                         return new NdrStructureStringTypeReferece(format, reader);
                     case NdrFormatCharacter.FC_USER_MARSHAL:
-                        return FixupUserMarshal(stub_desc, new NdrUserMarshalTypeReference(type_cache, stub_desc, reader, type_desc));
+                        return FixupUserMarshal(context, new NdrUserMarshalTypeReference(context, reader));
                     case NdrFormatCharacter.FC_EMBEDDED_COMPLEX:
                         reader.ReadByte(); // Padding
-                        return Read(type_cache, stub_desc, type_desc, ReadTypeOffset(reader));
+                        return Read(context, ReadTypeOffset(reader));
                     case NdrFormatCharacter.FC_STRUCT:
-                        return FixupSimpleStructureType(new NdrSimpleStructureTypeReference(type_cache, stub_desc, reader, type_desc));
+                        return FixupSimpleStructureType(new NdrSimpleStructureTypeReference(context, reader));
                     case NdrFormatCharacter.FC_CSTRUCT:
-                        return new NdrConformantStructureTypeReference(type_cache, stub_desc, reader, type_desc);
+                        return new NdrConformantStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_PP:
                         throw new InvalidOperationException("Parser doesn't support pointer_info.");
                     case NdrFormatCharacter.FC_SMFARRAY:
                     case NdrFormatCharacter.FC_LGFARRAY:
-                        reader.ReadByte(); // Padding
-                        return new NdrSimpleArrayTypeReference(type_cache, format, stub_desc, reader, type_desc);
+                        return new NdrSimpleArrayTypeReference(context, format, reader);
+                    case NdrFormatCharacter.FC_CARRAY:
+                        return new NdrConformantArrayTypeReference(context, reader);
                     case NdrFormatCharacter.FC_RANGE:
                         return new NdrRangeTypeReference(reader);
                     // Skipping padding types.
@@ -885,19 +1009,25 @@ namespace OleViewDotNet
             }
         }
 
-        internal static NdrBaseTypeReference Read(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, int ofs)
+        internal static NdrBaseTypeReference Read(NdrParseContext context, int ofs)
         {
-            IntPtr type_ofs = type_desc + ofs;
-            if (type_cache.ContainsKey(type_ofs))
+            IntPtr type_ofs = context.TypeDesc + ofs;
+            if (context.TypeCache.ContainsKey(type_ofs))
             {
-                return type_cache[type_ofs];
+                return context.TypeCache[type_ofs];
             }
 
-            UnmanagedMemoryStream stm = new UnmanagedMemoryStream(new SafeBufferWrapper(type_desc), 0, int.MaxValue);
+            // Add a pending refence type, this is used only if the current type refers to itself (or indirectly).
+            NdrIndirectTypeReference ref_type = new NdrIndirectTypeReference();
+            context.TypeCache.Add(type_ofs, ref_type);
+
+            UnmanagedMemoryStream stm = new UnmanagedMemoryStream(new SafeBufferWrapper(context.TypeDesc), 0, int.MaxValue);
             stm.Position = ofs;
             BinaryReader reader = new BinaryReader(stm);
-            NdrBaseTypeReference ret = Read(type_cache, stub_desc, reader, type_desc);
-            type_cache[type_ofs] = ret;
+            NdrBaseTypeReference ret = Read(context, reader);
+            ref_type.FixupType(ret);
+            // Replace type cache entry with real value.
+            context.TypeCache[type_ofs] = ret;
             return ret;
         }
     }
@@ -906,16 +1036,16 @@ namespace OleViewDotNet
     {
         public NdrParamAttributes Attributes { get; private set; }
         public NdrBaseTypeReference Type { get; private set; }
-        public int SizeOffset { get; private set; }
+        public int Offset { get; private set; }
 
-        internal NdrProcedureParameter(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, BinaryReader reader, IntPtr type_desc)
+        internal NdrProcedureParameter(NdrParseContext context, BinaryReader reader)
         {
             Attributes = (NdrParamAttributes)reader.ReadUInt16();
-            SizeOffset = reader.ReadUInt16();
+            Offset = reader.ReadUInt16();
             if ((Attributes & NdrParamAttributes.IsBasetype) == 0)
             {
                 int type_ofs = reader.ReadUInt16();
-                Type = NdrBaseTypeReference.Read(type_cache, stub_desc, type_desc, type_ofs);
+                Type = NdrBaseTypeReference.Read(context, type_ofs);
             }
             else
             {
@@ -925,7 +1055,7 @@ namespace OleViewDotNet
             }
         }
 
-        public string Format(IDictionary<Guid, string> iids_to_names)
+        public string Format(NdrFormatContext context)
         {
             List<string> attributes = new List<string>();
             if ((Attributes & NdrParamAttributes.IsIn) != 0)
@@ -942,7 +1072,7 @@ namespace OleViewDotNet
             }
 
             string type_format = (Attributes & NdrParamAttributes.IsSimpleRef) == 0 
-                ? Type.FormatType(iids_to_names) : String.Format("{0}*", Type.FormatType(iids_to_names));
+                ? Type.FormatType(context) : String.Format("{0}*", Type.FormatType(context));
 
             if (attributes.Count > 0)
             {
@@ -960,13 +1090,42 @@ namespace OleViewDotNet
         }
     }
 
+    public class NdrFormatContext
+    {
+        public IDictionary<Guid, string> IidsToNames { get; private set; }
+        public IDictionary<NdrBaseStructureTypeReference, string> StructsToNames { get; private set; }
+
+        public NdrFormatContext(IDictionary<Guid, string> iids_to_names, 
+            IDictionary<NdrBaseStructureTypeReference, string> structs_to_names)
+        {
+            IidsToNames = iids_to_names;
+            StructsToNames = structs_to_names;
+        }
+    }
+
+    internal class NdrParseContext
+    {
+        public Dictionary<IntPtr, NdrBaseTypeReference> TypeCache { get; private set; }
+        public bool IsRobust { get; private set; }
+        public MIDL_STUB_DESC StubDesc { get; private set; }
+        public IntPtr TypeDesc { get; private set; }        
+
+        internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, bool is_robust)
+        {
+            TypeCache = type_cache;
+            StubDesc = stub_desc;
+            TypeDesc = type_desc;
+            IsRobust = is_robust;
+        }
+    }
+
     public class NdrProcedureDefinition
     {
         public NdrProcedureParameter[] Params { get; private set; }
         public NdrProcedureParameter ReturnValue { get; private set; }
         public int ProcNum { get; private set; }
 
-        public string FormatProcedure(IDictionary<Guid, string> iids_to_names)
+        public string FormatProcedure(NdrFormatContext context)
         {
             string return_value;
 
@@ -980,11 +1139,11 @@ namespace OleViewDotNet
             }
             else
             {
-                return_value = ReturnValue.Type.FormatType(iids_to_names);
+                return_value = ReturnValue.Type.FormatType(context);
             }
 
             return String.Format("{0} Proc{1}({2});", return_value,
-                ProcNum, string.Join(", ", Params.Select((p, i) => String.Format("{0} p{1}", p.Format(iids_to_names), i))));
+                ProcNum, string.Join(", ", Params.Select((p, i) => String.Format("/* Stack Offset: {0} */ {1} p{2}", p.Offset, p.Format(context), i))));
         }
         
         internal NdrProcedureDefinition(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr proc_desc, IntPtr type_desc)
@@ -1006,13 +1165,19 @@ namespace OleViewDotNet
                 throw new ArgumentException("HandleType must be FC_AUTO_HANDLE");
             }
             ProcNum = header.ProcNum;
-
+            NdrProcHeaderExts exts = new NdrProcHeaderExts();
             if ((header.Oi2Flags & NdrInterpreterOptFlags.HasExtensions) == NdrInterpreterOptFlags.HasExtensions)
             {
                 // Just ignore extensions.
-                byte ext_size = Marshal.ReadByte(proc_desc);
+                int ext_size = Marshal.ReadByte(proc_desc);
+                if (Marshal.SizeOf(typeof(NdrProcHeaderExts)) <= ext_size)
+                {
+                    exts = Marshal.PtrToStructure<NdrProcHeaderExts>(proc_desc);
+                }
                 proc_desc += ext_size;
             }
+
+            NdrParseContext context = new NdrParseContext(type_cache, stub_desc, type_desc, (exts.Flags2 & NdrInterpreterOptFlags2.HasNewCorrDesc) != 0);
 
             List<NdrProcedureParameter> ps = new List<NdrProcedureParameter>();
 
@@ -1022,12 +1187,12 @@ namespace OleViewDotNet
             int param_count = has_return ? header.NumberParams - 1 : header.NumberParams;
             for (int param = 0; param < param_count; ++param)
             {
-                ps.Add(new NdrProcedureParameter(type_cache, stub_desc, reader, type_desc));
+                ps.Add(new NdrProcedureParameter(context, reader));
             }
             Params = ps.ToArray();
             if (has_return)
             {
-                ReturnValue = new NdrProcedureParameter(type_cache, stub_desc, reader, type_desc);
+                ReturnValue = new NdrProcedureParameter(context, reader);
             }
         }
     }
