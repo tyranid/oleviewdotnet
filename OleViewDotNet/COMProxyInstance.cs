@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -186,15 +187,32 @@ namespace OleViewDotNet
             return procs.ToArray();
         }
 
-        public COMProxyInstance(string path)
+        private static IntPtr FindProxyDllInfo(SafeLibraryHandle lib)
         {
-            using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(path))
+            try
             {
-                List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
                 GetProxyDllInfo get_proxy_dllinfo = lib.GetFunctionPointer<GetProxyDllInfo>();
                 IntPtr pInfo;
                 IntPtr pId;
                 get_proxy_dllinfo(out pInfo, out pId);
+                return pInfo;
+            }
+            catch (Win32Exception)
+            {
+                return IntPtr.Zero;
+            }
+        }
+
+        public COMProxyInstance(COMCLSIDEntry clsid)
+        {
+            using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(clsid.Server))
+            {
+                List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
+                IntPtr pInfo = FindProxyDllInfo(lib);
+                if (pInfo == IntPtr.Zero)
+                {
+                    throw new ArgumentException("Can't find proxy information in server DLL");
+                }
 
                 foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
                 {

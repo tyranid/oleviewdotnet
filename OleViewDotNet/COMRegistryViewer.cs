@@ -65,7 +65,8 @@ namespace OleViewDotNet
             AppIDsWithIL,
             MimeTypes,
             AppIDsWithAC,
-        }        
+            ProxyCLSIDs,
+        }
 
         /// <summary>
         /// Current display mode
@@ -151,6 +152,8 @@ namespace OleViewDotNet
                         break;
                     case DisplayMode.MimeTypes:
                         LoadMimeTypes();
+                        break;
+                    case DisplayMode.ProxyCLSIDs:
                         break;
                     default:
                         break;
@@ -1427,7 +1430,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMProxyInstance proxy = new COMProxyInstance(clsid.Server);
+                        COMProxyInstance proxy = new COMProxyInstance(clsid);
                         Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, clsid.Name, proxy, selected_iid));
                     }
                     catch (Exception ex)
