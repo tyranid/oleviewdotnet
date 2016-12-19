@@ -29,11 +29,13 @@ using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
+    [Flags]
     public enum COMServerType
     {
-        UnknownServer,
-        InProcServer32,
-        LocalServer32,
+        UnknownServer = 0,
+        InProcServer32 = 1,
+        LocalServer32 = 2,
+        InProcAndLocalServer = InProcServer32 | LocalServer32
     }
 
     public enum COMThreadingModel
@@ -106,7 +108,7 @@ namespace OleViewDotNet
 
             return filename.Trim();
         }
-
+        
         private void LoadFromKey(RegistryKey key)
         {
             HashSet<Guid> categories = new HashSet<Guid>();

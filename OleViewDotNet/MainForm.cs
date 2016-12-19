@@ -580,5 +580,10 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private void menuRegistryInterfaceProxies_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.ProxyCLSIDs);
+        }
     }
 }

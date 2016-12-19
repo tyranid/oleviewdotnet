@@ -154,6 +154,7 @@ namespace OleViewDotNet
                         LoadMimeTypes();
                         break;
                     case DisplayMode.ProxyCLSIDs:
+                        LoadCLSIDByServer(ServerType.Proxies);
                         break;
                     default:
                         break;
@@ -291,7 +292,7 @@ namespace OleViewDotNet
             treeComRegistry.Nodes.AddRange(clsidNodes);
             Text = "CLSIDs";            
         }
-
+        
         private void LoadProgIDs()
         {
             int i = 0;
@@ -332,15 +333,21 @@ namespace OleViewDotNet
         {
             None,
             Local,
-            Surrogate
+            Surrogate,
+            Proxies,
+        }
+
+        private bool IsProxyClsid(COMCLSIDEntry ent)
+        {
+            return ent.ServerType == COMServerType.InProcServer32 && m_registry.GetProxiesForClsid(ent).Count() > 0;
         }
 
         private void LoadCLSIDByServer(ServerType serverType)
         {            
             int i = 0;
             IDictionary<string, List<COMCLSIDEntry>> dict;
-            
-            if(serverType == ServerType.Local)
+
+            if (serverType == ServerType.Local)
             {
                 Text = "CLSIDs by Local Server";
                 dict = m_registry.ClsidsByLocalServer;
@@ -350,11 +357,20 @@ namespace OleViewDotNet
                 Text = "CLSIDs With Surrogate";
                 dict = m_registry.ClsidsWithSurrogate;
             }
-            else
+            else if (serverType == ServerType.None)
             {
                 Text = "CLSIDs by Server";
                 dict = m_registry.ClsidsByServer;
-            } 
+            }
+            else if (serverType == ServerType.Proxies)
+            {
+                Text = "Proxy CLSIDs By Server";
+                dict = m_registry.ClsidsByServer.Where(p => p.Value.Any(c => IsProxyClsid(c))).ToDictionary(p => p.Key, p => p.Value.Where(c => IsProxyClsid(c)).ToList());
+            }
+            else
+            {
+                throw new ArgumentException(nameof(serverType));
+            }
             
             TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
             foreach (KeyValuePair<string, List<COMCLSIDEntry>> pair in dict)
