@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq;
 
 namespace OleViewDotNet
 {
@@ -165,7 +166,7 @@ namespace OleViewDotNet
 
         public IEnumerable<NdrBaseStructureTypeReference> Structures { get; private set; }
 
-        private NdrProcedureDefinition[] ReadProcs(Guid base_iid, CInterfaceStubHeader stub)
+        private NdrProcedureDefinition[] ReadProcs(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, Guid base_iid, CInterfaceStubHeader stub)
         {
             MIDL_SERVER_INFO server_info = stub.GetServerInfo();
             MIDL_STUB_DESC stub_desc = server_info.GetStubDesc();
@@ -182,7 +183,7 @@ namespace OleViewDotNet
                 int fmt_ofs = Marshal.ReadInt16(server_info.FmtStringOffset, start_ofs * 2);
                 if (fmt_ofs >= 0)
                 {
-                    procs.Add(new NdrProcedureDefinition(stub_desc, server_info.ProcString + fmt_ofs, type_desc));
+                    procs.Add(new NdrProcedureDefinition(type_cache, stub_desc, server_info.ProcString + fmt_ofs, type_desc));
                 }
                 start_ofs++;
             }
@@ -216,19 +217,24 @@ namespace OleViewDotNet
                     throw new ArgumentException("Can't find proxy information in server DLL");
                 }
 
+                List<NdrBaseStructureTypeReference> structs = new List<NdrBaseStructureTypeReference>();
+
                 foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
                 {
                     string[] names = file_info.GetNames();
                     CInterfaceStubHeader[] stubs = file_info.GetStubs();
                     Guid[] base_iids = file_info.GetBaseIids();
-
+                    Dictionary<IntPtr, NdrBaseTypeReference> type_cache 
+                        = new Dictionary<IntPtr, NdrBaseTypeReference>();
                     for (int i = 0; i < names.Length; ++i)
                     {
                         entries.Add(new COMProxyInstanceEntry(names[i], stubs[i].GetIid(),
-                            base_iids[i], stubs[i].DispatchTableCount, ReadProcs(base_iids[i], stubs[i])));
+                            base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
                     }
+                    structs.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
                 }
-                Entries = entries;
+                Entries = entries.AsReadOnly();
+                Structures = structs.AsReadOnly();
             }
         }
 
