@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Linq;
+using System.Text;
 
 namespace OleViewDotNet
 {
@@ -525,12 +526,17 @@ namespace OleViewDotNet
             MemberType = member_type;
             Offset = offset;
         }
+
+        public string FormatMember(NdrFormatContext context)
+        {
+            return String.Format("/* Offset: {0} */ {1}", Offset, MemberType.FormatType(context));
+        }
     }
     
     public class NdrBaseStructureTypeReference : NdrBaseTypeReference
     {
         protected List<NdrBaseTypeReference> _members;
-
+        public int Alignment { get; private set; }
         public int MemorySize { get; private set; }
 
         private IEnumerable<NdrStructureMember> GetMembers()
@@ -553,8 +559,7 @@ namespace OleViewDotNet
         internal NdrBaseStructureTypeReference(NdrFormatCharacter format, BinaryReader reader)
             : base(format)
         {
-            // Padding.
-            reader.ReadByte();
+            Alignment = reader.ReadByte();
             MemorySize = reader.ReadUInt16();
             _members = new List<NdrBaseTypeReference>();
         }
@@ -576,6 +581,18 @@ namespace OleViewDotNet
             }
             return base.FormatType(context);
         }
+
+        public virtual string FormatStruct(NdrFormatContext context)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(FormatType(context)).AppendLine(" {");
+            foreach (var member in Members.Select((m, i) => String.Format("{0} Member{1}", m.FormatMember(context), i)))
+            {
+                builder.Append("    ").AppendLine(member);
+            }
+            builder.AppendLine("};");
+            return builder.ToString();
+        }
     }    
 
     public class NdrSimpleStructureTypeReference : NdrBaseStructureTypeReference
@@ -592,9 +609,36 @@ namespace OleViewDotNet
         internal NdrConformantStructureTypeReference(NdrParseContext context, BinaryReader reader)
             : base(NdrFormatCharacter.FC_STRUCT, reader)
         {
-            NdrBaseTypeReference array = NdrBaseTypeReference.Read(context, ReadTypeOffset(reader));
+            NdrBaseTypeReference array = Read(context, ReadTypeOffset(reader));
             ReadMemberInfo(context, reader);
-            _members.Add(array);
+            if (array.Format != NdrFormatCharacter.FC_ZERO)
+            {
+                _members.Add(array);
+            }
+        }
+    }
+
+    public class NdrBogusStructureTypeReference : NdrBaseStructureTypeReference
+    {
+        internal NdrBogusStructureTypeReference(NdrParseContext context, BinaryReader reader) 
+            : base(NdrFormatCharacter.FC_BOGUS_STRUCT, reader)
+        {
+            NdrBaseTypeReference array = Read(context, ReadTypeOffset(reader));
+            BinaryReader pointer_reader = GetReader(context, ReadTypeOffset(reader));
+            ReadMemberInfo(context, reader);
+
+            for (int i = 0; i < _members.Count; ++i)
+            {
+                if (_members[i].Format == NdrFormatCharacter.FC_POINTER)
+                {
+                    _members[i] = Read(context, reader);
+                }
+            }
+
+            if (array.Format != NdrFormatCharacter.FC_ZERO)
+            {
+                _members.Add(array);
+            }
         }
     }
 
@@ -679,6 +723,75 @@ namespace OleViewDotNet
                 default:
                     throw new InvalidOperationException("Format must be a padding character");
             }
+        }
+    }
+
+    public class NdrPointerInfoInstance
+    {
+        public int OffsetInMemory { get; private set; }
+        public int OffsetInBuffer { get; private set; }
+        public NdrPointerTypeReference PointerType { get; private set; }
+
+        internal NdrPointerInfoInstance(NdrParseContext context, BinaryReader reader)
+        {
+            OffsetInMemory = reader.ReadInt16();
+            OffsetInBuffer = reader.ReadInt16();
+            PointerType = NdrBaseTypeReference.Read(context, reader) as NdrPointerTypeReference;
+        }
+    }
+
+    public class NdrPointerInfoTypeReference : NdrBaseTypeReference
+    {
+        public NdrFormatCharacter BasePointerType { get; private set; }
+        public NdrFormatCharacter SubPointerType { get; private set; }
+        public int Iterations { get; private set; }
+        public int Increment { get; private set; }
+        public int OffsetToArray { get; private set; }
+        public IEnumerable<NdrPointerInfoInstance> PointerInstances { get; private set; }
+
+        private IEnumerable<NdrPointerInfoInstance> ReadComplex(NdrParseContext context, BinaryReader reader, bool has_interations)
+        {
+            if (has_interations)
+            {
+                Iterations = reader.ReadInt16();
+            }
+
+            Increment = reader.ReadInt16();
+            OffsetToArray = reader.ReadInt16();
+            int num_of_pointers = reader.ReadInt16();
+            while (num_of_pointers > 0)
+            {
+                yield return new NdrPointerInfoInstance(context, reader);
+                num_of_pointers--;
+            }
+        }
+
+        internal NdrPointerInfoTypeReference(NdrParseContext context, BinaryReader reader) 
+            : base(NdrFormatCharacter.FC_PP)
+        {
+            List<NdrPointerInfoInstance> instances = new List<NdrPointerInfoInstance>();
+            reader.ReadByte(); // Padding.
+            BasePointerType = (NdrFormatCharacter)reader.ReadByte();
+            SubPointerType = (NdrFormatCharacter)reader.ReadByte();
+            
+            switch (BasePointerType)
+            {
+                case NdrFormatCharacter.FC_NO_REPEAT:
+                    instances.Add(new NdrPointerInfoInstance(context, reader));
+                    break;
+                case NdrFormatCharacter.FC_FIXED_REPEAT:
+                    instances.AddRange(ReadComplex(context, reader, true));
+                    break;
+                case NdrFormatCharacter.FC_VARIABLE_REPEAT:
+                    instances.AddRange(ReadComplex(context, reader, false));
+                    break;
+            }
+
+            while ((NdrFormatCharacter)reader.ReadByte() != NdrFormatCharacter.FC_END)
+            {
+            }
+
+            PointerInstances = instances;
         }
     }
 
@@ -981,8 +1094,10 @@ namespace OleViewDotNet
                         return FixupSimpleStructureType(new NdrSimpleStructureTypeReference(context, reader));
                     case NdrFormatCharacter.FC_CSTRUCT:
                         return new NdrConformantStructureTypeReference(context, reader);
+                    case NdrFormatCharacter.FC_BOGUS_STRUCT:
+                        return new NdrBogusStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_PP:
-                        throw new InvalidOperationException("Parser doesn't support pointer_info.");
+                        return new NdrPointerInfoTypeReference(context, reader);
                     case NdrFormatCharacter.FC_SMFARRAY:
                     case NdrFormatCharacter.FC_LGFARRAY:
                         return new NdrSimpleArrayTypeReference(context, format, reader);
@@ -1009,6 +1124,14 @@ namespace OleViewDotNet
             }
         }
 
+        internal static BinaryReader GetReader(NdrParseContext context, int ofs)
+        {
+            UnmanagedMemoryStream stm = new UnmanagedMemoryStream(
+                new SafeBufferWrapper(context.TypeDesc), 0, int.MaxValue);
+            stm.Position = ofs;
+            return new BinaryReader(stm);
+        }
+
         internal static NdrBaseTypeReference Read(NdrParseContext context, int ofs)
         {
             IntPtr type_ofs = context.TypeDesc + ofs;
@@ -1020,11 +1143,8 @@ namespace OleViewDotNet
             // Add a pending refence type, this is used only if the current type refers to itself (or indirectly).
             NdrIndirectTypeReference ref_type = new NdrIndirectTypeReference();
             context.TypeCache.Add(type_ofs, ref_type);
-
-            UnmanagedMemoryStream stm = new UnmanagedMemoryStream(new SafeBufferWrapper(context.TypeDesc), 0, int.MaxValue);
-            stm.Position = ofs;
-            BinaryReader reader = new BinaryReader(stm);
-            NdrBaseTypeReference ret = Read(context, reader);
+            
+            NdrBaseTypeReference ret = Read(context, GetReader(context, ofs));
             ref_type.FixupType(ret);
             // Replace type cache entry with real value.
             context.TypeCache[type_ofs] = ret;
