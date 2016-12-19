@@ -163,6 +163,8 @@ namespace OleViewDotNet
 
         public IEnumerable<COMProxyInstanceEntry> Entries { get; private set; }
 
+        public IEnumerable<NdrBaseStructureTypeReference> Structures { get; private set; }
+
         private NdrProcedureDefinition[] ReadProcs(Guid base_iid, CInterfaceStubHeader stub)
         {
             MIDL_SERVER_INFO server_info = stub.GetServerInfo();
@@ -203,9 +205,9 @@ namespace OleViewDotNet
             }
         }
 
-        public COMProxyInstance(COMCLSIDEntry clsid)
+        public COMProxyInstance(string path, IEnumerable<Guid> supported_iids)
         {
-            using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(clsid.Server))
+            using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(path))
             {
                 List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
                 IntPtr pInfo = FindProxyDllInfo(lib);
@@ -222,12 +224,16 @@ namespace OleViewDotNet
 
                     for (int i = 0; i < names.Length; ++i)
                     {
-                        entries.Add(new COMProxyInstanceEntry(names[i], stubs[i].GetIid(), 
+                        entries.Add(new COMProxyInstanceEntry(names[i], stubs[i].GetIid(),
                             base_iids[i], stubs[i].DispatchTableCount, ReadProcs(base_iids[i], stubs[i])));
                     }
                 }
                 Entries = entries;
             }
+        }
+
+        public COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.Server, new Guid[0])
+        {
         }
     }
 }
