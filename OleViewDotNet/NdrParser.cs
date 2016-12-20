@@ -698,6 +698,11 @@ namespace OleViewDotNet
         {
             return TotalSize;
         }
+
+        public override string FormatType(NdrFormatContext context)
+        {
+            return String.Format("{0}[{1}]", ElementType.FormatType(context), TotalSize);
+        }
     }
 
     public class NdrConformantArrayTypeReference : NdrBaseArrayTypeReference
@@ -710,6 +715,22 @@ namespace OleViewDotNet
         {
             ElementSize = reader.ReadInt16();
             ConformanceDescriptor = new NdrCorrelationDescriptor(context, reader);
+            ReadElementType(context, reader);
+        }
+    }
+
+    public class NdrBogusArrayTypeReference : NdrBaseArrayTypeReference
+    {
+        public int NumberofElements { get; private set; }
+        public NdrCorrelationDescriptor ConformanceDescriptor { get; private set; }
+        public NdrCorrelationDescriptor VarianceDescriptor { get; private set; }
+
+        internal NdrBogusArrayTypeReference(NdrParseContext context, BinaryReader reader) 
+            : base(context, NdrFormatCharacter.FC_BOGUS_ARRAY, reader)
+        {
+            NumberofElements = reader.ReadInt16();
+            ConformanceDescriptor = new NdrCorrelationDescriptor(context, reader);
+            VarianceDescriptor = new NdrCorrelationDescriptor(context, reader);
             ReadElementType(context, reader);
         }
     }
@@ -1125,6 +1146,8 @@ namespace OleViewDotNet
                         return new NdrSimpleArrayTypeReference(context, format, reader);
                     case NdrFormatCharacter.FC_CARRAY:
                         return new NdrConformantArrayTypeReference(context, reader);
+                    case NdrFormatCharacter.FC_BOGUS_ARRAY:
+                        return new NdrBogusArrayTypeReference(context, reader);
                     case NdrFormatCharacter.FC_RANGE:
                         return new NdrRangeTypeReference(reader);
                     // Skipping padding types.
