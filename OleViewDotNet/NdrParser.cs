@@ -670,9 +670,15 @@ namespace OleViewDotNet
             ElementType = Read(context, reader);
         }
 
+        protected virtual int GetArraySize()
+        {
+            return 0;
+        }
+
         public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("{0}[]", ElementType.FormatType(context));
+            int array_size = GetArraySize();
+            return String.Format("{0}[{1}]", ElementType.FormatType(context), array_size == 0 ? String.Empty : array_size.ToString());
         }
     }
 
@@ -699,9 +705,9 @@ namespace OleViewDotNet
             return TotalSize;
         }
 
-        public override string FormatType(NdrFormatContext context)
+        protected override int GetArraySize()
         {
-            return String.Format("{0}[{1}]", ElementType.FormatType(context), TotalSize);
+            return TotalSize;
         }
     }
 
@@ -709,12 +715,17 @@ namespace OleViewDotNet
     {
         public int ElementSize { get; private set; }
         public NdrCorrelationDescriptor ConformanceDescriptor { get; private set; }
+        public NdrCorrelationDescriptor VarianceDescriptor { get; private set; }
 
-        internal NdrConformantArrayTypeReference(NdrParseContext context, 
-            BinaryReader reader) : base(context, NdrFormatCharacter.FC_CARRAY, reader)
+        internal NdrConformantArrayTypeReference(NdrFormatCharacter format, NdrParseContext context, 
+            BinaryReader reader) : base(context, format, reader)
         {
             ElementSize = reader.ReadInt16();
             ConformanceDescriptor = new NdrCorrelationDescriptor(context, reader);
+            if (format == NdrFormatCharacter.FC_CVARRAY)
+            {
+                VarianceDescriptor = new NdrCorrelationDescriptor(context, reader);
+            }
             ReadElementType(context, reader);
         }
     }
@@ -732,6 +743,16 @@ namespace OleViewDotNet
             ConformanceDescriptor = new NdrCorrelationDescriptor(context, reader);
             VarianceDescriptor = new NdrCorrelationDescriptor(context, reader);
             ReadElementType(context, reader);
+        }
+
+        protected override int GetArraySize()
+        {
+            return NumberofElements;
+        }
+
+        public override int GetSize()
+        {
+            return NumberofElements * ElementType.GetSize();
         }
     }
 
@@ -1145,7 +1166,8 @@ namespace OleViewDotNet
                     case NdrFormatCharacter.FC_LGFARRAY:
                         return new NdrSimpleArrayTypeReference(context, format, reader);
                     case NdrFormatCharacter.FC_CARRAY:
-                        return new NdrConformantArrayTypeReference(context, reader);
+                    case NdrFormatCharacter.FC_CVARRAY:
+                        return new NdrConformantArrayTypeReference(format, context, reader);
                     case NdrFormatCharacter.FC_BOGUS_ARRAY:
                         return new NdrBogusArrayTypeReference(context, reader);
                     case NdrFormatCharacter.FC_RANGE:
