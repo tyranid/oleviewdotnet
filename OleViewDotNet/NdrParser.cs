@@ -186,6 +186,10 @@ namespace OleViewDotNet
         ServerCorrCheck     = 0x04,
         HasNotify           = 0x08,
         HasNotify2          = 0x10,
+        Unknown20           = 0x20,
+        ExtendedCorrDesc    = 0x40,
+        Unknown80           = 0x80,
+        Valid = HasNewCorrDesc | ClientCorrCheck | ServerCorrCheck | HasNotify | HasNotify2 | ExtendedCorrDesc
     }
     
     [StructLayout(LayoutKind.Sequential)]
@@ -279,10 +283,13 @@ namespace OleViewDotNet
             byte op_byte = reader.ReadByte();
             int offset = reader.ReadInt16();
             byte flags = 0;
-            if (context.IsRobust)
+            if (context.DescSize > 4)
             {
                 flags = reader.ReadByte();
                 reader.ReadByte();
+
+                // Read padding.
+                reader.ReadAll(context.DescSize - 6);
             }
 
             if (type_byte != 0xFF || op_byte != 0xFF || offset != -1)
@@ -617,7 +624,7 @@ namespace OleViewDotNet
     public class NdrConformantStructureTypeReference : NdrBaseStructureTypeReference
     {
         internal NdrConformantStructureTypeReference(NdrParseContext context, BinaryReader reader)
-            : base(NdrFormatCharacter.FC_STRUCT, reader)
+            : base(NdrFormatCharacter.FC_CSTRUCT, reader)
         {
             NdrBaseTypeReference array = Read(context, ReadTypeOffset(reader));
             ReadMemberInfo(context, reader);
@@ -1298,16 +1305,18 @@ namespace OleViewDotNet
     internal class NdrParseContext
     {
         public Dictionary<IntPtr, NdrBaseTypeReference> TypeCache { get; private set; }
-        public bool IsRobust { get; private set; }
+        //public bool IsRobust { get; private set; }
         public MIDL_STUB_DESC StubDesc { get; private set; }
         public IntPtr TypeDesc { get; private set; }        
+        public int DescSize { get; private set; }
 
-        internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, bool is_robust)
+        internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, int desc_size)//, bool is_robust)
         {
             TypeCache = type_cache;
             StubDesc = stub_desc;
             TypeDesc = type_desc;
-            IsRobust = is_robust;
+            DescSize = desc_size;
+            //IsRobust = is_robust;
         }
     }
 
@@ -1369,7 +1378,17 @@ namespace OleViewDotNet
                 proc_desc += ext_size;
             }
 
-            NdrParseContext context = new NdrParseContext(type_cache, stub_desc, type_desc, (exts.Flags2 & NdrInterpreterOptFlags2.HasNewCorrDesc) != 0);
+            if ((exts.Flags2 & ~NdrInterpreterOptFlags2.Valid) != 0)
+            {
+                System.Diagnostics.Trace.WriteLine(exts.Flags2.ToString());
+            }
+
+            int desc_size = (exts.Flags2 & NdrInterpreterOptFlags2.HasNewCorrDesc) != 0 ? 6 : 4;
+            if ((exts.Flags2 & NdrInterpreterOptFlags2.ExtendedCorrDesc) != 0)
+            {
+                desc_size = 16;
+            }
+            NdrParseContext context = new NdrParseContext(type_cache, stub_desc, type_desc, desc_size);
 
             List<NdrProcedureParameter> ps = new List<NdrProcedureParameter>();
 
