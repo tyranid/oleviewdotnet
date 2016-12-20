@@ -1286,8 +1286,8 @@ namespace OleViewDotNet
                         return new NdrConformantStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_BOGUS_STRUCT:
                         return new NdrBogusStructureTypeReference(context, reader);
-                    case NdrFormatCharacter.FC_HARD_STRUCT:
-                        return new NdrHardStructureTypeReference(context, reader);
+                    //case NdrFormatCharacter.FC_HARD_STRUCT:
+                    //    return new NdrHardStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_PP:
                         return new NdrPointerInfoTypeReference(context, reader);
                     case NdrFormatCharacter.FC_SMFARRAY:
