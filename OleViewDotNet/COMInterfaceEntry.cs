@@ -47,7 +47,7 @@ namespace OleViewDotNet
             string name = key.GetValue(null) as string;
             if (!String.IsNullOrWhiteSpace(name))
             {
-                Name = name.ToString();
+                Name = COMUtilities.DemangleWinRTName(name.ToString());
                 m_iidtoname.TryAdd(Iid, Name);
             }
             else

@@ -283,13 +283,13 @@ namespace OleViewDotNet
             byte op_byte = reader.ReadByte();
             int offset = reader.ReadInt16();
             byte flags = 0;
-            if (context.DescSize > 4)
+            if (context.CorrDescSize > 4)
             {
                 flags = reader.ReadByte();
                 reader.ReadByte();
 
                 // Read padding.
-                reader.ReadAll(context.DescSize - 6);
+                reader.ReadAll(context.CorrDescSize - 6);
             }
 
             if (type_byte != 0xFF || op_byte != 0xFF || offset != -1)
@@ -354,7 +354,7 @@ namespace OleViewDotNet
             }
             else
             {
-                return String.Format("/* iis_is param offset: {0} */ IUnknown*", IidIsDescriptor.Offset);
+                return String.Format("/* iid_is param offset: {0} */ IUnknown*", IidIsDescriptor.Offset);
             }
         }
     }
@@ -471,11 +471,36 @@ namespace OleViewDotNet
 
     public enum NdrKnownTypes
     {
+        None,
+
+        // OLEAUT32
         BSTR,
         LPSAFEARRAY,
         VARIANT,
         HWND,
         GUID,
+
+        // OLE32
+        HENHMETAFILE,
+        HMETAFILEPICT,
+        HMETAFILE,
+        SNB,
+        STGMEDIUM,
+
+        // COMBASE
+        CLIPFORMAT,
+        HACCEL,
+        HBITMAP,
+        HBRUSH,
+        HDC,
+        HGLOBAL,
+        HICON,
+        HMENU,
+        HMONITOR,
+        HPALETTE,
+        HRGN,
+        HSTRING,
+        WdtpInterfacePointer,
     }
 
     public class NdrKnownTypeReference : NdrBaseTypeReference
@@ -502,11 +527,31 @@ namespace OleViewDotNet
                 case NdrKnownTypes.BSTR:
                 case NdrKnownTypes.LPSAFEARRAY:
                 case NdrKnownTypes.HWND:
+                case NdrKnownTypes.HENHMETAFILE:
+                case NdrKnownTypes.HMETAFILEPICT:
+                case NdrKnownTypes.HMETAFILE:
+                case NdrKnownTypes.HACCEL:
+                case NdrKnownTypes.HBITMAP:
+                case NdrKnownTypes.HBRUSH:
+                case NdrKnownTypes.HDC:
+                case NdrKnownTypes.HGLOBAL:
+                case NdrKnownTypes.HICON:
+                case NdrKnownTypes.HMENU:
+                case NdrKnownTypes.HMONITOR:
+                case NdrKnownTypes.HPALETTE:
+                case NdrKnownTypes.HRGN:
+                case NdrKnownTypes.HSTRING:
+                case NdrKnownTypes.WdtpInterfacePointer:
                     return IntPtr.Size;
                 case NdrKnownTypes.VARIANT:
                     return Environment.Is64BitProcess ? 24 : 16;
+                case NdrKnownTypes.SNB:
+                case NdrKnownTypes.CLIPFORMAT:
+                    return 4;
+                case NdrKnownTypes.STGMEDIUM:
+                    return Environment.Is64BitProcess ? 24 : 12;
                 default:
-                    throw new InvalidOperationException("Invalid known type");
+                    throw new ArgumentException("Unknown Known Type");
             }
         }
     }
@@ -659,6 +704,26 @@ namespace OleViewDotNet
             {
                 _members.Add(array);
             }
+        }
+    }
+
+    public class NdrHardStructureTypeReference : NdrBaseStructureTypeReference
+    {
+        public int EnumOffset { get; private set; }
+        public int CopySize { get; private set; }
+        public int MemCopyIncr { get; private set; }
+        public int UnionDescOffset { get; private set; }
+
+        internal NdrHardStructureTypeReference(NdrParseContext context, BinaryReader reader) 
+            : base(NdrFormatCharacter.FC_HARD_STRUCT, reader)
+        {
+            // Reserved.
+            reader.ReadInt32();
+            EnumOffset = reader.ReadInt16();
+            //CopySize = reader.ReadInt16();
+            //MemCopyIncr = reader.ReadInt16();
+            UnionDescOffset = reader.ReadInt16();
+            ReadMemberInfo(context, reader);
         }
     }
 
@@ -977,30 +1042,77 @@ namespace OleViewDotNet
             return (NdrFormatCharacter)reader.ReadByte();
         }
 
+        private class StandardUserMarshaler
+        {
+            public NdrKnownTypes KnownType { get; private set; }
+            public bool IsMatch(IntPtr ptr)
+            {
+                return ptr == _size_ptr || ptr == _size_64_ptr;
+            }
+
+            public StandardUserMarshaler(SafeLibraryHandle lib, NdrKnownTypes known_type)
+            {
+                _size_ptr = lib.GetFunctionPointer(String.Format("{0}_UserSize", known_type));
+                _size_64_ptr = lib.GetFunctionPointer(String.Format("{0}_UserSize64", known_type));
+                KnownType = known_type;
+            }
+
+            private IntPtr _size_ptr;
+            private IntPtr _size_64_ptr;
+        }
+
         private class StandardUserMarshalers
         {
-            public IntPtr BSTR_UserSizePtr;
-            public IntPtr BSTR_UserSize64Ptr;
-            public IntPtr VARIANT_UserSizePtr;
-            public IntPtr VARIANT_UserSize64Ptr;
-            public IntPtr LPSAFEARRAY_UserSizePtr;
-            public IntPtr LPSAFEARRAY_UserSize64Ptr;
-            public IntPtr HWND_UserSizePtr;
-            public IntPtr HWND_UserSize64Ptr;
+            List<StandardUserMarshaler> _marshalers;
 
             public StandardUserMarshalers()
             {
+                _marshalers = new List<StandardUserMarshaler>();
                 using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary("oleaut32.dll"))
                 {
-                    BSTR_UserSizePtr = lib.GetFunctionPointer("BSTR_UserSize");
-                    BSTR_UserSize64Ptr = lib.GetFunctionPointer("BSTR_UserSize64");
-                    VARIANT_UserSizePtr = lib.GetFunctionPointer("VARIANT_UserSize");
-                    VARIANT_UserSize64Ptr = lib.GetFunctionPointer("VARIANT_UserSize64");
-                    LPSAFEARRAY_UserSizePtr = lib.GetFunctionPointer("LPSAFEARRAY_UserSize");
-                    LPSAFEARRAY_UserSize64Ptr = lib.GetFunctionPointer("LPSAFEARRAY_UserSize64");
-                    HWND_UserSizePtr = lib.GetFunctionPointer("HWND_UserSize");
-                    HWND_UserSize64Ptr = lib.GetFunctionPointer("HWND_UserSize64");
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.BSTR));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.VARIANT));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.LPSAFEARRAY));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HWND));
                 }
+
+                using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary("ole32.dll"))
+                {
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HENHMETAFILE));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HMETAFILEPICT));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HMETAFILE));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.SNB));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.STGMEDIUM));
+                }
+
+                using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary("combase.dll"))
+                {
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.CLIPFORMAT));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HACCEL));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HBITMAP));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HBRUSH));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HDC));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HGLOBAL));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HICON));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HMENU));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HMONITOR));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HPALETTE));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HRGN));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.HSTRING));
+                    _marshalers.Add(new StandardUserMarshaler(lib, NdrKnownTypes.WdtpInterfacePointer));
+                }
+            }
+
+            public NdrKnownTypes GetKnownType(IntPtr ptr)
+            {
+                foreach (var marshaler in _marshalers)
+                {
+                    if (marshaler.IsMatch(ptr))
+                    {
+                        return marshaler.KnownType;
+                    }
+                }
+                return NdrKnownTypes.None;
             }
         }
 
@@ -1026,22 +1138,29 @@ namespace OleViewDotNet
                 }
 
                 IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), Marshal.ReadIntPtr(context.StubDesc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
-                if ((usersize_ptr == m_marshalers.BSTR_UserSizePtr) || (usersize_ptr == m_marshalers.BSTR_UserSize64Ptr))
+
+                NdrKnownTypes known_type = m_marshalers.GetKnownType(usersize_ptr);
+                if (known_type != NdrKnownTypes.None)
                 {
-                    return new NdrKnownTypeReference(NdrKnownTypes.BSTR);
+                    return new NdrKnownTypeReference(known_type);
                 }
-                if ((usersize_ptr == m_marshalers.VARIANT_UserSizePtr) || (usersize_ptr == m_marshalers.VARIANT_UserSize64Ptr))
-                {
-                    return new NdrKnownTypeReference(NdrKnownTypes.VARIANT);
-                }
-                if ((usersize_ptr == m_marshalers.LPSAFEARRAY_UserSizePtr) || (usersize_ptr == m_marshalers.LPSAFEARRAY_UserSize64Ptr))
-                {
-                    return new NdrKnownTypeReference(NdrKnownTypes.LPSAFEARRAY);
-                }
-                if ((usersize_ptr == m_marshalers.HWND_UserSizePtr) || (usersize_ptr == m_marshalers.HWND_UserSize64Ptr))
-                {
-                    return new NdrKnownTypeReference(NdrKnownTypes.HWND);
-                }
+
+                //if ((usersize_ptr == m_marshalers.BSTR_UserSizePtr) || (usersize_ptr == m_marshalers.BSTR_UserSize64Ptr))
+                //{
+                //    return new NdrKnownTypeReference(NdrKnownTypes.BSTR);
+                //}
+                //if ((usersize_ptr == m_marshalers.VARIANT_UserSizePtr) || (usersize_ptr == m_marshalers.VARIANT_UserSize64Ptr))
+                //{
+                //    return new NdrKnownTypeReference(NdrKnownTypes.VARIANT);
+                //}
+                //if ((usersize_ptr == m_marshalers.LPSAFEARRAY_UserSizePtr) || (usersize_ptr == m_marshalers.LPSAFEARRAY_UserSize64Ptr))
+                //{
+                //    return new NdrKnownTypeReference(NdrKnownTypes.LPSAFEARRAY);
+                //}
+                //if ((usersize_ptr == m_marshalers.HWND_UserSizePtr) || (usersize_ptr == m_marshalers.HWND_UserSize64Ptr))
+                //{
+                //    return new NdrKnownTypeReference(NdrKnownTypes.HWND);
+                //}
             }
             return type;
         }
@@ -1167,6 +1286,8 @@ namespace OleViewDotNet
                         return new NdrConformantStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_BOGUS_STRUCT:
                         return new NdrBogusStructureTypeReference(context, reader);
+                    case NdrFormatCharacter.FC_HARD_STRUCT:
+                        return new NdrHardStructureTypeReference(context, reader);
                     case NdrFormatCharacter.FC_PP:
                         return new NdrPointerInfoTypeReference(context, reader);
                     case NdrFormatCharacter.FC_SMFARRAY:
@@ -1305,18 +1426,16 @@ namespace OleViewDotNet
     internal class NdrParseContext
     {
         public Dictionary<IntPtr, NdrBaseTypeReference> TypeCache { get; private set; }
-        //public bool IsRobust { get; private set; }
         public MIDL_STUB_DESC StubDesc { get; private set; }
         public IntPtr TypeDesc { get; private set; }        
-        public int DescSize { get; private set; }
+        public int CorrDescSize { get; private set; }
 
         internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, int desc_size)//, bool is_robust)
         {
             TypeCache = type_cache;
             StubDesc = stub_desc;
             TypeDesc = type_desc;
-            DescSize = desc_size;
-            //IsRobust = is_robust;
+            CorrDescSize = desc_size;
         }
     }
 
@@ -1380,13 +1499,17 @@ namespace OleViewDotNet
 
             if ((exts.Flags2 & ~NdrInterpreterOptFlags2.Valid) != 0)
             {
-                System.Diagnostics.Trace.WriteLine(exts.Flags2.ToString());
+                //System.Diagnostics.Trace.WriteLine(exts.Flags2.ToString());
             }
 
-            int desc_size = (exts.Flags2 & NdrInterpreterOptFlags2.HasNewCorrDesc) != 0 ? 6 : 4;
-            if ((exts.Flags2 & NdrInterpreterOptFlags2.ExtendedCorrDesc) != 0)
+            int desc_size = 4;
+            if ((exts.Flags2 & NdrInterpreterOptFlags2.HasNewCorrDesc) != 0)
             {
-                desc_size = 16;
+                desc_size = 6;
+                if ((exts.Flags2 & NdrInterpreterOptFlags2.ExtendedCorrDesc) != 0)
+                {
+                    desc_size = 16;
+                }
             }
             NdrParseContext context = new NdrParseContext(type_cache, stub_desc, type_desc, desc_size);
 

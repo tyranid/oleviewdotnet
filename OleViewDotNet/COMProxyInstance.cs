@@ -137,7 +137,7 @@ namespace OleViewDotNet
         internal COMProxyInstanceEntry(COMProxyInstance instance, string name, Guid iid, Guid base_iid, int dispatch_count, NdrProcedureDefinition[] procs)
         {
             _instance = instance;
-            Name = name;
+            Name = COMUtilities.DemangleWinRTName(name);
             Iid = iid;
             BaseIid = base_iid == Guid.Empty ? COMInterfaceEntry.IID_IUnknown : base_iid;
             DispatchCount = dispatch_count;

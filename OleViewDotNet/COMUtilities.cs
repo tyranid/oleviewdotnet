@@ -1287,6 +1287,109 @@ namespace OleViewDotNet
 
             return GetTargetAddress(curr_module, ptr);
         }
+        
+        private static string GetNextToken(string name, out string token)
+        {
+            token = null;
+            if (name.Length == 0)
+            {
+                return name;
+            }
+            int end_index = name.IndexOf('_');
+            if (end_index < 0)
+            {
+                token = name;
+            }
+            else
+            {
+                token = name.Substring(0, end_index);
+            }
+            return name.Substring(end_index + 1).TrimStart('_');
+        }
+
+        private static string GetNextToken(string name, out int token)
+        {
+            if (name.Length == 0 || !char.IsDigit(name[0]))
+            {
+                throw new InvalidDataException("Expected an integer");
+            }
+            int length = 0;
+            while (char.IsDigit(name[length]))
+            {
+                length++;
+            }
+
+            token = int.Parse(name.Substring(0, length));
+
+            return name.Substring(length).TrimStart('_'); 
+        }
+
+        private static string ReadType(ref string name)
+        {
+            string token;
+            name = GetNextToken(name, out token);
+            if (String.IsNullOrEmpty(token))
+            {
+                throw new InvalidDataException("Expected a type name");
+            }
+
+            if (char.IsLetter(token[0]))
+            {
+                return token;
+            }
+            else if (token[0] == '~')
+            {
+                StringBuilder builder = new StringBuilder();
+                int type_count;
+
+                name = GetNextToken(name, out type_count);
+                builder.Append(token.Substring(1));
+                builder.Append("<");
+                List<string> types = new List<string>();
+                for (int i = 0; i < type_count; ++i)
+                {
+                    types.Add(ReadType(ref name));
+                }
+                builder.Append(String.Join(",", types));
+                builder.Append(">");
+                return builder.ToString();
+            }
+            else
+            {
+                throw new InvalidDataException("Expected a type name or a generic type");
+            }
+        }
+
+        private static string DemangleGenericType(string name)
+        {
+            name = name.Replace("__F", "~").Replace("__C", "::");
+            return ReadType(ref name);
+        }
+
+        // TODO: This isn't exactly correct, but can't find any good documentation.
+        internal static string DemangleWinRTName(string name)
+        {
+            name = name.Trim();
+            if (name.StartsWith("__x_"))
+            {
+                return name.Substring(4).Replace("_", "::");
+            }
+
+            if (name.StartsWith("__F"))
+            {
+                try
+                {
+                    return DemangleGenericType(name);
+                }
+                catch (InvalidDataException)
+                {
+                    System.Diagnostics.Trace.WriteLine(name);
+                }
+            }
+
+            return name;
+        }
+
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
