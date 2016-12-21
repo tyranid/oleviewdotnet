@@ -256,8 +256,24 @@ namespace OleViewDotNet
             }
         }
 
-        public COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.Server, new Guid[0])
+        private COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.Server, new Guid[0])
         {
+        }
+
+        private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
+
+        public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid)
+        {
+            if (m_proxies.ContainsKey(clsid.Clsid))
+            {
+                return m_proxies[clsid.Clsid];
+            }
+            else
+            {
+                COMProxyInstance proxy = new COMProxyInstance(clsid);
+                m_proxies[clsid.Clsid] = proxy;
+                return proxy;
+            }
         }
     }
 }

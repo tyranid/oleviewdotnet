@@ -1446,8 +1446,8 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMProxyInstance proxy = new COMProxyInstance(clsid);
-                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, clsid.Name, proxy, selected_iid));
+                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, 
+                            clsid.Name, COMProxyInstance.GetFromCLSID(clsid), selected_iid));
                     }
                     catch (Exception ex)
                     {
