@@ -249,8 +249,8 @@ namespace OleViewDotNet
                 }
 
                 string apartment = "s";
-                if (ent.ThreadingModel == COMThreadingModel.Both 
-                    || ent.ThreadingModel == COMThreadingModel.Free)
+                if (ent.DefaultThreadingModel == COMThreadingModel.Both 
+                    || ent.DefaultThreadingModel == COMThreadingModel.Free)
                 {
                     apartment = "m";
                 }

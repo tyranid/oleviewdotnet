@@ -180,7 +180,7 @@ namespace OleViewDotNet
 
             AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.ToString("B"));
             AppendFormatLine(strRet, "Name: {0}", ent.Name);
-            AppendFormatLine(strRet, "{0}: {1}", ent.ServerType.ToString(), ent.Server);
+            AppendFormatLine(strRet, "{0}: {1}", ent.DefaultServerType.ToString(), ent.DefaultServer);
             IEnumerable<string> progids = m_registry.GetProgIdsForClsid(ent.Clsid).Select(p => p.ProgID);
             if (progids.Count() > 0)
             {
@@ -339,7 +339,7 @@ namespace OleViewDotNet
 
         private bool IsProxyClsid(COMCLSIDEntry ent)
         {
-            return ent.ServerType == COMServerType.InProcServer32 && m_registry.GetProxiesForClsid(ent).Count() > 0;
+            return ent.DefaultServerType == COMServerType.InProcServer32 && m_registry.GetProxiesForClsid(ent).Count() > 0;
         }
 
         private void LoadCLSIDByServer(ServerType serverType)

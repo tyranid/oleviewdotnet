@@ -78,10 +78,10 @@ namespace OleViewDotNet
         {
             textBoxClsidName.Text = entry.Name;
             textBoxClsid.Text = entry.Clsid.ToString("B");
-            lblServerType.Text = "Server Type: " + entry.ServerType;
-            lblThreadingModel.Text = "Threading Model: " + entry.ThreadingModel;
-            textBoxServer.Text = entry.Server;
-            textBoxCmdLine.Text = GetStringValue(entry.CmdLine);
+            lblServerType.Text = "Server Type: " + entry.DefaultServerType;
+            lblThreadingModel.Text = "Threading Model: " + entry.DefaultThreadingModel;
+            textBoxServer.Text = entry.DefaultServer;
+            textBoxCmdLine.Text = GetStringValue(entry.DefaultCmdLine);
             textBoxTreatAs.Text = GetGuidValue(entry.TreatAs);
             btnTreatAsProps.Enabled = m_registry.Clsids.ContainsKey(entry.TreatAs);
             var progids = m_registry.Progids;
@@ -125,6 +125,21 @@ namespace OleViewDotNet
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
                 tabControlProperties.TabPages.Add(tabPageProxies);
+            }
+
+            if (entry.Servers.Count > 1)
+            {
+                foreach (COMCLSIDServerEntry server in entry.Servers.Values)
+                {
+                    ListViewItem item = listViewCLSIDServers.Items.Add(server.ServerType.ToString());
+                    item.SubItems.Add(server.Server);
+                    item.SubItems.Add(server.CommandLine);
+                    item.SubItems.Add(server.ThreadingModel.ToString());
+                }
+
+                listViewCLSIDServers.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                listViewCLSIDServers.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                tabControlProperties.TabPages.Add(tabPageServers);
             }
 
             m_clsid = entry;

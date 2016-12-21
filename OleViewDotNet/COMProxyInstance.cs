@@ -256,7 +256,7 @@ namespace OleViewDotNet
             }
         }
 
-        private COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.Server, new Guid[0])
+        private COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.DefaultServer, new Guid[0])
         {
         }
 

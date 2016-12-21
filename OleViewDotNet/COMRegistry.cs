@@ -111,8 +111,8 @@ namespace OleViewDotNet
             {
                 if (m_clsidbyserver == null)
                 {
-                    m_clsidbyserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.Server) && e.ServerType != COMServerType.UnknownServer,
-                        e => e.Server);
+                    m_clsidbyserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType != COMServerType.UnknownServer,
+                        e => e.DefaultServer);
                 }
 
                 return m_clsidbyserver;
@@ -125,8 +125,8 @@ namespace OleViewDotNet
             {
                 if (m_clsidbylocalserver == null)
                 {
-                    m_clsidbylocalserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.Server) && e.ServerType == COMServerType.LocalServer32,
-                        e => e.Server);
+                    m_clsidbylocalserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType == COMServerType.LocalServer32,
+                        e => e.DefaultServer);
                 }
 
                 return m_clsidbylocalserver;
@@ -679,7 +679,7 @@ namespace OleViewDotNet
         private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
         {
             List<COMCLSIDEntry> list = null;
-            string strServer = entry.Server.ToLower();
+            string strServer = entry.DefaultServer.ToLower();
             if (dict.ContainsKey(strServer))
             {
                 list = dict[strServer];

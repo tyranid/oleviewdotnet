@@ -91,7 +91,7 @@ namespace OleViewDotNet
             Dictionary<string, string> props = new Dictionary<string, string>();
             props.Add("CLSID", ent.Clsid.ToString("B"));
             props.Add("Name", ent.Name);
-            props.Add("Server", ent.Server);
+            props.Add("Server", ent.DefaultServer);
 
             /* Need to implement a type library reader */
             Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
@@ -173,7 +173,7 @@ namespace OleViewDotNet
                             strObjName = ent.Name;
                             props.Add("CLSID", ent.Clsid.ToString("B"));
                             props.Add("Name", ent.Name);
-                            props.Add("Server", ent.Server);
+                            props.Add("Server", ent.DefaultServer);
 
                             comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
                             await ent.LoadSupportedInterfacesAsync(false);
@@ -274,7 +274,7 @@ namespace OleViewDotNet
                     strObjName = ent.Name;
                     props.Add("CLSID", ent.Clsid.ToString("B"));
                     props.Add("Name", ent.Name);
-                    props.Add("Server", ent.Server);
+                    props.Add("Server", ent.DefaultServer);
                     await ent.LoadSupportedInterfacesAsync(false);
                     ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                 }

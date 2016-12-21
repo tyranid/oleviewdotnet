@@ -51,6 +51,10 @@
             System.Windows.Forms.Label label19;
             System.Windows.Forms.ColumnHeader columnHeaderName;
             System.Windows.Forms.ColumnHeader columnHeaderIID;
+            System.Windows.Forms.ColumnHeader columnServer;
+            System.Windows.Forms.ColumnHeader columnCmdLine;
+            System.Windows.Forms.ColumnHeader columnServerType;
+            System.Windows.Forms.ColumnHeader columnThreadingModel;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.btnTreatAsProps = new System.Windows.Forms.Button();
@@ -93,6 +97,8 @@
             this.textBoxIID = new System.Windows.Forms.TextBox();
             this.tabPageProxies = new System.Windows.Forms.TabPage();
             this.listViewProxies = new System.Windows.Forms.ListView();
+            this.tabPageServers = new System.Windows.Forms.TabPage();
+            this.listViewCLSIDServers = new System.Windows.Forms.ListView();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -115,6 +121,10 @@
             label19 = new System.Windows.Forms.Label();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderIID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnServer = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnCmdLine = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnServerType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnThreadingModel = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.contextMenuStripProgids.SuspendLayout();
@@ -127,6 +137,7 @@
             this.tabPageAppID.SuspendLayout();
             this.tabPageInterface.SuspendLayout();
             this.tabPageProxies.SuspendLayout();
+            this.tabPageServers.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -327,6 +338,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageAppID);
             this.tabControlProperties.Controls.Add(this.tabPageInterface);
             this.tabControlProperties.Controls.Add(this.tabPageProxies);
+            this.tabControlProperties.Controls.Add(this.tabPageServers);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Name = "tabControlProperties";
@@ -785,6 +797,49 @@
             this.listViewProxies.UseCompatibleStateImageBehavior = false;
             this.listViewProxies.View = System.Windows.Forms.View.Details;
             // 
+            // tabPageServers
+            // 
+            this.tabPageServers.Controls.Add(this.listViewCLSIDServers);
+            this.tabPageServers.Location = new System.Drawing.Point(4, 22);
+            this.tabPageServers.Name = "tabPageServers";
+            this.tabPageServers.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageServers.Size = new System.Drawing.Size(685, 433);
+            this.tabPageServers.TabIndex = 6;
+            this.tabPageServers.Text = "Servers";
+            this.tabPageServers.UseVisualStyleBackColor = true;
+            // 
+            // listViewCLSIDServers
+            // 
+            this.listViewCLSIDServers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnServerType,
+            columnServer,
+            columnCmdLine,
+            columnThreadingModel});
+            this.listViewCLSIDServers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewCLSIDServers.Location = new System.Drawing.Point(3, 3);
+            this.listViewCLSIDServers.MultiSelect = false;
+            this.listViewCLSIDServers.Name = "listViewCLSIDServers";
+            this.listViewCLSIDServers.Size = new System.Drawing.Size(679, 427);
+            this.listViewCLSIDServers.TabIndex = 0;
+            this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
+            this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
+            // 
+            // columnServer
+            // 
+            columnServer.Text = "Server";
+            // 
+            // columnCmdLine
+            // 
+            columnCmdLine.Text = "Command Line";
+            // 
+            // columnServerType
+            // 
+            columnServerType.Text = "Type";
+            // 
+            // columnThreadingModel
+            // 
+            columnThreadingModel.Text = "Threading Model";
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -811,6 +866,7 @@
             this.tabPageInterface.ResumeLayout(false);
             this.tabPageInterface.PerformLayout();
             this.tabPageProxies.ResumeLayout(false);
+            this.tabPageServers.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -859,5 +915,7 @@
         private System.Windows.Forms.TextBox textBoxTypeLib;
         private System.Windows.Forms.TabPage tabPageProxies;
         private System.Windows.Forms.ListView listViewProxies;
+        private System.Windows.Forms.TabPage tabPageServers;
+        private System.Windows.Forms.ListView listViewCLSIDServers;
     }
 }
