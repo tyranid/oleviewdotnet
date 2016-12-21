@@ -106,7 +106,7 @@ namespace OleViewDotNet
 
             if (String.IsNullOrWhiteSpace(RunAs) && !String.IsNullOrWhiteSpace(LocalService))
             {
-                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\" + LocalService))
+                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\" + LocalService))
                 {
                     if (serviceKey != null)
                     {
