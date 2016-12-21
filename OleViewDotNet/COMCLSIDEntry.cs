@@ -629,6 +629,23 @@ namespace OleViewDotNet
             return ret;
         }
 
+        public object CreateClassFactory()
+        {
+            IntPtr obj;
+            Guid iid = COMInterfaceEntry.IID_IUnknown;
+            Guid clsid = Clsid;
+
+            int hr = COMUtilities.CoGetClassObject(ref clsid, CreateContext, IntPtr.Zero, ref iid, out obj);
+            if (hr != 0)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            object ret = Marshal.GetObjectForIUnknown(obj);
+            Marshal.Release(obj);
+            return ret;
+        }
+
         public override string ToString()
         {
             return String.Format("COMCLSIDEntry: {0}", Name);

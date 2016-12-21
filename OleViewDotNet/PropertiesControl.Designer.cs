@@ -99,6 +99,13 @@
             this.listViewProxies = new System.Windows.Forms.ListView();
             this.tabPageServers = new System.Windows.Forms.TabPage();
             this.listViewCLSIDServers = new System.Windows.Forms.ListView();
+            this.contextMenuStripInterfaces = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyIIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -138,6 +145,7 @@
             this.tabPageInterface.SuspendLayout();
             this.tabPageProxies.SuspendLayout();
             this.tabPageServers.SuspendLayout();
+            this.contextMenuStripInterfaces.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -329,6 +337,22 @@
             // 
             columnHeaderIID.Text = "IID";
             columnHeaderIID.Width = 290;
+            // 
+            // columnServer
+            // 
+            columnServer.Text = "Server";
+            // 
+            // columnCmdLine
+            // 
+            columnCmdLine.Text = "Command Line";
+            // 
+            // columnServerType
+            // 
+            columnServerType.Text = "Type";
+            // 
+            // columnThreadingModel
+            // 
+            columnThreadingModel.Text = "Threading Model";
             // 
             // tabControlProperties
             // 
@@ -550,6 +574,7 @@
             this.listViewInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewInterfaces.ContextMenuStrip = this.contextMenuStripInterfaces;
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewInterfaces.Location = new System.Drawing.Point(3, 36);
@@ -565,6 +590,7 @@
             this.listViewFactoryInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewFactoryInterfaces.ContextMenuStrip = this.contextMenuStripInterfaces;
             this.listViewFactoryInterfaces.FullRowSelect = true;
             this.listViewFactoryInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewFactoryInterfaces.Location = new System.Drawing.Point(3, 34);
@@ -824,21 +850,60 @@
             this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
             this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
             // 
-            // columnServer
+            // contextMenuStripInterfaces
             // 
-            columnServer.Text = "Server";
+            this.contextMenuStripInterfaces.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem,
+            this.copyIIDToolStripMenuItem,
+            this.viewProxyDefinitionToolStripMenuItem});
+            this.contextMenuStripInterfaces.Name = "contextMenuStripInterfaces";
+            this.contextMenuStripInterfaces.Size = new System.Drawing.Size(187, 70);
+            this.contextMenuStripInterfaces.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripInterfaces_Opening);
             // 
-            // columnCmdLine
+            // copyToolStripMenuItem
             // 
-            columnCmdLine.Text = "Command Line";
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
-            // columnServerType
+            // copyIIDToolStripMenuItem
             // 
-            columnServerType.Text = "Type";
+            this.copyIIDToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.asStringToolStripMenuItem,
+            this.asCStructureToolStripMenuItem,
+            this.asHexStringToolStripMenuItem});
+            this.copyIIDToolStripMenuItem.Name = "copyIIDToolStripMenuItem";
+            this.copyIIDToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyIIDToolStripMenuItem.Text = "Copy IID";
             // 
-            // columnThreadingModel
+            // asStringToolStripMenuItem
             // 
-            columnThreadingModel.Text = "Threading Model";
+            this.asStringToolStripMenuItem.Name = "asStringToolStripMenuItem";
+            this.asStringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.asStringToolStripMenuItem.Text = "As String";
+            this.asStringToolStripMenuItem.Click += new System.EventHandler(this.asStringToolStripMenuItem_Click);
+            // 
+            // asCStructureToolStripMenuItem
+            // 
+            this.asCStructureToolStripMenuItem.Name = "asCStructureToolStripMenuItem";
+            this.asCStructureToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.asCStructureToolStripMenuItem.Text = "As C Structure";
+            this.asCStructureToolStripMenuItem.Click += new System.EventHandler(this.asCStructureToolStripMenuItem_Click);
+            // 
+            // asHexStringToolStripMenuItem
+            // 
+            this.asHexStringToolStripMenuItem.Name = "asHexStringToolStripMenuItem";
+            this.asHexStringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.asHexStringToolStripMenuItem.Text = "As Hex String";
+            this.asHexStringToolStripMenuItem.Click += new System.EventHandler(this.asHexStringToolStripMenuItem_Click);
+            // 
+            // viewProxyDefinitionToolStripMenuItem
+            // 
+            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
+            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
+            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
             // 
             // PropertiesControl
             // 
@@ -867,6 +932,7 @@
             this.tabPageInterface.PerformLayout();
             this.tabPageProxies.ResumeLayout(false);
             this.tabPageServers.ResumeLayout(false);
+            this.contextMenuStripInterfaces.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -917,5 +983,12 @@
         private System.Windows.Forms.ListView listViewProxies;
         private System.Windows.Forms.TabPage tabPageServers;
         private System.Windows.Forms.ListView listViewCLSIDServers;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripInterfaces;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyIIDToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem asStringToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem asCStructureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem asHexStringToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
     }
 }

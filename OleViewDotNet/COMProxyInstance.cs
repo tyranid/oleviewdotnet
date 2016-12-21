@@ -248,7 +248,7 @@ namespace OleViewDotNet
                 // server DLL's rdata section. But this is probably good enough for now.
                 using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(pInfo))
                 {
-                    if (lib.DangerousGetHandle() != module.DangerousGetHandle())
+                    if (module == null || lib.DangerousGetHandle() != module.DangerousGetHandle())
                     {
                         return IntPtr.Zero;
                     }

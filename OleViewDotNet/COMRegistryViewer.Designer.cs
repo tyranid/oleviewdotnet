@@ -47,6 +47,7 @@
             this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,7 +56,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createClassFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -173,6 +174,7 @@
             this.createSpecialToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createLocalServerToolStripMenuItem,
             this.createInProcServerToolStripMenuItem,
+            this.createClassFactoryToolStripMenuItem,
             this.createInSessionToolStripMenuItem});
             this.createSpecialToolStripMenuItem.Name = "createSpecialToolStripMenuItem";
             this.createSpecialToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
@@ -214,6 +216,13 @@
             this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
             this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
+            // viewProxyDefinitionToolStripMenuItem
+            // 
+            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
+            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
+            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
             // 
             // viewLaunchPermissionsToolStripMenuItem
             // 
@@ -303,12 +312,12 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // viewProxyDefinitionToolStripMenuItem
+            // createClassFactoryToolStripMenuItem
             // 
-            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
-            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
-            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
+            this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
+            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createClassFactoryToolStripMenuItem.Text = "Create Class Factory";
+            this.createClassFactoryToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -352,5 +361,6 @@
         private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createClassFactoryToolStripMenuItem;
     }
 }

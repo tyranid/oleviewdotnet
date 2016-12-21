@@ -33,14 +33,16 @@ namespace OleViewDotNet
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
             view.Items.Clear();
-            foreach (COMInterfaceInstance entry in entries)
+            foreach (Tuple<COMInterfaceInstance, COMInterfaceEntry> entry in 
+                entries.Select(e => new Tuple<COMInterfaceInstance, COMInterfaceEntry>(e, m_registry.MapIidToInterface(e.Iid))).OrderBy(e => e.Item2.Name))
             {
-                COMInterfaceEntry int_entry = m_registry.MapIidToInterface(entry.Iid);
-                ListViewItem item = view.Items.Add(int_entry.Name);
-                item.SubItems.Add(int_entry.NumMethods.ToString());
-                if (!String.IsNullOrWhiteSpace(entry.Module))
+                ListViewItem item = view.Items.Add(entry.Item2.Name);
+                item.SubItems.Add(entry.Item1.Iid.ToString("B"));
+                item.SubItems.Add(entry.Item2.NumMethods.ToString());
+                if (!String.IsNullOrWhiteSpace(entry.Item1.Module))
                 {
-                    item.SubItems.Add(String.Format("{0}+0x{1:X}", entry.Module, entry.VTableOffset));
+                    item.SubItems.Add(String.Format("{0}+0x{1:X}", 
+                        entry.Item1.Module, entry.Item1.VTableOffset));
                 }
                 item.Tag = entry;
             }
@@ -196,9 +198,11 @@ namespace OleViewDotNet
             listViewCategories.Columns.Add("Name", 100);
             listViewProgIDs.Columns.Add("Name", 100);
             listViewInterfaces.Columns.Add("Name", 100);
+            listViewInterfaces.Columns.Add("IID", 100);
             listViewInterfaces.Columns.Add("Methods", 100);
             listViewInterfaces.Columns.Add("VTable Offset", 100);
             listViewFactoryInterfaces.Columns.Add("Name", 100);
+            listViewFactoryInterfaces.Columns.Add("IID", 100);
             listViewFactoryInterfaces.Columns.Add("Methods", 100);
             listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
             tabControlProperties.TabPages.Clear();
@@ -288,6 +292,99 @@ namespace OleViewDotNet
                 {
                     Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface.Iid));
                 }
+            }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ListView view = sender as ListView;
+            if (view != null && view.SelectedIndices.Count > 0)
+            {
+                ListViewItem item = view.SelectedItems[0];
+                COMRegistryViewer.CopyTextToClipboard(item.Text);
+            }
+        }
+
+        private void CopyIID(ListView view, COMRegistryViewer.CopyGuidType type)
+        {
+            if (view != null && view.SelectedIndices.Count > 0)
+            {
+                ListViewItem item = view.SelectedItems[0];
+                Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
+                COMRegistryViewer.CopyGuidToClipboard(intf.Item1.Iid, type);
+            }
+        }
+
+        private void asStringToolStripMenuItem_Click(object sender, EventArgs e)
+        {            
+            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsString);
+        }
+
+        private void asCStructureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsStructure);
+        }
+
+        private void asHexStringToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsHexString);
+        }
+
+        private ListView GetListViewForMenu(object sender)
+        {
+            ContextMenuStrip menu = sender as ContextMenuStrip;
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+
+            if (item != null)
+            {
+                menu = item.Owner as ContextMenuStrip; 
+            }
+
+            if (menu != null)
+            {
+                return menu.SourceControl as ListView;
+            }
+            return null;
+        }
+
+        private void contextMenuStripInterfaces_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ListView view = GetListViewForMenu(sender);
+            if (view != null && view.SelectedIndices.Count > 0)
+            {
+                ListViewItem item = view.SelectedItems[0];
+                Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = 
+                    item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
+                viewProxyDefinitionToolStripMenuItem.Enabled = m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid);
+            }
+            else
+            {
+                viewProxyDefinitionToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        private void viewProxyDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ListView view = GetListViewForMenu(sender);
+                if (view != null && view.SelectedIndices.Count > 0)
+                {
+                    ListViewItem item = view.SelectedItems[0];
+                    Tuple<COMInterfaceInstance, COMInterfaceEntry> intf =
+                        item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
+
+                    if (m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid))
+                    {
+                        COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
+                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
+                            clsid.Name, COMProxyInstance.GetFromCLSID(clsid), intf.Item1.Iid));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
             }
         }
     }

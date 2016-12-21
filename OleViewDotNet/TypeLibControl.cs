@@ -171,6 +171,7 @@ namespace OleViewDotNet
                 if (item.Iid == iid_to_view)
                 {
                     item.Selected = true;
+                    item.EnsureVisible();
                 }
             }
             listViewStructures.Items.AddRange(structs.ToArray());

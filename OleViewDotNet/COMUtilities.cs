@@ -96,6 +96,9 @@ namespace OleViewDotNet
         CLSCTX_FROM_DEFAULT_CONTEXT = 0x20000,
         CLSCTX_ACTIVATE_32_BIT_SERVER = 0x40000,
         CLSCTX_ACTIVATE_64_BIT_SERVER = 0x80000,
+        CLSCTX_APPCONTAINER = 0x400000,
+        CLSCTX_ACTIVATE_AAA_AS_IU = 0x800000,
+        CLSCTX_PS_DLL = unchecked((int)0x80000000),
         CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
         CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
     }
@@ -548,17 +551,18 @@ namespace OleViewDotNet
                         IDispatch disp = (IDispatch)comObj;
 
                         disp.GetTypeInfo(0, 0x409, out typeInfo);
+
                         ITypeInfo ti = (ITypeInfo)Marshal.GetObjectForIUnknown(typeInfo);
                         ITypeLib tl = null;
                         int iIndex = 0;
                         ti.GetContainingTypeLib(out tl, out iIndex);
-
                         Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
                         Assembly asm = ConvertTypeLibToAssembly(tl, null);
 
                         if (asm != null)
                         {
-                            ret = asm.GetType(Marshal.GetTypeLibName(tl) + "." + Marshal.GetTypeInfoName(ti));
+                            string name = Marshal.GetTypeInfoName(ti);
+                            ret = asm.GetTypes().First(t => t.Name == name);
                         }
                     }
                     catch (Exception)

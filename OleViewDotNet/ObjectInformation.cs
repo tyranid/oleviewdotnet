@@ -185,10 +185,14 @@ namespace OleViewDotNet
 
         private void btnDispatch_Click(object sender, EventArgs e)
         {
-            Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, COMUtilities.GetDispatchTypeInfo(m_pObject)); ;
-            if ((frm != null) && !frm.IsDisposed)
+            Type disp_type = COMUtilities.GetDispatchTypeInfo(m_pObject);
+            if (disp_type != null)
             {
-                Program.GetMainForm(m_registry).HostControl(frm);
+                Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, disp_type);
+                if ((frm != null) && !frm.IsDisposed)
+                {
+                    Program.GetMainForm(m_registry).HostControl(frm);
+                }
             }
         }
 

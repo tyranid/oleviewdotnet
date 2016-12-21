@@ -1001,7 +1001,27 @@ namespace OleViewDotNet
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Program.ShowError(this, ex);
+                }
+            }
+        }
+
+        private async Task CreateClassFactory()
+        {
+            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            if (ent != null)
+            {
+                try
+                {
+                    object comObj = ent.CreateClassFactory();
+                    if (comObj != null)
+                    {
+                        await SetupObjectView(ent, comObj);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Program.ShowError(this, ex);
                 }
             }
         }
@@ -1455,6 +1475,11 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
+
+        private async void createClassFactoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateClassFactory();
         }
     }
 }
