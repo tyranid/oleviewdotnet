@@ -100,7 +100,8 @@ namespace OleViewDotNet
         public enum KnownInterfaces
         {
             IUnknown,
-            IMarshal
+            IMarshal,
+            IPSFactoryBuffer,
         }
 
         public static Guid IID_IUnknown
@@ -131,6 +132,11 @@ namespace OleViewDotNet
         public static Guid IID_IPersistStreamInit
         {
             get { return typeof(IPersistStreamInit).GUID; }
+        }
+
+        public static Guid IID_IPSFactoryBuffer
+        {
+            get { return new Guid("D5F569D0-593B-101A-B569-08002B2DBF7A"); }
         }
 
         public bool IsOleControl
@@ -166,7 +172,7 @@ namespace OleViewDotNet
                 case KnownInterfaces.IUnknown:
                     ent = new COMInterfaceEntry();
                     ent.Base = "";
-                    ent.Iid = new Guid("{00000000-0000-0000-C000-000000000046}");
+                    ent.Iid = IID_IUnknown;
                     ent.ProxyClsid = Guid.Empty;
                     ent.NumMethods = 3;
                     ent.Name = "IUnknown";
@@ -175,10 +181,19 @@ namespace OleViewDotNet
                 case KnownInterfaces.IMarshal:
                     ent = new COMInterfaceEntry();
                     ent.Base = "";
-                    ent.Iid = new Guid("{00000003-0000-0000-C000-000000000046}");
+                    ent.Iid = IID_IMarshal;
                     ent.ProxyClsid = Guid.Empty;
                     ent.NumMethods = 9;
                     ent.Name = "IMarshal";
+                    ent.TypeLibVersion = String.Empty;
+                    break;
+                case KnownInterfaces.IPSFactoryBuffer:
+                    ent = new COMInterfaceEntry();
+                    ent.Base = "";
+                    ent.Iid = IID_IPSFactoryBuffer;
+                    ent.ProxyClsid = Guid.Empty;
+                    ent.NumMethods = 4;
+                    ent.Name = "IPSFactoryBuffer";
                     ent.TypeLibVersion = String.Empty;
                     break;
             }

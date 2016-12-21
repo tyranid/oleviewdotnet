@@ -17,7 +17,6 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -771,10 +770,11 @@ namespace OleViewDotNet
         private void LoadInterfaces(RegistryKey rootKey)
         {
             Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
-            COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown);
-            interfaces.Add(unk.Iid, unk);
-            unk = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IMarshal);
-            interfaces.Add(unk.Iid, unk);
+            foreach (COMInterfaceEntry.KnownInterfaces known_infs in Enum.GetValues(typeof(COMInterfaceEntry.KnownInterfaces)))
+            {
+                COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(known_infs);
+                interfaces.Add(unk.Iid, unk);
+            }
             using (RegistryKey iidKey = rootKey.OpenSubKey("Interface"))
             {
                 if (iidKey != null)

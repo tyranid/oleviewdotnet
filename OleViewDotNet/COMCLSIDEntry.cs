@@ -568,11 +568,15 @@ namespace OleViewDotNet
 
                 if (DefaultServerType == COMServerType.InProcServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;             
+                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;
                 }
                 else if (DefaultServerType == COMServerType.LocalServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;             
+                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
+                }
+                else if (DefaultServerType == COMServerType.InProcHandler32)
+                {
+                    dwContext = CLSCTX.CLSCTX_INPROC_HANDLER;
                 }
 
                 return dwContext;

@@ -1234,10 +1234,10 @@ namespace OleViewDotNet
             return ret;
         }
 
-        internal static SafeLibraryHandle SafeGetModuleHandle(IntPtr handle)
+        internal static SafeLibraryHandle SafeGetModuleHandle(IntPtr address)
         {
             SafeLibraryHandle ret;
-            if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, handle, out ret))
+            if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, address, out ret))
             {
                 return null;
             }

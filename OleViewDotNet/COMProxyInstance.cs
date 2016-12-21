@@ -171,6 +171,9 @@ namespace OleViewDotNet
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate void GetProxyDllInfo(out IntPtr pInfo, out IntPtr pId);
 
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private delegate int DllGetClassObject(ref Guid clsid, ref Guid riid, out IntPtr ppv);
+
         public IEnumerable<COMProxyInstanceEntry> Entries { get; private set; }
 
         public IEnumerable<NdrBaseStructureTypeReference> Structures { get; private set; }
@@ -208,7 +211,7 @@ namespace OleViewDotNet
             return procs.ToArray();
         }
 
-        private static IntPtr FindProxyDllInfo(SafeLibraryHandle lib)
+        private static IntPtr FindProxyDllInfo(SafeLibraryHandle lib, Guid clsid)
         {
             try
             {
@@ -220,47 +223,108 @@ namespace OleViewDotNet
             }
             catch (Win32Exception)
             {
+            }
+
+            IntPtr psfactory = IntPtr.Zero;
+            try
+            {
+                DllGetClassObject dll_get_class_object = lib.GetFunctionPointer<DllGetClassObject>();
+                Guid IID_IPSFactoryBuffer = COMInterfaceEntry.IID_IPSFactoryBuffer;
+
+                int hr = dll_get_class_object(ref clsid, ref IID_IPSFactoryBuffer, out psfactory);
+                if (hr != 0)
+                {
+                    throw new Win32Exception(hr);
+                }
+
+                // The PSFactoryBuffer object seems to be structured like on Win10 at least.
+                // VTABLE*
+                // Reference Count
+                // ProxyFileInfo*
+
+                IntPtr pInfo = Marshal.ReadIntPtr(psfactory, 2 * IntPtr.Size);
+                // TODO: Should add better checks here, 
+                // for example VTable should be in COMBASE and the pointer should be in the
+                // server DLL's rdata section. But this is probably good enough for now.
+                using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(pInfo))
+                {
+                    if (lib.DangerousGetHandle() != module.DangerousGetHandle())
+                    {
+                        return IntPtr.Zero;
+                    }
+                }
+
+                return pInfo;
+            }
+            catch (Win32Exception)
+            {
                 return IntPtr.Zero;
+            }
+            finally
+            {
+                if (psfactory != IntPtr.Zero)
+                {
+                    Marshal.Release(psfactory);
+                }
             }
         }
 
-        public COMProxyInstance(string path, IEnumerable<Guid> supported_iids)
+        private bool InitFromFileInfo(IntPtr pInfo)
+        {
+            List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
+            List<NdrBaseStructureTypeReference> structs = new List<NdrBaseStructureTypeReference>();
+
+            foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
+            {
+                string[] names = file_info.GetNames();
+                CInterfaceStubHeader[] stubs = file_info.GetStubs();
+                Guid[] base_iids = file_info.GetBaseIids();
+                Dictionary<IntPtr, NdrBaseTypeReference> type_cache
+                    = new Dictionary<IntPtr, NdrBaseTypeReference>();
+                for (int i = 0; i < names.Length; ++i)
+                {
+                    entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
+                        base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
+                }
+                structs.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
+            }
+            Entries = entries.AsReadOnly();
+            Structures = structs.AsReadOnly();
+            return true;
+        }
+
+        private bool InitFromFile(string path, Guid clsid)
         {
             using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(path))
             {
-                List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
-                IntPtr pInfo = FindProxyDllInfo(lib);
+                IntPtr pInfo = FindProxyDllInfo(lib, clsid);
                 if (pInfo == IntPtr.Zero)
                 {
-                    throw new ArgumentException("Can't find proxy information in server DLL");
+                    return false;
                 }
 
-                List<NdrBaseStructureTypeReference> structs = new List<NdrBaseStructureTypeReference>();
-
-                foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
-                {                    
-                    string[] names = file_info.GetNames();
-                    CInterfaceStubHeader[] stubs = file_info.GetStubs();
-                    Guid[] base_iids = file_info.GetBaseIids();
-                    Dictionary<IntPtr, NdrBaseTypeReference> type_cache 
-                        = new Dictionary<IntPtr, NdrBaseTypeReference>();
-                    for (int i = 0; i < names.Length; ++i)
-                    {
-                        entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
-                            base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
-                    }
-                    structs.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
-                }
-                Entries = entries.AsReadOnly();
-                Structures = structs.AsReadOnly();
+                return InitFromFileInfo(pInfo);
             }
         }
 
-        private COMProxyInstance(COMCLSIDEntry clsid) : this(clsid.DefaultServer, new Guid[0])
+        public COMProxyInstance(string path)
         {
+            if (!InitFromFile(path, Guid.Empty))
+            {
+                throw new ArgumentException("Can't find proxy information in server DLL");
+            }
+        }
+
+        private COMProxyInstance(COMCLSIDEntry clsid)
+        {
+            if (!InitFromFile(clsid.DefaultServer, clsid.Clsid))
+            {
+                throw new ArgumentException("Can't find proxy information in server DLL");
+            }
         }
 
         private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
+        private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new Dictionary<string, COMProxyInstance>(StringComparer.OrdinalIgnoreCase);
 
         public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid)
         {
@@ -272,6 +336,20 @@ namespace OleViewDotNet
             {
                 COMProxyInstance proxy = new COMProxyInstance(clsid);
                 m_proxies[clsid.Clsid] = proxy;
+                return proxy;
+            }
+        }
+
+        public static COMProxyInstance GetFromFile(string path)
+        {
+            if (m_proxies_by_file.ContainsKey(path))
+            {
+                return m_proxies_by_file[path];
+            }
+            else
+            {
+                COMProxyInstance proxy = new COMProxyInstance(path);
+                m_proxies_by_file[path] = proxy;
                 return proxy;
             }
         }

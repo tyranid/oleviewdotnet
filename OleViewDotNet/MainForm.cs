@@ -595,7 +595,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMProxyInstance proxy = new COMProxyInstance(dlg.FileName, new Guid[0]);
+                        COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName);
                         HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
                     }
                     catch (Exception ex)

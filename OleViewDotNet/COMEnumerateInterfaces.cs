@@ -151,6 +151,8 @@ namespace OleViewDotNet
                 Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
                 QueryInterface(punk, COMInterfaceEntry.IID_IMarshal, module_names, _interfaces);
                 QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal, module_names, _factory_interfaces);
+                QueryInterface(punk, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _interfaces);
+                QueryInterface(pfactory, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _factory_interfaces);
 
                 using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
                 {
