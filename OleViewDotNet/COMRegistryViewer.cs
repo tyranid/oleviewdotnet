@@ -316,7 +316,7 @@ namespace OleViewDotNet
         private void LoadCLSIDsByNames()
         {
             List<TreeNode> nodes = new List<TreeNode>(m_registry.Clsids.Count);
-            foreach (COMCLSIDEntry ent in m_registry.ClsidsByName)
+            foreach (COMCLSIDEntry ent in m_registry.Clsids.Values)
             {
                 TreeNode node = new TreeNode(ent.Name, ClassIcon, ClassIcon);
                 node.ToolTipText = BuildCLSIDToolTip(ent);
@@ -325,7 +325,7 @@ namespace OleViewDotNet
                 nodes.Add(node);
             }
 
-            treeComRegistry.Nodes.AddRange(nodes.ToArray());
+            treeComRegistry.Nodes.AddRange(nodes.OrderBy(n => n.Text).ToArray());
             Text = "CLSIDs by Name";
         }
 

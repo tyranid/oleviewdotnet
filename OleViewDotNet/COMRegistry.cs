@@ -60,7 +60,6 @@ namespace OleViewDotNet
         private List<Guid> m_preapproved;
 
         // These are built on demand, just different views.
-        private COMCLSIDEntry[] m_clsidbyname;
         private COMInterfaceEntry[] m_interfacebyname;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
@@ -142,19 +141,6 @@ namespace OleViewDotNet
                                                              e => m_appid[e.AppID].DllSurrogate);
                 }
                 return m_clsidwithsurrogate;
-            }
-        }
-
-        public IEnumerable<COMCLSIDEntry> ClsidsByName
-        {
-            get 
-            {
-                if (m_clsidbyname == null)
-                {
-                    m_clsidbyname = m_clsids.Values.OrderBy(e => e.Name).ToArray();
-                }
-
-                return m_clsidbyname; 
             }
         }
 
