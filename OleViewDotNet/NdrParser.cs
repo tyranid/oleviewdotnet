@@ -1137,30 +1137,14 @@ namespace OleViewDotNet
                     m_marshalers = new StandardUserMarshalers();
                 }
 
-                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), Marshal.ReadIntPtr(context.StubDesc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
+                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), 
+                    Marshal.ReadIntPtr(context.StubDesc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
 
                 NdrKnownTypes known_type = m_marshalers.GetKnownType(usersize_ptr);
                 if (known_type != NdrKnownTypes.None)
                 {
                     return new NdrKnownTypeReference(known_type);
                 }
-
-                //if ((usersize_ptr == m_marshalers.BSTR_UserSizePtr) || (usersize_ptr == m_marshalers.BSTR_UserSize64Ptr))
-                //{
-                //    return new NdrKnownTypeReference(NdrKnownTypes.BSTR);
-                //}
-                //if ((usersize_ptr == m_marshalers.VARIANT_UserSizePtr) || (usersize_ptr == m_marshalers.VARIANT_UserSize64Ptr))
-                //{
-                //    return new NdrKnownTypeReference(NdrKnownTypes.VARIANT);
-                //}
-                //if ((usersize_ptr == m_marshalers.LPSAFEARRAY_UserSizePtr) || (usersize_ptr == m_marshalers.LPSAFEARRAY_UserSize64Ptr))
-                //{
-                //    return new NdrKnownTypeReference(NdrKnownTypes.LPSAFEARRAY);
-                //}
-                //if ((usersize_ptr == m_marshalers.HWND_UserSizePtr) || (usersize_ptr == m_marshalers.HWND_UserSize64Ptr))
-                //{
-                //    return new NdrKnownTypeReference(NdrKnownTypes.HWND);
-                //}
             }
             return type;
         }
@@ -1495,11 +1479,6 @@ namespace OleViewDotNet
                     exts = Marshal.PtrToStructure<NdrProcHeaderExts>(proc_desc);
                 }
                 proc_desc += ext_size;
-            }
-
-            if ((exts.Flags2 & ~NdrInterpreterOptFlags2.Valid) != 0)
-            {
-                //System.Diagnostics.Trace.WriteLine(exts.Flags2.ToString());
             }
 
             int desc_size = 4;
