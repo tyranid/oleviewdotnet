@@ -72,7 +72,7 @@ namespace OleViewDotNet
 
         #region Public Properties
 
-        public SortedDictionary<Guid, COMCLSIDEntry> Clsids
+        public IDictionary<Guid, COMCLSIDEntry> Clsids
         {
             get 
             {
@@ -80,7 +80,7 @@ namespace OleViewDotNet
             }
         }
 
-        public SortedDictionary<Guid, COMInterfaceEntry> Interfaces
+        public IDictionary<Guid, COMInterfaceEntry> Interfaces
         {
             get 
             {
@@ -88,7 +88,7 @@ namespace OleViewDotNet
             }
         }
 
-        public SortedDictionary<string, COMProgIDEntry> Progids
+        public IDictionary<string, COMProgIDEntry> Progids
         {
             get 
             {
@@ -179,9 +179,9 @@ namespace OleViewDotNet
             get { return m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e != null); }
         }
 
-        public COMIELowRightsElevationPolicy[] LowRights
+        public IEnumerable<COMIELowRightsElevationPolicy> LowRights
         {
-            get { return m_lowrights.ToArray(); }
+            get { return m_lowrights.AsReadOnly(); }
         }
 
         public IDictionary<Guid, COMAppIDEntry> AppIDs
