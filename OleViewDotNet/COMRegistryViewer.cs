@@ -441,41 +441,18 @@ namespace OleViewDotNet
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToList();
             IDictionary<Guid, COMAppIDEntry> appids = m_registry.AppIDs;
-            Dictionary<string, ServiceController> services;
-
-            try
-            {
-                services = ServiceController.GetServices().ToDictionary(s => s.ServiceName.ToLower());
-            }
-            catch (Win32Exception)
-            {
-                services = new Dictionary<string,ServiceController>();
-            }
 
             List<TreeNode> serverNodes = new List<TreeNode>();
             foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
             {   
-                if(appids.ContainsKey(pair.Key) && !String.IsNullOrWhiteSpace(appids[pair.Key].LocalService))
+                if(appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
                 {
-                    COMAppIDEntry appidEnt = appids[pair.Key];                    
+                    COMAppIDEntry appidEnt = appids[pair.Key];
 
-                    string name = appidEnt.LocalService;
-
-                    if (services.ContainsKey(name.ToLower()))
-                    {                       
-                        try
-                        {
-                            ServiceController sc = services[name.ToLower()];
-
-                            string displayName = sc.DisplayName;
-                            if (!String.IsNullOrWhiteSpace(displayName))
-                            {
-                                name = displayName;
-                            }                            
-                        }
-                        catch (Win32Exception)
-                        {
-                        } 
+                    string name = appidEnt.LocalService.DisplayName;
+                    if (String.IsNullOrWhiteSpace(name))
+                    {
+                        name = appidEnt.LocalService.Name;
                     }
                     
                     TreeNode node = new TreeNode(name);
@@ -525,9 +502,17 @@ namespace OleViewDotNet
                 AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
             }
 
-            if (!String.IsNullOrWhiteSpace(appidEnt.LocalService))
+            if (appidEnt.IsService)
             {
-                AppendFormatLine(builder, "LocalService: {0}", appidEnt.LocalService);
+                AppendFormatLine(builder, "Service Name: {0}", appidEnt.LocalService.Name);
+                if (!String.IsNullOrWhiteSpace(appidEnt.LocalService.DisplayName))
+                {
+                    AppendFormatLine(builder, "Display Name: {0}", appidEnt.LocalService.DisplayName);
+                }
+                if (!String.IsNullOrWhiteSpace(appidEnt.LocalService.UserName))
+                {
+                    AppendFormatLine(builder, "Service User: {0}", appidEnt.LocalService.UserName);
+                }
             }
 
             if (appidEnt.HasLaunchPermission)

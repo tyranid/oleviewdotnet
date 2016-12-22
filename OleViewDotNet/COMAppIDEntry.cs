@@ -16,10 +16,13 @@
 
 using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.ComponentModel;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Xml.Schema;
+using System.ServiceProcess;
+using System.Collections.Generic;
 
 namespace OleViewDotNet
 {
@@ -35,6 +38,86 @@ namespace OleViewDotNet
         IUServerActivateInClientSessionOnly = 0x20,
         Reserved1 = 0x40,
         Reserved2 = 0x80,
+    }
+
+    public class COMAppIDServiceEntry : IXmlSerializable
+    {
+        public string DisplayName { get; private set; }
+        public string Name { get; private set; }
+        public string ServiceType { get; private set; }
+        public string UserName { get; private set; }
+        public string ImagePath { get; private set; }
+        public string ServiceDll { get; private set; }
+
+        internal COMAppIDServiceEntry(RegistryKey key, 
+            ServiceController service)
+        {
+            DisplayName = service.DisplayName;
+            Name = service.ServiceName;
+            ServiceType = service.ServiceType.ToString();
+            ServiceDll = String.Empty;
+            ImagePath = String.Empty;
+            UserName = String.Empty;
+            if (key != null)
+            {
+                UserName = COMUtilities.ReadStringFromKey(key, null, "ObjectName");
+                ImagePath = COMUtilities.ReadStringFromKey(key, null, "ImagePath");
+                if (service.ServiceType == System.ServiceProcess.ServiceType.Win32ShareProcess)
+                {
+                    ServiceDll = COMUtilities.ReadStringFromKey(key, "Parameters", "ServiceDll");
+                }
+                else
+                {
+                    ServiceDll = String.Empty;
+                }
+            }
+        }
+
+        internal COMAppIDServiceEntry()
+        {
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            DisplayName = reader.ReadString("display");
+            Name = reader.ReadString("name");
+            ServiceType = reader.ReadString("type");
+            UserName = reader.ReadString("user");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteOptionalAttributeString("display", DisplayName);
+            writer.WriteOptionalAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("type", ServiceType);
+            writer.WriteOptionalAttributeString("user", UserName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMAppIDServiceEntry right = obj as COMAppIDServiceEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return DisplayName == right.DisplayName && Name == right.Name && ServiceType == right.ServiceType && UserName == right.UserName;
+        }
+
+        public override int GetHashCode()
+        {
+            return DisplayName.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ ServiceType.GetSafeHashCode() ^ UserName.GetSafeHashCode();
+        }
     }
 
     public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable
@@ -62,7 +145,6 @@ namespace OleViewDotNet
 
         private void LoadFromKey(RegistryKey key)
         {
-            LocalService = key.GetValue("LocalService") as string;
             RunAs = key.GetValue("RunAs") as string;
             string name = key.GetValue(null) as string;
             if (!String.IsNullOrWhiteSpace(name))
@@ -104,25 +186,28 @@ namespace OleViewDotNet
                 Flags = (COMAppIDFlags)flags;
             }
 
-            if (String.IsNullOrWhiteSpace(RunAs) && !String.IsNullOrWhiteSpace(LocalService))
+            string local_service = key.GetValue("LocalService") as string;
+
+            if (!String.IsNullOrWhiteSpace(local_service))
             {
-                using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\" + LocalService))
+                try
                 {
-                    if (serviceKey != null)
+                    using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\" + local_service))
                     {
-                        RunAs = serviceKey.GetValue("ObjectName") as string;
+                        using (ServiceController service = new ServiceController(local_service))
+                        {
+                            LocalService = new COMAppIDServiceEntry(serviceKey, service);
+                        }
                     }
+                }
+                catch
+                {
                 }
             }
 
             if (String.IsNullOrWhiteSpace(RunAs))
             {
                 RunAs = String.Empty;
-            }
-
-            if (String.IsNullOrWhiteSpace(LocalService))
-            {
-                LocalService = String.Empty;
             }
         }
 
@@ -135,13 +220,18 @@ namespace OleViewDotNet
 
         public string DllSurrogate { get; private set; }
 
-        public string LocalService { get; private set; }
+        public COMAppIDServiceEntry LocalService { get; private set; }
 
         public string RunAs { get; private set; }
 
         public string Name { get; private set; }
 
         public COMAppIDFlags Flags { get; private set; }
+
+        public bool IsService
+        {
+            get { return LocalService != null; }
+        }
 
         public string LaunchPermission
         {
@@ -201,15 +291,28 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return AppId == right.AppId && DllSurrogate == right.DllSurrogate && LocalService == right.LocalService && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
+            if (LocalService != null)
+            {
+                if (!LocalService.Equals(right.LocalService))
+                {
+                    return false;
+                }
+            }
+            else if (right.LocalService != null)
+            {
+                return false;
+            }
+            
+            return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
                 && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission;
         }
 
         public override int GetHashCode()
         {
-            return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() ^ LocalService.GetSafeHashCode() 
+            return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() 
                 ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
-                LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode();
+                LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode() ^
+                LocalService.GetSafeHashCode();
         }
 
         internal COMAppIDEntry()
@@ -225,24 +328,28 @@ namespace OleViewDotNet
         {
             AppId = reader.ReadGuid("appid");
             DllSurrogate = reader.ReadString("dllsurrogate");
-            LocalService = reader.ReadString("localservice");
             RunAs = reader.ReadString("runas");
             Name = reader.ReadString("name");
             Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.ReadString("flags"), true);
             LaunchPermission = reader.ReadString("launchperm");
             AccessPermission = reader.ReadString("accessperm");
+            IEnumerable<COMAppIDServiceEntry> service = reader.ReadSerializableObjects<COMAppIDServiceEntry>("service", () => new COMAppIDServiceEntry());
+            LocalService = service.FirstOrDefault();
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             writer.WriteGuid("appid", AppId);
             writer.WriteOptionalAttributeString("dllsurrogate", DllSurrogate);
-            writer.WriteOptionalAttributeString("localservice", LocalService);
             writer.WriteOptionalAttributeString("runas", RunAs);
             writer.WriteOptionalAttributeString("name", Name);
             writer.WriteAttributeString("flags", Flags.ToString());
             writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
             writer.WriteOptionalAttributeString("accessperm", AccessPermission);
+            if (LocalService != null)
+            {
+                writer.WriteSerializableObjects("service", new IXmlSerializable[] { LocalService });
+            }
         }
     }
 }

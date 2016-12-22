@@ -55,6 +55,8 @@
             System.Windows.Forms.ColumnHeader columnCmdLine;
             System.Windows.Forms.ColumnHeader columnServerType;
             System.Windows.Forms.ColumnHeader columnThreadingModel;
+            System.Windows.Forms.Label label21;
+            System.Windows.Forms.Label label20;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.btnTreatAsProps = new System.Windows.Forms.Button();
@@ -106,6 +108,10 @@
             this.asCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.asHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPageService = new System.Windows.Forms.TabPage();
+            this.textBoxServiceName = new System.Windows.Forms.TextBox();
+            this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
+            this.lblServiceType = new System.Windows.Forms.Label();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -132,6 +138,8 @@
             columnCmdLine = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnServerType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnThreadingModel = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            label21 = new System.Windows.Forms.Label();
+            label20 = new System.Windows.Forms.Label();
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.contextMenuStripProgids.SuspendLayout();
@@ -146,6 +154,7 @@
             this.tabPageProxies.SuspendLayout();
             this.tabPageServers.SuspendLayout();
             this.contextMenuStripInterfaces.SuspendLayout();
+            this.tabPageService.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -363,6 +372,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageInterface);
             this.tabControlProperties.Controls.Add(this.tabPageProxies);
             this.tabControlProperties.Controls.Add(this.tabPageServers);
+            this.tabControlProperties.Controls.Add(this.tabPageService);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Name = "tabControlProperties";
@@ -905,6 +915,64 @@
             this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
             this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
             // 
+            // tabPageService
+            // 
+            this.tabPageService.Controls.Add(this.lblServiceType);
+            this.tabPageService.Controls.Add(this.textBoxServiceDisplayName);
+            this.tabPageService.Controls.Add(label20);
+            this.tabPageService.Controls.Add(this.textBoxServiceName);
+            this.tabPageService.Controls.Add(label21);
+            this.tabPageService.Location = new System.Drawing.Point(4, 22);
+            this.tabPageService.Name = "tabPageService";
+            this.tabPageService.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageService.Size = new System.Drawing.Size(685, 433);
+            this.tabPageService.TabIndex = 7;
+            this.tabPageService.Text = "Service";
+            this.tabPageService.UseVisualStyleBackColor = true;
+            // 
+            // textBoxServiceName
+            // 
+            this.textBoxServiceName.Location = new System.Drawing.Point(96, 6);
+            this.textBoxServiceName.Name = "textBoxServiceName";
+            this.textBoxServiceName.ReadOnly = true;
+            this.textBoxServiceName.Size = new System.Drawing.Size(313, 20);
+            this.textBoxServiceName.TabIndex = 7;
+            // 
+            // label21
+            // 
+            label21.AutoSize = true;
+            label21.Location = new System.Drawing.Point(15, 9);
+            label21.Name = "label21";
+            label21.Size = new System.Drawing.Size(38, 13);
+            label21.TabIndex = 6;
+            label21.Text = "Name:";
+            // 
+            // textBoxServiceDisplayName
+            // 
+            this.textBoxServiceDisplayName.Location = new System.Drawing.Point(96, 32);
+            this.textBoxServiceDisplayName.Name = "textBoxServiceDisplayName";
+            this.textBoxServiceDisplayName.ReadOnly = true;
+            this.textBoxServiceDisplayName.Size = new System.Drawing.Size(313, 20);
+            this.textBoxServiceDisplayName.TabIndex = 9;
+            // 
+            // label20
+            // 
+            label20.AutoSize = true;
+            label20.Location = new System.Drawing.Point(15, 35);
+            label20.Name = "label20";
+            label20.Size = new System.Drawing.Size(75, 13);
+            label20.TabIndex = 8;
+            label20.Text = "Display Name:";
+            // 
+            // lblServiceType
+            // 
+            this.lblServiceType.AutoSize = true;
+            this.lblServiceType.Location = new System.Drawing.Point(15, 62);
+            this.lblServiceType.Name = "lblServiceType";
+            this.lblServiceType.Size = new System.Drawing.Size(73, 13);
+            this.lblServiceType.TabIndex = 10;
+            this.lblServiceType.Text = "Service Type:";
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -933,6 +1001,8 @@
             this.tabPageProxies.ResumeLayout(false);
             this.tabPageServers.ResumeLayout(false);
             this.contextMenuStripInterfaces.ResumeLayout(false);
+            this.tabPageService.ResumeLayout(false);
+            this.tabPageService.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -990,5 +1060,9 @@
         private System.Windows.Forms.ToolStripMenuItem asCStructureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem asHexStringToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPageService;
+        private System.Windows.Forms.TextBox textBoxServiceDisplayName;
+        private System.Windows.Forms.TextBox textBoxServiceName;
+        private System.Windows.Forms.Label lblServiceType;
     }
 }

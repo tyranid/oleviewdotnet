@@ -67,7 +67,7 @@ namespace OleViewDotNet
             textBoxLaunchPermission.Text = entry.LaunchPermission;
             textBoxAccessPermission.Text = entry.AccessPermission;
             lblAppIdRunAs.Text = String.Format("Run As: {0}", GetStringValue(entry.RunAs));
-            lblService.Text = String.Format("Service: {0}", GetStringValue(entry.LocalService));
+            lblService.Text = String.Format("Service: {0}", GetStringValue(entry.IsService ? entry.LocalService.Name : null));
             lblAppIDFlags.Text = String.Format("Flags: {0}", entry.Flags);
             textBoxDllSurrogate.Text = GetStringValue(entry.DllSurrogate);
             btnViewAccessPermissions.Enabled = entry.HasAccessPermission;

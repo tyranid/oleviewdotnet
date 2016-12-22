@@ -263,10 +263,16 @@ namespace OleViewDotNet
 
         public static string ReadStringFromKey(RegistryKey rootKey, string keyName, string valueName)
         {
-            using (RegistryKey key = rootKey.OpenSubKey(keyName))
-            {
-                string valueString = String.Empty;
+            RegistryKey key = rootKey;
 
+            try
+            {
+                if (keyName != null)
+                {
+                    key = rootKey.OpenSubKey(keyName);
+                }
+
+                string valueString = String.Empty;
                 if (key != null)
                 {
                     object valueObject = key.GetValue(valueName);
@@ -277,6 +283,13 @@ namespace OleViewDotNet
                 }
 
                 return valueString.TrimEnd('\0');
+            }
+            finally
+            {
+                if (key != null && key != rootKey)
+                {
+                    key.Close();
+                }
             }
         }
 
