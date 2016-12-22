@@ -40,11 +40,18 @@ namespace OleViewDotNet
         Reserved2 = 0x80,
     }
 
+    [Flags]
+    public enum COMAppIDRotFlags
+    {
+        None = 0,
+        AllowAnyClient = 1,
+    }
+
     public class COMAppIDServiceEntry : IXmlSerializable
     {
         public string DisplayName { get; private set; }
         public string Name { get; private set; }
-        public string ServiceType { get; private set; }
+        public ServiceType ServiceType { get; private set; }
         public string UserName { get; private set; }
         public string ImagePath { get; private set; }
         public string ServiceDll { get; private set; }
@@ -54,7 +61,7 @@ namespace OleViewDotNet
         {
             DisplayName = service.DisplayName;
             Name = service.ServiceName;
-            ServiceType = service.ServiceType.ToString();
+            ServiceType = service.ServiceType;
             ServiceDll = String.Empty;
             ImagePath = String.Empty;
             UserName = String.Empty;
@@ -86,7 +93,7 @@ namespace OleViewDotNet
         {
             DisplayName = reader.ReadString("display");
             Name = reader.ReadString("name");
-            ServiceType = reader.ReadString("type");
+            ServiceType = reader.ReadEnum<System.ServiceProcess.ServiceType>("type");
             UserName = reader.ReadString("user");
         }
 
@@ -94,7 +101,7 @@ namespace OleViewDotNet
         {
             writer.WriteOptionalAttributeString("display", DisplayName);
             writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteOptionalAttributeString("type", ServiceType);
+            writer.WriteEnum("type", ServiceType);
             writer.WriteOptionalAttributeString("user", UserName);
         }
 
@@ -116,7 +123,7 @@ namespace OleViewDotNet
 
         public override int GetHashCode()
         {
-            return DisplayName.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ ServiceType.GetSafeHashCode() ^ UserName.GetSafeHashCode();
+            return DisplayName.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ ServiceType.GetHashCode() ^ UserName.GetSafeHashCode();
         }
     }
 
@@ -209,6 +216,12 @@ namespace OleViewDotNet
             {
                 RunAs = String.Empty;
             }
+
+            object rotflags = key.GetValue("ROTFlags");
+            if (rotflags != null && rotflags is int)
+            {
+                RotFlags = (COMAppIDRotFlags)rotflags;
+            }
         }
 
         public int CompareTo(COMAppIDEntry other)
@@ -273,6 +286,11 @@ namespace OleViewDotNet
             get { return COMSecurity.SDHasAC(LaunchPermission); }
         }
 
+        public COMAppIDRotFlags RotFlags
+        {
+            get; private set;
+        }        
+
         public override string ToString()
         {
             return String.Format("COMAppIDEntry: {0}", Name);
@@ -304,7 +322,7 @@ namespace OleViewDotNet
             }
             
             return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
-                && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission;
+                && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission && RotFlags == right.RotFlags;
         }
 
         public override int GetHashCode()
@@ -312,7 +330,7 @@ namespace OleViewDotNet
             return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() 
                 ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
                 LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode() ^
-                LocalService.GetSafeHashCode();
+                LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode();
         }
 
         internal COMAppIDEntry()
@@ -333,6 +351,7 @@ namespace OleViewDotNet
             Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.ReadString("flags"), true);
             LaunchPermission = reader.ReadString("launchperm");
             AccessPermission = reader.ReadString("accessperm");
+            RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
             IEnumerable<COMAppIDServiceEntry> service = reader.ReadSerializableObjects<COMAppIDServiceEntry>("service", () => new COMAppIDServiceEntry());
             LocalService = service.FirstOrDefault();
         }
@@ -346,6 +365,7 @@ namespace OleViewDotNet
             writer.WriteAttributeString("flags", Flags.ToString());
             writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
             writer.WriteOptionalAttributeString("accessperm", AccessPermission);
+            writer.WriteEnum("rot", RotFlags);
             if (LocalService != null)
             {
                 writer.WriteSerializableObjects("service", new IXmlSerializable[] { LocalService });

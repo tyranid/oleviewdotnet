@@ -166,7 +166,7 @@ namespace OleViewDotNet
             }
 
             Cursor.Current = currCursor;
-            m_originalNodes = treeComRegistry.Nodes.Cast<TreeNode>().ToArray();
+            m_originalNodes = treeComRegistry.Nodes.OfType<TreeNode>().ToArray();
         }
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace OleViewDotNet
                 i++;
             }
 
-            treeComRegistry.Nodes.AddRange(serverNodes);
+            treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
         }
 
         private void LoadInterfaces()
@@ -479,7 +479,7 @@ namespace OleViewDotNet
                 }
             }
 
-            treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
+            treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             Text = "Local Services";
         }
 
@@ -504,15 +504,18 @@ namespace OleViewDotNet
 
             if (appidEnt.IsService)
             {
-                AppendFormatLine(builder, "Service Name: {0}", appidEnt.LocalService.Name);
-                if (!String.IsNullOrWhiteSpace(appidEnt.LocalService.DisplayName))
+                COMAppIDServiceEntry service = appidEnt.LocalService;
+                AppendFormatLine(builder, "Service Name: {0}", service.Name);
+                if (!String.IsNullOrWhiteSpace(service.DisplayName))
                 {
-                    AppendFormatLine(builder, "Display Name: {0}", appidEnt.LocalService.DisplayName);
+                    AppendFormatLine(builder, "Display Name: {0}", service.DisplayName);
                 }
-                if (!String.IsNullOrWhiteSpace(appidEnt.LocalService.UserName))
+                if (!String.IsNullOrWhiteSpace(service.UserName))
                 {
-                    AppendFormatLine(builder, "Service User: {0}", appidEnt.LocalService.UserName);
+                    AppendFormatLine(builder, "Service User: {0}", service.UserName);
                 }
+                AppendFormatLine(builder, "Service Path: {0}", 
+                    service.ServiceType == ServiceType.Win32ShareProcess ? service.ServiceDll : service.ImagePath);
             }
 
             if (appidEnt.HasLaunchPermission)
@@ -524,6 +527,12 @@ namespace OleViewDotNet
             {
                 AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermission, 64));
             }
+
+            if (appidEnt.RotFlags != COMAppIDRotFlags.None)
+            {
+                AppendFormatLine(builder, "RotFlags: {0}", appidEnt.RotFlags);
+            }
+
             return builder.ToString();
         }
 
@@ -575,7 +584,7 @@ namespace OleViewDotNet
                 }
             }
 
-            treeComRegistry.Nodes.AddRange(serverNodes.ToArray());
+            treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             string text = "AppIDs";
             if (filterIL)
             {
@@ -1160,13 +1169,15 @@ namespace OleViewDotNet
         private static Func<object, bool> CreatePythonFilter(string filter)
         {
             StringBuilder builder = new StringBuilder();
+            builder.AppendLine("from OleViewDotNet import *");
             builder.AppendLine("def run_filter(entry):");
             builder.AppendFormat("  return {0}", filter);
             builder.AppendLine();
-            
+
             ScriptEngine engine = Python.CreateEngine();
             ScriptSource source = engine.CreateScriptSourceFromString(builder.ToString(), SourceCodeKind.File);
             ScriptScope scope = engine.CreateScope();
+            scope.Engine.Runtime.LoadAssembly(typeof(COMCLSIDEntry).Assembly);
             source.Execute(scope);
             return scope.GetVariable<Func<object, bool>>("run_filter");            
         }
