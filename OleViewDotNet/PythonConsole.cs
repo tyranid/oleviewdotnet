@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
