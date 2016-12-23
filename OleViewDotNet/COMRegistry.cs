@@ -262,6 +262,26 @@ namespace OleViewDotNet
             }
         }
 
+        public string DefaultAccessPermission
+        {
+            get; private set;
+        }
+
+        public string DefaultAccessRestriction
+        {
+            get; private set;
+        }
+
+        public string DefaultLaunchPermission
+        {
+            get; private set;
+        }
+
+        public string DefaultLaunchRestriction
+        {
+            get; private set;
+        }
+
         #endregion
 
         #region Public Methods
@@ -319,6 +339,10 @@ namespace OleViewDotNet
                 writer.WriteBool("sixfour", SixtyFourBit);
                 writer.WriteEnum("mode", LoadingMode);
                 writer.WriteAttributeString("user", CreatedUser);
+                writer.WriteAttributeString("access", DefaultAccessPermission);
+                writer.WriteAttributeString("accessr", DefaultAccessRestriction);
+                writer.WriteAttributeString("launch", DefaultLaunchPermission);
+                writer.WriteAttributeString("launchr", DefaultLaunchRestriction);
                 progress.Report("CLSIDs");
                 writer.WriteSerializableObjects("clsids", m_clsids.Values);
                 progress.Report("ProgIDs");
@@ -578,6 +602,7 @@ namespace OleViewDotNet
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
             {
+                LoadDefaultSecurity();
                 progress.Report("AppIDs");
                 LoadAppIDs(classes_key);
                 progress.Report("CLSIDs");
@@ -626,6 +651,10 @@ namespace OleViewDotNet
                 SixtyFourBit = reader.ReadBool("sixfour");
                 LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
                 CreatedUser = reader.GetAttribute("user");
+                DefaultAccessPermission = reader.ReadString("access");
+                DefaultAccessRestriction = reader.ReadString("accessr");
+                DefaultLaunchPermission = reader.ReadString("launch");
+                DefaultLaunchRestriction = reader.ReadString("launchr");
                 progress.Report("CLSIDs");
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
                 progress.Report("ProgIDs");
@@ -675,6 +704,27 @@ namespace OleViewDotNet
                 dict[strServer] = list;
             }
             list.Add(entry);
+        }
+
+        private string GetSecurityDescriptor(RegistryKey key, string name, string default_sd)
+        {
+            byte[] sd = key.GetValue(name) as byte[];
+            if (sd == null)
+            {
+                return default_sd;
+            }
+            return COMSecurity.GetStringSDForSD(sd);
+        }
+
+        private void LoadDefaultSecurity()
+        {
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Ole"))
+            {
+                DefaultAccessPermission = GetSecurityDescriptor(key, "DefaultAccessPermission", COMSecurity.GetDefaultAccessPermissions());
+                DefaultAccessRestriction = GetSecurityDescriptor(key, "DefaultAccessRestriction", COMSecurity.GetDefaultAccessRestrictions());
+                DefaultLaunchPermission = GetSecurityDescriptor(key, "DefaultLaunchPermission", COMSecurity.GetDefaultLaunchPermissions());
+                DefaultLaunchRestriction = GetSecurityDescriptor(key, "DefaultLaunchRestriction", COMSecurity.GetDefaultLaunchRestrictions());
+            }
         }
 
         /// <summary>

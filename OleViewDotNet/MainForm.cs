@@ -444,22 +444,22 @@ namespace OleViewDotNet
 
         private void menuSecurityDefaultAccess_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Access", COMSecurity.GetDefaultAccessPermissions(), true);
+            COMSecurity.ViewSecurity(this, "Default Access", m_registry.DefaultAccessPermission, true);
         }
 
         private void menuSecurityDefaultAccessRestriction_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Access Restrictions", COMSecurity.GetDefaultAccessRestrictions(), true);
+            COMSecurity.ViewSecurity(this, "Default Access Restrictions", m_registry.DefaultAccessRestriction, true);
         }
 
         private void menuSecurityDefaultLaunch_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Launch", COMSecurity.GetDefaultLaunchPermissions(), false);
+            COMSecurity.ViewSecurity(this, "Default Launch", m_registry.DefaultLaunchPermission, false);
         }
 
         private void menuSecurityDefaultLaunchRestriction_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Launch Restrictions", COMSecurity.GetDefaultLaunchRestrictions(), false);
+            COMSecurity.ViewSecurity(this, "Default Launch Restrictions", m_registry.DefaultLaunchRestriction, false);
         }
 
         public COMRegistry Registry { get { return m_registry; } }
