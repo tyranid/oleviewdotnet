@@ -308,22 +308,11 @@ namespace OleViewDotNet
             ReadServerKey(servers, key, COMServerType.InProcHandler32);
             Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(servers);
 
-            AppID = Guid.Empty;
-
-            try
+            AppID = COMUtilities.ReadGuidFromKey(key, null, "AppID");
+            if (AppID == Guid.Empty)
             {
-                object appid = key.GetValue("AppID");
-                if ((appid != null) && (appid.ToString().Length > 0))
-                {
-                    Guid appid_guid;
-                    if (Guid.TryParse(appid.ToString(), out appid_guid))
-                    {
-                        AppID = appid_guid;
-                    }
-                }
-            }
-            catch (FormatException)
-            {
+                AppID = COMUtilities.ReadGuidFromKey(Registry.ClassesRoot,
+                        String.Format(@"AppID\{0}", Path.GetFileName(DefaultServer)), "AppID");
             }
 
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);

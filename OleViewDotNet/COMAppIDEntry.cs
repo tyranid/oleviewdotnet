@@ -72,6 +72,10 @@ namespace OleViewDotNet
                 if (service.ServiceType == System.ServiceProcess.ServiceType.Win32ShareProcess)
                 {
                     ServiceDll = COMUtilities.ReadStringFromKey(key, "Parameters", "ServiceDll");
+                    if (String.IsNullOrEmpty(ServiceDll))
+                    {
+                        ServiceDll = COMUtilities.ReadStringFromKey(key, null, "ServiceDll");
+                    }
                 }
                 else
                 {
@@ -95,6 +99,8 @@ namespace OleViewDotNet
             Name = reader.ReadString("name");
             ServiceType = reader.ReadEnum<System.ServiceProcess.ServiceType>("type");
             UserName = reader.ReadString("user");
+            ImagePath = reader.ReadString("path");
+            ServiceDll = reader.ReadString("dll");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -103,6 +109,8 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("name", Name);
             writer.WriteEnum("type", ServiceType);
             writer.WriteOptionalAttributeString("user", UserName);
+            writer.WriteOptionalAttributeString("path", ImagePath);
+            writer.WriteOptionalAttributeString("dll", ServiceDll);
         }
 
         public override bool Equals(object obj)
@@ -289,7 +297,7 @@ namespace OleViewDotNet
         public COMAppIDRotFlags RotFlags
         {
             get; private set;
-        }        
+        }
 
         public override string ToString()
         {
@@ -368,7 +376,7 @@ namespace OleViewDotNet
             writer.WriteEnum("rot", RotFlags);
             if (LocalService != null)
             {
-                writer.WriteSerializableObjects("service", new IXmlSerializable[] { LocalService });
+                writer.WriteSerializableObjects("service", new COMAppIDServiceEntry[] { LocalService });
             }
         }
     }

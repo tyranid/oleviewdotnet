@@ -533,6 +533,11 @@ namespace OleViewDotNet
                 AppendFormatLine(builder, "RotFlags: {0}", appidEnt.RotFlags);
             }
 
+            if (!String.IsNullOrWhiteSpace(appidEnt.DllSurrogate))
+            {
+                AppendFormatLine(builder, "DLL Surrogate: {0}", appidEnt.DllSurrogate);
+            }
+
             return builder.ToString();
         }
 
