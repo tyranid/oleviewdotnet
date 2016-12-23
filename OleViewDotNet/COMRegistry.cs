@@ -60,10 +60,7 @@ namespace OleViewDotNet
         private List<Guid> m_preapproved;
 
         // These are built on demand, just different views.
-        private COMInterfaceEntry[] m_interfacebyname;
         private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbylocalserver;
-        private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidwithsurrogate;
         private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
         private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
         private Dictionary<Guid, string> m_iids_to_names;
@@ -114,46 +111,6 @@ namespace OleViewDotNet
                 }
 
                 return m_clsidbyserver;
-            }
-        }
-
-        public IDictionary<string, List<COMCLSIDEntry>> ClsidsByLocalServer
-        {
-            get
-            {
-                if (m_clsidbylocalserver == null)
-                {
-                    m_clsidbylocalserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType == COMServerType.LocalServer32,
-                        e => e.DefaultServer);
-                }
-
-                return m_clsidbylocalserver;
-            }
-        }
-
-        public IDictionary<string, List<COMCLSIDEntry>> ClsidsWithSurrogate
-        {
-            get
-            {
-                if (m_clsidwithsurrogate == null)
-                {
-                    m_clsidwithsurrogate = GetClsidsByString(e => m_appid.ContainsKey(e.AppID) && !String.IsNullOrWhiteSpace(m_appid[e.AppID].DllSurrogate),
-                                                             e => m_appid[e.AppID].DllSurrogate);
-                }
-                return m_clsidwithsurrogate;
-            }
-        }
-
-        public IEnumerable<COMInterfaceEntry> InterfacesByName
-        {
-            get
-            {
-                if (m_interfacebyname == null)
-                {
-                    m_interfacebyname = m_interfaces.Values.OrderBy(i => i.Name).ToArray();
-                }
-
-                return m_interfacebyname;
             }
         }
 
@@ -208,7 +165,8 @@ namespace OleViewDotNet
             {
                 if (m_proxiesbyclsid == null)
                 {
-                    m_proxiesbyclsid = m_interfaces.Values.Where(i => i.ProxyClsid != Guid.Empty).GroupBy(i => i.ProxyClsid).ToDictionary(e => e.Key, e => e.AsEnumerable());
+                    m_proxiesbyclsid = m_interfaces.Values.Where(i => i.ProxyClsid != Guid.Empty)
+                        .GroupBy(i => i.ProxyClsid).ToDictionary(e => e.Key, e => e.AsEnumerable());
                 }
                 return m_proxiesbyclsid;
             }

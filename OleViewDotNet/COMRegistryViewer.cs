@@ -42,6 +42,7 @@ namespace OleViewDotNet
         /// </summary>
         COMRegistry m_registry;
         TreeNode[] m_originalNodes;
+        HashSet<FilterType> m_filter_types;
 
         /// <summary>
         /// Enumeration to indicate what to display
@@ -89,6 +90,7 @@ namespace OleViewDotNet
         {
             InitializeComponent();
             m_registry = reg;
+            m_filter_types = new HashSet<FilterType>();
             m_mode = mode;
             comboBoxMode.SelectedIndex = 0;
             SetupTree();
@@ -121,10 +123,10 @@ namespace OleViewDotNet
                         LoadCLSIDByServer(ServerType.Surrogate);
                         break;
                     case DisplayMode.Interfaces:
-                        LoadInterfaces();
+                        LoadInterfaces(false);
                         break;
                     case DisplayMode.InterfacesByName:
-                        LoadInterfacesByName();
+                        LoadInterfaces(true);
                         break;
                     case DisplayMode.ImplementedCategories:
                         LoadImplementedCategories();
@@ -308,7 +310,7 @@ namespace OleViewDotNet
                 }
                 i++;
             }
-
+            m_filter_types.Add(FilterType.ProgID);
             treeComRegistry.Nodes.AddRange(progidNodes);
             Text = "ProgIDs";
         }
@@ -325,6 +327,7 @@ namespace OleViewDotNet
                 nodes.Add(node);
             }
 
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(nodes.OrderBy(n => n.Text).ToArray());
             Text = "CLSIDs by Name";
         }
@@ -342,86 +345,115 @@ namespace OleViewDotNet
             return ent.DefaultServerType == COMServerType.InProcServer32 && m_registry.GetProxiesForClsid(ent).Count() > 0;
         }
 
-        private void LoadCLSIDByServer(ServerType serverType)
-        {            
-            int i = 0;
-            IDictionary<string, List<COMCLSIDEntry>> dict;
+        private bool HasSurrogate(COMCLSIDEntry ent)
+        {
+            return m_registry.AppIDs.ContainsKey(ent.AppID) && !String.IsNullOrWhiteSpace(m_registry.AppIDs[ent.AppID].DllSurrogate);
+        }
 
-            if (serverType == ServerType.Local)
+        private class COMCLSIDServerEqualityComparer : IEqualityComparer<COMCLSIDServerEntry>
+        {
+            public bool Equals(COMCLSIDServerEntry x, COMCLSIDServerEntry y)
             {
-                Text = "CLSIDs by Local Server";
-                dict = m_registry.ClsidsByLocalServer;
+                return x.Server.Equals(y.Server, StringComparison.OrdinalIgnoreCase);
             }
-            else if (serverType == ServerType.Surrogate)
+
+            public int GetHashCode(COMCLSIDServerEntry obj)
             {
-                Text = "CLSIDs With Surrogate";
-                dict = m_registry.ClsidsWithSurrogate;
+                return obj.Server.GetHashCode();
             }
-            else if (serverType == ServerType.None)
+        }
+
+        private void LoadCLSIDByServer(ServerType serverType)
+        {
+            IEnumerable<KeyValuePair<COMCLSIDServerEntry, List<COMCLSIDEntry>>> servers = null;
+
+            if (serverType == ServerType.Surrogate)
             {
-                Text = "CLSIDs by Server";
-                dict = m_registry.ClsidsByServer;
-            }
-            else if (serverType == ServerType.Proxies)
-            {
-                Text = "Proxy CLSIDs By Server";
-                dict = m_registry.ClsidsByServer.Where(p => p.Value.Any(c => IsProxyClsid(c))).ToDictionary(p => p.Key, p => p.Value.Where(c => IsProxyClsid(c)).ToList());
+                servers = m_registry.Clsids.Values.Where(c => HasSurrogate(c))
+                    .GroupBy(c => m_registry.AppIDs[c.AppID].DllSurrogate, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => new COMCLSIDServerEntry(COMServerType.LocalServer32, g.Key), g => g.AsEnumerable().ToList());
             }
             else
             {
-                throw new ArgumentException(nameof(serverType));
-            }
-            
-            TreeNode[] serverNodes = new TreeNode[dict.Keys.Count];
-            foreach (KeyValuePair<string, List<COMCLSIDEntry>> pair in dict)
-            {                                
-                serverNodes[i] = new TreeNode(pair.Key);
-                serverNodes[i].ToolTipText = pair.Key;
-            
-                TreeNode[] clsidNodes = new TreeNode[pair.Value.Count];
-                string[] nodeNames = new string[pair.Value.Count];
-                int j = 0;
-
-                foreach(COMCLSIDEntry ent in pair.Value)
-                {                    
-                    clsidNodes[j] = CreateClsidNode(ent); ;
-                    nodeNames[j] = ent.Name;
-                    j++;
+                Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>> dict = 
+                    new Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>>(new COMCLSIDServerEqualityComparer());
+                IEnumerable<COMCLSIDEntry> clsids = m_registry.Clsids.Values.Where(e => e.Servers.Count > 0);
+                if (serverType == ServerType.Proxies)
+                {
+                    clsids = clsids.Where(c => IsProxyClsid(c));
                 }
 
-                Array.Sort(nodeNames, clsidNodes);
-                serverNodes[i].Nodes.AddRange(clsidNodes);
-                
-                i++;
+                foreach (COMCLSIDEntry entry in clsids)
+                {
+                    foreach (COMCLSIDServerEntry server in entry.Servers.Values)
+                    {
+                        if (!dict.ContainsKey(server))
+                        {
+                            dict[server] = new List<COMCLSIDEntry>();
+                        }
+                        dict[server].Add(entry);
+                    }
+                }
+
+                servers = dict;
+
+                if (serverType == ServerType.Local)
+                {
+                    servers = servers.Where(p => p.Key.ServerType == COMServerType.LocalServer32);
+                }
             }
 
+            switch (serverType)
+            {
+                case ServerType.Local:
+                    Text = "CLSIDs by Local Server";
+                    break;
+                case ServerType.Surrogate:
+                    Text = "CLSIDs With Surrogate";
+                    break;
+                case ServerType.None:
+                    Text = "CLSIDs by Server";
+                    break;
+                case ServerType.Proxies:
+                    Text = "Proxy CLSIDs By Server";
+                    break;
+            }
+
+            List<TreeNode> serverNodes = new List<TreeNode>(m_registry.Clsids.Count);
+            foreach (var pair in servers)
+            {
+                TreeNode node = new TreeNode(pair.Key.Server);
+                node.ToolTipText = pair.Key.Server;
+                node.Tag = pair.Key;
+                node.Nodes.AddRange(pair.Value.OrderBy(c => c.Name).Select(c => CreateClsidNode(c)).ToArray());
+                serverNodes.Add(node);
+            }
+
+            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.Server);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
         }
 
-        private void LoadInterfaces()
+        private void LoadInterfaces(bool by_name)
         {
-            int i = 0;
-            TreeNode[] iidNodes = new TreeNode[m_registry.Interfaces.Count];
-            foreach (COMInterfaceEntry ent in m_registry.Interfaces.Values)
+            IEnumerable<TreeNode> intfs = null;
+            if (by_name)
             {
-                iidNodes[i] = CreateInterfaceNode(ent);
-                i++;
+                intfs = m_registry.Interfaces.Values.OrderBy(i => i.Name).Select(i => CreateInterfaceNameNode(i, null));
+                Text = "Interfaces by Name";
             }
-            treeComRegistry.Nodes.AddRange(iidNodes);
-            Text = "Interfaces";
-        }
-
-        private void LoadInterfacesByName()
-        {
-            List<TreeNode> nodes = new List<TreeNode>(m_registry.Interfaces.Count);
-            foreach (COMInterfaceEntry ent in m_registry.InterfacesByName)
+            else
             {
-                nodes.Add(CreateInterfaceNameNode(ent, null));
+                intfs = m_registry.Interfaces.Values.Select(i => CreateInterfaceNode(i));
+                Text = "Interfaces";
             }
-            treeComRegistry.Nodes.AddRange(nodes.ToArray());
-            Text = "Interfaces by Name";
-        }
 
+            m_filter_types.Add(FilterType.Interface);
+            treeComRegistry.BeginUpdate();
+            treeComRegistry.Nodes.AddRange(intfs.ToArray());
+            treeComRegistry.EndUpdate();
+        }
+        
         private static StringBuilder AppendFormatLine(StringBuilder builder, string format, params object[] ps)
         {
             return builder.AppendFormat(format, ps).AppendLine();
@@ -479,6 +511,8 @@ namespace OleViewDotNet
                 }
             }
 
+            m_filter_types.Add(FilterType.AppId);
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             Text = "Local Services";
         }
@@ -589,6 +623,8 @@ namespace OleViewDotNet
                 }
             }
 
+            m_filter_types.Add(FilterType.AppId);
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             string text = "AppIDs";
             if (filterIL)
@@ -627,6 +663,8 @@ namespace OleViewDotNet
                 catNodes[i++] = pair.Value;
             }
 
+            m_filter_types.Add(FilterType.Category);
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(catNodes);
             Text = "Implemented Categories";
         }
@@ -638,7 +676,8 @@ namespace OleViewDotNet
             {
                 nodes.Add(CreateCLSIDNode(ent));
             }
-            
+
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "Explorer PreApproved";   
         }
@@ -680,6 +719,8 @@ namespace OleViewDotNet
                 currNode.ToolTipText = tooltip.ToString();
             }
 
+            m_filter_types.Add(FilterType.LowRights);
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(clsidNodes.ToArray());
             
             Text = "IE Low Rights Elevation Policy"; 
@@ -703,6 +744,8 @@ namespace OleViewDotNet
                 nodes.Add(node);
             }
 
+            m_filter_types.Add(FilterType.MimeType);
+            m_filter_types.Add(FilterType.Clsid);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "MIME Types";
         }
@@ -741,6 +784,7 @@ namespace OleViewDotNet
                 i++;
             }
 
+            m_filter_types.Add(FilterType.TypeLib);
             treeComRegistry.Nodes.AddRange(typelibNodes);
             Text = "Type Libraries"; 
         }

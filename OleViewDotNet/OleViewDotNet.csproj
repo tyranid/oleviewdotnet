@@ -139,11 +139,18 @@
     <Compile Include="ObjectHexEditor.Designer.cs">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="RegistryViewerFilter.cs" />
     <Compile Include="RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="RegistryPropertiesControl.Designer.cs">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ViewFilterControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ViewFilterControl.Designer.cs">
+      <DependentUpon>ViewFilterControl.cs</DependentUpon>
     </Compile>
     <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
@@ -327,6 +334,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="RegistryPropertiesControl.resx">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewFilterControl.resx">
+      <DependentUpon>ViewFilterControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WaitingDialog.resx">
       <DependentUpon>WaitingDialog.cs</DependentUpon>

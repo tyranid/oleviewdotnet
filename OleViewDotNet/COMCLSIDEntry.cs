@@ -79,7 +79,8 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Server == right.Server && CommandLine == right.CommandLine 
+            return Server == right.Server
+                && CommandLine == right.CommandLine
                 && ServerType == right.ServerType && ThreadingModel == right.ThreadingModel;
         }
 
@@ -176,12 +177,17 @@ namespace OleViewDotNet
             return COMThreadingModel.Apartment;
         }
 
-        internal COMCLSIDServerEntry(COMServerType server_type)
+        internal COMCLSIDServerEntry(COMServerType server_type, string server)
         {
-            Server = String.Empty;
+            Server = server;
             CommandLine = String.Empty;
             ServerType = server_type;
             ThreadingModel = COMThreadingModel.Apartment;
+        }
+
+        internal COMCLSIDServerEntry(COMServerType server_type) 
+            : this(server_type, String.Empty)
+        {
         }
 
         internal COMCLSIDServerEntry() : this(COMServerType.UnknownServer)
