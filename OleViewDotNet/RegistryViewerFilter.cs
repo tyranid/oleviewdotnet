@@ -44,13 +44,17 @@ namespace OleViewDotNet
     public enum FilterComparison
     {
         Contains,
+        Excludes,
+        Equals,
+        NotEquals,
+        StartsWith,
+        EndsWith,
     }
 
     public class RegistryViewerFilter
     {
         public FilterOperation Operation { get; set; }
         public FilterType Type { get; set; }
-        
-
+        public FilterComparison Comparison { get; set; }
     }
 }
