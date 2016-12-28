@@ -40,6 +40,9 @@ namespace OleViewDotNet
             AddListItem("64bit", registry.SixtyFourBit);
             AddListItem("File Path", registry.FilePath);
             AddListItem("CLSID Count", registry.Clsids.Count);
+            AddListItem("InProcServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcServer32)).Count());
+            AddListItem("LocalServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.LocalServer32)).Count());
+            AddListItem("InProcHandler CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcHandler32)).Count());
             AddListItem("AppID Count", registry.AppIDs.Count);
             AddListItem("ProgID Count", registry.Progids.Count);
             AddListItem("Interfaces Count", registry.Interfaces.Count);
