@@ -143,6 +143,7 @@ namespace OleViewDotNet
             bool show_help = false;
             bool query_interfaces = false;
             int concurrent_queries = Environment.ProcessorCount;
+            bool refresh_interfaces = false;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
 
@@ -153,6 +154,7 @@ namespace OleViewDotNet
                 { "q|query", "Query all interfaces for database", v => query_interfaces = v != null },
                 { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
                 { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
+                { "refresh", "Refresh interfaces in query", v => refresh_interfaces = v != null },
                 { "m",  "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
                 { "u",  "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
@@ -204,7 +206,7 @@ namespace OleViewDotNet
 
                     if (query_interfaces)
                     {
-                        if (!COMUtilities.QueryAllInterfaces(null, registry, server_types, concurrent_queries))
+                        if (!COMUtilities.QueryAllInterfaces(null, registry, server_types, concurrent_queries, refresh_interfaces))
                         {
                             Environment.Exit(1);
                         }

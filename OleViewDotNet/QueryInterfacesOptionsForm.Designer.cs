@@ -30,12 +30,13 @@
         {
             System.Windows.Forms.GroupBox groupBoxServerType;
             System.Windows.Forms.Label label1;
-            this.checkBoxInProcServer = new System.Windows.Forms.CheckBox();
-            this.checkBoxLocalServer = new System.Windows.Forms.CheckBox();
             this.checkBoxInProcHandler = new System.Windows.Forms.CheckBox();
+            this.checkBoxLocalServer = new System.Windows.Forms.CheckBox();
+            this.checkBoxInProcServer = new System.Windows.Forms.CheckBox();
             this.numericUpDownConcurrentQueries = new System.Windows.Forms.NumericUpDown();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.checkBoxRefreshInterfaces = new System.Windows.Forms.CheckBox();
             groupBoxServerType = new System.Windows.Forms.GroupBox();
             label1 = new System.Windows.Forms.Label();
             groupBoxServerType.SuspendLayout();
@@ -54,17 +55,17 @@
             groupBoxServerType.TabStop = false;
             groupBoxServerType.Text = "COM Server Types";
             // 
-            // checkBoxInProcServer
+            // checkBoxInProcHandler
             // 
-            this.checkBoxInProcServer.AutoSize = true;
-            this.checkBoxInProcServer.Checked = true;
-            this.checkBoxInProcServer.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxInProcServer.Location = new System.Drawing.Point(17, 30);
-            this.checkBoxInProcServer.Name = "checkBoxInProcServer";
-            this.checkBoxInProcServer.Size = new System.Drawing.Size(94, 17);
-            this.checkBoxInProcServer.TabIndex = 0;
-            this.checkBoxInProcServer.Text = "In Proc Server";
-            this.checkBoxInProcServer.UseVisualStyleBackColor = true;
+            this.checkBoxInProcHandler.AutoSize = true;
+            this.checkBoxInProcHandler.Checked = true;
+            this.checkBoxInProcHandler.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxInProcHandler.Location = new System.Drawing.Point(215, 30);
+            this.checkBoxInProcHandler.Name = "checkBoxInProcHandler";
+            this.checkBoxInProcHandler.Size = new System.Drawing.Size(100, 17);
+            this.checkBoxInProcHandler.TabIndex = 2;
+            this.checkBoxInProcHandler.Text = "In Proc Handler";
+            this.checkBoxInProcHandler.UseVisualStyleBackColor = true;
             // 
             // checkBoxLocalServer
             // 
@@ -78,17 +79,17 @@
             this.checkBoxLocalServer.Text = "Local Server";
             this.checkBoxLocalServer.UseVisualStyleBackColor = true;
             // 
-            // checkBoxInProcHandler
+            // checkBoxInProcServer
             // 
-            this.checkBoxInProcHandler.AutoSize = true;
-            this.checkBoxInProcHandler.Checked = true;
-            this.checkBoxInProcHandler.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxInProcHandler.Location = new System.Drawing.Point(215, 30);
-            this.checkBoxInProcHandler.Name = "checkBoxInProcHandler";
-            this.checkBoxInProcHandler.Size = new System.Drawing.Size(100, 17);
-            this.checkBoxInProcHandler.TabIndex = 2;
-            this.checkBoxInProcHandler.Text = "In Proc Handler";
-            this.checkBoxInProcHandler.UseVisualStyleBackColor = true;
+            this.checkBoxInProcServer.AutoSize = true;
+            this.checkBoxInProcServer.Checked = true;
+            this.checkBoxInProcServer.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxInProcServer.Location = new System.Drawing.Point(17, 30);
+            this.checkBoxInProcServer.Name = "checkBoxInProcServer";
+            this.checkBoxInProcServer.Size = new System.Drawing.Size(94, 17);
+            this.checkBoxInProcServer.TabIndex = 0;
+            this.checkBoxInProcServer.Text = "In Proc Server";
+            this.checkBoxInProcServer.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -128,12 +129,23 @@
             // 
             // btnCancel
             // 
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(196, 104);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxRefreshInterfaces
+            // 
+            this.checkBoxRefreshInterfaces.AutoSize = true;
+            this.checkBoxRefreshInterfaces.Location = new System.Drawing.Point(206, 81);
+            this.checkBoxRefreshInterfaces.Name = "checkBoxRefreshInterfaces";
+            this.checkBoxRefreshInterfaces.Size = new System.Drawing.Size(113, 17);
+            this.checkBoxRefreshInterfaces.TabIndex = 5;
+            this.checkBoxRefreshInterfaces.Text = "Refresh Interfaces";
+            this.checkBoxRefreshInterfaces.UseVisualStyleBackColor = true;
             // 
             // QueryInterfacesOptionsForm
             // 
@@ -143,6 +155,7 @@
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(359, 134);
             this.ControlBox = false;
+            this.Controls.Add(this.checkBoxRefreshInterfaces);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.numericUpDownConcurrentQueries);
@@ -169,5 +182,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownConcurrentQueries;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.CheckBox checkBoxRefreshInterfaces;
     }
 }

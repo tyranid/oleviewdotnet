@@ -1512,10 +1512,10 @@ namespace OleViewDotNet
             return true;
         }
 
-        internal static bool QueryAllInterfaces(IWin32Window parent, COMRegistry registry, IEnumerable<COMServerType> server_types, int concurrent_queries)
+        internal static bool QueryAllInterfaces(IWin32Window parent, COMRegistry registry, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
         {
             using (WaitingDialog dlg = new WaitingDialog(
-                (p, t) => COMUtilities.QueryAllInterfaces(registry.Clsids.Values.Where(c => !c.InterfacesLoaded && server_types.Contains(c.DefaultServerType)),
+                (p, t) => COMUtilities.QueryAllInterfaces(registry.Clsids.Values.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),
                             p, t, concurrent_queries),
                 s => s))
             {

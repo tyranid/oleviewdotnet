@@ -614,7 +614,8 @@ namespace OleViewDotNet
                 if (options.ShowDialog(this) == DialogResult.OK)
                 {
                     COMUtilities.QueryAllInterfaces(this, m_registry, 
-                        options.ServerTypes, options.ConcurrentQueries);
+                        options.ServerTypes, options.ConcurrentQueries,
+                        options.RefreshInterfaces);
                 }
             }
         }

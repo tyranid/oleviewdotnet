@@ -55,6 +55,7 @@ namespace OleViewDotNet
 
                 ServerTypes = server_types.AsReadOnly();
                 ConcurrentQueries = (int)numericUpDownConcurrentQueries.Value;
+                RefreshInterfaces = checkBoxRefreshInterfaces.Checked;
                 DialogResult = DialogResult.OK;
                 Close();
             }
@@ -68,6 +69,11 @@ namespace OleViewDotNet
         public int ConcurrentQueries
         {
             get; private set; 
+        }
+
+        public bool RefreshInterfaces
+        {
+            get; private set;
         }
             
     }
