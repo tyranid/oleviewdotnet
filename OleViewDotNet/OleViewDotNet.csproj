@@ -158,6 +158,12 @@
     <Compile Include="ViewFilterControl.Designer.cs">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewFilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewFilterForm.Designer.cs">
+      <DependentUpon>ViewFilterForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="XmlUtils.cs" />
     <Compile Include="ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
@@ -346,6 +352,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ViewFilterControl.resx">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewFilterForm.resx">
+      <DependentUpon>ViewFilterForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WaitingDialog.resx">
       <DependentUpon>WaitingDialog.cs</DependentUpon>

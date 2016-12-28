@@ -90,7 +90,7 @@ namespace OleViewDotNet
         {
             TypelibId = reader.ReadGuid("libid");
             reader.Read();
-            Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry());
+            Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(TypelibId));
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -102,6 +102,7 @@ namespace OleViewDotNet
 
     public class COMTypeLibVersionEntry : IXmlSerializable
     {
+        public Guid TypelibId { get; private set; }
         public string Version { get; private set; }
         public string Name { get; private set; }
         public string Win32Path { get; private set; }
@@ -145,7 +146,8 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMTypeLibVersionEntry(string version, Guid typelibid, RegistryKey key)
+        internal COMTypeLibVersionEntry(string version, Guid typelibid, RegistryKey key) 
+            : this(typelibid)
         {
             Version = version;
             Name = key.GetValue(null) as string;
@@ -173,8 +175,9 @@ namespace OleViewDotNet
             }
         }
 
-        public COMTypeLibVersionEntry()
+        public COMTypeLibVersionEntry(Guid typelibid)
         {
+            TypelibId = typelibid;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

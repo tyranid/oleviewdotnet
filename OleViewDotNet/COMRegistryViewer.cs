@@ -43,6 +43,7 @@ namespace OleViewDotNet
         COMRegistry m_registry;
         TreeNode[] m_originalNodes;
         HashSet<FilterType> m_filter_types;
+        RegistryViewerFilter m_filter;
 
         /// <summary>
         /// Enumeration to indicate what to display
@@ -91,6 +92,7 @@ namespace OleViewDotNet
             InitializeComponent();
             m_registry = reg;
             m_filter_types = new HashSet<FilterType>();
+            m_filter = new RegistryViewerFilter();
             m_mode = mode;
             comboBoxMode.SelectedIndex = 0;
             SetupTree();
@@ -333,7 +335,7 @@ namespace OleViewDotNet
                 nodes.Add(node);
             }
 
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(nodes.OrderBy(n => n.Text).ToArray());
             Text = "CLSIDs by Name";
         }
@@ -435,7 +437,7 @@ namespace OleViewDotNet
                 serverNodes.Add(node);
             }
 
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             m_filter_types.Add(FilterType.Server);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
         }
@@ -517,8 +519,8 @@ namespace OleViewDotNet
                 }
             }
 
-            m_filter_types.Add(FilterType.AppId);
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.AppID);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             Text = "Local Services";
         }
@@ -629,8 +631,8 @@ namespace OleViewDotNet
                 }
             }
 
-            m_filter_types.Add(FilterType.AppId);
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.AppID);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             string text = "AppIDs";
             if (filterIL)
@@ -670,7 +672,7 @@ namespace OleViewDotNet
             }
 
             m_filter_types.Add(FilterType.Category);
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(catNodes);
             Text = "Implemented Categories";
         }
@@ -683,7 +685,7 @@ namespace OleViewDotNet
                 nodes.Add(CreateCLSIDNode(ent));
             }
 
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "Explorer PreApproved";   
         }
@@ -726,7 +728,7 @@ namespace OleViewDotNet
             }
 
             m_filter_types.Add(FilterType.LowRights);
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(clsidNodes.ToArray());
             
             Text = "IE Low Rights Elevation Policy"; 
@@ -747,11 +749,12 @@ namespace OleViewDotNet
                 {
                     node.ToolTipText = String.Format("Extension {0}", ent.Extension);
                 }
+                node.Tag = ent;
                 nodes.Add(node);
             }
 
             m_filter_types.Add(FilterType.MimeType);
-            m_filter_types.Add(FilterType.Clsid);
+            m_filter_types.Add(FilterType.CLSID);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "MIME Types";
         }
@@ -1249,6 +1252,11 @@ namespace OleViewDotNet
             }
         }
 
+        private static bool RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
+        {
+            return false;
+        }
+
         private static Func<TreeNode, bool> CreateFilter(string filter, int mode, bool caseSensitive)
         {                        
             StringComparison comp;
@@ -1297,6 +1305,10 @@ namespace OleViewDotNet
                         Func<object, bool> python_filter = CreatePythonFilter(filter);
 
                         return n => RunPythonFilter(n, python_filter);
+                    }
+                case 7:
+                    {
+                        return n => n
                     }
                 default:
                     throw new ArgumentException("Invalid mode value");

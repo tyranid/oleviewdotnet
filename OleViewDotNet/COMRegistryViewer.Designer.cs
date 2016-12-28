@@ -44,6 +44,7 @@
             this.createSpecialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createLocalServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInProcServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createClassFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,7 +57,6 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.createClassFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -117,7 +117,7 @@
             this.viewAccessPermissionsToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 312);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 290);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -193,6 +193,13 @@
             this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.createInProcServerToolStripMenuItem.Text = "Create InProc Server";
             this.createInProcServerToolStripMenuItem.Click += new System.EventHandler(this.createInProcServerToolStripMenuItem_Click);
+            // 
+            // createClassFactoryToolStripMenuItem
+            // 
+            this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
+            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createClassFactoryToolStripMenuItem.Text = "Create Class Factory";
+            this.createClassFactoryToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryToolStripMenuItem_Click);
             // 
             // createInSessionToolStripMenuItem
             // 
@@ -288,7 +295,8 @@
             "Equals",
             "Glob",
             "Regex",
-            "Python"});
+            "Python",
+            "Complex"});
             this.comboBoxMode.Location = new System.Drawing.Point(458, 5);
             this.comboBoxMode.Name = "comboBoxMode";
             this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
@@ -311,13 +319,6 @@
             this.textBoxFilter.Size = new System.Drawing.Size(367, 20);
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
-            // 
-            // createClassFactoryToolStripMenuItem
-            // 
-            this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
-            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.createClassFactoryToolStripMenuItem.Text = "Create Class Factory";
-            this.createClassFactoryToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
