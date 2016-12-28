@@ -360,8 +360,12 @@ namespace OleViewDotNet
             LaunchPermission = reader.ReadString("launchperm");
             AccessPermission = reader.ReadString("accessperm");
             RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
-            IEnumerable<COMAppIDServiceEntry> service = reader.ReadSerializableObjects<COMAppIDServiceEntry>("service", () => new COMAppIDServiceEntry());
-            LocalService = service.FirstOrDefault();
+            bool has_service = reader.ReadBool("service");
+            if (has_service)
+            {
+                IEnumerable<COMAppIDServiceEntry> service = reader.ReadSerializableObjects<COMAppIDServiceEntry>("service", () => new COMAppIDServiceEntry());
+                LocalService = service.FirstOrDefault();
+            }
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -376,6 +380,7 @@ namespace OleViewDotNet
             writer.WriteEnum("rot", RotFlags);
             if (LocalService != null)
             {
+                writer.WriteBool("service", true);
                 writer.WriteSerializableObjects("service", new COMAppIDServiceEntry[] { LocalService });
             }
         }
