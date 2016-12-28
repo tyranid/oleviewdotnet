@@ -23,19 +23,19 @@ namespace OleViewDotNet
 {
     partial class WaitingDialog : Form
     {
-        private class ReportProgress : IProgress<string>
+        private class ReportProgress : IProgress<Tuple<string, int>>
         {
             private CancellationToken _token;
-            private Action<string> _report;
+            private Action<string, int> _report;
             private Func<string, string> _format;
 
-            public void Report(string data)
+            public void Report(Tuple<string, int> data)
             {
                 _token.ThrowIfCancellationRequested();
-                _report(_format(data));
+                _report(_format(data.Item1), data.Item2);
             }
 
-            public ReportProgress(Action<string> report, CancellationToken token, Func<string, string> format)
+            public ReportProgress(Action<string, int> report, CancellationToken token, Func<string, string> format)
             {
                 _token = token;
                 _format = format;
@@ -47,7 +47,7 @@ namespace OleViewDotNet
         private BackgroundWorker m_worker;
         private CancellationTokenSource m_cancellation;
 
-        public WaitingDialog(Func<IProgress<string>, CancellationToken, object> worker_func, Func<string, string> format_label)
+        public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func, Func<string, string> format_label)
         {
             if (format_label == null)
             {
@@ -55,28 +55,38 @@ namespace OleViewDotNet
             }
             m_cancellation = new CancellationTokenSource();
             CancellationToken token = m_cancellation.Token;
-            m_progress = new ReportProgress(SetLabel, token, format_label);
+            m_progress = new ReportProgress(SetProgress, token, format_label);
             m_worker = new BackgroundWorker();
             m_worker.DoWork += (sender, e) => Result = worker_func(m_progress, token);
             m_worker.RunWorkerCompleted += RunWorkerCompletedCallback;
             InitializeComponent();
-            SetLabel(String.Empty);
+            SetProgress(String.Empty, 0);
         }
 
-        public WaitingDialog(Func<IProgress<string>, CancellationToken, object> worker_func) 
+        public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func) 
             : this(worker_func, null)
         {
         }
 
-        private void SetLabel(string value)
+        private void SetProgress(string value, int percent)
         {
-            Action set = () => SetLabel(value);
+            Action set = () => SetProgress(value, percent);
             if (InvokeRequired)
             {
                 Invoke(set);
             }
             else
             {
+                if (percent < 0)
+                {
+                    progressBar.Style = ProgressBarStyle.Marquee;
+                }
+                else
+                {
+                    progressBar.Style = ProgressBarStyle.Continuous;
+                    progressBar.Value = percent;
+                }
+
                 lblProgress.Text = value;
             }
         }

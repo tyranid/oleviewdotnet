@@ -63,16 +63,16 @@ namespace OleViewDotNet
         {
             if ((eventKind == ImporterEventKind.NOTIF_TYPECONVERTED) && (_progress != null))
             {
-                _progress.Report(eventMsg);
+                _progress.Report(new Tuple<string, int>(eventMsg, -1));
             }
         }
 
-        public TypeLibCallback(IProgress<string> progress)
+        public TypeLibCallback(IProgress<Tuple<string, int>> progress)
         {
             _progress = progress;
         }
 
-        private IProgress<string> _progress;
+        private IProgress<Tuple<string, int>> _progress;
     }
 
     [Flags]
@@ -491,7 +491,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static Assembly LoadTypeLib(string path, IProgress<string> progress)
+        public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
         {
             ITypeLib typeLib = null;
 
@@ -510,13 +510,13 @@ namespace OleViewDotNet
             }
         }
 
-        public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<string> progress)
+        public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
         {
             if (m_typelibs == null)
             {
                 if (progress != null)
                 {
-                    progress.Report("Initializing Global Libraries");
+                    progress.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
                 }
                 LoadTypeLibAssemblies();
             }
@@ -1410,7 +1410,7 @@ namespace OleViewDotNet
         }
 
         internal static COMRegistry LoadRegistry(IWin32Window window,
-            Func<IProgress<string>, CancellationToken, object> worker)
+            Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker)
         {
             using (WaitingDialog loader = new WaitingDialog(worker))
             {

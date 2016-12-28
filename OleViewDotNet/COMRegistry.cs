@@ -244,14 +244,14 @@ namespace OleViewDotNet
 
         #region Public Methods
 
-        private class DummyProgress : IProgress<string>
+        private class DummyProgress : IProgress<Tuple<string, int>>
         {
-            public void Report(string data)
+            public void Report(Tuple<string, int> data)
             {
             }
         }
 
-        public static COMRegistry Load(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress)
+        public static COMRegistry Load(COMRegistryMode mode, SecurityIdentifier user, IProgress<Tuple<string, int>> progress)
         {
             if (progress == null)
             {
@@ -279,7 +279,7 @@ namespace OleViewDotNet
             Save(path, new DummyProgress());
         }
 
-        public void Save(string path, IProgress<string> progress)
+        public void Save(string path, IProgress<Tuple<string, int>> progress)
         {
             if (progress == null)
             {
@@ -289,6 +289,8 @@ namespace OleViewDotNet
             XmlWriterSettings settings = new XmlWriterSettings();
             using (XmlTextWriter writer = new XmlTextWriter(path, Encoding.UTF8))
             {
+                const int total_count = 9;
+
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
                 writer.WriteStartElement("comregistry");                
@@ -301,23 +303,23 @@ namespace OleViewDotNet
                 writer.WriteAttributeString("accessr", DefaultAccessRestriction);
                 writer.WriteAttributeString("launch", DefaultLaunchPermission);
                 writer.WriteAttributeString("launchr", DefaultLaunchRestriction);
-                progress.Report("CLSIDs");
+                Report(progress, "CLSIDs", 1, total_count);
                 writer.WriteSerializableObjects("clsids", m_clsids.Values);
-                progress.Report("ProgIDs");
+                Report(progress, "ProgIDs", 2, total_count);
                 writer.WriteSerializableObjects("progids", m_progids.Values);
-                progress.Report("MIME Types");
+                Report(progress, "MIME Types", 3, total_count);
                 writer.WriteSerializableObjects("mimetypes", m_mimetypes);
-                progress.Report("AppIDs");
+                Report(progress, "AppIDs", 4, total_count);
                 writer.WriteSerializableObjects("appids", m_appid.Values);
-                progress.Report("Interfaces");
+                Report(progress, "Interfaces", 5, total_count);
                 writer.WriteSerializableObjects("intfs", m_interfaces.Values);
-                progress.Report("Categories");
+                Report(progress, "Categories", 6, total_count);
                 writer.WriteSerializableObjects("catids", m_categories.Values);
-                progress.Report("LowRights");
+                Report(progress, "LowRights", 7, total_count);
                 writer.WriteSerializableObjects("lowies", m_lowrights);
-                progress.Report("TypeLibs");
+                Report(progress, "TypeLibs", 8, total_count);
                 writer.WriteSerializableObjects("typelibs", m_typelibs.Values);
-                progress.Report("PreApproved");
+                Report(progress, "PreApproved", 9, total_count);
                 writer.WriteStartElement("preapp");
                 writer.WriteGuids("clsids", m_preapproved);
                 writer.WriteEndElement();
@@ -325,7 +327,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static COMRegistry Load(string path, IProgress<string> progress)
+        public static COMRegistry Load(string path, IProgress<Tuple<string, int>> progress)
         {
             if (progress == null)
             {
@@ -358,26 +360,39 @@ namespace OleViewDotNet
             return DiffLists(left.Values, right.Values, mode).ToSortedDictionary(key_selector);
         }
 
-        public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<string> progress)
+        private static void Report(IProgress<Tuple<string, int>> progress, string report)
         {
+            progress.Report(new Tuple<string, int>(report, -1));
+        }
+        
+        private static void Report(IProgress<Tuple<string, int>> progress, string report, int current, int total)
+        {
+            int percent = (current * 100) / total;
+            progress.Report(new Tuple<string, int>(report, percent));
+        }
+
+        public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<Tuple<string, int>> progress)
+        {
+            const int total_count = 9;
+
             COMRegistry ret = new COMRegistry(COMRegistryMode.Diff);
-            progress.Report("CLSIDs");
+            Report(progress, "CLSIDs", 1, total_count);
             ret.m_clsids = DiffDicts(left.m_clsids, right.m_clsids, mode, p => p.Clsid);
-            progress.Report("ProgIDs");
+            Report(progress, "ProgIDs", 2, total_count);
             ret.m_progids = DiffDicts(left.m_progids, right.m_progids, mode, p => p.ProgID);
-            progress.Report("MIME Types");
+            Report(progress, "MIME Types", 3, total_count);
             ret.m_mimetypes = DiffLists(left.m_mimetypes, right.m_mimetypes, mode).ToList();
-            progress.Report("AppIDs");
+            Report(progress, "AppIDs", 4, total_count);
             ret.m_appid = DiffDicts(left.m_appid, right.m_appid, mode, p => p.AppId);
-            progress.Report("Interfaces");
+            Report(progress, "Interfaces", 5, total_count);
             ret.m_interfaces = DiffDicts(left.m_interfaces, right.m_interfaces, mode, p => p.Iid);
-            progress.Report("Categories");
+            Report(progress, "Categories", 6, total_count);
             ret.m_categories = DiffDicts(left.m_categories, right.m_categories, mode, p => p.CategoryID);
-            progress.Report("LowRights");
+            Report(progress, "LowRights", 7, total_count);
             ret.m_lowrights = DiffLists(left.m_lowrights, right.m_lowrights, mode).ToList();
-            progress.Report("TypeLibs");
+            Report(progress, "TypeLibs", 8, total_count);
             ret.m_typelibs = DiffDicts(left.m_typelibs, right.m_typelibs, mode, p => p.TypelibId);
-            progress.Report("PreApproved");
+            Report(progress, "PreApproved", 9, total_count);
             ret.m_preapproved = DiffLists(left.m_preapproved, right.m_preapproved, mode).ToList();
             return ret;
         }
@@ -555,27 +570,28 @@ namespace OleViewDotNet
         /// <summary>
         /// Default constructor
         /// </summary>
-        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<string> progress) 
+        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<Tuple<string, int>> progress) 
             : this(mode)
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
             {
+                const int total_count = 8;
                 LoadDefaultSecurity();
-                progress.Report("AppIDs");
-                LoadAppIDs(classes_key);
-                progress.Report("CLSIDs");
+                Report(progress, "CLSIDs", 1, total_count);
                 LoadCLSIDs(classes_key);
-                progress.Report("ProgIDs");
+                Report(progress, "AppIDs", 2, total_count);
+                LoadAppIDs(classes_key);
+                Report(progress, "ProgIDs", 3, total_count);
                 LoadProgIDs(classes_key);
-                progress.Report("Interfaces");
+                Report(progress, "Interfaces", 4, total_count);
                 LoadInterfaces(classes_key);
-                progress.Report("MIME Types");
+                Report(progress, "MIME Types", 5, total_count);
                 LoadMimeTypes(classes_key);
-                progress.Report("PreApproved");
+                Report(progress, "PreApproved", 6, total_count);
                 LoadPreApproved(mode, user);
-                progress.Report("LowRights");
+                Report(progress, "LowRights", 7, total_count);
                 LoadLowRights(mode, user);
-                progress.Report("TypeLibs");
+                Report(progress, "TypeLibs", 8, total_count);
                 LoadTypelibs(classes_key);
             }
 
@@ -590,7 +606,7 @@ namespace OleViewDotNet
             }
         }
 
-        private COMRegistry(string path, IProgress<string> progress)
+        private COMRegistry(string path, IProgress<Tuple<string, int>> progress)
         {
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.DtdProcessing = DtdProcessing.Prohibit;
@@ -604,6 +620,8 @@ namespace OleViewDotNet
                     throw new XmlException("Invalid root node");
                 }
 
+                const int total_count = 9;
+
                 CreatedDate = reader.GetAttribute("created");
                 CreatedMachine = reader.GetAttribute("machine");
                 SixtyFourBit = reader.ReadBool("sixfour");
@@ -613,23 +631,23 @@ namespace OleViewDotNet
                 DefaultAccessRestriction = reader.ReadString("accessr");
                 DefaultLaunchPermission = reader.ReadString("launch");
                 DefaultLaunchRestriction = reader.ReadString("launchr");
-                progress.Report("CLSIDs");
+                Report(progress, "CLSIDs", 1, total_count);
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
-                progress.Report("ProgIDs");
+                Report(progress, "ProgIDs", 2, total_count);
                 m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry()).ToSortedDictionary(p => p.ProgID);
-                progress.Report("MIME Types");
+                Report(progress, "MIME Types", 3, total_count);
                 m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType()).ToList();
-                progress.Report("AppIDs");
+                Report(progress, "AppIDs", 4, total_count);
                 m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
-                progress.Report("Interfaces");
+                Report(progress, "Interfaces", 5, total_count);
                 m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
-                progress.Report("Categories");
+                Report(progress, "Categories", 6, total_count);
                 m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToSortedDictionary(p => p.CategoryID);
-                progress.Report("LowRights");
+                Report(progress, "LowRights", 7, total_count);
                 m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
-                progress.Report("TypeLibs");
+                Report(progress, "TypeLibs", 8, total_count);
                 m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry()).ToSortedDictionary(p => p.TypelibId);
-                progress.Report("PreApproved");
+                Report(progress, "PreApproved", 9, total_count);
                 if (reader.IsStartElement("preapp"))
                 {
                     m_preapproved = reader.ReadGuids("clsids").ToList();
