@@ -72,7 +72,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(123, 1);
+            label2.Location = new System.Drawing.Point(142, 0);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(29, 13);
             label2.TabIndex = 6;
@@ -81,7 +81,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(206, 1);
+            label3.Location = new System.Drawing.Point(242, 0);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(62, 13);
             label3.TabIndex = 7;
@@ -90,7 +90,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(342, 1);
+            label4.Location = new System.Drawing.Point(412, 1);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(34, 13);
             label4.TabIndex = 9;
@@ -99,7 +99,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(480, 1);
+            label5.Location = new System.Drawing.Point(562, 1);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(48, 13);
             label5.TabIndex = 15;
@@ -129,32 +129,35 @@
             this.comboBoxFilterType.Name = "comboBoxFilterType";
             this.comboBoxFilterType.Size = new System.Drawing.Size(89, 21);
             this.comboBoxFilterType.TabIndex = 1;
+            this.comboBoxFilterType.SelectedIndexChanged += new System.EventHandler(this.comboBoxFilterType_SelectedIndexChanged);
             // 
             // comboBoxFilterComparison
             // 
             this.comboBoxFilterComparison.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxFilterComparison.FormattingEnabled = true;
-            this.comboBoxFilterComparison.Location = new System.Drawing.Point(190, 17);
+            this.comboBoxFilterComparison.Location = new System.Drawing.Point(228, 17);
             this.comboBoxFilterComparison.Name = "comboBoxFilterComparison";
             this.comboBoxFilterComparison.Size = new System.Drawing.Size(89, 21);
             this.comboBoxFilterComparison.TabIndex = 3;
             // 
             // comboBoxField
             // 
+            this.comboBoxField.DisplayMember = "Name";
             this.comboBoxField.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxField.FormattingEnabled = true;
             this.comboBoxField.Location = new System.Drawing.Point(95, 17);
             this.comboBoxField.Name = "comboBoxField";
-            this.comboBoxField.Size = new System.Drawing.Size(89, 21);
+            this.comboBoxField.Size = new System.Drawing.Size(127, 21);
             this.comboBoxField.TabIndex = 4;
+            this.comboBoxField.ValueMember = "Name";
+            this.comboBoxField.SelectedIndexChanged += new System.EventHandler(this.comboBoxField_SelectedIndexChanged);
             // 
             // comboBoxValue
             // 
-            this.comboBoxValue.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxValue.FormattingEnabled = true;
-            this.comboBoxValue.Location = new System.Drawing.Point(285, 17);
+            this.comboBoxValue.Location = new System.Drawing.Point(323, 17);
             this.comboBoxValue.Name = "comboBoxValue";
-            this.comboBoxValue.Size = new System.Drawing.Size(171, 21);
+            this.comboBoxValue.Size = new System.Drawing.Size(218, 21);
             this.comboBoxValue.TabIndex = 8;
             // 
             // listViewFilters
@@ -165,14 +168,17 @@
             columnHeaderField,
             columnHeaderComparison,
             columnHeaderValue});
+            this.listViewFilters.FullRowSelect = true;
             this.listViewFilters.Location = new System.Drawing.Point(0, 73);
+            this.listViewFilters.MultiSelect = false;
             this.listViewFilters.Name = "listViewFilters";
-            this.listViewFilters.Size = new System.Drawing.Size(541, 140);
+            this.listViewFilters.Size = new System.Drawing.Size(628, 140);
             this.listViewFilters.SmallImageList = this.imageList;
             this.listViewFilters.TabIndex = 10;
             this.listViewFilters.UseCompatibleStateImageBehavior = false;
             this.listViewFilters.View = System.Windows.Forms.View.Details;
             this.listViewFilters.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.listViewFilters_ItemChecked);
+            this.listViewFilters.SelectedIndexChanged += new System.EventHandler(this.listViewFilters_SelectedIndexChanged);
             // 
             // imageList
             // 
@@ -193,27 +199,29 @@
             // 
             // btnAdd
             // 
-            this.btnAdd.Location = new System.Drawing.Point(381, 44);
+            this.btnAdd.Location = new System.Drawing.Point(472, 44);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
             this.btnAdd.TabIndex = 12;
             this.btnAdd.Text = "Add";
             this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // btnRemove
             // 
-            this.btnRemove.Location = new System.Drawing.Point(466, 44);
+            this.btnRemove.Location = new System.Drawing.Point(553, 44);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(75, 23);
             this.btnRemove.TabIndex = 13;
             this.btnRemove.Text = "Remove";
             this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
             // comboBoxDecision
             // 
             this.comboBoxDecision.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxDecision.FormattingEnabled = true;
-            this.comboBoxDecision.Location = new System.Drawing.Point(462, 17);
+            this.comboBoxDecision.Location = new System.Drawing.Point(549, 17);
             this.comboBoxDecision.Name = "comboBoxDecision";
             this.comboBoxDecision.Size = new System.Drawing.Size(79, 21);
             this.comboBoxDecision.TabIndex = 14;
@@ -237,7 +245,7 @@
             this.Controls.Add(this.comboBoxFilterComparison);
             this.Controls.Add(this.comboBoxFilterType);
             this.Name = "ViewFilterControl";
-            this.Size = new System.Drawing.Size(544, 215);
+            this.Size = new System.Drawing.Size(631, 215);
             this.ResumeLayout(false);
             this.PerformLayout();
 

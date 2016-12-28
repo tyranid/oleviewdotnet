@@ -28,21 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.viewFilterControl = new OleViewDotNet.ViewFilterControl();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.viewFilterControl = new OleViewDotNet.ViewFilterControl();
             this.SuspendLayout();
-            // 
-            // viewFilterControl
-            // 
-            this.viewFilterControl.Location = new System.Drawing.Point(12, 12);
-            this.viewFilterControl.Name = "viewFilterControl";
-            this.viewFilterControl.Size = new System.Drawing.Size(544, 215);
-            this.viewFilterControl.TabIndex = 0;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(173, 233);
+            this.btnOK.Location = new System.Drawing.Point(218, 233);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 1;
@@ -53,12 +46,19 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(313, 233);
+            this.btnCancel.Location = new System.Drawing.Point(358, 233);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            // 
+            // viewFilterControl
+            // 
+            this.viewFilterControl.Location = new System.Drawing.Point(12, 12);
+            this.viewFilterControl.Name = "viewFilterControl";
+            this.viewFilterControl.Size = new System.Drawing.Size(636, 215);
+            this.viewFilterControl.TabIndex = 0;
             // 
             // ViewFilterForm
             // 
@@ -66,7 +66,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(560, 261);
+            this.ClientSize = new System.Drawing.Size(650, 261);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.viewFilterControl);

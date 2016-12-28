@@ -16,7 +16,10 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -42,17 +45,23 @@ namespace OleViewDotNet
 
         private FilterSorter m_sorter;
 
+        private static ListViewItem CreateItem(RegistryViewerFilterEntry entry)
+        {
+            ListViewItem item = new ListViewItem(entry.Type.ToString(), entry.Decision == FilterDecision.Include ? 1 : 0);
+            item.SubItems.Add(entry.Field.ToString());
+            item.SubItems.Add(entry.Comparison.ToString());
+            item.SubItems.Add(entry.Value);
+            item.Checked = entry.Enabled;
+            item.Tag = entry.Clone();
+            return item;
+        }
+
         private void UpdateFilter(RegistryViewerFilter filter)
         {
             listViewFilters.Items.Clear();
             foreach (var entry in filter.Filters)
             {
-                ListViewItem item = new ListViewItem(entry.Type.ToString(), entry.Decision == FilterDecision.Include ? 0 : 1);
-                item.SubItems.Add(entry.Field.ToString());
-                item.SubItems.Add(entry.Comparison.ToString());
-                item.SubItems.Add(entry.Value);
-                item.Checked = entry.Enabled;
-                item.Tag = entry.Clone();
+                listViewFilters.Items.Add(CreateItem(entry));
             }
             listViewFilters.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewFilters.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -69,11 +78,33 @@ namespace OleViewDotNet
             return filter;
         }
 
+        private static void PopulateComboBox(ComboBox comboBox, IEnumerable<object> values)
+        {
+            comboBox.Items.Clear();
+            comboBox.Items.AddRange(values.ToArray());
+            if (comboBox.Items.Count > 0)
+            {
+                comboBox.SelectedIndex = 0;
+            }
+        }
+
+        private static void PopulateComboBox(ComboBox comboBox, Type enum_type)
+        {
+            PopulateComboBox(comboBox, Enum.GetValues(enum_type).OfType<object>());
+        }
+
         public ViewFilterControl()
         {
             InitializeComponent();
             m_sorter = new FilterSorter(0);
             listViewFilters.ListViewItemSorter = m_sorter;
+            PopulateComboBox(comboBoxDecision, typeof(FilterDecision));
+            PopulateComboBox(comboBoxFilterComparison, typeof(FilterComparison));
+        }
+
+        public void SetTypes(IEnumerable<FilterType> types)
+        {
+            PopulateComboBox(comboBoxFilterType, types.OfType<object>());
         }
 
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -94,7 +125,7 @@ namespace OleViewDotNet
 
         private void OnFilterChanged()
         {
-            FilterChanged(this, new EventArgs());
+            FilterChanged?.Invoke(this, new EventArgs());
         }
 
         private void listViewFilters_ItemChecked(object sender, ItemCheckedEventArgs e)
@@ -108,6 +139,77 @@ namespace OleViewDotNet
         {
             listViewFilters.Items.Clear();
             OnFilterChanged();
+        }
+
+        private void comboBoxFilterType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBoxField.Items.Clear();
+            PopulateComboBox(comboBoxField, RegistryViewerFilter.GetFieldsForType((FilterType)comboBoxFilterType.SelectedItem));
+        }
+
+        private void comboBoxField_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBoxValue.Items.Clear();
+            comboBoxValue.Text = String.Empty;
+
+            PropertyInfo pi = (PropertyInfo)comboBoxField.SelectedItem;
+            Type type = pi.PropertyType;
+
+            if (type == typeof(bool))
+            {
+                PopulateComboBox(comboBoxValue, new object[] { "True", "False" });
+                comboBoxValue.DropDownStyle = ComboBoxStyle.DropDownList;
+            }
+            else if (type.IsEnum)
+            {
+                PopulateComboBox(comboBoxValue, type);
+                comboBoxValue.DropDownStyle = ComboBoxStyle.DropDownList;
+            }
+            else if (type == typeof(Guid))
+            {
+                comboBoxValue.Text = Guid.Empty.ToString();
+            }
+            else
+            {
+                comboBoxValue.DropDownStyle = ComboBoxStyle.DropDown;
+            }
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            RegistryViewerFilterEntry entry = new RegistryViewerFilterEntry();
+            entry.Type = (FilterType)comboBoxFilterType.SelectedItem;
+            entry.Field = ((PropertyInfo)comboBoxField.SelectedItem).Name;
+            entry.Enabled = true;
+            entry.Decision = (FilterDecision)comboBoxDecision.SelectedItem;
+            entry.Comparison = (FilterComparison)comboBoxFilterComparison.SelectedItem;
+            entry.Value = comboBoxValue.Text;
+            listViewFilters.Items.Add(CreateItem(entry));
+            listViewFilters.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listViewFilters.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            listViewFilters.Sort();
+            OnFilterChanged();
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+            if (listViewFilters.SelectedIndices.Count > 0)
+            {
+                listViewFilters.Items.RemoveAt(listViewFilters.SelectedIndices[0]);
+                OnFilterChanged();
+            }
+        }
+
+        private void listViewFilters_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listViewFilters.SelectedIndices.Count > 0)
+            {
+                btnRemove.Enabled = true;
+            }
+            else
+            {
+                btnRemove.Enabled = false;
+            }
         }
     }
 }

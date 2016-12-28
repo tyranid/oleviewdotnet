@@ -15,16 +15,18 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
     public partial class ViewFilterForm : Form
     {
-        public ViewFilterForm(RegistryViewerFilter filter)
+        public ViewFilterForm(RegistryViewerFilter filter, IEnumerable<FilterType> types)
         {
             InitializeComponent();
             viewFilterControl.Filter = filter;
+            viewFilterControl.SetTypes(types);
         }
 
         public RegistryViewerFilter Filter
@@ -35,6 +37,8 @@ namespace OleViewDotNet
         private void btnOK_Click(object sender, EventArgs e)
         {
             Filter = viewFilterControl.Filter;
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

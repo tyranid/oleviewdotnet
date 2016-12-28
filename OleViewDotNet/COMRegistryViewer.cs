@@ -94,6 +94,10 @@ namespace OleViewDotNet
             m_filter_types = new HashSet<FilterType>();
             m_filter = new RegistryViewerFilter();
             m_mode = mode;
+            foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
+            {
+                comboBoxMode.Items.Add(filter);
+            }
             comboBoxMode.SelectedIndex = 0;
             SetupTree();
         }
@@ -298,7 +302,8 @@ namespace OleViewDotNet
                 clsidNodes[i] = CreateCLSIDNode(ent);                
                 i++;
             }
-
+            m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(clsidNodes);
             Text = "CLSIDs";            
         }
@@ -336,6 +341,7 @@ namespace OleViewDotNet
             }
 
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(nodes.OrderBy(n => n.Text).ToArray());
             Text = "CLSIDs by Name";
         }
@@ -439,6 +445,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.CLSID);
             m_filter_types.Add(FilterType.Server);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
         }
 
@@ -521,6 +528,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.AppID);
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             Text = "Local Services";
         }
@@ -633,6 +641,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.AppID);
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(serverNodes.OrderBy(n => n.Text).ToArray());
             string text = "AppIDs";
             if (filterIL)
@@ -686,6 +695,7 @@ namespace OleViewDotNet
             }
 
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "Explorer PreApproved";   
         }
@@ -729,6 +739,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.LowRights);
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(clsidNodes.ToArray());
             
             Text = "IE Low Rights Elevation Policy"; 
@@ -755,6 +766,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.MimeType);
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(nodes.ToArray());
             Text = "MIME Types";
         }
@@ -1246,20 +1258,45 @@ namespace OleViewDotNet
             {
                 return python_filter(node.Tag);
             }
-            catch (Exception)
+            catch 
             {
                 return false;
             }
         }
 
-        private static bool RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
+        private static FilterResult RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
         {
-            return false;
+            try
+            {
+                return filter.Filter(node.Tag);
+            }
+            catch
+            {
+                return FilterResult.None;
+            }
         }
 
-        private static Func<TreeNode, bool> CreateFilter(string filter, int mode, bool caseSensitive)
+        private enum FilterMode
+        {
+            Contains,
+            BeginsWith,
+            EndsWith,
+            Equals,
+            Glob,
+            Regex,
+            Python,
+            Complex,
+        }
+
+        private static Func<TreeNode, bool> CreateFilter(string filter, FilterMode mode, bool caseSensitive)
         {                        
             StringComparison comp;
+
+            filter = filter.Trim();
+            if (String.IsNullOrEmpty(filter))
+            {
+                return null;
+            }
 
             if(caseSensitive)
             {
@@ -1272,7 +1309,7 @@ namespace OleViewDotNet
 
             switch (mode)
             {
-                case 0:
+                case FilterMode.Contains:
                     if (caseSensitive)
                     {
                         return n => n.Text.Contains(filter);
@@ -1282,33 +1319,29 @@ namespace OleViewDotNet
                         filter = filter.ToLower();
                         return n => n.Text.ToLower().Contains(filter.ToLower());
                     }
-                case 1:
+                case FilterMode.BeginsWith:
                     return n => n.Text.StartsWith(filter, comp);
-                case 2:
+                case FilterMode.EndsWith:
                     return n => n.Text.EndsWith(filter, comp);
-                case 3:
+                case FilterMode.Equals:
                     return n => n.Text.Equals(filter, comp);
-                case 4:
+                case FilterMode.Glob:
                     {
                         Regex r = GlobToRegex(filter, caseSensitive);
 
                         return n => r.IsMatch(n.Text);
                     }
-                case 5:
+                case FilterMode.Regex:
                     {
                         Regex r = new Regex(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
                         return n => r.IsMatch(n.Text);
                     }
-                case 6:
+                case FilterMode.Python:
                     {
                         Func<object, bool> python_filter = CreatePythonFilter(filter);
 
                         return n => RunPythonFilter(n, python_filter);
-                    }
-                case 7:
-                    {
-                        return n => n
                     }
                 default:
                     throw new ArgumentException("Invalid mode value");
@@ -1316,16 +1349,16 @@ namespace OleViewDotNet
         }
 
         // Check if top node or one of its subnodes matches the filter
-        private static bool FilterNode(TreeNode n, Func<TreeNode, bool> filterFunc)
+        private static FilterResult FilterNode(TreeNode n, Func<TreeNode, FilterResult> filterFunc)
         {
-            bool result = filterFunc(n);
+            FilterResult result = filterFunc(n);
 
-            if (!result)
+            if (result == FilterResult.None)
             {
                 foreach (TreeNode node in n.Nodes)
                 {
                     result = FilterNode(node, filterFunc);
-                    if (result)
+                    if (result == FilterResult.Include)
                     {
                         break;
                     }
@@ -1338,14 +1371,33 @@ namespace OleViewDotNet
         private async void btnApply_Click(object sender, EventArgs e)
         {
             try
-            {                
-                string filter = textBoxFilter.Text.Trim();
-                TreeNode[] nodes;
-
-                if (filter.Length > 0)
+            {
+                TreeNode[] nodes = null;
+                Func<TreeNode, FilterResult> filterFunc = null;
+                FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
+                if (mode == FilterMode.Complex)
                 {
-                    Func<TreeNode, bool> filterFunc = CreateFilter(filter, comboBoxMode.SelectedIndex, false);
-                    nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc)).ToArray());
+                    using (ViewFilterForm form = new ViewFilterForm(m_filter, m_filter_types))
+                    {
+                        if (form.ShowDialog(this) == DialogResult.OK)
+                        {
+                            m_filter = form.Filter;
+                            if (m_filter.Filters.Count > 0)
+                            {
+                                filterFunc = n => RunComplexFilter(n, m_filter);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Func<TreeNode, bool> filter = CreateFilter(textBoxFilter.Text, mode, false);
+                    filterFunc = n => filter(n) ? FilterResult.Include : FilterResult.None;
+                }
+
+                if (filterFunc != null)
+                {
+                    nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc) == FilterResult.Include).ToArray());
                 }
                 else
                 {

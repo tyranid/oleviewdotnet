@@ -50,6 +50,13 @@ namespace OleViewDotNet
         EndsWith,
     }
 
+    public enum FilterResult
+    {
+        None,
+        Include,
+        Exclude,
+    }
+
     public class RegistryViewerFilterEntry
     {
         public FilterDecision Decision { get; set; }
@@ -74,8 +81,8 @@ namespace OleViewDotNet
                     return false;
                 }
 
-                FieldInfo fi = RegistryViewerFilter.GetFieldForTypeAndName(Type, Field);
-                object value_obj = fi.GetValue(entry);
+                PropertyInfo pi = RegistryViewerFilter.GetFieldForTypeAndName(Type, Field);
+                object value_obj = pi.GetValue(entry);
                 if (value_obj == null)
                 {
                     return false;
@@ -117,30 +124,28 @@ namespace OleViewDotNet
             Filters = new List<RegistryViewerFilterEntry>();
         }
 
-        public bool Include(object entry)
+        public FilterResult Filter(object entry)
         {
-            if (entry == null)
+            if (entry != null)
             {
-                return false;
-            }
-
-            foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Exclude))
-            {
-                if (filter.IsMatch(entry))
+                foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Exclude))
                 {
-                    return false;
+                    if (filter.IsMatch(entry))
+                    {
+                        return FilterResult.Exclude;
+                    }
+                }
+
+                foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include))
+                {
+                    if (filter.IsMatch(entry))
+                    {
+                        return FilterResult.Include;
+                    }
                 }
             }
 
-            foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include))
-            {
-                if (filter.IsMatch(entry))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return FilterResult.None;
         }
 
         public static Type GetTypeForFilter(FilterType type)
@@ -170,25 +175,25 @@ namespace OleViewDotNet
             }
         }
 
-        private static bool IsFilterField(FieldInfo fi)
+        private static bool IsFilterProperty(PropertyInfo pi)
         {
-            Type t = fi.FieldType;
-            return t.IsPrimitive || t.IsEnum || t == typeof(Guid) || t == typeof(string);
+            Type t = pi.PropertyType;
+            return !pi.GetMethod.IsStatic && (t.IsPrimitive || t.IsEnum || t == typeof(Guid) || t == typeof(string));
         }
 
-        public static IEnumerable<FieldInfo> GetFieldsForType(FilterType type)
+        public static IEnumerable<PropertyInfo> GetFieldsForType(FilterType type)
         {
-            return GetTypeForFilter(type).GetFields().Where(f => IsFilterField(f));
+            return GetTypeForFilter(type).GetProperties().Where(f => IsFilterProperty(f)).OrderBy(f => f.Name);
         }
 
-        public static FieldInfo GetFieldForTypeAndName(FilterType type, string name)
+        public static PropertyInfo GetFieldForTypeAndName(FilterType type, string name)
         {
-            FieldInfo fi = GetTypeForFilter(type).GetField(name);
-            if (fi == null || !IsFilterField(fi))
+            PropertyInfo pi = GetTypeForFilter(type).GetProperty(name);
+            if (pi == null || !IsFilterProperty(pi))
             {
                 throw new ArgumentException("Invalid field for filter", nameof(name));
             }
-            return fi;
+            return pi;
         }
     }
 }

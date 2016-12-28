@@ -288,15 +288,6 @@
             // 
             this.comboBoxMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMode.FormattingEnabled = true;
-            this.comboBoxMode.Items.AddRange(new object[] {
-            "Contains",
-            "Begins With",
-            "Ends With",
-            "Equals",
-            "Glob",
-            "Regex",
-            "Python",
-            "Complex"});
             this.comboBoxMode.Location = new System.Drawing.Point(458, 5);
             this.comboBoxMode.Name = "comboBoxMode";
             this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
