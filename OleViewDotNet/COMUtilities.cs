@@ -32,6 +32,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -1459,6 +1460,67 @@ namespace OleViewDotNet
                     Program.ShowError(window, dlg.Error);
                 }
                 return null;
+            }
+        }
+
+        private class ReportQueryProgress
+        {
+            private int _total_count;
+            private int _current;
+            private IProgress<Tuple<string, int>> _progress;
+
+            const int MINIMUM_REPORT_SIZE = 25;
+
+            public ReportQueryProgress(IProgress<Tuple<string, int>> progress, int total_count)
+            {
+                _total_count = total_count;
+                _progress = progress;
+            }
+
+            public void Report()
+            {
+                int current = Interlocked.Increment(ref _current);
+                if ((current % MINIMUM_REPORT_SIZE) == 1)
+                {
+                    _progress.Report(new Tuple<string, int>(String.Format("Querying Interfaces: {0} of {1}", current, _total_count),
+                        (100 * current) / _total_count));
+                }
+            }
+        }
+
+        private static bool QueryAllInterfaces(IEnumerable<COMCLSIDEntry> clsids, IProgress<Tuple<string, int>> progress, CancellationToken token, int concurrent_queries)
+        {
+            ParallelOptions po = new ParallelOptions();
+            po.CancellationToken = token;
+            po.MaxDegreeOfParallelism = concurrent_queries;
+
+            ReportQueryProgress query_progress = new ReportQueryProgress(progress, clsids.Count());
+
+            Parallel.ForEach(clsids, po, clsid =>
+            {
+                po.CancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    query_progress.Report();
+                    clsid.LoadSupportedInterfaces(false);
+                }
+                catch
+                {
+                }
+            });
+
+            return true;
+        }
+
+        internal static bool QueryAllInterfaces(IWin32Window parent, COMRegistry registry, IEnumerable<COMServerType> server_types, int concurrent_queries)
+        {
+            using (WaitingDialog dlg = new WaitingDialog(
+                (p, t) => COMUtilities.QueryAllInterfaces(registry.Clsids.Values.Where(c => !c.InterfacesLoaded && server_types.Contains(c.DefaultServerType)),
+                            p, t, concurrent_queries),
+                s => s))
+            {
+                dlg.Text = "Querying Interfaces";
+                return dlg.ShowDialog(parent) == DialogResult.OK;
             }
         }
     }

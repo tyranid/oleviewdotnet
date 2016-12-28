@@ -25,6 +25,7 @@ using WeifenLuo.WinFormsUI.Docking;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 using System.Reflection;
+using System.Threading;
 
 namespace OleViewDotNet
 {
@@ -606,15 +607,16 @@ namespace OleViewDotNet
             }
         }
 
-        private object QueryAllInterfaces(IProgress<string> progress)
-        {
-            //var query = m_registry.Clsids.Values.AsParallel().WithCancellation(
-
-            return null;
-        }
-
         private void menuFileQueryAllInterfaces_Click(object sender, EventArgs e)
         {
+            using (QueryInterfacesOptionsForm options = new QueryInterfacesOptionsForm())
+            {
+                if (options.ShowDialog(this) == DialogResult.OK)
+                {
+                    COMUtilities.QueryAllInterfaces(this, m_registry, 
+                        options.ServerTypes, options.ConcurrentQueries);
+                }
+            }
         }
     }
 }

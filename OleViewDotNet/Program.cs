@@ -125,6 +125,11 @@ namespace OleViewDotNet
             }
         }
 
+        static IEnumerable<COMServerType> ParseServerTypes(string servers)
+        {
+            string[] ss = servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            return ss.Select(s => (COMServerType)Enum.Parse(typeof(COMServerType), s, true)).ToArray();
+        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -136,18 +141,33 @@ namespace OleViewDotNet
             string save_file = null;
             bool enum_clsid = false;
             bool show_help = false;
+            bool query_interfaces = false;
+            int concurrent_queries = Environment.ProcessorCount;
             COMRegistryMode mode = COMRegistryMode.Merged;
+            IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
 
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },
                 { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
+                { "q|query", "Query all interfaces for database", v => query_interfaces = v != null },
+                { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
+                { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
                 { "m",  "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
                 { "u",  "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
-            List<string> additional_args = opts.Parse(args);
+            List<string> additional_args = new List<string>();
+
+            try
+            {
+                additional_args = opts.Parse(args);
+            }
+            catch
+            {
+                show_help = true;
+            }
 
             if (show_help || (enum_clsid && additional_args.Count < 4))
             {
@@ -179,9 +199,24 @@ namespace OleViewDotNet
 
                 try
                 {
-                    _appContext = new MultiApplicationContext(new MainForm(
-                        database_file != null ? COMUtilities.LoadRegistry(null, database_file) 
-                        : COMUtilities.LoadRegistry(null, mode)));
+                    COMRegistry registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
+                        : COMUtilities.LoadRegistry(null, mode);
+
+                    if (query_interfaces)
+                    {
+                        if (!COMUtilities.QueryAllInterfaces(null, registry, server_types, concurrent_queries))
+                        {
+                            Environment.Exit(1);
+                        }
+                    }
+
+                    if (save_file != null)
+                    {
+                        registry.Save(save_file);
+                        Environment.Exit(0);
+                    }
+
+                    _appContext = new MultiApplicationContext(new MainForm(registry));
                     Application.Run(_appContext);
                 }
                 catch (Exception ex)

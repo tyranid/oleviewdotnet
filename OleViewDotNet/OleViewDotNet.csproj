@@ -139,6 +139,12 @@
     <Compile Include="ObjectHexEditor.Designer.cs">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="QueryInterfacesOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QueryInterfacesOptionsForm.Designer.cs">
+      <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="RegistryViewerFilter.cs" />
     <Compile Include="RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
@@ -331,6 +337,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ObjectHexEditor.resx">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QueryInterfacesOptionsForm.resx">
+      <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="RegistryPropertiesControl.resx">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>

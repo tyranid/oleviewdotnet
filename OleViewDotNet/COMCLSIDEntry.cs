@@ -518,6 +518,14 @@ namespace OleViewDotNet
         }
 
         /// <summary>
+        /// Indicates that the class' interface list has been loaded.
+        /// </summary>
+        public bool InterfacesLoaded
+        {
+            get { return m_loaded_interfaces; }
+        }
+
+        /// <summary>
         /// Get list of interfaces.
         /// </summary>
         /// <remarks>You must have called LoadSupportedInterfaces before this call to get any useful output.</remarks>

@@ -207,6 +207,12 @@ namespace OleViewDotNet
                 AppendFormatLine(strRet, "Interface Proxies: {0}", proxies.Length);
             }
 
+            if (ent.InterfacesLoaded)
+            {
+                AppendFormatLine(strRet, "Instance Interfaces: {0}", ent.Interfaces.Count());
+                AppendFormatLine(strRet, "Factory Interfaces: {0}", ent.FactoryInterfaces.Count());
+            }
+
             return strRet.ToString();
         }
 
