@@ -1183,6 +1183,11 @@ namespace OleViewDotNet
                     }
                 }
 
+                if (m_filter_types.Contains(FilterType.CLSID))
+                {
+                    contextMenuStrip.Items.Add(queryAllInterfacesToolStripMenuItem);
+                }
+
                 if (PropertiesControl.SupportsProperties(node.Tag))
                 {
                     contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
@@ -1392,7 +1397,10 @@ namespace OleViewDotNet
                 else
                 {
                     Func<TreeNode, bool> filter = CreateFilter(textBoxFilter.Text, mode, false);
-                    filterFunc = n => filter(n) ? FilterResult.Include : FilterResult.None;
+                    if (filter != null)
+                    {
+                        filterFunc = n => filter(n) ? FilterResult.Include : FilterResult.None;
+                    }
                 }
 
                 if (filterFunc != null)
@@ -1595,6 +1603,40 @@ namespace OleViewDotNet
         private async void createClassFactoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             await CreateClassFactory();
+        }
+
+        private void GetClsidsFromNodes(List<COMCLSIDEntry> clsids, TreeNodeCollection nodes)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (node.Tag is COMCLSIDEntry)
+                {
+                    clsids.Add((COMCLSIDEntry)node.Tag);
+                }
+
+                if (node.Nodes.Count > 0)
+                {
+                    GetClsidsFromNodes(clsids, node.Nodes);
+                }
+            }
+        }
+
+        private void queryAllInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (QueryInterfacesOptionsForm options = new QueryInterfacesOptionsForm())
+            {
+                if (options.ShowDialog(this) == DialogResult.OK)
+                {
+                    List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
+                    GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
+                    if (clsids.Count > 0)
+                    {
+                        COMUtilities.QueryAllInterfaces(this, clsids,
+                            options.ServerTypes, options.ConcurrentQueries,
+                            options.RefreshInterfaces);
+                    }
+                }
+            }
         }
     }
 }

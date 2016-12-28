@@ -613,7 +613,7 @@ namespace OleViewDotNet
             {
                 if (options.ShowDialog(this) == DialogResult.OK)
                 {
-                    COMUtilities.QueryAllInterfaces(this, m_registry, 
+                    COMUtilities.QueryAllInterfaces(this, m_registry.Clsids.Values, 
                         options.ServerTypes, options.ConcurrentQueries,
                         options.RefreshInterfaces);
                 }

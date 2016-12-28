@@ -206,7 +206,7 @@ namespace OleViewDotNet
 
                     if (query_interfaces)
                     {
-                        if (!COMUtilities.QueryAllInterfaces(null, registry, server_types, concurrent_queries, refresh_interfaces))
+                        if (!COMUtilities.QueryAllInterfaces(null, registry.Clsids.Values, server_types, concurrent_queries, refresh_interfaces))
                         {
                             Environment.Exit(1);
                         }

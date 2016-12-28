@@ -57,6 +57,7 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
+            this.queryAllInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -115,9 +116,10 @@
             this.viewProxyDefinitionToolStripMenuItem,
             this.viewLaunchPermissionsToolStripMenuItem,
             this.viewAccessPermissionsToolStripMenuItem,
+            this.queryAllInterfacesToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 290);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 334);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -311,6 +313,13 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
+            // queryAllInterfacesToolStripMenuItem
+            // 
+            this.queryAllInterfacesToolStripMenuItem.Name = "queryAllInterfacesToolStripMenuItem";
+            this.queryAllInterfacesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.queryAllInterfacesToolStripMenuItem.Text = "Query All Interfaces";
+            this.queryAllInterfacesToolStripMenuItem.Click += new System.EventHandler(this.queryAllInterfacesToolStripMenuItem_Click);
+            // 
             // COMRegistryViewer
             // 
             this.Controls.Add(this.splitContainer);
@@ -354,5 +363,6 @@
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createClassFactoryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem queryAllInterfacesToolStripMenuItem;
     }
 }
