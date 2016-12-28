@@ -47,7 +47,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMRegistry registry = Program.LoadRegistry(this, dlg.FileName);
+                        COMRegistry registry = COMUtilities.LoadRegistry(this, dlg.FileName);
                         comboBox.Items.Add(registry);
                         comboBox.SelectedItem = registry;
                     }
@@ -95,7 +95,7 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    DiffRegistry = Program.DiffRegistry(this, left, right, GetDiffMode());
+                    DiffRegistry = COMUtilities.DiffRegistry(this, left, right, GetDiffMode());
                     DialogResult = DialogResult.OK;
                     Close();
                 }

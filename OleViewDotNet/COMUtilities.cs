@@ -31,6 +31,8 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Security.AccessControl;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
@@ -1407,6 +1409,58 @@ namespace OleViewDotNet
             return name;
         }
 
+        internal static COMRegistry LoadRegistry(IWin32Window window,
+            Func<IProgress<string>, CancellationToken, object> worker)
+        {
+            using (WaitingDialog loader = new WaitingDialog(worker))
+            {
+                if (loader.ShowDialog(window) == DialogResult.OK)
+                {
+                    return loader.Result as COMRegistry;
+                }
+                else
+                {
+                    throw loader.Error;
+                }
+            }
+        }
+
+        internal static COMRegistry LoadRegistry(IWin32Window window, COMRegistryMode mode)
+        {
+            if (mode == COMRegistryMode.Diff)
+            {
+                throw new ArgumentException("Can't load a diff registry");
+            }
+            return LoadRegistry(window, (progress, token) => COMRegistry.Load(mode, null, progress));
+        }
+
+        internal static COMRegistry LoadRegistry(IWin32Window window, string database_file)
+        {
+            return LoadRegistry(window, (progress, token) => COMRegistry.Load(database_file, progress));
+        }
+
+        internal static COMRegistry DiffRegistry(IWin32Window window, COMRegistry left, COMRegistry right, COMRegistryDiffMode mode)
+        {
+            return LoadRegistry(window, (progress, token) => COMRegistry.Diff(left, right, mode, progress));
+        }
+
+        internal static Assembly LoadTypeLib(IWin32Window window, string path)
+        {
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
+            {
+                dlg.Text = String.Format("Loading TypeLib {0}", path);
+                dlg.CancelEnabled = false;
+                if (dlg.ShowDialog(window) == DialogResult.OK)
+                {
+                    return (Assembly)dlg.Result;
+                }
+                else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+                {
+                    Program.ShowError(window, dlg.Error);
+                }
+                return null;
+            }
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

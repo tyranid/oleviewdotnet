@@ -427,7 +427,7 @@ namespace OleViewDotNet
                 dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    LoadRegistry(() => Program.LoadRegistry(this, dlg.FileName));
+                    LoadRegistry(() => COMUtilities.LoadRegistry(this, dlg.FileName));
                 }
             }
         }
@@ -486,12 +486,12 @@ namespace OleViewDotNet
 
         private void menuFileOpenMachineOnly_Click(object sender, EventArgs e)
         {
-            LoadRegistry(() => Program.LoadRegistry(this, COMRegistryMode.MachineOnly));
+            LoadRegistry(() => COMUtilities.LoadRegistry(this, COMRegistryMode.MachineOnly));
         }
 
         private void menuFileOpenUserOnly_Click(object sender, EventArgs e)
         {
-            LoadRegistry(() => Program.LoadRegistry(this, COMRegistryMode.UserOnly));
+            LoadRegistry(() => COMUtilities.LoadRegistry(this, COMRegistryMode.UserOnly));
         }
 
         private void menuFileDiff_Click(object sender, EventArgs e)
@@ -572,7 +572,7 @@ namespace OleViewDotNet
                 dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    Assembly typelib = Program.LoadTypeLib(this, dlg.FileName);
+                    Assembly typelib = COMUtilities.LoadTypeLib(this, dlg.FileName);
                     if (typelib != null)
                     {
                         HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty));
@@ -604,6 +604,17 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
+
+        private object QueryAllInterfaces(IProgress<string> progress)
+        {
+            //var query = m_registry.Clsids.Values.AsParallel().WithCancellation(
+
+            return null;
+        }
+
+        private void menuFileQueryAllInterfaces_Click(object sender, EventArgs e)
+        {
         }
     }
 }

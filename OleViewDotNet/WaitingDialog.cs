@@ -16,34 +16,28 @@
 
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-    public partial class WaitingDialog : Form
+    partial class WaitingDialog : Form
     {
         private class ReportProgress : IProgress<string>
         {
-            private bool _cancel;
+            private CancellationToken _token;
             private Action<string> _report;
             private Func<string, string> _format;
 
-            public void Cancel()
-            {
-                _cancel = true;
-            }
-
             public void Report(string data)
             {
-                if (_cancel)
-                {
-                    throw new OperationCanceledException();
-                }
+                _token.ThrowIfCancellationRequested();
                 _report(_format(data));
             }
 
-            public ReportProgress(Action<string> report, Func<string, string> format)
+            public ReportProgress(Action<string> report, CancellationToken token, Func<string, string> format)
             {
+                _token = token;
                 _format = format;
                 _report = report;
             }
@@ -51,22 +45,25 @@ namespace OleViewDotNet
 
         private ReportProgress m_progress;
         private BackgroundWorker m_worker;
+        private CancellationTokenSource m_cancellation;
 
-        public WaitingDialog(Func<IProgress<string>, object> worker_func, Func<string, string> format_label)
+        public WaitingDialog(Func<IProgress<string>, CancellationToken, object> worker_func, Func<string, string> format_label)
         {
             if (format_label == null)
             {
                 format_label = s => String.Format("Currently Processing {0}. Please Wait.", s);
             }
-            m_progress = new ReportProgress(SetLabel, format_label);
+            m_cancellation = new CancellationTokenSource();
+            CancellationToken token = m_cancellation.Token;
+            m_progress = new ReportProgress(SetLabel, token, format_label);
             m_worker = new BackgroundWorker();
-            m_worker.DoWork += (sender, e) => Result = worker_func(m_progress);
+            m_worker.DoWork += (sender, e) => Result = worker_func(m_progress, token);
             m_worker.RunWorkerCompleted += RunWorkerCompletedCallback;
             InitializeComponent();
             SetLabel(String.Empty);
         }
 
-        public WaitingDialog(Func<IProgress<string>, object> worker_func) 
+        public WaitingDialog(Func<IProgress<string>, CancellationToken, object> worker_func) 
             : this(worker_func, null)
         {
         }
@@ -114,7 +111,7 @@ namespace OleViewDotNet
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            m_progress.Cancel();
+            m_cancellation.Cancel();
         }
     }
 }

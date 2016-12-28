@@ -287,7 +287,7 @@ namespace OleViewDotNet
         {
             if (m_typelib != null)
             {
-                Assembly typelib = Program.LoadTypeLib(this, m_typelib.NativePath);
+                Assembly typelib = COMUtilities.LoadTypeLib(this, m_typelib.NativePath);
                 if (typelib != null)
                 {
                     Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface.Iid));

@@ -1400,7 +1400,7 @@ namespace OleViewDotNet
                 
                 if(ent != null)
                 {
-                    Assembly typelib = Program.LoadTypeLib(this, ent.NativePath);
+                    Assembly typelib = COMUtilities.LoadTypeLib(this, ent.NativePath);
                     if (typelib != null)
                     {
                         Program.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name, typelib, selected_guid));

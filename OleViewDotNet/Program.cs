@@ -16,12 +16,11 @@
 
 using NDesk.Options;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Windows.Forms;
-using System.Reflection;
 
 namespace OleViewDotNet
 {
@@ -126,58 +125,6 @@ namespace OleViewDotNet
             }
         }
 
-        internal static COMRegistry LoadRegistry(IWin32Window window, 
-            Func<IProgress<string>, object> worker)
-        {
-            using (WaitingDialog loader = new WaitingDialog(worker))
-            {
-                if (loader.ShowDialog(window) == DialogResult.OK)
-                {
-                    return loader.Result as COMRegistry;
-                }
-                else
-                {
-                    throw loader.Error;
-                }
-            }
-        }
-
-        internal static COMRegistry LoadRegistry(IWin32Window window, COMRegistryMode mode)
-        {
-            if (mode == COMRegistryMode.Diff)
-            {
-                throw new ArgumentException("Can't load a diff registry");
-            }
-            return LoadRegistry(window, progress => COMRegistry.Load(mode, null, progress));
-        }
-
-        internal static COMRegistry LoadRegistry(IWin32Window window, string database_file)
-        {
-            return LoadRegistry(window, progress => COMRegistry.Load(database_file, progress));
-        }
-
-        internal static COMRegistry DiffRegistry(IWin32Window window, COMRegistry left, COMRegistry right, COMRegistryDiffMode mode)
-        {
-            return LoadRegistry(window, progress => COMRegistry.Diff(left, right, mode, progress));
-        }
-
-        internal static Assembly LoadTypeLib(IWin32Window window, string path)
-        {
-            using (WaitingDialog dlg = new WaitingDialog(p => COMUtilities.LoadTypeLib(path, p), s => s))
-            {
-                dlg.Text = String.Format("Loading TypeLib {0}", path);
-                dlg.CancelEnabled = false;
-                if (dlg.ShowDialog(window) == DialogResult.OK)
-                {
-                    return (Assembly)dlg.Result;
-                }
-                else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
-                {
-                    Program.ShowError(window, dlg.Error);
-                }
-                return null;
-            }
-        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -233,7 +180,8 @@ namespace OleViewDotNet
                 try
                 {
                     _appContext = new MultiApplicationContext(new MainForm(
-                        database_file != null ? LoadRegistry(null, database_file) : LoadRegistry(null, mode)));
+                        database_file != null ? COMUtilities.LoadRegistry(null, database_file) 
+                        : COMUtilities.LoadRegistry(null, mode)));
                     Application.Run(_appContext);
                 }
                 catch (Exception ex)
