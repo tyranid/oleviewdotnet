@@ -682,6 +682,7 @@ namespace OleViewDotNet
 
             m_filter_types.Add(FilterType.Category);
             m_filter_types.Add(FilterType.CLSID);
+            m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(catNodes);
             Text = "Implemented Categories";
         }
@@ -1702,6 +1703,15 @@ namespace OleViewDotNet
             if (clsid != null)
             {
                 await CreateElevated(clsid, true);
+            }
+        }
+
+        private void comboBoxMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxMode.SelectedItem != null)
+            {
+                FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
+                textBoxFilter.Enabled = mode != FilterMode.Complex;
             }
         }
     }

@@ -123,7 +123,7 @@
             this.queryAllInterfacesToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 334);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 312);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -307,6 +307,7 @@
             this.comboBoxMode.Name = "comboBoxMode";
             this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
             this.comboBoxMode.TabIndex = 4;
+            this.comboBoxMode.SelectedIndexChanged += new System.EventHandler(this.comboBoxMode_SelectedIndexChanged);
             // 
             // btnApply
             // 

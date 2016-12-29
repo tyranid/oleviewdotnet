@@ -90,6 +90,11 @@ namespace OleViewDotNet
         public async Task HostObject(COMCLSIDEntry ent, object obj)
         {
             Dictionary<string, string> props = new Dictionary<string, string>();
+
+            if (ent == null)
+            {
+                ent = new COMCLSIDEntry(Guid.Empty, COMServerType.UnknownServer);
+            }
             props.Add("CLSID", ent.Clsid.ToString("B"));
             props.Add("Name", ent.Name);
             props.Add("Server", ent.DefaultServer);
