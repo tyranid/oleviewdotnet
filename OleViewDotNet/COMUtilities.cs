@@ -1265,12 +1265,11 @@ namespace OleViewDotNet
         }
 
         // Walk series of jumps until we either find an address we don't know or we change modules.
-        internal static IntPtr GetTargetAddress(IntPtr curr_module, IntPtr ptr)
+        internal static IntPtr GetTargetAddress(SafeLibraryHandle curr_module, IntPtr ptr)
         {
             byte start_byte = Marshal.ReadByte(ptr);
             switch (start_byte)
             {
-                // TODO: We don't handle delay loaded DLLs atm.
                 // Absolute jump.
                 case 0xFF:
                     if (Marshal.ReadByte(ptr + 1) != 0x25)
@@ -1293,13 +1292,43 @@ namespace OleViewDotNet
                 case 0xE9:
                     ptr = ptr + 5 + Marshal.ReadInt32(ptr + 1);
                     break;
+                // lea rax, ofs import - Delay load 64bit
+                case 0x48:
+                    {
+                        if (!Environment.Is64BitProcess || Marshal.ReadByte(ptr + 1) != 0x8D || Marshal.ReadByte(ptr + 2) != 0x05)
+                        {
+                            return ptr;
+                        }
+                        IntPtr iat = ptr + Marshal.ReadInt32(ptr + 3) + 7;
+                        Dictionary<IntPtr, IntPtr> delayed_loaded = curr_module.ParseDelayedImports();
+                        if (delayed_loaded.ContainsKey(iat))
+                        {
+                            return delayed_loaded[iat];
+                        }
+                        return ptr;
+                    }
+                // mov eax, ofs import - Delay load 32bit
+                case 0xB8:
+                    {
+                        if (Environment.Is64BitProcess)
+                        {
+                            return ptr;
+                        }
+                        IntPtr iat = Marshal.ReadIntPtr(ptr + 1);
+                        Dictionary<IntPtr, IntPtr> delayed_loaded = curr_module.ParseDelayedImports();
+                        if (delayed_loaded.ContainsKey(iat))
+                        {
+                            return delayed_loaded[iat];
+                        }
+                        return ptr;
+                    }
                 default:
                     return ptr;
             }
 
             using (SafeLibraryHandle lib = COMUtilities.SafeGetModuleHandle(ptr))
             {
-                if (lib == null || lib.DangerousGetHandle() != curr_module)
+                if (lib == null || lib.DangerousGetHandle() != curr_module.DangerousGetHandle())
                 {
                     return ptr;
                 }
@@ -1533,6 +1562,9 @@ namespace OleViewDotNet
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
         private static extern IntPtr GetProcAddress(IntPtr hModule, string name);
 
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi, EntryPoint = "GetProcAddress")]
+        private static extern IntPtr GetProcAddressOrdinal(IntPtr hModule, IntPtr name);
+
         internal SafeLibraryHandle(IntPtr ptr, bool ownsHandle) : base(ownsHandle)
         {
         }
@@ -1574,6 +1606,11 @@ namespace OleViewDotNet
             return GetProcAddress(handle, name);
         }
 
+        public IntPtr GetFunctionPointer(IntPtr ordinal)
+        {
+            return GetProcAddressOrdinal(handle, ordinal);
+        }
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
 
@@ -1594,6 +1631,113 @@ namespace OleViewDotNet
                 return path.Substring(index + 1);
             }
             return "Unknown";
+        }
+
+        [DllImport("dbghelp.dll", SetLastError = true)]
+        static extern IntPtr ImageDirectoryEntryToData(IntPtr Base, bool MappedAsImage, ushort DirectoryEntry, out int Size);
+
+        const ushort IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT = 13;
+
+        private IntPtr RvaToVA(long rva)
+        {
+            return new IntPtr(handle.ToInt64() + rva);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct IMAGE_DELAY_IMPORT_DESCRIPTOR
+        {
+            public uint Characteristics;
+            public int szName;
+            public int phmod;
+            public int pIAT;
+            public int pINT;
+            public int pBoundIAT;
+            public int pUnloadIAT;
+            public uint dwTimeStamp;
+        }
+
+        private void ParseDelayedImport(Dictionary<IntPtr, IntPtr> imports, IMAGE_DELAY_IMPORT_DESCRIPTOR desc)
+        {
+            if (desc.pIAT == 0 || desc.pINT == 0)
+            {
+                return;
+            }
+
+            string name = Marshal.PtrToStringAnsi(RvaToVA(desc.szName));
+            IntPtr IAT = RvaToVA(desc.pIAT);
+            IntPtr INT = RvaToVA(desc.pINT);
+
+            try
+            {
+                using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(name))
+                {
+                    IntPtr import_name_rva = Marshal.ReadIntPtr(INT);
+
+                    while (import_name_rva != IntPtr.Zero)
+                    {
+                        IntPtr import;
+                        // Ordinal
+                        if (import_name_rva.ToInt64() < 0)
+                        {
+                            import = lib.GetFunctionPointer(new IntPtr(import_name_rva.ToInt64() & 0xFFFF));
+                        }
+                        else
+                        {
+                            IntPtr import_ofs = RvaToVA(import_name_rva.ToInt64() + 2);
+                            string import_name = Marshal.PtrToStringAnsi(import_ofs);
+                            import = lib.GetFunctionPointer(import_name);
+                        }
+
+                        if (import != IntPtr.Zero)
+                        {
+                            imports[IAT] = import;
+                        }
+
+                        INT += IntPtr.Size;
+                        IAT += IntPtr.Size;
+                        import_name_rva = Marshal.ReadIntPtr(INT);
+                    }
+                }
+            }
+            catch (Win32Exception)
+            {
+            }
+        }
+
+        private Dictionary<IntPtr, IntPtr> _delayed_imports;
+
+        public Dictionary<IntPtr, IntPtr> ParseDelayedImports()
+        {
+            if (_delayed_imports != null)
+            {
+                return _delayed_imports;
+            }
+            _delayed_imports = new Dictionary<IntPtr, IntPtr>();
+            int size;
+            IntPtr delayed_imports = ImageDirectoryEntryToData(handle, true, IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT, out size);
+            if (delayed_imports == null)
+            {
+                return _delayed_imports;
+            }
+
+            int i = 0;
+            int desc_size = Marshal.SizeOf(typeof(IMAGE_DELAY_IMPORT_DESCRIPTOR));
+            // Should really only do up to sizeof image delay import desc
+            while (i <= (size - desc_size))
+            {
+                IMAGE_DELAY_IMPORT_DESCRIPTOR desc = Marshal.PtrToStructure<IMAGE_DELAY_IMPORT_DESCRIPTOR>(delayed_imports);
+                if (desc.szName == 0)
+                {
+                    break;
+                }
+
+                ParseDelayedImport(_delayed_imports, desc);
+
+                delayed_imports += desc_size;
+                size -= desc_size;
+            }
+
+            return _delayed_imports;
         }
     }
 }

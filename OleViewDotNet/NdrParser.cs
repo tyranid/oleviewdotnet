@@ -1137,7 +1137,7 @@ namespace OleViewDotNet
                     m_marshalers = new StandardUserMarshalers();
                 }
 
-                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module.DangerousGetHandle(), 
+                IntPtr usersize_ptr = COMUtilities.GetTargetAddress(module, 
                     Marshal.ReadIntPtr(context.StubDesc.aUserMarshalQuadruple, type.QuadrupleIndex * IntPtr.Size * 4));
 
                 NdrKnownTypes known_type = m_marshalers.GetKnownType(usersize_ptr);
