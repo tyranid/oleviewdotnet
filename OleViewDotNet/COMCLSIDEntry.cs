@@ -323,7 +323,7 @@ namespace OleViewDotNet
 
             if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
             {
-                servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32));
+                servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, "<APPID HOSTED>"));
             }
 
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
