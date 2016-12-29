@@ -1037,7 +1037,6 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                
                 if (node.Tag is COMCLSIDEntry)
                 {
                     ent = (COMCLSIDEntry)node.Tag;
@@ -1118,6 +1117,18 @@ namespace OleViewDotNet
                 item.Click += consoleToolStripMenuItem_Click;
                 createInSessionToolStripMenuItem.DropDownItems.Add(item);
             }
+            createSpecialToolStripMenuItem.DropDownItems.Add(createInSessionToolStripMenuItem);
+        }
+
+        private static bool HasServerType(COMCLSIDEntry clsid, COMServerType type)
+        {
+            if (clsid.DefaultServerType == COMServerType.UnknownServer)
+            {
+                // If we have no servers we assume anything is possible.
+                return true;
+            }
+
+            return clsid.Servers.ContainsKey(type);
         }
 
         private void contextMenuStrip_Opening(object sender, CancelEventArgs e)
@@ -1135,16 +1146,38 @@ namespace OleViewDotNet
                 {
                     contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                     contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
-                    SetupCreateSpecialSessions();
-                    contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
-                    contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
+
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-
-                    if (progid != null)
+                    if (progid != null && m_registry.Clsids.ContainsKey(progid.Clsid))
                     {
                         clsid = m_registry.MapClsidToEntry(progid.Clsid);
                     }
+
+                    createSpecialToolStripMenuItem.DropDownItems.Clear();
+
+                    if (HasServerType(clsid, COMServerType.InProcServer32))
+                    {
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createInProcServerToolStripMenuItem);
+                    }
+
+                    if (HasServerType(clsid, COMServerType.InProcHandler32))
+                    {
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createInProcHandlerToolStripMenuItem);
+                    }
+
+                    if (HasServerType(clsid, COMServerType.LocalServer32))
+                    {
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createLocalServerToolStripMenuItem);
+                        SetupCreateSpecialSessions();
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createElevatedToolStripMenuItem);
+                    }
+
+                    createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryToolStripMenuItem);
+
+                    contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
+                    
+                    contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
                     if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                     {
@@ -1538,11 +1571,10 @@ namespace OleViewDotNet
             await CreateInstance(CLSCTX.CLSCTX_INPROC_SERVER);
         }
 
-        private async Task CreateInSession(COMCLSIDEntry ent, string session_id)
+        private async Task CreateFromMoniker(COMCLSIDEntry ent, string moniker)
         {
             try
             {
-                string moniker = String.Format("session:{0}!new:{1}", session_id, ent.Clsid);
                 object obj = Marshal.BindToMoniker(moniker);
                 await SetupObjectView(ent, obj);
             }
@@ -1550,6 +1582,17 @@ namespace OleViewDotNet
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private async Task CreateInSession(COMCLSIDEntry ent, string session_id)
+        {
+            await CreateFromMoniker(ent, String.Format("session:{0}!new:{1}", session_id, ent.Clsid));
+        }
+
+        private async Task CreateElevated(COMCLSIDEntry ent, bool factory)
+        {
+            await CreateFromMoniker(ent, String.Format("Elevation:Administrator!{0}:{1}", 
+                factory ? "clsid" : "new", ent.Clsid));
         }
 
         private async void consoleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1636,6 +1679,29 @@ namespace OleViewDotNet
                             options.RefreshInterfaces);
                     }
                 }
+            }
+        }
+
+        private async void createInProcHandlerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(CLSCTX.CLSCTX_INPROC_HANDLER);
+        }
+
+        private async void instanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMCLSIDEntry clsid = GetSelectedClsidEntry();
+            if (clsid != null)
+            {
+                await CreateElevated(clsid, false);
+            }
+        }
+
+        private async void classFactoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMCLSIDEntry clsid = GetSelectedClsidEntry();
+            if (clsid != null)
+            {
+                await CreateElevated(clsid, true);
             }
         }
     }

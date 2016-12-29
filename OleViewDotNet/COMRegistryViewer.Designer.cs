@@ -51,13 +51,17 @@
             this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.queryAllInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.queryAllInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createInProcHandlerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createElevatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.classFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -176,8 +180,10 @@
             this.createSpecialToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createLocalServerToolStripMenuItem,
             this.createInProcServerToolStripMenuItem,
+            this.createInProcHandlerToolStripMenuItem,
             this.createClassFactoryToolStripMenuItem,
-            this.createInSessionToolStripMenuItem});
+            this.createInSessionToolStripMenuItem,
+            this.createElevatedToolStripMenuItem});
             this.createSpecialToolStripMenuItem.Name = "createSpecialToolStripMenuItem";
             this.createSpecialToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.createSpecialToolStripMenuItem.Text = "Create Special";
@@ -185,21 +191,21 @@
             // createLocalServerToolStripMenuItem
             // 
             this.createLocalServerToolStripMenuItem.Name = "createLocalServerToolStripMenuItem";
-            this.createLocalServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createLocalServerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.createLocalServerToolStripMenuItem.Text = "Create Local Server";
             this.createLocalServerToolStripMenuItem.Click += new System.EventHandler(this.createLocalServerToolStripMenuItem_Click);
             // 
             // createInProcServerToolStripMenuItem
             // 
             this.createInProcServerToolStripMenuItem.Name = "createInProcServerToolStripMenuItem";
-            this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.createInProcServerToolStripMenuItem.Text = "Create InProc Server";
             this.createInProcServerToolStripMenuItem.Click += new System.EventHandler(this.createInProcServerToolStripMenuItem_Click);
             // 
             // createClassFactoryToolStripMenuItem
             // 
             this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
-            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.createClassFactoryToolStripMenuItem.Text = "Create Class Factory";
             this.createClassFactoryToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryToolStripMenuItem_Click);
             // 
@@ -208,13 +214,13 @@
             this.createInSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.consoleToolStripMenuItem});
             this.createInSessionToolStripMenuItem.Name = "createInSessionToolStripMenuItem";
-            this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.createInSessionToolStripMenuItem.Text = "Create In Session";
             // 
             // consoleToolStripMenuItem
             // 
             this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.consoleToolStripMenuItem.Tag = "Console";
             this.consoleToolStripMenuItem.Text = "Console";
             this.consoleToolStripMenuItem.Click += new System.EventHandler(this.consoleToolStripMenuItem_Click);
@@ -246,6 +252,13 @@
             this.viewAccessPermissionsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.viewAccessPermissionsToolStripMenuItem.Text = "View Access Permissions";
             this.viewAccessPermissionsToolStripMenuItem.Click += new System.EventHandler(this.viewAccessPermissionsToolStripMenuItem_Click);
+            // 
+            // queryAllInterfacesToolStripMenuItem
+            // 
+            this.queryAllInterfacesToolStripMenuItem.Name = "queryAllInterfacesToolStripMenuItem";
+            this.queryAllInterfacesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.queryAllInterfacesToolStripMenuItem.Text = "Query All Interfaces";
+            this.queryAllInterfacesToolStripMenuItem.Click += new System.EventHandler(this.queryAllInterfacesToolStripMenuItem_Click);
             // 
             // propertiesToolStripMenuItem
             // 
@@ -313,12 +326,35 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // queryAllInterfacesToolStripMenuItem
+            // createInProcHandlerToolStripMenuItem
             // 
-            this.queryAllInterfacesToolStripMenuItem.Name = "queryAllInterfacesToolStripMenuItem";
-            this.queryAllInterfacesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.queryAllInterfacesToolStripMenuItem.Text = "Query All Interfaces";
-            this.queryAllInterfacesToolStripMenuItem.Click += new System.EventHandler(this.queryAllInterfacesToolStripMenuItem_Click);
+            this.createInProcHandlerToolStripMenuItem.Name = "createInProcHandlerToolStripMenuItem";
+            this.createInProcHandlerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createInProcHandlerToolStripMenuItem.Text = "Create InProc Handler";
+            this.createInProcHandlerToolStripMenuItem.Click += new System.EventHandler(this.createInProcHandlerToolStripMenuItem_Click);
+            // 
+            // createElevatedToolStripMenuItem
+            // 
+            this.createElevatedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.instanceToolStripMenuItem,
+            this.classFactoryToolStripMenuItem});
+            this.createElevatedToolStripMenuItem.Name = "createElevatedToolStripMenuItem";
+            this.createElevatedToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createElevatedToolStripMenuItem.Text = "Create Elevated";
+            // 
+            // instanceToolStripMenuItem
+            // 
+            this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.instanceToolStripMenuItem.Text = "Instance";
+            this.instanceToolStripMenuItem.Click += new System.EventHandler(this.instanceToolStripMenuItem_Click);
+            // 
+            // classFactoryToolStripMenuItem
+            // 
+            this.classFactoryToolStripMenuItem.Name = "classFactoryToolStripMenuItem";
+            this.classFactoryToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.classFactoryToolStripMenuItem.Text = "Class Factory";
+            this.classFactoryToolStripMenuItem.Click += new System.EventHandler(this.classFactoryToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -364,5 +400,9 @@
         private System.Windows.Forms.ToolStripMenuItem viewProxyDefinitionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createClassFactoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queryAllInterfacesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createInProcHandlerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createElevatedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem instanceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem classFactoryToolStripMenuItem;
     }
 }
