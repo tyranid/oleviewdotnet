@@ -191,11 +191,53 @@ namespace OleViewDotNet
             OnFilterChanged();
         }
 
+        private void UpdateInputForEntry(RegistryViewerFilterEntry entry)
+        {
+            bool in_list = false;
+            foreach (FilterType type in comboBoxFilterType.Items)
+            {
+                if (entry.Type == type)
+                {
+                    in_list = true;
+                    break;
+                }
+            }
+
+            if (!in_list)
+            {
+                return;
+            }
+
+            in_list = false;
+            comboBoxFilterType.SelectedItem = entry.Type;
+            foreach (PropertyInfo pi in comboBoxField.Items)
+            {
+                if (pi.Name == entry.Field)
+                {
+                    comboBoxField.SelectedItem = pi;
+                    in_list = true;
+                    break;
+                }
+            }
+
+            if (!in_list)
+            {
+                return;
+            }
+
+            comboBoxFilterComparison.SelectedItem = entry.Comparison;
+            comboBoxValue.Text = entry.Value;
+            comboBoxDecision.SelectedItem = entry.Decision;
+        }
+
         private void btnRemove_Click(object sender, EventArgs e)
         {
             if (listViewFilters.SelectedIndices.Count > 0)
             {
+                RegistryViewerFilterEntry entry = (RegistryViewerFilterEntry)listViewFilters.SelectedItems[0].Tag;
                 listViewFilters.Items.RemoveAt(listViewFilters.SelectedIndices[0]);
+                UpdateInputForEntry(entry);                
+
                 OnFilterChanged();
             }
         }
