@@ -321,6 +321,11 @@ namespace OleViewDotNet
                         String.Format(@"AppID\{0}", Path.GetFileName(DefaultServer)), "AppID");
             }
 
+            if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
+            {
+                servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32));
+            }
+
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             if (key.HasSubkey("Control"))
             {
@@ -475,8 +480,7 @@ namespace OleViewDotNet
                 return Servers[COMServerType.InProcHandler32];
             }
 
-            return new COMCLSIDServerEntry(AppID != Guid.Empty 
-                ? COMServerType.LocalServer32 : COMServerType.UnknownServer);
+            return new COMCLSIDServerEntry(COMServerType.UnknownServer);
         }
 
         /// <summary>
