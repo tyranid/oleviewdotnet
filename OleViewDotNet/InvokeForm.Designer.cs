@@ -123,6 +123,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "InvokeForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "InvokeForm";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.InvokeForm_FormClosed);
             this.Load += new System.EventHandler(this.InvokeForm_Load);

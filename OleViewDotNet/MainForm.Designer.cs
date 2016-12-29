@@ -40,6 +40,7 @@
             this.menuFileOpenMachineOnly = new System.Windows.Forms.MenuItem();
             this.menuFileOpenUserOnly = new System.Windows.Forms.MenuItem();
             this.menuFileDiff = new System.Windows.Forms.MenuItem();
+            this.menuFileQueryAllInterfaces = new System.Windows.Forms.MenuItem();
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
@@ -89,7 +90,6 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuFileQueryAllInterfaces = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -167,6 +167,12 @@
             this.menuFileDiff.Index = 7;
             this.menuFileDiff.Text = "Diff Registries";
             this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
+            // 
+            // menuFileQueryAllInterfaces
+            // 
+            this.menuFileQueryAllInterfaces.Index = 8;
+            this.menuFileQueryAllInterfaces.Text = "Query All Interfaces";
+            this.menuFileQueryAllInterfaces.Click += new System.EventHandler(this.menuFileQueryAllInterfaces_Click);
             // 
             // menuItem8
             // 
@@ -495,12 +501,6 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuFileQueryAllInterfaces
-            // 
-            this.menuFileQueryAllInterfaces.Index = 8;
-            this.menuFileQueryAllInterfaces.Text = "Query All Interfaces";
-            this.menuFileQueryAllInterfaces.Click += new System.EventHandler(this.menuFileQueryAllInterfaces_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -510,6 +510,7 @@
             this.IsMdiContainer = true;
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "OleView .NET";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);

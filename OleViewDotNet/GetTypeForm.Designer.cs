@@ -120,6 +120,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "GetTypeForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GetTypeForm";
             this.Load += new System.EventHandler(this.GetTypeForm_Load);
             this.ResumeLayout(false);

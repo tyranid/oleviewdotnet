@@ -76,6 +76,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "WaitingDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Loading...";
             this.Load += new System.EventHandler(this.LoadingDialog_Load);
             this.ResumeLayout(false);

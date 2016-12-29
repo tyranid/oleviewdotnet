@@ -63,6 +63,8 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CreateIStreamForm";
+            this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Create IStream";
             this.ResumeLayout(false);
 

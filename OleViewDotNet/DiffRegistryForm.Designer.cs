@@ -178,6 +178,7 @@
             this.Name = "DiffRegistryForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Difference Registry";
             groupBoxDiffMode.ResumeLayout(false);
             groupBoxDiffMode.PerformLayout();
