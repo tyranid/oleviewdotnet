@@ -78,7 +78,7 @@ namespace OleViewDotNet
             listViewProperties.Columns.Add("Value");
             listViewProperties.Columns.Add("Writeable");
 
-            lblName.Text = "Name: " + m_dispType.Name;
+            lblName.Text = m_dispType.Name;
             MemberInfo[] members = m_dispType.GetMembers();
             foreach (MemberInfo info in members)
             {

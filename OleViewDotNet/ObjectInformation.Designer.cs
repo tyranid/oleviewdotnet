@@ -34,10 +34,10 @@
             this.listViewProperties = new System.Windows.Forms.ListView();
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.btnCreate = new System.Windows.Forms.Button();
-            this.btnMarshal = new System.Windows.Forms.Button();
-            this.btnSaveStream = new System.Windows.Forms.Button();
-            this.btnDispatch = new System.Windows.Forms.Button();
             this.btnOleContainer = new System.Windows.Forms.Button();
+            this.btnMarshal = new System.Windows.Forms.Button();
+            this.btnDispatch = new System.Windows.Forms.Button();
+            this.btnSaveStream = new System.Windows.Forms.Button();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -50,108 +50,19 @@
             label1.AutoSize = true;
             label1.Location = new System.Drawing.Point(3, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(57, 13);
+            label1.Size = new System.Drawing.Size(106, 25);
             label1.TabIndex = 0;
             label1.Text = "Properties:";
-            // 
-            // listViewProperties
-            // 
-            tableLayoutPanel.SetColumnSpan(this.listViewProperties, 6);
-            this.listViewProperties.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewProperties.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listViewProperties.FullRowSelect = true;
-            this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProperties.Location = new System.Drawing.Point(3, 16);
-            this.listViewProperties.Name = "listViewProperties";
-            this.listViewProperties.Size = new System.Drawing.Size(1030, 214);
-            this.listViewProperties.TabIndex = 1;
-            this.listViewProperties.UseCompatibleStateImageBehavior = false;
-            this.listViewProperties.View = System.Windows.Forms.View.Details;
             // 
             // label2
             // 
             label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(3, 233);
+            label2.Location = new System.Drawing.Point(3, 227);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(57, 13);
+            label2.Size = new System.Drawing.Size(103, 25);
             label2.TabIndex = 2;
             label2.Text = "Interfaces:";
-            // 
-            // listViewInterfaces
-            // 
-            tableLayoutPanel.SetColumnSpan(this.listViewInterfaces, 6);
-            this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewInterfaces.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listViewInterfaces.FullRowSelect = true;
-            this.listViewInterfaces.Location = new System.Drawing.Point(3, 249);
-            this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(1030, 214);
-            this.listViewInterfaces.TabIndex = 3;
-            this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
-            this.listViewInterfaces.View = System.Windows.Forms.View.Details;
-            this.listViewInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewInterfaces_ColumnClick);
-            this.listViewInterfaces.DoubleClick += new System.EventHandler(this.listViewInterfaces_DoubleClick);
-            // 
-            // btnCreate
-            // 
-            this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnCreate.Enabled = false;
-            this.btnCreate.Location = new System.Drawing.Point(327, 469);
-            this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(75, 23);
-            this.btnCreate.TabIndex = 8;
-            this.btnCreate.Text = "Create";
-            this.btnCreate.UseVisualStyleBackColor = true;
-            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
-            // 
-            // btnMarshal
-            // 
-            this.btnMarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnMarshal.Enabled = false;
-            this.btnMarshal.Location = new System.Drawing.Point(246, 469);
-            this.btnMarshal.Name = "btnMarshal";
-            this.btnMarshal.Size = new System.Drawing.Size(75, 23);
-            this.btnMarshal.TabIndex = 7;
-            this.btnMarshal.Text = "Marshal";
-            this.btnMarshal.UseVisualStyleBackColor = true;
-            this.btnMarshal.Click += new System.EventHandler(this.btnMarshal_Click);
-            // 
-            // btnSaveStream
-            // 
-            this.btnSaveStream.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSaveStream.Enabled = false;
-            this.btnSaveStream.Location = new System.Drawing.Point(165, 469);
-            this.btnSaveStream.Name = "btnSaveStream";
-            this.btnSaveStream.Size = new System.Drawing.Size(75, 23);
-            this.btnSaveStream.TabIndex = 6;
-            this.btnSaveStream.Text = "Save Strm";
-            this.btnSaveStream.UseVisualStyleBackColor = true;
-            this.btnSaveStream.Click += new System.EventHandler(this.btnSaveStream_Click);
-            // 
-            // btnDispatch
-            // 
-            this.btnDispatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDispatch.Enabled = false;
-            this.btnDispatch.Location = new System.Drawing.Point(84, 469);
-            this.btnDispatch.Name = "btnDispatch";
-            this.btnDispatch.Size = new System.Drawing.Size(75, 23);
-            this.btnDispatch.TabIndex = 5;
-            this.btnDispatch.Text = "Open Disp";
-            this.btnDispatch.UseVisualStyleBackColor = true;
-            this.btnDispatch.Click += new System.EventHandler(this.btnDispatch_Click);
-            // 
-            // btnOleContainer
-            // 
-            this.btnOleContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnOleContainer.Enabled = false;
-            this.btnOleContainer.Location = new System.Drawing.Point(3, 469);
-            this.btnOleContainer.Name = "btnOleContainer";
-            this.btnOleContainer.Size = new System.Drawing.Size(75, 23);
-            this.btnOleContainer.TabIndex = 4;
-            this.btnOleContainer.Text = "Open OLE";
-            this.btnOleContainer.UseVisualStyleBackColor = true;
-            this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
             // tableLayoutPanel
             // 
@@ -182,6 +93,100 @@
             tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanel.Size = new System.Drawing.Size(1036, 495);
             tableLayoutPanel.TabIndex = 5;
+            // 
+            // listViewProperties
+            // 
+            tableLayoutPanel.SetColumnSpan(this.listViewProperties, 6);
+            this.listViewProperties.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewProperties.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewProperties.FullRowSelect = true;
+            this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.listViewProperties.Location = new System.Drawing.Point(3, 28);
+            this.listViewProperties.Name = "listViewProperties";
+            this.listViewProperties.Size = new System.Drawing.Size(1030, 196);
+            this.listViewProperties.TabIndex = 1;
+            this.listViewProperties.UseCompatibleStateImageBehavior = false;
+            this.listViewProperties.View = System.Windows.Forms.View.Details;
+            // 
+            // listViewInterfaces
+            // 
+            tableLayoutPanel.SetColumnSpan(this.listViewInterfaces, 6);
+            this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewInterfaces.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewInterfaces.FullRowSelect = true;
+            this.listViewInterfaces.Location = new System.Drawing.Point(3, 255);
+            this.listViewInterfaces.Name = "listViewInterfaces";
+            this.listViewInterfaces.Size = new System.Drawing.Size(1030, 196);
+            this.listViewInterfaces.TabIndex = 3;
+            this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
+            this.listViewInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewInterfaces_ColumnClick);
+            this.listViewInterfaces.DoubleClick += new System.EventHandler(this.listViewInterfaces_DoubleClick);
+            // 
+            // btnCreate
+            // 
+            this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCreate.AutoSize = true;
+            this.btnCreate.Enabled = false;
+            this.btnCreate.Location = new System.Drawing.Point(486, 457);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(81, 35);
+            this.btnCreate.TabIndex = 8;
+            this.btnCreate.Text = "Create";
+            this.btnCreate.UseVisualStyleBackColor = true;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
+            // btnOleContainer
+            // 
+            this.btnOleContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnOleContainer.AutoSize = true;
+            this.btnOleContainer.Enabled = false;
+            this.btnOleContainer.Location = new System.Drawing.Point(3, 457);
+            this.btnOleContainer.Name = "btnOleContainer";
+            this.btnOleContainer.Size = new System.Drawing.Size(116, 35);
+            this.btnOleContainer.TabIndex = 4;
+            this.btnOleContainer.Text = "Open OLE";
+            this.btnOleContainer.UseVisualStyleBackColor = true;
+            this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
+            // 
+            // btnMarshal
+            // 
+            this.btnMarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnMarshal.AutoSize = true;
+            this.btnMarshal.Enabled = false;
+            this.btnMarshal.Location = new System.Drawing.Point(388, 457);
+            this.btnMarshal.Name = "btnMarshal";
+            this.btnMarshal.Size = new System.Drawing.Size(92, 35);
+            this.btnMarshal.TabIndex = 7;
+            this.btnMarshal.Text = "Marshal";
+            this.btnMarshal.UseVisualStyleBackColor = true;
+            this.btnMarshal.Click += new System.EventHandler(this.btnMarshal_Click);
+            // 
+            // btnDispatch
+            // 
+            this.btnDispatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnDispatch.AutoSize = true;
+            this.btnDispatch.Enabled = false;
+            this.btnDispatch.Location = new System.Drawing.Point(125, 457);
+            this.btnDispatch.Name = "btnDispatch";
+            this.btnDispatch.Size = new System.Drawing.Size(115, 35);
+            this.btnDispatch.TabIndex = 5;
+            this.btnDispatch.Text = "Open Disp";
+            this.btnDispatch.UseVisualStyleBackColor = true;
+            this.btnDispatch.Click += new System.EventHandler(this.btnDispatch_Click);
+            // 
+            // btnSaveStream
+            // 
+            this.btnSaveStream.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSaveStream.AutoSize = true;
+            this.btnSaveStream.Enabled = false;
+            this.btnSaveStream.Location = new System.Drawing.Point(246, 457);
+            this.btnSaveStream.Name = "btnSaveStream";
+            this.btnSaveStream.Size = new System.Drawing.Size(136, 35);
+            this.btnSaveStream.TabIndex = 6;
+            this.btnSaveStream.Text = "Save Stream";
+            this.btnSaveStream.UseVisualStyleBackColor = true;
+            this.btnSaveStream.Click += new System.EventHandler(this.btnSaveStream_Click);
             // 
             // ObjectInformation
             // 
