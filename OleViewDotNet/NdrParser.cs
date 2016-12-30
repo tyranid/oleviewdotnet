@@ -136,7 +136,6 @@ namespace OleViewDotNet
         FC_END_OF_UNIVERSE          // 0xba
     }
 
-
     [Flags]
     public enum NdrInterpreterFlags : byte
     {
@@ -807,6 +806,23 @@ namespace OleViewDotNet
             }
             ReadElementType(context, reader);
         }
+
+        protected override int GetArraySize()
+        {
+            if (VarianceDescriptor != null 
+                && VarianceDescriptor.CorrelationType == NdrCorrelationType.FC_CONSTANT_CONFORMANCE)
+            {
+                return VarianceDescriptor.Offset;
+            }
+
+            if (ConformanceDescriptor != null 
+                && ConformanceDescriptor.CorrelationType == NdrCorrelationType.FC_CONSTANT_CONFORMANCE)
+            {
+                return ConformanceDescriptor.Offset;
+            }
+
+            return base.GetArraySize();
+        }
     }
 
     public class NdrBogusArrayTypeReference : NdrBaseArrayTypeReference
@@ -826,7 +842,24 @@ namespace OleViewDotNet
 
         protected override int GetArraySize()
         {
-            return NumberofElements;
+            if (NumberofElements > 0)
+            {
+                return NumberofElements;
+            }
+
+            if (VarianceDescriptor != null 
+                && VarianceDescriptor.CorrelationType == NdrCorrelationType.FC_CONSTANT_CONFORMANCE)
+            {
+                return VarianceDescriptor.Offset;
+            }
+
+            if (ConformanceDescriptor != null 
+                && ConformanceDescriptor.CorrelationType == NdrCorrelationType.FC_CONSTANT_CONFORMANCE)
+            {
+                return ConformanceDescriptor.Offset;
+            }
+
+            return base.GetArraySize();
         }
 
         public override int GetSize()
