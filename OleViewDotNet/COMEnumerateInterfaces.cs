@@ -132,7 +132,7 @@ namespace OleViewDotNet
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
 
             int hr = 0;
-            hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, IntPtr.Zero, ref IID_IUnknown, out pfactory);
+            hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, null, ref IID_IUnknown, out pfactory);
             // If we can't get class object, no chance we'll get object.
             if (hr != 0)
             {

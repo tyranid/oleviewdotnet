@@ -37,7 +37,6 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-
     public enum ObjectSafetyFlags
     {
         INTERFACESAFE_FOR_UNTRUSTED_CALLER	= 0x00000001,
@@ -169,6 +168,15 @@ namespace OleViewDotNet
             }
         }
 
+        public IntPtr GetObjectPointer()
+        {
+            if (pItf != IntPtr.Zero)
+            {
+                Marshal.AddRef(pItf);
+            }
+            return pItf;
+        }
+
         public int HResult()
         {
             return hr;
@@ -192,6 +200,29 @@ namespace OleViewDotNet
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public sealed class COSERVERINFO : IDisposable
+    {
+        int dwReserved1;
+        [MarshalAs(UnmanagedType.LPWStr)]
+        string pwszName;
+        IntPtr pAuthInfo;
+        int dwReserved2;
+
+        void IDisposable.Dispose()
+        {
+            if (pAuthInfo != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(pAuthInfo);
+            }
+        }
+
+        public COSERVERINFO(string name)
+        {
+            pwszName = name;
+        }   
+    }
+
     public static class COMUtilities
     {
         private enum RegKind
@@ -206,8 +237,10 @@ namespace OleViewDotNet
             [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
         [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]        
         public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
+        [DllImport("ole32.dll", EntryPoint = "CoCreateInstanceEx", CallingConvention = CallingConvention.StdCall)]
+        public static extern int CoCreateInstanceEx(ref Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
         [DllImport("ole32.dll", EntryPoint = "CoGetClassObject", CallingConvention = CallingConvention.StdCall)]
-        public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, IntPtr pServerInfo, ref Guid riid, out IntPtr ppv);
+        public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, ref Guid riid, out IntPtr ppv);
         [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 

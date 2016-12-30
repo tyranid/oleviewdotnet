@@ -44,9 +44,13 @@
             this.createSpecialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createLocalServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInProcServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createInProcHandlerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createClassFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createElevatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.classFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,10 +62,8 @@
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.createInProcHandlerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createElevatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.classFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createClassFactoryRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -123,7 +125,7 @@
             this.queryAllInterfacesToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 312);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 334);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -181,7 +183,9 @@
             this.createLocalServerToolStripMenuItem,
             this.createInProcServerToolStripMenuItem,
             this.createInProcHandlerToolStripMenuItem,
+            this.createRemoteToolStripMenuItem,
             this.createClassFactoryToolStripMenuItem,
+            this.createClassFactoryRemoteToolStripMenuItem,
             this.createInSessionToolStripMenuItem,
             this.createElevatedToolStripMenuItem});
             this.createSpecialToolStripMenuItem.Name = "createSpecialToolStripMenuItem";
@@ -202,6 +206,13 @@
             this.createInProcServerToolStripMenuItem.Text = "Create InProc Server";
             this.createInProcServerToolStripMenuItem.Click += new System.EventHandler(this.createInProcServerToolStripMenuItem_Click);
             // 
+            // createInProcHandlerToolStripMenuItem
+            // 
+            this.createInProcHandlerToolStripMenuItem.Name = "createInProcHandlerToolStripMenuItem";
+            this.createInProcHandlerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createInProcHandlerToolStripMenuItem.Text = "Create InProc Handler";
+            this.createInProcHandlerToolStripMenuItem.Click += new System.EventHandler(this.createInProcHandlerToolStripMenuItem_Click);
+            // 
             // createClassFactoryToolStripMenuItem
             // 
             this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
@@ -220,10 +231,33 @@
             // consoleToolStripMenuItem
             // 
             this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.consoleToolStripMenuItem.Tag = "Console";
             this.consoleToolStripMenuItem.Text = "Console";
             this.consoleToolStripMenuItem.Click += new System.EventHandler(this.consoleToolStripMenuItem_Click);
+            // 
+            // createElevatedToolStripMenuItem
+            // 
+            this.createElevatedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.instanceToolStripMenuItem,
+            this.classFactoryToolStripMenuItem});
+            this.createElevatedToolStripMenuItem.Name = "createElevatedToolStripMenuItem";
+            this.createElevatedToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createElevatedToolStripMenuItem.Text = "Create Elevated";
+            // 
+            // instanceToolStripMenuItem
+            // 
+            this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.instanceToolStripMenuItem.Text = "Instance";
+            this.instanceToolStripMenuItem.Click += new System.EventHandler(this.instanceToolStripMenuItem_Click);
+            // 
+            // classFactoryToolStripMenuItem
+            // 
+            this.classFactoryToolStripMenuItem.Name = "classFactoryToolStripMenuItem";
+            this.classFactoryToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.classFactoryToolStripMenuItem.Text = "Class Factory";
+            this.classFactoryToolStripMenuItem.Click += new System.EventHandler(this.classFactoryToolStripMenuItem_Click);
             // 
             // viewTypeLibraryToolStripMenuItem
             // 
@@ -327,35 +361,19 @@
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // createInProcHandlerToolStripMenuItem
+            // createRemoteToolStripMenuItem
             // 
-            this.createInProcHandlerToolStripMenuItem.Name = "createInProcHandlerToolStripMenuItem";
-            this.createInProcHandlerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-            this.createInProcHandlerToolStripMenuItem.Text = "Create InProc Handler";
-            this.createInProcHandlerToolStripMenuItem.Click += new System.EventHandler(this.createInProcHandlerToolStripMenuItem_Click);
+            this.createRemoteToolStripMenuItem.Name = "createRemoteToolStripMenuItem";
+            this.createRemoteToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createRemoteToolStripMenuItem.Text = "Create Remote";
+            this.createRemoteToolStripMenuItem.Click += new System.EventHandler(this.createRemoteToolStripMenuItem_Click);
             // 
-            // createElevatedToolStripMenuItem
+            // createClassFactoryRemoteToolStripMenuItem
             // 
-            this.createElevatedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.instanceToolStripMenuItem,
-            this.classFactoryToolStripMenuItem});
-            this.createElevatedToolStripMenuItem.Name = "createElevatedToolStripMenuItem";
-            this.createElevatedToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-            this.createElevatedToolStripMenuItem.Text = "Create Elevated";
-            // 
-            // instanceToolStripMenuItem
-            // 
-            this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.instanceToolStripMenuItem.Text = "Instance";
-            this.instanceToolStripMenuItem.Click += new System.EventHandler(this.instanceToolStripMenuItem_Click);
-            // 
-            // classFactoryToolStripMenuItem
-            // 
-            this.classFactoryToolStripMenuItem.Name = "classFactoryToolStripMenuItem";
-            this.classFactoryToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.classFactoryToolStripMenuItem.Text = "Class Factory";
-            this.classFactoryToolStripMenuItem.Click += new System.EventHandler(this.classFactoryToolStripMenuItem_Click);
+            this.createClassFactoryRemoteToolStripMenuItem.Name = "createClassFactoryRemoteToolStripMenuItem";
+            this.createClassFactoryRemoteToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.createClassFactoryRemoteToolStripMenuItem.Text = "Create Class Factory Remote";
+            this.createClassFactoryRemoteToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryRemoteToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -405,5 +423,7 @@
         private System.Windows.Forms.ToolStripMenuItem createElevatedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem instanceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem classFactoryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createRemoteToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createClassFactoryRemoteToolStripMenuItem;
     }
 }

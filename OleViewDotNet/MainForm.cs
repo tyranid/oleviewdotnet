@@ -186,7 +186,7 @@ namespace OleViewDotNet
                             props.Add("Name", ent.Name);
                             props.Add("Server", ent.DefaultServer);
 
-                            comObj = ent.CreateInstanceAsObject(frm.ClsCtx);
+                            comObj = ent.CreateInstanceAsObject(frm.ClsCtx, null);
                             await ent.LoadSupportedInterfacesAsync(false);
                             ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                         }
@@ -528,7 +528,7 @@ namespace OleViewDotNet
                         COMCLSIDEntry entry = m_registry.GetFileClass(dlg.FileName);
                         if (entry != null)
                         {
-                            IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext);
+                            IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext, null);
                             ps.Load(dlg.FileName, (int)STGM.STGM_READ);
                             await HostObject(entry, ps, false);
                         }

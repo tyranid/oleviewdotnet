@@ -1050,14 +1050,14 @@ namespace OleViewDotNet
             return ent;
         }
 
-        private async Task CreateInstance(CLSCTX clsctx)
+        private async Task CreateInstance(CLSCTX clsctx, string server)
         {
             COMCLSIDEntry ent = GetSelectedClsidEntry();
             if (ent != null)
             {
                 try
                 {
-                    object comObj = ent.CreateInstanceAsObject(clsctx);
+                    object comObj = ent.CreateInstanceAsObject(clsctx, server);
                     if (comObj != null)
                     {
                         await SetupObjectView(ent, comObj, false);
@@ -1070,14 +1070,14 @@ namespace OleViewDotNet
             }
         }
 
-        private async Task CreateClassFactory()
+        private async Task CreateClassFactory(string server)
         {
             COMCLSIDEntry ent = GetSelectedClsidEntry();
             if (ent != null)
             {
                 try
                 {
-                    object comObj = ent.CreateClassFactory();
+                    object comObj = ent.CreateClassFactory(server);
                     if (comObj != null)
                     {
                         await SetupObjectView(ent, comObj, true);
@@ -1092,7 +1092,7 @@ namespace OleViewDotNet
 
         private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_ALL);
+            await CreateInstance(CLSCTX.CLSCTX_ALL, null);
         }
 
         private void EnableViewPermissions(COMAppIDEntry appid)
@@ -1172,9 +1172,11 @@ namespace OleViewDotNet
                         createSpecialToolStripMenuItem.DropDownItems.Add(createLocalServerToolStripMenuItem);
                         SetupCreateSpecialSessions();
                         createSpecialToolStripMenuItem.DropDownItems.Add(createElevatedToolStripMenuItem);
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createRemoteToolStripMenuItem);
                     }
 
                     createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryToolStripMenuItem);
+                    createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
 
                     contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                     
@@ -1564,12 +1566,12 @@ namespace OleViewDotNet
 
         private async void createLocalServerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_LOCAL_SERVER);
+            await CreateInstance(CLSCTX.CLSCTX_LOCAL_SERVER, null);
         }
 
         private async void createInProcServerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_INPROC_SERVER);
+            await CreateInstance(CLSCTX.CLSCTX_INPROC_SERVER, null);
         }
 
         private async Task CreateFromMoniker(COMCLSIDEntry ent, string moniker)
@@ -1646,7 +1648,7 @@ namespace OleViewDotNet
 
         private async void createClassFactoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateClassFactory();
+            await CreateClassFactory(null);
         }
 
         private void GetClsidsFromNodes(List<COMCLSIDEntry> clsids, TreeNodeCollection nodes)
@@ -1685,7 +1687,7 @@ namespace OleViewDotNet
 
         private async void createInProcHandlerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_INPROC_HANDLER);
+            await CreateInstance(CLSCTX.CLSCTX_INPROC_HANDLER, null);
         }
 
         private async void instanceToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1712,6 +1714,30 @@ namespace OleViewDotNet
             {
                 FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
                 textBoxFilter.Enabled = mode != FilterMode.Complex;
+            }
+        }
+
+        private async void createRemoteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (GetTextForm frm = new GetTextForm("localhost"))
+            {
+                frm.Text = "Enter Remote Host";
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    await CreateInstance(CLSCTX.CLSCTX_SERVER, frm.Data);
+                }
+            }
+        }
+
+        private async void createClassFactoryRemoteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (GetTextForm frm = new GetTextForm("localhost"))
+            {
+                frm.Text = "Enter Remote Host";
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    await CreateClassFactory(frm.Data);
+                }
             }
         }
     }

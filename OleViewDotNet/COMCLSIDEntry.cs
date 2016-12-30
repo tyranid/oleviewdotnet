@@ -493,6 +493,11 @@ namespace OleViewDotNet
         /// <exception cref="Win32Exception">Thrown on error.</exception>
         public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
         {
+            if (Clsid == Guid.Empty)
+            {
+                return false;
+            }
+
             if (refresh || !m_loaded_interfaces)
             {
                 COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
@@ -590,7 +595,7 @@ namespace OleViewDotNet
             }           
         }
 
-        public IntPtr CreateInstance(CLSCTX dwContext)
+        public IntPtr CreateInstance(CLSCTX dwContext, string server)
         {
             IntPtr pInterface = IntPtr.Zero;
             
@@ -612,19 +617,46 @@ namespace OleViewDotNet
             
             Guid iid = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
             Guid clsid = Clsid;
-            int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
 
-            if (iError != 0)
+            int hr = 0;
+            if (server != null)
             {
-                Marshal.ThrowExceptionForHR(iError);
+                MULTI_QI[] qis = new MULTI_QI[1];
+                qis[0] = new MULTI_QI(iid);
+                COSERVERINFO server_info = new COSERVERINFO(server);
+                try
+                {
+                    hr = COMUtilities.CoCreateInstanceEx(ref clsid, IntPtr.Zero, dwContext, server_info, 1, qis);
+                    if (hr == 0)
+                    {
+                        hr = qis[0].HResult();
+                        if (hr == 0)
+                        {
+                            pInterface = qis[0].GetObjectPointer();
+                        }
+                    }
+                }
+                finally
+                {
+                    ((IDisposable)qis[0]).Dispose();
+                }
+            }
+            else
+            {
+                hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
+            }
+
+            if (hr != 0)
+            {
+                Marshal.ThrowExceptionForHR(hr);
             }
 
             return pInterface;
         }
 
-        public object CreateInstanceAsObject(CLSCTX dwContext)
+        public object CreateInstanceAsObject(CLSCTX dwContext, string server)
         {
-            IntPtr pObject = CreateInstance(dwContext);
+            IntPtr pObject = CreateInstance(dwContext, server);
             object ret = null;
 
             if (pObject != IntPtr.Zero)
@@ -638,11 +670,18 @@ namespace OleViewDotNet
 
         public object CreateClassFactory()
         {
+            return CreateClassFactory(null);
+        }
+
+        public object CreateClassFactory(string server)
+        {
             IntPtr obj;
             Guid iid = COMInterfaceEntry.IID_IUnknown;
             Guid clsid = Clsid;
 
-            int hr = COMUtilities.CoGetClassObject(ref clsid, CreateContext, IntPtr.Zero, ref iid, out obj);
+            COSERVERINFO server_info = server != null ? new COSERVERINFO(server) : null;
+
+            int hr = COMUtilities.CoGetClassObject(ref clsid, CreateContext, server_info, ref iid, out obj);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
