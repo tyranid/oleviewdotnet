@@ -45,18 +45,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.listViewProperties = new System.Windows.Forms.ListView();
             this.tabPageScript = new System.Windows.Forms.TabPage();
-            this.splitContainerScript = new System.Windows.Forms.SplitContainer();
-            this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.toolStripButtonImport = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButtonExport = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
             this.textEditorControl = new ICSharpCode.TextEditor.TextEditorControl();
             this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.richTextBoxOutput = new System.Windows.Forms.RichTextBox();
             this.contextMenuStripOutput = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.splitContainerScript = new System.Windows.Forms.SplitContainer();
+            this.toolStripButtonImport = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonExport = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.contextMenuProperties.SuspendLayout();
             this.contextMenuMethods.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -66,13 +66,13 @@
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
             this.tabPageScript.SuspendLayout();
+            this.contextMenuStripScript.SuspendLayout();
+            this.contextMenuStripOutput.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerScript)).BeginInit();
             this.splitContainerScript.Panel1.SuspendLayout();
             this.splitContainerScript.Panel2.SuspendLayout();
             this.splitContainerScript.SuspendLayout();
             this.toolStrip.SuspendLayout();
-            this.contextMenuStripScript.SuspendLayout();
-            this.contextMenuStripOutput.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuProperties
@@ -233,74 +233,6 @@
             this.tabPageScript.Text = "Script";
             this.tabPageScript.UseVisualStyleBackColor = true;
             // 
-            // splitContainerScript
-            // 
-            this.splitContainerScript.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerScript.Location = new System.Drawing.Point(3, 3);
-            this.splitContainerScript.Name = "splitContainerScript";
-            this.splitContainerScript.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainerScript.Panel1
-            // 
-            this.splitContainerScript.Panel1.Controls.Add(this.toolStrip);
-            this.splitContainerScript.Panel1.Controls.Add(this.textEditorControl);
-            // 
-            // splitContainerScript.Panel2
-            // 
-            this.splitContainerScript.Panel2.Controls.Add(this.richTextBoxOutput);
-            this.splitContainerScript.Size = new System.Drawing.Size(1038, 473);
-            this.splitContainerScript.SplitterDistance = 307;
-            this.splitContainerScript.TabIndex = 0;
-            // 
-            // toolStrip
-            // 
-            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButtonImport,
-            this.toolStripButtonExport,
-            this.toolStripSeparator1,
-            this.toolStripButtonRun});
-            this.toolStrip.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(1038, 25);
-            this.toolStrip.TabIndex = 1;
-            this.toolStrip.Text = "toolStrip";
-            // 
-            // toolStripButtonImport
-            // 
-            this.toolStripButtonImport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButtonImport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonImport.Image")));
-            this.toolStripButtonImport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonImport.Name = "toolStripButtonImport";
-            this.toolStripButtonImport.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButtonImport.Text = "Import";
-            this.toolStripButtonImport.ToolTipText = "Import a script";
-            this.toolStripButtonImport.Click += new System.EventHandler(this.toolStripButtonImport_Click);
-            // 
-            // toolStripButtonExport
-            // 
-            this.toolStripButtonExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButtonExport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonExport.Image")));
-            this.toolStripButtonExport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonExport.Name = "toolStripButtonExport";
-            this.toolStripButtonExport.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButtonExport.Text = "Export";
-            this.toolStripButtonExport.ToolTipText = "Export a script";
-            this.toolStripButtonExport.Click += new System.EventHandler(this.toolStripButtonExport_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripButtonRun
-            // 
-            this.toolStripButtonRun.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRun.Image")));
-            this.toolStripButtonRun.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonRun.Name = "toolStripButtonRun";
-            this.toolStripButtonRun.Size = new System.Drawing.Size(48, 22);
-            this.toolStripButtonRun.Text = "Run";
-            this.toolStripButtonRun.Click += new System.EventHandler(this.toolStripButtonRun_Click);
-            // 
             // textEditorControl
             // 
             this.textEditorControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -356,6 +288,74 @@
             this.clearOutputToolStripMenuItem.Text = "Clear Output";
             this.clearOutputToolStripMenuItem.Click += new System.EventHandler(this.clearOutputToolStripMenuItem_Click);
             // 
+            // splitContainerScript
+            // 
+            this.splitContainerScript.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerScript.Location = new System.Drawing.Point(3, 3);
+            this.splitContainerScript.Name = "splitContainerScript";
+            this.splitContainerScript.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainerScript.Panel1
+            // 
+            this.splitContainerScript.Panel1.Controls.Add(this.toolStrip);
+            this.splitContainerScript.Panel1.Controls.Add(this.textEditorControl);
+            // 
+            // splitContainerScript.Panel2
+            // 
+            this.splitContainerScript.Panel2.Controls.Add(this.richTextBoxOutput);
+            this.splitContainerScript.Size = new System.Drawing.Size(1038, 473);
+            this.splitContainerScript.SplitterDistance = 307;
+            this.splitContainerScript.TabIndex = 0;
+            // 
+            // toolStripButtonImport
+            // 
+            this.toolStripButtonImport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonImport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonImport.Image")));
+            this.toolStripButtonImport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonImport.Name = "toolStripButtonImport";
+            this.toolStripButtonImport.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonImport.Text = "Import";
+            this.toolStripButtonImport.ToolTipText = "Import a script";
+            this.toolStripButtonImport.Click += new System.EventHandler(this.toolStripButtonImport_Click);
+            // 
+            // toolStripButtonExport
+            // 
+            this.toolStripButtonExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonExport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonExport.Image")));
+            this.toolStripButtonExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonExport.Name = "toolStripButtonExport";
+            this.toolStripButtonExport.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonExport.Text = "Export";
+            this.toolStripButtonExport.ToolTipText = "Export a script";
+            this.toolStripButtonExport.Click += new System.EventHandler(this.toolStripButtonExport_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButtonRun
+            // 
+            this.toolStripButtonRun.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRun.Image")));
+            this.toolStripButtonRun.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRun.Name = "toolStripButtonRun";
+            this.toolStripButtonRun.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButtonRun.Text = "Run";
+            this.toolStripButtonRun.Click += new System.EventHandler(this.toolStripButtonRun_Click);
+            // 
+            // toolStrip
+            // 
+            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButtonImport,
+            this.toolStripButtonExport,
+            this.toolStripSeparator1,
+            this.toolStripButtonRun});
+            this.toolStrip.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip.Name = "toolStrip";
+            this.toolStrip.Size = new System.Drawing.Size(1038, 25);
+            this.toolStrip.TabIndex = 1;
+            this.toolStrip.Text = "toolStrip";
+            // 
             // TypedObjectViewer
             // 
             this.Controls.Add(this.tabControl);
@@ -373,6 +373,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
             this.tabPageScript.ResumeLayout(false);
+            this.contextMenuStripScript.ResumeLayout(false);
+            this.contextMenuStripOutput.ResumeLayout(false);
             this.splitContainerScript.Panel1.ResumeLayout(false);
             this.splitContainerScript.Panel1.PerformLayout();
             this.splitContainerScript.Panel2.ResumeLayout(false);
@@ -380,8 +382,6 @@
             this.splitContainerScript.ResumeLayout(false);
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
-            this.contextMenuStripScript.ResumeLayout(false);
-            this.contextMenuStripOutput.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -402,12 +402,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ListView listViewProperties;
         private System.Windows.Forms.TabPage tabPageScript;
-        private System.Windows.Forms.SplitContainer splitContainerScript;
-        private System.Windows.Forms.ToolStrip toolStrip;
-        private System.Windows.Forms.ToolStripButton toolStripButtonImport;
-        private System.Windows.Forms.ToolStripButton toolStripButtonExport;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButtonRun;
         private ICSharpCode.TextEditor.TextEditorControl textEditorControl;
         private System.Windows.Forms.RichTextBox richTextBoxOutput;
         private System.Windows.Forms.ToolStripMenuItem openInvokeToolStripMenuItem;
@@ -415,5 +409,11 @@
         private System.Windows.Forms.ToolStripMenuItem clearOutputToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripScript;
         private System.Windows.Forms.ToolStripMenuItem runToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainerScript;
+        private System.Windows.Forms.ToolStrip toolStrip;
+        private System.Windows.Forms.ToolStripButton toolStripButtonImport;
+        private System.Windows.Forms.ToolStripButton toolStripButtonExport;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRun;
     }
 }

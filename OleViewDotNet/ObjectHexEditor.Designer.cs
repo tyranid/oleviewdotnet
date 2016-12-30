@@ -28,15 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
             this.btnLoadFromStream = new System.Windows.Forms.Button();
             this.btnUnmarshal = new System.Windows.Forms.Button();
             this.hexEditor = new OleViewDotNet.HexEditor();
+            tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnLoadFromStream
             // 
-            this.btnLoadFromStream.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnLoadFromStream.Location = new System.Drawing.Point(3, 458);
+            this.btnLoadFromStream.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnLoadFromStream.Location = new System.Drawing.Point(3, 460);
             this.btnLoadFromStream.Name = "btnLoadFromStream";
             this.btnLoadFromStream.Size = new System.Drawing.Size(75, 23);
             this.btnLoadFromStream.TabIndex = 1;
@@ -46,8 +49,8 @@
             // 
             // btnUnmarshal
             // 
-            this.btnUnmarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnUnmarshal.Location = new System.Drawing.Point(84, 458);
+            this.btnUnmarshal.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnUnmarshal.Location = new System.Drawing.Point(84, 460);
             this.btnUnmarshal.Name = "btnUnmarshal";
             this.btnUnmarshal.Size = new System.Drawing.Size(75, 23);
             this.btnUnmarshal.TabIndex = 2;
@@ -55,26 +58,42 @@
             this.btnUnmarshal.UseVisualStyleBackColor = true;
             this.btnUnmarshal.Click += new System.EventHandler(this.btnUnmarshal_Click);
             // 
+            // tableLayoutPanel
+            // 
+            tableLayoutPanel.ColumnCount = 3;
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel.Controls.Add(this.btnLoadFromStream, 0, 1);
+            tableLayoutPanel.Controls.Add(this.hexEditor, 0, 0);
+            tableLayoutPanel.Controls.Add(this.btnUnmarshal, 1, 1);
+            tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            tableLayoutPanel.Name = "tableLayoutPanel";
+            tableLayoutPanel.RowCount = 2;
+            tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanel.Size = new System.Drawing.Size(861, 486);
+            tableLayoutPanel.TabIndex = 3;
+            // 
             // hexEditor
             // 
-            this.hexEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.hexEditor.Bytes = new byte[0];
-            this.hexEditor.Location = new System.Drawing.Point(0, 0);
+            tableLayoutPanel.SetColumnSpan(this.hexEditor, 3);
+            this.hexEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.hexEditor.Location = new System.Drawing.Point(3, 3);
             this.hexEditor.Name = "hexEditor";
-            this.hexEditor.Size = new System.Drawing.Size(858, 452);
+            this.hexEditor.Size = new System.Drawing.Size(855, 451);
             this.hexEditor.TabIndex = 0;
             // 
             // ObjectHexEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.btnUnmarshal);
-            this.Controls.Add(this.btnLoadFromStream);
-            this.Controls.Add(this.hexEditor);
+            this.Controls.Add(tableLayoutPanel);
             this.Name = "ObjectHexEditor";
             this.Size = new System.Drawing.Size(861, 486);
+            tableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

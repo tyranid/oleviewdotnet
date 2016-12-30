@@ -45,7 +45,9 @@
             this.createLocalServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInProcServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInProcHandlerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createClassFactoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createClassFactoryRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createInSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createElevatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,25 +60,21 @@
             this.queryAllInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
-            this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
-            this.createRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createClassFactoryRemoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
-            this.splitContainer.Panel1.SuspendLayout();
-            this.splitContainer.Panel2.SuspendLayout();
-            this.splitContainer.SuspendLayout();
+            this.tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // labelFilter
             // 
+            labelFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
             labelFilter.AutoSize = true;
-            labelFilter.Location = new System.Drawing.Point(3, 9);
+            labelFilter.Location = new System.Drawing.Point(3, 8);
             labelFilter.Name = "labelFilter";
             labelFilter.Size = new System.Drawing.Size(32, 13);
             labelFilter.TabIndex = 1;
@@ -84,8 +82,9 @@
             // 
             // labelMode
             // 
+            labelMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             labelMode.AutoSize = true;
-            labelMode.Location = new System.Drawing.Point(417, 9);
+            labelMode.Location = new System.Drawing.Point(804, 8);
             labelMode.Name = "labelMode";
             labelMode.Size = new System.Drawing.Size(37, 13);
             labelMode.TabIndex = 5;
@@ -93,16 +92,17 @@
             // 
             // treeComRegistry
             // 
+            this.tableLayoutPanel.SetColumnSpan(this.treeComRegistry, 5);
             this.treeComRegistry.ContextMenuStrip = this.contextMenuStrip;
             this.treeComRegistry.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeComRegistry.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeComRegistry.ImageIndex = 0;
             this.treeComRegistry.ImageList = this.treeImageList;
-            this.treeComRegistry.Location = new System.Drawing.Point(0, 0);
+            this.treeComRegistry.Location = new System.Drawing.Point(3, 32);
             this.treeComRegistry.Name = "treeComRegistry";
             this.treeComRegistry.SelectedImageIndex = 0;
             this.treeComRegistry.ShowNodeToolTips = true;
-            this.treeComRegistry.Size = new System.Drawing.Size(699, 383);
+            this.treeComRegistry.Size = new System.Drawing.Size(1046, 495);
             this.treeComRegistry.TabIndex = 0;
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
             this.treeComRegistry.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeComRegistry_MouseDown);
@@ -125,7 +125,7 @@
             this.queryAllInterfacesToolStripMenuItem,
             this.propertiesToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 334);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 312);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -195,37 +195,51 @@
             // createLocalServerToolStripMenuItem
             // 
             this.createLocalServerToolStripMenuItem.Name = "createLocalServerToolStripMenuItem";
-            this.createLocalServerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createLocalServerToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createLocalServerToolStripMenuItem.Text = "Create Local Server";
             this.createLocalServerToolStripMenuItem.Click += new System.EventHandler(this.createLocalServerToolStripMenuItem_Click);
             // 
             // createInProcServerToolStripMenuItem
             // 
             this.createInProcServerToolStripMenuItem.Name = "createInProcServerToolStripMenuItem";
-            this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createInProcServerToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createInProcServerToolStripMenuItem.Text = "Create InProc Server";
             this.createInProcServerToolStripMenuItem.Click += new System.EventHandler(this.createInProcServerToolStripMenuItem_Click);
             // 
             // createInProcHandlerToolStripMenuItem
             // 
             this.createInProcHandlerToolStripMenuItem.Name = "createInProcHandlerToolStripMenuItem";
-            this.createInProcHandlerToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createInProcHandlerToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createInProcHandlerToolStripMenuItem.Text = "Create InProc Handler";
             this.createInProcHandlerToolStripMenuItem.Click += new System.EventHandler(this.createInProcHandlerToolStripMenuItem_Click);
+            // 
+            // createRemoteToolStripMenuItem
+            // 
+            this.createRemoteToolStripMenuItem.Name = "createRemoteToolStripMenuItem";
+            this.createRemoteToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.createRemoteToolStripMenuItem.Text = "Create Remote";
+            this.createRemoteToolStripMenuItem.Click += new System.EventHandler(this.createRemoteToolStripMenuItem_Click);
             // 
             // createClassFactoryToolStripMenuItem
             // 
             this.createClassFactoryToolStripMenuItem.Name = "createClassFactoryToolStripMenuItem";
-            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createClassFactoryToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createClassFactoryToolStripMenuItem.Text = "Create Class Factory";
             this.createClassFactoryToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryToolStripMenuItem_Click);
+            // 
+            // createClassFactoryRemoteToolStripMenuItem
+            // 
+            this.createClassFactoryRemoteToolStripMenuItem.Name = "createClassFactoryRemoteToolStripMenuItem";
+            this.createClassFactoryRemoteToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.createClassFactoryRemoteToolStripMenuItem.Text = "Create Class Factory Remote";
+            this.createClassFactoryRemoteToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryRemoteToolStripMenuItem_Click);
             // 
             // createInSessionToolStripMenuItem
             // 
             this.createInSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.consoleToolStripMenuItem});
             this.createInSessionToolStripMenuItem.Name = "createInSessionToolStripMenuItem";
-            this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createInSessionToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createInSessionToolStripMenuItem.Text = "Create In Session";
             // 
             // consoleToolStripMenuItem
@@ -242,7 +256,7 @@
             this.instanceToolStripMenuItem,
             this.classFactoryToolStripMenuItem});
             this.createElevatedToolStripMenuItem.Name = "createElevatedToolStripMenuItem";
-            this.createElevatedToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.createElevatedToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.createElevatedToolStripMenuItem.Text = "Create Elevated";
             // 
             // instanceToolStripMenuItem
@@ -309,35 +323,12 @@
             this.treeImageList.Images.SetKeyName(1, "interface.ico");
             this.treeImageList.Images.SetKeyName(2, "class.ico");
             // 
-            // splitContainer
-            // 
-            this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer.IsSplitterFixed = true;
-            this.splitContainer.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer.Name = "splitContainer";
-            this.splitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer.Panel1
-            // 
-            this.splitContainer.Panel1.Controls.Add(labelMode);
-            this.splitContainer.Panel1.Controls.Add(this.comboBoxMode);
-            this.splitContainer.Panel1.Controls.Add(this.btnApply);
-            this.splitContainer.Panel1.Controls.Add(labelFilter);
-            this.splitContainer.Panel1.Controls.Add(this.textBoxFilter);
-            // 
-            // splitContainer.Panel2
-            // 
-            this.splitContainer.Panel2.Controls.Add(this.treeComRegistry);
-            this.splitContainer.Size = new System.Drawing.Size(699, 416);
-            this.splitContainer.SplitterDistance = 29;
-            this.splitContainer.TabIndex = 2;
-            // 
             // comboBoxMode
             // 
+            this.comboBoxMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMode.FormattingEnabled = true;
-            this.comboBoxMode.Location = new System.Drawing.Point(458, 5);
+            this.comboBoxMode.Location = new System.Drawing.Point(847, 4);
             this.comboBoxMode.Name = "comboBoxMode";
             this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
             this.comboBoxMode.TabIndex = 4;
@@ -345,7 +336,8 @@
             // 
             // btnApply
             // 
-            this.btnApply.Location = new System.Drawing.Point(585, 3);
+            this.btnApply.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnApply.Location = new System.Drawing.Point(974, 3);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(75, 23);
             this.btnApply.TabIndex = 3;
@@ -355,38 +347,45 @@
             // 
             // textBoxFilter
             // 
-            this.textBoxFilter.Location = new System.Drawing.Point(41, 6);
+            this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxFilter.Location = new System.Drawing.Point(41, 4);
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(367, 20);
+            this.textBoxFilter.Size = new System.Drawing.Size(757, 20);
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
-            // createRemoteToolStripMenuItem
+            // tableLayoutPanel
             // 
-            this.createRemoteToolStripMenuItem.Name = "createRemoteToolStripMenuItem";
-            this.createRemoteToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-            this.createRemoteToolStripMenuItem.Text = "Create Remote";
-            this.createRemoteToolStripMenuItem.Click += new System.EventHandler(this.createRemoteToolStripMenuItem_Click);
-            // 
-            // createClassFactoryRemoteToolStripMenuItem
-            // 
-            this.createClassFactoryRemoteToolStripMenuItem.Name = "createClassFactoryRemoteToolStripMenuItem";
-            this.createClassFactoryRemoteToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.createClassFactoryRemoteToolStripMenuItem.Text = "Create Class Factory Remote";
-            this.createClassFactoryRemoteToolStripMenuItem.Click += new System.EventHandler(this.createClassFactoryRemoteToolStripMenuItem_Click);
+            this.tableLayoutPanel.ColumnCount = 5;
+            this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel.Controls.Add(labelFilter, 0, 0);
+            this.tableLayoutPanel.Controls.Add(this.textBoxFilter, 1, 0);
+            this.tableLayoutPanel.Controls.Add(this.treeComRegistry, 0, 1);
+            this.tableLayoutPanel.Controls.Add(labelMode, 2, 0);
+            this.tableLayoutPanel.Controls.Add(this.btnApply, 4, 0);
+            this.tableLayoutPanel.Controls.Add(this.comboBoxMode, 3, 0);
+            this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel.Name = "tableLayoutPanel";
+            this.tableLayoutPanel.RowCount = 2;
+            this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel.Size = new System.Drawing.Size(1052, 530);
+            this.tableLayoutPanel.TabIndex = 6;
             // 
             // COMRegistryViewer
             // 
-            this.Controls.Add(this.splitContainer);
+            this.Controls.Add(this.tableLayoutPanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "COMRegistryViewer";
-            this.Size = new System.Drawing.Size(699, 416);
+            this.Size = new System.Drawing.Size(1052, 530);
             this.contextMenuStrip.ResumeLayout(false);
-            this.splitContainer.Panel1.ResumeLayout(false);
-            this.splitContainer.Panel1.PerformLayout();
-            this.splitContainer.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
-            this.splitContainer.ResumeLayout(false);
+            this.tableLayoutPanel.ResumeLayout(false);
+            this.tableLayoutPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -402,7 +401,6 @@
         private System.Windows.Forms.ImageList treeImageList;
         private System.Windows.Forms.ToolStripMenuItem createInstanceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem refreshInterfacesToolStripMenuItem;
-        private System.Windows.Forms.SplitContainer splitContainer;
         private System.Windows.Forms.Button btnApply;
         private System.Windows.Forms.TextBox textBoxFilter;
         private System.Windows.Forms.ComboBox comboBoxMode;
@@ -425,5 +423,6 @@
         private System.Windows.Forms.ToolStripMenuItem classFactoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createRemoteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createClassFactoryRemoteToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
     }
 }

@@ -28,16 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
             this.btnLoad = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnInit = new System.Windows.Forms.Button();
             this.hexEditor = new OleViewDotNet.HexEditor();
+            tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnLoad
             // 
             this.btnLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnLoad.Location = new System.Drawing.Point(12, 416);
+            this.btnLoad.Location = new System.Drawing.Point(3, 596);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 1;
@@ -48,7 +51,7 @@
             // btnSave
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSave.Location = new System.Drawing.Point(93, 416);
+            this.btnSave.Location = new System.Drawing.Point(84, 596);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 2;
@@ -59,7 +62,7 @@
             // btnInit
             // 
             this.btnInit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnInit.Location = new System.Drawing.Point(174, 416);
+            this.btnInit.Location = new System.Drawing.Point(165, 596);
             this.btnInit.Name = "btnInit";
             this.btnInit.Size = new System.Drawing.Size(75, 23);
             this.btnInit.TabIndex = 3;
@@ -69,24 +72,41 @@
             // 
             // hexEditor
             // 
-            this.hexEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.hexEditor.Location = new System.Drawing.Point(0, 0);
+            this.hexEditor.Bytes = new byte[0];
+            tableLayoutPanel.SetColumnSpan(this.hexEditor, 4);
+            this.hexEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.hexEditor.Location = new System.Drawing.Point(3, 3);
             this.hexEditor.Name = "hexEditor";
-            this.hexEditor.Size = new System.Drawing.Size(770, 410);
+            this.hexEditor.Size = new System.Drawing.Size(1027, 587);
             this.hexEditor.TabIndex = 4;
             // 
+            // tableLayoutPanel
+            // 
+            tableLayoutPanel.ColumnCount = 4;
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel.Controls.Add(this.btnLoad, 0, 1);
+            tableLayoutPanel.Controls.Add(this.hexEditor, 0, 0);
+            tableLayoutPanel.Controls.Add(this.btnSave, 1, 1);
+            tableLayoutPanel.Controls.Add(this.btnInit, 2, 1);
+            tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            tableLayoutPanel.Name = "tableLayoutPanel";
+            tableLayoutPanel.RowCount = 2;
+            tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanel.Size = new System.Drawing.Size(1033, 622);
+            tableLayoutPanel.TabIndex = 5;
+            // 
             // PersistStreamTypeViewer
-            //             
-            this.ClientSize = new System.Drawing.Size(770, 449);
-            this.Controls.Add(this.hexEditor);
-            this.Controls.Add(this.btnInit);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.btnLoad);
+            // 
+            this.Controls.Add(tableLayoutPanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "PersistStreamTypeViewer";
-            this.Text = "PersistStreamTypeViewer";
+            this.Size = new System.Drawing.Size(1033, 622);
+            tableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

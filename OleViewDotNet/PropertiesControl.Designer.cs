@@ -57,6 +57,14 @@
             System.Windows.Forms.ColumnHeader columnThreadingModel;
             System.Windows.Forms.Label label21;
             System.Windows.Forms.Label label20;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelService;
+            System.Windows.Forms.Label label22;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelInterface;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelAppID;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelSupportedInterfaces;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelClsid;
+            System.Windows.Forms.Label label26;
+            System.Windows.Forms.Label label27;
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.btnTreatAsProps = new System.Windows.Forms.Button();
@@ -74,9 +82,15 @@
             this.textBoxClsid = new System.Windows.Forms.TextBox();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
             this.tabPageSupportedInterfaces = new System.Windows.Forms.TabPage();
-            this.splitContainerInterfaces = new System.Windows.Forms.SplitContainer();
             this.btnRefreshInterfaces = new System.Windows.Forms.Button();
             this.listViewInterfaces = new System.Windows.Forms.ListView();
+            this.contextMenuStripInterfaces = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyIIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.tabPageAppID = new System.Windows.Forms.TabPage();
             this.lblAppIDFlags = new System.Windows.Forms.Label();
@@ -101,17 +115,13 @@
             this.listViewProxies = new System.Windows.Forms.ListView();
             this.tabPageServers = new System.Windows.Forms.TabPage();
             this.listViewCLSIDServers = new System.Windows.Forms.ListView();
-            this.contextMenuStripInterfaces = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.copyIIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.asStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.asCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.asHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewProxyDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPageService = new System.Windows.Forms.TabPage();
-            this.textBoxServiceName = new System.Windows.Forms.TextBox();
-            this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
             this.lblServiceType = new System.Windows.Forms.Label();
+            this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
+            this.textBoxServiceName = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -140,27 +150,37 @@
             columnThreadingModel = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             label21 = new System.Windows.Forms.Label();
             label20 = new System.Windows.Forms.Label();
+            tableLayoutPanelService = new System.Windows.Forms.TableLayoutPanel();
+            label22 = new System.Windows.Forms.Label();
+            tableLayoutPanelInterface = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanelAppID = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanelSupportedInterfaces = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanelClsid = new System.Windows.Forms.TableLayoutPanel();
+            label26 = new System.Windows.Forms.Label();
+            label27 = new System.Windows.Forms.Label();
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.contextMenuStripProgids.SuspendLayout();
             this.tabPageNoProperties.SuspendLayout();
             this.tabPageSupportedInterfaces.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerInterfaces)).BeginInit();
-            this.splitContainerInterfaces.Panel1.SuspendLayout();
-            this.splitContainerInterfaces.Panel2.SuspendLayout();
-            this.splitContainerInterfaces.SuspendLayout();
+            this.contextMenuStripInterfaces.SuspendLayout();
             this.tabPageAppID.SuspendLayout();
             this.tabPageInterface.SuspendLayout();
             this.tabPageProxies.SuspendLayout();
             this.tabPageServers.SuspendLayout();
-            this.contextMenuStripInterfaces.SuspendLayout();
             this.tabPageService.SuspendLayout();
+            tableLayoutPanelService.SuspendLayout();
+            tableLayoutPanelInterface.SuspendLayout();
+            tableLayoutPanelAppID.SuspendLayout();
+            tableLayoutPanelSupportedInterfaces.SuspendLayout();
+            tableLayoutPanelClsid.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
             // 
+            lblClsid.Anchor = System.Windows.Forms.AnchorStyles.Left;
             lblClsid.AutoSize = true;
-            lblClsid.Location = new System.Drawing.Point(11, 44);
+            lblClsid.Location = new System.Drawing.Point(3, 34);
             lblClsid.Name = "lblClsid";
             lblClsid.Size = new System.Drawing.Size(41, 13);
             lblClsid.TabIndex = 0;
@@ -168,8 +188,9 @@
             // 
             // label1
             // 
+            label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(11, 14);
+            label1.Location = new System.Drawing.Point(3, 6);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(38, 13);
             label1.TabIndex = 4;
@@ -186,8 +207,9 @@
             // 
             // label3
             // 
+            label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(11, 194);
+            label3.Location = new System.Drawing.Point(3, 162);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(48, 13);
             label3.TabIndex = 7;
@@ -195,8 +217,9 @@
             // 
             // label4
             // 
+            label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(11, 295);
+            label4.Location = new System.Drawing.Point(3, 294);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(60, 13);
             label4.TabIndex = 9;
@@ -204,8 +227,9 @@
             // 
             // label5
             // 
+            label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(3, 11);
+            label5.Location = new System.Drawing.Point(3, 8);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(57, 13);
             label5.TabIndex = 9;
@@ -214,7 +238,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(3, 9);
+            label6.Location = new System.Drawing.Point(3, 221);
             label6.Name = "label6";
             label6.Size = new System.Drawing.Size(95, 13);
             label6.TabIndex = 11;
@@ -222,8 +246,9 @@
             // 
             // label7
             // 
+            label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(11, 99);
+            label7.Location = new System.Drawing.Point(3, 74);
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(41, 13);
             label7.TabIndex = 10;
@@ -231,8 +256,9 @@
             // 
             // label8
             // 
+            label8.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(7, 9);
+            label8.Location = new System.Drawing.Point(3, 6);
             label8.Name = "label8";
             label8.Size = new System.Drawing.Size(38, 13);
             label8.TabIndex = 8;
@@ -240,8 +266,9 @@
             // 
             // label9
             // 
+            label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(7, 39);
+            label9.Location = new System.Drawing.Point(3, 32);
             label9.Name = "label9";
             label9.Size = new System.Drawing.Size(40, 13);
             label9.TabIndex = 6;
@@ -249,8 +276,9 @@
             // 
             // label10
             // 
+            label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label10.AutoSize = true;
-            label10.Location = new System.Drawing.Point(5, 151);
+            label10.Location = new System.Drawing.Point(3, 91);
             label10.Name = "label10";
             label10.Size = new System.Drawing.Size(99, 13);
             label10.TabIndex = 10;
@@ -258,8 +286,9 @@
             // 
             // label11
             // 
+            label11.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(5, 195);
+            label11.Location = new System.Drawing.Point(3, 130);
             label11.Name = "label11";
             label11.Size = new System.Drawing.Size(98, 13);
             label11.TabIndex = 12;
@@ -267,8 +296,9 @@
             // 
             // label12
             // 
+            label12.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(5, 242);
+            label12.Location = new System.Drawing.Point(3, 169);
             label12.Name = "label12";
             label12.Size = new System.Drawing.Size(71, 13);
             label12.TabIndex = 16;
@@ -276,8 +306,9 @@
             // 
             // label13
             // 
+            label13.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label13.AutoSize = true;
-            label13.Location = new System.Drawing.Point(11, 128);
+            label13.Location = new System.Drawing.Point(3, 100);
             label13.Name = "label13";
             label13.Size = new System.Drawing.Size(51, 13);
             label13.TabIndex = 12;
@@ -285,8 +316,9 @@
             // 
             // label14
             // 
+            label14.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label14.AutoSize = true;
-            label14.Location = new System.Drawing.Point(11, 155);
+            label14.Location = new System.Drawing.Point(3, 128);
             label14.Name = "label14";
             label14.Size = new System.Drawing.Size(47, 13);
             label14.TabIndex = 14;
@@ -294,8 +326,9 @@
             // 
             // label15
             // 
+            label15.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label15.AutoSize = true;
-            label15.Location = new System.Drawing.Point(6, 14);
+            label15.Location = new System.Drawing.Point(3, 6);
             label15.Name = "label15";
             label15.Size = new System.Drawing.Size(38, 13);
             label15.TabIndex = 8;
@@ -303,8 +336,9 @@
             // 
             // label16
             // 
+            label16.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label16.AutoSize = true;
-            label16.Location = new System.Drawing.Point(6, 47);
+            label16.Location = new System.Drawing.Point(3, 32);
             label16.Name = "label16";
             label16.Size = new System.Drawing.Size(24, 13);
             label16.TabIndex = 6;
@@ -312,8 +346,9 @@
             // 
             // label17
             // 
+            label17.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label17.AutoSize = true;
-            label17.Location = new System.Drawing.Point(6, 80);
+            label17.Location = new System.Drawing.Point(3, 58);
             label17.Name = "label17";
             label17.Size = new System.Drawing.Size(34, 13);
             label17.TabIndex = 10;
@@ -321,8 +356,9 @@
             // 
             // label18
             // 
+            label18.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label18.AutoSize = true;
-            label18.Location = new System.Drawing.Point(6, 116);
+            label18.Location = new System.Drawing.Point(3, 86);
             label18.Name = "label18";
             label18.Size = new System.Drawing.Size(36, 13);
             label18.TabIndex = 12;
@@ -330,8 +366,9 @@
             // 
             // label19
             // 
+            label19.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label19.AutoSize = true;
-            label19.Location = new System.Drawing.Point(6, 151);
+            label19.Location = new System.Drawing.Point(3, 115);
             label19.Name = "label19";
             label19.Size = new System.Drawing.Size(48, 13);
             label19.TabIndex = 19;
@@ -363,6 +400,26 @@
             // 
             columnThreadingModel.Text = "Threading Model";
             // 
+            // label21
+            // 
+            label21.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label21.AutoSize = true;
+            label21.Location = new System.Drawing.Point(3, 6);
+            label21.Name = "label21";
+            label21.Size = new System.Drawing.Size(38, 13);
+            label21.TabIndex = 6;
+            label21.Text = "Name:";
+            // 
+            // label20
+            // 
+            label20.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label20.AutoSize = true;
+            label20.Location = new System.Drawing.Point(3, 32);
+            label20.Name = "label20";
+            label20.Size = new System.Drawing.Size(75, 13);
+            label20.TabIndex = 8;
+            label20.Text = "Display Name:";
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
@@ -382,24 +439,7 @@
             // 
             // tabPageClsid
             // 
-            this.tabPageClsid.Controls.Add(this.btnTreatAsProps);
-            this.tabPageClsid.Controls.Add(this.btnCreate);
-            this.tabPageClsid.Controls.Add(this.textBoxTreatAs);
-            this.tabPageClsid.Controls.Add(label14);
-            this.tabPageClsid.Controls.Add(this.textBoxCmdLine);
-            this.tabPageClsid.Controls.Add(label13);
-            this.tabPageClsid.Controls.Add(this.textBoxServer);
-            this.tabPageClsid.Controls.Add(label7);
-            this.tabPageClsid.Controls.Add(label4);
-            this.tabPageClsid.Controls.Add(this.listViewCategories);
-            this.tabPageClsid.Controls.Add(label3);
-            this.tabPageClsid.Controls.Add(this.listViewProgIDs);
-            this.tabPageClsid.Controls.Add(this.textBoxClsidName);
-            this.tabPageClsid.Controls.Add(label1);
-            this.tabPageClsid.Controls.Add(this.lblThreadingModel);
-            this.tabPageClsid.Controls.Add(this.lblServerType);
-            this.tabPageClsid.Controls.Add(this.textBoxClsid);
-            this.tabPageClsid.Controls.Add(lblClsid);
+            this.tabPageClsid.Controls.Add(tableLayoutPanelClsid);
             this.tabPageClsid.Location = new System.Drawing.Point(4, 22);
             this.tabPageClsid.Name = "tabPageClsid";
             this.tabPageClsid.Padding = new System.Windows.Forms.Padding(3);
@@ -410,8 +450,9 @@
             // 
             // btnTreatAsProps
             // 
+            this.btnTreatAsProps.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnTreatAsProps.Enabled = false;
-            this.btnTreatAsProps.Location = new System.Drawing.Point(330, 151);
+            this.btnTreatAsProps.Location = new System.Drawing.Point(601, 123);
             this.btnTreatAsProps.Name = "btnTreatAsProps";
             this.btnTreatAsProps.Size = new System.Drawing.Size(75, 23);
             this.btnTreatAsProps.TabIndex = 17;
@@ -421,7 +462,8 @@
             // 
             // btnCreate
             // 
-            this.btnCreate.Location = new System.Drawing.Point(330, 39);
+            this.btnCreate.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCreate.Location = new System.Drawing.Point(601, 29);
             this.btnCreate.Name = "btnCreate";
             this.btnCreate.Size = new System.Drawing.Size(75, 23);
             this.btnCreate.TabIndex = 16;
@@ -431,49 +473,58 @@
             // 
             // textBoxTreatAs
             // 
-            this.textBoxTreatAs.Location = new System.Drawing.Point(64, 152);
+            this.textBoxTreatAs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxTreatAs.Location = new System.Drawing.Point(99, 124);
             this.textBoxTreatAs.Name = "textBoxTreatAs";
             this.textBoxTreatAs.ReadOnly = true;
-            this.textBoxTreatAs.Size = new System.Drawing.Size(260, 20);
+            this.textBoxTreatAs.Size = new System.Drawing.Size(496, 20);
             this.textBoxTreatAs.TabIndex = 15;
             // 
             // textBoxCmdLine
             // 
-            this.textBoxCmdLine.Location = new System.Drawing.Point(64, 125);
+            this.textBoxCmdLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelClsid.SetColumnSpan(this.textBoxCmdLine, 2);
+            this.textBoxCmdLine.Location = new System.Drawing.Point(99, 97);
             this.textBoxCmdLine.Name = "textBoxCmdLine";
             this.textBoxCmdLine.ReadOnly = true;
-            this.textBoxCmdLine.Size = new System.Drawing.Size(341, 20);
+            this.textBoxCmdLine.Size = new System.Drawing.Size(577, 20);
             this.textBoxCmdLine.TabIndex = 13;
             // 
             // textBoxServer
             // 
-            this.textBoxServer.Location = new System.Drawing.Point(64, 96);
+            this.textBoxServer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelClsid.SetColumnSpan(this.textBoxServer, 2);
+            this.textBoxServer.Location = new System.Drawing.Point(99, 71);
             this.textBoxServer.Name = "textBoxServer";
             this.textBoxServer.ReadOnly = true;
-            this.textBoxServer.Size = new System.Drawing.Size(341, 20);
+            this.textBoxServer.Size = new System.Drawing.Size(577, 20);
             this.textBoxServer.TabIndex = 11;
             // 
             // listViewCategories
             // 
+            tableLayoutPanelClsid.SetColumnSpan(this.listViewCategories, 3);
+            this.listViewCategories.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewCategories.FullRowSelect = true;
             this.listViewCategories.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewCategories.Location = new System.Drawing.Point(11, 311);
+            this.listViewCategories.Location = new System.Drawing.Point(3, 310);
             this.listViewCategories.MultiSelect = false;
             this.listViewCategories.Name = "listViewCategories";
-            this.listViewCategories.Size = new System.Drawing.Size(394, 82);
+            this.listViewCategories.Size = new System.Drawing.Size(673, 114);
             this.listViewCategories.TabIndex = 8;
             this.listViewCategories.UseCompatibleStateImageBehavior = false;
             this.listViewCategories.View = System.Windows.Forms.View.Details;
             // 
             // listViewProgIDs
             // 
+            tableLayoutPanelClsid.SetColumnSpan(this.listViewProgIDs, 3);
             this.listViewProgIDs.ContextMenuStrip = this.contextMenuStripProgids;
+            this.listViewProgIDs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewProgIDs.FullRowSelect = true;
             this.listViewProgIDs.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProgIDs.Location = new System.Drawing.Point(11, 210);
+            this.listViewProgIDs.Location = new System.Drawing.Point(3, 178);
             this.listViewProgIDs.MultiSelect = false;
             this.listViewProgIDs.Name = "listViewProgIDs";
-            this.listViewProgIDs.Size = new System.Drawing.Size(394, 82);
+            this.listViewProgIDs.Size = new System.Drawing.Size(673, 113);
             this.listViewProgIDs.TabIndex = 6;
             this.listViewProgIDs.UseCompatibleStateImageBehavior = false;
             this.listViewProgIDs.View = System.Windows.Forms.View.Details;
@@ -494,16 +545,19 @@
             // 
             // textBoxClsidName
             // 
-            this.textBoxClsidName.Location = new System.Drawing.Point(64, 11);
+            this.textBoxClsidName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelClsid.SetColumnSpan(this.textBoxClsidName, 2);
+            this.textBoxClsidName.Location = new System.Drawing.Point(99, 3);
             this.textBoxClsidName.Name = "textBoxClsidName";
             this.textBoxClsidName.ReadOnly = true;
-            this.textBoxClsidName.Size = new System.Drawing.Size(341, 20);
+            this.textBoxClsidName.Size = new System.Drawing.Size(577, 20);
             this.textBoxClsidName.TabIndex = 5;
             // 
             // lblThreadingModel
             // 
+            this.lblThreadingModel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblThreadingModel.AutoSize = true;
-            this.lblThreadingModel.Location = new System.Drawing.Point(11, 176);
+            this.lblThreadingModel.Location = new System.Drawing.Point(99, 149);
             this.lblThreadingModel.Name = "lblThreadingModel";
             this.lblThreadingModel.Size = new System.Drawing.Size(90, 13);
             this.lblThreadingModel.TabIndex = 3;
@@ -511,8 +565,9 @@
             // 
             // lblServerType
             // 
+            this.lblServerType.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblServerType.AutoSize = true;
-            this.lblServerType.Location = new System.Drawing.Point(11, 73);
+            this.lblServerType.Location = new System.Drawing.Point(99, 55);
             this.lblServerType.Name = "lblServerType";
             this.lblServerType.Size = new System.Drawing.Size(68, 13);
             this.lblServerType.TabIndex = 2;
@@ -520,10 +575,11 @@
             // 
             // textBoxClsid
             // 
-            this.textBoxClsid.Location = new System.Drawing.Point(64, 41);
+            this.textBoxClsid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxClsid.Location = new System.Drawing.Point(99, 30);
             this.textBoxClsid.Name = "textBoxClsid";
             this.textBoxClsid.ReadOnly = true;
-            this.textBoxClsid.Size = new System.Drawing.Size(260, 20);
+            this.textBoxClsid.Size = new System.Drawing.Size(496, 20);
             this.textBoxClsid.TabIndex = 1;
             // 
             // tabPageNoProperties
@@ -539,7 +595,7 @@
             // 
             // tabPageSupportedInterfaces
             // 
-            this.tabPageSupportedInterfaces.Controls.Add(this.splitContainerInterfaces);
+            this.tabPageSupportedInterfaces.Controls.Add(tableLayoutPanelSupportedInterfaces);
             this.tabPageSupportedInterfaces.Location = new System.Drawing.Point(4, 22);
             this.tabPageSupportedInterfaces.Name = "tabPageSupportedInterfaces";
             this.tabPageSupportedInterfaces.Padding = new System.Windows.Forms.Padding(3);
@@ -548,30 +604,9 @@
             this.tabPageSupportedInterfaces.Text = "Supported Interfaces";
             this.tabPageSupportedInterfaces.UseVisualStyleBackColor = true;
             // 
-            // splitContainerInterfaces
-            // 
-            this.splitContainerInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerInterfaces.Location = new System.Drawing.Point(3, 3);
-            this.splitContainerInterfaces.Name = "splitContainerInterfaces";
-            this.splitContainerInterfaces.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainerInterfaces.Panel1
-            // 
-            this.splitContainerInterfaces.Panel1.Controls.Add(label5);
-            this.splitContainerInterfaces.Panel1.Controls.Add(this.btnRefreshInterfaces);
-            this.splitContainerInterfaces.Panel1.Controls.Add(this.listViewInterfaces);
-            // 
-            // splitContainerInterfaces.Panel2
-            // 
-            this.splitContainerInterfaces.Panel2.Controls.Add(label6);
-            this.splitContainerInterfaces.Panel2.Controls.Add(this.listViewFactoryInterfaces);
-            this.splitContainerInterfaces.Size = new System.Drawing.Size(679, 427);
-            this.splitContainerInterfaces.SplitterDistance = 207;
-            this.splitContainerInterfaces.TabIndex = 13;
-            // 
             // btnRefreshInterfaces
             // 
-            this.btnRefreshInterfaces.Location = new System.Drawing.Point(66, 6);
+            this.btnRefreshInterfaces.Location = new System.Drawing.Point(104, 3);
             this.btnRefreshInterfaces.Name = "btnRefreshInterfaces";
             this.btnRefreshInterfaces.Size = new System.Drawing.Size(75, 23);
             this.btnRefreshInterfaces.TabIndex = 12;
@@ -581,53 +616,94 @@
             // 
             // listViewInterfaces
             // 
-            this.listViewInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelSupportedInterfaces.SetColumnSpan(this.listViewInterfaces, 3);
             this.listViewInterfaces.ContextMenuStrip = this.contextMenuStripInterfaces;
+            this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewInterfaces.Location = new System.Drawing.Point(3, 36);
+            this.listViewInterfaces.Location = new System.Drawing.Point(3, 32);
             this.listViewInterfaces.MultiSelect = false;
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(673, 157);
+            this.listViewInterfaces.Size = new System.Drawing.Size(673, 186);
             this.listViewInterfaces.TabIndex = 8;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
             // 
+            // contextMenuStripInterfaces
+            // 
+            this.contextMenuStripInterfaces.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem,
+            this.copyIIDToolStripMenuItem,
+            this.viewProxyDefinitionToolStripMenuItem});
+            this.contextMenuStripInterfaces.Name = "contextMenuStripInterfaces";
+            this.contextMenuStripInterfaces.Size = new System.Drawing.Size(187, 70);
+            this.contextMenuStripInterfaces.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripInterfaces_Opening);
+            // 
+            // copyToolStripMenuItem
+            // 
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
+            // 
+            // copyIIDToolStripMenuItem
+            // 
+            this.copyIIDToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.asStringToolStripMenuItem,
+            this.asCStructureToolStripMenuItem,
+            this.asHexStringToolStripMenuItem});
+            this.copyIIDToolStripMenuItem.Name = "copyIIDToolStripMenuItem";
+            this.copyIIDToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyIIDToolStripMenuItem.Text = "Copy IID";
+            // 
+            // asStringToolStripMenuItem
+            // 
+            this.asStringToolStripMenuItem.Name = "asStringToolStripMenuItem";
+            this.asStringToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asStringToolStripMenuItem.Text = "As String";
+            this.asStringToolStripMenuItem.Click += new System.EventHandler(this.asStringToolStripMenuItem_Click);
+            // 
+            // asCStructureToolStripMenuItem
+            // 
+            this.asCStructureToolStripMenuItem.Name = "asCStructureToolStripMenuItem";
+            this.asCStructureToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asCStructureToolStripMenuItem.Text = "As C Structure";
+            this.asCStructureToolStripMenuItem.Click += new System.EventHandler(this.asCStructureToolStripMenuItem_Click);
+            // 
+            // asHexStringToolStripMenuItem
+            // 
+            this.asHexStringToolStripMenuItem.Name = "asHexStringToolStripMenuItem";
+            this.asHexStringToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asHexStringToolStripMenuItem.Text = "As Hex String";
+            this.asHexStringToolStripMenuItem.Click += new System.EventHandler(this.asHexStringToolStripMenuItem_Click);
+            // 
+            // viewProxyDefinitionToolStripMenuItem
+            // 
+            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
+            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
+            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
+            // 
             // listViewFactoryInterfaces
             // 
-            this.listViewFactoryInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelSupportedInterfaces.SetColumnSpan(this.listViewFactoryInterfaces, 3);
             this.listViewFactoryInterfaces.ContextMenuStrip = this.contextMenuStripInterfaces;
+            this.listViewFactoryInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewFactoryInterfaces.FullRowSelect = true;
             this.listViewFactoryInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(3, 34);
+            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(3, 237);
             this.listViewFactoryInterfaces.MultiSelect = false;
             this.listViewFactoryInterfaces.Name = "listViewFactoryInterfaces";
-            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(673, 179);
+            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(673, 187);
             this.listViewFactoryInterfaces.TabIndex = 10;
             this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
             // 
             // tabPageAppID
             // 
-            this.tabPageAppID.Controls.Add(this.lblAppIDFlags);
+            this.tabPageAppID.Controls.Add(tableLayoutPanelAppID);
             this.tabPageAppID.Controls.Add(this.btnViewAccessPermissions);
             this.tabPageAppID.Controls.Add(this.btnViewLaunchPermissions);
-            this.tabPageAppID.Controls.Add(this.textBoxDllSurrogate);
-            this.tabPageAppID.Controls.Add(label12);
-            this.tabPageAppID.Controls.Add(this.lblService);
-            this.tabPageAppID.Controls.Add(this.lblAppIdRunAs);
-            this.tabPageAppID.Controls.Add(this.textBoxAccessPermission);
-            this.tabPageAppID.Controls.Add(label11);
-            this.tabPageAppID.Controls.Add(this.textBoxLaunchPermission);
-            this.tabPageAppID.Controls.Add(label10);
-            this.tabPageAppID.Controls.Add(this.textBoxAppIdName);
-            this.tabPageAppID.Controls.Add(label8);
-            this.tabPageAppID.Controls.Add(this.textBoxAppIdGuid);
-            this.tabPageAppID.Controls.Add(label9);
             this.tabPageAppID.Location = new System.Drawing.Point(4, 22);
             this.tabPageAppID.Name = "tabPageAppID";
             this.tabPageAppID.Padding = new System.Windows.Forms.Padding(3);
@@ -638,8 +714,9 @@
             // 
             // lblAppIDFlags
             // 
+            this.lblAppIDFlags.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblAppIDFlags.AutoSize = true;
-            this.lblAppIDFlags.Location = new System.Drawing.Point(7, 123);
+            this.lblAppIDFlags.Location = new System.Drawing.Point(108, 78);
             this.lblAppIDFlags.Name = "lblAppIDFlags";
             this.lblAppIDFlags.Size = new System.Drawing.Size(35, 13);
             this.lblAppIDFlags.TabIndex = 20;
@@ -667,16 +744,19 @@
             // 
             // textBoxDllSurrogate
             // 
-            this.textBoxDllSurrogate.Location = new System.Drawing.Point(6, 258);
+            this.textBoxDllSurrogate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxDllSurrogate, 2);
+            this.textBoxDllSurrogate.Location = new System.Drawing.Point(3, 185);
             this.textBoxDllSurrogate.Name = "textBoxDllSurrogate";
             this.textBoxDllSurrogate.ReadOnly = true;
-            this.textBoxDllSurrogate.Size = new System.Drawing.Size(376, 20);
+            this.textBoxDllSurrogate.Size = new System.Drawing.Size(673, 20);
             this.textBoxDllSurrogate.TabIndex = 17;
             // 
             // lblService
             // 
+            this.lblService.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblService.AutoSize = true;
-            this.lblService.Location = new System.Drawing.Point(6, 99);
+            this.lblService.Location = new System.Drawing.Point(108, 65);
             this.lblService.Name = "lblService";
             this.lblService.Size = new System.Drawing.Size(46, 13);
             this.lblService.TabIndex = 15;
@@ -684,8 +764,9 @@
             // 
             // lblAppIdRunAs
             // 
+            this.lblAppIdRunAs.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblAppIdRunAs.AutoSize = true;
-            this.lblAppIdRunAs.Location = new System.Drawing.Point(7, 72);
+            this.lblAppIdRunAs.Location = new System.Drawing.Point(108, 52);
             this.lblAppIdRunAs.Name = "lblAppIdRunAs";
             this.lblAppIdRunAs.Size = new System.Drawing.Size(45, 13);
             this.lblAppIdRunAs.TabIndex = 14;
@@ -693,50 +774,45 @@
             // 
             // textBoxAccessPermission
             // 
-            this.textBoxAccessPermission.Location = new System.Drawing.Point(6, 211);
+            this.textBoxAccessPermission.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxAccessPermission, 2);
+            this.textBoxAccessPermission.Location = new System.Drawing.Point(3, 146);
             this.textBoxAccessPermission.Name = "textBoxAccessPermission";
             this.textBoxAccessPermission.ReadOnly = true;
-            this.textBoxAccessPermission.Size = new System.Drawing.Size(295, 20);
+            this.textBoxAccessPermission.Size = new System.Drawing.Size(673, 20);
             this.textBoxAccessPermission.TabIndex = 13;
             // 
             // textBoxLaunchPermission
             // 
-            this.textBoxLaunchPermission.Location = new System.Drawing.Point(6, 167);
+            this.textBoxLaunchPermission.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxLaunchPermission, 2);
+            this.textBoxLaunchPermission.Location = new System.Drawing.Point(3, 107);
             this.textBoxLaunchPermission.Name = "textBoxLaunchPermission";
             this.textBoxLaunchPermission.ReadOnly = true;
-            this.textBoxLaunchPermission.Size = new System.Drawing.Size(295, 20);
+            this.textBoxLaunchPermission.Size = new System.Drawing.Size(673, 20);
             this.textBoxLaunchPermission.TabIndex = 11;
             // 
             // textBoxAppIdName
             // 
-            this.textBoxAppIdName.Location = new System.Drawing.Point(51, 6);
+            this.textBoxAppIdName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxAppIdName.Location = new System.Drawing.Point(108, 3);
             this.textBoxAppIdName.Name = "textBoxAppIdName";
             this.textBoxAppIdName.ReadOnly = true;
-            this.textBoxAppIdName.Size = new System.Drawing.Size(335, 20);
+            this.textBoxAppIdName.Size = new System.Drawing.Size(568, 20);
             this.textBoxAppIdName.TabIndex = 9;
             // 
             // textBoxAppIdGuid
             // 
-            this.textBoxAppIdGuid.Location = new System.Drawing.Point(51, 36);
+            this.textBoxAppIdGuid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxAppIdGuid.Location = new System.Drawing.Point(108, 29);
             this.textBoxAppIdGuid.Name = "textBoxAppIdGuid";
             this.textBoxAppIdGuid.ReadOnly = true;
-            this.textBoxAppIdGuid.Size = new System.Drawing.Size(335, 20);
+            this.textBoxAppIdGuid.Size = new System.Drawing.Size(568, 20);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
             // tabPageInterface
             // 
-            this.tabPageInterface.Controls.Add(this.btnOpenTypeLib);
-            this.tabPageInterface.Controls.Add(this.textBoxTypeLib);
-            this.tabPageInterface.Controls.Add(label19);
-            this.tabPageInterface.Controls.Add(this.btnProxyProperties);
-            this.tabPageInterface.Controls.Add(this.textBoxInterfaceProxy);
-            this.tabPageInterface.Controls.Add(label18);
-            this.tabPageInterface.Controls.Add(this.textBoxInterfaceBase);
-            this.tabPageInterface.Controls.Add(label17);
-            this.tabPageInterface.Controls.Add(this.textBoxInterfaceName);
-            this.tabPageInterface.Controls.Add(label15);
-            this.tabPageInterface.Controls.Add(this.textBoxIID);
-            this.tabPageInterface.Controls.Add(label16);
+            this.tabPageInterface.Controls.Add(tableLayoutPanelInterface);
             this.tabPageInterface.Location = new System.Drawing.Point(4, 22);
             this.tabPageInterface.Name = "tabPageInterface";
             this.tabPageInterface.Padding = new System.Windows.Forms.Padding(3);
@@ -748,7 +824,7 @@
             // btnOpenTypeLib
             // 
             this.btnOpenTypeLib.Enabled = false;
-            this.btnOpenTypeLib.Location = new System.Drawing.Point(325, 146);
+            this.btnOpenTypeLib.Location = new System.Drawing.Point(601, 110);
             this.btnOpenTypeLib.Name = "btnOpenTypeLib";
             this.btnOpenTypeLib.Size = new System.Drawing.Size(75, 23);
             this.btnOpenTypeLib.TabIndex = 21;
@@ -758,16 +834,17 @@
             // 
             // textBoxTypeLib
             // 
-            this.textBoxTypeLib.Location = new System.Drawing.Point(59, 148);
+            this.textBoxTypeLib.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxTypeLib.Location = new System.Drawing.Point(57, 111);
             this.textBoxTypeLib.Name = "textBoxTypeLib";
             this.textBoxTypeLib.ReadOnly = true;
-            this.textBoxTypeLib.Size = new System.Drawing.Size(259, 20);
+            this.textBoxTypeLib.Size = new System.Drawing.Size(538, 20);
             this.textBoxTypeLib.TabIndex = 20;
             // 
             // btnProxyProperties
             // 
             this.btnProxyProperties.Enabled = false;
-            this.btnProxyProperties.Location = new System.Drawing.Point(325, 111);
+            this.btnProxyProperties.Location = new System.Drawing.Point(601, 81);
             this.btnProxyProperties.Name = "btnProxyProperties";
             this.btnProxyProperties.Size = new System.Drawing.Size(75, 23);
             this.btnProxyProperties.TabIndex = 18;
@@ -777,34 +854,41 @@
             // 
             // textBoxInterfaceProxy
             // 
-            this.textBoxInterfaceProxy.Location = new System.Drawing.Point(59, 113);
+            this.textBoxInterfaceProxy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxInterfaceProxy.Location = new System.Drawing.Point(57, 82);
             this.textBoxInterfaceProxy.Name = "textBoxInterfaceProxy";
             this.textBoxInterfaceProxy.ReadOnly = true;
-            this.textBoxInterfaceProxy.Size = new System.Drawing.Size(259, 20);
+            this.textBoxInterfaceProxy.Size = new System.Drawing.Size(538, 20);
             this.textBoxInterfaceProxy.TabIndex = 13;
             // 
             // textBoxInterfaceBase
             // 
-            this.textBoxInterfaceBase.Location = new System.Drawing.Point(59, 77);
+            this.textBoxInterfaceBase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelInterface.SetColumnSpan(this.textBoxInterfaceBase, 2);
+            this.textBoxInterfaceBase.Location = new System.Drawing.Point(57, 55);
             this.textBoxInterfaceBase.Name = "textBoxInterfaceBase";
             this.textBoxInterfaceBase.ReadOnly = true;
-            this.textBoxInterfaceBase.Size = new System.Drawing.Size(341, 20);
+            this.textBoxInterfaceBase.Size = new System.Drawing.Size(619, 20);
             this.textBoxInterfaceBase.TabIndex = 11;
             // 
             // textBoxInterfaceName
             // 
-            this.textBoxInterfaceName.Location = new System.Drawing.Point(59, 11);
+            this.textBoxInterfaceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelInterface.SetColumnSpan(this.textBoxInterfaceName, 2);
+            this.textBoxInterfaceName.Location = new System.Drawing.Point(57, 3);
             this.textBoxInterfaceName.Name = "textBoxInterfaceName";
             this.textBoxInterfaceName.ReadOnly = true;
-            this.textBoxInterfaceName.Size = new System.Drawing.Size(341, 20);
+            this.textBoxInterfaceName.Size = new System.Drawing.Size(619, 20);
             this.textBoxInterfaceName.TabIndex = 9;
             // 
             // textBoxIID
             // 
-            this.textBoxIID.Location = new System.Drawing.Point(59, 44);
+            this.textBoxIID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            tableLayoutPanelInterface.SetColumnSpan(this.textBoxIID, 2);
+            this.textBoxIID.Location = new System.Drawing.Point(57, 29);
             this.textBoxIID.Name = "textBoxIID";
             this.textBoxIID.ReadOnly = true;
-            this.textBoxIID.Size = new System.Drawing.Size(341, 20);
+            this.textBoxIID.Size = new System.Drawing.Size(619, 20);
             this.textBoxIID.TabIndex = 7;
             // 
             // tabPageProxies
@@ -860,68 +944,9 @@
             this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
             this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
             // 
-            // contextMenuStripInterfaces
-            // 
-            this.contextMenuStripInterfaces.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyToolStripMenuItem,
-            this.copyIIDToolStripMenuItem,
-            this.viewProxyDefinitionToolStripMenuItem});
-            this.contextMenuStripInterfaces.Name = "contextMenuStripInterfaces";
-            this.contextMenuStripInterfaces.Size = new System.Drawing.Size(187, 70);
-            this.contextMenuStripInterfaces.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripInterfaces_Opening);
-            // 
-            // copyToolStripMenuItem
-            // 
-            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.copyToolStripMenuItem.Text = "Copy";
-            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
-            // 
-            // copyIIDToolStripMenuItem
-            // 
-            this.copyIIDToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.asStringToolStripMenuItem,
-            this.asCStructureToolStripMenuItem,
-            this.asHexStringToolStripMenuItem});
-            this.copyIIDToolStripMenuItem.Name = "copyIIDToolStripMenuItem";
-            this.copyIIDToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.copyIIDToolStripMenuItem.Text = "Copy IID";
-            // 
-            // asStringToolStripMenuItem
-            // 
-            this.asStringToolStripMenuItem.Name = "asStringToolStripMenuItem";
-            this.asStringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.asStringToolStripMenuItem.Text = "As String";
-            this.asStringToolStripMenuItem.Click += new System.EventHandler(this.asStringToolStripMenuItem_Click);
-            // 
-            // asCStructureToolStripMenuItem
-            // 
-            this.asCStructureToolStripMenuItem.Name = "asCStructureToolStripMenuItem";
-            this.asCStructureToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.asCStructureToolStripMenuItem.Text = "As C Structure";
-            this.asCStructureToolStripMenuItem.Click += new System.EventHandler(this.asCStructureToolStripMenuItem_Click);
-            // 
-            // asHexStringToolStripMenuItem
-            // 
-            this.asHexStringToolStripMenuItem.Name = "asHexStringToolStripMenuItem";
-            this.asHexStringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.asHexStringToolStripMenuItem.Text = "As Hex String";
-            this.asHexStringToolStripMenuItem.Click += new System.EventHandler(this.asHexStringToolStripMenuItem_Click);
-            // 
-            // viewProxyDefinitionToolStripMenuItem
-            // 
-            this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
-            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
-            this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
-            // 
             // tabPageService
             // 
-            this.tabPageService.Controls.Add(this.lblServiceType);
-            this.tabPageService.Controls.Add(this.textBoxServiceDisplayName);
-            this.tabPageService.Controls.Add(label20);
-            this.tabPageService.Controls.Add(this.textBoxServiceName);
-            this.tabPageService.Controls.Add(label21);
+            this.tabPageService.Controls.Add(tableLayoutPanelService);
             this.tabPageService.Location = new System.Drawing.Point(4, 22);
             this.tabPageService.Name = "tabPageService";
             this.tabPageService.Padding = new System.Windows.Forms.Padding(3);
@@ -930,48 +955,252 @@
             this.tabPageService.Text = "Service";
             this.tabPageService.UseVisualStyleBackColor = true;
             // 
-            // textBoxServiceName
-            // 
-            this.textBoxServiceName.Location = new System.Drawing.Point(96, 6);
-            this.textBoxServiceName.Name = "textBoxServiceName";
-            this.textBoxServiceName.ReadOnly = true;
-            this.textBoxServiceName.Size = new System.Drawing.Size(313, 20);
-            this.textBoxServiceName.TabIndex = 7;
-            // 
-            // label21
-            // 
-            label21.AutoSize = true;
-            label21.Location = new System.Drawing.Point(15, 9);
-            label21.Name = "label21";
-            label21.Size = new System.Drawing.Size(38, 13);
-            label21.TabIndex = 6;
-            label21.Text = "Name:";
-            // 
-            // textBoxServiceDisplayName
-            // 
-            this.textBoxServiceDisplayName.Location = new System.Drawing.Point(96, 32);
-            this.textBoxServiceDisplayName.Name = "textBoxServiceDisplayName";
-            this.textBoxServiceDisplayName.ReadOnly = true;
-            this.textBoxServiceDisplayName.Size = new System.Drawing.Size(313, 20);
-            this.textBoxServiceDisplayName.TabIndex = 9;
-            // 
-            // label20
-            // 
-            label20.AutoSize = true;
-            label20.Location = new System.Drawing.Point(15, 35);
-            label20.Name = "label20";
-            label20.Size = new System.Drawing.Size(75, 13);
-            label20.TabIndex = 8;
-            label20.Text = "Display Name:";
-            // 
             // lblServiceType
             // 
+            this.lblServiceType.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblServiceType.AutoSize = true;
-            this.lblServiceType.Location = new System.Drawing.Point(15, 62);
+            this.lblServiceType.Location = new System.Drawing.Point(84, 52);
             this.lblServiceType.Name = "lblServiceType";
             this.lblServiceType.Size = new System.Drawing.Size(73, 13);
             this.lblServiceType.TabIndex = 10;
             this.lblServiceType.Text = "Service Type:";
+            // 
+            // textBoxServiceDisplayName
+            // 
+            this.textBoxServiceDisplayName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxServiceDisplayName.Location = new System.Drawing.Point(84, 29);
+            this.textBoxServiceDisplayName.Name = "textBoxServiceDisplayName";
+            this.textBoxServiceDisplayName.ReadOnly = true;
+            this.textBoxServiceDisplayName.Size = new System.Drawing.Size(592, 20);
+            this.textBoxServiceDisplayName.TabIndex = 9;
+            // 
+            // textBoxServiceName
+            // 
+            this.textBoxServiceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxServiceName.Location = new System.Drawing.Point(84, 3);
+            this.textBoxServiceName.Name = "textBoxServiceName";
+            this.textBoxServiceName.ReadOnly = true;
+            this.textBoxServiceName.Size = new System.Drawing.Size(592, 20);
+            this.textBoxServiceName.TabIndex = 7;
+            // 
+            // tableLayoutPanelService
+            // 
+            tableLayoutPanelService.ColumnCount = 2;
+            tableLayoutPanelService.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelService.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelService.Controls.Add(label22, 0, 2);
+            tableLayoutPanelService.Controls.Add(label21, 0, 0);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceDisplayName, 1, 1);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceName, 1, 0);
+            tableLayoutPanelService.Controls.Add(label20, 0, 1);
+            tableLayoutPanelService.Controls.Add(this.lblServiceType, 1, 2);
+            tableLayoutPanelService.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelService.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelService.Name = "tableLayoutPanelService";
+            tableLayoutPanelService.RowCount = 4;
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            tableLayoutPanelService.Size = new System.Drawing.Size(679, 427);
+            tableLayoutPanelService.TabIndex = 11;
+            // 
+            // label22
+            // 
+            label22.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label22.AutoSize = true;
+            label22.Location = new System.Drawing.Point(3, 52);
+            label22.Name = "label22";
+            label22.Size = new System.Drawing.Size(73, 13);
+            label22.TabIndex = 11;
+            label22.Text = "Service Type:";
+            // 
+            // tableLayoutPanelInterface
+            // 
+            tableLayoutPanelInterface.ColumnCount = 3;
+            tableLayoutPanelInterface.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelInterface.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelInterface.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelInterface.Controls.Add(label15, 0, 0);
+            tableLayoutPanelInterface.Controls.Add(this.btnOpenTypeLib, 2, 4);
+            tableLayoutPanelInterface.Controls.Add(label16, 0, 1);
+            tableLayoutPanelInterface.Controls.Add(this.btnProxyProperties, 2, 3);
+            tableLayoutPanelInterface.Controls.Add(this.textBoxTypeLib, 1, 4);
+            tableLayoutPanelInterface.Controls.Add(label17, 0, 2);
+            tableLayoutPanelInterface.Controls.Add(label19, 0, 4);
+            tableLayoutPanelInterface.Controls.Add(this.textBoxInterfaceProxy, 1, 3);
+            tableLayoutPanelInterface.Controls.Add(label18, 0, 3);
+            tableLayoutPanelInterface.Controls.Add(this.textBoxInterfaceBase, 1, 2);
+            tableLayoutPanelInterface.Controls.Add(this.textBoxInterfaceName, 1, 0);
+            tableLayoutPanelInterface.Controls.Add(this.textBoxIID, 1, 1);
+            tableLayoutPanelInterface.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelInterface.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelInterface.Name = "tableLayoutPanelInterface";
+            tableLayoutPanelInterface.RowCount = 6;
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelInterface.Size = new System.Drawing.Size(679, 427);
+            tableLayoutPanelInterface.TabIndex = 22;
+            // 
+            // tableLayoutPanelAppID
+            // 
+            tableLayoutPanelAppID.ColumnCount = 2;
+            tableLayoutPanelAppID.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelAppID.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelAppID.Controls.Add(this.label25, 0, 4);
+            tableLayoutPanelAppID.Controls.Add(this.label24, 0, 3);
+            tableLayoutPanelAppID.Controls.Add(this.lblAppIDFlags, 1, 4);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxDllSurrogate, 0, 10);
+            tableLayoutPanelAppID.Controls.Add(this.label23, 0, 2);
+            tableLayoutPanelAppID.Controls.Add(label12, 0, 9);
+            tableLayoutPanelAppID.Controls.Add(label8, 0, 0);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAccessPermission, 0, 8);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAppIdName, 1, 0);
+            tableLayoutPanelAppID.Controls.Add(label11, 0, 7);
+            tableLayoutPanelAppID.Controls.Add(label9, 0, 1);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxLaunchPermission, 0, 6);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAppIdGuid, 1, 1);
+            tableLayoutPanelAppID.Controls.Add(label10, 0, 5);
+            tableLayoutPanelAppID.Controls.Add(this.lblAppIdRunAs, 1, 2);
+            tableLayoutPanelAppID.Controls.Add(this.lblService, 1, 3);
+            tableLayoutPanelAppID.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelAppID.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelAppID.Name = "tableLayoutPanelAppID";
+            tableLayoutPanelAppID.RowCount = 12;
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelAppID.Size = new System.Drawing.Size(679, 427);
+            tableLayoutPanelAppID.TabIndex = 21;
+            // 
+            // label23
+            // 
+            this.label23.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(3, 52);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(45, 13);
+            this.label23.TabIndex = 15;
+            this.label23.Text = "Run As:";
+            // 
+            // label24
+            // 
+            this.label24.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(3, 65);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(46, 13);
+            this.label24.TabIndex = 16;
+            this.label24.Text = "Service:";
+            // 
+            // label25
+            // 
+            this.label25.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(3, 78);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(35, 13);
+            this.label25.TabIndex = 21;
+            this.label25.Text = "Flags:";
+            // 
+            // tableLayoutPanelSupportedInterfaces
+            // 
+            tableLayoutPanelSupportedInterfaces.ColumnCount = 3;
+            tableLayoutPanelSupportedInterfaces.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelSupportedInterfaces.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelSupportedInterfaces.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelSupportedInterfaces.Controls.Add(this.listViewFactoryInterfaces, 0, 3);
+            tableLayoutPanelSupportedInterfaces.Controls.Add(label6, 0, 2);
+            tableLayoutPanelSupportedInterfaces.Controls.Add(this.listViewInterfaces, 0, 1);
+            tableLayoutPanelSupportedInterfaces.Controls.Add(this.btnRefreshInterfaces, 1, 0);
+            tableLayoutPanelSupportedInterfaces.Controls.Add(label5, 0, 0);
+            tableLayoutPanelSupportedInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelSupportedInterfaces.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelSupportedInterfaces.Name = "tableLayoutPanelSupportedInterfaces";
+            tableLayoutPanelSupportedInterfaces.RowCount = 4;
+            tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanelSupportedInterfaces.Size = new System.Drawing.Size(679, 427);
+            tableLayoutPanelSupportedInterfaces.TabIndex = 14;
+            // 
+            // tableLayoutPanelClsid
+            // 
+            tableLayoutPanelClsid.ColumnCount = 3;
+            tableLayoutPanelClsid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelClsid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelClsid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelClsid.Controls.Add(label26, 0, 2);
+            tableLayoutPanelClsid.Controls.Add(this.btnCreate, 2, 1);
+            tableLayoutPanelClsid.Controls.Add(label1, 0, 0);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxClsidName, 1, 0);
+            tableLayoutPanelClsid.Controls.Add(this.listViewCategories, 0, 10);
+            tableLayoutPanelClsid.Controls.Add(label4, 0, 9);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxTreatAs, 1, 5);
+            tableLayoutPanelClsid.Controls.Add(lblClsid, 0, 1);
+            tableLayoutPanelClsid.Controls.Add(this.listViewProgIDs, 0, 8);
+            tableLayoutPanelClsid.Controls.Add(label14, 0, 5);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxClsid, 1, 1);
+            tableLayoutPanelClsid.Controls.Add(label13, 0, 4);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxCmdLine, 1, 4);
+            tableLayoutPanelClsid.Controls.Add(this.lblServerType, 1, 2);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxServer, 1, 3);
+            tableLayoutPanelClsid.Controls.Add(label7, 0, 3);
+            tableLayoutPanelClsid.Controls.Add(this.btnTreatAsProps, 2, 5);
+            tableLayoutPanelClsid.Controls.Add(this.lblThreadingModel, 1, 6);
+            tableLayoutPanelClsid.Controls.Add(label27, 0, 6);
+            tableLayoutPanelClsid.Controls.Add(label3, 0, 7);
+            tableLayoutPanelClsid.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelClsid.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelClsid.Name = "tableLayoutPanelClsid";
+            tableLayoutPanelClsid.RowCount = 11;
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanelClsid.Size = new System.Drawing.Size(679, 427);
+            tableLayoutPanelClsid.TabIndex = 18;
+            // 
+            // label26
+            // 
+            label26.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label26.AutoSize = true;
+            label26.Location = new System.Drawing.Point(3, 55);
+            label26.Name = "label26";
+            label26.Size = new System.Drawing.Size(68, 13);
+            label26.TabIndex = 19;
+            label26.Text = "Server Type:";
+            // 
+            // label27
+            // 
+            label27.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label27.AutoSize = true;
+            label27.Location = new System.Drawing.Point(3, 149);
+            label27.Name = "label27";
+            label27.Size = new System.Drawing.Size(90, 13);
+            label27.TabIndex = 20;
+            label27.Text = "Threading Model:";
             // 
             // PropertiesControl
             // 
@@ -983,26 +1212,26 @@
             this.Size = new System.Drawing.Size(693, 459);
             this.tabControlProperties.ResumeLayout(false);
             this.tabPageClsid.ResumeLayout(false);
-            this.tabPageClsid.PerformLayout();
             this.contextMenuStripProgids.ResumeLayout(false);
             this.tabPageNoProperties.ResumeLayout(false);
             this.tabPageNoProperties.PerformLayout();
             this.tabPageSupportedInterfaces.ResumeLayout(false);
-            this.splitContainerInterfaces.Panel1.ResumeLayout(false);
-            this.splitContainerInterfaces.Panel1.PerformLayout();
-            this.splitContainerInterfaces.Panel2.ResumeLayout(false);
-            this.splitContainerInterfaces.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerInterfaces)).EndInit();
-            this.splitContainerInterfaces.ResumeLayout(false);
+            this.contextMenuStripInterfaces.ResumeLayout(false);
             this.tabPageAppID.ResumeLayout(false);
-            this.tabPageAppID.PerformLayout();
             this.tabPageInterface.ResumeLayout(false);
-            this.tabPageInterface.PerformLayout();
             this.tabPageProxies.ResumeLayout(false);
             this.tabPageServers.ResumeLayout(false);
-            this.contextMenuStripInterfaces.ResumeLayout(false);
             this.tabPageService.ResumeLayout(false);
-            this.tabPageService.PerformLayout();
+            tableLayoutPanelService.ResumeLayout(false);
+            tableLayoutPanelService.PerformLayout();
+            tableLayoutPanelInterface.ResumeLayout(false);
+            tableLayoutPanelInterface.PerformLayout();
+            tableLayoutPanelAppID.ResumeLayout(false);
+            tableLayoutPanelAppID.PerformLayout();
+            tableLayoutPanelSupportedInterfaces.ResumeLayout(false);
+            tableLayoutPanelSupportedInterfaces.PerformLayout();
+            tableLayoutPanelClsid.ResumeLayout(false);
+            tableLayoutPanelClsid.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1031,7 +1260,6 @@
         private System.Windows.Forms.Label lblAppIdRunAs;
         private System.Windows.Forms.Label lblService;
         private System.Windows.Forms.TextBox textBoxDllSurrogate;
-        private System.Windows.Forms.SplitContainer splitContainerInterfaces;
         private System.Windows.Forms.Button btnViewLaunchPermissions;
         private System.Windows.Forms.Button btnViewAccessPermissions;
         private System.Windows.Forms.Label lblAppIDFlags;
@@ -1064,5 +1292,8 @@
         private System.Windows.Forms.TextBox textBoxServiceDisplayName;
         private System.Windows.Forms.TextBox textBoxServiceName;
         private System.Windows.Forms.Label lblServiceType;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label23;
     }
 }

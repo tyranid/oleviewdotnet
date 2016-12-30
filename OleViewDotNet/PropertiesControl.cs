@@ -66,9 +66,9 @@ namespace OleViewDotNet
             textBoxAppIdGuid.Text = entry.AppId.ToString("B");
             textBoxLaunchPermission.Text = entry.LaunchPermission;
             textBoxAccessPermission.Text = entry.AccessPermission;
-            lblAppIdRunAs.Text = String.Format("Run As: {0}", GetStringValue(entry.RunAs));
-            lblService.Text = String.Format("Service: {0}", GetStringValue(entry.IsService ? entry.LocalService.Name : null));
-            lblAppIDFlags.Text = String.Format("Flags: {0}", entry.Flags);
+            lblAppIdRunAs.Text = GetStringValue(entry.RunAs);
+            lblService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
+            lblAppIDFlags.Text = entry.Flags.ToString();
             textBoxDllSurrogate.Text = GetStringValue(entry.DllSurrogate);
             btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
             btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
@@ -80,8 +80,8 @@ namespace OleViewDotNet
         {
             textBoxClsidName.Text = entry.Name;
             textBoxClsid.Text = entry.Clsid.ToString("B");
-            lblServerType.Text = "Server Type: " + entry.DefaultServerType;
-            lblThreadingModel.Text = "Threading Model: " + entry.DefaultThreadingModel;
+            lblServerType.Text = entry.DefaultServerType.ToString();
+            lblThreadingModel.Text = entry.DefaultThreadingModel.ToString();
             textBoxServer.Text = entry.DefaultServer;
             textBoxCmdLine.Text = GetStringValue(entry.DefaultCmdLine);
             textBoxTreatAs.Text = GetGuidValue(entry.TreatAs);
