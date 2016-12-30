@@ -87,7 +87,7 @@ namespace OleViewDotNet
             frm.Show(m_dockPanel);
         }
 
-        public async Task HostObject(COMCLSIDEntry ent, object obj)
+        public async Task HostObject(COMCLSIDEntry ent, object obj, bool factory)
         {
             Dictionary<string, string> props = new Dictionary<string, string>();
 
@@ -102,10 +102,15 @@ namespace OleViewDotNet
             /* Need to implement a type library reader */
             Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
 
-            await ent.LoadSupportedInterfacesAsync(false);
+            if (!ent.InterfacesLoaded)
+            {
+                await ent.LoadSupportedInterfacesAsync(false);
+            }
+
+            IEnumerable<COMInterfaceInstance> intfs = factory ? ent.FactoryInterfaces : ent.Interfaces;
 
             ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
-                props, ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
+                props, intfs.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
             HostControl(view);
         }
 
@@ -255,7 +260,7 @@ namespace OleViewDotNet
                         byte[] data = File.ReadAllBytes(dlg.FileName);
                         Guid clsid;
                         object comObj = COMUtilities.UnmarshalObject(new MemoryStream(data), out clsid);
-                        await HostObject(m_registry.MapClsidToEntry(clsid), comObj);
+                        await HostObject(m_registry.MapClsidToEntry(clsid), comObj, comObj is IClassFactory);
                     }
                     catch (Exception ex)
                     {
@@ -311,7 +316,7 @@ namespace OleViewDotNet
                             Guid clsid;
                             object obj = COMUtilities.OleLoadFromStream(stm, out clsid);
 
-                            await HostObject(m_registry.MapClsidToEntry(clsid), obj);
+                            await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
                         }
                     }
                     catch (Exception ex)
@@ -525,7 +530,7 @@ namespace OleViewDotNet
                         {
                             IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext);
                             ps.Load(dlg.FileName, (int)STGM.STGM_READ);
-                            await HostObject(entry, ps);
+                            await HostObject(entry, ps, false);
                         }
                     }
                 }

@@ -379,7 +379,14 @@ namespace OleViewDotNet
 
         public override string FormatType(NdrFormatContext context)
         {
-            return String.Format("{0}*", Type.FormatType(context));
+            if (Type is NdrBaseArrayTypeReference)
+            {
+                return Type.FormatType(context);
+            }
+            else
+            {
+                return String.Format("{0}*", Type.FormatType(context));
+            }
         }
 
         public override int GetSize()

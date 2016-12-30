@@ -1027,9 +1027,9 @@ namespace OleViewDotNet
             }
         }
 
-        private async Task SetupObjectView(COMCLSIDEntry ent, object obj)
+        private async Task SetupObjectView(COMCLSIDEntry ent, object obj, bool factory)
         {
-            await Program.GetMainForm(m_registry).HostObject(ent, obj);
+            await Program.GetMainForm(m_registry).HostObject(ent, obj, factory);
         }
 
         private COMCLSIDEntry GetSelectedClsidEntry()
@@ -1060,7 +1060,7 @@ namespace OleViewDotNet
                     object comObj = ent.CreateInstanceAsObject(clsctx);
                     if (comObj != null)
                     {
-                        await SetupObjectView(ent, comObj);
+                        await SetupObjectView(ent, comObj, false);
                     }
                 }
                 catch (Exception ex)
@@ -1080,7 +1080,7 @@ namespace OleViewDotNet
                     object comObj = ent.CreateClassFactory();
                     if (comObj != null)
                     {
-                        await SetupObjectView(ent, comObj);
+                        await SetupObjectView(ent, comObj, true);
                     }
                 }
                 catch (Exception ex)
@@ -1577,7 +1577,7 @@ namespace OleViewDotNet
             try
             {
                 object obj = Marshal.BindToMoniker(moniker);
-                await SetupObjectView(ent, obj);
+                await SetupObjectView(ent, obj, obj is IClassFactory);
             }
             catch (Exception ex)
             {

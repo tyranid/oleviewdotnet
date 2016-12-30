@@ -264,7 +264,7 @@ namespace OleViewDotNet
                 object comObj = m_clsid.CreateInstanceAsObject(m_clsid.CreateContext);
                 if (comObj != null)
                 {
-                    await Program.GetMainForm(m_registry).HostObject(m_clsid, comObj);
+                    await Program.GetMainForm(m_registry).HostObject(m_clsid, comObj, false);
                 }
             }
             catch (Exception ex)

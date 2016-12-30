@@ -39,7 +39,7 @@ namespace OleViewDotNet
                 MemoryStream stm = new MemoryStream(hexEditor.Bytes);
                 Guid clsid;
                 object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out clsid);
-                await Program.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj);
+                await Program.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, false);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace OleViewDotNet
                 MemoryStream stm = new MemoryStream(hexEditor.Bytes);
                 Guid clsid;
                 object obj = COMUtilities.UnmarshalObject(new MemoryStream(hexEditor.Bytes), out clsid);
-                await Program.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj);
+                await Program.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
             }
             catch (Exception ex)
             {
