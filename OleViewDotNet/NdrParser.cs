@@ -1512,7 +1512,6 @@ namespace OleViewDotNet
             NdrProcHeaderExts exts = new NdrProcHeaderExts();
             if ((header.Oi2Flags & NdrInterpreterOptFlags.HasExtensions) == NdrInterpreterOptFlags.HasExtensions)
             {
-                // Just ignore extensions.
                 int ext_size = Marshal.ReadByte(proc_desc);
                 if (Marshal.SizeOf(typeof(NdrProcHeaderExts)) <= ext_size)
                 {
