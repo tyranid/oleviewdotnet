@@ -726,6 +726,7 @@ namespace OleViewDotNet
                 }
 
                 TreeNode currNode = new TreeNode(ent.Name);
+                currNode.Tag = ent;
                 clsidNodes.Add(currNode);
 
                 foreach (COMCLSIDEntry cls in clsids)
