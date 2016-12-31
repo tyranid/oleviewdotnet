@@ -40,7 +40,7 @@
             // 
             this.listViewROT.ContextMenuStrip = this.contextMenuStrip;
             this.listViewROT.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewROT.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewROT.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewROT.Location = new System.Drawing.Point(0, 0);
             this.listViewROT.Name = "listViewROT";
             this.listViewROT.Size = new System.Drawing.Size(867, 486);
@@ -54,20 +54,20 @@
             this.refreshToolStripMenuItem,
             this.bindToObjectToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(148, 48);
+            this.contextMenuStrip.Size = new System.Drawing.Size(147, 48);
             // 
             // refreshToolStripMenuItem
             // 
             this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
             this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.refreshToolStripMenuItem.Text = "Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.menuROTRefresh_Click);
             // 
             // bindToObjectToolStripMenuItem
             // 
             this.bindToObjectToolStripMenuItem.Name = "bindToObjectToolStripMenuItem";
-            this.bindToObjectToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.bindToObjectToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.bindToObjectToolStripMenuItem.Text = "BindToObject";
             this.bindToObjectToolStripMenuItem.Click += new System.EventHandler(this.menuROTBindToObject_Click);
             // 
@@ -75,10 +75,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(867, 486);
             this.Controls.Add(this.listViewROT);
-            this.Name = "ROTViewer";            
-            this.Text = "ROTViewer";
+            this.Name = "ROTViewer";
+            this.Size = new System.Drawing.Size(867, 486);
             this.Load += new System.EventHandler(this.ROTViewer_Load);
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
