@@ -65,9 +65,11 @@
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelClsid;
             System.Windows.Forms.Label label26;
             System.Windows.Forms.Label label27;
+            System.Windows.Forms.Label label28;
+            System.Windows.Forms.Label label29;
+            System.Windows.Forms.Label label30;
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
             this.textBoxServiceName = new System.Windows.Forms.TextBox();
-            this.lblServiceType = new System.Windows.Forms.Label();
             this.btnOpenTypeLib = new System.Windows.Forms.Button();
             this.btnProxyProperties = new System.Windows.Forms.Button();
             this.textBoxTypeLib = new System.Windows.Forms.TextBox();
@@ -77,15 +79,17 @@
             this.textBoxIID = new System.Windows.Forms.TextBox();
             this.label25 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
-            this.lblAppIDFlags = new System.Windows.Forms.Label();
             this.textBoxDllSurrogate = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.textBoxAccessPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdName = new System.Windows.Forms.TextBox();
             this.textBoxLaunchPermission = new System.Windows.Forms.TextBox();
             this.textBoxAppIdGuid = new System.Windows.Forms.TextBox();
-            this.lblAppIdRunAs = new System.Windows.Forms.Label();
-            this.lblService = new System.Windows.Forms.Label();
+            this.btnViewAccessPermissions = new System.Windows.Forms.Button();
+            this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
+            this.textBoxAppIDRunAs = new System.Windows.Forms.TextBox();
+            this.textBoxAppIDService = new System.Windows.Forms.TextBox();
+            this.textBoxAppIDFlags = new System.Windows.Forms.TextBox();
             this.listViewFactoryInterfaces = new System.Windows.Forms.ListView();
             this.contextMenuStripInterfaces = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -105,23 +109,25 @@
             this.copyProgIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBoxClsid = new System.Windows.Forms.TextBox();
             this.textBoxCmdLine = new System.Windows.Forms.TextBox();
-            this.lblServerType = new System.Windows.Forms.Label();
             this.textBoxServer = new System.Windows.Forms.TextBox();
             this.btnTreatAsProps = new System.Windows.Forms.Button();
-            this.lblThreadingModel = new System.Windows.Forms.Label();
+            this.textBoxServerType = new System.Windows.Forms.TextBox();
+            this.textBoxThreadingModel = new System.Windows.Forms.TextBox();
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
             this.tabPageSupportedInterfaces = new System.Windows.Forms.TabPage();
             this.tabPageAppID = new System.Windows.Forms.TabPage();
-            this.btnViewAccessPermissions = new System.Windows.Forms.Button();
-            this.btnViewLaunchPermissions = new System.Windows.Forms.Button();
             this.tabPageInterface = new System.Windows.Forms.TabPage();
             this.tabPageProxies = new System.Windows.Forms.TabPage();
             this.listViewProxies = new System.Windows.Forms.ListView();
             this.tabPageServers = new System.Windows.Forms.TabPage();
             this.listViewCLSIDServers = new System.Windows.Forms.ListView();
             this.tabPageService = new System.Windows.Forms.TabPage();
+            this.textBoxServiceType = new System.Windows.Forms.TextBox();
+            this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
+            this.textBoxServiceDll = new System.Windows.Forms.TextBox();
+            this.textBoxServiceUserName = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -158,6 +164,9 @@
             tableLayoutPanelClsid = new System.Windows.Forms.TableLayoutPanel();
             label26 = new System.Windows.Forms.Label();
             label27 = new System.Windows.Forms.Label();
+            label28 = new System.Windows.Forms.Label();
+            label29 = new System.Windows.Forms.Label();
+            label30 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -180,10 +189,10 @@
             // 
             lblClsid.Anchor = System.Windows.Forms.AnchorStyles.Left;
             lblClsid.AutoSize = true;
-            lblClsid.Location = new System.Drawing.Point(2, 31);
+            lblClsid.Location = new System.Drawing.Point(2, 43);
             lblClsid.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             lblClsid.Name = "lblClsid";
-            lblClsid.Size = new System.Drawing.Size(41, 13);
+            lblClsid.Size = new System.Drawing.Size(83, 26);
             lblClsid.TabIndex = 0;
             lblClsid.Text = "CLSID:";
             // 
@@ -194,7 +203,7 @@
             label1.Location = new System.Drawing.Point(2, 5);
             label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(38, 13);
+            label1.Size = new System.Drawing.Size(77, 26);
             label1.TabIndex = 4;
             label1.Text = "Name:";
             // 
@@ -204,7 +213,7 @@
             label2.Location = new System.Drawing.Point(10, 7);
             label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(71, 13);
+            label2.Size = new System.Drawing.Size(145, 26);
             label2.TabIndex = 0;
             label2.Text = "No Properties";
             // 
@@ -212,10 +221,10 @@
             // 
             label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(2, 152);
+            label3.Location = new System.Drawing.Point(2, 264);
             label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(48, 13);
+            label3.Size = new System.Drawing.Size(97, 26);
             label3.TabIndex = 7;
             label3.Text = "ProgIDs:";
             // 
@@ -223,10 +232,10 @@
             // 
             label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(2, 185);
+            label4.Location = new System.Drawing.Point(2, 337);
             label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(60, 13);
+            label4.Size = new System.Drawing.Size(123, 26);
             label4.TabIndex = 9;
             label4.Text = "Categories:";
             // 
@@ -237,17 +246,17 @@
             label5.Location = new System.Drawing.Point(2, 7);
             label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(57, 13);
+            label5.Size = new System.Drawing.Size(113, 26);
             label5.TabIndex = 9;
             label5.Text = "Interfaces:";
             // 
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(2, 116);
+            label6.Location = new System.Drawing.Point(2, 212);
             label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(95, 13);
+            label6.Size = new System.Drawing.Size(191, 26);
             label6.TabIndex = 11;
             label6.Text = "Factory Interfaces:";
             // 
@@ -255,10 +264,10 @@
             // 
             label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(2, 69);
+            label7.Location = new System.Drawing.Point(2, 119);
             label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(41, 13);
+            label7.Size = new System.Drawing.Size(82, 26);
             label7.TabIndex = 10;
             label7.Text = "Server:";
             // 
@@ -269,7 +278,7 @@
             label8.Location = new System.Drawing.Point(2, 5);
             label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(38, 13);
+            label8.Size = new System.Drawing.Size(77, 26);
             label8.TabIndex = 8;
             label8.Text = "Name:";
             // 
@@ -277,10 +286,10 @@
             // 
             label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(2, 29);
+            label9.Location = new System.Drawing.Point(2, 41);
             label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(40, 13);
+            label9.Size = new System.Drawing.Size(79, 26);
             label9.TabIndex = 6;
             label9.Text = "AppID:";
             // 
@@ -288,10 +297,10 @@
             // 
             label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label10.AutoSize = true;
-            label10.Location = new System.Drawing.Point(2, 87);
+            label10.Location = new System.Drawing.Point(2, 186);
             label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label10.Name = "label10";
-            label10.Size = new System.Drawing.Size(99, 13);
+            label10.Size = new System.Drawing.Size(204, 26);
             label10.TabIndex = 10;
             label10.Text = "Launch Permission:";
             // 
@@ -299,10 +308,10 @@
             // 
             label11.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(2, 127);
+            label11.Location = new System.Drawing.Point(2, 252);
             label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label11.Name = "label11";
-            label11.Size = new System.Drawing.Size(98, 13);
+            label11.Size = new System.Drawing.Size(204, 26);
             label11.TabIndex = 12;
             label11.Text = "Access Permission:";
             // 
@@ -310,10 +319,10 @@
             // 
             label12.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(2, 167);
+            label12.Location = new System.Drawing.Point(2, 318);
             label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label12.Name = "label12";
-            label12.Size = new System.Drawing.Size(71, 13);
+            label12.Size = new System.Drawing.Size(145, 26);
             label12.TabIndex = 16;
             label12.Text = "Dll Surrogate:";
             // 
@@ -321,10 +330,10 @@
             // 
             label13.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label13.AutoSize = true;
-            label13.Location = new System.Drawing.Point(2, 93);
+            label13.Location = new System.Drawing.Point(2, 155);
             label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label13.Name = "label13";
-            label13.Size = new System.Drawing.Size(51, 13);
+            label13.Size = new System.Drawing.Size(106, 26);
             label13.TabIndex = 12;
             label13.Text = "CmdLine:";
             // 
@@ -332,10 +341,10 @@
             // 
             label14.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label14.AutoSize = true;
-            label14.Location = new System.Drawing.Point(2, 119);
+            label14.Location = new System.Drawing.Point(2, 193);
             label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label14.Name = "label14";
-            label14.Size = new System.Drawing.Size(47, 13);
+            label14.Size = new System.Drawing.Size(93, 26);
             label14.TabIndex = 14;
             label14.Text = "TreatAs:";
             // 
@@ -346,7 +355,7 @@
             label15.Location = new System.Drawing.Point(2, 5);
             label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label15.Name = "label15";
-            label15.Size = new System.Drawing.Size(38, 13);
+            label15.Size = new System.Drawing.Size(77, 26);
             label15.TabIndex = 8;
             label15.Text = "Name:";
             // 
@@ -354,10 +363,10 @@
             // 
             label16.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label16.AutoSize = true;
-            label16.Location = new System.Drawing.Point(2, 29);
+            label16.Location = new System.Drawing.Point(2, 41);
             label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label16.Name = "label16";
-            label16.Size = new System.Drawing.Size(24, 13);
+            label16.Size = new System.Drawing.Size(46, 26);
             label16.TabIndex = 6;
             label16.Text = "IID:";
             // 
@@ -365,10 +374,10 @@
             // 
             label17.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label17.AutoSize = true;
-            label17.Location = new System.Drawing.Point(2, 53);
+            label17.Location = new System.Drawing.Point(2, 77);
             label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label17.Name = "label17";
-            label17.Size = new System.Drawing.Size(34, 13);
+            label17.Size = new System.Drawing.Size(68, 26);
             label17.TabIndex = 10;
             label17.Text = "Base:";
             // 
@@ -376,10 +385,10 @@
             // 
             label18.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label18.AutoSize = true;
-            label18.Location = new System.Drawing.Point(2, 79);
+            label18.Location = new System.Drawing.Point(2, 115);
             label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label18.Name = "label18";
-            label18.Size = new System.Drawing.Size(36, 13);
+            label18.Size = new System.Drawing.Size(74, 26);
             label18.TabIndex = 12;
             label18.Text = "Proxy:";
             // 
@@ -387,10 +396,10 @@
             // 
             label19.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label19.AutoSize = true;
-            label19.Location = new System.Drawing.Point(2, 106);
+            label19.Location = new System.Drawing.Point(2, 155);
             label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label19.Name = "label19";
-            label19.Size = new System.Drawing.Size(48, 13);
+            label19.Size = new System.Drawing.Size(94, 26);
             label19.TabIndex = 19;
             label19.Text = "TypeLib:";
             // 
@@ -427,7 +436,7 @@
             label21.Location = new System.Drawing.Point(2, 5);
             label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label21.Name = "label21";
-            label21.Size = new System.Drawing.Size(38, 13);
+            label21.Size = new System.Drawing.Size(77, 26);
             label21.TabIndex = 6;
             label21.Text = "Name:";
             // 
@@ -435,10 +444,10 @@
             // 
             label20.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label20.AutoSize = true;
-            label20.Location = new System.Drawing.Point(2, 29);
+            label20.Location = new System.Drawing.Point(2, 41);
             label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label20.Name = "label20";
-            label20.Size = new System.Drawing.Size(75, 13);
+            label20.Size = new System.Drawing.Size(155, 26);
             label20.TabIndex = 8;
             label20.Text = "Display Name:";
             // 
@@ -447,65 +456,63 @@
             tableLayoutPanelService.ColumnCount = 2;
             tableLayoutPanelService.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             tableLayoutPanelService.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelService.Controls.Add(label30, 0, 5);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceDll, 1, 4);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceImagePath, 1, 3);
             tableLayoutPanelService.Controls.Add(label22, 0, 2);
             tableLayoutPanelService.Controls.Add(label21, 0, 0);
             tableLayoutPanelService.Controls.Add(this.textBoxServiceDisplayName, 1, 1);
             tableLayoutPanelService.Controls.Add(this.textBoxServiceName, 1, 0);
             tableLayoutPanelService.Controls.Add(label20, 0, 1);
-            tableLayoutPanelService.Controls.Add(this.lblServiceType, 1, 2);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceType, 1, 2);
+            tableLayoutPanelService.Controls.Add(label28, 0, 3);
+            tableLayoutPanelService.Controls.Add(label29, 0, 4);
+            tableLayoutPanelService.Controls.Add(this.textBoxServiceUserName, 1, 5);
             tableLayoutPanelService.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelService.Location = new System.Drawing.Point(2, 2);
-            tableLayoutPanelService.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            tableLayoutPanelService.Margin = new System.Windows.Forms.Padding(2);
             tableLayoutPanelService.Name = "tableLayoutPanelService";
-            tableLayoutPanelService.RowCount = 4;
+            tableLayoutPanelService.RowCount = 7;
             tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 11F));
-            tableLayoutPanelService.Size = new System.Drawing.Size(366, 219);
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelService.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            tableLayoutPanelService.Size = new System.Drawing.Size(725, 410);
             tableLayoutPanelService.TabIndex = 11;
             // 
             // label22
             // 
             label22.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label22.AutoSize = true;
-            label22.Location = new System.Drawing.Point(2, 48);
+            label22.Location = new System.Drawing.Point(2, 78);
             label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label22.Name = "label22";
-            label22.Size = new System.Drawing.Size(73, 13);
+            label22.Size = new System.Drawing.Size(144, 26);
             label22.TabIndex = 11;
             label22.Text = "Service Type:";
             // 
             // textBoxServiceDisplayName
             // 
             this.textBoxServiceDisplayName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxServiceDisplayName.Location = new System.Drawing.Point(81, 26);
-            this.textBoxServiceDisplayName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxServiceDisplayName.Location = new System.Drawing.Point(161, 38);
+            this.textBoxServiceDisplayName.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxServiceDisplayName.Name = "textBoxServiceDisplayName";
             this.textBoxServiceDisplayName.ReadOnly = true;
-            this.textBoxServiceDisplayName.Size = new System.Drawing.Size(283, 20);
+            this.textBoxServiceDisplayName.Size = new System.Drawing.Size(562, 32);
             this.textBoxServiceDisplayName.TabIndex = 9;
             // 
             // textBoxServiceName
             // 
-            this.textBoxServiceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxServiceName.Location = new System.Drawing.Point(81, 2);
-            this.textBoxServiceName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxServiceName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceName.Location = new System.Drawing.Point(161, 2);
+            this.textBoxServiceName.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxServiceName.Name = "textBoxServiceName";
             this.textBoxServiceName.ReadOnly = true;
-            this.textBoxServiceName.Size = new System.Drawing.Size(283, 20);
+            this.textBoxServiceName.Size = new System.Drawing.Size(562, 32);
             this.textBoxServiceName.TabIndex = 7;
-            // 
-            // lblServiceType
-            // 
-            this.lblServiceType.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblServiceType.AutoSize = true;
-            this.lblServiceType.Location = new System.Drawing.Point(81, 48);
-            this.lblServiceType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblServiceType.Name = "lblServiceType";
-            this.lblServiceType.Size = new System.Drawing.Size(73, 13);
-            this.lblServiceType.TabIndex = 10;
-            this.lblServiceType.Text = "Service Type:";
             // 
             // tableLayoutPanelInterface
             // 
@@ -527,7 +534,7 @@
             tableLayoutPanelInterface.Controls.Add(this.textBoxIID, 1, 1);
             tableLayoutPanelInterface.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelInterface.Location = new System.Drawing.Point(2, 2);
-            tableLayoutPanelInterface.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            tableLayoutPanelInterface.Margin = new System.Windows.Forms.Padding(2);
             tableLayoutPanelInterface.Name = "tableLayoutPanelInterface";
             tableLayoutPanelInterface.RowCount = 6;
             tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -536,17 +543,17 @@
             tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelInterface.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelInterface.Size = new System.Drawing.Size(366, 219);
+            tableLayoutPanelInterface.Size = new System.Drawing.Size(725, 410);
             tableLayoutPanelInterface.TabIndex = 22;
             // 
             // btnOpenTypeLib
             // 
             this.btnOpenTypeLib.AutoSize = true;
             this.btnOpenTypeLib.Enabled = false;
-            this.btnOpenTypeLib.Location = new System.Drawing.Point(300, 101);
-            this.btnOpenTypeLib.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnOpenTypeLib.Location = new System.Drawing.Point(602, 150);
+            this.btnOpenTypeLib.Margin = new System.Windows.Forms.Padding(2);
             this.btnOpenTypeLib.Name = "btnOpenTypeLib";
-            this.btnOpenTypeLib.Size = new System.Drawing.Size(43, 23);
+            this.btnOpenTypeLib.Size = new System.Drawing.Size(75, 36);
             this.btnOpenTypeLib.TabIndex = 21;
             this.btnOpenTypeLib.Text = "Open";
             this.btnOpenTypeLib.UseVisualStyleBackColor = true;
@@ -556,10 +563,10 @@
             // 
             this.btnProxyProperties.AutoSize = true;
             this.btnProxyProperties.Enabled = false;
-            this.btnProxyProperties.Location = new System.Drawing.Point(300, 74);
-            this.btnProxyProperties.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnProxyProperties.Location = new System.Drawing.Point(602, 110);
+            this.btnProxyProperties.Margin = new System.Windows.Forms.Padding(2);
             this.btnProxyProperties.Name = "btnProxyProperties";
-            this.btnProxyProperties.Size = new System.Drawing.Size(64, 23);
+            this.btnProxyProperties.Size = new System.Drawing.Size(121, 36);
             this.btnProxyProperties.TabIndex = 18;
             this.btnProxyProperties.Text = "Properties";
             this.btnProxyProperties.UseVisualStyleBackColor = true;
@@ -568,54 +575,54 @@
             // textBoxTypeLib
             // 
             this.textBoxTypeLib.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxTypeLib.Location = new System.Drawing.Point(54, 102);
-            this.textBoxTypeLib.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxTypeLib.Location = new System.Drawing.Point(100, 152);
+            this.textBoxTypeLib.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxTypeLib.Name = "textBoxTypeLib";
             this.textBoxTypeLib.ReadOnly = true;
-            this.textBoxTypeLib.Size = new System.Drawing.Size(242, 20);
+            this.textBoxTypeLib.Size = new System.Drawing.Size(498, 32);
             this.textBoxTypeLib.TabIndex = 20;
             // 
             // textBoxInterfaceProxy
             // 
             this.textBoxInterfaceProxy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxInterfaceProxy.Location = new System.Drawing.Point(54, 75);
-            this.textBoxInterfaceProxy.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxInterfaceProxy.Location = new System.Drawing.Point(100, 112);
+            this.textBoxInterfaceProxy.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxInterfaceProxy.Name = "textBoxInterfaceProxy";
             this.textBoxInterfaceProxy.ReadOnly = true;
-            this.textBoxInterfaceProxy.Size = new System.Drawing.Size(242, 20);
+            this.textBoxInterfaceProxy.Size = new System.Drawing.Size(498, 32);
             this.textBoxInterfaceProxy.TabIndex = 13;
             // 
             // textBoxInterfaceBase
             // 
             this.textBoxInterfaceBase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelInterface.SetColumnSpan(this.textBoxInterfaceBase, 2);
-            this.textBoxInterfaceBase.Location = new System.Drawing.Point(54, 50);
-            this.textBoxInterfaceBase.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxInterfaceBase.Location = new System.Drawing.Point(100, 74);
+            this.textBoxInterfaceBase.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxInterfaceBase.Name = "textBoxInterfaceBase";
             this.textBoxInterfaceBase.ReadOnly = true;
-            this.textBoxInterfaceBase.Size = new System.Drawing.Size(310, 20);
+            this.textBoxInterfaceBase.Size = new System.Drawing.Size(623, 32);
             this.textBoxInterfaceBase.TabIndex = 11;
             // 
             // textBoxInterfaceName
             // 
             this.textBoxInterfaceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelInterface.SetColumnSpan(this.textBoxInterfaceName, 2);
-            this.textBoxInterfaceName.Location = new System.Drawing.Point(54, 2);
-            this.textBoxInterfaceName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxInterfaceName.Location = new System.Drawing.Point(100, 2);
+            this.textBoxInterfaceName.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxInterfaceName.Name = "textBoxInterfaceName";
             this.textBoxInterfaceName.ReadOnly = true;
-            this.textBoxInterfaceName.Size = new System.Drawing.Size(310, 20);
+            this.textBoxInterfaceName.Size = new System.Drawing.Size(623, 32);
             this.textBoxInterfaceName.TabIndex = 9;
             // 
             // textBoxIID
             // 
             this.textBoxIID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelInterface.SetColumnSpan(this.textBoxIID, 2);
-            this.textBoxIID.Location = new System.Drawing.Point(54, 26);
-            this.textBoxIID.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxIID.Location = new System.Drawing.Point(100, 38);
+            this.textBoxIID.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxIID.Name = "textBoxIID";
             this.textBoxIID.ReadOnly = true;
-            this.textBoxIID.Size = new System.Drawing.Size(310, 20);
+            this.textBoxIID.Size = new System.Drawing.Size(623, 32);
             this.textBoxIID.TabIndex = 7;
             // 
             // tableLayoutPanelAppID
@@ -626,7 +633,6 @@
             tableLayoutPanelAppID.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             tableLayoutPanelAppID.Controls.Add(this.label25, 0, 4);
             tableLayoutPanelAppID.Controls.Add(this.label24, 0, 3);
-            tableLayoutPanelAppID.Controls.Add(this.lblAppIDFlags, 1, 4);
             tableLayoutPanelAppID.Controls.Add(this.textBoxDllSurrogate, 0, 10);
             tableLayoutPanelAppID.Controls.Add(this.label23, 0, 2);
             tableLayoutPanelAppID.Controls.Add(label12, 0, 9);
@@ -638,13 +644,14 @@
             tableLayoutPanelAppID.Controls.Add(this.textBoxLaunchPermission, 0, 6);
             tableLayoutPanelAppID.Controls.Add(this.textBoxAppIdGuid, 1, 1);
             tableLayoutPanelAppID.Controls.Add(label10, 0, 5);
-            tableLayoutPanelAppID.Controls.Add(this.lblAppIdRunAs, 1, 2);
-            tableLayoutPanelAppID.Controls.Add(this.lblService, 1, 3);
             tableLayoutPanelAppID.Controls.Add(this.btnViewAccessPermissions, 2, 8);
             tableLayoutPanelAppID.Controls.Add(this.btnViewLaunchPermissions, 2, 6);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAppIDRunAs, 1, 2);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAppIDService, 1, 3);
+            tableLayoutPanelAppID.Controls.Add(this.textBoxAppIDFlags, 1, 4);
             tableLayoutPanelAppID.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelAppID.Location = new System.Drawing.Point(2, 2);
-            tableLayoutPanelAppID.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            tableLayoutPanelAppID.Margin = new System.Windows.Forms.Padding(2);
             tableLayoutPanelAppID.Name = "tableLayoutPanelAppID";
             tableLayoutPanelAppID.RowCount = 12;
             tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -659,17 +666,17 @@
             tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelAppID.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelAppID.Size = new System.Drawing.Size(733, 432);
+            tableLayoutPanelAppID.Size = new System.Drawing.Size(725, 410);
             tableLayoutPanelAppID.TabIndex = 21;
             // 
             // label25
             // 
             this.label25.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(2, 74);
+            this.label25.Location = new System.Drawing.Point(2, 154);
             this.label25.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(35, 13);
+            this.label25.Size = new System.Drawing.Size(71, 26);
             this.label25.TabIndex = 21;
             this.label25.Text = "Flags:";
             // 
@@ -677,43 +684,32 @@
             // 
             this.label24.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(2, 61);
+            this.label24.Location = new System.Drawing.Point(2, 116);
             this.label24.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(46, 13);
+            this.label24.Size = new System.Drawing.Size(91, 26);
             this.label24.TabIndex = 16;
             this.label24.Text = "Service:";
-            // 
-            // lblAppIDFlags
-            // 
-            this.lblAppIDFlags.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblAppIDFlags.AutoSize = true;
-            this.lblAppIDFlags.Location = new System.Drawing.Point(105, 74);
-            this.lblAppIDFlags.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblAppIDFlags.Name = "lblAppIDFlags";
-            this.lblAppIDFlags.Size = new System.Drawing.Size(35, 13);
-            this.lblAppIDFlags.TabIndex = 20;
-            this.lblAppIDFlags.Text = "Flags:";
             // 
             // textBoxDllSurrogate
             // 
             this.textBoxDllSurrogate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelAppID.SetColumnSpan(this.textBoxDllSurrogate, 3);
-            this.textBoxDllSurrogate.Location = new System.Drawing.Point(2, 182);
-            this.textBoxDllSurrogate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxDllSurrogate.Location = new System.Drawing.Point(2, 346);
+            this.textBoxDllSurrogate.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxDllSurrogate.Name = "textBoxDllSurrogate";
             this.textBoxDllSurrogate.ReadOnly = true;
-            this.textBoxDllSurrogate.Size = new System.Drawing.Size(729, 20);
+            this.textBoxDllSurrogate.Size = new System.Drawing.Size(721, 32);
             this.textBoxDllSurrogate.TabIndex = 17;
             // 
             // label23
             // 
             this.label23.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(2, 48);
+            this.label23.Location = new System.Drawing.Point(2, 78);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(45, 13);
+            this.label23.Size = new System.Drawing.Size(90, 26);
             this.label23.TabIndex = 15;
             this.label23.Text = "Run As:";
             // 
@@ -721,67 +717,99 @@
             // 
             this.textBoxAccessPermission.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelAppID.SetColumnSpan(this.textBoxAccessPermission, 2);
-            this.textBoxAccessPermission.Location = new System.Drawing.Point(2, 143);
-            this.textBoxAccessPermission.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxAccessPermission.Location = new System.Drawing.Point(2, 282);
+            this.textBoxAccessPermission.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxAccessPermission.Name = "textBoxAccessPermission";
             this.textBoxAccessPermission.ReadOnly = true;
-            this.textBoxAccessPermission.Size = new System.Drawing.Size(655, 20);
+            this.textBoxAccessPermission.Size = new System.Drawing.Size(647, 32);
             this.textBoxAccessPermission.TabIndex = 13;
             // 
             // textBoxAppIdName
             // 
             this.textBoxAppIdName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelAppID.SetColumnSpan(this.textBoxAppIdName, 2);
-            this.textBoxAppIdName.Location = new System.Drawing.Point(105, 2);
-            this.textBoxAppIdName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxAppIdName.Location = new System.Drawing.Point(210, 2);
+            this.textBoxAppIdName.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxAppIdName.Name = "textBoxAppIdName";
             this.textBoxAppIdName.ReadOnly = true;
-            this.textBoxAppIdName.Size = new System.Drawing.Size(626, 20);
+            this.textBoxAppIdName.Size = new System.Drawing.Size(513, 32);
             this.textBoxAppIdName.TabIndex = 9;
             // 
             // textBoxLaunchPermission
             // 
             this.textBoxLaunchPermission.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelAppID.SetColumnSpan(this.textBoxLaunchPermission, 2);
-            this.textBoxLaunchPermission.Location = new System.Drawing.Point(2, 103);
-            this.textBoxLaunchPermission.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxLaunchPermission.Location = new System.Drawing.Point(2, 216);
+            this.textBoxLaunchPermission.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxLaunchPermission.Name = "textBoxLaunchPermission";
             this.textBoxLaunchPermission.ReadOnly = true;
-            this.textBoxLaunchPermission.Size = new System.Drawing.Size(655, 20);
+            this.textBoxLaunchPermission.Size = new System.Drawing.Size(647, 32);
             this.textBoxLaunchPermission.TabIndex = 11;
             // 
             // textBoxAppIdGuid
             // 
             this.textBoxAppIdGuid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelAppID.SetColumnSpan(this.textBoxAppIdGuid, 2);
-            this.textBoxAppIdGuid.Location = new System.Drawing.Point(105, 26);
-            this.textBoxAppIdGuid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxAppIdGuid.Location = new System.Drawing.Point(210, 38);
+            this.textBoxAppIdGuid.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxAppIdGuid.Name = "textBoxAppIdGuid";
             this.textBoxAppIdGuid.ReadOnly = true;
-            this.textBoxAppIdGuid.Size = new System.Drawing.Size(626, 20);
+            this.textBoxAppIdGuid.Size = new System.Drawing.Size(513, 32);
             this.textBoxAppIdGuid.TabIndex = 7;
             // 
-            // lblAppIdRunAs
+            // btnViewAccessPermissions
             // 
-            this.lblAppIdRunAs.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblAppIdRunAs.AutoSize = true;
-            this.lblAppIdRunAs.Location = new System.Drawing.Point(105, 48);
-            this.lblAppIdRunAs.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblAppIdRunAs.Name = "lblAppIdRunAs";
-            this.lblAppIdRunAs.Size = new System.Drawing.Size(45, 13);
-            this.lblAppIdRunAs.TabIndex = 14;
-            this.lblAppIdRunAs.Text = "Run As:";
+            this.btnViewAccessPermissions.AutoSize = true;
+            this.btnViewAccessPermissions.Location = new System.Drawing.Point(653, 280);
+            this.btnViewAccessPermissions.Margin = new System.Windows.Forms.Padding(2);
+            this.btnViewAccessPermissions.Name = "btnViewAccessPermissions";
+            this.btnViewAccessPermissions.Size = new System.Drawing.Size(70, 36);
+            this.btnViewAccessPermissions.TabIndex = 19;
+            this.btnViewAccessPermissions.Text = "View";
+            this.btnViewAccessPermissions.UseVisualStyleBackColor = true;
+            this.btnViewAccessPermissions.Click += new System.EventHandler(this.btnViewAccessPermissions_Click);
             // 
-            // lblService
+            // btnViewLaunchPermissions
             // 
-            this.lblService.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblService.AutoSize = true;
-            this.lblService.Location = new System.Drawing.Point(105, 61);
-            this.lblService.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblService.Name = "lblService";
-            this.lblService.Size = new System.Drawing.Size(46, 13);
-            this.lblService.TabIndex = 15;
-            this.lblService.Text = "Service:";
+            this.btnViewLaunchPermissions.AutoSize = true;
+            this.btnViewLaunchPermissions.Location = new System.Drawing.Point(653, 214);
+            this.btnViewLaunchPermissions.Margin = new System.Windows.Forms.Padding(2);
+            this.btnViewLaunchPermissions.Name = "btnViewLaunchPermissions";
+            this.btnViewLaunchPermissions.Size = new System.Drawing.Size(70, 36);
+            this.btnViewLaunchPermissions.TabIndex = 18;
+            this.btnViewLaunchPermissions.Text = "View";
+            this.btnViewLaunchPermissions.UseVisualStyleBackColor = true;
+            this.btnViewLaunchPermissions.Click += new System.EventHandler(this.btnViewLaunchPermissions_Click);
+            // 
+            // textBoxAppIDRunAs
+            // 
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxAppIDRunAs, 2);
+            this.textBoxAppIDRunAs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxAppIDRunAs.Location = new System.Drawing.Point(211, 75);
+            this.textBoxAppIDRunAs.Name = "textBoxAppIDRunAs";
+            this.textBoxAppIDRunAs.ReadOnly = true;
+            this.textBoxAppIDRunAs.Size = new System.Drawing.Size(511, 32);
+            this.textBoxAppIDRunAs.TabIndex = 22;
+            // 
+            // textBoxAppIDService
+            // 
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxAppIDService, 2);
+            this.textBoxAppIDService.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxAppIDService.Location = new System.Drawing.Point(211, 113);
+            this.textBoxAppIDService.Name = "textBoxAppIDService";
+            this.textBoxAppIDService.ReadOnly = true;
+            this.textBoxAppIDService.Size = new System.Drawing.Size(511, 32);
+            this.textBoxAppIDService.TabIndex = 24;
+            // 
+            // textBoxAppIDFlags
+            // 
+            tableLayoutPanelAppID.SetColumnSpan(this.textBoxAppIDFlags, 2);
+            this.textBoxAppIDFlags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxAppIDFlags.Location = new System.Drawing.Point(211, 151);
+            this.textBoxAppIDFlags.Name = "textBoxAppIDFlags";
+            this.textBoxAppIDFlags.ReadOnly = true;
+            this.textBoxAppIDFlags.Size = new System.Drawing.Size(511, 32);
+            this.textBoxAppIDFlags.TabIndex = 26;
             // 
             // tableLayoutPanelSupportedInterfaces
             // 
@@ -796,14 +824,14 @@
             tableLayoutPanelSupportedInterfaces.Controls.Add(label5, 0, 0);
             tableLayoutPanelSupportedInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelSupportedInterfaces.Location = new System.Drawing.Point(2, 2);
-            tableLayoutPanelSupportedInterfaces.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            tableLayoutPanelSupportedInterfaces.Margin = new System.Windows.Forms.Padding(2);
             tableLayoutPanelSupportedInterfaces.Name = "tableLayoutPanelSupportedInterfaces";
             tableLayoutPanelSupportedInterfaces.RowCount = 4;
             tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelSupportedInterfaces.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            tableLayoutPanelSupportedInterfaces.Size = new System.Drawing.Size(366, 219);
+            tableLayoutPanelSupportedInterfaces.Size = new System.Drawing.Size(725, 410);
             tableLayoutPanelSupportedInterfaces.TabIndex = 14;
             // 
             // listViewFactoryInterfaces
@@ -813,11 +841,11 @@
             this.listViewFactoryInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewFactoryInterfaces.FullRowSelect = true;
             this.listViewFactoryInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(2, 131);
-            this.listViewFactoryInterfaces.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewFactoryInterfaces.Location = new System.Drawing.Point(2, 240);
+            this.listViewFactoryInterfaces.Margin = new System.Windows.Forms.Padding(2);
             this.listViewFactoryInterfaces.MultiSelect = false;
             this.listViewFactoryInterfaces.Name = "listViewFactoryInterfaces";
-            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(362, 86);
+            this.listViewFactoryInterfaces.Size = new System.Drawing.Size(721, 168);
             this.listViewFactoryInterfaces.TabIndex = 10;
             this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
@@ -830,13 +858,13 @@
             this.copyIIDToolStripMenuItem,
             this.viewProxyDefinitionToolStripMenuItem});
             this.contextMenuStripInterfaces.Name = "contextMenuStripInterfaces";
-            this.contextMenuStripInterfaces.Size = new System.Drawing.Size(187, 70);
+            this.contextMenuStripInterfaces.Size = new System.Drawing.Size(345, 118);
             this.contextMenuStripInterfaces.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripInterfaces_Opening);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(344, 38);
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
@@ -847,34 +875,34 @@
             this.asCStructureToolStripMenuItem,
             this.asHexStringToolStripMenuItem});
             this.copyIIDToolStripMenuItem.Name = "copyIIDToolStripMenuItem";
-            this.copyIIDToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.copyIIDToolStripMenuItem.Size = new System.Drawing.Size(344, 38);
             this.copyIIDToolStripMenuItem.Text = "Copy IID";
             // 
             // asStringToolStripMenuItem
             // 
             this.asStringToolStripMenuItem.Name = "asStringToolStripMenuItem";
-            this.asStringToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asStringToolStripMenuItem.Size = new System.Drawing.Size(265, 38);
             this.asStringToolStripMenuItem.Text = "As String";
             this.asStringToolStripMenuItem.Click += new System.EventHandler(this.asStringToolStripMenuItem_Click);
             // 
             // asCStructureToolStripMenuItem
             // 
             this.asCStructureToolStripMenuItem.Name = "asCStructureToolStripMenuItem";
-            this.asCStructureToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asCStructureToolStripMenuItem.Size = new System.Drawing.Size(265, 38);
             this.asCStructureToolStripMenuItem.Text = "As C Structure";
             this.asCStructureToolStripMenuItem.Click += new System.EventHandler(this.asCStructureToolStripMenuItem_Click);
             // 
             // asHexStringToolStripMenuItem
             // 
             this.asHexStringToolStripMenuItem.Name = "asHexStringToolStripMenuItem";
-            this.asHexStringToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.asHexStringToolStripMenuItem.Size = new System.Drawing.Size(265, 38);
             this.asHexStringToolStripMenuItem.Text = "As Hex String";
             this.asHexStringToolStripMenuItem.Click += new System.EventHandler(this.asHexStringToolStripMenuItem_Click);
             // 
             // viewProxyDefinitionToolStripMenuItem
             // 
             this.viewProxyDefinitionToolStripMenuItem.Name = "viewProxyDefinitionToolStripMenuItem";
-            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.viewProxyDefinitionToolStripMenuItem.Size = new System.Drawing.Size(344, 38);
             this.viewProxyDefinitionToolStripMenuItem.Text = "View Proxy Definition";
             this.viewProxyDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewProxyDefinitionToolStripMenuItem_Click);
             // 
@@ -885,11 +913,11 @@
             this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewInterfaces.Location = new System.Drawing.Point(2, 29);
-            this.listViewInterfaces.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewInterfaces.Location = new System.Drawing.Point(2, 42);
+            this.listViewInterfaces.Margin = new System.Windows.Forms.Padding(2);
             this.listViewInterfaces.MultiSelect = false;
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(362, 85);
+            this.listViewInterfaces.Size = new System.Drawing.Size(721, 168);
             this.listViewInterfaces.TabIndex = 8;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
@@ -897,10 +925,10 @@
             // btnRefreshInterfaces
             // 
             this.btnRefreshInterfaces.AutoSize = true;
-            this.btnRefreshInterfaces.Location = new System.Drawing.Point(101, 2);
-            this.btnRefreshInterfaces.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnRefreshInterfaces.Location = new System.Drawing.Point(197, 2);
+            this.btnRefreshInterfaces.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefreshInterfaces.Name = "btnRefreshInterfaces";
-            this.btnRefreshInterfaces.Size = new System.Drawing.Size(54, 23);
+            this.btnRefreshInterfaces.Size = new System.Drawing.Size(98, 36);
             this.btnRefreshInterfaces.TabIndex = 12;
             this.btnRefreshInterfaces.Text = "Refresh";
             this.btnRefreshInterfaces.UseVisualStyleBackColor = true;
@@ -925,16 +953,16 @@
             tableLayoutPanelClsid.Controls.Add(this.textBoxClsid, 1, 1);
             tableLayoutPanelClsid.Controls.Add(label13, 0, 4);
             tableLayoutPanelClsid.Controls.Add(this.textBoxCmdLine, 1, 4);
-            tableLayoutPanelClsid.Controls.Add(this.lblServerType, 1, 2);
             tableLayoutPanelClsid.Controls.Add(this.textBoxServer, 1, 3);
             tableLayoutPanelClsid.Controls.Add(label7, 0, 3);
             tableLayoutPanelClsid.Controls.Add(this.btnTreatAsProps, 2, 5);
-            tableLayoutPanelClsid.Controls.Add(this.lblThreadingModel, 1, 6);
             tableLayoutPanelClsid.Controls.Add(label27, 0, 6);
             tableLayoutPanelClsid.Controls.Add(label3, 0, 7);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxServerType, 1, 2);
+            tableLayoutPanelClsid.Controls.Add(this.textBoxThreadingModel, 1, 6);
             tableLayoutPanelClsid.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelClsid.Location = new System.Drawing.Point(2, 2);
-            tableLayoutPanelClsid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            tableLayoutPanelClsid.Margin = new System.Windows.Forms.Padding(2);
             tableLayoutPanelClsid.Name = "tableLayoutPanelClsid";
             tableLayoutPanelClsid.RowCount = 11;
             tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -948,17 +976,17 @@
             tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelClsid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            tableLayoutPanelClsid.Size = new System.Drawing.Size(366, 219);
+            tableLayoutPanelClsid.Size = new System.Drawing.Size(725, 410);
             tableLayoutPanelClsid.TabIndex = 18;
             // 
             // label26
             // 
             label26.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label26.AutoSize = true;
-            label26.Location = new System.Drawing.Point(2, 51);
+            label26.Location = new System.Drawing.Point(2, 82);
             label26.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label26.Name = "label26";
-            label26.Size = new System.Drawing.Size(68, 13);
+            label26.Size = new System.Drawing.Size(135, 26);
             label26.TabIndex = 19;
             label26.Text = "Server Type:";
             // 
@@ -966,10 +994,10 @@
             // 
             this.btnCreate.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnCreate.AutoSize = true;
-            this.btnCreate.Location = new System.Drawing.Point(300, 26);
-            this.btnCreate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnCreate.Location = new System.Drawing.Point(602, 38);
+            this.btnCreate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(48, 23);
+            this.btnCreate.Size = new System.Drawing.Size(120, 36);
             this.btnCreate.TabIndex = 16;
             this.btnCreate.Text = "Create";
             this.btnCreate.UseVisualStyleBackColor = true;
@@ -979,11 +1007,11 @@
             // 
             this.textBoxClsidName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelClsid.SetColumnSpan(this.textBoxClsidName, 2);
-            this.textBoxClsidName.Location = new System.Drawing.Point(96, 2);
-            this.textBoxClsidName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxClsidName.Location = new System.Drawing.Point(185, 2);
+            this.textBoxClsidName.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxClsidName.Name = "textBoxClsidName";
             this.textBoxClsidName.ReadOnly = true;
-            this.textBoxClsidName.Size = new System.Drawing.Size(268, 20);
+            this.textBoxClsidName.Size = new System.Drawing.Size(538, 32);
             this.textBoxClsidName.TabIndex = 5;
             // 
             // listViewCategories
@@ -992,11 +1020,11 @@
             this.listViewCategories.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewCategories.FullRowSelect = true;
             this.listViewCategories.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewCategories.Location = new System.Drawing.Point(2, 200);
-            this.listViewCategories.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewCategories.Location = new System.Drawing.Point(2, 365);
+            this.listViewCategories.Margin = new System.Windows.Forms.Padding(2);
             this.listViewCategories.MultiSelect = false;
             this.listViewCategories.Name = "listViewCategories";
-            this.listViewCategories.Size = new System.Drawing.Size(362, 17);
+            this.listViewCategories.Size = new System.Drawing.Size(721, 43);
             this.listViewCategories.TabIndex = 8;
             this.listViewCategories.UseCompatibleStateImageBehavior = false;
             this.listViewCategories.View = System.Windows.Forms.View.Details;
@@ -1004,11 +1032,11 @@
             // textBoxTreatAs
             // 
             this.textBoxTreatAs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxTreatAs.Location = new System.Drawing.Point(96, 115);
-            this.textBoxTreatAs.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxTreatAs.Location = new System.Drawing.Point(185, 190);
+            this.textBoxTreatAs.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxTreatAs.Name = "textBoxTreatAs";
             this.textBoxTreatAs.ReadOnly = true;
-            this.textBoxTreatAs.Size = new System.Drawing.Size(200, 20);
+            this.textBoxTreatAs.Size = new System.Drawing.Size(413, 32);
             this.textBoxTreatAs.TabIndex = 15;
             // 
             // listViewProgIDs
@@ -1018,11 +1046,11 @@
             this.listViewProgIDs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewProgIDs.FullRowSelect = true;
             this.listViewProgIDs.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProgIDs.Location = new System.Drawing.Point(2, 167);
-            this.listViewProgIDs.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewProgIDs.Location = new System.Drawing.Point(2, 292);
+            this.listViewProgIDs.Margin = new System.Windows.Forms.Padding(2);
             this.listViewProgIDs.MultiSelect = false;
             this.listViewProgIDs.Name = "listViewProgIDs";
-            this.listViewProgIDs.Size = new System.Drawing.Size(362, 16);
+            this.listViewProgIDs.Size = new System.Drawing.Size(721, 43);
             this.listViewProgIDs.TabIndex = 6;
             this.listViewProgIDs.UseCompatibleStateImageBehavior = false;
             this.listViewProgIDs.View = System.Windows.Forms.View.Details;
@@ -1033,56 +1061,45 @@
             this.contextMenuStripProgids.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyProgIDToolStripMenuItem});
             this.contextMenuStripProgids.Name = "contextMenuStripProgids";
-            this.contextMenuStripProgids.Size = new System.Drawing.Size(142, 26);
+            this.contextMenuStripProgids.Size = new System.Drawing.Size(250, 42);
             // 
             // copyProgIDToolStripMenuItem
             // 
             this.copyProgIDToolStripMenuItem.Name = "copyProgIDToolStripMenuItem";
-            this.copyProgIDToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.copyProgIDToolStripMenuItem.Size = new System.Drawing.Size(249, 38);
             this.copyProgIDToolStripMenuItem.Text = "Copy ProgID";
             this.copyProgIDToolStripMenuItem.Click += new System.EventHandler(this.copyProgIDToolStripMenuItem_Click);
             // 
             // textBoxClsid
             // 
             this.textBoxClsid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxClsid.Location = new System.Drawing.Point(96, 27);
-            this.textBoxClsid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxClsid.Location = new System.Drawing.Point(185, 40);
+            this.textBoxClsid.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxClsid.Name = "textBoxClsid";
             this.textBoxClsid.ReadOnly = true;
-            this.textBoxClsid.Size = new System.Drawing.Size(200, 20);
+            this.textBoxClsid.Size = new System.Drawing.Size(413, 32);
             this.textBoxClsid.TabIndex = 1;
             // 
             // textBoxCmdLine
             // 
             this.textBoxCmdLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelClsid.SetColumnSpan(this.textBoxCmdLine, 2);
-            this.textBoxCmdLine.Location = new System.Drawing.Point(96, 90);
-            this.textBoxCmdLine.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxCmdLine.Location = new System.Drawing.Point(185, 152);
+            this.textBoxCmdLine.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxCmdLine.Name = "textBoxCmdLine";
             this.textBoxCmdLine.ReadOnly = true;
-            this.textBoxCmdLine.Size = new System.Drawing.Size(268, 20);
+            this.textBoxCmdLine.Size = new System.Drawing.Size(538, 32);
             this.textBoxCmdLine.TabIndex = 13;
-            // 
-            // lblServerType
-            // 
-            this.lblServerType.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblServerType.AutoSize = true;
-            this.lblServerType.Location = new System.Drawing.Point(96, 51);
-            this.lblServerType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblServerType.Name = "lblServerType";
-            this.lblServerType.Size = new System.Drawing.Size(68, 13);
-            this.lblServerType.TabIndex = 2;
-            this.lblServerType.Text = "Server Type:";
             // 
             // textBoxServer
             // 
             this.textBoxServer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             tableLayoutPanelClsid.SetColumnSpan(this.textBoxServer, 2);
-            this.textBoxServer.Location = new System.Drawing.Point(96, 66);
-            this.textBoxServer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxServer.Location = new System.Drawing.Point(185, 116);
+            this.textBoxServer.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxServer.Name = "textBoxServer";
             this.textBoxServer.ReadOnly = true;
-            this.textBoxServer.Size = new System.Drawing.Size(268, 20);
+            this.textBoxServer.Size = new System.Drawing.Size(538, 32);
             this.textBoxServer.TabIndex = 11;
             // 
             // btnTreatAsProps
@@ -1090,36 +1107,45 @@
             this.btnTreatAsProps.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnTreatAsProps.AutoSize = true;
             this.btnTreatAsProps.Enabled = false;
-            this.btnTreatAsProps.Location = new System.Drawing.Point(300, 114);
-            this.btnTreatAsProps.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnTreatAsProps.Location = new System.Drawing.Point(602, 188);
+            this.btnTreatAsProps.Margin = new System.Windows.Forms.Padding(2);
             this.btnTreatAsProps.Name = "btnTreatAsProps";
-            this.btnTreatAsProps.Size = new System.Drawing.Size(64, 23);
+            this.btnTreatAsProps.Size = new System.Drawing.Size(121, 36);
             this.btnTreatAsProps.TabIndex = 17;
             this.btnTreatAsProps.Text = "Properties";
             this.btnTreatAsProps.UseVisualStyleBackColor = true;
             this.btnTreatAsProps.Click += new System.EventHandler(this.btnTreatAsProps_Click);
             // 
-            // lblThreadingModel
-            // 
-            this.lblThreadingModel.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblThreadingModel.AutoSize = true;
-            this.lblThreadingModel.Location = new System.Drawing.Point(96, 139);
-            this.lblThreadingModel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblThreadingModel.Name = "lblThreadingModel";
-            this.lblThreadingModel.Size = new System.Drawing.Size(90, 13);
-            this.lblThreadingModel.TabIndex = 3;
-            this.lblThreadingModel.Text = "Threading Model:";
-            // 
             // label27
             // 
             label27.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label27.AutoSize = true;
-            label27.Location = new System.Drawing.Point(2, 139);
+            label27.Location = new System.Drawing.Point(2, 232);
             label27.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             label27.Name = "label27";
-            label27.Size = new System.Drawing.Size(90, 13);
+            label27.Size = new System.Drawing.Size(179, 26);
             label27.TabIndex = 20;
             label27.Text = "Threading Model:";
+            // 
+            // textBoxServerType
+            // 
+            tableLayoutPanelClsid.SetColumnSpan(this.textBoxServerType, 2);
+            this.textBoxServerType.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServerType.Location = new System.Drawing.Point(186, 79);
+            this.textBoxServerType.Name = "textBoxServerType";
+            this.textBoxServerType.ReadOnly = true;
+            this.textBoxServerType.Size = new System.Drawing.Size(536, 32);
+            this.textBoxServerType.TabIndex = 21;
+            // 
+            // textBoxThreadingModel
+            // 
+            tableLayoutPanelClsid.SetColumnSpan(this.textBoxThreadingModel, 2);
+            this.textBoxThreadingModel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxThreadingModel.Location = new System.Drawing.Point(186, 229);
+            this.textBoxThreadingModel.Name = "textBoxThreadingModel";
+            this.textBoxThreadingModel.ReadOnly = true;
+            this.textBoxThreadingModel.Size = new System.Drawing.Size(536, 32);
+            this.textBoxThreadingModel.TabIndex = 22;
             // 
             // tabControlProperties
             // 
@@ -1133,7 +1159,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageService);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
-            this.tabControlProperties.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabControlProperties.Margin = new System.Windows.Forms.Padding(2);
             this.tabControlProperties.Name = "tabControlProperties";
             this.tabControlProperties.SelectedIndex = 0;
             this.tabControlProperties.Size = new System.Drawing.Size(745, 462);
@@ -1142,11 +1168,11 @@
             // tabPageClsid
             // 
             this.tabPageClsid.Controls.Add(tableLayoutPanelClsid);
-            this.tabPageClsid.Location = new System.Drawing.Point(4, 22);
-            this.tabPageClsid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageClsid.Location = new System.Drawing.Point(8, 40);
+            this.tabPageClsid.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageClsid.Name = "tabPageClsid";
-            this.tabPageClsid.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageClsid.Size = new System.Drawing.Size(370, 223);
+            this.tabPageClsid.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageClsid.Size = new System.Drawing.Size(729, 414);
             this.tabPageClsid.TabIndex = 0;
             this.tabPageClsid.Text = "CLSID";
             this.tabPageClsid.UseVisualStyleBackColor = true;
@@ -1154,11 +1180,11 @@
             // tabPageNoProperties
             // 
             this.tabPageNoProperties.Controls.Add(label2);
-            this.tabPageNoProperties.Location = new System.Drawing.Point(4, 22);
-            this.tabPageNoProperties.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageNoProperties.Location = new System.Drawing.Point(8, 40);
+            this.tabPageNoProperties.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageNoProperties.Name = "tabPageNoProperties";
-            this.tabPageNoProperties.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageNoProperties.Size = new System.Drawing.Size(370, 223);
+            this.tabPageNoProperties.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageNoProperties.Size = new System.Drawing.Size(729, 414);
             this.tabPageNoProperties.TabIndex = 1;
             this.tabPageNoProperties.Text = "No Properties";
             this.tabPageNoProperties.UseVisualStyleBackColor = true;
@@ -1166,11 +1192,11 @@
             // tabPageSupportedInterfaces
             // 
             this.tabPageSupportedInterfaces.Controls.Add(tableLayoutPanelSupportedInterfaces);
-            this.tabPageSupportedInterfaces.Location = new System.Drawing.Point(4, 22);
-            this.tabPageSupportedInterfaces.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageSupportedInterfaces.Location = new System.Drawing.Point(8, 40);
+            this.tabPageSupportedInterfaces.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageSupportedInterfaces.Name = "tabPageSupportedInterfaces";
-            this.tabPageSupportedInterfaces.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageSupportedInterfaces.Size = new System.Drawing.Size(370, 223);
+            this.tabPageSupportedInterfaces.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageSupportedInterfaces.Size = new System.Drawing.Size(729, 414);
             this.tabPageSupportedInterfaces.TabIndex = 2;
             this.tabPageSupportedInterfaces.Text = "Supported Interfaces";
             this.tabPageSupportedInterfaces.UseVisualStyleBackColor = true;
@@ -1178,47 +1204,23 @@
             // tabPageAppID
             // 
             this.tabPageAppID.Controls.Add(tableLayoutPanelAppID);
-            this.tabPageAppID.Location = new System.Drawing.Point(4, 22);
-            this.tabPageAppID.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageAppID.Location = new System.Drawing.Point(8, 40);
+            this.tabPageAppID.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageAppID.Name = "tabPageAppID";
-            this.tabPageAppID.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageAppID.Size = new System.Drawing.Size(737, 436);
+            this.tabPageAppID.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageAppID.Size = new System.Drawing.Size(729, 414);
             this.tabPageAppID.TabIndex = 3;
             this.tabPageAppID.Text = "AppID";
             this.tabPageAppID.UseVisualStyleBackColor = true;
             // 
-            // btnViewAccessPermissions
-            // 
-            this.btnViewAccessPermissions.AutoSize = true;
-            this.btnViewAccessPermissions.Location = new System.Drawing.Point(661, 142);
-            this.btnViewAccessPermissions.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.btnViewAccessPermissions.Name = "btnViewAccessPermissions";
-            this.btnViewAccessPermissions.Size = new System.Drawing.Size(70, 23);
-            this.btnViewAccessPermissions.TabIndex = 19;
-            this.btnViewAccessPermissions.Text = "View";
-            this.btnViewAccessPermissions.UseVisualStyleBackColor = true;
-            this.btnViewAccessPermissions.Click += new System.EventHandler(this.btnViewAccessPermissions_Click);
-            // 
-            // btnViewLaunchPermissions
-            // 
-            this.btnViewLaunchPermissions.AutoSize = true;
-            this.btnViewLaunchPermissions.Location = new System.Drawing.Point(661, 102);
-            this.btnViewLaunchPermissions.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.btnViewLaunchPermissions.Name = "btnViewLaunchPermissions";
-            this.btnViewLaunchPermissions.Size = new System.Drawing.Size(70, 23);
-            this.btnViewLaunchPermissions.TabIndex = 18;
-            this.btnViewLaunchPermissions.Text = "View";
-            this.btnViewLaunchPermissions.UseVisualStyleBackColor = true;
-            this.btnViewLaunchPermissions.Click += new System.EventHandler(this.btnViewLaunchPermissions_Click);
-            // 
             // tabPageInterface
             // 
             this.tabPageInterface.Controls.Add(tableLayoutPanelInterface);
-            this.tabPageInterface.Location = new System.Drawing.Point(4, 22);
-            this.tabPageInterface.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageInterface.Location = new System.Drawing.Point(8, 40);
+            this.tabPageInterface.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageInterface.Name = "tabPageInterface";
-            this.tabPageInterface.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageInterface.Size = new System.Drawing.Size(370, 223);
+            this.tabPageInterface.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageInterface.Size = new System.Drawing.Size(729, 414);
             this.tabPageInterface.TabIndex = 4;
             this.tabPageInterface.Text = "Interface";
             this.tabPageInterface.UseVisualStyleBackColor = true;
@@ -1226,11 +1228,11 @@
             // tabPageProxies
             // 
             this.tabPageProxies.Controls.Add(this.listViewProxies);
-            this.tabPageProxies.Location = new System.Drawing.Point(4, 22);
-            this.tabPageProxies.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageProxies.Location = new System.Drawing.Point(8, 40);
+            this.tabPageProxies.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageProxies.Name = "tabPageProxies";
-            this.tabPageProxies.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageProxies.Size = new System.Drawing.Size(370, 223);
+            this.tabPageProxies.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageProxies.Size = new System.Drawing.Size(729, 414);
             this.tabPageProxies.TabIndex = 5;
             this.tabPageProxies.Text = "Proxies";
             this.tabPageProxies.UseVisualStyleBackColor = true;
@@ -1243,10 +1245,10 @@
             this.listViewProxies.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewProxies.FullRowSelect = true;
             this.listViewProxies.Location = new System.Drawing.Point(2, 2);
-            this.listViewProxies.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewProxies.Margin = new System.Windows.Forms.Padding(2);
             this.listViewProxies.MultiSelect = false;
             this.listViewProxies.Name = "listViewProxies";
-            this.listViewProxies.Size = new System.Drawing.Size(366, 219);
+            this.listViewProxies.Size = new System.Drawing.Size(725, 410);
             this.listViewProxies.TabIndex = 0;
             this.listViewProxies.UseCompatibleStateImageBehavior = false;
             this.listViewProxies.View = System.Windows.Forms.View.Details;
@@ -1254,11 +1256,11 @@
             // tabPageServers
             // 
             this.tabPageServers.Controls.Add(this.listViewCLSIDServers);
-            this.tabPageServers.Location = new System.Drawing.Point(4, 22);
-            this.tabPageServers.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageServers.Location = new System.Drawing.Point(8, 40);
+            this.tabPageServers.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageServers.Name = "tabPageServers";
-            this.tabPageServers.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageServers.Size = new System.Drawing.Size(370, 223);
+            this.tabPageServers.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageServers.Size = new System.Drawing.Size(729, 414);
             this.tabPageServers.TabIndex = 6;
             this.tabPageServers.Text = "Servers";
             this.tabPageServers.UseVisualStyleBackColor = true;
@@ -1272,10 +1274,10 @@
             columnThreadingModel});
             this.listViewCLSIDServers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewCLSIDServers.Location = new System.Drawing.Point(2, 2);
-            this.listViewCLSIDServers.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewCLSIDServers.Margin = new System.Windows.Forms.Padding(2);
             this.listViewCLSIDServers.MultiSelect = false;
             this.listViewCLSIDServers.Name = "listViewCLSIDServers";
-            this.listViewCLSIDServers.Size = new System.Drawing.Size(366, 219);
+            this.listViewCLSIDServers.Size = new System.Drawing.Size(725, 410);
             this.listViewCLSIDServers.TabIndex = 0;
             this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
             this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
@@ -1283,22 +1285,88 @@
             // tabPageService
             // 
             this.tabPageService.Controls.Add(tableLayoutPanelService);
-            this.tabPageService.Location = new System.Drawing.Point(4, 22);
-            this.tabPageService.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageService.Location = new System.Drawing.Point(8, 40);
+            this.tabPageService.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageService.Name = "tabPageService";
-            this.tabPageService.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageService.Size = new System.Drawing.Size(370, 223);
+            this.tabPageService.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageService.Size = new System.Drawing.Size(729, 414);
             this.tabPageService.TabIndex = 7;
             this.tabPageService.Text = "Service";
             this.tabPageService.UseVisualStyleBackColor = true;
             // 
+            // textBoxServiceType
+            // 
+            this.textBoxServiceType.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceType.Location = new System.Drawing.Point(162, 75);
+            this.textBoxServiceType.Name = "textBoxServiceType";
+            this.textBoxServiceType.ReadOnly = true;
+            this.textBoxServiceType.Size = new System.Drawing.Size(560, 32);
+            this.textBoxServiceType.TabIndex = 12;
+            // 
+            // label28
+            // 
+            label28.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label28.AutoSize = true;
+            label28.Location = new System.Drawing.Point(3, 116);
+            label28.Name = "label28";
+            label28.Size = new System.Drawing.Size(130, 26);
+            label28.TabIndex = 13;
+            label28.Text = "Image Path:";
+            // 
+            // textBoxServiceImagePath
+            // 
+            this.textBoxServiceImagePath.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceImagePath.Location = new System.Drawing.Point(162, 113);
+            this.textBoxServiceImagePath.Name = "textBoxServiceImagePath";
+            this.textBoxServiceImagePath.ReadOnly = true;
+            this.textBoxServiceImagePath.Size = new System.Drawing.Size(560, 32);
+            this.textBoxServiceImagePath.TabIndex = 14;
+            // 
+            // label29
+            // 
+            label29.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label29.AutoSize = true;
+            label29.Location = new System.Drawing.Point(3, 154);
+            label29.Name = "label29";
+            label29.Size = new System.Drawing.Size(137, 26);
+            label29.TabIndex = 15;
+            label29.Text = "Service DLL:";
+            // 
+            // textBoxServiceDll
+            // 
+            this.textBoxServiceDll.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceDll.Location = new System.Drawing.Point(162, 151);
+            this.textBoxServiceDll.Name = "textBoxServiceDll";
+            this.textBoxServiceDll.ReadOnly = true;
+            this.textBoxServiceDll.Size = new System.Drawing.Size(560, 32);
+            this.textBoxServiceDll.TabIndex = 16;
+            // 
+            // label30
+            // 
+            label30.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label30.AutoSize = true;
+            label30.Location = new System.Drawing.Point(3, 192);
+            label30.Name = "label30";
+            label30.Size = new System.Drawing.Size(129, 26);
+            label30.TabIndex = 17;
+            label30.Text = "User Name:";
+            // 
+            // textBoxServiceUserName
+            // 
+            this.textBoxServiceUserName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceUserName.Location = new System.Drawing.Point(162, 189);
+            this.textBoxServiceUserName.Name = "textBoxServiceUserName";
+            this.textBoxServiceUserName.ReadOnly = true;
+            this.textBoxServiceUserName.Size = new System.Drawing.Size(560, 32);
+            this.textBoxServiceUserName.TabIndex = 18;
+            // 
             // PropertiesControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tabControlProperties);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PropertiesControl";
             this.Size = new System.Drawing.Size(745, 462);
             tableLayoutPanelService.ResumeLayout(false);
@@ -1333,8 +1401,6 @@
         private System.Windows.Forms.TabPage tabPageClsid;
         private System.Windows.Forms.TabPage tabPageNoProperties;
         private System.Windows.Forms.TextBox textBoxClsid;
-        private System.Windows.Forms.Label lblServerType;
-        private System.Windows.Forms.Label lblThreadingModel;
         private System.Windows.Forms.TextBox textBoxClsidName;
         private System.Windows.Forms.ListView listViewProgIDs;
         private System.Windows.Forms.ListView listViewCategories;
@@ -1348,12 +1414,9 @@
         private System.Windows.Forms.TextBox textBoxAppIdGuid;
         private System.Windows.Forms.TextBox textBoxAccessPermission;
         private System.Windows.Forms.TextBox textBoxLaunchPermission;
-        private System.Windows.Forms.Label lblAppIdRunAs;
-        private System.Windows.Forms.Label lblService;
         private System.Windows.Forms.TextBox textBoxDllSurrogate;
         private System.Windows.Forms.Button btnViewLaunchPermissions;
         private System.Windows.Forms.Button btnViewAccessPermissions;
-        private System.Windows.Forms.Label lblAppIDFlags;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripProgids;
         private System.Windows.Forms.ToolStripMenuItem copyProgIDToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxCmdLine;
@@ -1382,9 +1445,17 @@
         private System.Windows.Forms.TabPage tabPageService;
         private System.Windows.Forms.TextBox textBoxServiceDisplayName;
         private System.Windows.Forms.TextBox textBoxServiceName;
-        private System.Windows.Forms.Label lblServiceType;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox textBoxServerType;
+        private System.Windows.Forms.TextBox textBoxThreadingModel;
+        private System.Windows.Forms.TextBox textBoxAppIDRunAs;
+        private System.Windows.Forms.TextBox textBoxAppIDService;
+        private System.Windows.Forms.TextBox textBoxAppIDFlags;
+        private System.Windows.Forms.TextBox textBoxServiceType;
+        private System.Windows.Forms.TextBox textBoxServiceImagePath;
+        private System.Windows.Forms.TextBox textBoxServiceDll;
+        private System.Windows.Forms.TextBox textBoxServiceUserName;
     }
 }

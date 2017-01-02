@@ -66,13 +66,25 @@ namespace OleViewDotNet
             textBoxAppIdGuid.Text = entry.AppId.ToString("B");
             textBoxLaunchPermission.Text = entry.LaunchPermission;
             textBoxAccessPermission.Text = entry.AccessPermission;
-            lblAppIdRunAs.Text = GetStringValue(entry.RunAs);
-            lblService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
-            lblAppIDFlags.Text = entry.Flags.ToString();
+            textBoxAppIDRunAs.Text = GetStringValue(entry.RunAs);
+            textBoxAppIDService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
+            textBoxAppIDFlags.Text = entry.Flags.ToString();
             textBoxDllSurrogate.Text = GetStringValue(entry.DllSurrogate);
             btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
             btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
             tabControlProperties.TabPages.Add(tabPageAppID);
+
+            if (entry.IsService)
+            {
+                textBoxServiceName.Text = entry.LocalService.Name;
+                textBoxServiceDisplayName.Text = GetStringValue(entry.LocalService.DisplayName);
+                textBoxServiceType.Text = entry.LocalService.ServiceType.ToString();
+                textBoxServiceImagePath.Text = entry.LocalService.ImagePath;
+                textBoxServiceDll.Text = GetStringValue(entry.LocalService.ServiceDll);
+                textBoxServiceUserName.Text = GetStringValue(entry.LocalService.UserName);
+                tabControlProperties.TabPages.Add(tabPageService);
+            }
+
             m_appid = entry;
         }
 
@@ -80,8 +92,8 @@ namespace OleViewDotNet
         {
             textBoxClsidName.Text = entry.Name;
             textBoxClsid.Text = entry.Clsid.ToString("B");
-            lblServerType.Text = entry.DefaultServerType.ToString();
-            lblThreadingModel.Text = entry.DefaultThreadingModel.ToString();
+            textBoxServerType.Text = entry.DefaultServerType.ToString();
+            textBoxThreadingModel.Text = entry.DefaultThreadingModel.ToString();
             textBoxServer.Text = entry.DefaultServer;
             textBoxCmdLine.Text = GetStringValue(entry.DefaultCmdLine);
             textBoxTreatAs.Text = GetGuidValue(entry.TreatAs);
