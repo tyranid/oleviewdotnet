@@ -1429,6 +1429,10 @@ namespace OleViewDotNet
                                 filterFunc = n => RunComplexFilter(n, m_filter);
                             }
                         }
+                        else
+                        {
+                            return;
+                        }
                     }
                 }
                 else
