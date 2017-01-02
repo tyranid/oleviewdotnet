@@ -32,7 +32,30 @@ namespace OleViewDotNet
     public partial class MainForm : Form
     {
         private DockPanel   m_dockPanel;
-        private COMRegistry m_registry;  
+        private COMRegistry m_registry;
+
+        private void UpdateTitle()
+        {
+            Text = "OleViewDotNet";
+            if (Environment.Is64BitOperatingSystem)
+            {
+                if (!Environment.Is64BitProcess)
+                {
+                    Text += " 32bit";
+                    menuFileOpenViewer.Text = "Open 64bit Viewer";
+                }
+                else
+                {
+                    Text += " 64bit";
+                    menuFileOpenViewer.Text = "Open 32bit Viewer";
+                }
+            }
+
+            if (m_registry.FilePath != null)
+            {
+                Text += String.Format(" - {0}", m_registry.FilePath);
+            }
+        }
 
         public MainForm(COMRegistry registry)
         {
@@ -53,20 +76,15 @@ namespace OleViewDotNet
             {
                 if (!Environment.Is64BitProcess)
                 {
-                    Text += " 32bit";
                     menuFileOpenViewer.Text = "Open 64bit Viewer";
                 }
                 else
                 {
-                    Text += " 64bit";
                     menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
-            
-            if (registry.FilePath != null)
-            {
-                Text += String.Format(" - {0}", registry.FilePath);
-            }
+
+            UpdateTitle();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -411,23 +429,51 @@ namespace OleViewDotNet
             ParseOrBindMoniker(true);
         }
 
-        private void menuFileSaveDatabase_Click(object sender, EventArgs e)
+        private string GetSaveFileName(bool saveas)
         {
+            if (saveas && !String.IsNullOrWhiteSpace(m_registry.FilePath))
+            {
+                return m_registry.FilePath;
+            }
+
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
+                if (!String.IsNullOrWhiteSpace(m_registry.FilePath))
+                {
+                    dlg.FileName = m_registry.FilePath;
+                }
+
                 dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    try
-                    {
-                        m_registry.Save(dlg.FileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    return dlg.FileName;
                 }
             }
+
+            return String.Empty;
+        }
+
+        private void SaveDatabase(bool saveas)
+        {
+            string filename = GetSaveFileName(saveas);
+            if (String.IsNullOrWhiteSpace(filename))
+            {
+                return;
+            }
+
+            try
+            {
+                m_registry.Save(filename);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void menuFileSaveDatabase_Click(object sender, EventArgs e)
+        {
+            SaveDatabase(false);
         }
 
 
@@ -628,6 +674,11 @@ namespace OleViewDotNet
                         options.RefreshInterfaces);
                 }
             }
+        }
+
+        private void menuFileSaveAsDatabase_Click(object sender, EventArgs e)
+        {
+            SaveDatabase(true);
         }
     }
 }

@@ -325,6 +325,7 @@ namespace OleViewDotNet
                 writer.WriteEndElement();
                 writer.WriteEndElement();
             }
+            FilePath = path;
         }
 
         public static COMRegistry Load(string path, IProgress<Tuple<string, int>> progress)
