@@ -293,7 +293,7 @@ namespace OleViewDotNet
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
-                writer.WriteStartElement("comregistry");                
+                writer.WriteStartElement("comregistry");
                 writer.WriteOptionalAttributeString("created", CreatedDate);
                 writer.WriteOptionalAttributeString("machine", CreatedMachine);
                 writer.WriteBool("sixfour", SixtyFourBit);
@@ -614,6 +614,7 @@ namespace OleViewDotNet
             settings.IgnoreComments = true;
             settings.IgnoreProcessingInstructions = true;
             settings.IgnoreWhitespace = true;
+            settings.CheckCharacters = false;
             using (XmlReader reader = XmlReader.Create(path, settings))
             {
                 if (!reader.IsStartElement("comregistry"))

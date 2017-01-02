@@ -212,7 +212,7 @@ namespace OleViewDotNet
 
         internal static string CleanupXmlString(this string str)
         {
-            return new string(str.Where(c => c >= ' ' && !Char.IsSurrogate(c)).ToArray());
+            return new string(str.Where(c => c >= ' ' && !Char.IsSurrogate(c) && c != 0xFFFF).ToArray());
         }
     }
 }

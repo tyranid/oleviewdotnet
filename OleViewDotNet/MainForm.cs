@@ -464,6 +464,7 @@ namespace OleViewDotNet
             try
             {
                 m_registry.Save(filename);
+                UpdateTitle();
             }
             catch (Exception ex)
             {
