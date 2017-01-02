@@ -241,9 +241,13 @@ namespace OleViewDotNet
 
         public string DllSurrogate { get; private set; }
 
+        public bool HasDllSurrogate { get { return !String.IsNullOrWhiteSpace(DllSurrogate); } }
+
         public COMAppIDServiceEntry LocalService { get; private set; }
 
         public string RunAs { get; private set; }
+
+        public bool HasRunAs { get { return !String.IsNullOrWhiteSpace(RunAs); } }
 
         public string Name { get; private set; }
 
