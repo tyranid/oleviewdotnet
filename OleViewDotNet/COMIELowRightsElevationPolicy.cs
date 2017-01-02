@@ -148,7 +148,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteGuid("uuid", Uuid);
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("path", AppPath);

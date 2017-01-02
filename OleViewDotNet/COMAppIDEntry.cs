@@ -374,7 +374,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("dllsurrogate", DllSurrogate);
             writer.WriteOptionalAttributeString("runas", RunAs);
             writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteAttributeString("flags", Flags.ToString());
+            writer.WriteOptionalAttributeString("flags", Flags.ToString());
             writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
             writer.WriteOptionalAttributeString("accessperm", AccessPermission);
             writer.WriteEnum("rot", RotFlags);

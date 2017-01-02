@@ -54,7 +54,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteGuid("catid", CategoryID);
             writer.WriteGuids("clsids", Clsids);
         }

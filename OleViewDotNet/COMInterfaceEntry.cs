@@ -294,7 +294,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteGuid("iid", Iid);
             writer.WriteGuid("proxy", ProxyClsid);
             writer.WriteInt("num", NumMethods);

@@ -732,7 +732,7 @@ namespace OleViewDotNet
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
             writer.WriteBool("loaded", m_loaded_interfaces);
-            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("name", Name);
             if (m_loaded_interfaces)
             {
                 writer.WriteSerializableObjects("ints", m_interfaces);

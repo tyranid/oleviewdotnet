@@ -111,7 +111,7 @@ namespace OleViewDotNet
         {
             if (!String.IsNullOrEmpty(value))
             {
-                writer.WriteAttributeString(name, value);
+                writer.WriteAttributeString(name, CleanupXmlString(value));
             }
         }
 
@@ -208,6 +208,11 @@ namespace OleViewDotNet
             Func<TValue, TKey> key_selector, Func<TValue, TElement> value_selector)
         {
             return new SortedDictionary<TKey, TElement>(enumerable.ToDictionary(key_selector, value_selector));
+        }
+
+        internal static string CleanupXmlString(this string str)
+        {
+            return new string(str.Where(c => c >= ' ' && !Char.IsSurrogate(c)).ToArray());
         }
     }
 }

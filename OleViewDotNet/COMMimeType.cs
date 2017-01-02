@@ -86,7 +86,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("mimetype", MimeType);
+            writer.WriteOptionalAttributeString("mimetype", MimeType);
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("ext", Extension);
         }

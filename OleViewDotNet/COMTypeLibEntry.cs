@@ -195,8 +195,8 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("ver", Version);
-            writer.WriteAttributeString("name", Name);
+            writer.WriteOptionalAttributeString("ver", Version);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteOptionalAttributeString("win32", Win32Path);
             writer.WriteOptionalAttributeString("win64", Win64Path);
         }
