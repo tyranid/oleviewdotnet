@@ -18,14 +18,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using System.Linq;
-using WeifenLuo.WinFormsUI.Docking;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.ComTypes;
 using System.Reflection;
-using System.Threading;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet
 {
@@ -391,26 +390,20 @@ namespace OleViewDotNet
 
         private void ParseOrBindMoniker(bool bind)
         {
-            using (GetTextForm frm = new GetTextForm(_last_moniker))
+            using (BuildMonikerForm frm = new BuildMonikerForm(_last_moniker))
             {
-                frm.Text = "Specify Moniker";
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
                     try
                     {
-                        _last_moniker = frm.Data;
-                        IBindCtx bc = COMUtilities.CreateBindCtx(0);
-                        int eaten = 0;
-                        IMoniker moniker = COMUtilities.MkParseDisplayName(bc, _last_moniker, out eaten);
-
-                        object comObj = moniker;
-
+                        _last_moniker = frm.MonikerString;
+                        object comObj = frm.Moniker;
                         if (bind)
                         {
                             Guid iid = COMInterfaceEntry.IID_IUnknown;
-                            moniker.BindToObject(bc, null, ref iid, out comObj);
+                            frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
                         }
-                        
+
                         if (comObj != null)
                         {
                             OpenObjectInformation(comObj, _last_moniker);
@@ -418,10 +411,42 @@ namespace OleViewDotNet
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Program.ShowError(this, ex);
                     }
                 }
             }
+
+            //using (GetTextForm frm = new GetTextForm(_last_moniker))
+            //{
+                //frm.Text = "Specify Moniker";
+                //if (frm.ShowDialog(this) == DialogResult.OK)
+                //{
+                //    try
+                //    {
+                //        _last_moniker = frm.Data;
+                //        IBindCtx bc = COMUtilities.CreateBindCtx(0);
+                //        int eaten = 0;
+                //        IMoniker moniker = COMUtilities.MkParseDisplayName(bc, _last_moniker, out eaten);
+
+                //        object comObj = moniker;
+
+                //        if (bind)
+                //        {
+                //            Guid iid = COMInterfaceEntry.IID_IUnknown;
+                //            moniker.BindToObject(bc, null, ref iid, out comObj);
+                //        }
+                        
+                //        if (comObj != null)
+                //        {
+                //            OpenObjectInformation(comObj, _last_moniker);
+                //        }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        Program.ShowError(this, ex);
+                //    }
+                //}
+            //}
         }
         
         private void menuObjectBindMoniker_Click(object sender, EventArgs e)

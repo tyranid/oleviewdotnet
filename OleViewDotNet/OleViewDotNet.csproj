@@ -127,6 +127,12 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="BuildMonikerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BuildMonikerForm.Designer.cs">
+      <DependentUpon>BuildMonikerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="COMInterfaces.cs" />
     <Compile Include="COMProxyInstance.cs" />
     <Compile Include="DiffRegistryForm.cs">
@@ -310,6 +316,9 @@
     </Compile>
     <EmbeddedResource Include="AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BuildMonikerForm.resx">
+      <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ClassFactoryTypeViewer.resx">
       <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
