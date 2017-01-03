@@ -223,6 +223,14 @@ namespace OleViewDotNet
         }   
     }
 
+    [Flags]
+    public enum CreateUrlMonikerFlags
+    {
+        Legacy = 0,
+        Uniform = 1,
+        NoCanonicalize = 2,
+    }
+
     public static class COMUtilities
     {
         private enum RegKind
@@ -271,6 +279,12 @@ namespace OleViewDotNet
 
         [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
         public static extern IMoniker MkParseDisplayName(IBindCtx pbc, string szUserName, out int pchEaten);
+
+        [DllImport("urlmon.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern int CreateURLMonikerEx(IMoniker pMkCtx,
+                                                    string szURL,
+                                                    out IMoniker ppmk,
+                                                    CreateUrlMonikerFlags dwFlags);
 
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;

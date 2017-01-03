@@ -15,15 +15,8 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -60,6 +53,21 @@ namespace OleViewDotNet
             }
             else
             {
+                Uri uri = null;
+                if (Uri.TryCreate(moniker_string, UriKind.Absolute, out uri))
+                {
+                    if (!uri.IsFile || moniker_string.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        IMoniker moniker;
+                        int hr = COMUtilities.CreateURLMonikerEx(null, moniker_string, out moniker, CreateUrlMonikerFlags.Uniform);
+                        if (hr != 0)
+                        {
+                            Marshal.ThrowExceptionForHR(hr);
+                        }
+                        return moniker;
+                    }
+                }
+                
                 int eaten = 0;
                 return COMUtilities.MkParseDisplayName(bind_context, moniker_string, out eaten);
             }
