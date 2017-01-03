@@ -48,20 +48,18 @@
             // lblLeft
             // 
             lblLeft.AutoSize = true;
-            lblLeft.Location = new System.Drawing.Point(22, 17);
-            lblLeft.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            lblLeft.Location = new System.Drawing.Point(12, 9);
             lblLeft.Name = "lblLeft";
-            lblLeft.Size = new System.Drawing.Size(50, 25);
+            lblLeft.Size = new System.Drawing.Size(28, 13);
             lblLeft.TabIndex = 0;
             lblLeft.Text = "Left:";
             // 
             // lblRight
             // 
             lblRight.AutoSize = true;
-            lblRight.Location = new System.Drawing.Point(22, 66);
-            lblRight.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            lblRight.Location = new System.Drawing.Point(12, 36);
             lblRight.Name = "lblRight";
-            lblRight.Size = new System.Drawing.Size(62, 25);
+            lblRight.Size = new System.Drawing.Size(35, 13);
             lblRight.TabIndex = 5;
             lblRight.Text = "Right:";
             // 
@@ -69,11 +67,9 @@
             // 
             groupBoxDiffMode.Controls.Add(this.radioRightOnly);
             groupBoxDiffMode.Controls.Add(this.radioLeftOnly);
-            groupBoxDiffMode.Location = new System.Drawing.Point(28, 122);
-            groupBoxDiffMode.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            groupBoxDiffMode.Location = new System.Drawing.Point(15, 66);
             groupBoxDiffMode.Name = "groupBoxDiffMode";
-            groupBoxDiffMode.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
-            groupBoxDiffMode.Size = new System.Drawing.Size(820, 96);
+            groupBoxDiffMode.Size = new System.Drawing.Size(447, 52);
             groupBoxDiffMode.TabIndex = 9;
             groupBoxDiffMode.TabStop = false;
             groupBoxDiffMode.Text = "Difference Mode";
@@ -81,10 +77,9 @@
             // radioRightOnly
             // 
             this.radioRightOnly.AutoSize = true;
-            this.radioRightOnly.Location = new System.Drawing.Point(449, 35);
-            this.radioRightOnly.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.radioRightOnly.Location = new System.Drawing.Point(245, 19);
             this.radioRightOnly.Name = "radioRightOnly";
-            this.radioRightOnly.Size = new System.Drawing.Size(272, 29);
+            this.radioRightOnly.Size = new System.Drawing.Size(154, 17);
             this.radioRightOnly.TabIndex = 2;
             this.radioRightOnly.Text = "Keep Right Difference Only";
             this.radioRightOnly.UseVisualStyleBackColor = true;
@@ -94,10 +89,9 @@
             this.radioLeftOnly.AutoSize = true;
             this.radioLeftOnly.Checked = true;
             this.radioLeftOnly.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioLeftOnly.Location = new System.Drawing.Point(119, 35);
-            this.radioLeftOnly.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.radioLeftOnly.Location = new System.Drawing.Point(65, 19);
             this.radioLeftOnly.Name = "radioLeftOnly";
-            this.radioLeftOnly.Size = new System.Drawing.Size(260, 29);
+            this.radioLeftOnly.Size = new System.Drawing.Size(147, 17);
             this.radioLeftOnly.TabIndex = 1;
             this.radioLeftOnly.TabStop = true;
             this.radioLeftOnly.Text = "Keep Left Difference Only";
@@ -108,18 +102,16 @@
             this.comboBoxLeft.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
             this.comboBoxLeft.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxLeft.FormattingEnabled = true;
-            this.comboBoxLeft.Location = new System.Drawing.Point(84, 11);
-            this.comboBoxLeft.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.comboBoxLeft.Location = new System.Drawing.Point(46, 6);
             this.comboBoxLeft.Name = "comboBoxLeft";
-            this.comboBoxLeft.Size = new System.Drawing.Size(611, 32);
+            this.comboBoxLeft.Size = new System.Drawing.Size(335, 21);
             this.comboBoxLeft.TabIndex = 1;
             // 
             // btnAddLeft
             // 
-            this.btnAddLeft.Location = new System.Drawing.Point(710, 7);
-            this.btnAddLeft.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnAddLeft.Location = new System.Drawing.Point(387, 4);
             this.btnAddLeft.Name = "btnAddLeft";
-            this.btnAddLeft.Size = new System.Drawing.Size(138, 42);
+            this.btnAddLeft.Size = new System.Drawing.Size(75, 23);
             this.btnAddLeft.TabIndex = 2;
             this.btnAddLeft.Text = "Add";
             this.btnAddLeft.UseVisualStyleBackColor = true;
@@ -127,10 +119,9 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(255, 229);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnOK.Location = new System.Drawing.Point(139, 124);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(138, 42);
+            this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 3;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -139,20 +130,18 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(449, 229);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnCancel.Location = new System.Drawing.Point(245, 124);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(138, 42);
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
             // btnAddRight
             // 
-            this.btnAddRight.Location = new System.Drawing.Point(710, 57);
-            this.btnAddRight.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnAddRight.Location = new System.Drawing.Point(387, 31);
             this.btnAddRight.Name = "btnAddRight";
-            this.btnAddRight.Size = new System.Drawing.Size(138, 42);
+            this.btnAddRight.Size = new System.Drawing.Size(75, 23);
             this.btnAddRight.TabIndex = 7;
             this.btnAddRight.Text = "Add";
             this.btnAddRight.UseVisualStyleBackColor = true;
@@ -163,19 +152,18 @@
             this.comboBoxRight.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
             this.comboBoxRight.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxRight.FormattingEnabled = true;
-            this.comboBoxRight.Location = new System.Drawing.Point(84, 61);
-            this.comboBoxRight.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.comboBoxRight.Location = new System.Drawing.Point(46, 33);
             this.comboBoxRight.Name = "comboBoxRight";
-            this.comboBoxRight.Size = new System.Drawing.Size(611, 32);
+            this.comboBoxRight.Size = new System.Drawing.Size(335, 21);
             this.comboBoxRight.TabIndex = 6;
             // 
             // DiffRegistryForm
             // 
             this.AcceptButton = this.btnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(869, 281);
+            this.ClientSize = new System.Drawing.Size(478, 166);
             this.ControlBox = false;
             this.Controls.Add(this.btnAddRight);
             this.Controls.Add(this.comboBoxRight);
@@ -186,9 +174,8 @@
             this.Controls.Add(this.comboBoxLeft);
             this.Controls.Add(lblLeft);
             this.Controls.Add(groupBoxDiffMode);
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
-            this.MaximumSize = new System.Drawing.Size(893, 345);
-            this.MinimumSize = new System.Drawing.Size(893, 345);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximumSize = new System.Drawing.Size(494, 205);
             this.Name = "DiffRegistryForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

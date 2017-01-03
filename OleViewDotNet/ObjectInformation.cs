@@ -198,45 +198,30 @@ namespace OleViewDotNet
 
         private void btnSaveStream_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            try
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                using (MemoryStream stm = new MemoryStream())
                 {
-                    try
-                    {
-                        using (Stream stm = File.Open(dlg.FileName, FileMode.Create, FileAccess.ReadWrite))
-                        {
-                            COMUtilities.OleSaveToStream(m_pObject, stm);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    COMUtilities.OleSaveToStream(m_pObject, stm);
+                    Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, stm.ToArray()));
                 }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
             }
         }
 
         private void btnMarshal_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            try
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    try
-                    {
-                        File.WriteAllBytes(dlg.FileName, COMUtilities.MarshalObject(m_pObject));
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, COMUtilities.MarshalObject(m_pObject)));
             }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }   
         }
 
         private void listViewInterfaces_ColumnClick(object sender, ColumnClickEventArgs e)

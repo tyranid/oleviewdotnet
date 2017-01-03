@@ -84,7 +84,7 @@
             // 
             labelMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             labelMode.AutoSize = true;
-            labelMode.Location = new System.Drawing.Point(804, 8);
+            labelMode.Location = new System.Drawing.Point(759, 8);
             labelMode.Name = "labelMode";
             labelMode.Size = new System.Drawing.Size(37, 13);
             labelMode.TabIndex = 5;
@@ -95,14 +95,14 @@
             this.tableLayoutPanel.SetColumnSpan(this.treeComRegistry, 5);
             this.treeComRegistry.ContextMenuStrip = this.contextMenuStrip;
             this.treeComRegistry.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeComRegistry.Font = new System.Drawing.Font("Consolas", 8.142858F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.treeComRegistry.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeComRegistry.ImageIndex = 0;
             this.treeComRegistry.ImageList = this.treeImageList;
-            this.treeComRegistry.Location = new System.Drawing.Point(3, 33);
+            this.treeComRegistry.Location = new System.Drawing.Point(3, 32);
             this.treeComRegistry.Name = "treeComRegistry";
             this.treeComRegistry.SelectedImageIndex = 0;
             this.treeComRegistry.ShowNodeToolTips = true;
-            this.treeComRegistry.Size = new System.Drawing.Size(1046, 494);
+            this.treeComRegistry.Size = new System.Drawing.Size(1046, 495);
             this.treeComRegistry.TabIndex = 0;
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
             this.treeComRegistry.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeComRegistry_MouseDown);
@@ -329,18 +329,18 @@
             this.comboBoxMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMode.FormattingEnabled = true;
-            this.comboBoxMode.Location = new System.Drawing.Point(847, 4);
+            this.comboBoxMode.Location = new System.Drawing.Point(802, 4);
             this.comboBoxMode.Name = "comboBoxMode";
-            this.comboBoxMode.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxMode.Size = new System.Drawing.Size(164, 21);
             this.comboBoxMode.TabIndex = 4;
             this.comboBoxMode.SelectedIndexChanged += new System.EventHandler(this.comboBoxMode_SelectedIndexChanged);
             // 
             // textBoxFilter
             // 
             this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxFilter.Location = new System.Drawing.Point(41, 5);
+            this.textBoxFilter.Location = new System.Drawing.Point(41, 4);
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(757, 20);
+            this.textBoxFilter.Size = new System.Drawing.Size(712, 20);
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyDown);
             // 
@@ -371,9 +371,9 @@
             // 
             this.btnApply.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnApply.AutoSize = true;
-            this.btnApply.Location = new System.Drawing.Point(974, 3);
+            this.btnApply.Location = new System.Drawing.Point(972, 3);
             this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(75, 24);
+            this.btnApply.Size = new System.Drawing.Size(77, 23);
             this.btnApply.TabIndex = 6;
             this.btnApply.Text = "Apply";
             this.btnApply.UseVisualStyleBackColor = true;
