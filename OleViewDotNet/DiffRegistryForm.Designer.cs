@@ -119,7 +119,7 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(139, 124);
+            this.btnOK.Location = new System.Drawing.Point(130, 124);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 3;
@@ -130,7 +130,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(245, 124);
+            this.btnCancel.Location = new System.Drawing.Point(273, 124);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
@@ -163,8 +163,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(478, 166);
-            this.ControlBox = false;
+            this.ClientSize = new System.Drawing.Size(478, 152);
             this.Controls.Add(this.btnAddRight);
             this.Controls.Add(this.comboBoxRight);
             this.Controls.Add(lblRight);
@@ -175,7 +174,8 @@
             this.Controls.Add(lblLeft);
             this.Controls.Add(groupBoxDiffMode);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximumSize = new System.Drawing.Size(494, 205);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "DiffRegistryForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
