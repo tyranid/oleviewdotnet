@@ -98,7 +98,7 @@
             // 
             tableLayoutPanel.SetColumnSpan(this.listViewProperties, 6);
             this.listViewProperties.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewProperties.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewProperties.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewProperties.FullRowSelect = true;
             this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.listViewProperties.Location = new System.Drawing.Point(3, 16);
@@ -112,7 +112,7 @@
             // 
             tableLayoutPanel.SetColumnSpan(this.listViewInterfaces, 6);
             this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewInterfaces.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listViewInterfaces.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.Location = new System.Drawing.Point(3, 249);
             this.listViewInterfaces.Name = "listViewInterfaces";

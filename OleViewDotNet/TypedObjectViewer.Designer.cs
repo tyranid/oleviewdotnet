@@ -32,81 +32,91 @@
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelTop;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelBottom;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TypedObjectViewer));
-            this.contextMenuProperties = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listViewMethods = new System.Windows.Forms.ListView();
             this.contextMenuMethods = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openInvokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openObjectToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblName = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.listViewProperties = new System.Windows.Forms.ListView();
+            this.contextMenuProperties = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageInvoke = new System.Windows.Forms.TabPage();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
-            this.lblName = new System.Windows.Forms.Label();
-            this.listViewMethods = new System.Windows.Forms.ListView();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.listViewProperties = new System.Windows.Forms.ListView();
             this.tabPageScript = new System.Windows.Forms.TabPage();
             this.splitContainerScript = new System.Windows.Forms.SplitContainer();
-            this.textEditorControl = new ICSharpCode.TextEditor.TextEditorControl();
-            this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.richTextBoxOutput = new System.Windows.Forms.RichTextBox();
-            this.contextMenuStripOutput = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.clearOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label3 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripButtonImport = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonExport = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
+            this.textEditorControl = new ICSharpCode.TextEditor.TextEditorControl();
+            this.contextMenuStripScript = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.richTextBoxOutput = new System.Windows.Forms.RichTextBox();
+            this.contextMenuStripOutput = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.clearOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tableLayoutPanelTop = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanelBottom = new System.Windows.Forms.TableLayoutPanel();
-            this.contextMenuProperties.SuspendLayout();
+            tableLayoutPanelTop.SuspendLayout();
             this.contextMenuMethods.SuspendLayout();
+            tableLayoutPanelBottom.SuspendLayout();
+            this.contextMenuProperties.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPageInvoke.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
-            tableLayoutPanelTop.SuspendLayout();
             this.tabPageScript.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerScript)).BeginInit();
             this.splitContainerScript.Panel1.SuspendLayout();
             this.splitContainerScript.Panel2.SuspendLayout();
             this.splitContainerScript.SuspendLayout();
-            this.contextMenuStripScript.SuspendLayout();
-            this.contextMenuStripOutput.SuspendLayout();
-            tableLayoutPanelBottom.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.toolStrip.SuspendLayout();
+            this.contextMenuStripScript.SuspendLayout();
+            this.contextMenuStripOutput.SuspendLayout();
             this.SuspendLayout();
             // 
-            // contextMenuProperties
+            // tableLayoutPanelTop
             // 
-            this.contextMenuProperties.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.contextMenuProperties.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.refreshToolStripMenuItem,
-            this.openObjectToolStripMenuItem});
-            this.contextMenuProperties.Name = "contextMenuProperties";
-            this.contextMenuProperties.Size = new System.Drawing.Size(224, 72);
+            tableLayoutPanelTop.ColumnCount = 2;
+            tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelTop.Controls.Add(this.listViewMethods, 0, 2);
+            tableLayoutPanelTop.Controls.Add(this.label1, 0, 1);
+            tableLayoutPanelTop.Controls.Add(this.lblName, 1, 0);
+            tableLayoutPanelTop.Controls.Add(this.label3, 0, 0);
+            tableLayoutPanelTop.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
+            tableLayoutPanelTop.Name = "tableLayoutPanelTop";
+            tableLayoutPanelTop.RowCount = 3;
+            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelTop.Size = new System.Drawing.Size(1672, 491);
+            tableLayoutPanelTop.TabIndex = 3;
             // 
-            // refreshToolStripMenuItem
+            // listViewMethods
             // 
-            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(223, 34);
-            this.refreshToolStripMenuItem.Text = "Refresh";
-            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
-            // 
-            // openObjectToolStripMenuItem
-            // 
-            this.openObjectToolStripMenuItem.Name = "openObjectToolStripMenuItem";
-            this.openObjectToolStripMenuItem.Size = new System.Drawing.Size(223, 34);
-            this.openObjectToolStripMenuItem.Text = "Open Object";
-            this.openObjectToolStripMenuItem.Click += new System.EventHandler(this.openObjectToolStripMenuItem_Click);
+            tableLayoutPanelTop.SetColumnSpan(this.listViewMethods, 2);
+            this.listViewMethods.ContextMenuStrip = this.contextMenuMethods;
+            this.listViewMethods.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewMethods.FullRowSelect = true;
+            this.listViewMethods.Location = new System.Drawing.Point(3, 29);
+            this.listViewMethods.Name = "listViewMethods";
+            this.listViewMethods.Size = new System.Drawing.Size(1666, 459);
+            this.listViewMethods.TabIndex = 1;
+            this.listViewMethods.UseCompatibleStateImageBehavior = false;
+            this.listViewMethods.View = System.Windows.Forms.View.Details;
+            this.listViewMethods.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
+            this.listViewMethods.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewMethods_MouseDoubleClick);
             // 
             // contextMenuMethods
             // 
@@ -115,20 +125,111 @@
             this.openInvokeToolStripMenuItem,
             this.openObjectToolStripMenuItem1});
             this.contextMenuMethods.Name = "contextMenuMethods";
-            this.contextMenuMethods.Size = new System.Drawing.Size(224, 72);
+            this.contextMenuMethods.Size = new System.Drawing.Size(142, 48);
             // 
             // openInvokeToolStripMenuItem
             // 
             this.openInvokeToolStripMenuItem.Name = "openInvokeToolStripMenuItem";
-            this.openInvokeToolStripMenuItem.Size = new System.Drawing.Size(223, 34);
+            this.openInvokeToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.openInvokeToolStripMenuItem.Text = "Open Invoke";
             // 
             // openObjectToolStripMenuItem1
             // 
             this.openObjectToolStripMenuItem1.Name = "openObjectToolStripMenuItem1";
-            this.openObjectToolStripMenuItem1.Size = new System.Drawing.Size(223, 34);
+            this.openObjectToolStripMenuItem1.Size = new System.Drawing.Size(141, 22);
             this.openObjectToolStripMenuItem1.Text = "Open Object";
             this.openObjectToolStripMenuItem1.Click += new System.EventHandler(this.openObjectToolStripMenuItem1_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 13);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(51, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Methods:";
+            // 
+            // lblName
+            // 
+            this.lblName.AutoSize = true;
+            this.lblName.Location = new System.Drawing.Point(60, 0);
+            this.lblName.Name = "lblName";
+            this.lblName.Size = new System.Drawing.Size(38, 13);
+            this.lblName.TabIndex = 0;
+            this.lblName.Text = "Name:";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(38, 13);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "Name:";
+            // 
+            // tableLayoutPanelBottom
+            // 
+            tableLayoutPanelBottom.ColumnCount = 1;
+            tableLayoutPanelBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelBottom.Controls.Add(this.label2, 0, 0);
+            tableLayoutPanelBottom.Controls.Add(this.listViewProperties, 0, 1);
+            tableLayoutPanelBottom.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelBottom.Location = new System.Drawing.Point(0, 0);
+            tableLayoutPanelBottom.Name = "tableLayoutPanelBottom";
+            tableLayoutPanelBottom.RowCount = 2;
+            tableLayoutPanelBottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelBottom.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelBottom.Size = new System.Drawing.Size(1672, 495);
+            tableLayoutPanelBottom.TabIndex = 5;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(57, 13);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Properties:";
+            // 
+            // listViewProperties
+            // 
+            this.listViewProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewProperties.ContextMenuStrip = this.contextMenuProperties;
+            this.listViewProperties.FullRowSelect = true;
+            this.listViewProperties.Location = new System.Drawing.Point(3, 16);
+            this.listViewProperties.Name = "listViewProperties";
+            this.listViewProperties.Size = new System.Drawing.Size(1666, 476);
+            this.listViewProperties.TabIndex = 4;
+            this.listViewProperties.UseCompatibleStateImageBehavior = false;
+            this.listViewProperties.View = System.Windows.Forms.View.Details;
+            this.listViewProperties.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
+            this.listViewProperties.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewProperties_MouseDoubleClick);
+            // 
+            // contextMenuProperties
+            // 
+            this.contextMenuProperties.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.contextMenuProperties.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshToolStripMenuItem,
+            this.openObjectToolStripMenuItem});
+            this.contextMenuProperties.Name = "contextMenuProperties";
+            this.contextMenuProperties.Size = new System.Drawing.Size(142, 48);
+            // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
+            // 
+            // openObjectToolStripMenuItem
+            // 
+            this.openObjectToolStripMenuItem.Name = "openObjectToolStripMenuItem";
+            this.openObjectToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.openObjectToolStripMenuItem.Text = "Open Object";
+            this.openObjectToolStripMenuItem.Click += new System.EventHandler(this.openObjectToolStripMenuItem_Click);
             // 
             // tabControl
             // 
@@ -144,10 +245,10 @@
             // tabPageInvoke
             // 
             this.tabPageInvoke.Controls.Add(this.splitContainer);
-            this.tabPageInvoke.Location = new System.Drawing.Point(4, 33);
+            this.tabPageInvoke.Location = new System.Drawing.Point(4, 22);
             this.tabPageInvoke.Name = "tabPageInvoke";
             this.tabPageInvoke.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInvoke.Size = new System.Drawing.Size(1680, 989);
+            this.tabPageInvoke.Size = new System.Drawing.Size(1680, 1000);
             this.tabPageInvoke.TabIndex = 0;
             this.tabPageInvoke.Text = "Invoke";
             this.tabPageInvoke.UseVisualStyleBackColor = true;
@@ -167,94 +268,17 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(tableLayoutPanelBottom);
-            this.splitContainer.Size = new System.Drawing.Size(1674, 983);
-            this.splitContainer.SplitterDistance = 488;
+            this.splitContainer.Size = new System.Drawing.Size(1674, 994);
+            this.splitContainer.SplitterDistance = 493;
             this.splitContainer.TabIndex = 6;
-            // 
-            // tableLayoutPanelTop
-            // 
-            tableLayoutPanelTop.ColumnCount = 2;
-            tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            tableLayoutPanelTop.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelTop.Controls.Add(this.listViewMethods, 0, 2);
-            tableLayoutPanelTop.Controls.Add(this.label1, 0, 1);
-            tableLayoutPanelTop.Controls.Add(this.lblName, 1, 0);
-            tableLayoutPanelTop.Controls.Add(this.label3, 0, 0);
-            tableLayoutPanelTop.Dock = System.Windows.Forms.DockStyle.Fill;
-            tableLayoutPanelTop.Location = new System.Drawing.Point(0, 0);
-            tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-            tableLayoutPanelTop.RowCount = 3;
-            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            tableLayoutPanelTop.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelTop.Size = new System.Drawing.Size(1672, 486);
-            tableLayoutPanelTop.TabIndex = 3;
-            // 
-            // lblName
-            // 
-            this.lblName.AutoSize = true;
-            this.lblName.Location = new System.Drawing.Point(103, 0);
-            this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(70, 25);
-            this.lblName.TabIndex = 0;
-            this.lblName.Text = "Name:";
-            // 
-            // listViewMethods
-            // 
-            tableLayoutPanelTop.SetColumnSpan(this.listViewMethods, 2);
-            this.listViewMethods.ContextMenuStrip = this.contextMenuMethods;
-            this.listViewMethods.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewMethods.FullRowSelect = true;
-            this.listViewMethods.Location = new System.Drawing.Point(3, 53);
-            this.listViewMethods.Name = "listViewMethods";
-            this.listViewMethods.Size = new System.Drawing.Size(1666, 430);
-            this.listViewMethods.TabIndex = 1;
-            this.listViewMethods.UseCompatibleStateImageBehavior = false;
-            this.listViewMethods.View = System.Windows.Forms.View.Details;
-            this.listViewMethods.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
-            this.listViewMethods.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewMethods_MouseDoubleClick);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 25);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(94, 25);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Methods:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(106, 25);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Properties:";
-            // 
-            // listViewProperties
-            // 
-            this.listViewProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewProperties.ContextMenuStrip = this.contextMenuProperties;
-            this.listViewProperties.FullRowSelect = true;
-            this.listViewProperties.Location = new System.Drawing.Point(3, 28);
-            this.listViewProperties.Name = "listViewProperties";
-            this.listViewProperties.Size = new System.Drawing.Size(1666, 458);
-            this.listViewProperties.TabIndex = 4;
-            this.listViewProperties.UseCompatibleStateImageBehavior = false;
-            this.listViewProperties.View = System.Windows.Forms.View.Details;
-            this.listViewProperties.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
-            this.listViewProperties.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewProperties_MouseDoubleClick);
             // 
             // tabPageScript
             // 
             this.tabPageScript.Controls.Add(this.splitContainerScript);
-            this.tabPageScript.Location = new System.Drawing.Point(4, 33);
+            this.tabPageScript.Location = new System.Drawing.Point(4, 22);
             this.tabPageScript.Name = "tabPageScript";
             this.tabPageScript.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageScript.Size = new System.Drawing.Size(1680, 989);
+            this.tabPageScript.Size = new System.Drawing.Size(1680, 1000);
             this.tabPageScript.TabIndex = 1;
             this.tabPageScript.Text = "Script";
             this.tabPageScript.UseVisualStyleBackColor = true;
@@ -273,88 +297,9 @@
             // splitContainerScript.Panel2
             // 
             this.splitContainerScript.Panel2.Controls.Add(this.richTextBoxOutput);
-            this.splitContainerScript.Size = new System.Drawing.Size(1674, 983);
-            this.splitContainerScript.SplitterDistance = 636;
+            this.splitContainerScript.Size = new System.Drawing.Size(1674, 994);
+            this.splitContainerScript.SplitterDistance = 643;
             this.splitContainerScript.TabIndex = 0;
-            // 
-            // textEditorControl
-            // 
-            this.textEditorControl.ContextMenuStrip = this.contextMenuStripScript;
-            this.textEditorControl.ConvertTabsToSpaces = true;
-            this.textEditorControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textEditorControl.IsReadOnly = false;
-            this.textEditorControl.Location = new System.Drawing.Point(3, 40);
-            this.textEditorControl.Name = "textEditorControl";
-            this.textEditorControl.Size = new System.Drawing.Size(1668, 593);
-            this.textEditorControl.TabIndex = 0;
-            this.textEditorControl.Text = "# Current object accessed through \'obj\'\r\n# IDispatch object through \'disp\'\r\n# Ope" +
-    "n new view window using \'host.openobj\' passing the object to view\r\nprint obj";
-            // 
-            // contextMenuStripScript
-            // 
-            this.contextMenuStripScript.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.contextMenuStripScript.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.runToolStripMenuItem});
-            this.contextMenuStripScript.Name = "contextMenuStripScript";
-            this.contextMenuStripScript.Size = new System.Drawing.Size(177, 38);
-            // 
-            // runToolStripMenuItem
-            // 
-            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(176, 34);
-            this.runToolStripMenuItem.Text = "Run";
-            this.runToolStripMenuItem.Click += new System.EventHandler(this.toolStripButtonRun_Click);
-            // 
-            // richTextBoxOutput
-            // 
-            this.richTextBoxOutput.ContextMenuStrip = this.contextMenuStripOutput;
-            this.richTextBoxOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxOutput.Location = new System.Drawing.Point(0, 0);
-            this.richTextBoxOutput.Name = "richTextBoxOutput";
-            this.richTextBoxOutput.ReadOnly = true;
-            this.richTextBoxOutput.Size = new System.Drawing.Size(1674, 343);
-            this.richTextBoxOutput.TabIndex = 0;
-            this.richTextBoxOutput.Text = "";
-            // 
-            // contextMenuStripOutput
-            // 
-            this.contextMenuStripOutput.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.contextMenuStripOutput.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearOutputToolStripMenuItem});
-            this.contextMenuStripOutput.Name = "contextMenuStripOutput";
-            this.contextMenuStripOutput.Size = new System.Drawing.Size(225, 38);
-            // 
-            // clearOutputToolStripMenuItem
-            // 
-            this.clearOutputToolStripMenuItem.Name = "clearOutputToolStripMenuItem";
-            this.clearOutputToolStripMenuItem.Size = new System.Drawing.Size(224, 34);
-            this.clearOutputToolStripMenuItem.Text = "Clear Output";
-            this.clearOutputToolStripMenuItem.Click += new System.EventHandler(this.clearOutputToolStripMenuItem_Click);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(70, 25);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "Name:";
-            // 
-            // tableLayoutPanelBottom
-            // 
-            tableLayoutPanelBottom.ColumnCount = 1;
-            tableLayoutPanelBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelBottom.Controls.Add(this.label2, 0, 0);
-            tableLayoutPanelBottom.Controls.Add(this.listViewProperties, 0, 1);
-            tableLayoutPanelBottom.Dock = System.Windows.Forms.DockStyle.Fill;
-            tableLayoutPanelBottom.Location = new System.Drawing.Point(0, 0);
-            tableLayoutPanelBottom.Name = "tableLayoutPanelBottom";
-            tableLayoutPanelBottom.RowCount = 2;
-            tableLayoutPanelBottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            tableLayoutPanelBottom.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelBottom.Size = new System.Drawing.Size(1672, 489);
-            tableLayoutPanelBottom.TabIndex = 5;
             // 
             // tableLayoutPanel1
             // 
@@ -368,12 +313,11 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1674, 636);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1674, 643);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // toolStrip
             // 
-            this.toolStrip.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonImport,
             this.toolStripButtonExport,
@@ -381,7 +325,7 @@
             this.toolStripButtonRun});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(1674, 37);
+            this.toolStrip.Size = new System.Drawing.Size(1674, 25);
             this.toolStrip.TabIndex = 2;
             this.toolStrip.Text = "toolStrip";
             // 
@@ -391,7 +335,7 @@
             this.toolStripButtonImport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonImport.Image")));
             this.toolStripButtonImport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonImport.Name = "toolStripButtonImport";
-            this.toolStripButtonImport.Size = new System.Drawing.Size(32, 34);
+            this.toolStripButtonImport.Size = new System.Drawing.Size(23, 22);
             this.toolStripButtonImport.Text = "Import";
             this.toolStripButtonImport.ToolTipText = "Import a script";
             this.toolStripButtonImport.Click += new System.EventHandler(this.toolStripButtonImport_Click);
@@ -402,7 +346,7 @@
             this.toolStripButtonExport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonExport.Image")));
             this.toolStripButtonExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonExport.Name = "toolStripButtonExport";
-            this.toolStripButtonExport.Size = new System.Drawing.Size(32, 34);
+            this.toolStripButtonExport.Size = new System.Drawing.Size(23, 22);
             this.toolStripButtonExport.Text = "Export";
             this.toolStripButtonExport.ToolTipText = "Export a script";
             this.toolStripButtonExport.Click += new System.EventHandler(this.toolStripButtonExport_Click);
@@ -410,16 +354,71 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 37);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // toolStripButtonRun
             // 
             this.toolStripButtonRun.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRun.Image")));
             this.toolStripButtonRun.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonRun.Name = "toolStripButtonRun";
-            this.toolStripButtonRun.Size = new System.Drawing.Size(82, 34);
+            this.toolStripButtonRun.Size = new System.Drawing.Size(48, 22);
             this.toolStripButtonRun.Text = "Run";
             this.toolStripButtonRun.Click += new System.EventHandler(this.toolStripButtonRun_Click);
+            // 
+            // textEditorControl
+            // 
+            this.textEditorControl.ContextMenuStrip = this.contextMenuStripScript;
+            this.textEditorControl.ConvertTabsToSpaces = true;
+            this.textEditorControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textEditorControl.IsReadOnly = false;
+            this.textEditorControl.Location = new System.Drawing.Point(3, 28);
+            this.textEditorControl.Name = "textEditorControl";
+            this.textEditorControl.Size = new System.Drawing.Size(1668, 612);
+            this.textEditorControl.TabIndex = 0;
+            this.textEditorControl.Text = "# Current object accessed through \'obj\'\r\n# IDispatch object through \'disp\'\r\n# Ope" +
+    "n new view window using \'host.openobj\' passing the object to view\r\nprint obj";
+            // 
+            // contextMenuStripScript
+            // 
+            this.contextMenuStripScript.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.contextMenuStripScript.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.runToolStripMenuItem});
+            this.contextMenuStripScript.Name = "contextMenuStripScript";
+            this.contextMenuStripScript.Size = new System.Drawing.Size(115, 26);
+            // 
+            // runToolStripMenuItem
+            // 
+            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
+            this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.runToolStripMenuItem.Text = "Run";
+            this.runToolStripMenuItem.Click += new System.EventHandler(this.toolStripButtonRun_Click);
+            // 
+            // richTextBoxOutput
+            // 
+            this.richTextBoxOutput.ContextMenuStrip = this.contextMenuStripOutput;
+            this.richTextBoxOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxOutput.Location = new System.Drawing.Point(0, 0);
+            this.richTextBoxOutput.Name = "richTextBoxOutput";
+            this.richTextBoxOutput.ReadOnly = true;
+            this.richTextBoxOutput.Size = new System.Drawing.Size(1674, 347);
+            this.richTextBoxOutput.TabIndex = 0;
+            this.richTextBoxOutput.Text = "";
+            // 
+            // contextMenuStripOutput
+            // 
+            this.contextMenuStripOutput.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.contextMenuStripOutput.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearOutputToolStripMenuItem});
+            this.contextMenuStripOutput.Name = "contextMenuStripOutput";
+            this.contextMenuStripOutput.Size = new System.Drawing.Size(143, 26);
+            // 
+            // clearOutputToolStripMenuItem
+            // 
+            this.clearOutputToolStripMenuItem.Name = "clearOutputToolStripMenuItem";
+            this.clearOutputToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.clearOutputToolStripMenuItem.Text = "Clear Output";
+            this.clearOutputToolStripMenuItem.Click += new System.EventHandler(this.clearOutputToolStripMenuItem_Click);
             // 
             // TypedObjectViewer
             // 
@@ -427,29 +426,29 @@
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "TypedObjectViewer";
             this.Size = new System.Drawing.Size(1688, 1026);
-            this.contextMenuProperties.ResumeLayout(false);
+            tableLayoutPanelTop.ResumeLayout(false);
+            tableLayoutPanelTop.PerformLayout();
             this.contextMenuMethods.ResumeLayout(false);
+            tableLayoutPanelBottom.ResumeLayout(false);
+            tableLayoutPanelBottom.PerformLayout();
+            this.contextMenuProperties.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPageInvoke.ResumeLayout(false);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
-            tableLayoutPanelTop.ResumeLayout(false);
-            tableLayoutPanelTop.PerformLayout();
             this.tabPageScript.ResumeLayout(false);
             this.splitContainerScript.Panel1.ResumeLayout(false);
             this.splitContainerScript.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerScript)).EndInit();
             this.splitContainerScript.ResumeLayout(false);
-            this.contextMenuStripScript.ResumeLayout(false);
-            this.contextMenuStripOutput.ResumeLayout(false);
-            tableLayoutPanelBottom.ResumeLayout(false);
-            tableLayoutPanelBottom.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
+            this.contextMenuStripScript.ResumeLayout(false);
+            this.contextMenuStripOutput.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
