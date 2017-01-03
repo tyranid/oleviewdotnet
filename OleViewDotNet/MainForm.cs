@@ -415,38 +415,6 @@ namespace OleViewDotNet
                     }
                 }
             }
-
-            //using (GetTextForm frm = new GetTextForm(_last_moniker))
-            //{
-                //frm.Text = "Specify Moniker";
-                //if (frm.ShowDialog(this) == DialogResult.OK)
-                //{
-                //    try
-                //    {
-                //        _last_moniker = frm.Data;
-                //        IBindCtx bc = COMUtilities.CreateBindCtx(0);
-                //        int eaten = 0;
-                //        IMoniker moniker = COMUtilities.MkParseDisplayName(bc, _last_moniker, out eaten);
-
-                //        object comObj = moniker;
-
-                //        if (bind)
-                //        {
-                //            Guid iid = COMInterfaceEntry.IID_IUnknown;
-                //            moniker.BindToObject(bc, null, ref iid, out comObj);
-                //        }
-                        
-                //        if (comObj != null)
-                //        {
-                //            OpenObjectInformation(comObj, _last_moniker);
-                //        }
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        Program.ShowError(this, ex);
-                //    }
-                //}
-            //}
         }
         
         private void menuObjectBindMoniker_Click(object sender, EventArgs e)
