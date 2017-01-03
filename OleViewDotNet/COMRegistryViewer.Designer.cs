@@ -104,7 +104,9 @@
             this.treeComRegistry.ShowNodeToolTips = true;
             this.treeComRegistry.Size = new System.Drawing.Size(1046, 495);
             this.treeComRegistry.TabIndex = 0;
+            this.treeComRegistry.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterCollapse);
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
+            this.treeComRegistry.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterExpand);
             this.treeComRegistry.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeComRegistry_MouseDown);
             // 
             // contextMenuStrip
@@ -321,8 +323,9 @@
             this.treeImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("treeImageList.ImageStream")));
             this.treeImageList.TransparentColor = System.Drawing.Color.Transparent;
             this.treeImageList.Images.SetKeyName(0, "folder.ico");
-            this.treeImageList.Images.SetKeyName(1, "interface.ico");
-            this.treeImageList.Images.SetKeyName(2, "class.ico");
+            this.treeImageList.Images.SetKeyName(1, "class.ico");
+            this.treeImageList.Images.SetKeyName(2, "interface.ico");
+            this.treeImageList.Images.SetKeyName(3, "folderopen.ico");
             // 
             // comboBoxMode
             // 

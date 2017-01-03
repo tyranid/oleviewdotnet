@@ -426,6 +426,9 @@
     <None Include="interface.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="class.ico" />
+    <None Include="folder.ico" />
+    <None Include="FolderOpen.ico" />
     <Content Include="license.txt" />
     <Content Include="oleview.ico" />
     <Content Include="PythonLib\oleviewdotnet\registry.py">

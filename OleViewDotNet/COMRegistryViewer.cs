@@ -75,12 +75,10 @@ namespace OleViewDotNet
         /// </summary>
         private DisplayMode m_mode;
 
-        /// <summary>
-        /// Constants for the ImageList icons
-        /// </summary>
-        private const int FolderIcon = 0;
-        private const int InterfaceIcon = 1;
-        private const int ClassIcon = 2;        
+        private const string FolderKey = "folder.ico";
+        private const string InterfaceKey = "interface.ico";
+        private const string ClassKey = "class.ico";
+        private const string FolderOpenKey = "folderopen.ico";
 
         /// <summary>
         /// Constructor
@@ -99,16 +97,24 @@ namespace OleViewDotNet
                 comboBoxMode.Items.Add(filter);
             }
             comboBoxMode.SelectedIndex = 0;
-            SetupTree();
+            SetupTree(mode);
         }
 
-        private void SetupTree()
+        private TreeNode CreateNode(string text, string image_key)
         {
+            TreeNode node = new TreeNode(text);
+            node.ImageKey = image_key;
+            node.SelectedImageKey = image_key;
+            return node;
+        }
+
+        private void SetupTree(DisplayMode mode)
+        {   
             Cursor currCursor = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                switch (m_mode)
+                switch (mode)
                 {
                     case DisplayMode.CLSIDsByName:
                         LoadCLSIDsByNames();
@@ -170,7 +176,7 @@ namespace OleViewDotNet
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.ShowError(this, ex);
             }
 
             Cursor.Current = currCursor;
@@ -266,8 +272,8 @@ namespace OleViewDotNet
         }
 
         private TreeNode CreateCLSIDNode(COMCLSIDEntry ent)
-        {            
-            TreeNode nodeRet = new TreeNode(String.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassIcon, ClassIcon);
+        {
+            TreeNode nodeRet = CreateNode(String.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassKey);
             nodeRet.ToolTipText = BuildCLSIDToolTip(ent);
             nodeRet.Tag = ent;
             nodeRet.Nodes.Add("IUnknown");
@@ -277,7 +283,7 @@ namespace OleViewDotNet
 
         private TreeNode CreateInterfaceNode(COMInterfaceEntry ent)
         {
-            TreeNode nodeRet = new TreeNode(String.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceIcon, InterfaceIcon);
+            TreeNode nodeRet = CreateNode(String.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceKey);
             nodeRet.ToolTipText = BuildInterfaceToolTip(ent, null);
             nodeRet.Tag = ent;
 
@@ -286,7 +292,7 @@ namespace OleViewDotNet
 
         private TreeNode CreateInterfaceNameNode(COMInterfaceEntry ent, COMInterfaceInstance instance)
         {
-            TreeNode nodeRet = new TreeNode(ent.Name, InterfaceIcon, InterfaceIcon);
+            TreeNode nodeRet = CreateNode(ent.Name, InterfaceKey);
             nodeRet.ToolTipText = BuildInterfaceToolTip(ent, instance);
             nodeRet.Tag = ent;
 
@@ -314,7 +320,7 @@ namespace OleViewDotNet
             TreeNode[] progidNodes = new TreeNode[m_registry.Progids.Count];
             foreach (COMProgIDEntry ent in m_registry.Progids.Values)
             {
-                progidNodes[i] = new TreeNode(ent.ProgID, ClassIcon, ClassIcon);
+                progidNodes[i] = CreateNode(ent.ProgID, ClassKey);
                 progidNodes[i].ToolTipText = BuildProgIDToolTip(ent);
                 progidNodes[i].Tag = ent;
                 if (m_registry.MapClsidToEntry(ent.Clsid) != null)
@@ -333,7 +339,7 @@ namespace OleViewDotNet
             List<TreeNode> nodes = new List<TreeNode>(m_registry.Clsids.Count);
             foreach (COMCLSIDEntry ent in m_registry.Clsids.Values)
             {
-                TreeNode node = new TreeNode(ent.Name, ClassIcon, ClassIcon);
+                TreeNode node = CreateNode(ent.Name, ClassKey);
                 node.ToolTipText = BuildCLSIDToolTip(ent);
                 node.Tag = ent;
                 node.Nodes.Add("IUnknown");
@@ -436,7 +442,7 @@ namespace OleViewDotNet
             List<TreeNode> serverNodes = new List<TreeNode>(m_registry.Clsids.Count);
             foreach (var pair in servers)
             {
-                TreeNode node = new TreeNode(pair.Key.Server);
+                TreeNode node = CreateNode(pair.Key.Server, FolderKey);
                 node.ToolTipText = pair.Key.Server;
                 node.Tag = pair.Key;
                 node.Nodes.AddRange(pair.Value.OrderBy(c => c.Name).Select(c => CreateClsidNode(c)).ToArray());
@@ -476,7 +482,7 @@ namespace OleViewDotNet
 
         private TreeNode CreateClsidNode(COMCLSIDEntry ent)
         {
-            TreeNode currNode = new TreeNode(ent.Name, ClassIcon, ClassIcon);
+            TreeNode currNode = CreateNode(ent.Name, ClassKey);
             currNode.ToolTipText = BuildCLSIDToolTip(ent);
             currNode.Tag = ent;
             currNode.Nodes.Add("IUnknown");
@@ -501,8 +507,8 @@ namespace OleViewDotNet
                     {
                         name = appidEnt.LocalService.Name;
                     }
-                    
-                    TreeNode node = new TreeNode(name);
+
+                    TreeNode node = CreateNode(name, FolderKey);
                     node.ToolTipText = BuildAppIdTooltip(appidEnt);
                     node.Tag = appidEnt;
                     
@@ -614,7 +620,7 @@ namespace OleViewDotNet
                         continue;
                     }
 
-                    TreeNode node = new TreeNode(appidEnt.Name);
+                    TreeNode node = CreateNode(appidEnt.Name, FolderKey);
                     node.Tag = appidEnt;
                     
                     node.ToolTipText = BuildAppIdTooltip(appidEnt);
@@ -662,7 +668,7 @@ namespace OleViewDotNet
 
             foreach (var pair in m_registry.ImplementedCategories.Values)
             {
-                TreeNode currNode = new TreeNode(pair.Name);
+                TreeNode currNode = CreateNode(pair.Name, FolderKey);
                 currNode.Tag = pair;
                 currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.ToString("B"));
                 sortedNodes.Add(currNode.Text, currNode);
@@ -725,7 +731,7 @@ namespace OleViewDotNet
                     continue;
                 }
 
-                TreeNode currNode = new TreeNode(ent.Name);
+                TreeNode currNode = CreateNode(ent.Name, FolderKey);
                 currNode.Tag = ent;
                 clsidNodes.Add(currNode);
 
@@ -752,7 +758,7 @@ namespace OleViewDotNet
             List<TreeNode> nodes = new List<TreeNode>(m_registry.MimeTypes.Count());
             foreach (COMMimeType ent in m_registry.MimeTypes)
             {
-                TreeNode node = new TreeNode(ent.MimeType);
+                TreeNode node = CreateNode(ent.MimeType, FolderKey);
                 if (m_registry.Clsids.ContainsKey(ent.Clsid))
                 {
                     node.Nodes.Add(CreateCLSIDNode(m_registry.Clsids[ent.Clsid]));
@@ -775,8 +781,8 @@ namespace OleViewDotNet
 
         private TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
         {
-            TreeNode node = new TreeNode(String.Format("{0} : Version {1}", entry.Name, entry.Version), 
-                ClassIcon, ClassIcon);
+            TreeNode node = CreateNode(String.Format("{0} : Version {1}", entry.Name, entry.Version), 
+                ClassKey);
 
             node.Tag = entry;
             List<string> entries = new List<string>();
@@ -799,7 +805,7 @@ namespace OleViewDotNet
             TreeNode[] typelibNodes = new TreeNode[m_registry.Typelibs.Values.Count];
             foreach (COMTypeLibEntry ent in m_registry.Typelibs.Values)
             {
-                typelibNodes[i] = new TreeNode(ent.TypelibId.ToString());
+                typelibNodes[i] = CreateNode(ent.TypelibId.ToString(), FolderKey);
                 foreach (COMTypeLibVersionEntry ver in ent.Versions)
                 {
                     typelibNodes[i].Nodes.Add(CreateTypelibVersionNode(ver));
@@ -829,7 +835,7 @@ namespace OleViewDotNet
             if (clsid != null)
             {
                 node.Nodes.Clear();
-                TreeNode wait_node = new TreeNode("Please Wait, Populating Interfaces", InterfaceIcon, InterfaceIcon);
+                TreeNode wait_node = CreateNode("Please Wait, Populating Interfaces", InterfaceKey);
                 node.Nodes.Add(wait_node);
                 try
                 {
@@ -1743,6 +1749,26 @@ namespace OleViewDotNet
                 {
                     await CreateClassFactory(frm.Data);
                 }
+            }
+        }
+
+        private void treeComRegistry_AfterExpand(object sender, TreeViewEventArgs e)
+        {
+            TreeNode node = e.Node;
+            if (node.ImageKey == FolderKey)
+            {
+                node.ImageKey = FolderOpenKey;
+                node.SelectedImageKey = FolderOpenKey;
+            }
+        }
+
+        private void treeComRegistry_AfterCollapse(object sender, TreeViewEventArgs e)
+        {
+            TreeNode node = e.Node;
+            if (node.ImageKey == FolderOpenKey)
+            {
+                node.ImageKey = FolderKey;
+                node.SelectedImageKey = FolderKey;
             }
         }
     }
