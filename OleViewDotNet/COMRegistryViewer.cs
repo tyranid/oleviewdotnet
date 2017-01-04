@@ -599,50 +599,35 @@ namespace OleViewDotNet
 
         private void LoadAppIDs(bool filterIL, bool filterAC)
         {
-            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToList();
+            IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
             IDictionary<Guid, COMAppIDEntry> appids = m_registry.AppIDs;            
 
             List<TreeNode> serverNodes = new List<TreeNode>();
-            foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
+            foreach (var pair in appids)
             {
-                if (appids.ContainsKey(pair.Key))
+                COMAppIDEntry appidEnt = appids[pair.Key];
+                    
+                if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == SecurityIntegrityLevel.Medium &&
+                    COMSecurity.GetILForSD(appidEnt.LaunchPermission) == SecurityIntegrityLevel.Medium)
                 {
-                    COMAppIDEntry appidEnt = appids[pair.Key];
-                    
-                    if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == SecurityIntegrityLevel.Medium &&
-                        COMSecurity.GetILForSD(appidEnt.LaunchPermission) == SecurityIntegrityLevel.Medium)
-                    {
-                        continue;
-                    }
-
-                    if (filterAC && !COMSecurity.SDHasAC(appidEnt.AccessPermission) && !COMSecurity.SDHasAC(appidEnt.LaunchPermission))
-                    {
-                        continue;
-                    }
-
-                    TreeNode node = CreateNode(appidEnt.Name, FolderKey);
-                    node.Tag = appidEnt;
-                    
-                    node.ToolTipText = BuildAppIdTooltip(appidEnt);
-
-                    int count = pair.Count();
-
-                    TreeNode[] clsidNodes = new TreeNode[count];
-                    string[] nodeNames = new string[count];
-                    int j = 0;
-
-                    foreach (COMCLSIDEntry ent in pair)
-                    {
-                        clsidNodes[j] = CreateClsidNode(ent);
-                        nodeNames[j] = ent.Name;
-                        j++;
-                    }
-
-                    Array.Sort(nodeNames, clsidNodes);
-                    node.Nodes.AddRange(clsidNodes);
-
-                    serverNodes.Add(node);
+                    continue;
                 }
+
+                if (filterAC && !COMSecurity.SDHasAC(appidEnt.AccessPermission) && !COMSecurity.SDHasAC(appidEnt.LaunchPermission))
+                {
+                    continue;
+                }
+
+                TreeNode node = CreateNode(appidEnt.Name, FolderKey);
+                node.Tag = appidEnt;
+                node.ToolTipText = BuildAppIdTooltip(appidEnt);
+
+                if (clsidsByAppId.ContainsKey(pair.Key))
+                {
+                    node.Nodes.AddRange(clsidsByAppId[pair.Key].OrderBy(c => c.Name).Select(c => CreateClsidNode(c)).ToArray());
+                }
+
+                serverNodes.Add(node);
             }
 
             m_filter_types.Add(FilterType.AppID);
