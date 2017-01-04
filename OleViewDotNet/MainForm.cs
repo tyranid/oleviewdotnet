@@ -422,9 +422,9 @@ namespace OleViewDotNet
             ParseOrBindMoniker(true);
         }
 
-        private string GetSaveFileName(bool saveas)
+        private string GetSaveFileName(bool save)
         {
-            if (saveas && !String.IsNullOrWhiteSpace(m_registry.FilePath))
+            if (save && !String.IsNullOrWhiteSpace(m_registry.FilePath))
             {
                 return m_registry.FilePath;
             }
@@ -446,9 +446,9 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
-        private void SaveDatabase(bool saveas)
+        private void SaveDatabase(bool save)
         {
-            string filename = GetSaveFileName(saveas);
+            string filename = GetSaveFileName(save);
             if (String.IsNullOrWhiteSpace(filename))
             {
                 return;
