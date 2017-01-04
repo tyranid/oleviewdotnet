@@ -1312,11 +1312,24 @@ namespace OleViewDotNet
             }
         }
 
-        private static FilterResult RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
+        private FilterResult RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
         {
             try
             {
-                return filter.Filter(node.Tag);
+                COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                FilterResult result = filter.Filter(node.Tag);
+                if (result == FilterResult.None && clsid != null && clsid.InterfacesLoaded)
+                {
+                    foreach (COMInterfaceEntry intf in clsid.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)))
+                    {
+                        result = filter.Filter(intf);
+                        if (result != FilterResult.None)
+                        {
+                            break;
+                        }
+                    }
+                }
+                return result;
             }
             catch
             {
