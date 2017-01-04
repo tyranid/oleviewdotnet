@@ -53,19 +53,17 @@ namespace OleViewDotNet
             }
             else
             {
-                Uri uri = null;
-                if (Uri.TryCreate(moniker_string, UriKind.Absolute, out uri))
+                if (moniker_string.StartsWith("file:", StringComparison.OrdinalIgnoreCase) ||
+                    moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                    moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!uri.IsFile || moniker_string.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+                    IMoniker moniker;
+                    int hr = COMUtilities.CreateURLMonikerEx(null, moniker_string, out moniker, CreateUrlMonikerFlags.Uniform);
+                    if (hr != 0)
                     {
-                        IMoniker moniker;
-                        int hr = COMUtilities.CreateURLMonikerEx(null, moniker_string, out moniker, CreateUrlMonikerFlags.Uniform);
-                        if (hr != 0)
-                        {
-                            Marshal.ThrowExceptionForHR(hr);
-                        }
-                        return moniker;
+                        Marshal.ThrowExceptionForHR(hr);
                     }
+                    return moniker;
                 }
                 
                 int eaten = 0;
