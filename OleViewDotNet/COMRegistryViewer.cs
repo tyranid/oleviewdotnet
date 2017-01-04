@@ -804,6 +804,11 @@ namespace OleViewDotNet
             Text = "Type Libraries"; 
         }
 
+        private void AddInterfaceNodes(TreeNode node, IEnumerable<COMInterfaceInstance> intfs)
+        {
+            node.Nodes.AddRange(intfs.Select(i => CreateInterfaceNameNode(m_registry.MapIidToInterface(i.Iid), i)).OrderBy(n => n.Text).ToArray());
+        }
+
         private async Task SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
         {
             COMCLSIDEntry clsid = null;
@@ -826,23 +831,29 @@ namespace OleViewDotNet
                 try
                 {
                     await clsid.LoadSupportedInterfacesAsync(bRefresh);
-                    if (clsid.Interfaces.Count() > 0)
+                    int interface_count = clsid.Interfaces.Count();
+                    int factory_count = clsid.Interfaces.Count();
+                    if (interface_count == 0 && factory_count == 0)
                     {
-                        node.Nodes.Remove(wait_node);
-                        foreach (COMInterfaceInstance ent in clsid.Interfaces)
-                        {
-                            node.Nodes.Add(CreateInterfaceNameNode(m_registry.MapIidToInterface(ent.Iid), ent));
-                        }
+                        wait_node.Text = "Error querying COM interfaces - Timeout";
                     }
                     else
                     {
-                        if (clsid.FactoryInterfaces.Count() > 0)
+                        if (interface_count > 0)
                         {
-                            wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
+                            node.Nodes.Remove(wait_node);
+                            AddInterfaceNodes(node, clsid.Interfaces);
                         }
                         else
                         {
-                            wait_node.Text = "Error querying COM interfaces - Timeout";
+                            wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
+                        }
+
+                        if (clsid.FactoryInterfaces.Count() > 0)
+                        {
+                            TreeNode factory = CreateNode("Factory Interfaces", FolderKey);
+                            AddInterfaceNodes(factory, clsid.FactoryInterfaces);
+                            node.Nodes.Add(factory);
                         }
                     }
                 }
@@ -1313,7 +1324,7 @@ namespace OleViewDotNet
                 FilterResult result = filter.Filter(node.Tag);
                 if (result == FilterResult.None && clsid != null && clsid.InterfacesLoaded)
                 {
-                    foreach (COMInterfaceEntry intf in clsid.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid)))
+                    foreach (COMInterfaceEntry intf in clsid.Interfaces.Concat(clsid.FactoryInterfaces).Select(i => m_registry.MapIidToInterface(i.Iid)))
                     {
                         result = filter.Filter(intf);
                         if (result != FilterResult.None)
