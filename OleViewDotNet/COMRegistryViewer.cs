@@ -791,6 +791,7 @@ namespace OleViewDotNet
             foreach (COMTypeLibEntry ent in m_registry.Typelibs.Values)
             {
                 typelibNodes[i] = CreateNode(ent.TypelibId.ToString(), FolderKey);
+                typelibNodes[i].Tag = ent;
                 foreach (COMTypeLibVersionEntry ver in ent.Versions)
                 {
                     typelibNodes[i].Nodes.Add(CreateTypelibVersionNode(ver));
@@ -947,6 +948,10 @@ namespace OleViewDotNet
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)tag;                    
                     guid = ent.Clsid;
+                }
+                else if (tag is COMTypeLibVersionEntry)
+                {
+                    guid = ((COMTypeLibVersionEntry)tag).TypelibId;
                 }
                 else if (tag is COMTypeLibEntry)
                 {
