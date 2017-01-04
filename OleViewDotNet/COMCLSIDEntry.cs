@@ -361,6 +361,7 @@ namespace OleViewDotNet
 
             Categories = categories.ToList().AsReadOnly();
             TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
+            CanElevate = COMUtilities.ReadIntFromKey(key, "Elevation", "Enabled") != 0;
         }
 
         public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
@@ -420,6 +421,8 @@ namespace OleViewDotNet
             }
         }
 
+        public bool CanElevate { get; private set; }
+
         public IDictionary<COMServerType, COMCLSIDServerEntry> Servers { get; private set; }
 
         public IEnumerable<Guid> Categories
@@ -450,13 +453,13 @@ namespace OleViewDotNet
 
             // We don't consider the loaded interfaces.
             return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID 
-                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values);
+                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values) && CanElevate == right.CanElevate;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode() 
-                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode();
+                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() ^ CanElevate.GetHashCode();
         }
 
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
@@ -722,6 +725,7 @@ namespace OleViewDotNet
             Categories = reader.ReadGuids("catids");
             TreatAs = reader.ReadGuid("treatas");
             m_loaded_interfaces = reader.ReadBool("loaded");
+            CanElevate = reader.ReadBool("elevate");
             Name = reader.ReadString("name");
             if (m_loaded_interfaces)
             {
@@ -740,6 +744,7 @@ namespace OleViewDotNet
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
             writer.WriteBool("loaded", m_loaded_interfaces);
+            writer.WriteBool("elevate", CanElevate);
             writer.WriteOptionalAttributeString("name", Name);
             if (m_loaded_interfaces)
             {

@@ -1168,7 +1168,10 @@ namespace OleViewDotNet
                     {
                         createSpecialToolStripMenuItem.DropDownItems.Add(createLocalServerToolStripMenuItem);
                         SetupCreateSpecialSessions();
-                        createSpecialToolStripMenuItem.DropDownItems.Add(createElevatedToolStripMenuItem);
+                        if (clsid.CanElevate)
+                        {
+                            createSpecialToolStripMenuItem.DropDownItems.Add(createElevatedToolStripMenuItem);
+                        }
                         createSpecialToolStripMenuItem.DropDownItems.Add(createRemoteToolStripMenuItem);
                     }
 
