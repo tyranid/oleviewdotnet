@@ -156,6 +156,7 @@ namespace OleViewDotNet
                 tabControlProperties.TabPages.Add(tabPageServers);
             }
 
+            SetupTypeLibVersionEntry(m_registry.GetTypeLibVersionEntry(entry.TypeLib, null));
             m_clsid = entry;
         }
 
@@ -165,11 +166,9 @@ namespace OleViewDotNet
             textBoxIID.Text = GetGuidValue(entry.Iid);
             textBoxInterfaceBase.Text = GetStringValue(entry.Base);
             textBoxInterfaceProxy.Text = GetGuidValue(entry.ProxyClsid);
-            btnProxyProperties.Enabled = m_registry.Clsids.ContainsKey(entry.ProxyClsid);
-            textBoxTypeLib.Text = GetGuidValue(entry.TypeLib);
-            m_typelib = m_registry.GetTypeLibVersionEntry(entry.TypeLib, entry.TypeLibVersion);
-            btnOpenTypeLib.Enabled = m_typelib != null;            
+            btnProxyProperties.Enabled = m_registry.Clsids.ContainsKey(entry.ProxyClsid);                           
             tabControlProperties.TabPages.Add(tabPageInterface);
+            SetupTypeLibVersionEntry(m_registry.GetTypeLibVersionEntry(entry.TypeLib, entry.TypeLibVersion));
             m_interface = entry;
         }
 
@@ -196,11 +195,32 @@ namespace OleViewDotNet
             {
                 SetupInterfaceEntry((COMInterfaceEntry)obj);
             }
+
+            if (obj is COMTypeLibVersionEntry)
+            {
+                SetupTypeLibVersionEntry((COMTypeLibVersionEntry)obj);
+            }
+        }
+
+        private void SetupTypeLibVersionEntry(COMTypeLibVersionEntry entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+            textBoxTypeLibName.Text = entry.Name;
+            textBoxTypeLibId.Text = GetGuidValue(entry.TypelibId);
+            textBoxTypeLibVersion.Text = entry.Version;
+            textBoxTypeLibWin32.Text = GetStringValue(entry.Win32Path);
+            textBoxTypeLibWin64.Text = GetStringValue(entry.Win64Path);
+            m_typelib = entry;
+            tabControlProperties.TabPages.Add(tabPageTypeLib);
         }
 
         public static bool SupportsProperties(object obj)
         {
-            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry || obj is COMInterfaceEntry;
+            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry 
+                || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
@@ -302,7 +322,7 @@ namespace OleViewDotNet
                 Assembly typelib = COMUtilities.LoadTypeLib(this, m_typelib.NativePath);
                 if (typelib != null)
                 {
-                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface.Iid));
+                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface != null ? m_interface.Iid : Guid.Empty));
                 }
             }
         }

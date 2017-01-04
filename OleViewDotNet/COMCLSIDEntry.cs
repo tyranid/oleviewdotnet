@@ -412,6 +412,14 @@ namespace OleViewDotNet
 
         public Guid TypeLib { get; private set; }
 
+        public bool HasTypeLib
+        {
+            get
+            {
+                return TypeLib != Guid.Empty;
+            }
+        }
+
         public IDictionary<COMServerType, COMCLSIDServerEntry> Servers { get; private set; }
 
         public IEnumerable<Guid> Categories

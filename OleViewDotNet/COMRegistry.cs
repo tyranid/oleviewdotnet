@@ -495,7 +495,7 @@ namespace OleViewDotNet
             COMTypeLibEntry entry = m_typelibs[typelib];
             foreach (var ver in entry.Versions)
             {
-                if (ver.Version == version)
+                if (version == null || ver.Version == version)
                 {
                     return ver;
                 }
