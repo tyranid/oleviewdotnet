@@ -832,7 +832,7 @@ namespace OleViewDotNet
                 {
                     await clsid.LoadSupportedInterfacesAsync(bRefresh);
                     int interface_count = clsid.Interfaces.Count();
-                    int factory_count = clsid.Interfaces.Count();
+                    int factory_count = clsid.FactoryInterfaces.Count();
                     if (interface_count == 0 && factory_count == 0)
                     {
                         wait_node.Text = "Error querying COM interfaces - Timeout";
@@ -849,7 +849,7 @@ namespace OleViewDotNet
                             wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
                         }
 
-                        if (clsid.FactoryInterfaces.Count() > 0)
+                        if (factory_count > 0)
                         {
                             TreeNode factory = CreateNode("Factory Interfaces", FolderKey);
                             AddInterfaceNodes(factory, clsid.FactoryInterfaces);
