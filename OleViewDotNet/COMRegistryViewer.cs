@@ -1752,7 +1752,7 @@ namespace OleViewDotNet
                 frm.Text = "Enter Remote Host";
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
-                    await CreateInstance(CLSCTX.CLSCTX_SERVER, frm.Data);
+                    await CreateInstance(CLSCTX.CLSCTX_REMOTE_SERVER, frm.Data);
                 }
             }
         }

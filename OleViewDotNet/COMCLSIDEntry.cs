@@ -620,6 +620,10 @@ namespace OleViewDotNet
                 {
                     dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
                 }
+                else if (DefaultServerType == COMServerType.InProcHandler32)
+                {
+                    dwContext = CLSCTX.CLSCTX_INPROC_HANDLER;
+                }
                 else
                 {
                     dwContext = CLSCTX.CLSCTX_SERVER;
