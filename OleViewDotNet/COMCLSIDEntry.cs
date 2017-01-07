@@ -696,7 +696,8 @@ namespace OleViewDotNet
 
             COSERVERINFO server_info = server != null ? new COSERVERINFO(server) : null;
 
-            int hr = COMUtilities.CoGetClassObject(ref clsid, CreateContext, server_info, ref iid, out obj);
+            int hr = COMUtilities.CoGetClassObject(ref clsid, server_info != null ? CLSCTX.CLSCTX_REMOTE_SERVER 
+                : CreateContext, server_info, ref iid, out obj);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);

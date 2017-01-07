@@ -298,6 +298,16 @@ namespace OleViewDotNet
             get { return COMSecurity.SDHasAC(LaunchPermission); }
         }
 
+        public bool HasRemoteAccess
+        {
+            get { return COMSecurity.SDHasRemoteAccess(AccessPermission); }
+        }
+
+        public bool HasRemoteLaunch
+        {
+            get { return COMSecurity.SDHasRemoteAccess(LaunchPermission); }
+        }
+
         public COMAppIDRotFlags RotFlags
         {
             get; private set;

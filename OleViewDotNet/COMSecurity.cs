@@ -468,6 +468,32 @@ namespace OleViewDotNet
             return false;
         }
 
+        public static bool SDHasRemoteAccess(string sddl)
+        {
+            if (String.IsNullOrWhiteSpace(sddl))
+            {
+                // Asssume defaults give _someone_ remote access.
+                return true;
+            }
+
+            RawSecurityDescriptor sd = new RawSecurityDescriptor(sddl);
+
+            foreach (var ace in sd.DiscretionaryAcl)
+            {
+                CommonAce common_ace = ace as CommonAce;
+                if (common_ace != null)
+                {
+                    COMAccessRights access = (COMAccessRights)(uint)common_ace.AccessMask;
+                    if ((access == COMAccessRights.Execute) 
+                        || (access & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         enum WTS_CONNECTSTATE_CLASS
         {
             WTSActive,              // User logged on to WinStation
