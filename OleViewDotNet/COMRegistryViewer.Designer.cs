@@ -326,6 +326,7 @@
             this.treeImageList.Images.SetKeyName(1, "class.ico");
             this.treeImageList.Images.SetKeyName(2, "interface.ico");
             this.treeImageList.Images.SetKeyName(3, "folderopen.ico");
+            this.treeImageList.Images.SetKeyName(4, "process.ico");
             // 
             // comboBoxMode
             // 

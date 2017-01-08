@@ -68,6 +68,7 @@ namespace OleViewDotNet
             MimeTypes,
             AppIDsWithAC,
             ProxyCLSIDs,
+            Processes,
         }
 
         /// <summary>
@@ -79,6 +80,7 @@ namespace OleViewDotNet
         private const string InterfaceKey = "interface.ico";
         private const string ClassKey = "class.ico";
         private const string FolderOpenKey = "folderopen.ico";
+        private const string ProcessKey = "process.ico";
 
         /// <summary>
         /// Constructor
@@ -169,6 +171,9 @@ namespace OleViewDotNet
                         break;
                     case DisplayMode.ProxyCLSIDs:
                         LoadCLSIDByServer(ServerType.Proxies);
+                        break;
+                    case DisplayMode.Processes:
+                        LoadProcesses();
                         break;
                     default:
                         break;
@@ -350,6 +355,65 @@ namespace OleViewDotNet
             m_filter_types.Add(FilterType.Interface);
             treeComRegistry.Nodes.AddRange(nodes.OrderBy(n => n.Text).ToArray());
             Text = "CLSIDs by Name";
+        }
+
+        private static string BuildCOMProcessTooltip(COMProcessEntry proc)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("Path: {0}", proc.ExecutablePath).AppendLine();
+            if (proc.AppId != Guid.Empty)
+            {
+                builder.AppendFormat("AppID: {0}", proc.AppId).AppendLine();
+            }
+            builder.AppendFormat("Access Permissions: {0}", proc.AccessPermissions).AppendLine();
+            return builder.ToString();
+        }
+
+        private static string BuildCOMIpidTooltip(COMIPIDEntry ipid)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("Interface: 0x{0:X}", ipid.Interface.ToInt64()).AppendLine();
+            builder.AppendFormat("Stub: 0x{0:X}", ipid.Stub.ToInt64()).AppendLine();
+            builder.AppendFormat("Flags: {0}", ipid.Flags).AppendLine();
+            builder.AppendFormat("Strong Refs: {0}", ipid.StrongRefs).AppendLine();
+            builder.AppendFormat("Weak Refs: {0}", ipid.WeakRefs).AppendLine();
+            builder.AppendFormat("Private Refs: {0}", ipid.PrivateRefs).AppendLine();
+            return builder.ToString();
+        }
+
+        private void LoadProcesses()
+        {
+            List<TreeNode> nodes = new List<TreeNode>();
+            try
+            {
+                string dbghelp = Environment.Is64BitProcess
+                    ? Properties.Settings.Default.DbgHelpPath64
+                    : Properties.Settings.Default.DbgHelpPath32;
+                IEnumerable<COMProcessEntry> procs = COMProcessParser.GetProcesses(dbghelp, Properties.Settings.Default.SymbolPath);
+                foreach (COMProcessEntry proc in procs.OrderBy(p => p.Name).Where(p => p.Ipids.Count() > 0))
+                {
+                    TreeNode node = CreateNode(String.Format("{0} - {1}", proc.Pid, proc.Name), ProcessKey);
+                    node.ToolTipText = BuildCOMProcessTooltip(proc);
+                    node.Tag = proc;
+                    foreach (COMIPIDEntry ipid in proc.Ipids)
+                    {
+                        COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+                        TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid, intf.Name), InterfaceKey);
+                        ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
+                        ipid_node.Tag = ipid;
+                        node.Nodes.Add(ipid_node);
+                    }
+                    nodes.Add(node);
+                }
+                m_filter_types.Add(FilterType.Process);
+                m_filter_types.Add(FilterType.Ipid);
+                treeComRegistry.Nodes.AddRange(nodes.ToArray());
+                Text = "Processes";
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
         }
 
         enum ServerType
@@ -957,7 +1021,7 @@ namespace OleViewDotNet
                 }
                 else if (tag is COMProgIDEntry)
                 {
-                    COMProgIDEntry ent = (COMProgIDEntry)tag;                    
+                    COMProgIDEntry ent = (COMProgIDEntry)tag;
                     guid = ent.Clsid;
                 }
                 else if (tag is COMTypeLibVersionEntry)
@@ -975,6 +1039,10 @@ namespace OleViewDotNet
                 else if (tag is COMAppIDEntry)
                 {
                     guid = ((COMAppIDEntry)tag).AppId;
+                }
+                else if (tag is COMIPIDEntry)
+                {
+                    guid = ((COMIPIDEntry)tag).Ipid;
                 }
             }
 

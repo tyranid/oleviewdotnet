@@ -34,8 +34,10 @@
             this.menuFile = new System.Windows.Forms.MenuItem();
             this.menuFilePythonConsole = new System.Windows.Forms.MenuItem();
             this.menuFileOpenViewer = new System.Windows.Forms.MenuItem();
+            this.menuItem10 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenDatabase = new System.Windows.Forms.MenuItem();
             this.menuFileSaveDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveAsDatabase = new System.Windows.Forms.MenuItem();
             this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenMachineOnly = new System.Windows.Forms.MenuItem();
             this.menuFileOpenUserOnly = new System.Windows.Forms.MenuItem();
@@ -90,8 +92,9 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuItem10 = new System.Windows.Forms.MenuItem();
-            this.menuFileSaveAsDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileConfigureSymbols = new System.Windows.Forms.MenuItem();
+            this.menuItem12 = new System.Windows.Forms.MenuItem();
+            this.menuRegistryProcesses = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -122,6 +125,8 @@
             this.menuFileOpenTypeLib,
             this.menuFileOpenProxyDll,
             this.menuItem2,
+            this.menuFileConfigureSymbols,
+            this.menuItem12,
             this.menuFileExit});
             this.menuFile.Text = "&File";
             // 
@@ -137,6 +142,11 @@
             this.menuFileOpenViewer.Text = "Open &32 Bit Viewer";
             this.menuFileOpenViewer.Click += new System.EventHandler(this.menuFileOpenViewer_Click);
             // 
+            // menuItem10
+            // 
+            this.menuItem10.Index = 2;
+            this.menuItem10.Text = "-";
+            // 
             // menuFileOpenDatabase
             // 
             this.menuFileOpenDatabase.Index = 3;
@@ -150,6 +160,12 @@
             this.menuFileSaveDatabase.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.menuFileSaveDatabase.Text = "&Save Database";
             this.menuFileSaveDatabase.Click += new System.EventHandler(this.menuFileSaveDatabase_Click);
+            // 
+            // menuFileSaveAsDatabase
+            // 
+            this.menuFileSaveAsDatabase.Index = 5;
+            this.menuFileSaveAsDatabase.Text = "Save &as... Database";
+            this.menuFileSaveAsDatabase.Click += new System.EventHandler(this.menuFileSaveAsDatabase_Click);
             // 
             // menuItem7
             // 
@@ -204,7 +220,7 @@
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 15;
+            this.menuFileExit.Index = 17;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -220,6 +236,7 @@
             this.menuViewCLSIDsWithSurrogate,
             this.menuViewProgIDs,
             this.menuRegistryMimeTypes,
+            this.menuRegistryProcesses,
             this.menuItem4,
             this.menuViewPreApproved,
             this.menuViewImplementedCategories,
@@ -282,93 +299,93 @@
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 7;
+            this.menuItem4.Index = 8;
             this.menuItem4.Text = "-";
             // 
             // menuViewPreApproved
             // 
-            this.menuViewPreApproved.Index = 8;
+            this.menuViewPreApproved.Index = 9;
             this.menuViewPreApproved.Text = "&Explorer PreApproved";
             this.menuViewPreApproved.Click += new System.EventHandler(this.menuViewPreApproved_Click);
             // 
             // menuViewImplementedCategories
             // 
-            this.menuViewImplementedCategories.Index = 9;
+            this.menuViewImplementedCategories.Index = 10;
             this.menuViewImplementedCategories.Text = "&Implemented Categories";
             this.menuViewImplementedCategories.Click += new System.EventHandler(this.menuViewImplementedCategories_Click);
             // 
             // menuViewIELowRights
             // 
-            this.menuViewIELowRights.Index = 10;
+            this.menuViewIELowRights.Index = 11;
             this.menuViewIELowRights.Text = "IE Low &Rights Elevation Policy";
             this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
             // 
             // menuItem5
             // 
-            this.menuItem5.Index = 11;
+            this.menuItem5.Index = 12;
             this.menuItem5.Text = "-";
             // 
             // menuViewAppIDs
             // 
-            this.menuViewAppIDs.Index = 12;
+            this.menuViewAppIDs.Index = 13;
             this.menuViewAppIDs.Text = "&App IDs";
             this.menuViewAppIDs.Click += new System.EventHandler(this.menuViewAppIDs_Click);
             // 
             // menuRegistryAppIDsIL
             // 
-            this.menuRegistryAppIDsIL.Index = 13;
+            this.menuRegistryAppIDsIL.Index = 14;
             this.menuRegistryAppIDsIL.Text = "App IDs &With IL";
             this.menuRegistryAppIDsIL.Click += new System.EventHandler(this.menuRegistryAppIDsIL_Click);
             // 
             // menuRegistryAppIDsWithAC
             // 
-            this.menuRegistryAppIDsWithAC.Index = 14;
+            this.menuRegistryAppIDsWithAC.Index = 15;
             this.menuRegistryAppIDsWithAC.Text = "App IDs with AppContai&ner";
             this.menuRegistryAppIDsWithAC.Click += new System.EventHandler(this.menuRegistryAppIDsWithAC_Click);
             // 
             // menuViewLocalServices
             // 
-            this.menuViewLocalServices.Index = 15;
+            this.menuViewLocalServices.Index = 16;
             this.menuViewLocalServices.Text = "L&ocal Services";
             this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
             // 
             // menuItem1
             // 
-            this.menuItem1.Index = 16;
+            this.menuItem1.Index = 17;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 17;
+            this.menuViewInterfaces.Index = 18;
             this.menuViewInterfaces.Text = "Inter&faces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 18;
+            this.menuViewInterfacesByName.Index = 19;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
             // menuRegistryTypeLibraries
             // 
-            this.menuRegistryTypeLibraries.Index = 19;
+            this.menuRegistryTypeLibraries.Index = 20;
             this.menuRegistryTypeLibraries.Text = "&Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
             // menuRegistryInterfaceProxies
             // 
-            this.menuRegistryInterfaceProxies.Index = 20;
+            this.menuRegistryInterfaceProxies.Index = 21;
             this.menuRegistryInterfaceProxies.Text = "Interface Pro&xies";
             this.menuRegistryInterfaceProxies.Click += new System.EventHandler(this.menuRegistryInterfaceProxies_Click);
             // 
             // menuItem6
             // 
-            this.menuItem6.Index = 21;
+            this.menuItem6.Index = 22;
             this.menuItem6.Text = "-";
             // 
             // menuRegistryProperties
             // 
-            this.menuRegistryProperties.Index = 22;
+            this.menuRegistryProperties.Index = 23;
             this.menuRegistryProperties.Text = "Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
             // 
@@ -507,25 +524,30 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuItem10
+            // menuFileConfigureSymbols
             // 
-            this.menuItem10.Index = 2;
-            this.menuItem10.Text = "-";
+            this.menuFileConfigureSymbols.Index = 15;
+            this.menuFileConfigureSymbols.Text = "Configure Symbols";
+            this.menuFileConfigureSymbols.Click += new System.EventHandler(this.menuFileConfigureSymbols_Click);
             // 
-            // menuFileSaveAsDatabase
+            // menuItem12
             // 
-            this.menuFileSaveAsDatabase.Index = 5;
-            this.menuFileSaveAsDatabase.Text = "Save &as... Database";
-            this.menuFileSaveAsDatabase.Click += new System.EventHandler(this.menuFileSaveAsDatabase_Click);
+            this.menuItem12.Index = 16;
+            this.menuItem12.Text = "-";
+            // 
+            // menuRegistryProcesses
+            // 
+            this.menuRegistryProcesses.Index = 7;
+            this.menuRegistryProcesses.Text = "Processes";
+            this.menuRegistryProcesses.Click += new System.EventHandler(this.menuRegistryProcesses_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1646, 862);
+            this.ClientSize = new System.Drawing.Size(823, 448);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -599,6 +621,9 @@
         private System.Windows.Forms.MenuItem menuFileQueryAllInterfaces;
         private System.Windows.Forms.MenuItem menuItem10;
         private System.Windows.Forms.MenuItem menuFileSaveAsDatabase;
+        private System.Windows.Forms.MenuItem menuFileConfigureSymbols;
+        private System.Windows.Forms.MenuItem menuItem12;
+        private System.Windows.Forms.MenuItem menuRegistryProcesses;
     }
 }
 

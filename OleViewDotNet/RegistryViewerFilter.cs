@@ -38,6 +38,8 @@ namespace OleViewDotNet
         LowRights,
         MimeType,
         Server,
+        Process,
+        Ipid,
     }
 
     public enum FilterComparison
@@ -170,6 +172,10 @@ namespace OleViewDotNet
                     return typeof(COMCLSIDServerEntry);
                 case FilterType.TypeLib:
                     return typeof(COMTypeLibVersionEntry);
+                case FilterType.Process:
+                    return typeof(COMProcessEntry);
+                case FilterType.Ipid:
+                    return typeof(COMIPIDEntry);
                 default:
                     throw new ArgumentException("Invalid filter type", nameof(type));
             }

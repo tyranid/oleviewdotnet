@@ -674,5 +674,18 @@ namespace OleViewDotNet
         {
             SaveDatabase(true);
         }
+
+        private void menuFileConfigureSymbols_Click(object sender, EventArgs e)
+        {
+            using (ConfigureSymbolsForm frm = new ConfigureSymbolsForm())
+            {
+                frm.ShowDialog(this);
+            }
+        }
+
+        private void menuRegistryProcesses_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.Processes);
+        }
     }
 }

@@ -134,7 +134,14 @@
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMInterfaces.cs" />
+    <Compile Include="COMProcessParser.cs" />
     <Compile Include="COMProxyInstance.cs" />
+    <Compile Include="ConfigureSymbolsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfigureSymbolsForm.Designer.cs">
+      <DependentUpon>ConfigureSymbolsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DiffRegistryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -161,6 +168,7 @@
     <Compile Include="RegistryPropertiesControl.Designer.cs">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="SymbolResolver.cs" />
     <Compile Include="ViewFilterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -325,6 +333,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfigureSymbolsForm.resx">
+      <DependentUpon>ConfigureSymbolsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ConsoleControl.resx">
       <DependentUpon>ConsoleControl.cs</DependentUpon>
