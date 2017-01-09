@@ -119,7 +119,7 @@ namespace OleViewDotNet
         public COMIELowRightsElevationPolicy(Guid guid, RegistryKey key)
         {            
             Uuid = guid;
-            Name = Uuid.ToString("B");
+            Name = Uuid.FormatGuid();
             LoadFromRegistry(key);
         }
 

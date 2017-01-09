@@ -44,6 +44,7 @@ namespace OleViewDotNet
         TreeNode[] m_originalNodes;
         HashSet<FilterType> m_filter_types;
         RegistryViewerFilter m_filter;
+        IEnumerable<COMProcessEntry> m_processes;
 
         /// <summary>
         /// Enumeration to indicate what to display
@@ -87,13 +88,14 @@ namespace OleViewDotNet
         /// </summary>
         /// <param name="reg">The COM registry</param>
         /// <param name="mode">The display mode</param>
-        public COMRegistryViewer(COMRegistry reg, DisplayMode mode)
+        public COMRegistryViewer(COMRegistry reg, DisplayMode mode, IEnumerable<COMProcessEntry> processes)
         {
             InitializeComponent();
             m_registry = reg;
             m_filter_types = new HashSet<FilterType>();
             m_filter = new RegistryViewerFilter();
             m_mode = mode;
+            m_processes = processes;
             foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
             {
                 comboBoxMode.Items.Add(filter);
@@ -197,7 +199,7 @@ namespace OleViewDotNet
         {
             StringBuilder strRet = new StringBuilder();
 
-            AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.ToString("B"));
+            AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.FormatGuid());
             AppendFormatLine(strRet, "Name: {0}", ent.Name);
             AppendFormatLine(strRet, "{0}: {1}", ent.DefaultServerType.ToString(), ent.DefaultServer);
             IEnumerable<string> progids = m_registry.GetProgIdsForClsid(ent.Clsid).Select(p => p.ProgID);
@@ -211,11 +213,11 @@ namespace OleViewDotNet
             }
             if (ent.AppID != Guid.Empty)
             {
-                AppendFormatLine(strRet, "AppID: {0}", ent.AppID.ToString("B"));            
+                AppendFormatLine(strRet, "AppID: {0}", ent.AppID.FormatGuid());            
             }
             if (ent.TypeLib != Guid.Empty)
             {
-                AppendFormatLine(strRet, "TypeLib: {0}", ent.TypeLib.ToString("B"));
+                AppendFormatLine(strRet, "TypeLib: {0}", ent.TypeLib.FormatGuid());
             }
 
             COMInterfaceEntry[] proxies = m_registry.GetProxiesForClsid(ent);
@@ -248,7 +250,7 @@ namespace OleViewDotNet
             }
             else
             {
-                strRet = String.Format("CLSID: {0}\n", ent.Clsid.ToString("B"));
+                strRet = String.Format("CLSID: {0}\n", ent.Clsid.FormatGuid());
             }
 
             return strRet;
@@ -259,10 +261,10 @@ namespace OleViewDotNet
             StringBuilder builder = new StringBuilder();
 
             AppendFormatLine(builder, "Name: {0}", ent.Name);
-            AppendFormatLine(builder, "IID: {0}", ent.Iid.ToString("B"));
+            AppendFormatLine(builder, "IID: {0}", ent.Iid.FormatGuid());
             if (ent.ProxyClsid != Guid.Empty)
             {
-                AppendFormatLine(builder, "ProxyCLSID: {0}", ent.ProxyClsid.ToString("B"));
+                AppendFormatLine(builder, "ProxyCLSID: {0}", ent.ProxyClsid.FormatGuid());
             }
             if (instance != null && instance.Module != null)
             {
@@ -270,7 +272,7 @@ namespace OleViewDotNet
             }
             if (ent.HasTypeLib)
             {
-                AppendFormatLine(builder, "TypeLib: {0}", ent.TypeLib.ToString("B"));
+                AppendFormatLine(builder, "TypeLib: {0}", ent.TypeLib.FormatGuid());
             }
 
             return builder.ToString();
@@ -366,6 +368,7 @@ namespace OleViewDotNet
                 builder.AppendFormat("AppID: {0}", proc.AppId).AppendLine();
             }
             builder.AppendFormat("Access Permissions: {0}", proc.AccessPermissions).AppendLine();
+            builder.AppendFormat("LRPC Permissions: {0}", proc.LRpcPermissions).AppendLine();
             return builder.ToString();
         }
 
@@ -384,36 +387,26 @@ namespace OleViewDotNet
         private void LoadProcesses()
         {
             List<TreeNode> nodes = new List<TreeNode>();
-            try
+            
+            foreach (COMProcessEntry proc in m_processes.Where(p => p.Ipids.Count() > 0))
             {
-                string dbghelp = Environment.Is64BitProcess
-                    ? Properties.Settings.Default.DbgHelpPath64
-                    : Properties.Settings.Default.DbgHelpPath32;
-                IEnumerable<COMProcessEntry> procs = COMProcessParser.GetProcesses(dbghelp, Properties.Settings.Default.SymbolPath);
-                foreach (COMProcessEntry proc in procs.OrderBy(p => p.Name).Where(p => p.Ipids.Count() > 0))
+                TreeNode node = CreateNode(String.Format("{0,-8} - {1} - {2}", proc.Pid, proc.Name, proc.User), ProcessKey);
+                node.ToolTipText = BuildCOMProcessTooltip(proc);
+                node.Tag = proc;
+                foreach (COMIPIDEntry ipid in proc.Ipids.Where(i => i.IsRunning))
                 {
-                    TreeNode node = CreateNode(String.Format("{0} - {1}", proc.Pid, proc.Name), ProcessKey);
-                    node.ToolTipText = BuildCOMProcessTooltip(proc);
-                    node.Tag = proc;
-                    foreach (COMIPIDEntry ipid in proc.Ipids)
-                    {
-                        COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
-                        TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid, intf.Name), InterfaceKey);
-                        ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
-                        ipid_node.Tag = ipid;
-                        node.Nodes.Add(ipid_node);
-                    }
-                    nodes.Add(node);
+                    COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+                    TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
+                    ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
+                    ipid_node.Tag = ipid;
+                    node.Nodes.Add(ipid_node);
                 }
-                m_filter_types.Add(FilterType.Process);
-                m_filter_types.Add(FilterType.Ipid);
-                treeComRegistry.Nodes.AddRange(nodes.ToArray());
-                Text = "Processes";
+                nodes.Add(node);
             }
-            catch (Exception ex)
-            {
-                Program.ShowError(this, ex);
-            }
+            m_filter_types.Add(FilterType.Process);
+            m_filter_types.Add(FilterType.Ipid);
+            treeComRegistry.Nodes.AddRange(nodes.ToArray());
+            Text = "Running Processes";
         }
 
         enum ServerType
@@ -719,7 +712,7 @@ namespace OleViewDotNet
             {
                 TreeNode currNode = CreateNode(pair.Name, FolderKey);
                 currNode.Tag = pair;
-                currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.ToString("B"));
+                currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.FormatGuid());
                 sortedNodes.Add(currNode.Text, currNode);
 
                 IEnumerable<COMCLSIDEntry> clsids = pair.Clsids.Select(c => m_registry.MapClsidToEntry(c)).Where(c => c != null).OrderBy(c => c.Name);
@@ -979,16 +972,7 @@ namespace OleViewDotNet
                     break;
                 case CopyGuidType.CopyAsStructure:
                     {
-                        MemoryStream ms = new MemoryStream(guid.ToByteArray());
-                        BinaryReader reader = new BinaryReader(ms);
-                        strCopy = "struct GUID guidObject = { ";
-                        strCopy += String.Format("0x{0:X08}, 0x{1:X04}, 0x{2:X04}, {{", reader.ReadUInt32(),
-                            reader.ReadUInt16(), reader.ReadUInt16());
-                        for (int i = 0; i < 8; i++)
-                        {
-                            strCopy += String.Format("0x{0:X02}, ", reader.ReadByte());
-                        }
-                        strCopy += "}};";
+                        strCopy = String.Format("GUID guidObject = {0:X};", guid);
                     }
                     break;
                 case CopyGuidType.CopyAsHexString:

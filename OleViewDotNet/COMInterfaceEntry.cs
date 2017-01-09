@@ -34,7 +34,7 @@ namespace OleViewDotNet
             {
                 return ret;
             }
-            return iid.ToString("B");
+            return iid.FormatGuid();
         }
 
         public int CompareTo(COMInterfaceEntry right)
@@ -52,7 +52,7 @@ namespace OleViewDotNet
             }
             else
             {
-                Name = Iid.ToString("B");
+                Name = Iid.FormatGuid();
             }
               
             ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);

@@ -34,6 +34,7 @@
             this.comboBoxClsCtx = new System.Windows.Forms.ComboBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.checkBoxClassFactory = new System.Windows.Forms.CheckBox();
             lblCLSID = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -91,12 +92,23 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // checkBoxClassFactory
+            // 
+            this.checkBoxClassFactory.AutoSize = true;
+            this.checkBoxClassFactory.Location = new System.Drawing.Point(276, 36);
+            this.checkBoxClassFactory.Name = "checkBoxClassFactory";
+            this.checkBoxClassFactory.Size = new System.Drawing.Size(89, 17);
+            this.checkBoxClassFactory.TabIndex = 6;
+            this.checkBoxClassFactory.Text = "Class Factory";
+            this.checkBoxClassFactory.UseVisualStyleBackColor = true;
+            // 
             // CreateCLSIDForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(397, 92);
+            this.Controls.Add(this.checkBoxClassFactory);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.comboBoxClsCtx);
@@ -122,5 +134,6 @@
         private System.Windows.Forms.ComboBox comboBoxClsCtx;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.CheckBox checkBoxClassFactory;
     }
 }

@@ -72,6 +72,18 @@
             System.Windows.Forms.Label label33;
             System.Windows.Forms.Label label34;
             System.Windows.Forms.Label label35;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelProcess;
+            System.Windows.Forms.Label label42;
+            System.Windows.Forms.Label label19;
+            System.Windows.Forms.Label label36;
+            System.Windows.Forms.Label label37;
+            System.Windows.Forms.Label label38;
+            System.Windows.Forms.Label label39;
+            System.Windows.Forms.Label label40;
+            System.Windows.Forms.Label label41;
+            System.Windows.Forms.ColumnHeader columnHeaderIPid;
+            System.Windows.Forms.ColumnHeader columnHeaderProcessIid;
+            System.Windows.Forms.ColumnHeader columnHeaderFlags;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -119,6 +131,21 @@
             this.btnTreatAsProps = new System.Windows.Forms.Button();
             this.textBoxServerType = new System.Windows.Forms.TextBox();
             this.textBoxThreadingModel = new System.Windows.Forms.TextBox();
+            this.textBoxProcessLrpcPermissions = new System.Windows.Forms.TextBox();
+            this.textBoxProcessExecutablePath = new System.Windows.Forms.TextBox();
+            this.textBoxProcessProcessId = new System.Windows.Forms.TextBox();
+            this.textBoxProcess64Bit = new System.Windows.Forms.TextBox();
+            this.textBoxProcessAppId = new System.Windows.Forms.TextBox();
+            this.textBoxProcessAccessPermissions = new System.Windows.Forms.TextBox();
+            this.textBoxProcessUser = new System.Windows.Forms.TextBox();
+            this.listViewProcessIPids = new System.Windows.Forms.ListView();
+            this.contextMenuStripIpids = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.marshalStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyInterfacePointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyStubPointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnProcessViewAccessPermissions = new System.Windows.Forms.Button();
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
@@ -138,6 +165,7 @@
             this.textBoxTypeLibVersion = new System.Windows.Forms.TextBox();
             this.textBoxTypeLibWin32 = new System.Windows.Forms.TextBox();
             this.textBoxTypeLibWin64 = new System.Windows.Forms.TextBox();
+            this.tabPageProcess = new System.Windows.Forms.TabPage();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -181,6 +209,18 @@
             label33 = new System.Windows.Forms.Label();
             label34 = new System.Windows.Forms.Label();
             label35 = new System.Windows.Forms.Label();
+            tableLayoutPanelProcess = new System.Windows.Forms.TableLayoutPanel();
+            label42 = new System.Windows.Forms.Label();
+            label19 = new System.Windows.Forms.Label();
+            label36 = new System.Windows.Forms.Label();
+            label37 = new System.Windows.Forms.Label();
+            label38 = new System.Windows.Forms.Label();
+            label39 = new System.Windows.Forms.Label();
+            label40 = new System.Windows.Forms.Label();
+            label41 = new System.Windows.Forms.Label();
+            columnHeaderIPid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderProcessIid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -188,6 +228,8 @@
             this.contextMenuStripInterfaces.SuspendLayout();
             tableLayoutPanelClsid.SuspendLayout();
             this.contextMenuStripProgids.SuspendLayout();
+            tableLayoutPanelProcess.SuspendLayout();
+            this.contextMenuStripIpids.SuspendLayout();
             this.tabControlProperties.SuspendLayout();
             this.tabPageClsid.SuspendLayout();
             this.tabPageNoProperties.SuspendLayout();
@@ -199,6 +241,7 @@
             this.tabPageService.SuspendLayout();
             this.tabPageTypeLib.SuspendLayout();
             this.tableLayoutPanelTypeLib.SuspendLayout();
+            this.tabPageProcess.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -1254,6 +1297,281 @@
             label35.TabIndex = 9;
             label35.Text = "Win64 Path:";
             // 
+            // tableLayoutPanelProcess
+            // 
+            tableLayoutPanelProcess.ColumnCount = 3;
+            tableLayoutPanelProcess.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelProcess.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelProcess.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessLrpcPermissions, 1, 5);
+            tableLayoutPanelProcess.Controls.Add(label42, 0, 5);
+            tableLayoutPanelProcess.Controls.Add(label19, 0, 0);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessExecutablePath, 1, 0);
+            tableLayoutPanelProcess.Controls.Add(label36, 0, 1);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessProcessId, 1, 1);
+            tableLayoutPanelProcess.Controls.Add(label37, 0, 2);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcess64Bit, 1, 2);
+            tableLayoutPanelProcess.Controls.Add(label38, 0, 3);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessAppId, 1, 3);
+            tableLayoutPanelProcess.Controls.Add(label39, 0, 4);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessAccessPermissions, 1, 4);
+            tableLayoutPanelProcess.Controls.Add(label40, 0, 6);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessUser, 1, 6);
+            tableLayoutPanelProcess.Controls.Add(label41, 0, 7);
+            tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 8);
+            tableLayoutPanelProcess.Controls.Add(this.btnProcessViewAccessPermissions, 2, 4);
+            tableLayoutPanelProcess.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelProcess.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelProcess.Name = "tableLayoutPanelProcess";
+            tableLayoutPanelProcess.RowCount = 9;
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelProcess.Size = new System.Drawing.Size(569, 357);
+            tableLayoutPanelProcess.TabIndex = 0;
+            // 
+            // textBoxProcessLrpcPermissions
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessLrpcPermissions, 2);
+            this.textBoxProcessLrpcPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessLrpcPermissions.Location = new System.Drawing.Point(112, 136);
+            this.textBoxProcessLrpcPermissions.Name = "textBoxProcessLrpcPermissions";
+            this.textBoxProcessLrpcPermissions.ReadOnly = true;
+            this.textBoxProcessLrpcPermissions.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessLrpcPermissions.TabIndex = 16;
+            // 
+            // label42
+            // 
+            label42.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label42.AutoSize = true;
+            label42.Location = new System.Drawing.Point(3, 139);
+            label42.Name = "label42";
+            label42.Size = new System.Drawing.Size(96, 13);
+            label42.TabIndex = 15;
+            label42.Text = "LRPC Permissions:";
+            // 
+            // label19
+            // 
+            label19.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label19.AutoSize = true;
+            label19.Location = new System.Drawing.Point(3, 6);
+            label19.Name = "label19";
+            label19.Size = new System.Drawing.Size(88, 13);
+            label19.TabIndex = 0;
+            label19.Text = "Executable Path:";
+            // 
+            // textBoxProcessExecutablePath
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessExecutablePath, 2);
+            this.textBoxProcessExecutablePath.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessExecutablePath.Location = new System.Drawing.Point(112, 3);
+            this.textBoxProcessExecutablePath.Name = "textBoxProcessExecutablePath";
+            this.textBoxProcessExecutablePath.ReadOnly = true;
+            this.textBoxProcessExecutablePath.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessExecutablePath.TabIndex = 1;
+            // 
+            // label36
+            // 
+            label36.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label36.AutoSize = true;
+            label36.Location = new System.Drawing.Point(3, 32);
+            label36.Name = "label36";
+            label36.Size = new System.Drawing.Size(62, 13);
+            label36.TabIndex = 2;
+            label36.Text = "Process ID:";
+            // 
+            // textBoxProcessProcessId
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessProcessId, 2);
+            this.textBoxProcessProcessId.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessProcessId.Location = new System.Drawing.Point(112, 29);
+            this.textBoxProcessProcessId.Name = "textBoxProcessProcessId";
+            this.textBoxProcessProcessId.ReadOnly = true;
+            this.textBoxProcessProcessId.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessProcessId.TabIndex = 3;
+            // 
+            // label37
+            // 
+            label37.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label37.AutoSize = true;
+            label37.Location = new System.Drawing.Point(3, 58);
+            label37.Name = "label37";
+            label37.Size = new System.Drawing.Size(34, 13);
+            label37.TabIndex = 4;
+            label37.Text = "64 Bit";
+            // 
+            // textBoxProcess64Bit
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcess64Bit, 2);
+            this.textBoxProcess64Bit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcess64Bit.Location = new System.Drawing.Point(112, 55);
+            this.textBoxProcess64Bit.Name = "textBoxProcess64Bit";
+            this.textBoxProcess64Bit.ReadOnly = true;
+            this.textBoxProcess64Bit.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcess64Bit.TabIndex = 5;
+            // 
+            // label38
+            // 
+            label38.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label38.AutoSize = true;
+            label38.Location = new System.Drawing.Point(3, 84);
+            label38.Name = "label38";
+            label38.Size = new System.Drawing.Size(40, 13);
+            label38.TabIndex = 6;
+            label38.Text = "AppID:";
+            // 
+            // textBoxProcessAppId
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessAppId, 2);
+            this.textBoxProcessAppId.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessAppId.Location = new System.Drawing.Point(112, 81);
+            this.textBoxProcessAppId.Name = "textBoxProcessAppId";
+            this.textBoxProcessAppId.ReadOnly = true;
+            this.textBoxProcessAppId.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessAppId.TabIndex = 7;
+            // 
+            // label39
+            // 
+            label39.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label39.AutoSize = true;
+            label39.Location = new System.Drawing.Point(3, 112);
+            label39.Name = "label39";
+            label39.Size = new System.Drawing.Size(103, 13);
+            label39.TabIndex = 8;
+            label39.Text = "Access Permissions:";
+            // 
+            // textBoxProcessAccessPermissions
+            // 
+            this.textBoxProcessAccessPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessAccessPermissions.Location = new System.Drawing.Point(112, 107);
+            this.textBoxProcessAccessPermissions.Name = "textBoxProcessAccessPermissions";
+            this.textBoxProcessAccessPermissions.ReadOnly = true;
+            this.textBoxProcessAccessPermissions.Size = new System.Drawing.Size(373, 20);
+            this.textBoxProcessAccessPermissions.TabIndex = 9;
+            // 
+            // label40
+            // 
+            label40.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label40.AutoSize = true;
+            label40.Location = new System.Drawing.Point(3, 165);
+            label40.Name = "label40";
+            label40.Size = new System.Drawing.Size(29, 13);
+            label40.TabIndex = 10;
+            label40.Text = "User";
+            // 
+            // textBoxProcessUser
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessUser, 2);
+            this.textBoxProcessUser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessUser.Location = new System.Drawing.Point(112, 162);
+            this.textBoxProcessUser.Name = "textBoxProcessUser";
+            this.textBoxProcessUser.ReadOnly = true;
+            this.textBoxProcessUser.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessUser.TabIndex = 11;
+            // 
+            // label41
+            // 
+            label41.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label41.AutoSize = true;
+            label41.Location = new System.Drawing.Point(3, 185);
+            label41.Name = "label41";
+            label41.Size = new System.Drawing.Size(36, 13);
+            label41.TabIndex = 12;
+            label41.Text = "IPIDs:";
+            // 
+            // listViewProcessIPids
+            // 
+            this.listViewProcessIPids.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnHeaderIPid,
+            columnHeaderProcessIid,
+            columnHeaderFlags});
+            tableLayoutPanelProcess.SetColumnSpan(this.listViewProcessIPids, 3);
+            this.listViewProcessIPids.ContextMenuStrip = this.contextMenuStripIpids;
+            this.listViewProcessIPids.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewProcessIPids.FullRowSelect = true;
+            this.listViewProcessIPids.Location = new System.Drawing.Point(3, 201);
+            this.listViewProcessIPids.MultiSelect = false;
+            this.listViewProcessIPids.Name = "listViewProcessIPids";
+            this.listViewProcessIPids.Size = new System.Drawing.Size(563, 153);
+            this.listViewProcessIPids.TabIndex = 13;
+            this.listViewProcessIPids.UseCompatibleStateImageBehavior = false;
+            this.listViewProcessIPids.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeaderIPid
+            // 
+            columnHeaderIPid.Text = "IPID";
+            // 
+            // columnHeaderProcessIid
+            // 
+            columnHeaderProcessIid.Text = "IID";
+            // 
+            // columnHeaderFlags
+            // 
+            columnHeaderFlags.Text = "Flags";
+            // 
+            // contextMenuStripIpids
+            // 
+            this.contextMenuStripIpids.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.marshalStreamToolStripMenuItem,
+            this.copyInterfacePointerToolStripMenuItem,
+            this.copyStubPointerToolStripMenuItem});
+            this.contextMenuStripIpids.Name = "contextMenuStripIpids";
+            this.contextMenuStripIpids.Size = new System.Drawing.Size(193, 70);
+            // 
+            // marshalStreamToolStripMenuItem
+            // 
+            this.marshalStreamToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toHexEditorToolStripMenuItem,
+            this.toFileToolStripMenuItem});
+            this.marshalStreamToolStripMenuItem.Name = "marshalStreamToolStripMenuItem";
+            this.marshalStreamToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.marshalStreamToolStripMenuItem.Text = "Marshal Stream";
+            // 
+            // toHexEditorToolStripMenuItem
+            // 
+            this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
+            this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
+            // 
+            // toFileToolStripMenuItem
+            // 
+            this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.toFileToolStripMenuItem.Text = "To File";
+            this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
+            // 
+            // copyInterfacePointerToolStripMenuItem
+            // 
+            this.copyInterfacePointerToolStripMenuItem.Name = "copyInterfacePointerToolStripMenuItem";
+            this.copyInterfacePointerToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.copyInterfacePointerToolStripMenuItem.Text = "Copy Interface Pointer";
+            this.copyInterfacePointerToolStripMenuItem.Click += new System.EventHandler(this.copyInterfacePointerToolStripMenuItem_Click);
+            // 
+            // copyStubPointerToolStripMenuItem
+            // 
+            this.copyStubPointerToolStripMenuItem.Name = "copyStubPointerToolStripMenuItem";
+            this.copyStubPointerToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.copyStubPointerToolStripMenuItem.Text = "Copy Stub Pointer";
+            this.copyStubPointerToolStripMenuItem.Click += new System.EventHandler(this.copyStubPointerToolStripMenuItem_Click);
+            // 
+            // btnProcessViewAccessPermissions
+            // 
+            this.btnProcessViewAccessPermissions.AutoSize = true;
+            this.btnProcessViewAccessPermissions.Location = new System.Drawing.Point(491, 107);
+            this.btnProcessViewAccessPermissions.Name = "btnProcessViewAccessPermissions";
+            this.btnProcessViewAccessPermissions.Size = new System.Drawing.Size(75, 23);
+            this.btnProcessViewAccessPermissions.TabIndex = 14;
+            this.btnProcessViewAccessPermissions.Text = "View";
+            this.btnProcessViewAccessPermissions.UseVisualStyleBackColor = true;
+            this.btnProcessViewAccessPermissions.Click += new System.EventHandler(this.btnProcessViewAccessPermissions_Click);
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
@@ -1265,6 +1583,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageServers);
             this.tabControlProperties.Controls.Add(this.tabPageService);
             this.tabControlProperties.Controls.Add(this.tabPageTypeLib);
+            this.tabControlProperties.Controls.Add(this.tabPageProcess);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Margin = new System.Windows.Forms.Padding(1);
@@ -1504,6 +1823,17 @@
             this.textBoxTypeLibWin64.Size = new System.Drawing.Size(491, 20);
             this.textBoxTypeLibWin64.TabIndex = 10;
             // 
+            // tabPageProcess
+            // 
+            this.tabPageProcess.Controls.Add(tableLayoutPanelProcess);
+            this.tabPageProcess.Location = new System.Drawing.Point(4, 22);
+            this.tabPageProcess.Name = "tabPageProcess";
+            this.tabPageProcess.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageProcess.Size = new System.Drawing.Size(575, 363);
+            this.tabPageProcess.TabIndex = 9;
+            this.tabPageProcess.Text = "Process";
+            this.tabPageProcess.UseVisualStyleBackColor = true;
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1525,6 +1855,9 @@
             tableLayoutPanelClsid.ResumeLayout(false);
             tableLayoutPanelClsid.PerformLayout();
             this.contextMenuStripProgids.ResumeLayout(false);
+            tableLayoutPanelProcess.ResumeLayout(false);
+            tableLayoutPanelProcess.PerformLayout();
+            this.contextMenuStripIpids.ResumeLayout(false);
             this.tabControlProperties.ResumeLayout(false);
             this.tabPageClsid.ResumeLayout(false);
             this.tabPageNoProperties.ResumeLayout(false);
@@ -1538,6 +1871,7 @@
             this.tabPageTypeLib.ResumeLayout(false);
             this.tableLayoutPanelTypeLib.ResumeLayout(false);
             this.tableLayoutPanelTypeLib.PerformLayout();
+            this.tabPageProcess.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1610,5 +1944,21 @@
         private System.Windows.Forms.TextBox textBoxTypeLibWin32;
         private System.Windows.Forms.TextBox textBoxTypeLibWin64;
         private System.Windows.Forms.Button btnOpenTypeLib;
+        private System.Windows.Forms.TabPage tabPageProcess;
+        private System.Windows.Forms.TextBox textBoxProcessExecutablePath;
+        private System.Windows.Forms.TextBox textBoxProcessProcessId;
+        private System.Windows.Forms.TextBox textBoxProcess64Bit;
+        private System.Windows.Forms.TextBox textBoxProcessAppId;
+        private System.Windows.Forms.TextBox textBoxProcessAccessPermissions;
+        private System.Windows.Forms.TextBox textBoxProcessUser;
+        private System.Windows.Forms.ListView listViewProcessIPids;
+        private System.Windows.Forms.Button btnProcessViewAccessPermissions;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripIpids;
+        private System.Windows.Forms.ToolStripMenuItem marshalStreamToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyInterfacePointerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyStubPointerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toHexEditorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toFileToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxProcessLrpcPermissions;
     }
 }

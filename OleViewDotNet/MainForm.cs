@@ -112,7 +112,7 @@ namespace OleViewDotNet
             {
                 ent = new COMCLSIDEntry(Guid.Empty, COMServerType.UnknownServer);
             }
-            props.Add("CLSID", ent.Clsid.ToString("B"));
+            props.Add("CLSID", ent.Clsid.FormatGuid());
             props.Add("Name", ent.Name);
             props.Add("Server", ent.DefaultServer);
 
@@ -131,9 +131,14 @@ namespace OleViewDotNet
             HostControl(view);
         }
 
+        private void OpenView(COMRegistryViewer.DisplayMode mode, IEnumerable<COMProcessEntry> processes)
+        {
+            HostControl(new COMRegistryViewer(m_registry, mode, processes));                
+        }
+
         private void OpenView(COMRegistryViewer.DisplayMode mode)
         {
-            HostControl(new COMRegistryViewer(m_registry, mode));                
+            OpenView(mode, null);
         }
 
         private void menuViewCLSIDs_Click(object sender, EventArgs e)
@@ -199,27 +204,51 @@ namespace OleViewDotNet
                         {
                             COMCLSIDEntry ent = m_registry.Clsids[g];
                             strObjName = ent.Name;
-                            props.Add("CLSID", ent.Clsid.ToString("B"));
+                            props.Add("CLSID", ent.Clsid.FormatGuid());
                             props.Add("Name", ent.Name);
                             props.Add("Server", ent.DefaultServer);
-
-                            comObj = ent.CreateInstanceAsObject(frm.ClsCtx, null);
                             await ent.LoadSupportedInterfacesAsync(false);
-                            ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
+
+                            if (frm.ClassFactory)
+                            {
+                                comObj = ent.CreateClassFactory();
+                                ints = ent.FactoryInterfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
+                            }
+                            else
+                            {
+                                comObj = ent.CreateInstanceAsObject(frm.ClsCtx, null);
+                                ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
+                            }
                         }
                         else
                         {
                             Guid unk = COMInterfaceEntry.IID_IUnknown;
                             IntPtr pObj;
+                            int hr;
 
-                            if (COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
-                                ref unk, out pObj) == 0)
+                            if (frm.ClassFactory)
                             {
-                                ints = m_registry.GetInterfacesForIUnknown(pObj);
-                                comObj = Marshal.GetObjectForIUnknown(pObj);
-                                strObjName = g.ToString("B");
-                                props.Add("CLSID", g.ToString("B"));
-                                Marshal.Release(pObj);
+                                hr = COMUtilities.CoGetClassObject(ref g, frm.ClsCtx, null, ref unk, out pObj);
+                            }
+                            else
+                            {
+                                hr = COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
+                                            ref unk, out pObj);
+                            }
+
+                            if (hr == 0)
+                            {
+                                try
+                                {
+                                    ints = m_registry.GetInterfacesForIUnknown(pObj);
+                                    comObj = Marshal.GetObjectForIUnknown(pObj);
+                                    strObjName = g.FormatGuid();
+                                    props.Add("CLSID", g.FormatGuid());
+                                }
+                                finally
+                                {
+                                    Marshal.Release(pObj);
+                                }
                             }
                         }
 
@@ -300,7 +329,7 @@ namespace OleViewDotNet
                 {
                     COMCLSIDEntry ent = m_registry.Clsids[clsid];
                     strObjName = ent.Name;
-                    props.Add("CLSID", ent.Clsid.ToString("B"));
+                    props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.DefaultServer);
                     await ent.LoadSupportedInterfacesAsync(false);
@@ -309,8 +338,8 @@ namespace OleViewDotNet
                 else
                 {
                     ints = m_registry.GetInterfacesForObject(comObj);
-                    strObjName = defaultName != null ? defaultName : clsid.ToString("B");
-                    props.Add("CLSID", clsid.ToString("B"));
+                    strObjName = defaultName != null ? defaultName : clsid.FormatGuid();
+                    props.Add("CLSID", clsid.FormatGuid());
                 }
 
                 Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
@@ -683,9 +712,40 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuRegistryProcesses_Click(object sender, EventArgs e)
+        private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)
         {
-            OpenView(COMRegistryViewer.DisplayMode.Processes);
+            if (!Properties.Settings.Default.SymbolsConfigured)
+            {
+                if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
+                    "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    using (ConfigureSymbolsForm frm = new ConfigureSymbolsForm())
+                    {
+                        frm.ShowDialog(this);
+                    }
+                }
+            }
+
+            IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this);
+            if (processes != null && processes.Count() > 0)
+            {
+                OpenView(COMRegistryViewer.DisplayMode.Processes, processes.OrderBy(orderby_selector));
+            }
+        }
+
+        private void menuObjectProcessesByPid_Click(object sender, EventArgs e)
+        {
+            LoadProcesses(p => p.Pid);
+        }
+
+        private void menuObjectProcessesByName_Click(object sender, EventArgs e)
+        {
+            LoadProcesses(p => p.Name);
+        }
+
+        private void menuObjectProcessByUser_Click(object sender, EventArgs e)
+        {
+            LoadProcesses(p => p.User);
         }
     }
 }

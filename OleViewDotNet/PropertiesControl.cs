@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -29,6 +30,7 @@ namespace OleViewDotNet
         private COMCLSIDEntry m_clsid;
         private COMInterfaceEntry m_interface;
         private COMTypeLibVersionEntry m_typelib;
+        private COMProcessEntry m_process;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -37,7 +39,7 @@ namespace OleViewDotNet
                 entries.Select(e => new Tuple<COMInterfaceInstance, COMInterfaceEntry>(e, m_registry.MapIidToInterface(e.Iid))).OrderBy(e => e.Item2.Name))
             {
                 ListViewItem item = view.Items.Add(entry.Item2.Name);
-                item.SubItems.Add(entry.Item1.Iid.ToString("B"));
+                item.SubItems.Add(entry.Item1.Iid.FormatGuid());
                 item.SubItems.Add(entry.Item2.NumMethods.ToString());
                 if (!String.IsNullOrWhiteSpace(entry.Item1.Module))
                 {
@@ -57,13 +59,13 @@ namespace OleViewDotNet
 
         private static string GetGuidValue(Guid guid)
         {
-            return guid == Guid.Empty ? "N/A" : guid.ToString("B");
+            return guid == Guid.Empty ? "N/A" : guid.FormatGuid();
         }
 
         private void SetupAppIdEntry(COMAppIDEntry entry)
         {
             textBoxAppIdName.Text = entry.Name;
-            textBoxAppIdGuid.Text = entry.AppId.ToString("B");
+            textBoxAppIdGuid.Text = entry.AppId.FormatGuid();
             textBoxLaunchPermission.Text = entry.LaunchPermission;
             textBoxAccessPermission.Text = entry.AccessPermission;
             textBoxAppIDRunAs.Text = GetStringValue(entry.RunAs);
@@ -91,7 +93,7 @@ namespace OleViewDotNet
         private void SetupClsidEntry(COMCLSIDEntry entry)
         {
             textBoxClsidName.Text = entry.Name;
-            textBoxClsid.Text = entry.Clsid.ToString("B");
+            textBoxClsid.Text = entry.Clsid.FormatGuid();
             textBoxServerType.Text = entry.DefaultServerType.ToString();
             textBoxThreadingModel.Text = entry.DefaultThreadingModel.ToString();
             textBoxServer.Text = entry.DefaultServer;
@@ -134,7 +136,7 @@ namespace OleViewDotNet
                 foreach (COMInterfaceEntry intf in proxies.OrderBy(i => i.Name))
                 {
                     ListViewItem item = listViewProxies.Items.Add(intf.Name);
-                    item.SubItems.Add(intf.Iid.ToString("B"));
+                    item.SubItems.Add(intf.Iid.FormatGuid());
                 }
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -200,6 +202,38 @@ namespace OleViewDotNet
             {
                 SetupTypeLibVersionEntry((COMTypeLibVersionEntry)obj);
             }
+
+            if (obj is COMProcessEntry)
+            {
+                SetupProcessEntry((COMProcessEntry)obj);
+            }
+        }
+
+        private void SetupProcessEntry(COMProcessEntry obj)
+        {
+            m_process = obj;
+            textBoxProcessExecutablePath.Text = obj.ExecutablePath;
+            textBoxProcessProcessId.Text = obj.Pid.ToString();
+            textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
+            textBoxProcess64Bit.Text = obj.Is64Bit.ToString();
+            textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions);
+            btnProcessViewAccessPermissions.Enabled = !String.IsNullOrWhiteSpace(obj.AccessPermissions);
+            textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions);
+            textBoxProcessUser.Text = GetStringValue(obj.User);
+            foreach (COMIPIDEntry ipid in obj.Ipids)
+            {
+                ListViewItem item = listViewProcessIPids.Items.Add(ipid.Ipid.ToString());
+                item.SubItems.Add(m_registry.MapIidToInterface(ipid.Iid).Name);
+                item.SubItems.Add(ipid.Flags.ToString());
+                item.Tag = ipid;
+            }
+            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            tabControlProperties.TabPages.Add(tabPageProcess);
+            if (m_registry.AppIDs.ContainsKey(obj.AppId))
+            {
+                SetupAppIdEntry((COMAppIDEntry)m_registry.AppIDs[obj.AppId]);
+            }
         }
 
         private void SetupTypeLibVersionEntry(COMTypeLibVersionEntry entry)
@@ -220,7 +254,7 @@ namespace OleViewDotNet
         public static bool SupportsProperties(object obj)
         {
             return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry 
-                || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry;
+                || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry || obj is COMProcessEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
@@ -417,6 +451,71 @@ namespace OleViewDotNet
             catch (Exception ex)
             {
                 Program.ShowError(this, ex);
+            }
+        }
+
+        private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(this, String.Format("Process {0} Access", m_process.Name), 
+                m_process.AccessPermissions, true);
+        }
+
+        private COMIPIDEntry GetSelectedIpid()
+        {
+            if (listViewProcessIPids.SelectedItems.Count > 0)
+            {
+                return (COMIPIDEntry)listViewProcessIPids.SelectedItems[0].Tag;
+            }
+            return null;
+        }
+
+        private void copyInterfacePointerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                COMRegistryViewer.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Interface.ToInt64()));
+            }
+        }
+
+        private void copyStubPointerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                COMRegistryViewer.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Stub.ToInt64()));
+            }
+        }
+
+        private void toHexEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, ipid.ToObjref()));
+            }
+        }
+
+        private void toFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        try
+                        {
+                            File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.ShowError(this, ex);
+                        }
+                    }
+                }
             }
         }
     }

@@ -51,7 +51,10 @@ namespace OleViewDotNet
             {
                 using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(textBoxDbgHelp.Text))
                 {
-                    valid_dll = true;
+                    if (lib.GetFunctionPointer("SymInitializeW") != IntPtr.Zero)
+                    {
+                        valid_dll = true;
+                    }
                 }
             }
             catch(Win32Exception)

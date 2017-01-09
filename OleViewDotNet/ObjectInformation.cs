@@ -111,7 +111,7 @@ namespace OleViewDotNet
             {
                 ListViewItem item = listViewInterfaces.Items.Add(ent.Name);
                 item.Tag = ent;
-                item.SubItems.Add(ent.Iid.ToString("B"));
+                item.SubItems.Add(ent.Iid.FormatGuid());
 
                 InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
                 if (factory != null)

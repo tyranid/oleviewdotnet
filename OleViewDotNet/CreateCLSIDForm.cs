@@ -23,6 +23,7 @@ namespace OleViewDotNet
     {
         public Guid Clsid { get; private set; }
         public CLSCTX ClsCtx { get; private set; }
+        public bool ClassFactory { get; private set; }
 
         public CreateCLSIDForm()
         {
@@ -44,6 +45,7 @@ namespace OleViewDotNet
             {
                 Clsid = clsid;
                 ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;
+                ClassFactory = checkBoxClassFactory.Checked;
 
                 DialogResult = DialogResult.OK;
                 Close();

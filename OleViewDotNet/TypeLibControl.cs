@@ -115,7 +115,7 @@ namespace OleViewDotNet
             foreach (Type t in typelib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
             {
                 ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.GUID);
-                item.SubItems.Add(t.GUID.ToString("B"));
+                item.SubItems.Add(t.GUID.FormatGuid());
                 item.Tag = t;
                 yield return item;
             }
@@ -126,7 +126,7 @@ namespace OleViewDotNet
             foreach (COMProxyInstanceEntry t in proxy.Entries.OrderBy(t => t.Name))
             {
                 ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.Iid);
-                item.SubItems.Add(t.Iid.ToString("B"));
+                item.SubItems.Add(t.Iid.FormatGuid());
                 item.Tag = t;
                 yield return item;
             }

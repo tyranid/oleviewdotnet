@@ -305,7 +305,7 @@ namespace OleViewDotNet
 
             if (Name == null)
             {
-                Name = Clsid.ToString("B");
+                Name = Clsid.FormatGuid();
             }
 
             Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();

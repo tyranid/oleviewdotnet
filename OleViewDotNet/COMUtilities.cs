@@ -401,7 +401,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    strDesc = catid.ToString("B");
+                    strDesc = catid.FormatGuid();
                 }
             }
 
@@ -1539,6 +1539,27 @@ namespace OleViewDotNet
             }
         }
 
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window)
+        {
+            string dbghelp = Environment.Is64BitProcess
+                    ? Properties.Settings.Default.DbgHelpPath64
+                    : Properties.Settings.Default.DbgHelpPath32;
+            string symbol_path = Properties.Settings.Default.SymbolPath;
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(dbghelp, symbol_path, progress), s => s))
+            {
+                dlg.Text = "Loading Processes";
+                if (dlg.ShowDialog(window) == DialogResult.OK)
+                {
+                    return (IEnumerable<COMProcessEntry>)dlg.Result;
+                }
+                else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+                {
+                    Program.ShowError(window, dlg.Error);
+                }
+                return null;
+            }
+        }
+
         private class ReportQueryProgress
         {
             private int _total_count;
@@ -1598,6 +1619,11 @@ namespace OleViewDotNet
                 dlg.Text = "Querying Interfaces";
                 return dlg.ShowDialog(parent) == DialogResult.OK;
             }
+        }
+
+        internal static string FormatGuid(this Guid guid)
+        {
+            return guid.ToString().ToUpper();
         }
     }
 
@@ -1787,4 +1813,5 @@ namespace OleViewDotNet
             return _delayed_imports;
         }
     }
+
 }

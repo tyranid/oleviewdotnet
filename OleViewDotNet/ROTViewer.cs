@@ -75,7 +75,7 @@ namespace OleViewDotNet
                     }
                     else
                     {
-                        item.SubItems.Add(clsid.ToString("B"));
+                        item.SubItems.Add(clsid.FormatGuid());
                     }
                 }                
             }
@@ -113,7 +113,7 @@ namespace OleViewDotNet
 
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 props.Add("Display Name", info.strDisplayName);
-                props.Add("CLSID", info.clsid.ToString("B"));
+                props.Add("CLSID", info.clsid.FormatGuid());
 
                 try
                 {

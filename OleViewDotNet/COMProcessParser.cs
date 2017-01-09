@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 
 namespace OleViewDotNet
@@ -507,6 +508,14 @@ namespace OleViewDotNet
                 }
                 return true;
             }
+
+            private SafeHGlobalBuffer() : base(false)
+            {
+                SetHandle(IntPtr.Zero);
+                Initialize(0);
+            }
+
+            public static SafeHGlobalBuffer Null { get { return new SafeHGlobalBuffer(); } }
         }
 
         internal class SafeStructureBuffer<T> : SafeHGlobalBuffer where T : new()
@@ -725,6 +734,8 @@ namespace OleViewDotNet
             }
         }
 
+        static HashSet<uint> _flags = new HashSet<uint>();
+
         static List<COMIPIDEntry> ParseIPIDEntries<T>(SafeKernelObjectHandle process, IntPtr ipid_table) 
             where T : struct, IPIDEntryNativeInterface
         {
@@ -746,6 +757,10 @@ namespace OleViewDotNet
                     for (int entry_index = 0; entry_index < palloc.EntriesPerPage; ++entry_index)
                     {
                         IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
+                        if (_flags.Add(ipid_entry.Flags))
+                        {
+                            System.Diagnostics.Trace.WriteLine(String.Format("Flags: {0:X}", ipid_entry.Flags));
+                        }
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
                             entries.Add(new COMIPIDEntry(ipid_entry, process));
@@ -838,15 +853,299 @@ namespace OleViewDotNet
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
         private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(IntPtr sd, uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
 
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
+        private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(ref SecurityDescriptorAbsolute sd, 
+            uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         private extern static IntPtr LocalFree(IntPtr hMem);
 
-        private static string GetProcessAccessSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver)
+        [Flags]
+        enum SecurityDescriptorControl : ushort
         {
-            IntPtr sd = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName("gSecDesc"));
+            OwnerDefaulted = 0x0001,
+            GroupDefaulted = 0x0002,
+            DaclPresent = 0x0004,
+            DaclDefaulted = 0x0008,
+            SaclPresent = 0x0010,
+            SaclDefaulted = 0x0020,
+            DaclAutoInheritReq = 0x0100,
+            SaclAutoInheritReq = 0x0200,
+            DaclAutoInherited = 0x0400,
+            SaclAutoInherited = 0x0800,
+            DaclProtected = 0x1000,
+            SaclProtected = 0x2000,
+            RmControlValid = 0x4000,
+            SelfRelative = 0x8000,
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SecurityDescriptorHeader
+        {
+            public byte Revision;
+            public byte Sbz1;
+            public SecurityDescriptorControl Control;
+
+            public bool HasFlag(SecurityDescriptorControl control)
+            {
+                return (control & Control) == control;
+            }
+        }
+
+        interface ISecurityDescriptor
+        {
+            IntPtr GetOwner(IntPtr base_address);
+            IntPtr GetGroup(IntPtr base_address);
+            IntPtr GetSacl(IntPtr base_address);
+            IntPtr GetDacl(IntPtr base_address);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SecurityDescriptorRelative : ISecurityDescriptor
+        {
+            public SecurityDescriptorHeader Header;
+            public int Owner;
+            public int Group;
+            public int Sacl;
+            public int Dacl;
+
+            IntPtr ISecurityDescriptor.GetOwner(IntPtr base_address)
+            {
+                if (Owner == 0)
+                {
+                    return IntPtr.Zero;
+                }
+
+                return base_address + Owner;
+            }
+
+            IntPtr ISecurityDescriptor.GetGroup(IntPtr base_address)
+            {
+                if (Group == 0)
+                {
+                    return IntPtr.Zero;
+                }
+
+                return base_address + Group;
+            }
+
+            IntPtr ISecurityDescriptor.GetSacl(IntPtr base_address)
+            {
+                if (Sacl == 0)
+                {
+                    return IntPtr.Zero;
+                }
+
+                return base_address + Sacl;
+            }
+
+            IntPtr ISecurityDescriptor.GetDacl(IntPtr base_address)
+            {
+                if (Dacl == 0)
+                {
+                    return IntPtr.Zero;
+                }
+
+                return base_address + Dacl;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SecurityDescriptorAbsolute : ISecurityDescriptor
+        {
+            public SecurityDescriptorHeader Header;
+            public IntPtr Owner;
+            public IntPtr Group;
+            public IntPtr Sacl;
+            public IntPtr Dacl;
+
+            IntPtr ISecurityDescriptor.GetOwner(IntPtr base_address)
+            {
+                return Owner;
+            }
+
+            IntPtr ISecurityDescriptor.GetGroup(IntPtr base_address)
+            {
+                return Group;
+            }
+
+            IntPtr ISecurityDescriptor.GetSacl(IntPtr base_address)
+            {
+                return Sacl;
+            }
+
+            IntPtr ISecurityDescriptor.GetDacl(IntPtr base_address)
+            {
+                return Dacl;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SecurityDescriptorAbsolute32 : ISecurityDescriptor
+        {
+            public SecurityDescriptorHeader Header;
+            public int Owner;
+            public int Group;
+            public int Sacl;
+            public int Dacl;
+
+            IntPtr ISecurityDescriptor.GetOwner(IntPtr base_address)
+            {
+                return new IntPtr(Owner);
+            }
+
+            IntPtr ISecurityDescriptor.GetGroup(IntPtr base_address)
+            {
+                return new IntPtr(Group);
+            }
+
+            IntPtr ISecurityDescriptor.GetSacl(IntPtr base_address)
+            {
+                return new IntPtr(Sacl);
+            }
+
+            IntPtr ISecurityDescriptor.GetDacl(IntPtr base_address)
+            {
+                return new IntPtr(Dacl);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SidHeader
+        {
+            public byte Revision;
+            public byte RidCount;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct AclHeader
+        {
+            public byte AclRevision;
+            public byte Sbz1;
+            public ushort AclSize;
+            public ushort AceCount;
+            public ushort Sbz2;
+        }
+
+        private static SafeBuffer ReadSid(SafeKernelObjectHandle process, IntPtr address)
+        {
+            SidHeader header = ReadStruct<SidHeader>(process, address);
+            if (header.Revision != 1)
+            {
+                return SafeHGlobalBuffer.Null;
+            }
+
+            return ReadBuffer(process, address, 8 + header.RidCount * 4);
+        }
+
+        private static SafeBuffer ReadAcl(SafeKernelObjectHandle process, IntPtr address)
+        {
+            AclHeader header = ReadStruct<AclHeader>(process, address);
+            if (header.AclRevision > 4)
+            {
+                return SafeHGlobalBuffer.Null;
+            }
+
+            if (header.AclSize < Marshal.SizeOf(typeof(AclHeader)))
+            {
+                return SafeHGlobalBuffer.Null;
+            }
+
+            return ReadBuffer(process, address, header.AclSize);
+        }
+
+        private static string ReadSecurityDescriptorFromAddress(SafeKernelObjectHandle process, IntPtr address)
+        {
+            SecurityDescriptorHeader header = ReadStruct<SecurityDescriptorHeader>(process, address);
+            if (header.Revision != 1)
+            {
+                return String.Empty;
+            }
+
+            ISecurityDescriptor sd = null;
+            if (header.HasFlag(SecurityDescriptorControl.SelfRelative))
+            {
+                sd = ReadStruct<SecurityDescriptorRelative>(process, address);
+            }
+            else if (Is64bitProcess(process))
+            {
+                sd = ReadStruct<SecurityDescriptorAbsolute>(process, address);
+            }
+            else
+            {
+                sd = ReadStruct<SecurityDescriptorAbsolute32>(process, address);
+            }
+
+            SecurityDescriptorAbsolute new_sd = new SecurityDescriptorAbsolute();
+            new_sd.Header = header;
+            new_sd.Header.Control = header.Control & ~SecurityDescriptorControl.SelfRelative;
+            List<SafeBuffer> buffers = new List<SafeBuffer>();
+            try
+            {
+                if (!header.HasFlag(SecurityDescriptorControl.OwnerDefaulted))
+                {
+                    SafeBuffer buf = ReadSid(process, sd.GetOwner(address));
+                    if (buf != null)
+                    {
+                        buffers.Add(buf);
+                        new_sd.Owner = buf.DangerousGetHandle();
+                    }
+                }
+                if (!header.HasFlag(SecurityDescriptorControl.OwnerDefaulted))
+                {
+                    SafeBuffer buf = ReadSid(process, sd.GetGroup(address));
+                    if (buf != null)
+                    {
+                        buffers.Add(buf);
+                        new_sd.Group = buf.DangerousGetHandle();
+                    }
+                }
+                if (header.HasFlag(SecurityDescriptorControl.DaclPresent))
+                {
+                    SafeBuffer buf = ReadAcl(process, sd.GetDacl(address));
+                    if (buf != null)
+                    {
+                        buffers.Add(buf);
+                        new_sd.Dacl = buf.DangerousGetHandle();
+                    }
+                }
+                if (header.HasFlag(SecurityDescriptorControl.SaclPresent))
+                {
+                    SafeBuffer buf = ReadAcl(process, sd.GetSacl(address));
+                    if (buf != null)
+                    {
+                        buffers.Add(buf);
+                        new_sd.Sacl = buf.DangerousGetHandle();
+                    }
+                }
+
+                IntPtr str;
+                int length;
+                if (ConvertSecurityDescriptorToStringSecurityDescriptor(ref new_sd, SDDL_REVISION_1,
+                    SecurityInformation.All, out str, out length))
+                {
+                    string ret = Marshal.PtrToStringUni(str);
+                    LocalFree(str);
+                    return ret;
+                }
+            }
+            finally
+            {
+                foreach (SafeBuffer buf in buffers)
+                {
+                    buf.Close();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        private static string ReadSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        {
+            IntPtr sd = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
             if (sd == IntPtr.Zero)
             {
-                return "ERROR: NO SYMBOL";
+                return String.Empty;
             }
             IntPtr sd_ptr;
             if (Is64bitProcess(process))
@@ -860,27 +1159,21 @@ namespace OleViewDotNet
 
             if (sd_ptr == IntPtr.Zero)
             {
-                return "<ALL ACCESS>";
+                return "D:NO_ACCESS_CONTROL";
             }
 
-            using (var buf = ReadBuffer(process, sd_ptr, 4 * 1024))
-            {
-                if (buf != null)
-                {
-                    IntPtr str;
-                    int length;
-                    if (ConvertSecurityDescriptorToStringSecurityDescriptor(buf.DangerousGetHandle(), SDDL_REVISION_1, SecurityInformation.All, out str, out length))
-                    {
-                        string ret = Marshal.PtrToStringUni(str);
-                        LocalFree(str);
-                        return ret;
-                    }
-                }
-            }
-
-            return "ERROR: INVALID SD";
+            return ReadSecurityDescriptorFromAddress(process, sd_ptr);
         }
 
+        private static string GetProcessAccessSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver)
+        {
+            return ReadSecurityDescriptor(process, resolver, "gSecDesc");
+        }
+
+        private static string GetLrpcSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver)
+        {
+            return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct Luid
@@ -948,7 +1241,7 @@ namespace OleViewDotNet
                     return Marshal.GetLastWin32Error() == 0;
                 }
                 return false;
-            }
+            }   
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -968,6 +1261,31 @@ namespace OleViewDotNet
                 return builder.ToString();
             }
             return String.Empty;
+        }
+
+        private static string GetProcessUser(SafeKernelObjectHandle process)
+        {
+            SafeKernelObjectHandle token;
+            if (OpenProcessToken(process.DangerousGetHandle(), MaximumAllowed, out token))
+            {
+                using (token)
+                {
+                    using (WindowsIdentity id = new WindowsIdentity(token.DangerousGetHandle()))
+                    {
+                        SecurityIdentifier sid = id.User;
+                        try
+                        {
+                            NTAccount account = (NTAccount)sid.Translate(typeof(NTAccount));
+                            return account.Value;
+                        }
+                        catch (IdentityNotMappedException)
+                        {
+                            return sid.Value;
+                        }
+                    }
+                }
+            }
+            return "Unknown";
         }
 
         public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path)
@@ -993,20 +1311,27 @@ namespace OleViewDotNet
                         ParseIPIDEntries(process, resolver), 
                         is64bit,
                         GetProcessAppId(process, resolver), 
-                        GetProcessAccessSecurityDescriptor(process, resolver));
+                        GetProcessAccessSecurityDescriptor(process, resolver),
+                        GetLrpcSecurityDescriptor(process, resolver),
+                        GetProcessUser(process));
                 }
             }
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(string dbghelp_path, string symbol_path)
+        public static IEnumerable<COMProcessEntry> GetProcesses(string dbghelp_path, string symbol_path, IProgress<Tuple<string, int>> progress)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
+            int current_pid = Process.GetCurrentProcess().Id;
             EnableDebugPrivilege();
-            IEnumerable<Process> procs = Process.GetProcesses().OrderBy(p => p.ProcessName);
+            IEnumerable<Process> procs = Process.GetProcesses().Where(p => p.Id != current_pid).OrderBy(p => p.ProcessName);
+            int total_count = procs.Count();
+            int current_count = 0;
             foreach (Process p in procs)
             {
                 try
                 {
+                    progress.Report(new Tuple<string, int>(String.Format("Parsing process {0}", p.ProcessName), 
+                        100 * current_count++ / total_count));
                     COMProcessEntry proc = COMProcessParser.ParseProcess(p.Id,
                         dbghelp_path, symbol_path);
                     if (proc != null)
@@ -1043,9 +1368,11 @@ namespace OleViewDotNet
         public bool Is64Bit { get; private set; }
         public Guid AppId { get; private set; }
         public string AccessPermissions { get; private set; }
+        public string LRpcPermissions { get; private set; }
+        public string User { get; private set; }
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
-            bool is64bit, Guid appid, string access_perm)
+            bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user)
         {
             Pid = pid;
             ExecutablePath = path;
@@ -1053,6 +1380,8 @@ namespace OleViewDotNet
             Is64Bit = is64bit;
             AppId = appid;
             AccessPermissions = access_perm;
+            LRpcPermissions = lrpc_perm;
+            User = user;
         }
     }
 
@@ -1093,6 +1422,22 @@ namespace OleViewDotNet
             {
                 return (Flags & (IPIDFlags.IPIDF_DISCONNECTED | IPIDFlags.IPIDF_DEACTIVATED)) == 0;
             }
+        }
+
+        public byte[] ToObjref()
+        {
+            MemoryStream stm = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(stm);
+            writer.Write(Encoding.ASCII.GetBytes("MEOW"));
+            writer.Write(1);
+            writer.Write(Iid.ToByteArray());
+            writer.Write(0);
+            writer.Write(1);
+            writer.Write(Oxid.ToByteArray(), 0, 8);
+            writer.Write(new byte[8]);
+            writer.Write(Ipid.ToByteArray());
+            writer.Write(0);
+            return stm.ToArray();
         }
 
         internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, COMProcessParser.SafeKernelObjectHandle process)
