@@ -982,13 +982,11 @@ namespace OleViewDotNet
             }
         }
 
-        public static object UnmarshalObject(Stream stm, out Guid clsid)
+        public static object UnmarshalObject(Stream stm)
         {
-            clsid = Guid.Empty;
             Guid iid = COMInterfaceEntry.IID_IUnknown;
             object obj;
             CoUnmarshalInterface(new IStreamImpl(stm), ref iid, out obj);
-            clsid = GetObjectClass(obj);
             return obj;
         }
 

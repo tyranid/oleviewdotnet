@@ -304,9 +304,8 @@ namespace OleViewDotNet
                     try
                     {
                         byte[] data = File.ReadAllBytes(dlg.FileName);
-                        Guid clsid;
-                        object comObj = COMUtilities.UnmarshalObject(new MemoryStream(data), out clsid);
-                        await HostObject(m_registry.MapClsidToEntry(clsid), comObj, comObj is IClassFactory);
+                        object comObj = COMUtilities.UnmarshalObject(new MemoryStream(data));
+                        await OpenObjectInformation(comObj, String.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
                     }
                     catch (Exception ex)
                     {
@@ -316,7 +315,7 @@ namespace OleViewDotNet
             }
         }
 
-        private async void OpenObjectInformation(object comObj, string defaultName)
+        public async Task OpenObjectInformation(object comObj, string defaultName)
         {
             if (comObj != null)
             {
@@ -361,7 +360,6 @@ namespace OleViewDotNet
                         {
                             Guid clsid;
                             object obj = COMUtilities.OleLoadFromStream(stm, out clsid);
-
                             await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
                         }
                     }
@@ -417,7 +415,7 @@ namespace OleViewDotNet
 
         private string _last_moniker = "Specify Moniker";
 
-        private void ParseOrBindMoniker(bool bind)
+        private async Task ParseOrBindMoniker(bool bind)
         {
             using (BuildMonikerForm frm = new BuildMonikerForm(_last_moniker))
             {
@@ -435,7 +433,7 @@ namespace OleViewDotNet
 
                         if (comObj != null)
                         {
-                            OpenObjectInformation(comObj, _last_moniker);
+                            await OpenObjectInformation(comObj, _last_moniker);
                         }
                     }
                     catch (Exception ex)
@@ -446,9 +444,9 @@ namespace OleViewDotNet
             }
         }
         
-        private void menuObjectBindMoniker_Click(object sender, EventArgs e)
+        private async void menuObjectBindMoniker_Click(object sender, EventArgs e)
         {
-            ParseOrBindMoniker(true);
+            await ParseOrBindMoniker(true);
         }
 
         private string GetSaveFileName(bool save)
@@ -498,7 +496,6 @@ namespace OleViewDotNet
         {
             SaveDatabase(false);
         }
-
 
         private void menuFileOpenDatabase_Click(object sender, EventArgs e)
         {
@@ -610,9 +607,9 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuObjectParseMoniker_Click(object sender, EventArgs e)
+        private async void menuObjectParseMoniker_Click(object sender, EventArgs e)
         {
-            ParseOrBindMoniker(false);
+            await ParseOrBindMoniker(false);
         }
 
         private void OpenHexEditor(byte[] bytes)
