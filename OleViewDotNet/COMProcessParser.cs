@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 
@@ -1434,7 +1435,10 @@ namespace OleViewDotNet
             writer.Write(0);
             writer.Write(1);
             writer.Write(Oxid.ToByteArray(), 0, 8);
-            writer.Write(new byte[8]);
+            RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            byte[] oid = new byte[8];
+            rng.GetBytes(oid);
+            writer.Write(oid);
             writer.Write(Ipid.ToByteArray());
             writer.Write(0);
             return stm.ToArray();
