@@ -20,6 +20,7 @@ using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -383,23 +384,33 @@ namespace OleViewDotNet
             return builder.ToString();
         }
 
+        private static string BuildCOMProcessName(COMProcessEntry proc)
+        {
+            return String.Format("{0,-8} - {1} - {2}", proc.Pid, proc.Name, proc.User);
+        }
+
+        private void PopulatorIpids(TreeNode node, COMProcessEntry proc)
+        {
+            foreach (COMIPIDEntry ipid in proc.Ipids.Where(i => i.IsRunning))
+            {
+                COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+                TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
+                ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
+                ipid_node.Tag = ipid;
+                node.Nodes.Add(ipid_node);
+            }
+        }
+
         private void LoadProcesses()
         {
             List<TreeNode> nodes = new List<TreeNode>();
             
             foreach (COMProcessEntry proc in m_processes.Where(p => p.Ipids.Count() > 0))
             {
-                TreeNode node = CreateNode(String.Format("{0,-8} - {1} - {2}", proc.Pid, proc.Name, proc.User), ProcessKey);
+                TreeNode node = CreateNode(BuildCOMProcessName(proc), ProcessKey);
                 node.ToolTipText = BuildCOMProcessTooltip(proc);
                 node.Tag = proc;
-                foreach (COMIPIDEntry ipid in proc.Ipids.Where(i => i.IsRunning))
-                {
-                    COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
-                    TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
-                    ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
-                    ipid_node.Tag = ipid;
-                    node.Nodes.Add(ipid_node);
-                }
+                PopulatorIpids(node, proc);
                 nodes.Add(node);
             }
             m_filter_types.Add(FilterType.Process);
@@ -1266,7 +1277,7 @@ namespace OleViewDotNet
                     createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
 
                     contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
-                    
+
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
                     if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
@@ -1304,6 +1315,20 @@ namespace OleViewDotNet
                     {
                         contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                     }
+                }
+                else if (node.Tag is COMProcessEntry)
+                {
+                    contextMenuStrip.Items.Add(refreshProcessToolStripMenuItem);
+                }
+                else if (node.Tag is COMIPIDEntry)
+                {
+                    COMIPIDEntry ipid = (COMIPIDEntry)node.Tag;
+                    COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+                    if (intf.HasProxy && m_registry.Clsids.ContainsKey(intf.ProxyClsid))
+                    {
+                        contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                    }
+                    contextMenuStrip.Items.Add(unmarshalToolStripMenuItem);
                 }
 
                 if (m_filter_types.Contains(FilterType.CLSID))
@@ -1728,9 +1753,14 @@ namespace OleViewDotNet
             {
                 COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
                 Guid selected_iid = Guid.Empty;
-                if (clsid == null && node.Tag is COMInterfaceEntry)
+                if (clsid == null && (node.Tag is COMInterfaceEntry || node.Tag is COMIPIDEntry))
                 {
-                    COMInterfaceEntry intf = (COMInterfaceEntry)node.Tag;
+                    COMInterfaceEntry intf = node.Tag as COMInterfaceEntry;
+                    if (intf == null)
+                    {
+                        intf = m_registry.MapIidToInterface(((COMIPIDEntry)node.Tag).Iid);
+                    }
+
                     selected_iid = intf.Iid;
                     clsid = m_registry.Clsids[intf.ProxyClsid];
                 }
@@ -1862,6 +1892,91 @@ namespace OleViewDotNet
             {
                 node.ImageKey = FolderKey;
                 node.SelectedImageKey = FolderKey;
+            }
+        }
+
+        private void refreshProcessToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null && node.Tag is COMProcessEntry)
+            {
+                
+                COMProcessEntry process = (COMProcessEntry)node.Tag;
+                string dbghelp = Environment.Is64BitProcess
+                    ? Properties.Settings.Default.DbgHelpPath64
+                    : Properties.Settings.Default.DbgHelpPath32;
+                string symbol_path = Properties.Settings.Default.SymbolPath;
+                process = COMProcessParser.ParseProcess(process.Pid, dbghelp, symbol_path);
+                if (process == null)
+                {
+                    treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);
+                    m_originalNodes = m_originalNodes.Where(n => n != node).ToArray();
+                }
+                else
+                {
+                    node.Tag = process;
+                    node.Nodes.Clear();
+                    PopulatorIpids(node, process);
+                }
+            }
+        }
+
+        private COMIPIDEntry GetSelectedIpid()
+        {
+            if (treeComRegistry.SelectedNode != null)
+            {
+                return treeComRegistry.SelectedNode.Tag as COMIPIDEntry;
+            }
+            return null;
+        }
+
+        private void toHexEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, ipid.ToObjref()));
+            }
+        }
+
+        private void toFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        try
+                        {
+                            File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.ShowError(this, ex);
+                        }
+                    }
+                }
+            }
+        }
+
+        private async void toObjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                try
+                {
+                    await Program.GetMainForm(m_registry).OpenObjectInformation(
+                        COMUtilities.UnmarshalObject(ipid.ToObjref()),
+                        String.Format("IPID {0}", ipid.Ipid));
+                }
+                catch (Exception ex)
+                {
+                    Program.ShowError(this, ex);
+                }
             }
         }
     }

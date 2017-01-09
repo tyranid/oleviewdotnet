@@ -990,6 +990,11 @@ namespace OleViewDotNet
             return obj;
         }
 
+        public static object UnmarshalObject(byte[] objref)
+        {
+            return UnmarshalObject(new MemoryStream(objref));
+        }
+
         public static Guid GetObjectClass(object p)
         {
             Guid ret = Guid.Empty;

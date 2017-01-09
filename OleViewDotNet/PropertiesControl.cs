@@ -518,5 +518,23 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private async void toObjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                try
+                {
+                    await Program.GetMainForm(m_registry).OpenObjectInformation(
+                        COMUtilities.UnmarshalObject(ipid.ToObjref()), 
+                        String.Format("IPID {0}", ipid.Ipid));
+                }
+                catch (Exception ex)
+                {
+                    Program.ShowError(this, ex);
+                }
+            }
+        }
     }
 }

@@ -166,6 +166,7 @@
             this.textBoxTypeLibWin32 = new System.Windows.Forms.TextBox();
             this.textBoxTypeLibWin64 = new System.Windows.Forms.TextBox();
             this.tabPageProcess = new System.Windows.Forms.TabPage();
+            this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -1522,28 +1523,29 @@
             this.copyInterfacePointerToolStripMenuItem,
             this.copyStubPointerToolStripMenuItem});
             this.contextMenuStripIpids.Name = "contextMenuStripIpids";
-            this.contextMenuStripIpids.Size = new System.Drawing.Size(193, 70);
+            this.contextMenuStripIpids.Size = new System.Drawing.Size(193, 92);
             // 
             // marshalStreamToolStripMenuItem
             // 
             this.marshalStreamToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toHexEditorToolStripMenuItem,
-            this.toFileToolStripMenuItem});
+            this.toFileToolStripMenuItem,
+            this.toObjectToolStripMenuItem});
             this.marshalStreamToolStripMenuItem.Name = "marshalStreamToolStripMenuItem";
             this.marshalStreamToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.marshalStreamToolStripMenuItem.Text = "Marshal Stream";
+            this.marshalStreamToolStripMenuItem.Text = "Unmarshal Stream";
             // 
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
             // 
             // toFileToolStripMenuItem
             // 
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.toFileToolStripMenuItem.Text = "To File";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
             // 
@@ -1834,6 +1836,13 @@
             this.tabPageProcess.Text = "Process";
             this.tabPageProcess.UseVisualStyleBackColor = true;
             // 
+            // toObjectToolStripMenuItem
+            // 
+            this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toObjectToolStripMenuItem.Text = "To Object";
+            this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1960,5 +1969,6 @@
         private System.Windows.Forms.ToolStripMenuItem toHexEditorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toFileToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxProcessLrpcPermissions;
+        private System.Windows.Forms.ToolStripMenuItem toObjectToolStripMenuItem;
     }
 }
