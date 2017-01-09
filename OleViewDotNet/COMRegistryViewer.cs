@@ -20,7 +20,6 @@ using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -989,7 +988,28 @@ namespace OleViewDotNet
             }
         }
 
-        private Guid GetGuidFromType(TreeNode node)
+        private static bool CanGetGuid(TreeNode node)
+        {
+            Guid guid = Guid.Empty;
+            if (node != null)
+            {
+                object tag = node.Tag;
+                if (tag is COMCLSIDEntry ||
+                    tag is COMInterfaceEntry ||
+                    tag is COMProgIDEntry ||
+                    tag is COMTypeLibVersionEntry ||
+                    tag is COMTypeLibEntry ||
+                    tag is Guid ||
+                    tag is COMAppIDEntry ||
+                    tag is COMIPIDEntry)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static Guid GetGuidFromType(TreeNode node)
         {
             Guid guid = Guid.Empty;
             if (node != null)
@@ -1200,9 +1220,13 @@ namespace OleViewDotNet
             {
                 contextMenuStrip.Items.Clear();
                 contextMenuStrip.Items.Add(copyToolStripMenuItem);
-                contextMenuStrip.Items.Add(copyGUIDToolStripMenuItem);
-                contextMenuStrip.Items.Add(copyGUIDHexStringToolStripMenuItem);
-                contextMenuStrip.Items.Add(copyGUIDCStructureToolStripMenuItem);
+                if (CanGetGuid(node))
+                {
+                    contextMenuStrip.Items.Add(copyGUIDToolStripMenuItem);
+                    contextMenuStrip.Items.Add(copyGUIDHexStringToolStripMenuItem);
+                    contextMenuStrip.Items.Add(copyGUIDCStructureToolStripMenuItem);
+                }
+
                 if ((node.Tag is COMCLSIDEntry) || (node.Tag is COMProgIDEntry))
                 {
                     contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
