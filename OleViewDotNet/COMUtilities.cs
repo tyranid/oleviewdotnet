@@ -558,6 +558,21 @@ namespace OleViewDotNet
             }
         }
 
+        public static Assembly LoadTypeLib(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
+        {
+            try
+            {
+                return ConvertTypeLibToAssembly(typeLib, progress);
+            }
+            finally
+            {
+                if (typeLib != null)
+                {
+                    Marshal.ReleaseComObject(typeLib);
+                }
+            }
+        }
+
         public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
         {
             if (m_typelibs == null)
@@ -595,7 +610,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static Type GetDispatchTypeInfo(object comObj)
+        public static Type GetDispatchTypeInfo(IWin32Window parent, object comObj)
         {
             Type ret = null;
 
@@ -620,7 +635,7 @@ namespace OleViewDotNet
                         int iIndex = 0;
                         ti.GetContainingTypeLib(out tl, out iIndex);
                         Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
-                        Assembly asm = ConvertTypeLibToAssembly(tl, null);
+                        Assembly asm = LoadTypeLib(parent, tl);
 
                         if (asm != null)
                         {
@@ -1526,6 +1541,24 @@ namespace OleViewDotNet
             using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
             {
                 dlg.Text = String.Format("Loading TypeLib {0}", path);
+                dlg.CancelEnabled = false;
+                if (dlg.ShowDialog(window) == DialogResult.OK)
+                {
+                    return (Assembly)dlg.Result;
+                }
+                else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+                {
+                    Program.ShowError(window, dlg.Error);
+                }
+                return null;
+            }
+        }
+
+        internal static Assembly LoadTypeLib(IWin32Window window, ITypeLib typelib)
+        {
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMUtilities.LoadTypeLib(typelib, progress), s => s))
+            {
+                dlg.Text = "Loading TypeLib";
                 dlg.CancelEnabled = false;
                 if (dlg.ShowDialog(window) == DialogResult.OK)
                 {

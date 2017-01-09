@@ -185,7 +185,7 @@ namespace OleViewDotNet
 
         private void btnDispatch_Click(object sender, EventArgs e)
         {
-            Type disp_type = COMUtilities.GetDispatchTypeInfo(m_pObject);
+            Type disp_type = COMUtilities.GetDispatchTypeInfo(this, m_pObject);
             if (disp_type != null)
             {
                 Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, disp_type);

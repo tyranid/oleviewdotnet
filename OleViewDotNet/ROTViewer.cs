@@ -123,7 +123,7 @@ namespace OleViewDotNet
                     Type dispType;
 
                     info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
-                    dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+                    dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
                     ObjectInformation view = new ObjectInformation(m_registry, info.strDisplayName, comObj, props, m_registry.GetInterfacesForObject(comObj));
                     Program.GetMainForm(m_registry).HostControl(view);
                 }
