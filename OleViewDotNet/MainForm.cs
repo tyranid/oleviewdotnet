@@ -117,7 +117,7 @@ namespace OleViewDotNet
             props.Add("Server", ent.DefaultServer);
 
             /* Need to implement a type library reader */
-            Type dispType = COMUtilities.GetDispatchTypeInfo(obj);
+            Type dispType = COMUtilities.GetDispatchTypeInfo(this, obj);
 
             if (!ent.InterfacesLoaded)
             {
@@ -255,7 +255,7 @@ namespace OleViewDotNet
                         if (comObj != null)
                         {
                             /* Need to implement a type library reader */
-                            Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+                            Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
 
                             HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));                            
                         }
@@ -342,7 +342,7 @@ namespace OleViewDotNet
                     props.Add("CLSID", clsid.FormatGuid());
                 }
 
-                Type dispType = COMUtilities.GetDispatchTypeInfo(comObj);
+                Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
                 HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));
             }
         }
