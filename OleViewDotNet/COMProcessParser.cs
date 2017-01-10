@@ -1331,8 +1331,11 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    progress.Report(new Tuple<string, int>(String.Format("Parsing process {0}", p.ProcessName), 
-                        100 * current_count++ / total_count));
+                    if (progress != null)
+                    {
+                        progress.Report(new Tuple<string, int>(String.Format("Parsing process {0}", p.ProcessName),
+                            100 * current_count++ / total_count));
+                    }
                     COMProcessEntry proc = COMProcessParser.ParseProcess(p.Id,
                         dbghelp_path, symbol_path);
                     if (proc != null)
