@@ -456,7 +456,7 @@ namespace OleViewDotNet
 
         private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, String.Format("Process {0} Access", m_process.Name), 
+            COMSecurity.ViewSecurity(this, String.Format("{0} Access", m_process.Name), 
                 m_process.AccessPermissions, true);
         }
 

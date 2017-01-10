@@ -279,7 +279,7 @@ namespace OleViewDotNet
 
         public static void ViewSecurity(IWin32Window parent, COMAppIDEntry appid, bool access)
         {
-            ViewSecurity(parent, String.Format("{0} {1} Permissions", appid.Name, access ? "Access" : "Launch"),
+            ViewSecurity(parent, String.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
                     access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
 

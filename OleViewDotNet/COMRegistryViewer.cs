@@ -1319,15 +1319,23 @@ namespace OleViewDotNet
                 else if (node.Tag is COMProcessEntry)
                 {
                     contextMenuStrip.Items.Add(refreshProcessToolStripMenuItem);
+                    contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
                 }
                 else if (node.Tag is COMIPIDEntry)
                 {
                     COMIPIDEntry ipid = (COMIPIDEntry)node.Tag;
                     COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+
+                    if (intf.HasTypeLib)
+                    {
+                        contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                    }
+
                     if (intf.HasProxy && m_registry.Clsids.ContainsKey(intf.ProxyClsid))
                     {
                         contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                     }
+
                     contextMenuStrip.Items.Add(unmarshalToolStripMenuItem);
                 }
 
@@ -1666,19 +1674,27 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                COMAppIDEntry appid = node.Tag as COMAppIDEntry;
-                if (appid == null)
+                if (node.Tag is COMProcessEntry)
                 {
-                    COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                    if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
-                    {
-                        appid = m_registry.AppIDs[clsid.AppID];
-                    }
+                    COMProcessEntry proc = (COMProcessEntry)node.Tag;
+                    COMSecurity.ViewSecurity(this, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
                 }
-
-                if (appid != null)
+                else
                 {
-                    COMSecurity.ViewSecurity(this, appid, access);
+                    COMAppIDEntry appid = node.Tag as COMAppIDEntry;
+                    if (appid == null)
+                    {
+                        COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                        if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
+                        {
+                            appid = m_registry.AppIDs[clsid.AppID];
+                        }
+                    }
+
+                    if (appid != null)
+                    {
+                        COMSecurity.ViewSecurity(this, appid, access);
+                    }
                 }
             }
         }
