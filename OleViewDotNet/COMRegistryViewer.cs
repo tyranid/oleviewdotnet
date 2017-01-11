@@ -369,6 +369,10 @@ namespace OleViewDotNet
             }
             builder.AppendFormat("Access Permissions: {0}", proc.AccessPermissions).AppendLine();
             builder.AppendFormat("LRPC Permissions: {0}", proc.LRpcPermissions).AppendLine();
+            if (!String.IsNullOrEmpty(proc.RpcEndpoint))
+            {
+                builder.AppendFormat("LRPC Endpoint: {0}", proc.RpcEndpoint);
+            }
             return builder.ToString();
         }
 
@@ -381,6 +385,7 @@ namespace OleViewDotNet
             builder.AppendFormat("Strong Refs: {0}", ipid.StrongRefs).AppendLine();
             builder.AppendFormat("Weak Refs: {0}", ipid.WeakRefs).AppendLine();
             builder.AppendFormat("Private Refs: {0}", ipid.PrivateRefs).AppendLine();
+            
             return builder.ToString();
         }
 
@@ -1183,7 +1188,7 @@ namespace OleViewDotNet
 
         private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_ALL, null);
+            await CreateInstance(CLSCTX.ALL, null);
         }
 
         private void EnableViewPermissions(COMAppIDEntry appid)
@@ -1711,12 +1716,12 @@ namespace OleViewDotNet
 
         private async void createLocalServerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_LOCAL_SERVER, null);
+            await CreateInstance(CLSCTX.LOCAL_SERVER, null);
         }
 
         private async void createInProcServerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_INPROC_SERVER, null);
+            await CreateInstance(CLSCTX.INPROC_SERVER, null);
         }
 
         private async Task CreateFromMoniker(COMCLSIDEntry ent, string moniker)
@@ -1837,7 +1842,7 @@ namespace OleViewDotNet
 
         private async void createInProcHandlerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await CreateInstance(CLSCTX.CLSCTX_INPROC_HANDLER, null);
+            await CreateInstance(CLSCTX.INPROC_HANDLER, null);
         }
 
         private async void instanceToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1874,7 +1879,7 @@ namespace OleViewDotNet
                 frm.Text = "Enter Remote Host";
                 if (frm.ShowDialog(this) == DialogResult.OK)
                 {
-                    await CreateInstance(CLSCTX.CLSCTX_REMOTE_SERVER, frm.Data);
+                    await CreateInstance(CLSCTX.REMOTE_SERVER, frm.Data);
                 }
             }
         }

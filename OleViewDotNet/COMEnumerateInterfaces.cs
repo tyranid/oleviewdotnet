@@ -102,7 +102,7 @@ namespace OleViewDotNet
 
                     using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(vtable))
                     {
-                        if (_clsctx == CLSCTX.CLSCTX_INPROC_SERVER && module != null)
+                        if (_clsctx == CLSCTX.INPROC_SERVER && module != null)
                         {
                             if (!module_names.ContainsKey(module.DangerousGetHandle()))
                             {

@@ -36,7 +36,7 @@ namespace OleViewDotNet
             {
                 Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
                 IntPtr unk;
-                int hr = COMUtilities.CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero, CLSCTX.CLSCTX_INPROC_SERVER, ref IID_IUnknown, out unk);
+                int hr = COMUtilities.CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref IID_IUnknown, out unk);
                 if (hr != 0)
                 {
                     Marshal.ThrowExceptionForHR(hr);

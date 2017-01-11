@@ -634,6 +634,15 @@ namespace OleViewDotNet
               out IntPtr lpNumberOfBytesRead
             );
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool ReadProcessMemory(
+              SafeKernelObjectHandle hProcess,
+              IntPtr lpBaseAddress,
+              byte[] lpBuffer,
+              IntPtr nSize,
+              out IntPtr lpNumberOfBytesRead
+            );
+
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern bool IsWow64Process(SafeKernelObjectHandle hProcess,
             [MarshalAs(UnmanagedType.Bool)] out bool Wow64Process);
@@ -706,6 +715,25 @@ namespace OleViewDotNet
 
                 return default(T);
             }
+        }
+
+        internal static string ReadUnicodeString(SafeKernelObjectHandle process, IntPtr ptr)
+        {
+            byte[] data = new byte[2];
+            StringBuilder builder = new StringBuilder();
+            IntPtr out_length;
+            int pos = 0;
+            while (ReadProcessMemory(process, ptr + pos, data, new IntPtr(data.Length), out out_length))
+            {
+                char c = BitConverter.ToChar(data, 0);
+                if (c == 0)
+                {
+                    break;
+                }
+                builder.Append(c);
+                pos += 2;
+            }
+            return builder.ToString();
         }
 
         private class PageAllocator
@@ -1176,6 +1204,16 @@ namespace OleViewDotNet
             return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
         }
 
+        private static string ReadString(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        {
+            IntPtr str = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
+            if (str != IntPtr.Zero)
+            {
+                return ReadUnicodeString(process, str);
+            }
+            return String.Empty;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         private struct Luid
         {
@@ -1314,7 +1352,8 @@ namespace OleViewDotNet
                         GetProcessAppId(process, resolver), 
                         GetProcessAccessSecurityDescriptor(process, resolver),
                         GetLrpcSecurityDescriptor(process, resolver),
-                        GetProcessUser(process));
+                        GetProcessUser(process),
+                        ReadString(process, resolver, "gwszLRPCEndPoint"));
                 }
             }
         }
@@ -1374,9 +1413,11 @@ namespace OleViewDotNet
         public string AccessPermissions { get; private set; }
         public string LRpcPermissions { get; private set; }
         public string User { get; private set; }
+        public string RpcEndpoint { get; private set; }
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
-            bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user)
+            bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
+            string rpc_endpoint)
         {
             Pid = pid;
             ExecutablePath = path;
@@ -1386,6 +1427,14 @@ namespace OleViewDotNet
             AccessPermissions = access_perm;
             LRpcPermissions = lrpc_perm;
             User = user;
+            if (!String.IsNullOrWhiteSpace(rpc_endpoint))
+            {
+                RpcEndpoint = "OLE" + rpc_endpoint;
+            }
+            else
+            {
+                RpcEndpoint = String.Empty;
+            }
         }
     }
 

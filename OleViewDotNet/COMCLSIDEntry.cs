@@ -587,19 +587,19 @@ namespace OleViewDotNet
         {
             get
             {
-                CLSCTX dwContext = CLSCTX.CLSCTX_ALL;
+                CLSCTX dwContext = CLSCTX.ALL;
 
                 if (DefaultServerType == COMServerType.InProcServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;
+                    dwContext = CLSCTX.INPROC_SERVER;
                 }
                 else if (DefaultServerType == COMServerType.LocalServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
+                    dwContext = CLSCTX.LOCAL_SERVER;
                 }
                 else if (DefaultServerType == COMServerType.InProcHandler32)
                 {
-                    dwContext = CLSCTX.CLSCTX_INPROC_HANDLER;
+                    dwContext = CLSCTX.INPROC_HANDLER;
                 }
 
                 return dwContext;
@@ -610,23 +610,23 @@ namespace OleViewDotNet
         {
             IntPtr pInterface = IntPtr.Zero;
             
-            if (dwContext == CLSCTX.CLSCTX_ALL)
+            if (dwContext == CLSCTX.ALL)
             {
                 if (DefaultServerType == COMServerType.InProcServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_INPROC_SERVER;
+                    dwContext = CLSCTX.INPROC_SERVER;
                 }
                 else if (DefaultServerType == COMServerType.LocalServer32)
                 {
-                    dwContext = CLSCTX.CLSCTX_LOCAL_SERVER;
+                    dwContext = CLSCTX.LOCAL_SERVER;
                 }
                 else if (DefaultServerType == COMServerType.InProcHandler32)
                 {
-                    dwContext = CLSCTX.CLSCTX_INPROC_HANDLER;
+                    dwContext = CLSCTX.INPROC_HANDLER;
                 }
                 else
                 {
-                    dwContext = CLSCTX.CLSCTX_SERVER;
+                    dwContext = CLSCTX.SERVER;
                 }
             }
             
@@ -696,7 +696,7 @@ namespace OleViewDotNet
 
             COSERVERINFO server_info = server != null ? new COSERVERINFO(server) : null;
 
-            int hr = COMUtilities.CoGetClassObject(ref clsid, server_info != null ? CLSCTX.CLSCTX_REMOTE_SERVER 
+            int hr = COMUtilities.CoGetClassObject(ref clsid, server_info != null ? CLSCTX.REMOTE_SERVER 
                 : CreateContext, server_info, ref iid, out obj);
             if (hr != 0)
             {

@@ -595,7 +595,7 @@ namespace OleViewDotNet
                         if (entry != null)
                         {
                             IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext, null);
-                            ps.Load(dlg.FileName, (int)STGM.STGM_READ);
+                            ps.Load(dlg.FileName, (int)STGM.READ);
                             await HostObject(entry, ps, false);
                         }
                     }

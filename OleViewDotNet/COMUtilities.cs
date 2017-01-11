@@ -78,54 +78,74 @@ namespace OleViewDotNet
     [Flags]
     public enum CLSCTX
     {
-        CLSCTX_INPROC_SERVER = 0x1,
-        CLSCTX_INPROC_HANDLER = 0x2,
-        CLSCTX_LOCAL_SERVER = 0x4,
-        CLSCTX_INPROC_SERVER16 = 0x8,
-        CLSCTX_REMOTE_SERVER = 0x10,
-        CLSCTX_INPROC_HANDLER16 = 0x20,
-        CLSCTX_RESERVED1 = 0x40,
-        CLSCTX_RESERVED2 = 0x80,
-        CLSCTX_RESERVED3 = 0x100,
-        CLSCTX_RESERVED4 = 0x200,
-        CLSCTX_NO_CODE_DOWNLOAD = 0x400,
-        CLSCTX_RESERVED5 = 0x800,
-        CLSCTX_NO_CUSTOM_MARSHAL = 0x1000,
-        CLSCTX_ENABLE_CODE_DOWNLOAD = 0x2000,
-        CLSCTX_NO_FAILURE_LOG = 0x4000,
-        CLSCTX_DISABLE_AAA = 0x8000,
-        CLSCTX_ENABLE_AAA = 0x10000,
-        CLSCTX_FROM_DEFAULT_CONTEXT = 0x20000,
-        CLSCTX_ACTIVATE_32_BIT_SERVER = 0x40000,
-        CLSCTX_ACTIVATE_64_BIT_SERVER = 0x80000,
-        CLSCTX_APPCONTAINER = 0x400000,
-        CLSCTX_ACTIVATE_AAA_AS_IU = 0x800000,
-        CLSCTX_PS_DLL = unchecked((int)0x80000000),
-        CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
-        CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER
+        INPROC_SERVER = 0x1,
+        INPROC_HANDLER = 0x2,
+        LOCAL_SERVER = 0x4,
+        INPROC_SERVER16 = 0x8,
+        REMOTE_SERVER = 0x10,
+        INPROC_HANDLER16 = 0x20,
+        RESERVED1 = 0x40,
+        RESERVED2 = 0x80,
+        RESERVED3 = 0x100,
+        RESERVED4 = 0x200,
+        NO_CODE_DOWNLOAD = 0x400,
+        RESERVED5 = 0x800,
+        NO_CUSTOM_MARSHAL = 0x1000,
+        ENABLE_CODE_DOWNLOAD = 0x2000,
+        NO_FAILURE_LOG = 0x4000,
+        DISABLE_AAA = 0x8000,
+        ENABLE_AAA = 0x10000,
+        FROM_DEFAULT_CONTEXT = 0x20000,
+        ACTIVATE_32_BIT_SERVER = 0x40000,
+        ACTIVATE_64_BIT_SERVER = 0x80000,
+        APPCONTAINER = 0x400000,
+        ACTIVATE_AAA_AS_IU = 0x800000,
+        PS_DLL = unchecked((int)0x80000000),
+        SERVER = INPROC_SERVER | LOCAL_SERVER | REMOTE_SERVER,
+        ALL = INPROC_SERVER | INPROC_HANDLER | LOCAL_SERVER | REMOTE_SERVER
     }
 
     [Flags]
     public enum STGM
     {
-        STGM_READ = 0x00000000,
-        STGM_WRITE = 0x00000001,
-        STGM_READWRITE = 0x00000002,
-        STGM_SHARE_DENY_NONE = 0x00000040,
-        STGM_SHARE_DENY_READ = 0x00000030,
-        STGM_SHARE_DENY_WRITE = 0x00000020,
-        STGM_SHARE_EXCLUSIVE = 0x00000010,
-        STGM_PRIORITY = 0x00040000,
-        STGM_CREATE = 0x00001000,
-        STGM_CONVERT = 0x00020000,
-        STGM_FAILIFTHERE = STGM_READ,
-        STGM_DIRECT = STGM_READ,
-        STGM_TRANSACTED = 0x00010000,
-        STGM_NOSCRATCH = 0x00100000,
-        STGM_NOSNAPSHOT = 0x00200000,
-        STGM_SIMPLE = 0x08000000,
-        STGM_DIRECT_SWMR = 0x00400000,
-        STGM_DELETEONRELEASE = 0x04000000
+        READ = 0x00000000,
+        WRITE = 0x00000001,
+        READWRITE = 0x00000002,
+        SHARE_DENY_NONE = 0x00000040,
+        SHARE_DENY_READ = 0x00000030,
+        SHARE_DENY_WRITE = 0x00000020,
+        SHARE_EXCLUSIVE = 0x00000010,
+        PRIORITY = 0x00040000,
+        CREATE = 0x00001000,
+        CONVERT = 0x00020000,
+        FAILIFTHERE = READ,
+        DIRECT = READ,
+        TRANSACTED = 0x00010000,
+        NOSCRATCH = 0x00100000,
+        NOSNAPSHOT = 0x00200000,
+        SIMPLE = 0x08000000,
+        DIRECT_SWMR = 0x00400000,
+        DELETEONRELEASE = 0x04000000
+    }
+
+    [Flags]
+    public enum EOLE_AUTHENTICATION_CAPABILITIES
+    {
+        NONE = 0,
+        MUTUAL_AUTH = 0x1,
+        STATIC_CLOAKING = 0x20,
+        DYNAMIC_CLOAKING = 0x40,
+        ANY_AUTHORITY = 0x80,
+        MAKE_FULLSIC = 0x100,
+        DEFAULT = 0x800,
+        SECURE_REFS = 0x2,
+        ACCESS_CONTROL = 0x4,
+        APPID = 0x8,
+        DYNAMIC = 0x10,
+        REQUIRE_FULLSIC = 0x200,
+        AUTO_IMPERSONATE = 0x400,
+        NO_CUSTOM_MARSHAL = 0x2000,
+        DISABLE_AAA = 0x1000
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -374,7 +394,7 @@ namespace OleViewDotNet
             IntPtr pCatMgr;
             string strDesc = String.Empty;
 
-            if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.CLSCTX_INPROC_SERVER, ref iid, out pCatMgr) == 0)
+            if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref iid, out pCatMgr) == 0)
             {
                 ICatInformation catInfo = (ICatInformation)Marshal.GetObjectForIUnknown(pCatMgr);
                 IntPtr pStrDesc;
@@ -965,7 +985,7 @@ namespace OleViewDotNet
                 IntPtr pObj;
                 object ret;
 
-                int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.CLSCTX_SERVER,
+                int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.SERVER,
                     ref unk, out pObj);
 
                 if (iError != 0)

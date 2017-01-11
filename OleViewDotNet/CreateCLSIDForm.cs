@@ -28,12 +28,12 @@ namespace OleViewDotNet
         public CreateCLSIDForm()
         {
             InitializeComponent();            
-            ClsCtx = CLSCTX.CLSCTX_SERVER;
-            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_INPROC_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_ACTIVATE_32_BIT_SERVER | CLSCTX.CLSCTX_LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.CLSCTX_ACTIVATE_64_BIT_SERVER | CLSCTX.CLSCTX_LOCAL_SERVER);
+            ClsCtx = CLSCTX.SERVER;
+            comboBoxClsCtx.Items.Add(CLSCTX.SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.INPROC_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.LOCAL_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_32_BIT_SERVER | CLSCTX.LOCAL_SERVER);
+            comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_64_BIT_SERVER | CLSCTX.LOCAL_SERVER);
             comboBoxClsCtx.SelectedIndex = 0;
         }
 
