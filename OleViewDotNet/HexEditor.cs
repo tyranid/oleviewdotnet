@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Be.Windows.Forms;
+using System;
 using System.IO;
 using System.Windows.Forms;
 
@@ -116,6 +117,7 @@ namespace OleViewDotNet
             copyToolStripMenuItem.Enabled = hexBox.CanCopy();
             copyHexToolStripMenuItem.Enabled = hexBox.CanCopy();
             cutToolStripMenuItem.Enabled = hexBox.CanCut();
+            copyGuidToolStripMenuItem.Enabled = hexBox.CanCopy() && hexBox.SelectionLength == 16;
         }
 
         private void copyHexToolStripMenuItem_Click(object sender, System.EventArgs e)
@@ -132,6 +134,30 @@ namespace OleViewDotNet
             {
                 hexBox.Cut();
             }
+        }
+
+        private byte[] GetSelectedBytes()
+        {
+            byte[] result = new byte[hexBox.SelectionLength]; 
+            for (int i = 0; i < result.Length; ++i)
+            {
+                result[i] = _bytes.ReadByte(hexBox.SelectionStart + i);
+            }
+            return result;
+        }
+
+        private void copyGuidToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            if (hexBox.CanCopy() && hexBox.SelectionLength == 16)
+            {
+                byte[] bytes = GetSelectedBytes();
+                COMRegistryViewer.CopyTextToClipboard(new Guid(bytes).FormatGuid());
+            }
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hexBox.SelectAll();
         }
     }
 }

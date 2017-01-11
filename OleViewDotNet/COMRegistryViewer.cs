@@ -991,7 +991,7 @@ namespace OleViewDotNet
                         guid.ToString());
                     break;
                 case CopyGuidType.CopyAsString:
-                    strCopy = guid.ToString("B");
+                    strCopy = guid.FormatGuid();
                     break;
                 case CopyGuidType.CopyAsStructure:
                     {
