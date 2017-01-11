@@ -77,6 +77,9 @@
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectProcesses = new System.Windows.Forms.MenuItem();
+            this.menuObjectProcessesByPid = new System.Windows.Forms.MenuItem();
+            this.menuObjectProcessesByName = new System.Windows.Forms.MenuItem();
+            this.menuObjectProcessByUser = new System.Windows.Forms.MenuItem();
             this.menuItem13 = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
             this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
@@ -96,9 +99,6 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessesByPid = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessesByName = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessByUser = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -436,6 +436,24 @@
             this.menuObjectProcessByUser});
             this.menuObjectProcesses.Text = "Processes";
             // 
+            // menuObjectProcessesByPid
+            // 
+            this.menuObjectProcessesByPid.Index = 0;
+            this.menuObjectProcessesByPid.Text = "By PID";
+            this.menuObjectProcessesByPid.Click += new System.EventHandler(this.menuObjectProcessesByPid_Click);
+            // 
+            // menuObjectProcessesByName
+            // 
+            this.menuObjectProcessesByName.Index = 1;
+            this.menuObjectProcessesByName.Text = "By Name";
+            this.menuObjectProcessesByName.Click += new System.EventHandler(this.menuObjectProcessesByName_Click);
+            // 
+            // menuObjectProcessByUser
+            // 
+            this.menuObjectProcessByUser.Index = 2;
+            this.menuObjectProcessByUser.Text = "By User";
+            this.menuObjectProcessByUser.Click += new System.EventHandler(this.menuObjectProcessByUser_Click);
+            // 
             // menuItem13
             // 
             this.menuItem13.Index = 2;
@@ -553,24 +571,6 @@
             this.menuHelpAbout.Index = 0;
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
-            // 
-            // menuObjectProcessesByPid
-            // 
-            this.menuObjectProcessesByPid.Index = 0;
-            this.menuObjectProcessesByPid.Text = "By PID";
-            this.menuObjectProcessesByPid.Click += new System.EventHandler(this.menuObjectProcessesByPid_Click);
-            // 
-            // menuObjectProcessesByName
-            // 
-            this.menuObjectProcessesByName.Index = 1;
-            this.menuObjectProcessesByName.Text = "By Name";
-            this.menuObjectProcessesByName.Click += new System.EventHandler(this.menuObjectProcessesByName_Click);
-            // 
-            // menuObjectProcessByUser
-            // 
-            this.menuObjectProcessByUser.Index = 2;
-            this.menuObjectProcessByUser.Text = "By User";
-            this.menuObjectProcessByUser.Click += new System.EventHandler(this.menuObjectProcessByUser_Click);
             // 
             // MainForm
             // 

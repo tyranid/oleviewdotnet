@@ -191,9 +191,9 @@ namespace OleViewDotNet
             f = _dbghelp_lib.GetFunctionPointer<T>();
         }
 
-        static COMProcessParser.SafeStructureBuffer<SYMBOL_INFO> AllocateSymInfo()
+        static SafeStructureBuffer<SYMBOL_INFO> AllocateSymInfo()
         {
-            return new COMProcessParser.SafeStructureBuffer<SYMBOL_INFO>(new SYMBOL_INFO(SYMBOL_INFO.MAX_SYM_NAME), SYMBOL_INFO.MAX_SYM_NAME * 2);
+            return new SafeStructureBuffer<SYMBOL_INFO>(new SYMBOL_INFO(SYMBOL_INFO.MAX_SYM_NAME), SYMBOL_INFO.MAX_SYM_NAME * 2);
         }
 
         static string GetNameFromSymbolInfo(IntPtr buffer)
@@ -247,7 +247,7 @@ namespace OleViewDotNet
 
         public IntPtr GetAddressOfSymbol(string name)
         {
-            using (COMProcessParser.SafeStructureBuffer<SYMBOL_INFO> sym_info = AllocateSymInfo())
+            using (SafeStructureBuffer<SYMBOL_INFO> sym_info = AllocateSymInfo())
             {
                 if (!_sym_from_name(_process, name, sym_info))
                 {

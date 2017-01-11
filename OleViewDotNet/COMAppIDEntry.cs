@@ -69,17 +69,10 @@ namespace OleViewDotNet
             {
                 UserName = COMUtilities.ReadStringFromKey(key, null, "ObjectName");
                 ImagePath = COMUtilities.ReadStringFromKey(key, null, "ImagePath");
-                if (service.ServiceType == System.ServiceProcess.ServiceType.Win32ShareProcess)
+                ServiceDll = COMUtilities.ReadStringFromKey(key, "Parameters", "ServiceDll");
+                if (String.IsNullOrEmpty(ServiceDll))
                 {
-                    ServiceDll = COMUtilities.ReadStringFromKey(key, "Parameters", "ServiceDll");
-                    if (String.IsNullOrEmpty(ServiceDll))
-                    {
-                        ServiceDll = COMUtilities.ReadStringFromKey(key, null, "ServiceDll");
-                    }
-                }
-                else
-                {
-                    ServiceDll = String.Empty;
+                    ServiceDll = COMUtilities.ReadStringFromKey(key, null, "ServiceDll");
                 }
             }
         }

@@ -168,6 +168,7 @@
     <Compile Include="RegistryPropertiesControl.Designer.cs">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="SafeHandles.cs" />
     <Compile Include="SymbolResolver.cs" />
     <Compile Include="ViewFilterControl.cs">
       <SubType>UserControl</SubType>

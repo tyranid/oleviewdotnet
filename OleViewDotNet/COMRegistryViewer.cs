@@ -413,22 +413,41 @@ namespace OleViewDotNet
                 node.Nodes.Add(ipid_node);
             }
         }
+        
+        private TreeNode CreateCOMProcessNode(COMProcessEntry proc, IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId)
+        {
+            TreeNode node = CreateNode(BuildCOMProcessName(proc), ProcessKey);
+            node.ToolTipText = BuildCOMProcessTooltip(proc);
+            node.Tag = proc;
+
+            if (appIdsByPid.ContainsKey(proc.Pid) && appIdsByPid[proc.Pid].Count() > 0)
+            {
+                TreeNode services_node = CreateNode("Services", FolderKey);
+                foreach (COMAppIDEntry appid in appIdsByPid[proc.Pid])
+                {
+                    if (clsidsByAppId.ContainsKey(appid.AppId))
+                    {
+                        services_node.Nodes.Add(CreateLocalServiceNode(appid, clsidsByAppId[appid.AppId]));
+                    }
+                }
+                node.Nodes.Add(services_node);
+            }
+
+            PopulatorIpids(node, proc);
+            return node;
+        }
 
         private void LoadProcesses()
         {
-            List<TreeNode> nodes = new List<TreeNode>();
-            
-            foreach (COMProcessEntry proc in m_processes.Where(p => p.Ipids.Count() > 0))
-            {
-                TreeNode node = CreateNode(BuildCOMProcessName(proc), ProcessKey);
-                node.ToolTipText = BuildCOMProcessTooltip(proc);
-                node.Tag = proc;
-                PopulatorIpids(node, proc);
-                nodes.Add(node);
-            }
+            var servicesById = COMUtilities.GetServicePids();
+            var appidsByService = m_registry.AppIDs.Values.Where(a => a.IsService).
+                GroupBy(a => a.LocalService.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g);
+            var clsidsByAppId = m_registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
+            var appsByPid = servicesById.ToDictionary(p => p.Key, p => p.Value.Where(v => appidsByService.ContainsKey(v)).SelectMany(v => appidsByService[v]));
             m_filter_types.Add(FilterType.Process);
             m_filter_types.Add(FilterType.Ipid);
-            treeComRegistry.Nodes.AddRange(nodes.ToArray());
+            m_filter_types.Add(FilterType.AppID);
+            treeComRegistry.Nodes.AddRange(m_processes.Where(p => p.Ipids.Count() > 0).Select(p => CreateCOMProcessNode(p, appsByPid, clsidsByAppId)).ToArray());
             Text = "Running Processes";
         }
 
@@ -570,6 +589,21 @@ namespace OleViewDotNet
             return currNode;
         }
 
+        private TreeNode CreateLocalServiceNode(COMAppIDEntry appidEnt, IEnumerable<COMCLSIDEntry> clsids)
+        {
+            string name = appidEnt.LocalService.DisplayName;
+            if (String.IsNullOrWhiteSpace(name))
+            {
+                name = appidEnt.LocalService.Name;
+            }
+
+            TreeNode node = CreateNode(name, FolderKey);
+            node.ToolTipText = BuildAppIdTooltip(appidEnt);
+            node.Tag = appidEnt;
+            node.Nodes.AddRange(clsids.OrderBy(c => c.Name).Select(c => CreateClsidNode(c)).ToArray());
+            return node;
+        }
+
         private void LoadLocalServices()
         {
             List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = m_registry.ClsidsByAppId.ToList();
@@ -580,35 +614,7 @@ namespace OleViewDotNet
             {   
                 if(appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
                 {
-                    COMAppIDEntry appidEnt = appids[pair.Key];
-
-                    string name = appidEnt.LocalService.DisplayName;
-                    if (String.IsNullOrWhiteSpace(name))
-                    {
-                        name = appidEnt.LocalService.Name;
-                    }
-
-                    TreeNode node = CreateNode(name, FolderKey);
-                    node.ToolTipText = BuildAppIdTooltip(appidEnt);
-                    node.Tag = appidEnt;
-                    
-                    int count = pair.Count();
-
-                    TreeNode[] clsidNodes = new TreeNode[count];
-                    string[] nodeNames = new string[count];
-                    int j = 0;
-
-                    foreach(COMCLSIDEntry ent in pair)
-                    {                        
-                        clsidNodes[j] = CreateClsidNode(ent);
-                        nodeNames[j] = ent.Name;
-                        j++;
-                    }
-
-                    Array.Sort(nodeNames, clsidNodes);
-                    node.Nodes.AddRange(clsidNodes);
-
-                    serverNodes.Add(node);
+                    serverNodes.Add(CreateLocalServiceNode(appids[pair.Key], pair));
                 }
             }
 
@@ -650,8 +656,11 @@ namespace OleViewDotNet
                 {
                     AppendFormatLine(builder, "Service User: {0}", service.UserName);
                 }
-                AppendFormatLine(builder, "Service Path: {0}", 
-                    service.ServiceType == ServiceType.Win32ShareProcess ? service.ServiceDll : service.ImagePath);
+                AppendFormatLine(builder, "Image Path: {0}", service.ImagePath);
+                if (!String.IsNullOrWhiteSpace(service.ServiceDll))
+                {
+                    AppendFormatLine(builder, "Service DLL: {0}", service.ServiceDll);
+                }
             }
 
             if (appidEnt.HasLaunchPermission)

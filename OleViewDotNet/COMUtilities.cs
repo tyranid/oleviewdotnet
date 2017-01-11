@@ -29,6 +29,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.AccessControl;
+using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -1700,6 +1701,121 @@ namespace OleViewDotNet
         internal static string FormatGuid(this Guid guid)
         {
             return guid.ToString().ToUpper();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SERVICE_STATUS_PROCESS
+        {
+            public int dwServiceType;
+            public int dwCurrentState;
+            public int dwControlsAccepted;
+            public int dwWin32ExitCode;
+            public int dwServiceSpecificExitCode;
+            public int dwCheckPoint;
+            public int dwWaitHint;
+            public int dwProcessId;
+            public int dwServiceFlags;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct ENUM_SERVICE_STATUS_PROCESS
+        {
+            public IntPtr lpServiceName;
+            public IntPtr lpDisplayName;
+            public SERVICE_STATUS_PROCESS ServiceStatusProcess;
+
+            public string GetName()
+            {
+                if (lpServiceName != IntPtr.Zero)
+                {
+                    return Marshal.PtrToStringUni(lpServiceName);
+                }
+                return String.Empty;
+            }
+        }
+
+        const int SC_MANAGER_CONNECT = 0x0001;
+        const int SC_MANAGER_ENUMERATE_SERVICE = 0x0004;
+        const int SERVICE_WIN32 = 0x00000030;
+        const int SERVICE_ACTIVE = 0x00000001;
+        const int ERROR_MORE_DATA = 234;
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern IntPtr OpenSCManager(
+              string lpMachineName,
+              string lpDatabaseName,
+              int dwDesiredAccess
+            );
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool CloseServiceHandle(
+                  IntPtr hSCObject
+                );
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool EnumServicesStatusEx(
+              IntPtr hSCManager,
+              int InfoLevel,
+              int dwServiceType,
+              int dwServiceState,
+              SafeBuffer lpServices,
+              int cbBufSize,
+              out int pcbBytesNeeded,
+              out int lpServicesReturned,
+              IntPtr lpResumeHandle,
+              string pszGroupName
+            );
+
+        internal static Dictionary<int, HashSet<string>> GetServicePids()
+        {
+            Dictionary<int, HashSet<string>> ret = new Dictionary<int, HashSet<string>>();
+            IntPtr hSC = OpenSCManager(null, null, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
+            try
+            {
+                int bytes_needed = 0;
+                int service_count = 0;
+                EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, SafeHGlobalBuffer.Null, 0, out bytes_needed, out service_count, IntPtr.Zero, null);
+                if (Marshal.GetLastWin32Error() != ERROR_MORE_DATA || bytes_needed <= 0)
+                {
+                    return ret;
+                }
+
+                int repeat_count = 5;
+                while (repeat_count > 0)
+                {
+                    using (SafeHGlobalBuffer buf = new SafeHGlobalBuffer(bytes_needed))
+                    {
+                        if (EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, buf, buf.Length, out bytes_needed, out service_count, IntPtr.Zero, null))
+                        {
+                            ENUM_SERVICE_STATUS_PROCESS[] services = new ENUM_SERVICE_STATUS_PROCESS[service_count];
+                            buf.ReadArray(0, services, 0, service_count);
+                            foreach (var service in services)
+                            {
+                                string name = service.GetName();
+                                if (!String.IsNullOrWhiteSpace(name))
+                                {
+                                    if (!ret.ContainsKey(service.ServiceStatusProcess.dwProcessId))
+                                    {
+                                        ret[service.ServiceStatusProcess.dwProcessId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                                    }
+
+                                    ret[service.ServiceStatusProcess.dwProcessId].Add(name);
+                                }
+                            }
+                        }
+                        --repeat_count;
+                    }
+                }
+            }
+            finally
+            {
+                if (hSC != IntPtr.Zero)
+                {
+                    CloseServiceHandle(hSC);
+                }
+            }
+
+            return ret;
         }
     }
 
