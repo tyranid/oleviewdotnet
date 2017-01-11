@@ -76,7 +76,6 @@
             System.Windows.Forms.Label label42;
             System.Windows.Forms.Label label19;
             System.Windows.Forms.Label label36;
-            System.Windows.Forms.Label label37;
             System.Windows.Forms.Label label38;
             System.Windows.Forms.Label label39;
             System.Windows.Forms.Label label40;
@@ -84,6 +83,7 @@
             System.Windows.Forms.ColumnHeader columnHeaderIPid;
             System.Windows.Forms.ColumnHeader columnHeaderProcessIid;
             System.Windows.Forms.ColumnHeader columnHeaderFlags;
+            System.Windows.Forms.Label label43;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -134,7 +134,6 @@
             this.textBoxProcessLrpcPermissions = new System.Windows.Forms.TextBox();
             this.textBoxProcessExecutablePath = new System.Windows.Forms.TextBox();
             this.textBoxProcessProcessId = new System.Windows.Forms.TextBox();
-            this.textBoxProcess64Bit = new System.Windows.Forms.TextBox();
             this.textBoxProcessAppId = new System.Windows.Forms.TextBox();
             this.textBoxProcessAccessPermissions = new System.Windows.Forms.TextBox();
             this.textBoxProcessUser = new System.Windows.Forms.TextBox();
@@ -143,6 +142,7 @@
             this.marshalStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyInterfacePointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyStubPointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnProcessViewAccessPermissions = new System.Windows.Forms.Button();
@@ -166,7 +166,7 @@
             this.textBoxTypeLibWin32 = new System.Windows.Forms.TextBox();
             this.textBoxTypeLibWin64 = new System.Windows.Forms.TextBox();
             this.tabPageProcess = new System.Windows.Forms.TabPage();
-            this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBoxProcessSecurity = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -214,7 +214,6 @@
             label42 = new System.Windows.Forms.Label();
             label19 = new System.Windows.Forms.Label();
             label36 = new System.Windows.Forms.Label();
-            label37 = new System.Windows.Forms.Label();
             label38 = new System.Windows.Forms.Label();
             label39 = new System.Windows.Forms.Label();
             label40 = new System.Windows.Forms.Label();
@@ -222,6 +221,7 @@
             columnHeaderIPid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderProcessIid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            label43 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -1310,21 +1310,22 @@
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessExecutablePath, 1, 0);
             tableLayoutPanelProcess.Controls.Add(label36, 0, 1);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessProcessId, 1, 1);
-            tableLayoutPanelProcess.Controls.Add(label37, 0, 2);
-            tableLayoutPanelProcess.Controls.Add(this.textBoxProcess64Bit, 1, 2);
             tableLayoutPanelProcess.Controls.Add(label38, 0, 3);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessAppId, 1, 3);
             tableLayoutPanelProcess.Controls.Add(label39, 0, 4);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessAccessPermissions, 1, 4);
             tableLayoutPanelProcess.Controls.Add(label40, 0, 6);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessUser, 1, 6);
-            tableLayoutPanelProcess.Controls.Add(label41, 0, 7);
-            tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 8);
+            tableLayoutPanelProcess.Controls.Add(label41, 0, 8);
+            tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 9);
             tableLayoutPanelProcess.Controls.Add(this.btnProcessViewAccessPermissions, 2, 4);
+            tableLayoutPanelProcess.Controls.Add(label43, 0, 7);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessSecurity, 1, 7);
             tableLayoutPanelProcess.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelProcess.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelProcess.Name = "tableLayoutPanelProcess";
-            tableLayoutPanelProcess.RowCount = 9;
+            tableLayoutPanelProcess.RowCount = 10;
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1341,7 +1342,7 @@
             // 
             tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessLrpcPermissions, 2);
             this.textBoxProcessLrpcPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProcessLrpcPermissions.Location = new System.Drawing.Point(112, 136);
+            this.textBoxProcessLrpcPermissions.Location = new System.Drawing.Point(112, 110);
             this.textBoxProcessLrpcPermissions.Name = "textBoxProcessLrpcPermissions";
             this.textBoxProcessLrpcPermissions.ReadOnly = true;
             this.textBoxProcessLrpcPermissions.Size = new System.Drawing.Size(454, 20);
@@ -1351,7 +1352,7 @@
             // 
             label42.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label42.AutoSize = true;
-            label42.Location = new System.Drawing.Point(3, 139);
+            label42.Location = new System.Drawing.Point(3, 113);
             label42.Name = "label42";
             label42.Size = new System.Drawing.Size(96, 13);
             label42.TabIndex = 15;
@@ -1397,31 +1398,11 @@
             this.textBoxProcessProcessId.Size = new System.Drawing.Size(454, 20);
             this.textBoxProcessProcessId.TabIndex = 3;
             // 
-            // label37
-            // 
-            label37.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label37.AutoSize = true;
-            label37.Location = new System.Drawing.Point(3, 58);
-            label37.Name = "label37";
-            label37.Size = new System.Drawing.Size(34, 13);
-            label37.TabIndex = 4;
-            label37.Text = "64 Bit";
-            // 
-            // textBoxProcess64Bit
-            // 
-            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcess64Bit, 2);
-            this.textBoxProcess64Bit.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProcess64Bit.Location = new System.Drawing.Point(112, 55);
-            this.textBoxProcess64Bit.Name = "textBoxProcess64Bit";
-            this.textBoxProcess64Bit.ReadOnly = true;
-            this.textBoxProcess64Bit.Size = new System.Drawing.Size(454, 20);
-            this.textBoxProcess64Bit.TabIndex = 5;
-            // 
             // label38
             // 
             label38.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label38.AutoSize = true;
-            label38.Location = new System.Drawing.Point(3, 84);
+            label38.Location = new System.Drawing.Point(3, 58);
             label38.Name = "label38";
             label38.Size = new System.Drawing.Size(40, 13);
             label38.TabIndex = 6;
@@ -1431,7 +1412,7 @@
             // 
             tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessAppId, 2);
             this.textBoxProcessAppId.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProcessAppId.Location = new System.Drawing.Point(112, 81);
+            this.textBoxProcessAppId.Location = new System.Drawing.Point(112, 55);
             this.textBoxProcessAppId.Name = "textBoxProcessAppId";
             this.textBoxProcessAppId.ReadOnly = true;
             this.textBoxProcessAppId.Size = new System.Drawing.Size(454, 20);
@@ -1441,7 +1422,7 @@
             // 
             label39.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label39.AutoSize = true;
-            label39.Location = new System.Drawing.Point(3, 112);
+            label39.Location = new System.Drawing.Point(3, 86);
             label39.Name = "label39";
             label39.Size = new System.Drawing.Size(103, 13);
             label39.TabIndex = 8;
@@ -1450,7 +1431,7 @@
             // textBoxProcessAccessPermissions
             // 
             this.textBoxProcessAccessPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProcessAccessPermissions.Location = new System.Drawing.Point(112, 107);
+            this.textBoxProcessAccessPermissions.Location = new System.Drawing.Point(112, 81);
             this.textBoxProcessAccessPermissions.Name = "textBoxProcessAccessPermissions";
             this.textBoxProcessAccessPermissions.ReadOnly = true;
             this.textBoxProcessAccessPermissions.Size = new System.Drawing.Size(373, 20);
@@ -1460,7 +1441,7 @@
             // 
             label40.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label40.AutoSize = true;
-            label40.Location = new System.Drawing.Point(3, 165);
+            label40.Location = new System.Drawing.Point(3, 139);
             label40.Name = "label40";
             label40.Size = new System.Drawing.Size(29, 13);
             label40.TabIndex = 10;
@@ -1470,7 +1451,7 @@
             // 
             tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessUser, 2);
             this.textBoxProcessUser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProcessUser.Location = new System.Drawing.Point(112, 162);
+            this.textBoxProcessUser.Location = new System.Drawing.Point(112, 136);
             this.textBoxProcessUser.Name = "textBoxProcessUser";
             this.textBoxProcessUser.ReadOnly = true;
             this.textBoxProcessUser.Size = new System.Drawing.Size(454, 20);
@@ -1523,7 +1504,7 @@
             this.copyInterfacePointerToolStripMenuItem,
             this.copyStubPointerToolStripMenuItem});
             this.contextMenuStripIpids.Name = "contextMenuStripIpids";
-            this.contextMenuStripIpids.Size = new System.Drawing.Size(193, 92);
+            this.contextMenuStripIpids.Size = new System.Drawing.Size(193, 70);
             // 
             // marshalStreamToolStripMenuItem
             // 
@@ -1538,16 +1519,23 @@
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
             // 
             // toFileToolStripMenuItem
             // 
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.toFileToolStripMenuItem.Text = "To File";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
+            // 
+            // toObjectToolStripMenuItem
+            // 
+            this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.toObjectToolStripMenuItem.Text = "To Object";
+            this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
             // 
             // copyInterfacePointerToolStripMenuItem
             // 
@@ -1566,7 +1554,7 @@
             // btnProcessViewAccessPermissions
             // 
             this.btnProcessViewAccessPermissions.AutoSize = true;
-            this.btnProcessViewAccessPermissions.Location = new System.Drawing.Point(491, 107);
+            this.btnProcessViewAccessPermissions.Location = new System.Drawing.Point(491, 81);
             this.btnProcessViewAccessPermissions.Name = "btnProcessViewAccessPermissions";
             this.btnProcessViewAccessPermissions.Size = new System.Drawing.Size(75, 23);
             this.btnProcessViewAccessPermissions.TabIndex = 14;
@@ -1836,12 +1824,25 @@
             this.tabPageProcess.Text = "Process";
             this.tabPageProcess.UseVisualStyleBackColor = true;
             // 
-            // toObjectToolStripMenuItem
+            // label43
             // 
-            this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
-            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.toObjectToolStripMenuItem.Text = "To Object";
-            this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
+            label43.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label43.AutoSize = true;
+            label43.Location = new System.Drawing.Point(3, 165);
+            label43.Name = "label43";
+            label43.Size = new System.Drawing.Size(76, 13);
+            label43.TabIndex = 17;
+            label43.Text = "Security Flags:";
+            // 
+            // textBoxProcessSecurity
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessSecurity, 2);
+            this.textBoxProcessSecurity.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessSecurity.Location = new System.Drawing.Point(112, 162);
+            this.textBoxProcessSecurity.Name = "textBoxProcessSecurity";
+            this.textBoxProcessSecurity.ReadOnly = true;
+            this.textBoxProcessSecurity.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessSecurity.TabIndex = 18;
             // 
             // PropertiesControl
             // 
@@ -1956,7 +1957,6 @@
         private System.Windows.Forms.TabPage tabPageProcess;
         private System.Windows.Forms.TextBox textBoxProcessExecutablePath;
         private System.Windows.Forms.TextBox textBoxProcessProcessId;
-        private System.Windows.Forms.TextBox textBoxProcess64Bit;
         private System.Windows.Forms.TextBox textBoxProcessAppId;
         private System.Windows.Forms.TextBox textBoxProcessAccessPermissions;
         private System.Windows.Forms.TextBox textBoxProcessUser;
@@ -1970,5 +1970,6 @@
         private System.Windows.Forms.ToolStripMenuItem toFileToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxProcessLrpcPermissions;
         private System.Windows.Forms.ToolStripMenuItem toObjectToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxProcessSecurity;
     }
 }

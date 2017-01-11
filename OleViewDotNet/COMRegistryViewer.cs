@@ -363,6 +363,7 @@ namespace OleViewDotNet
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Path: {0}", proc.ExecutablePath).AppendLine();
+            builder.AppendFormat("User: {0}", proc.User).AppendLine();
             if (proc.AppId != Guid.Empty)
             {
                 builder.AppendFormat("AppID: {0}", proc.AppId).AppendLine();
@@ -371,7 +372,14 @@ namespace OleViewDotNet
             builder.AppendFormat("LRPC Permissions: {0}", proc.LRpcPermissions).AppendLine();
             if (!String.IsNullOrEmpty(proc.RpcEndpoint))
             {
-                builder.AppendFormat("LRPC Endpoint: {0}", proc.RpcEndpoint);
+                builder.AppendFormat("LRPC Endpoint: {0}", proc.RpcEndpoint).AppendLine();
+            }
+            builder.AppendFormat("Capabilities: {0}", proc.Capabilities).AppendLine();
+            builder.AppendFormat("Authn Level: {0}", proc.AuthnLevel).AppendLine();
+            builder.AppendFormat("Imp Level: {0}", proc.ImpLevel).AppendLine();
+            if (proc.AccessControl != IntPtr.Zero)
+            {
+                builder.AppendFormat("Access Control: 0x{0:X}", proc.AccessControl.ToInt64());
             }
             return builder.ToString();
         }

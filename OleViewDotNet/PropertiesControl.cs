@@ -215,11 +215,12 @@ namespace OleViewDotNet
             textBoxProcessExecutablePath.Text = obj.ExecutablePath;
             textBoxProcessProcessId.Text = obj.Pid.ToString();
             textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
-            textBoxProcess64Bit.Text = obj.Is64Bit.ToString();
             textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions);
             btnProcessViewAccessPermissions.Enabled = !String.IsNullOrWhiteSpace(obj.AccessPermissions);
             textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions);
             textBoxProcessUser.Text = GetStringValue(obj.User);
+            textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}",
+                obj.Capabilities, obj.AuthnLevel, obj.ImpLevel);
             foreach (COMIPIDEntry ipid in obj.Ipids)
             {
                 ListViewItem item = listViewProcessIPids.Items.Add(ipid.Ipid.ToString());

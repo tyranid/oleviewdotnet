@@ -1214,6 +1214,40 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
+        public static int ReadInt(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        {
+            IntPtr p = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
+            if (p != IntPtr.Zero)
+            {
+                return ReadStruct<int>(process, p);
+            }
+            return 0;
+        }
+
+        public static T ReadEnum<T>(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        {
+            int value = ReadInt(process, resolver, symbol);
+            return (T)Enum.ToObject(typeof(T), value);
+        }
+
+        public static IntPtr ReadPointer(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        {
+            bool is64bit = Is64bitProcess(process);
+            IntPtr p = ResolveAddress(resolver, is64bit, GetSymbolName(symbol));
+            if (p != IntPtr.Zero)
+            {
+                if (is64bit)
+                {
+                    return ReadStruct<IntPtr>(process, p);
+                }
+                else
+                {
+                    return new IntPtr(ReadStruct<int>(process, p));
+                }
+            }
+            return IntPtr.Zero;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         private struct Luid
         {
@@ -1347,13 +1381,17 @@ namespace OleViewDotNet
                     return new COMProcessEntry(
                         pid,
                         GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver), 
+                        ParseIPIDEntries(process, resolver),
                         is64bit,
-                        GetProcessAppId(process, resolver), 
+                        GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
                         GetLrpcSecurityDescriptor(process, resolver),
                         GetProcessUser(process),
-                        ReadString(process, resolver, "gwszLRPCEndPoint"));
+                        ReadString(process, resolver, "gwszLRPCEndPoint"),
+                        ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
+                        ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
+                        ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
+                        ReadPointer(process, resolver, "gAccessControl"));
                 }
             }
         }
@@ -1414,10 +1452,16 @@ namespace OleViewDotNet
         public string LRpcPermissions { get; private set; }
         public string User { get; private set; }
         public string RpcEndpoint { get; private set; }
+        public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; private set; }
+        public RPC_AUTHN_LEVEL AuthnLevel { get; private set; }
+        public RPC_IMP_LEVEL ImpLevel { get; private set; }
+        public IntPtr AccessControl { get; private set; }
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
-            string rpc_endpoint)
+            string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
+            RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level,
+            IntPtr access_control)
         {
             Pid = pid;
             ExecutablePath = path;
@@ -1435,6 +1479,10 @@ namespace OleViewDotNet
             {
                 RpcEndpoint = String.Empty;
             }
+            Capabilities = capabilities;
+            AuthnLevel = authn_level;
+            ImpLevel = imp_level;
+            AccessControl = access_control;
         }
     }
 

@@ -148,6 +148,26 @@ namespace OleViewDotNet
         DISABLE_AAA = 0x1000
     }
 
+    public enum RPC_AUTHN_LEVEL
+    {
+        DEFAULT       = 0,
+        NONE          = 1,
+        CONNECT       = 2,
+        CALL          = 3,
+        PKT           = 4,
+        PKT_INTEGRITY = 5,
+        PKT_PRIVACY   = 6,
+    }
+
+    public enum RPC_IMP_LEVEL
+    {
+        DEFAULT      = 0,
+        ANONYMOUS    = 1,
+        IDENTIFY     = 2,
+        IMPERSONATE  = 3,
+        DELEGATE     = 4,
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct OptionalGuid : IDisposable
     {
