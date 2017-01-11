@@ -167,6 +167,7 @@ namespace OleViewDotNet
             }
             else if (type == typeof(Guid))
             {
+                comboBoxValue.DropDownStyle = ComboBoxStyle.DropDown;
                 comboBoxValue.Text = Guid.Empty.ToString();
             }
             else

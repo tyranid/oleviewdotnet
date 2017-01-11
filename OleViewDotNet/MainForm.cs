@@ -612,9 +612,9 @@ namespace OleViewDotNet
             await ParseOrBindMoniker(false);
         }
 
-        private void OpenHexEditor(byte[] bytes)
+        private void OpenHexEditor(string name, byte[] bytes)
         {
-            ObjectHexEditor editor = new ObjectHexEditor(m_registry, bytes);
+            ObjectHexEditor editor = new ObjectHexEditor(m_registry, name, bytes);
             HostControl(editor);
         }
 
@@ -624,10 +624,15 @@ namespace OleViewDotNet
             {
                 using (OpenFileDialog dlg = new OpenFileDialog())
                 {
+                    dlg.Multiselect = true;
                     dlg.Filter = "All Files (*.*)|*.*";
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                     {
-                        OpenHexEditor(File.ReadAllBytes(dlg.FileName));
+                        foreach(string file in dlg.FileNames)
+                        {
+                            OpenHexEditor(Path.GetFileName(file), 
+                                File.ReadAllBytes(file));
+                        }
                     }
                 }
             }
@@ -639,7 +644,7 @@ namespace OleViewDotNet
 
         private void menuHexEditorEmpty_Click(object sender, EventArgs e)
         {
-            OpenHexEditor(new byte[0]);
+            OpenHexEditor("Empty", new byte[0]);
         }
 
         private void menuFileOpenTypeLib_Click(object sender, EventArgs e)

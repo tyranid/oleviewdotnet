@@ -24,11 +24,18 @@ namespace OleViewDotNet
     {
         private COMRegistry m_registry;
 
-        public ObjectHexEditor(COMRegistry registry, byte[] bytes)
+        public ObjectHexEditor(COMRegistry registry, string name, byte[] bytes)
         {
             InitializeComponent();
             hexEditor.Bytes = bytes;
-            Text = "Hex Editor";
+            if (name != null)
+            {
+                Text = name;
+            }
+            else
+            {
+                Text = "Hex Editor";
+            }
             m_registry = registry;
         }
 

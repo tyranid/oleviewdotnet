@@ -64,5 +64,17 @@ namespace OleViewDotNet
 
             Close();
         }
+
+        private void renameToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            using (GetTextForm frm = new GetTextForm(TabText))
+            {
+                frm.Text = "Edit Tab Name";
+                if (frm.ShowDialog(this) == DialogResult.OK)
+                {
+                    TabText = frm.Data;
+                }
+            }
+        }
     }
 }

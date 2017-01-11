@@ -492,7 +492,7 @@ namespace OleViewDotNet
             COMIPIDEntry ipid = GetSelectedIpid();
             if (ipid != null)
             {
-                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, ipid.ToObjref()));
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, ipid.Ipid.ToString(), ipid.ToObjref()));
             }
         }
 

@@ -135,10 +135,6 @@ namespace OleViewDotNet
                 {
                     btnSaveStream.Enabled = true;
                 }
-                else if (ent.IsMarshal)
-                {
-                    btnMarshal.Enabled = true;
-                }
                 else if (ent.IsClassFactory)
                 {
                     btnCreate.Enabled = true;
@@ -203,7 +199,7 @@ namespace OleViewDotNet
                 using (MemoryStream stm = new MemoryStream())
                 {
                     COMUtilities.OleSaveToStream(m_pObject, stm);
-                    Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, stm.ToArray()));
+                    Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Stream Editor", stm.ToArray()));
                 }
             }
             catch (Exception ex)
@@ -216,7 +212,7 @@ namespace OleViewDotNet
         {
             try
             {
-                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, COMUtilities.MarshalObject(m_pObject)));
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Marshal Editor", COMUtilities.MarshalObject(m_pObject)));
             }
             catch (Exception ex)
             {
