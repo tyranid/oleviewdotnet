@@ -1034,7 +1034,8 @@ namespace OleViewDotNet
                     tag is COMTypeLibEntry ||
                     tag is Guid ||
                     tag is COMAppIDEntry ||
-                    tag is COMIPIDEntry)
+                    tag is COMIPIDEntry ||
+                    tag is COMCategory)
                 {
                     return true;
                 }
@@ -1044,46 +1045,49 @@ namespace OleViewDotNet
 
         private static Guid GetGuidFromType(TreeNode node)
         {
-            Guid guid = Guid.Empty;
             if (node != null)
             {
                 object tag = node.Tag;
                 if (tag is COMCLSIDEntry)
                 {
-                    guid = ((COMCLSIDEntry)tag).Clsid;
+                    return ((COMCLSIDEntry)tag).Clsid;
                 }
                 else if (tag is COMInterfaceEntry)
                 {
-                    guid = ((COMInterfaceEntry)tag).Iid;
+                    return ((COMInterfaceEntry)tag).Iid;
                 }
                 else if (tag is COMProgIDEntry)
                 {
                     COMProgIDEntry ent = (COMProgIDEntry)tag;
-                    guid = ent.Clsid;
+                    return ent.Clsid;
                 }
                 else if (tag is COMTypeLibVersionEntry)
                 {
-                    guid = ((COMTypeLibVersionEntry)tag).TypelibId;
+                    return ((COMTypeLibVersionEntry)tag).TypelibId;
                 }
                 else if (tag is COMTypeLibEntry)
                 {
-                    guid = ((COMTypeLibEntry)tag).TypelibId;
+                    return ((COMTypeLibEntry)tag).TypelibId;
                 }
                 else if (tag is Guid)
                 {
-                    guid = (Guid)tag;
+                    return (Guid)tag;
                 }
                 else if (tag is COMAppIDEntry)
                 {
-                    guid = ((COMAppIDEntry)tag).AppId;
+                    return ((COMAppIDEntry)tag).AppId;
                 }
                 else if (tag is COMIPIDEntry)
                 {
-                    guid = ((COMIPIDEntry)tag).Ipid;
+                    return ((COMIPIDEntry)tag).Ipid;
+                }
+                else if (tag is COMCategory)
+                {
+                    return ((COMCategory)tag).CategoryID;
                 }
             }
 
-            return guid;
+            return Guid.Empty;
         }
 
         private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)

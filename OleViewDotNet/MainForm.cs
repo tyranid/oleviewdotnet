@@ -494,7 +494,7 @@ namespace OleViewDotNet
 
         private void menuFileSaveDatabase_Click(object sender, EventArgs e)
         {
-            SaveDatabase(false);
+            SaveDatabase(true);
         }
 
         private void menuFileOpenDatabase_Click(object sender, EventArgs e)
@@ -703,7 +703,7 @@ namespace OleViewDotNet
 
         private void menuFileSaveAsDatabase_Click(object sender, EventArgs e)
         {
-            SaveDatabase(true);
+            SaveDatabase(false);
         }
 
         private void menuFileConfigureSymbols_Click(object sender, EventArgs e)
