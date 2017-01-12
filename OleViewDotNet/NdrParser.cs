@@ -1039,6 +1039,7 @@ namespace OleViewDotNet
             switch (Format)
             {
                 case NdrFormatCharacter.FC_BYTE:
+                case NdrFormatCharacter.FC_SMALL:
                     return "byte";
                 case NdrFormatCharacter.FC_CHAR:
                     return "sbyte";
@@ -1227,9 +1228,9 @@ namespace OleViewDotNet
             switch (Format)
             {
                 case NdrFormatCharacter.FC_BYTE:
+                case NdrFormatCharacter.FC_SMALL:
                 case NdrFormatCharacter.FC_CHAR:
                     return 1;
-                case NdrFormatCharacter.FC_SMALL:
                 case NdrFormatCharacter.FC_USMALL:
                 case NdrFormatCharacter.FC_WCHAR:
                 case NdrFormatCharacter.FC_SHORT:
