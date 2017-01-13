@@ -207,6 +207,11 @@ namespace OleViewDotNet
             {
                 SetupProcessEntry((COMProcessEntry)obj);
             }
+
+            if (obj is COMIPIDEntry)
+            {
+                SetupIPIDEntry((COMIPIDEntry)obj);
+            }
         }
 
         private void SetupProcessEntry(COMProcessEntry obj)
@@ -237,6 +242,22 @@ namespace OleViewDotNet
             }
         }
 
+        private void SetupIPIDEntry(COMIPIDEntry obj)
+        {
+            textBoxIPID.Text = obj.Ipid.FormatGuid();
+            textBoxIPIDIID.Text = obj.Iid.FormatGuid();
+            textBoxIPIDFlags.Text = obj.Flags.ToString();
+            textBoxIPIDInterface.Text = String.Format("0x{0:X}", obj.Interface.ToInt64());
+            textBoxIPIDStub.Text = String.Format("0x{0:X}", obj.Stub.ToInt64());
+            textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
+            textBoxIPIDReferences.Text = String.Format("Strong: {0}, Weak: {1}, Private: {2}",
+                obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);
+            byte[] ipid = obj.Ipid.ToByteArray();
+            textBoxIPIDProcessId.Text = BitConverter.ToUInt16(ipid, 4).ToString();
+            textBoxIPIDApartment.Text = BitConverter.ToInt16(ipid, 6).ToString();
+            tabControlProperties.TabPages.Add(tabPageIPID);
+        }
+
         private void SetupTypeLibVersionEntry(COMTypeLibVersionEntry entry)
         {
             if (entry == null)
@@ -255,7 +276,8 @@ namespace OleViewDotNet
         public static bool SupportsProperties(object obj)
         {
             return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry 
-                || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry || obj is COMProcessEntry;
+                || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry || obj is COMProcessEntry
+                || obj is COMIPIDEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)

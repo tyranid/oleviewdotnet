@@ -15,7 +15,9 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace OleViewDotNet
 {
@@ -85,7 +87,7 @@ namespace OleViewDotNet
         }
     }
 
-    internal sealed class SafeKernelObjectHandle : SafeHandle
+    internal class SafeKernelObjectHandle : SafeHandle
     {
         private SafeKernelObjectHandle()
             : base(IntPtr.Zero, true)
@@ -122,6 +124,145 @@ namespace OleViewDotNet
         public static SafeKernelObjectHandle Null
         {
             get { return new SafeKernelObjectHandle(IntPtr.Zero, false); }
+        }
+    }
+
+    internal class SafeProcessHandle : SafeKernelObjectHandle
+    {
+        private SafeProcessHandle()
+            : base(IntPtr.Zero, true)
+        {
+        }
+
+        public SafeProcessHandle(IntPtr handle, bool owns_handle)
+          : base(IntPtr.Zero, owns_handle)
+        {
+            SetHandle(handle);
+        }
+
+        private bool? _is64bit;
+
+        public bool Is64Bit
+        {
+            get
+            {
+                if (!_is64bit.HasValue)
+                {
+                    _is64bit = Is64bitProcess(this);
+                }
+                return _is64bit.Value;
+            }
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool ReadProcessMemory(
+              SafeKernelObjectHandle hProcess,
+              IntPtr lpBaseAddress,
+              SafeBuffer lpBuffer,
+              IntPtr nSize,
+              out IntPtr lpNumberOfBytesRead
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool ReadProcessMemory(
+              SafeKernelObjectHandle hProcess,
+              IntPtr lpBaseAddress,
+              byte[] lpBuffer,
+              IntPtr nSize,
+              out IntPtr lpNumberOfBytesRead
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern bool IsWow64Process(SafeKernelObjectHandle hProcess,
+            [MarshalAs(UnmanagedType.Bool)] out bool Wow64Process);
+
+        private static bool Is64bitProcess(SafeKernelObjectHandle process)
+        {
+            if (Environment.Is64BitOperatingSystem)
+            {
+                bool wow64 = false;
+                if (!IsWow64Process(process, out wow64))
+                {
+                    throw new Win32Exception();
+                }
+
+                return !wow64;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public T[] ReadArray<T>(IntPtr ptr, int count) where T : struct
+        {
+            using (var buf = ReadBuffer(ptr, count * Marshal.SizeOf(typeof(T))))
+            {
+                T[] ret = new T[count];
+                if (buf != null)
+                {
+                    buf.ReadArray(0, ret, 0, ret.Length);
+                }
+                return ret;
+            }
+        }
+
+        public SafeHGlobalBuffer ReadBuffer(IntPtr ptr, int length)
+        {
+            SafeHGlobalBuffer buf = new SafeHGlobalBuffer(length);
+            bool success = false;
+
+            try
+            {
+                IntPtr out_length;
+                success = ReadProcessMemory(this, ptr, buf, new IntPtr(buf.Length), out out_length);
+                if (success)
+                {
+                    return buf;
+                }
+            }
+            finally
+            {
+                if (!success)
+                {
+                    buf.Close();
+                }
+            }
+
+            return null;
+        }
+
+        public T ReadStruct<T>(IntPtr ptr) where T : new()
+        {
+            using (SafeStructureBuffer<T> buf = new SafeStructureBuffer<T>())
+            {
+                IntPtr out_length;
+                if (ReadProcessMemory(this, ptr, buf, new IntPtr(buf.Length), out out_length))
+                {
+                    return buf.Result;
+                }
+
+                return default(T);
+            }
+        }
+
+        public string ReadUnicodeString(IntPtr ptr)
+        {
+            byte[] data = new byte[2];
+            StringBuilder builder = new StringBuilder();
+            IntPtr out_length;
+            int pos = 0;
+            while (ReadProcessMemory(this, ptr + pos, data, new IntPtr(data.Length), out out_length))
+            {
+                char c = BitConverter.ToChar(data, 0);
+                if (c == 0)
+                {
+                    break;
+                }
+                builder.Append(c);
+                pos += 2;
+            }
+            return builder.ToString();
         }
     }
 }

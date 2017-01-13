@@ -213,13 +213,13 @@ namespace OleViewDotNet
                 string executable = key.GetValue("ServerExecutable") as string;
                 if (executable != null)
                 {
-                    CommandLine = server_string;
                     server_string = executable;
                 }
                 else
                 {
                     process_command_line = true;
                 }
+                CommandLine = server_string;
                 ThreadingModel = COMThreadingModel.Both;
             }
             else if (server_type == COMServerType.InProcServer32)

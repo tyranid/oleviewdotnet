@@ -41,7 +41,7 @@ namespace OleViewDotNet
             int Pages { get; }
             int EntrySize { get; }
             int EntriesPerPage { get; }
-            IntPtr[] ReadPages(SafeKernelObjectHandle handle);
+            IntPtr[] ReadPages(SafeProcessHandle handle);
 
         }
 
@@ -82,9 +82,9 @@ namespace OleViewDotNet
                 }
             }
 
-            IntPtr[] IPageAllocator.ReadPages(SafeKernelObjectHandle process)
+            IntPtr[] IPageAllocator.ReadPages(SafeProcessHandle process)
             {
-                return COMProcessParser.ReadArray<IntPtr>(process, _pPageListStart, _cPages);
+                return process.ReadArray<IntPtr>(_pPageListStart, _cPages);
             }
         };
 
@@ -140,9 +140,9 @@ namespace OleViewDotNet
                     return _cEntriesPerPage;
                 }
             }
-            IntPtr[] IPageAllocator.ReadPages(SafeKernelObjectHandle process)
+            IntPtr[] IPageAllocator.ReadPages(SafeProcessHandle process)
             {
-                return COMProcessParser.ReadArray<int>(process, new IntPtr(_pPageListStart), _cPages).Select(i => new IntPtr(i)).ToArray();
+                return process.ReadArray<int>(new IntPtr(_pPageListStart), _cPages).Select(i => new IntPtr(i)).ToArray();
             }
         };
 
@@ -156,7 +156,7 @@ namespace OleViewDotNet
             int StrongRefs { get; }
             int WeakRefs { get; }
             int PrivateRefs { get; }
-            IOXIDEntry GetOxidEntry(SafeKernelObjectHandle process);
+            IOXIDEntry GetOxidEntry(SafeProcessHandle process);
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -241,9 +241,9 @@ namespace OleViewDotNet
                 }
             }
 
-            IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(SafeKernelObjectHandle process)
+            IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(SafeProcessHandle process)
             {
-                return COMProcessParser.ReadStruct<OXIDEntryNative>(process, pOXIDEntry);
+                return process.ReadStruct<OXIDEntryNative>(pOXIDEntry);
             }
         };
 
@@ -329,9 +329,9 @@ namespace OleViewDotNet
                 }
             }
 
-            IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(SafeKernelObjectHandle process)
+            IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(SafeProcessHandle process)
             {
-                return COMProcessParser.ReadStruct<OXIDEntryNative32>(process, new IntPtr(pOXIDEntry));
+                return process.ReadStruct<OXIDEntryNative32>(new IntPtr(pOXIDEntry));
             }
         };
 
@@ -481,149 +481,6 @@ namespace OleViewDotNet
             }
         }
 
-        [Flags]
-        enum ProcessAccessRights : uint
-        {
-            None = 0,
-            CreateProcess = 0x0080,
-            CreateThread = 0x0002,
-            DupHandle = 0x0040,
-            QueryInformation = 0x0400,
-            QueryLimitedInformation = 0x1000,
-            SetInformation = 0x0200,
-            SetQuota = 0x0100,
-            SuspendResume = 0x0800,
-            Terminate = 0x0001,
-            VmOperation = 0x0008,
-            VmRead = 0x0010,
-            VmWrite = 0x0020,
-            GenericRead = 0x80000000,
-            GenericWrite = 0x40000000,
-            GenericExecute = 0x20000000,
-            GenericAll = 0x10000000,
-            Delete = 0x00010000,
-            ReadControl = 0x00020000,
-            WriteDac = 0x00040000,
-            WriteOwner = 0x00080000,
-            Synchronize = 0x00100000,
-            MaximumAllowed = 0x02000000,
-        };
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern SafeKernelObjectHandle OpenProcess(ProcessAccessRights dwDesiredAccess,
-                                                                 bool bInheritHandle,
-                                                                 int dwProcessId
-                                                                );
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool ReadProcessMemory(
-              SafeKernelObjectHandle hProcess,
-              IntPtr lpBaseAddress,
-              SafeBuffer lpBuffer,
-              IntPtr nSize,
-              out IntPtr lpNumberOfBytesRead
-            );
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool ReadProcessMemory(
-              SafeKernelObjectHandle hProcess,
-              IntPtr lpBaseAddress,
-              byte[] lpBuffer,
-              IntPtr nSize,
-              out IntPtr lpNumberOfBytesRead
-            );
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool IsWow64Process(SafeKernelObjectHandle hProcess,
-            [MarshalAs(UnmanagedType.Bool)] out bool Wow64Process);
-        
-        static bool Is64bitProcess(SafeKernelObjectHandle process)
-        {
-            if (Environment.Is64BitOperatingSystem)
-            {
-                bool wow64 = false;
-                if (!IsWow64Process(process, out wow64))
-                {
-                    throw new Win32Exception();
-                }
-
-                return !wow64;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        internal static T[] ReadArray<T>(SafeKernelObjectHandle process, IntPtr ptr, int count) where T : struct
-        {
-            using (var buf = ReadBuffer(process, ptr, count * Marshal.SizeOf(typeof(T))))
-            {
-                T[] ret = new T[count];
-                if (buf != null)
-                {
-                    buf.ReadArray(0, ret, 0, ret.Length);
-                }
-                return ret;
-            }
-        }
-
-        internal static SafeHGlobalBuffer ReadBuffer(SafeKernelObjectHandle process, IntPtr ptr, int length)
-        {
-            SafeHGlobalBuffer buf = new SafeHGlobalBuffer(length);
-            bool success = false;
-
-            try
-            {
-                IntPtr out_length;
-                success = ReadProcessMemory(process, ptr, buf, new IntPtr(buf.Length), out out_length);
-                if (success)
-                {
-                    return buf;
-                }
-            }
-            finally
-            {
-                if (!success)
-                {
-                    buf.Close();
-                }
-            }
-
-            return null;
-        }
-
-        internal static T ReadStruct<T>(SafeKernelObjectHandle process, IntPtr ptr) where T : new()
-        {
-            using (SafeStructureBuffer<T> buf = new SafeStructureBuffer<T>())
-            {
-                IntPtr out_length;
-                if (ReadProcessMemory(process, ptr, buf, new IntPtr(buf.Length), out out_length))
-                {
-                    return buf.Result;
-                }
-
-                return default(T);
-            }
-        }
-
-        internal static string ReadUnicodeString(SafeKernelObjectHandle process, IntPtr ptr)
-        {
-            byte[] data = new byte[2];
-            StringBuilder builder = new StringBuilder();
-            IntPtr out_length;
-            int pos = 0;
-            while (ReadProcessMemory(process, ptr + pos, data, new IntPtr(data.Length), out out_length))
-            {
-                char c = BitConverter.ToChar(data, 0);
-                if (c == 0)
-                {
-                    break;
-                }
-                builder.Append(c);
-                pos += 2;
-            }
-            return builder.ToString();
-        }
 
         private class PageAllocator
         {
@@ -631,17 +488,17 @@ namespace OleViewDotNet
             public int EntrySize { get; private set; }
             public int EntriesPerPage { get; private set; }
 
-            void Init<T>(SafeKernelObjectHandle process, IntPtr ipid_table) where T : IPageAllocator, new()
+            void Init<T>(SafeProcessHandle process, IntPtr ipid_table) where T : IPageAllocator, new()
             {
-                IPageAllocator page_alloc = ReadStruct<T>(process, ipid_table);
+                IPageAllocator page_alloc = process.ReadStruct<T>(ipid_table);
                 Pages = page_alloc.ReadPages(process);
                 EntrySize = page_alloc.EntrySize;
                 EntriesPerPage = page_alloc.EntriesPerPage;
             }
 
-            public PageAllocator(SafeKernelObjectHandle process, IntPtr ipid_table)
+            public PageAllocator(SafeProcessHandle process, IntPtr ipid_table)
             {
-                if (Is64bitProcess(process))
+                if (process.Is64Bit)
                 {
                     Init<CInternalPageAllocator>(process, ipid_table);
                 }
@@ -654,7 +511,7 @@ namespace OleViewDotNet
 
         static HashSet<uint> _flags = new HashSet<uint>();
 
-        static List<COMIPIDEntry> ParseIPIDEntries<T>(SafeKernelObjectHandle process, IntPtr ipid_table) 
+        static List<COMIPIDEntry> ParseIPIDEntries<T>(SafeProcessHandle process, IntPtr ipid_table, SymbolResolver resolver) 
             where T : struct, IPIDEntryNativeInterface
         {
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
@@ -666,7 +523,7 @@ namespace OleViewDotNet
 
             foreach (IntPtr page in palloc.Pages)
             {
-                using (var buf = ReadBuffer(process, page, palloc.EntriesPerPage * palloc.EntrySize))
+                using (var buf = process.ReadBuffer(page, palloc.EntriesPerPage * palloc.EntrySize))
                 {
                     if (buf == null)
                     {
@@ -681,7 +538,7 @@ namespace OleViewDotNet
                         }
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
-                            entries.Add(new COMIPIDEntry(ipid_entry, process));
+                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver));
                         }
                     }
                 }
@@ -711,7 +568,7 @@ namespace OleViewDotNet
             return String.Format("{0}!{1}", _dllname, name);
         }
 
-        static IntPtr ResolveAddress(SymbolResolver resolver, bool is64bit, string symbol)
+        internal static IntPtr AddressFromSymbol(SymbolResolver resolver, bool is64bit, string symbol)
         {
             Dictionary<string, IntPtr> resolved = is64bit ? _resolved_64bit : _resolved_32bit;
             if (resolved.ContainsKey(symbol))
@@ -728,32 +585,37 @@ namespace OleViewDotNet
             return ret;
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries(SafeKernelObjectHandle process, SymbolResolver resolver)
+        internal static string SymbolFromAddress(SymbolResolver resolver, bool is64bit, IntPtr address)
         {
-            IntPtr ipid_table = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName("CIPIDTable::_palloc"));
+            return String.Format("0x{0:X}", address.ToInt64());
+        }
+
+        static List<COMIPIDEntry> ParseIPIDEntries(SafeProcessHandle process, SymbolResolver resolver)
+        {
+            IntPtr ipid_table = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("CIPIDTable::_palloc"));
             if (ipid_table == IntPtr.Zero)
             {
                 return new List<COMIPIDEntry>();
             }
 
-            if (Is64bitProcess(process))
+            if (process.Is64Bit)
             {
-                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table);
+                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver);
             }
             else
             {
-                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table);
+                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver);
             }
         }
 
-        private static Guid GetProcessAppId(SafeKernelObjectHandle process, SymbolResolver resolver)
+        private static Guid GetProcessAppId(SafeProcessHandle process, SymbolResolver resolver)
         {
-            IntPtr appid = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName("g_AppId"));
+            IntPtr appid = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("g_AppId"));
             if (appid == IntPtr.Zero)
             {
                 return Guid.Empty;
             }
-            return ReadStruct<Guid>(process, appid);
+            return process.ReadStruct<Guid>(appid);
         }
 
         const uint SDDL_REVISION_1 = 1;
@@ -945,20 +807,20 @@ namespace OleViewDotNet
             public ushort Sbz2;
         }
 
-        private static SafeBuffer ReadSid(SafeKernelObjectHandle process, IntPtr address)
+        private static SafeBuffer ReadSid(SafeProcessHandle process, IntPtr address)
         {
-            SidHeader header = ReadStruct<SidHeader>(process, address);
+            SidHeader header = process.ReadStruct<SidHeader>(address);
             if (header.Revision != 1)
             {
                 return SafeHGlobalBuffer.Null;
             }
 
-            return ReadBuffer(process, address, 8 + header.RidCount * 4);
+            return process.ReadBuffer(address, 8 + header.RidCount * 4);
         }
 
-        private static SafeBuffer ReadAcl(SafeKernelObjectHandle process, IntPtr address)
+        private static SafeBuffer ReadAcl(SafeProcessHandle process, IntPtr address)
         {
-            AclHeader header = ReadStruct<AclHeader>(process, address);
+            AclHeader header = process.ReadStruct<AclHeader>(address);
             if (header.AclRevision > 4)
             {
                 return SafeHGlobalBuffer.Null;
@@ -969,12 +831,12 @@ namespace OleViewDotNet
                 return SafeHGlobalBuffer.Null;
             }
 
-            return ReadBuffer(process, address, header.AclSize);
+            return process.ReadBuffer(address, header.AclSize);
         }
 
-        private static string ReadSecurityDescriptorFromAddress(SafeKernelObjectHandle process, IntPtr address)
+        private static string ReadSecurityDescriptorFromAddress(SafeProcessHandle process, IntPtr address)
         {
-            SecurityDescriptorHeader header = ReadStruct<SecurityDescriptorHeader>(process, address);
+            SecurityDescriptorHeader header = process.ReadStruct<SecurityDescriptorHeader>(address);
             if (header.Revision != 1)
             {
                 return String.Empty;
@@ -983,15 +845,15 @@ namespace OleViewDotNet
             ISecurityDescriptor sd = null;
             if (header.HasFlag(SecurityDescriptorControl.SelfRelative))
             {
-                sd = ReadStruct<SecurityDescriptorRelative>(process, address);
+                sd = process.ReadStruct<SecurityDescriptorRelative>(address);
             }
-            else if (Is64bitProcess(process))
+            else if (process.Is64Bit)
             {
-                sd = ReadStruct<SecurityDescriptorAbsolute>(process, address);
+                sd = process.ReadStruct<SecurityDescriptorAbsolute>(address);
             }
             else
             {
-                sd = ReadStruct<SecurityDescriptorAbsolute32>(process, address);
+                sd = process.ReadStruct<SecurityDescriptorAbsolute32>(address);
             }
 
             SecurityDescriptorAbsolute new_sd = new SecurityDescriptorAbsolute();
@@ -1058,21 +920,21 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
-        private static string ReadSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        private static string ReadSecurityDescriptor(SafeProcessHandle process, SymbolResolver resolver, string symbol)
         {
-            IntPtr sd = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
+            IntPtr sd = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
             if (sd == IntPtr.Zero)
             {
                 return String.Empty;
             }
             IntPtr sd_ptr;
-            if (Is64bitProcess(process))
+            if (process.Is64Bit)
             {
-                sd_ptr = ReadStruct<IntPtr>(process, sd);
+                sd_ptr = process.ReadStruct<IntPtr>(sd);
             }
             else
             {
-                sd_ptr = new IntPtr(ReadStruct<int>(process, sd));
+                sd_ptr = new IntPtr(process.ReadStruct<int>(sd));
             }
 
             if (sd_ptr == IntPtr.Zero)
@@ -1083,55 +945,58 @@ namespace OleViewDotNet
             return ReadSecurityDescriptorFromAddress(process, sd_ptr);
         }
 
-        private static string GetProcessAccessSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver)
+        private static string GetProcessAccessSecurityDescriptor(SafeProcessHandle process, SymbolResolver resolver)
         {
             return ReadSecurityDescriptor(process, resolver, "gSecDesc");
         }
 
-        private static string GetLrpcSecurityDescriptor(SafeKernelObjectHandle process, SymbolResolver resolver)
+        private static string GetLrpcSecurityDescriptor(SafeProcessHandle process, SymbolResolver resolver)
         {
             return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
         }
 
-        private static string ReadString(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        private static string ReadString(SafeProcessHandle process, SymbolResolver resolver, string symbol)
         {
-            IntPtr str = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
+            IntPtr str = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
             if (str != IntPtr.Zero)
             {
-                return ReadUnicodeString(process, str);
+                return process.ReadUnicodeString(str);
             }
             return String.Empty;
         }
 
-        public static int ReadInt(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        public static int ReadInt(SafeProcessHandle process, SymbolResolver resolver, string symbol)
         {
-            IntPtr p = ResolveAddress(resolver, Is64bitProcess(process), GetSymbolName(symbol));
+            IntPtr p = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
             if (p != IntPtr.Zero)
             {
-                return ReadStruct<int>(process, p);
+                return process.ReadStruct<int>(p);
             }
             return 0;
         }
 
-        public static T ReadEnum<T>(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        public static T ReadEnum<T>(SafeProcessHandle process, SymbolResolver resolver, string symbol)
         {
             int value = ReadInt(process, resolver, symbol);
             return (T)Enum.ToObject(typeof(T), value);
         }
 
-        public static IntPtr ReadPointer(SafeKernelObjectHandle process, SymbolResolver resolver, string symbol)
+        public static IntPtr ReadPointer(SafeProcessHandle process, SymbolResolver resolver, string symbol)
         {
-            bool is64bit = Is64bitProcess(process);
-            IntPtr p = ResolveAddress(resolver, is64bit, GetSymbolName(symbol));
+            return ReadPointer(process, AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol)));
+        }
+
+        public static IntPtr ReadPointer(SafeProcessHandle process, IntPtr p)
+        {
             if (p != IntPtr.Zero)
             {
-                if (is64bit)
+                if (process.Is64Bit)
                 {
-                    return ReadStruct<IntPtr>(process, p);
+                    return process.ReadStruct<IntPtr>(p);
                 }
                 else
                 {
-                    return new IntPtr(ReadStruct<int>(process, p));
+                    return new IntPtr(process.ReadStruct<int>(p));
                 }
             }
             return IntPtr.Zero;
@@ -1214,7 +1079,7 @@ namespace OleViewDotNet
             ref int lpdwSize
         );
 
-        private static string GetProcessFileName(SafeKernelObjectHandle process)
+        private static string GetProcessFileName(SafeProcessHandle process)
         {
             StringBuilder builder = new StringBuilder(260);
             int size = builder.Capacity;
@@ -1225,7 +1090,7 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
-        private static string GetProcessUser(SafeKernelObjectHandle process)
+        private static string GetProcessUser(SafeProcessHandle process)
         {
             SafeKernelObjectHandle token;
             if (OpenProcessToken(process.DangerousGetHandle(), MaximumAllowed, out token))
@@ -1250,17 +1115,50 @@ namespace OleViewDotNet
             return "Unknown";
         }
 
+        [Flags]
+        internal enum ProcessAccessRights : uint
+        {
+            None = 0,
+            CreateProcess = 0x0080,
+            CreateThread = 0x0002,
+            DupHandle = 0x0040,
+            QueryInformation = 0x0400,
+            QueryLimitedInformation = 0x1000,
+            SetInformation = 0x0200,
+            SetQuota = 0x0100,
+            SuspendResume = 0x0800,
+            Terminate = 0x0001,
+            VmOperation = 0x0008,
+            VmRead = 0x0010,
+            VmWrite = 0x0020,
+            GenericRead = 0x80000000,
+            GenericWrite = 0x40000000,
+            GenericExecute = 0x20000000,
+            GenericAll = 0x10000000,
+            Delete = 0x00010000,
+            ReadControl = 0x00020000,
+            WriteDac = 0x00040000,
+            WriteOwner = 0x00080000,
+            Synchronize = 0x00100000,
+            MaximumAllowed = 0x02000000,
+        };
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern SafeProcessHandle OpenProcess(ProcessAccessRights dwDesiredAccess,
+                                                                 bool bInheritHandle,
+                                                                 int dwProcessId
+                                                                );
+
         public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path)
         {
-            using (SafeKernelObjectHandle process = OpenProcess(ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false, pid))
+            using (SafeProcessHandle process = OpenProcess(ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false, pid))
             {
                 if (process.IsInvalid)
                 {
                     return null;
                 }
 
-                bool is64bit = Is64bitProcess(process);
-                if (is64bit && !Environment.Is64BitProcess)
+                if (process.Is64Bit && !Environment.Is64BitProcess)
                 {
                     return null;
                 }
@@ -1271,7 +1169,7 @@ namespace OleViewDotNet
                         pid,
                         GetProcessFileName(process),
                         ParseIPIDEntries(process, resolver),
-                        is64bit,
+                        process.Is64Bit,
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
                         GetLrpcSecurityDescriptor(process, resolver),
@@ -1401,7 +1299,9 @@ namespace OleViewDotNet
         public Guid Iid { get; private set; }
         public IPIDFlags Flags { get; private set; }
         public IntPtr Interface { get; private set; }
+        public string InterfaceVTable { get; private set; }
         public IntPtr Stub { get; private set; }
+        public string StubVTable { get; private set; }
         public Guid Oxid { get; private set; }
         public int StrongRefs { get; private set; }
         public int WeakRefs { get; private set; }
@@ -1433,7 +1333,7 @@ namespace OleViewDotNet
             return stm.ToArray();
         }
 
-        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, SafeKernelObjectHandle process)
+        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, SafeProcessHandle process, SymbolResolver resolver)
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
