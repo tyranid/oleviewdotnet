@@ -29,6 +29,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.AccessControl;
+using System.Security.Principal;
 using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1817,6 +1818,15 @@ namespace OleViewDotNet
 
             return ret;
         }
+
+        internal static bool IsAdministrator()
+        {
+            using (WindowsIdentity id = WindowsIdentity.GetCurrent())
+            {
+                return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
+
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

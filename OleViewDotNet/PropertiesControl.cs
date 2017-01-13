@@ -445,7 +445,7 @@ namespace OleViewDotNet
                     {
                         COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
                         Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                            clsid.Name, COMProxyInstance.GetFromCLSID(clsid), intf.Item1.Iid));
+                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid), intf.Item1.Iid));
                     }
                 }
             }

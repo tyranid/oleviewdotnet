@@ -1812,7 +1812,7 @@ namespace OleViewDotNet
                     try
                     {
                         Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, 
-                            clsid.Name, COMProxyInstance.GetFromCLSID(clsid), selected_iid));
+                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid), selected_iid));
                     }
                     catch (Exception ex)
                     {

@@ -272,5 +272,17 @@ namespace OleViewDotNet
             textEditor.Text = text;
             textEditor.Refresh();
         }
+
+        public void SelectInterface(Guid iid)
+        {
+            foreach (ListViewItemWithIid item in listViewTypes.Items)
+            {
+                if (item.Iid == iid)
+                {
+                    item.Selected = true;
+                    item.EnsureVisible();
+                }
+            }
+        }
     }
 }

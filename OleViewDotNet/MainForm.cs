@@ -36,6 +36,12 @@ namespace OleViewDotNet
         private void UpdateTitle()
         {
             Text = "OleViewDotNet";
+            if (COMUtilities.IsAdministrator())
+            {
+                Text += " - Administrator -";
+                menuFileOpenAsAdmin.Visible = false;
+            }
+
             if (Environment.Is64BitOperatingSystem)
             {
                 if (!Environment.Is64BitProcess)
@@ -750,9 +756,20 @@ namespace OleViewDotNet
             LoadProcesses(p => p.User);
         }
 
-        private void menuItem11_Click(object sender, EventArgs e)
+        private void menuFileOpenAsAdmin_Click(object sender, EventArgs e)
         {
+            try
+            {
+                ProcessStartInfo start_info = new ProcessStartInfo(COMUtilities.GetExePath());
+                start_info.UseShellExecute = true;
+                start_info.Verb = "runas";
 
+                Process.Start(start_info).Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
