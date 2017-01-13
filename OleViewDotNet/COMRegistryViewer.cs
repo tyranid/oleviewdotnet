@@ -478,7 +478,7 @@ namespace OleViewDotNet
 
             public int GetHashCode(COMCLSIDServerEntry obj)
             {
-                return obj.Server.GetHashCode();
+                return obj.Server.ToLower().GetHashCode();
             }
         }
 
