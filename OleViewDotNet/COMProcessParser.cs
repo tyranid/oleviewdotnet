@@ -508,9 +508,7 @@ namespace OleViewDotNet
                 }
             }
         }
-
-        static HashSet<uint> _flags = new HashSet<uint>();
-
+        
         static List<COMIPIDEntry> ParseIPIDEntries<T>(SafeProcessHandle process, IntPtr ipid_table, SymbolResolver resolver) 
             where T : struct, IPIDEntryNativeInterface
         {
@@ -531,11 +529,7 @@ namespace OleViewDotNet
                     }
                     for (int entry_index = 0; entry_index < palloc.EntriesPerPage; ++entry_index)
                     {
-                        IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
-                        if (_flags.Add(ipid_entry.Flags))
-                        {
-                            System.Diagnostics.Trace.WriteLine(String.Format("Flags: {0:X}", ipid_entry.Flags));
-                        }
+                        IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));                        
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
                             entries.Add(new COMIPIDEntry(ipid_entry, process, resolver));
@@ -1345,6 +1339,14 @@ namespace OleViewDotNet
             StrongRefs = ipid.StrongRefs;
             WeakRefs = ipid.WeakRefs;
             PrivateRefs = ipid.PrivateRefs;
+            if (Interface != IntPtr.Zero)
+            {
+                InterfaceVTable = resolver.GetModuleRelativeAddress(COMProcessParser.ReadPointer(process, Interface));
+            }
+            if (Stub != IntPtr.Zero)
+            {
+                StubVTable = resolver.GetModuleRelativeAddress(COMProcessParser.ReadPointer(process, Stub));
+            }
         }
     }
 }

@@ -248,7 +248,9 @@ namespace OleViewDotNet
             textBoxIPIDIID.Text = obj.Iid.FormatGuid();
             textBoxIPIDFlags.Text = obj.Flags.ToString();
             textBoxIPIDInterface.Text = String.Format("0x{0:X}", obj.Interface.ToInt64());
+            textBoxIPIDInterfaceVTable.Text = GetStringValue(obj.InterfaceVTable);
             textBoxIPIDStub.Text = String.Format("0x{0:X}", obj.Stub.ToInt64());
+            textBoxIPIDStubVTable.Text = GetStringValue(obj.StubVTable);
             textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
             textBoxIPIDReferences.Text = String.Format("Strong: {0}, Weak: {1}, Private: {2}",
                 obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);

@@ -387,12 +387,20 @@ namespace OleViewDotNet
         private static string BuildCOMIpidTooltip(COMIPIDEntry ipid)
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat("Interface: 0x{0:X}", ipid.Interface.ToInt64()).AppendLine();
-            builder.AppendFormat("Stub: 0x{0:X}", ipid.Stub.ToInt64()).AppendLine();
-            builder.AppendFormat("Flags: {0}", ipid.Flags).AppendLine();
-            builder.AppendFormat("Strong Refs: {0}", ipid.StrongRefs).AppendLine();
-            builder.AppendFormat("Weak Refs: {0}", ipid.WeakRefs).AppendLine();
-            builder.AppendFormat("Private Refs: {0}", ipid.PrivateRefs).AppendLine();
+            AppendFormatLine(builder, "Interface: 0x{0:X}", ipid.Interface.ToInt64());
+            if (!String.IsNullOrWhiteSpace(ipid.InterfaceVTable))
+            {
+                AppendFormatLine(builder, "Interface VTable: {0}", ipid.InterfaceVTable);
+            }
+            AppendFormatLine(builder, "Stub: 0x{0:X}", ipid.Stub.ToInt64());
+            if (!String.IsNullOrWhiteSpace(ipid.StubVTable))
+            {
+                AppendFormatLine(builder, "Stub VTable: {0}", ipid.StubVTable);
+            }
+            AppendFormatLine(builder, "Flags: {0}", ipid.Flags);
+            AppendFormatLine(builder, "Strong Refs: {0}", ipid.StrongRefs);
+            AppendFormatLine(builder, "Weak Refs: {0}", ipid.WeakRefs);
+            AppendFormatLine(builder, "Private Refs: {0}", ipid.PrivateRefs);
             
             return builder.ToString();
         }

@@ -22,71 +22,18 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet
 {
-    enum SymTagEnum
+
+    sealed class SymbolLoadedModule
     {
-        SymTagNull,
-        SymTagExe,
-        SymTagCompiland,
-        SymTagCompilandDetails,
-        SymTagCompilandEnv,
-        SymTagFunction,
-        SymTagBlock,
-        SymTagData,
-        SymTagAnnotation,
-        SymTagLabel,
-        SymTagPublicSymbol,
-        SymTagUDT,
-        SymTagEnum,
-        SymTagFunctionType,
-        SymTagPointerType,
-        SymTagArrayType,
-        SymTagBaseType,
-        SymTagTypedef,
-        SymTagBaseClass,
-        SymTagFriend,
-        SymTagFunctionArgType,
-        SymTagFuncDebugStart,
-        SymTagFuncDebugEnd,
-        SymTagUsingNamespace,
-        SymTagVTableShape,
-        SymTagVTable,
-        SymTagCustom,
-        SymTagThunk,
-        SymTagCustomType,
-        SymTagManagedType,
-        SymTagDimension
-    }
+        public string Name { get; private set; }
+        public IntPtr BaseAddress { get; private set; }
+        public int ImageSize { get; private set; }
 
-    [StructLayout(LayoutKind.Sequential)]
-    class SYMBOL_INFO
-    {
-        public int SizeOfStruct;
-        public int TypeIndex;        // Type Index of symbol
-        public long Reserved1;
-        public long Reserved2;
-        public int Index;
-        public int Size;
-        public long ModBase;          // Base Address of module comtaining this symbol
-        public int Flags;
-        public long Value;            // Value of symbol, ValuePresent should be 1
-        public long Address;          // Address of symbol including base address of module
-        public int Register;         // register holding value or pointer to value
-        public int Scope;            // scope of the symbol
-        public SymTagEnum Tag;              // pdb classification
-        public int NameLen;          // Actual length of name
-        public int MaxNameLen;
-        public char Name;
-
-        public const int MAX_SYM_NAME = 2000;
-
-        public SYMBOL_INFO()
+        public SymbolLoadedModule(string name, IntPtr base_address, int image_size)
         {
-            SizeOfStruct = Marshal.SizeOf(typeof(SYMBOL_INFO));
-        }
-
-        public SYMBOL_INFO(int max_name_len) : this()
-        {
-            MaxNameLen = max_name_len;
+            Name = name;
+            BaseAddress = base_address;
+            ImageSize = image_size;
         }
     }
 
@@ -122,6 +69,89 @@ namespace OleViewDotNet
               EnumModules EnumModulesCallback,
               IntPtr UserContext
             );
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool SymFromAddrW(
+            IntPtr hProcess,
+            long Address,
+            out long Displacement,
+            SafeBuffer Symbol
+        );
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool SymGetModuleInfoW64(
+              IntPtr hProcess,
+              long dwAddr,
+              ref IMAGEHLP_MODULE64 ModuleInfo
+            );
+
+        enum SymTagEnum
+        {
+            SymTagNull,
+            SymTagExe,
+            SymTagCompiland,
+            SymTagCompilandDetails,
+            SymTagCompilandEnv,
+            SymTagFunction,
+            SymTagBlock,
+            SymTagData,
+            SymTagAnnotation,
+            SymTagLabel,
+            SymTagPublicSymbol,
+            SymTagUDT,
+            SymTagEnum,
+            SymTagFunctionType,
+            SymTagPointerType,
+            SymTagArrayType,
+            SymTagBaseType,
+            SymTagTypedef,
+            SymTagBaseClass,
+            SymTagFriend,
+            SymTagFunctionArgType,
+            SymTagFuncDebugStart,
+            SymTagFuncDebugEnd,
+            SymTagUsingNamespace,
+            SymTagVTableShape,
+            SymTagVTable,
+            SymTagCustom,
+            SymTagThunk,
+            SymTagCustomType,
+            SymTagManagedType,
+            SymTagDimension
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        class SYMBOL_INFO
+        {
+            public int SizeOfStruct;
+            public int TypeIndex;        // Type Index of symbol
+            public long Reserved1;
+            public long Reserved2;
+            public int Index;
+            public int Size;
+            public long ModBase;          // Base Address of module comtaining this symbol
+            public int Flags;
+            public long Value;            // Value of symbol, ValuePresent should be 1
+            public long Address;          // Address of symbol including base address of module
+            public int Register;         // register holding value or pointer to value
+            public int Scope;            // scope of the symbol
+            public SymTagEnum Tag;              // pdb classification
+            public int NameLen;          // Actual length of name
+            public int MaxNameLen;
+            public char Name;
+
+            public const int MAX_SYM_NAME = 2000;
+
+            public SYMBOL_INFO()
+            {
+                SizeOfStruct = Marshal.SizeOf(typeof(SYMBOL_INFO));
+            }
+
+            public SYMBOL_INFO(int max_name_len) : this()
+            {
+                MaxNameLen = max_name_len;
+            }
+        }
 
         [Flags]
         enum SymOptions : uint
@@ -160,6 +190,62 @@ namespace OleViewDotNet
             DEBUG                     = 0x80000000,
         }
 
+        enum SYM_TYPE
+        {
+            SymNone = 0,
+            SymCoff,
+            SymCv,
+            SymPdb,
+            SymExport,
+            SymDeferred,
+            SymSym, 
+            SymDia,
+            SymVirtual,
+            NumSymTypes
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        struct IMAGEHLP_MODULE64
+        {
+            public int SizeOfStruct;
+            public long BaseOfImage;
+            public int ImageSize;
+            public int TimeDateStamp;
+            public int CheckSum;
+            public int NumSyms;
+            public SYM_TYPE SymType;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string ModuleName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string ImageName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string LoadedImageName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string LoadedPdbName;
+            public int CVSig;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260*3)]
+            public string CVData;
+            public int PdbSig;
+            public Guid PdbSig70;
+            public int PdbAge;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool PdbUnmatched;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool DbgUnmatched;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool LineNumbers;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool GlobalSymbols;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool TypeInfo;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool SourceIndexed;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool Publics;
+            public int MachineType;
+            public int Reserved;
+        }
+
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate int SymSetOptions(
             SymOptions SymOptions
@@ -168,22 +254,14 @@ namespace OleViewDotNet
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern SafeLibraryHandle LoadLibrary(string filename);
 
-        static SafeLibraryHandle SafeLoadLibrary(string filename)
-        {
-            SafeLibraryHandle lib = LoadLibrary(filename);
-            if (lib.IsInvalid)
-            {
-                throw new Win32Exception();
-            }
-            return lib;
-        }
-
         private SafeLibraryHandle _dbghelp_lib;
         private SymInitializeW _sym_init;
         private SymCleanup _sym_cleanup;
         private SymFromNameW _sym_from_name;
         private SymSetOptions _sym_set_options;
         private SymEnumerateModulesW64 _sym_enum_modules;
+        private SymFromAddrW _sym_from_addr;
+        private SymGetModuleInfoW64 _sym_get_module_info;
         private IntPtr _process;
 
         private void GetFunc<T>(ref T f) where T : class
@@ -196,21 +274,23 @@ namespace OleViewDotNet
             return new SafeStructureBuffer<SYMBOL_INFO>(new SYMBOL_INFO(SYMBOL_INFO.MAX_SYM_NAME), SYMBOL_INFO.MAX_SYM_NAME * 2);
         }
 
-        static string GetNameFromSymbolInfo(IntPtr buffer)
+        static string GetNameFromSymbolInfo(SafeBuffer buffer)
         {
             IntPtr ofs = Marshal.OffsetOf<SYMBOL_INFO>("Name");
-            return Marshal.PtrToStringUni(buffer + ofs.ToInt32());
+            return Marshal.PtrToStringUni(buffer.DangerousGetHandle() + ofs.ToInt32());
         }
 
         public SymbolResolver(string dbghelp_path, IntPtr process, string symbol_path)
         {
             _process = process;
-            _dbghelp_lib = SafeLoadLibrary(dbghelp_path);
+            _dbghelp_lib = COMUtilities.SafeLoadLibrary(dbghelp_path);
             GetFunc(ref _sym_init);
             GetFunc(ref _sym_cleanup);
             GetFunc(ref _sym_from_name);
             GetFunc(ref _sym_set_options);
             GetFunc(ref _sym_enum_modules);
+            GetFunc(ref _sym_from_addr);
+            GetFunc(ref _sym_get_module_info);
 
             _sym_set_options(SymOptions.INCLUDE_32BIT_MODULES | SymOptions.UNDNAME | SymOptions.DEFERRED_LOADS);
 
@@ -220,29 +300,68 @@ namespace OleViewDotNet
             }
         }
 
-        public IEnumerable<Tuple<string, IntPtr>> GetLoadedModules()
+        private IMAGEHLP_MODULE64 GetModuleInfo(long base_address)
         {
-            List<Tuple<string, IntPtr>> modules = new List<Tuple<string, IntPtr>>();
+            IMAGEHLP_MODULE64 module = new IMAGEHLP_MODULE64();
+            module.SizeOfStruct = Marshal.SizeOf(module);
+            if (_sym_get_module_info(_process, base_address, ref module))
+            {
+                return module;
+            }
+            return new IMAGEHLP_MODULE64();
+        }
+
+        private IEnumerable<SymbolLoadedModule> GetLoadedModulesInternal()
+        {
+            List<SymbolLoadedModule> modules = new List<SymbolLoadedModule>();
 
             if (!_sym_enum_modules(_process, (s, m, p) =>
-                {
-                    modules.Add(new Tuple<string, IntPtr>(s, new IntPtr(m)));
-                    return true;
-                }, IntPtr.Zero))
+            {
+                modules.Add(new SymbolLoadedModule(s, new IntPtr(m), GetModuleInfo(m).ImageSize));
+                return true;
+            }, IntPtr.Zero))
             {
                 throw new Win32Exception();
             }
             return modules.AsReadOnly();
         }
 
-        public IntPtr GetLoadedModuleAddress(string module_name)
+        private IEnumerable<SymbolLoadedModule> _loaded_modules;
+
+        public IEnumerable<SymbolLoadedModule> GetLoadedModules()
         {
-            IEnumerable<Tuple<string, IntPtr>> modules = GetLoadedModules().Where(m => m.Item1 == "combase");
-            if (modules.Count() > 0)
+            if (_loaded_modules == null)
             {
-                return modules.First().Item2;
+                _loaded_modules = GetLoadedModulesInternal().OrderBy(s => s.BaseAddress.ToInt64());
             }
-            return IntPtr.Zero;
+            return _loaded_modules;
+        }
+
+        public SymbolLoadedModule GetModuleForAddress(IntPtr address)
+        {
+            long check_addr = address.ToInt64();
+
+            foreach (SymbolLoadedModule module in GetLoadedModules())
+            {
+                long base_address = module.BaseAddress.ToInt64();
+                if (check_addr >= base_address && check_addr < base_address + module.ImageSize)
+                {
+                    return module;
+                }
+            }
+
+            return null;
+        }
+
+        public string GetModuleRelativeAddress(IntPtr address)
+        {
+            SymbolLoadedModule module = GetModuleForAddress(address);
+            if (module == null)
+            {
+                return String.Format("0x{0:X}", address.ToInt64());
+            }
+
+            return String.Format("{0}+0x{1:X}", module.Name, address.ToInt64() - module.BaseAddress.ToInt64());
         }
 
         public IntPtr GetAddressOfSymbol(string name)
@@ -254,6 +373,20 @@ namespace OleViewDotNet
                     return IntPtr.Zero;
                 }
                 return new IntPtr(sym_info.Result.Address);
+            }
+        }
+
+        public string GetSymbolForAddress(IntPtr address)
+        {
+            using (SafeStructureBuffer<SYMBOL_INFO> sym_info = AllocateSymInfo())
+            {
+                long displacement;
+                if (_sym_from_addr(_process, address.ToInt64(), out displacement, sym_info))
+                {
+                    return GetNameFromSymbolInfo(sym_info);
+                }
+                // Perhaps should return module+X?
+                return String.Format("0x{0:X}", address.ToInt64());
             }
         }
 
