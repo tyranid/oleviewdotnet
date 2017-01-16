@@ -27,7 +27,7 @@ namespace OleViewDotNet
     public partial class TypeLibControl : UserControl
     {
         private IDictionary<Guid, string> m_iids_to_names;
-        private IDictionary<NdrBaseStructureTypeReference, string> m_structs_to_names;
+        private IDictionary<NdrComplexTypeReference, string> m_types_to_names;
 
         static void EmitMember(StringBuilder builder, MemberInfo mi)
         {
@@ -132,11 +132,11 @@ namespace OleViewDotNet
             }
         }
 
-        private static IEnumerable<ListViewItem> FormatProxyInstanceStructs(COMProxyInstance proxy)
+        private static IEnumerable<ListViewItem> FormatProxyInstanceComplexTypes(COMProxyInstance proxy)
         {
-            IDictionary<NdrBaseStructureTypeReference, string> structs_with_names = proxy.StructuresWithNames;
+            var types_with_names = proxy.ComplexTypesWithNames;
 
-            foreach (var pair in structs_with_names.OrderBy(p => p.Value))
+            foreach (var pair in types_with_names.OrderBy(p => p.Value))
             {
                 ListViewItem item = new ListViewItem(pair.Value);
                 item.Tag = pair.Key;
@@ -155,14 +155,14 @@ namespace OleViewDotNet
         }
 
         private TypeLibControl(IDictionary<Guid, string> iids_to_names, 
-            IDictionary<NdrBaseStructureTypeReference, string> structs_to_names,
+            IDictionary<NdrComplexTypeReference, string> types_to_names,
             string name, 
             Guid iid_to_view, 
             IEnumerable<ListViewItemWithIid> items, 
             IEnumerable<ListViewItem> structs)
         {
             m_iids_to_names = iids_to_names;
-            m_structs_to_names = structs_to_names;
+            m_types_to_names = types_to_names;
             InitializeComponent();
             listViewTypes.Items.AddRange(items.ToArray());
             listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -188,7 +188,7 @@ namespace OleViewDotNet
         }
 
         public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid iid_to_view) 
-            : this(registry.InterfacesToNames, proxy.StructuresWithNames, name, iid_to_view, FormatProxyInstance(proxy), FormatProxyInstanceStructs(proxy))
+            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, iid_to_view, FormatProxyInstance(proxy), FormatProxyInstanceComplexTypes(proxy))
         {
         }
 
@@ -257,7 +257,7 @@ namespace OleViewDotNet
             {
                 ListViewItem item = listViewStructures.SelectedItems[0];
                 Type type = item.Tag as Type;
-                NdrBaseStructureTypeReference str = item.Tag as NdrBaseStructureTypeReference;
+                NdrComplexTypeReference str = item.Tag as NdrComplexTypeReference;
 
                 if (type != null)
                 {
@@ -265,7 +265,7 @@ namespace OleViewDotNet
                 }
                 else if (str != null)
                 {
-                    text = str.FormatStruct(new NdrFormatContext(m_iids_to_names, m_structs_to_names));
+                    text = str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names));
                 }
             }
 

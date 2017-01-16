@@ -147,6 +147,10 @@ namespace OleViewDotNet
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
 
+            //COMProxyInstance proxy = COMProxyInstance.GetFromFile(@"C:\dev\COMObject\x64\Debug\COMObjectPS.dll");
+            //Console.WriteLine(proxy.Entries.Count());
+            //return;
+
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },

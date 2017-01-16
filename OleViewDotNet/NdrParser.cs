@@ -596,7 +596,7 @@ namespace OleViewDotNet
         }
     }
     
-    public class NdrBaseStructureTypeReference : NdrBaseTypeReference
+    public class NdrBaseStructureTypeReference : NdrComplexTypeReference
     {
         protected List<NdrBaseTypeReference> _members;
         public int Alignment { get; private set; }
@@ -638,16 +638,17 @@ namespace OleViewDotNet
 
         public override string FormatType(NdrFormatContext context)
         {
-            if (context.StructsToNames.ContainsKey(this))
+            if (context.ComplexTypesToNames.ContainsKey(this))
             {
-                return String.Format("struct {0}", context.StructsToNames[this]);
+                return String.Format("struct {0}", context.ComplexTypesToNames[this]);
             }
             return base.FormatType(context);
         }
 
-        public virtual string FormatStruct(NdrFormatContext context)
+        public override string FormatComplexType(NdrFormatContext context)
         {
             StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("/* Memory Size: {0} */", GetSize()).AppendLine();
             builder.Append(FormatType(context)).AppendLine(" {");
             foreach (var member in Members.Select((m, i) => String.Format("{0} Member{1}", m.FormatMember(context), i)))
             {
@@ -1020,6 +1021,161 @@ namespace OleViewDotNet
         }
     }
 
+    public sealed class NdrUnionArm
+    {
+        public NdrBaseTypeReference ArmType { get; private set; }
+        public int CaseValue { get; private set; }
+
+        internal NdrUnionArm(NdrParseContext context, BinaryReader reader)
+        {
+            CaseValue = reader.ReadInt32();
+            ArmType = ReadArmType(context, reader);
+        }
+
+        internal static NdrBaseTypeReference ReadArmType(NdrParseContext context, BinaryReader reader)
+        {
+            ushort type = reader.ReadUInt16();
+            if ((type & 0x8F00) == 0x8000)
+            {
+                return new NdrBaseTypeReference((NdrFormatCharacter)(type & 0xFF));
+            }
+            else if (type == 0)
+            {
+                return new NdrBaseTypeReference(NdrFormatCharacter.FC_ZERO);
+            }
+            else if (type == 0xFFFF)
+            {
+                return null;
+            }
+            else
+            {
+                reader.BaseStream.Position = reader.BaseStream.Position - 2;
+                return NdrBaseTypeReference.Read(context, NdrBaseTypeReference.ReadTypeOffset(reader));
+            }
+        }
+    }
+
+    public sealed class NdrUnionArms
+    {
+        public int MemorySize { get; private set; }
+        public IEnumerable<NdrUnionArm> Arms { get; private set; }
+        public NdrBaseTypeReference DefaultArm { get; private set; }
+        public int Alignment { get; private set; }
+
+        internal NdrUnionArms(NdrParseContext context, BinaryReader reader)
+        {
+            MemorySize = reader.ReadUInt16();
+            ushort start_word = reader.ReadUInt16();
+            Alignment = (start_word >> 12) & 0xF;
+            int count = start_word & 0xFFF;
+
+            List<NdrUnionArm> arms = new List<NdrUnionArm>();
+            while (count > 0)
+            {
+                arms.Add(new NdrUnionArm(context, reader));
+                count--;
+            }
+            Arms = arms.AsReadOnly();
+            DefaultArm = NdrUnionArm.ReadArmType(context, reader);
+        }
+
+        internal NdrUnionArms(NdrParseContext context, int ofs) 
+            : this(context, NdrBaseTypeReference.GetReader(context, ofs))
+        {
+        }
+    }
+
+    public abstract class NdrComplexTypeReference : NdrBaseTypeReference
+    {
+        public abstract string FormatComplexType(NdrFormatContext context);
+
+        internal NdrComplexTypeReference(NdrFormatCharacter format) : base(format)
+        {
+        }
+    }
+
+    public sealed class NdrUnionTypeReference : NdrComplexTypeReference
+    {
+        public NdrFormatCharacter SwitchType { get; private set; }
+        public int SwitchIncrement { get; private set; }
+        public NdrUnionArms Arms { get; private set; }
+        public NdrCorrelationDescriptor Correlation { get; private set; }
+
+        internal NdrUnionTypeReference(NdrFormatCharacter format, NdrParseContext context, BinaryReader reader) 
+            : base(format)
+        {
+            int switch_type = reader.ReadByte();
+            SwitchIncrement = (switch_type >> 4) & 0xF;
+            SwitchType = (NdrFormatCharacter)(switch_type & 0xF);
+
+            if (format == NdrFormatCharacter.FC_NON_ENCAPSULATED_UNION)
+            {
+                Correlation = new NdrCorrelationDescriptor(context, reader);
+                Arms = new NdrUnionArms(context, NdrBaseTypeReference.ReadTypeOffset(reader));
+            }
+            else
+            {
+                Arms = new NdrUnionArms(context, reader);
+            }
+        }
+
+        public override string FormatType(NdrFormatContext context)
+        {
+            if (context.ComplexTypesToNames.ContainsKey(this))
+            {
+                return String.Format("{0} {1}", 
+                    Format == NdrFormatCharacter.FC_NON_ENCAPSULATED_UNION ? "union" : "struct", 
+                    context.ComplexTypesToNames[this]);
+            }
+            return base.FormatType(context);
+        }
+
+        public override string FormatComplexType(NdrFormatContext context)
+        {
+            int indent = 4;
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("/* Memory Size: {0} */", GetSize()).AppendLine();
+            builder.Append(FormatType(context)).AppendLine(" {");
+
+            if (Format == NdrFormatCharacter.FC_ENCAPSULATED_UNION)
+            {
+                builder.Append(' ', indent).AppendFormat("{0} Selector;", new NdrBaseTypeReference(SwitchType).FormatType(context)).AppendLine();
+                builder.Append(' ', indent).AppendLine("union { ");
+                indent *= 2;
+            }
+
+            int index = 0;
+            foreach (NdrUnionArm arm in Arms.Arms)
+            {
+                builder.Append(' ', indent).AppendFormat("/* case: {0} */", arm.CaseValue).AppendLine();
+                builder.Append(' ', indent).AppendFormat("{0} Member_{1};", arm.ArmType.FormatType(context), index++).AppendLine();
+            }
+
+            if (Arms.DefaultArm != null)
+            {
+                builder.Append(' ', indent).AppendLine("/* default */");
+                if (Arms.DefaultArm.Format != NdrFormatCharacter.FC_ZERO)
+                {
+                    builder.Append(' ', indent).AppendFormat("{0} Default;", new NdrBaseTypeReference(Arms.DefaultArm.Format).FormatType(context)).AppendLine();
+                }
+            }
+
+            if (Format == NdrFormatCharacter.FC_ENCAPSULATED_UNION)
+            {
+                indent /= 2;
+                builder.Append(' ', indent).AppendLine("};");
+            }
+
+            builder.AppendLine("};");
+            return builder.ToString();
+        }
+
+        public override int GetSize()
+        {
+            return Arms.MemorySize + SwitchIncrement;
+        }
+    }
+    
     public class NdrBaseTypeReference
     {
         public NdrFormatCharacter Format { get; private set; }
@@ -1325,6 +1481,9 @@ namespace OleViewDotNet
                         return new NdrBogusArrayTypeReference(context, reader);
                     case NdrFormatCharacter.FC_RANGE:
                         return new NdrRangeTypeReference(reader);
+                    case NdrFormatCharacter.FC_ENCAPSULATED_UNION:
+                    case NdrFormatCharacter.FC_NON_ENCAPSULATED_UNION:
+                        return new NdrUnionTypeReference(format, context, reader);
                     // Skipping padding types.
                     case NdrFormatCharacter.FC_PAD:
                         break;
@@ -1438,13 +1597,13 @@ namespace OleViewDotNet
     public class NdrFormatContext
     {
         public IDictionary<Guid, string> IidsToNames { get; private set; }
-        public IDictionary<NdrBaseStructureTypeReference, string> StructsToNames { get; private set; }
+        public IDictionary<NdrComplexTypeReference, string> ComplexTypesToNames { get; private set; }
 
         public NdrFormatContext(IDictionary<Guid, string> iids_to_names, 
-            IDictionary<NdrBaseStructureTypeReference, string> structs_to_names)
+            IDictionary<NdrComplexTypeReference, string> types_to_names)
         {
             IidsToNames = iids_to_names;
-            StructsToNames = structs_to_names;
+            ComplexTypesToNames = types_to_names;
         }
     }
 
@@ -1455,7 +1614,7 @@ namespace OleViewDotNet
         public IntPtr TypeDesc { get; private set; }        
         public int CorrDescSize { get; private set; }
 
-        internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, int desc_size)//, bool is_robust)
+        internal NdrParseContext(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, MIDL_STUB_DESC stub_desc, IntPtr type_desc, int desc_size)
         {
             TypeCache = type_cache;
             StubDesc = stub_desc;

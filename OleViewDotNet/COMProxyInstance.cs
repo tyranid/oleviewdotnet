@@ -161,7 +161,7 @@ namespace OleViewDotNet
 
         public string Format(IDictionary<Guid, string> iids_to_names)
         {
-            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.StructuresWithNames);
+            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.ComplexTypesWithNames);
             return Format(context);
         }
     }
@@ -176,17 +176,33 @@ namespace OleViewDotNet
 
         public IEnumerable<COMProxyInstanceEntry> Entries { get; private set; }
 
-        public IEnumerable<NdrBaseStructureTypeReference> Structures { get; private set; }
+        public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
 
-        public Dictionary<NdrBaseStructureTypeReference, string> StructuresWithNames
+        private static string GetComplexTypeName(NdrComplexTypeReference type, int index)
+        {
+            if (type is NdrBaseStructureTypeReference)
+            {
+                return String.Format("Struct_{0}", index);
+            }
+            else if (type is NdrUnionTypeReference)
+            {
+                return String.Format("Union_{0}", index);
+            }
+            else
+            {
+                return String.Format("UnknownType_{0}", index);
+            }
+        }
+        
+        public Dictionary<NdrComplexTypeReference, string> ComplexTypesWithNames
         {
             get
             {
-                return Structures.Select((s, i) =>
-                    new Tuple<NdrBaseStructureTypeReference, string>(s, String.Format("Struct_{0}", i))).ToDictionary(v => v.Item1, v => v.Item2);
+                return ComplexTypes.Select((s, i) =>
+                    new Tuple<NdrComplexTypeReference, string>(s, GetComplexTypeName(s, i))).ToDictionary(v => v.Item1, v => v.Item2);
             }
         }
-
+        
         private NdrProcedureDefinition[] ReadProcs(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, Guid base_iid, CInterfaceStubHeader stub)
         {
             MIDL_SERVER_INFO server_info = stub.GetServerInfo();
@@ -272,7 +288,7 @@ namespace OleViewDotNet
         private bool InitFromFileInfo(IntPtr pInfo)
         {
             List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
-            List<NdrBaseStructureTypeReference> structs = new List<NdrBaseStructureTypeReference>();
+            List<NdrComplexTypeReference> complex_types = new List<NdrComplexTypeReference>();
 
             foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
             {
@@ -286,10 +302,11 @@ namespace OleViewDotNet
                     entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
                         base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
                 }
-                structs.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
+                complex_types.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
+                complex_types.AddRange(type_cache.Values.OfType<NdrUnionTypeReference>());
             }
             Entries = entries.AsReadOnly();
-            Structures = structs.AsReadOnly();
+            ComplexTypes = complex_types.AsReadOnly();
             return true;
         }
 
