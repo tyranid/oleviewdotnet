@@ -138,7 +138,13 @@ namespace OleViewDotNet
                     }
                 }
 
-                foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include))
+                var include_filters = Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include);
+                if (include_filters.Count() == 0)
+                {
+                    return FilterResult.Include;
+                }
+
+                foreach (var filter in include_filters)
                 {
                     if (filter.IsMatch(entry))
                     {
