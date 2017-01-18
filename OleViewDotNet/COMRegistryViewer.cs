@@ -20,6 +20,7 @@ using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -82,6 +83,7 @@ namespace OleViewDotNet
         private const string ClassKey = "class.ico";
         private const string FolderOpenKey = "folderopen.ico";
         private const string ProcessKey = "process.ico";
+        private const string ApplicationKey = "application.ico";
 
         /// <summary>
         /// Constructor
@@ -96,6 +98,8 @@ namespace OleViewDotNet
             m_filter = new RegistryViewerFilter();
             m_mode = mode;
             m_processes = processes;
+            treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
+
             foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
             {
                 comboBoxMode.Items.Add(filter);
@@ -424,7 +428,7 @@ namespace OleViewDotNet
         
         private TreeNode CreateCOMProcessNode(COMProcessEntry proc, IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId)
         {
-            TreeNode node = CreateNode(BuildCOMProcessName(proc), ProcessKey);
+            TreeNode node = CreateNode(BuildCOMProcessName(proc), ApplicationKey);
             node.ToolTipText = BuildCOMProcessTooltip(proc);
             node.Tag = proc;
 
@@ -689,6 +693,11 @@ namespace OleViewDotNet
             if (!String.IsNullOrWhiteSpace(appidEnt.DllSurrogate))
             {
                 AppendFormatLine(builder, "DLL Surrogate: {0}", appidEnt.DllSurrogate);
+            }
+
+            if (appidEnt.Flags != COMAppIDFlags.None)
+            {
+                AppendFormatLine(builder, "Flags: {0}", appidEnt.Flags);
             }
 
             return builder.ToString();
@@ -1719,6 +1728,11 @@ namespace OleViewDotNet
                     if (appid == null)
                     {
                         COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                        if (clsid == null && node.Tag is COMProgIDEntry)
+                        {
+                            clsid = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
+                        }
+
                         if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                         {
                             appid = m_registry.AppIDs[clsid.AppID];
