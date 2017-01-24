@@ -30,7 +30,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -567,13 +566,13 @@ namespace OleViewDotNet
                         }
                         catch (Exception e)
                         {
-                            System.Diagnostics.Trace.WriteLine(e.ToString());
+                            System.Diagnostics.Debug.WriteLine(e.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Trace.WriteLine(e.ToString());
+                    System.Diagnostics.Debug.WriteLine(e.ToString());
                 }
 
                 LoadBuiltinTypes(Assembly.GetExecutingAssembly());
@@ -1539,7 +1538,7 @@ namespace OleViewDotNet
                 }
                 catch (InvalidDataException)
                 {
-                    System.Diagnostics.Trace.WriteLine(name);
+                    System.Diagnostics.Debug.WriteLine(name);
                 }
             }
 
@@ -1824,6 +1823,18 @@ namespace OleViewDotNet
             using (WindowsIdentity id = WindowsIdentity.GetCurrent())
             {
                 return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
+
+        internal static string GetCOMDllName()
+        {
+            if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "combase.dll")))
+            {
+                return "combase";
+            }
+            else
+            {
+                return "ole32";
             }
         }
 

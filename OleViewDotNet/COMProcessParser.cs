@@ -544,18 +544,7 @@ namespace OleViewDotNet
         static Dictionary<string, IntPtr> _resolved_32bit = new Dictionary<string, IntPtr>();
         static Dictionary<string, IntPtr> _resolved_64bit = new Dictionary<string, IntPtr>();
 
-        static string GetDllName()
-        {
-            if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "combase.dll")))
-            {
-                return "combase";
-            }
-            else
-            {
-                return "ole32";
-            }
-        }
-        static string _dllname = GetDllName();
+        static string _dllname = COMUtilities.GetCOMDllName();
 
         static string GetSymbolName(string name)
         {
@@ -1157,7 +1146,7 @@ namespace OleViewDotNet
                     return null;
                 }
 
-                using (SymbolResolver resolver = new SymbolResolver(dbghelp_path, process.DangerousGetHandle(), symbol_path))
+                using (SymbolResolver resolver = new SymbolResolver(dbghelp_path, process, symbol_path))
                 {
                     return new COMProcessEntry(
                         pid,
@@ -1198,8 +1187,7 @@ namespace OleViewDotNet
                         dbghelp_path, symbol_path);
                     if (proc != null)
                     {
-                        ret.Add(COMProcessParser.ParseProcess(p.Id,
-                            dbghelp_path, symbol_path));
+                        ret.Add(proc);
                     }
                 }
                 catch (Win32Exception)

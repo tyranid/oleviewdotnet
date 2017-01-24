@@ -569,7 +569,7 @@ namespace OleViewDotNet
         {
             if (_formats.Add(format))
             {
-                System.Diagnostics.Trace.WriteLine(String.Format("{0}", format));
+                System.Diagnostics.Debug.WriteLine(String.Format("{0}", format));
             }
         }
 

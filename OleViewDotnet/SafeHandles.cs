@@ -154,6 +154,42 @@ namespace OleViewDotNet
             }
         }
 
+        private int? _pid;
+        public int Pid
+        {
+            get
+            {
+                if (!_pid.HasValue)
+                {
+                    _pid = GetProcessId(handle);
+                }
+                return _pid.Value;
+            }
+        }
+
+        private string _image_name;
+        public string ImageName
+        {
+            get
+            {
+                if (_image_name == null)
+                {
+                    StringBuilder builder = new StringBuilder(260);
+                    int size = builder.Capacity;
+                    if (QueryFullProcessImageName(handle, 0, builder, ref size))
+                    {
+                        _image_name = builder.ToString();
+                    }
+                    else
+                    {
+                        _image_name = "Unknown";
+                    }
+                }
+                return _image_name;
+            }
+
+        }
+
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool ReadProcessMemory(
               SafeKernelObjectHandle hProcess,
@@ -171,6 +207,17 @@ namespace OleViewDotNet
               IntPtr nSize,
               out IntPtr lpNumberOfBytesRead
             );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int GetProcessId(IntPtr Process);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern bool QueryFullProcessImageName(
+          IntPtr hProcess,
+          int dwFlags,
+          StringBuilder lpExeName,
+          ref int lpdwSize
+        );
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern bool IsWow64Process(SafeKernelObjectHandle hProcess,

@@ -17,12 +17,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace OleViewDotNet
 {
-
     sealed class SymbolLoadedModule
     {
         public string Name { get; private set; }
@@ -37,7 +38,16 @@ namespace OleViewDotNet
         }
     }
 
-    sealed class SymbolResolver : IDisposable
+    interface ISymbolResolver
+    {
+        IEnumerable<SymbolLoadedModule> GetLoadedModules();
+        SymbolLoadedModule GetModuleForAddress(IntPtr address);
+        string GetModuleRelativeAddress(IntPtr address);
+        IntPtr GetAddressOfSymbol(string name);
+        string GetSymbolForAddress(IntPtr address);
+    }
+
+    sealed class SymbolResolver : ISymbolResolver, IDisposable
     {
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate bool SymInitializeW(
@@ -50,6 +60,7 @@ namespace OleViewDotNet
         delegate bool SymCleanup(
             IntPtr hProcess
         );
+
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate bool SymFromNameW(
               IntPtr hProcess,
@@ -83,6 +94,16 @@ namespace OleViewDotNet
               IntPtr hProcess,
               long dwAddr,
               ref IMAGEHLP_MODULE64 ModuleInfo
+            );
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+        delegate long SymLoadModule64(
+              IntPtr hProcess,
+              IntPtr hFile,
+              string ImageName,
+              string ModuleName,
+              long BaseOfDll,
+              int SizeOfDll
             );
 
         enum SymTagEnum
@@ -250,6 +271,32 @@ namespace OleViewDotNet
         delegate int SymSetOptions(
             SymOptions SymOptions
         );
+        
+        [Flags]
+        enum EnumProcessModulesFilter
+        {
+            LIST_MODULES_DEFAULT = 0x00,
+            LIST_MODULES_32BIT = 0x01,
+            LIST_MODULES_64BIT = 0x02,        
+            LIST_MODULES_ALL = LIST_MODULES_32BIT | LIST_MODULES_64BIT,
+        }
+
+        [DllImport("Psapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern bool EnumProcessModulesEx(
+              SafeProcessHandle hProcess,
+              [Out] IntPtr[] lphModule,
+              int cb,
+              out int lpcbNeeded,
+              EnumProcessModulesFilter dwFilterFlag
+            );
+
+        [DllImport("Psapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern int GetModuleFileNameEx(
+              SafeProcessHandle hProcess,
+              IntPtr hModule,
+              StringBuilder lpFilename,
+              int nSize
+            );
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern SafeLibraryHandle LoadLibrary(string filename);
@@ -262,6 +309,7 @@ namespace OleViewDotNet
         private SymEnumerateModulesW64 _sym_enum_modules;
         private SymFromAddrW _sym_from_addr;
         private SymGetModuleInfoW64 _sym_get_module_info;
+        private SymLoadModule64 _sym_load_module;
         private IntPtr _process;
 
         private void GetFunc<T>(ref T f) where T : class
@@ -280,9 +328,9 @@ namespace OleViewDotNet
             return Marshal.PtrToStringUni(buffer.DangerousGetHandle() + ofs.ToInt32());
         }
 
-        public SymbolResolver(string dbghelp_path, IntPtr process, string symbol_path)
+        public SymbolResolver(string dbghelp_path, SafeProcessHandle process, string symbol_path)
         {
-            _process = process;
+            _process = process.DangerousGetHandle();
             _dbghelp_lib = COMUtilities.SafeLoadLibrary(dbghelp_path);
             GetFunc(ref _sym_init);
             GetFunc(ref _sym_cleanup);
@@ -291,12 +339,36 @@ namespace OleViewDotNet
             GetFunc(ref _sym_enum_modules);
             GetFunc(ref _sym_from_addr);
             GetFunc(ref _sym_get_module_info);
+            GetFunc(ref _sym_load_module);
 
             _sym_set_options(SymOptions.INCLUDE_32BIT_MODULES | SymOptions.UNDNAME | SymOptions.DEFERRED_LOADS);
 
-            if (!_sym_init(process, symbol_path, true))
+            if (!_sym_init(_process, symbol_path, true))
             {
-                throw new Win32Exception();
+                // If SymInitialize failed then we'll have to bootstrap modules manually.
+                if (!_sym_init(_process, symbol_path, false))
+                {
+                    throw new Win32Exception();
+                }
+                
+                IntPtr[] modules = new IntPtr[1024];
+                int return_length;
+                if (EnumProcessModulesEx(process, modules, modules.Length * IntPtr.Size, out return_length,
+                    process.Is64Bit ? EnumProcessModulesFilter.LIST_MODULES_64BIT : EnumProcessModulesFilter.LIST_MODULES_32BIT))
+                {
+                    foreach (IntPtr module in modules.Take(return_length / IntPtr.Size))
+                    {
+                        StringBuilder dllpath = new StringBuilder(260);
+                        if (GetModuleFileNameEx(process, module, dllpath, dllpath.Capacity) > 0)
+                        {
+                            if (_sym_load_module(_process, IntPtr.Zero, dllpath.ToString(), 
+                                Path.GetFileNameWithoutExtension(dllpath.ToString()), module.ToInt64(), 0) == 0)
+                            {
+                                System.Diagnostics.Debug.WriteLine(String.Format("Couldn't load {0}", dllpath));
+                            }
+                        }
+                    }
+                }
             }
         }
 
