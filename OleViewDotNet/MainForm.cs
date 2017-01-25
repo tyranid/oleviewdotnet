@@ -139,7 +139,10 @@ namespace OleViewDotNet
 
         private void OpenView(COMRegistryViewer.DisplayMode mode, IEnumerable<COMProcessEntry> processes)
         {
-            HostControl(new COMRegistryViewer(m_registry, mode, processes));                
+            Cursor currCursor = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            HostControl(new COMRegistryViewer(m_registry, mode, processes));
+            Cursor.Current = currCursor;
         }
 
         private void OpenView(COMRegistryViewer.DisplayMode mode)
