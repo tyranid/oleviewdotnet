@@ -25,7 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -234,6 +233,23 @@ namespace OleViewDotNet
             {
                 AppendFormatLine(strRet, "Instance Interfaces: {0}", ent.Interfaces.Count());
                 AppendFormatLine(strRet, "Factory Interfaces: {0}", ent.FactoryInterfaces.Count());
+            }
+            if (ent.DefaultServerType == COMServerType.InProcServer32)
+            {
+                COMCLSIDServerEntry server = ent.Servers[COMServerType.InProcServer32];
+                if (server.HasDotNet)
+                {
+                    AppendFormatLine(strRet, "Assembly: {0}", server.DotNet.AssemblyName);
+                    AppendFormatLine(strRet, "Class: {0}", server.DotNet.ClassName);
+                    if (!String.IsNullOrWhiteSpace(server.DotNet.CodeBase))
+                    {
+                        AppendFormatLine(strRet, "Codebase: {0}", server.DotNet.CodeBase);
+                    }
+                    if (!String.IsNullOrWhiteSpace(server.DotNet.RuntimeVersion))
+                    {
+                        AppendFormatLine(strRet, "Runtime Version: {0}", server.DotNet.RuntimeVersion);
+                    }
+                }
             }
 
             return strRet.ToString();

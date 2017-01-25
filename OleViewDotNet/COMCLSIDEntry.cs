@@ -47,6 +47,70 @@ namespace OleViewDotNet
         Neutral
     }
 
+    public class COMCLSIDServerDotNetEntry : IXmlSerializable
+    {
+        public string AssemblyName { get; private set; }
+        public string ClassName { get; private set; }
+        public string CodeBase { get; private set; }
+        public string RuntimeVersion { get; private set; }
+
+        internal COMCLSIDServerDotNetEntry()
+        {
+        }
+
+        internal COMCLSIDServerDotNetEntry(RegistryKey key)
+        {
+            AssemblyName = COMUtilities.ReadStringFromKey(key, null, "Assembly");
+            ClassName = COMUtilities.ReadStringFromKey(key, null, "Class");
+            CodeBase = COMUtilities.ReadStringFromKey(key, null, "CodeBase");
+            RuntimeVersion = COMUtilities.ReadStringFromKey(key, null, "RuntimeVersion");
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            AssemblyName = reader.ReadString("asm");
+            ClassName = reader.ReadString("cls");
+            CodeBase = reader.ReadString("code");
+            RuntimeVersion = reader.ReadString("ver");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteOptionalAttributeString("asm", AssemblyName);
+            writer.WriteOptionalAttributeString("cls", ClassName);
+            writer.WriteOptionalAttributeString("code", CodeBase);
+            writer.WriteOptionalAttributeString("ver", RuntimeVersion);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMCLSIDServerDotNetEntry right = obj as COMCLSIDServerDotNetEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return AssemblyName.Equals(right.AssemblyName) && ClassName.Equals(right.ClassName) 
+                && CodeBase.Equals(right.CodeBase) && RuntimeVersion.Equals(right.RuntimeVersion);
+        }
+
+        public override int GetHashCode()
+        {
+            return AssemblyName.GetHashCode() ^ ClassName.GetHashCode()
+                ^ CodeBase.GetHashCode() ^ RuntimeVersion.GetHashCode();
+        }
+    }
+
     public class COMCLSIDServerEntry : IXmlSerializable
     {
         /// <summary>
@@ -65,6 +129,8 @@ namespace OleViewDotNet
         /// The threading model.
         /// </summary>
         public COMThreadingModel ThreadingModel { get; private set; }
+        public COMCLSIDServerDotNetEntry DotNet { get; private set; }
+        public bool HasDotNet { get { return DotNet != null; } }
 
         public override bool Equals(object obj)
         {
@@ -225,6 +291,10 @@ namespace OleViewDotNet
             else if (server_type == COMServerType.InProcServer32)
             {
                 ThreadingModel = ReadThreadingModel(key);
+                if (key.GetValue("Assembly") != null)
+                {
+                    DotNet = new COMCLSIDServerDotNetEntry(key);
+                }
             }
             else
             {
@@ -245,6 +315,12 @@ namespace OleViewDotNet
             CommandLine = reader.ReadString("cmdline");
             ServerType = reader.ReadEnum<COMServerType>("type");
             ThreadingModel = reader.ReadEnum<COMThreadingModel>("model");
+            if (reader.ReadBool("dotnet"))
+            {
+                IEnumerable<COMCLSIDServerDotNetEntry> service = 
+                    reader.ReadSerializableObjects<COMCLSIDServerDotNetEntry>("dotnet", () => new COMCLSIDServerDotNetEntry());
+                DotNet = service.FirstOrDefault();
+            }
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -253,6 +329,12 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("cmdline", CommandLine);
             writer.WriteEnum("type", ServerType);
             writer.WriteEnum("model", ThreadingModel);
+            if (DotNet != null)
+            {
+                writer.WriteBool("dotnet", true);
+                writer.WriteSerializableObjects("dotnet", 
+                    new COMCLSIDServerDotNetEntry[] { DotNet });
+            }
         }
     }
 
@@ -271,13 +353,13 @@ namespace OleViewDotNet
             return String.Compare(Name, right.Name);
         }
         
-        private void ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
+        private COMCLSIDServerEntry ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
         {
             using (RegistryKey server_key = key.OpenSubKey(server_type.ToString()))
             {
                 if (server_key == null)
                 {
-                    return;
+                    return null;
                 }
 
                 COMCLSIDServerEntry entry = new COMCLSIDServerEntry(server_key, server_type);
@@ -285,6 +367,7 @@ namespace OleViewDotNet
                 {
                     servers.Add(server_type, new COMCLSIDServerEntry(server_key, server_type));
                 }
+                return entry;
             }
         }
 
@@ -303,16 +386,23 @@ namespace OleViewDotNet
                 }
             }
 
+            bool fake_name = false;
             if (Name == null)
             {
+                fake_name = true;
                 Name = Clsid.FormatGuid();
             }
 
             Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
-            ReadServerKey(servers, key, COMServerType.InProcServer32);
+            COMCLSIDServerEntry inproc_server = ReadServerKey(servers, key, COMServerType.InProcServer32);
             ReadServerKey(servers, key, COMServerType.LocalServer32);
             ReadServerKey(servers, key, COMServerType.InProcHandler32);
             Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(servers);
+
+            if (fake_name && inproc_server != null && inproc_server.HasDotNet)
+            {
+                Name = String.Format("{0}, {1}", inproc_server.DotNet.ClassName, inproc_server.DotNet.AssemblyName);
+            }
 
             AppID = COMUtilities.ReadGuidFromKey(key, null, "AppID");
             if (AppID == Guid.Empty)
