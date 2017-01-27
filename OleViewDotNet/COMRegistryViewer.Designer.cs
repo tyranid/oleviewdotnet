@@ -58,17 +58,21 @@
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryAllInterfacesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.unmarshalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cloneTreeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.allVisibleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.btnApply = new System.Windows.Forms.Button();
-            this.refreshProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.unmarshalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filteredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -133,7 +137,8 @@
             this.queryAllInterfacesToolStripMenuItem,
             this.refreshProcessToolStripMenuItem,
             this.propertiesToolStripMenuItem,
-            this.unmarshalToolStripMenuItem});
+            this.unmarshalToolStripMenuItem,
+            this.cloneTreeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.Size = new System.Drawing.Size(208, 378);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
@@ -318,12 +323,74 @@
             this.queryAllInterfacesToolStripMenuItem.Text = "Query All Interfaces";
             this.queryAllInterfacesToolStripMenuItem.Click += new System.EventHandler(this.queryAllInterfacesToolStripMenuItem_Click);
             // 
+            // refreshProcessToolStripMenuItem
+            // 
+            this.refreshProcessToolStripMenuItem.Name = "refreshProcessToolStripMenuItem";
+            this.refreshProcessToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.refreshProcessToolStripMenuItem.Text = "Refresh Process";
+            this.refreshProcessToolStripMenuItem.Click += new System.EventHandler(this.refreshProcessToolStripMenuItem_Click);
+            // 
             // propertiesToolStripMenuItem
             // 
             this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
             this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.propertiesToolStripMenuItem.Text = "Properties";
             this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
+            // 
+            // unmarshalToolStripMenuItem
+            // 
+            this.unmarshalToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toHexEditorToolStripMenuItem,
+            this.toFileToolStripMenuItem,
+            this.toObjectToolStripMenuItem});
+            this.unmarshalToolStripMenuItem.Name = "unmarshalToolStripMenuItem";
+            this.unmarshalToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.unmarshalToolStripMenuItem.Text = "Unmarshal";
+            // 
+            // toHexEditorToolStripMenuItem
+            // 
+            this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
+            this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
+            // 
+            // toFileToolStripMenuItem
+            // 
+            this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toFileToolStripMenuItem.Text = "To File";
+            this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
+            // 
+            // toObjectToolStripMenuItem
+            // 
+            this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toObjectToolStripMenuItem.Text = "To Object";
+            this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
+            // 
+            // cloneTreeToolStripMenuItem
+            // 
+            this.cloneTreeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.allVisibleToolStripMenuItem,
+            this.selectedToolStripMenuItem,
+            this.filteredToolStripMenuItem});
+            this.cloneTreeToolStripMenuItem.Name = "cloneTreeToolStripMenuItem";
+            this.cloneTreeToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.cloneTreeToolStripMenuItem.Text = "Clone Tree";
+            // 
+            // allVisibleToolStripMenuItem
+            // 
+            this.allVisibleToolStripMenuItem.Name = "allVisibleToolStripMenuItem";
+            this.allVisibleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.allVisibleToolStripMenuItem.Text = "All Visible";
+            this.allVisibleToolStripMenuItem.Click += new System.EventHandler(this.allVisibleToolStripMenuItem_Click);
+            // 
+            // selectedToolStripMenuItem
+            // 
+            this.selectedToolStripMenuItem.Name = "selectedToolStripMenuItem";
+            this.selectedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.selectedToolStripMenuItem.Text = "Selected";
+            this.selectedToolStripMenuItem.Click += new System.EventHandler(this.selectedToolStripMenuItem_Click);
             // 
             // treeImageList
             // 
@@ -390,43 +457,12 @@
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
             // 
-            // refreshProcessToolStripMenuItem
+            // filteredToolStripMenuItem
             // 
-            this.refreshProcessToolStripMenuItem.Name = "refreshProcessToolStripMenuItem";
-            this.refreshProcessToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.refreshProcessToolStripMenuItem.Text = "Refresh Process";
-            this.refreshProcessToolStripMenuItem.Click += new System.EventHandler(this.refreshProcessToolStripMenuItem_Click);
-            // 
-            // unmarshalToolStripMenuItem
-            // 
-            this.unmarshalToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toHexEditorToolStripMenuItem,
-            this.toFileToolStripMenuItem,
-            this.toObjectToolStripMenuItem});
-            this.unmarshalToolStripMenuItem.Name = "unmarshalToolStripMenuItem";
-            this.unmarshalToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.unmarshalToolStripMenuItem.Text = "Unmarshal";
-            // 
-            // toFileToolStripMenuItem
-            // 
-            this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.toFileToolStripMenuItem.Text = "To File";
-            this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
-            // 
-            // toHexEditorToolStripMenuItem
-            // 
-            this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
-            this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
-            // 
-            // toObjectToolStripMenuItem
-            // 
-            this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
-            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.toObjectToolStripMenuItem.Text = "To Object";
-            this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
+            this.filteredToolStripMenuItem.Name = "filteredToolStripMenuItem";
+            this.filteredToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.filteredToolStripMenuItem.Text = "Filtered";
+            this.filteredToolStripMenuItem.Click += new System.EventHandler(this.filteredToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 
@@ -480,5 +516,9 @@
         private System.Windows.Forms.ToolStripMenuItem toHexEditorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toObjectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cloneTreeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem allVisibleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filteredToolStripMenuItem;
     }
 }

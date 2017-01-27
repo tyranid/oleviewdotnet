@@ -40,10 +40,12 @@ namespace OleViewDotNet
         /// <summary>
         /// Current registry
         /// </summary>
-        COMRegistry m_registry;
-        TreeNode[] m_originalNodes;
-        HashSet<FilterType> m_filter_types;
-        RegistryViewerFilter m_filter;
+        private readonly COMRegistry m_registry;
+        private readonly HashSet<FilterType> m_filter_types;
+        private readonly DisplayMode m_mode;
+        private readonly IEnumerable<COMProcessEntry> m_processes;
+        private RegistryViewerFilter m_filter;
+        private TreeNode[] m_originalNodes;
 
         /// <summary>
         /// Enumeration to indicate what to display
@@ -214,6 +216,8 @@ namespace OleViewDotNet
             m_registry = reg;
             m_filter_types = new HashSet<FilterType>(filter_types);
             m_filter = new RegistryViewerFilter();
+            m_mode = mode;
+            m_processes = processes;
             treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
 
             foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
@@ -1434,6 +1438,12 @@ namespace OleViewDotNet
                     contextMenuStrip.Items.Add(queryAllInterfacesToolStripMenuItem);
                 }
 
+                if (treeComRegistry.Nodes.Count > 0)
+                {
+                    contextMenuStrip.Items.Add(cloneTreeToolStripMenuItem);
+                    selectedToolStripMenuItem.Enabled = treeComRegistry.SelectedNode != null;
+                }
+
                 if (PropertiesControl.SupportsProperties(node.Tag))
                 {
                     contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
@@ -2089,6 +2099,45 @@ namespace OleViewDotNet
                 catch (Exception ex)
                 {
                     Program.ShowError(this, ex);
+                }
+            }
+        }
+
+        private void CreateClonedTree(IEnumerable<TreeNode> nodes)
+        {
+            string text = Text;
+            if (!text.StartsWith("Clone of "))
+            {
+                text = "Clone of " + text;
+            }
+            COMRegistryViewer viewer = new COMRegistryViewer(m_registry, m_mode, m_processes, nodes.Select(n => (TreeNode)n.Clone()), m_filter_types, text);
+            Program.GetMainForm(m_registry).HostControl(viewer);
+        }
+
+        private void allVisibleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateClonedTree(treeComRegistry.Nodes.OfType<TreeNode>());
+        }
+
+        private void selectedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode selected = treeComRegistry.SelectedNode;
+            if (selected != null)
+            {
+                CreateClonedTree(new TreeNode[] { selected });
+            }
+        }
+
+        private async void filteredToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (ViewFilterForm form = new ViewFilterForm(new RegistryViewerFilter(), m_filter_types))
+            {
+                if (form.ShowDialog(this) == DialogResult.OK && form.Filter.Filters.Count > 0)
+                {
+                    IEnumerable<TreeNode> nodes = 
+                        await Task.Run(() => m_originalNodes.Where(n => 
+                        FilterNode(n, x => RunComplexFilter(x, form.Filter)) == FilterResult.Include).ToArray());
+                    CreateClonedTree(nodes);
                 }
             }
         }
