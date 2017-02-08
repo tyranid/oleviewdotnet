@@ -264,6 +264,25 @@ namespace OleViewDotNet
         }   
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public class BIND_OPTS3
+    {
+        int cbStruct;
+        public int grfFlags;
+        public int grfMode;
+        public int dwTickCountDeadline;
+        public int dwTrackFlags;
+        public CLSCTX dwClassContext;
+        public int locale;
+        public IntPtr pServerInfo;
+        public IntPtr hwnd;
+
+        public BIND_OPTS3()
+        {
+            cbStruct = Marshal.SizeOf(this);
+        }
+    }
+
     [Flags]
     public enum CreateUrlMonikerFlags
     {
@@ -292,6 +311,9 @@ namespace OleViewDotNet
         public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, ref Guid riid, out IntPtr ppv);
         [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+
+        [DllImport("ole32.dll", CharSet=CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
+        public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
@@ -1021,6 +1043,21 @@ namespace OleViewDotNet
 
                 return ret;
             }
+        }
+
+        public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
+        {
+            object ret;
+            Guid iid = COMInterfaceEntry.IID_IUnknown;
+            CoGetObject(moniker, bind_opts, ref iid, out ret);
+            return ret;
+        }
+
+        public static object CreateFromMoniker(string moniker, CLSCTX clsctx)
+        {
+            BIND_OPTS3 bind_opts = new BIND_OPTS3();
+            bind_opts.dwClassContext = clsctx;
+            return CreateFromMoniker(moniker, bind_opts);
         }
 
         public static object UnmarshalObject(Stream stm)

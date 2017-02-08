@@ -159,6 +159,22 @@ namespace OleViewDotNet
             }
 
             SetupTypeLibVersionEntry(m_registry.GetTypeLibVersionEntry(entry.TypeLib, null));
+
+            if (entry.Elevation != null)
+            {
+                textBoxElevationEnabled.Text = entry.Elevation.Enabled.ToString();
+                textBoxElevationIconReference.Text = GetStringValue(entry.Elevation.IconReference);
+                foreach (COMCLSIDEntry vso in entry.Elevation.VirtualServerObjects.Select(v => m_registry.MapClsidToEntry(v)))
+                {
+                    ListViewItem item = listViewElevationVSOs.Items.Add(vso.Name);
+                    item.SubItems.Add(vso.Clsid.ToString());
+                    item.Tag = vso;
+                }
+                listViewElevationVSOs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                listViewElevationVSOs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                tabControlProperties.TabPages.Add(tabPageElevation);
+            }
+
             m_clsid = entry;
         }
 
@@ -559,6 +575,21 @@ namespace OleViewDotNet
                 {
                     Program.ShowError(this, ex);
                 }
+            }
+        }
+
+        private void listViewElevationVSOs_DoubleClick(object sender, EventArgs e)
+        {
+            if (listViewElevationVSOs.SelectedItems.Count < 1)
+            {
+                return;
+            }
+
+            COMCLSIDEntry clsid = listViewElevationVSOs.SelectedItems[0].Tag as COMCLSIDEntry;
+            if (clsid != null)
+            {
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
+                        clsid.Name, clsid));
             }
         }
     }

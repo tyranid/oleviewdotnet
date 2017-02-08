@@ -96,6 +96,11 @@
             System.Windows.Forms.Label label51;
             System.Windows.Forms.Label label52;
             System.Windows.Forms.Label label53;
+            System.Windows.Forms.Label label55;
+            System.Windows.Forms.Label label56;
+            System.Windows.Forms.ColumnHeader columnHeaderElevationVsoName;
+            System.Windows.Forms.ColumnHeader columnHeaderElevationVsoClsid;
+            System.Windows.Forms.Label label54;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -168,6 +173,8 @@
             this.textBoxIPIDReferences = new System.Windows.Forms.TextBox();
             this.textBoxIPIDProcessId = new System.Windows.Forms.TextBox();
             this.textBoxIPIDApartment = new System.Windows.Forms.TextBox();
+            this.textBoxIPIDInterfaceVTable = new System.Windows.Forms.TextBox();
+            this.textBoxIPIDStubVTable = new System.Windows.Forms.TextBox();
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
@@ -189,8 +196,11 @@
             this.textBoxTypeLibWin64 = new System.Windows.Forms.TextBox();
             this.tabPageProcess = new System.Windows.Forms.TabPage();
             this.tabPageIPID = new System.Windows.Forms.TabPage();
-            this.textBoxIPIDInterfaceVTable = new System.Windows.Forms.TextBox();
-            this.textBoxIPIDStubVTable = new System.Windows.Forms.TextBox();
+            this.tabPageElevation = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanelElevation = new System.Windows.Forms.TableLayoutPanel();
+            this.textBoxElevationIconReference = new System.Windows.Forms.TextBox();
+            this.listViewElevationVSOs = new System.Windows.Forms.ListView();
+            this.textBoxElevationEnabled = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -258,6 +268,11 @@
             label51 = new System.Windows.Forms.Label();
             label52 = new System.Windows.Forms.Label();
             label53 = new System.Windows.Forms.Label();
+            label55 = new System.Windows.Forms.Label();
+            label56 = new System.Windows.Forms.Label();
+            columnHeaderElevationVsoName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderElevationVsoClsid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            label54 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -281,6 +296,8 @@
             this.tableLayoutPanelTypeLib.SuspendLayout();
             this.tabPageProcess.SuspendLayout();
             this.tabPageIPID.SuspendLayout();
+            this.tabPageElevation.SuspendLayout();
+            this.tableLayoutPanelElevation.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -1841,6 +1858,82 @@
             this.textBoxIPIDApartment.Size = new System.Drawing.Size(204, 20);
             this.textBoxIPIDApartment.TabIndex = 17;
             // 
+            // label52
+            // 
+            label52.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label52.AutoSize = true;
+            label52.Location = new System.Drawing.Point(284, 84);
+            label52.Name = "label52";
+            label52.Size = new System.Drawing.Size(44, 13);
+            label52.TabIndex = 18;
+            label52.Text = "VTable:";
+            // 
+            // textBoxIPIDInterfaceVTable
+            // 
+            this.textBoxIPIDInterfaceVTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxIPIDInterfaceVTable.Location = new System.Drawing.Point(362, 81);
+            this.textBoxIPIDInterfaceVTable.Name = "textBoxIPIDInterfaceVTable";
+            this.textBoxIPIDInterfaceVTable.ReadOnly = true;
+            this.textBoxIPIDInterfaceVTable.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDInterfaceVTable.TabIndex = 19;
+            // 
+            // label53
+            // 
+            label53.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label53.AutoSize = true;
+            label53.Location = new System.Drawing.Point(284, 110);
+            label53.Name = "label53";
+            label53.Size = new System.Drawing.Size(44, 13);
+            label53.TabIndex = 20;
+            label53.Text = "VTable:";
+            // 
+            // textBoxIPIDStubVTable
+            // 
+            this.textBoxIPIDStubVTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxIPIDStubVTable.Location = new System.Drawing.Point(362, 107);
+            this.textBoxIPIDStubVTable.Name = "textBoxIPIDStubVTable";
+            this.textBoxIPIDStubVTable.ReadOnly = true;
+            this.textBoxIPIDStubVTable.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDStubVTable.TabIndex = 21;
+            // 
+            // label55
+            // 
+            label55.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label55.AutoSize = true;
+            label55.Location = new System.Drawing.Point(3, 32);
+            label55.Name = "label55";
+            label55.Size = new System.Drawing.Size(84, 13);
+            label55.TabIndex = 2;
+            label55.Text = "Icon Reference:";
+            // 
+            // label56
+            // 
+            label56.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label56.AutoSize = true;
+            label56.Location = new System.Drawing.Point(3, 52);
+            label56.Name = "label56";
+            label56.Size = new System.Drawing.Size(37, 13);
+            label56.TabIndex = 4;
+            label56.Text = "VSOs:";
+            // 
+            // columnHeaderElevationVsoName
+            // 
+            columnHeaderElevationVsoName.Text = "Name";
+            // 
+            // columnHeaderElevationVsoClsid
+            // 
+            columnHeaderElevationVsoClsid.Text = "CLSID";
+            // 
+            // label54
+            // 
+            label54.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label54.AutoSize = true;
+            label54.Location = new System.Drawing.Point(3, 6);
+            label54.Name = "label54";
+            label54.Size = new System.Drawing.Size(49, 13);
+            label54.TabIndex = 7;
+            label54.Text = "Enabled:";
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
@@ -1854,6 +1947,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageTypeLib);
             this.tabControlProperties.Controls.Add(this.tabPageProcess);
             this.tabControlProperties.Controls.Add(this.tabPageIPID);
+            this.tabControlProperties.Controls.Add(this.tabPageElevation);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Margin = new System.Windows.Forms.Padding(1);
@@ -2115,43 +2209,73 @@
             this.tabPageIPID.Text = "IPID";
             this.tabPageIPID.UseVisualStyleBackColor = true;
             // 
-            // label52
+            // tabPageElevation
             // 
-            label52.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label52.AutoSize = true;
-            label52.Location = new System.Drawing.Point(284, 84);
-            label52.Name = "label52";
-            label52.Size = new System.Drawing.Size(44, 13);
-            label52.TabIndex = 18;
-            label52.Text = "VTable:";
+            this.tabPageElevation.Controls.Add(this.tableLayoutPanelElevation);
+            this.tabPageElevation.Location = new System.Drawing.Point(4, 22);
+            this.tabPageElevation.Name = "tabPageElevation";
+            this.tabPageElevation.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageElevation.Size = new System.Drawing.Size(575, 363);
+            this.tabPageElevation.TabIndex = 11;
+            this.tabPageElevation.Text = "Elevation";
+            this.tabPageElevation.UseVisualStyleBackColor = true;
             // 
-            // textBoxIPIDInterfaceVTable
+            // tableLayoutPanelElevation
             // 
-            this.textBoxIPIDInterfaceVTable.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDInterfaceVTable.Location = new System.Drawing.Point(362, 81);
-            this.textBoxIPIDInterfaceVTable.Name = "textBoxIPIDInterfaceVTable";
-            this.textBoxIPIDInterfaceVTable.ReadOnly = true;
-            this.textBoxIPIDInterfaceVTable.Size = new System.Drawing.Size(204, 20);
-            this.textBoxIPIDInterfaceVTable.TabIndex = 19;
+            this.tableLayoutPanelElevation.ColumnCount = 2;
+            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelElevation.Controls.Add(label55, 0, 1);
+            this.tableLayoutPanelElevation.Controls.Add(this.textBoxElevationIconReference, 1, 1);
+            this.tableLayoutPanelElevation.Controls.Add(label56, 0, 2);
+            this.tableLayoutPanelElevation.Controls.Add(this.listViewElevationVSOs, 0, 3);
+            this.tableLayoutPanelElevation.Controls.Add(label54, 0, 0);
+            this.tableLayoutPanelElevation.Controls.Add(this.textBoxElevationEnabled, 1, 0);
+            this.tableLayoutPanelElevation.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanelElevation.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanelElevation.Name = "tableLayoutPanelElevation";
+            this.tableLayoutPanelElevation.RowCount = 4;
+            this.tableLayoutPanelElevation.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelElevation.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelElevation.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelElevation.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelElevation.Size = new System.Drawing.Size(569, 357);
+            this.tableLayoutPanelElevation.TabIndex = 0;
             // 
-            // label53
+            // textBoxElevationIconReference
             // 
-            label53.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label53.AutoSize = true;
-            label53.Location = new System.Drawing.Point(284, 110);
-            label53.Name = "label53";
-            label53.Size = new System.Drawing.Size(44, 13);
-            label53.TabIndex = 20;
-            label53.Text = "VTable:";
+            this.textBoxElevationIconReference.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxElevationIconReference.Location = new System.Drawing.Point(93, 29);
+            this.textBoxElevationIconReference.Name = "textBoxElevationIconReference";
+            this.textBoxElevationIconReference.ReadOnly = true;
+            this.textBoxElevationIconReference.Size = new System.Drawing.Size(473, 20);
+            this.textBoxElevationIconReference.TabIndex = 3;
             // 
-            // textBoxIPIDStubVTable
+            // listViewElevationVSOs
             // 
-            this.textBoxIPIDStubVTable.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDStubVTable.Location = new System.Drawing.Point(362, 107);
-            this.textBoxIPIDStubVTable.Name = "textBoxIPIDStubVTable";
-            this.textBoxIPIDStubVTable.ReadOnly = true;
-            this.textBoxIPIDStubVTable.Size = new System.Drawing.Size(204, 20);
-            this.textBoxIPIDStubVTable.TabIndex = 21;
+            this.listViewElevationVSOs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnHeaderElevationVsoName,
+            columnHeaderElevationVsoClsid});
+            this.tableLayoutPanelElevation.SetColumnSpan(this.listViewElevationVSOs, 2);
+            this.listViewElevationVSOs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewElevationVSOs.FullRowSelect = true;
+            this.listViewElevationVSOs.Location = new System.Drawing.Point(3, 68);
+            this.listViewElevationVSOs.MultiSelect = false;
+            this.listViewElevationVSOs.Name = "listViewElevationVSOs";
+            this.listViewElevationVSOs.Size = new System.Drawing.Size(563, 286);
+            this.listViewElevationVSOs.TabIndex = 6;
+            this.listViewElevationVSOs.UseCompatibleStateImageBehavior = false;
+            this.listViewElevationVSOs.View = System.Windows.Forms.View.Details;
+            this.listViewElevationVSOs.DoubleClick += new System.EventHandler(this.listViewElevationVSOs_DoubleClick);
+            // 
+            // textBoxElevationEnabled
+            // 
+            this.textBoxElevationEnabled.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxElevationEnabled.Location = new System.Drawing.Point(93, 3);
+            this.textBoxElevationEnabled.Name = "textBoxElevationEnabled";
+            this.textBoxElevationEnabled.ReadOnly = true;
+            this.textBoxElevationEnabled.Size = new System.Drawing.Size(473, 20);
+            this.textBoxElevationEnabled.TabIndex = 8;
             // 
             // PropertiesControl
             // 
@@ -2194,6 +2318,9 @@
             this.tableLayoutPanelTypeLib.PerformLayout();
             this.tabPageProcess.ResumeLayout(false);
             this.tabPageIPID.ResumeLayout(false);
+            this.tabPageElevation.ResumeLayout(false);
+            this.tableLayoutPanelElevation.ResumeLayout(false);
+            this.tableLayoutPanelElevation.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2295,5 +2422,10 @@
         private System.Windows.Forms.TextBox textBoxIPIDApartment;
         private System.Windows.Forms.TextBox textBoxIPIDInterfaceVTable;
         private System.Windows.Forms.TextBox textBoxIPIDStubVTable;
+        private System.Windows.Forms.TabPage tabPageElevation;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelElevation;
+        private System.Windows.Forms.TextBox textBoxElevationIconReference;
+        private System.Windows.Forms.ListView listViewElevationVSOs;
+        private System.Windows.Forms.TextBox textBoxElevationEnabled;
     }
 }

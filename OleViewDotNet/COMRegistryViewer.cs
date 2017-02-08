@@ -1828,7 +1828,7 @@ namespace OleViewDotNet
         {
             try
             {
-                object obj = Marshal.BindToMoniker(moniker);
+                object obj = COMUtilities.CreateFromMoniker(moniker, CLSCTX.LOCAL_SERVER);
                 await SetupObjectView(ent, obj, obj is IClassFactory);
             }
             catch (Exception ex)

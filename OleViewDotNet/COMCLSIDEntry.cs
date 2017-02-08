@@ -47,6 +47,75 @@ namespace OleViewDotNet
         Neutral
     }
 
+    public class COMCLSIDElevationEntry : IXmlSerializable
+    {
+        public bool Enabled { get; private set; }
+        public string IconReference { get; private set; }
+        public IEnumerable<Guid> VirtualServerObjects { get; private set; }
+
+        internal COMCLSIDElevationEntry(RegistryKey key, RegistryKey vso_key)
+        {
+            Enabled = COMUtilities.ReadIntFromKey(key, null, "Enabled") != 0;
+            IconReference = COMUtilities.ReadStringFromKey(key, null, "IconReference");
+            HashSet<Guid> vsos = new HashSet<Guid>();
+            if (vso_key != null)
+            {
+                foreach (string value in vso_key.GetValueNames())
+                {
+                    if (COMUtilities.IsValidGUID(value))
+                    {
+                        vsos.Add(new Guid(value));
+                    }
+                }
+            }
+            VirtualServerObjects = new List<Guid>(vsos).AsReadOnly();
+        }
+
+        internal COMCLSIDElevationEntry()
+        {
+        }
+
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Enabled = reader.ReadBool("enabled");
+            IconReference = reader.ReadString("icon");
+            VirtualServerObjects = reader.ReadGuids("vsos");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteBool("enabled", Enabled);
+            writer.WriteOptionalAttributeString("icon", IconReference);
+            writer.WriteGuids("vsos", VirtualServerObjects);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMCLSIDElevationEntry right = obj as COMCLSIDElevationEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return Enabled == right.Enabled && IconReference == right.IconReference && VirtualServerObjects.SequenceEqual(right.VirtualServerObjects);
+        }
+
+        public override int GetHashCode()
+        {
+            return Enabled.GetHashCode() ^ IconReference.GetHashCode() ^ VirtualServerObjects.GetEnumHashCode();
+        }
+    }
+
     public class COMCLSIDServerDotNetEntry : IXmlSerializable
     {
         public string AssemblyName { get; private set; }
@@ -451,7 +520,14 @@ namespace OleViewDotNet
 
             Categories = categories.ToList().AsReadOnly();
             TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
-            CanElevate = COMUtilities.ReadIntFromKey(key, "Elevation", "Enabled") != 0;
+
+            using (RegistryKey elev_key = key.OpenSubKey("Elevation"), vso_key = key.OpenSubKey("VirtualServerObjects"))
+            {
+                if (elev_key != null)
+                {
+                    Elevation = new COMCLSIDElevationEntry(elev_key, vso_key);
+                }
+            }
         }
 
         public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
@@ -511,7 +587,15 @@ namespace OleViewDotNet
             }
         }
 
-        public bool CanElevate { get; private set; }
+        public bool CanElevate
+        {
+            get
+            {
+                return Elevation != null && Elevation.Enabled;
+            }
+        }
+
+        public COMCLSIDElevationEntry Elevation { get; private set; }
 
         public IDictionary<COMServerType, COMCLSIDServerEntry> Servers { get; private set; }
 
@@ -541,15 +625,28 @@ namespace OleViewDotNet
                 return false;
             }
 
+            if (Elevation != null)
+            {
+                if (!Elevation.Equals(right.Elevation))
+                {
+                    return false;
+                }
+            }
+            else if (right.Elevation != null)
+            {
+                return false;
+            }
+
             // We don't consider the loaded interfaces.
             return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID 
-                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values) && CanElevate == right.CanElevate;
+                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values);
         }
 
         public override int GetHashCode()
         {
-            return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode() 
-                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() ^ CanElevate.GetHashCode();
+            return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
+                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() 
+                ^ Elevation.GetSafeHashCode();
         }
 
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
@@ -820,7 +917,8 @@ namespace OleViewDotNet
             Categories = reader.ReadGuids("catids");
             TreatAs = reader.ReadGuid("treatas");
             m_loaded_interfaces = reader.ReadBool("loaded");
-            CanElevate = reader.ReadBool("elevate");
+            bool elevate = reader.ReadBool("elevate");
+
             Name = reader.ReadString("name");
             if (m_loaded_interfaces)
             {
@@ -829,6 +927,13 @@ namespace OleViewDotNet
             }
             Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(
                     reader.ReadSerializableObjects("servers", () => new COMCLSIDServerEntry()).ToDictionary(e => e.ServerType));
+
+            if (elevate)
+            {
+                IEnumerable<COMCLSIDElevationEntry> elevation = 
+                    reader.ReadSerializableObjects<COMCLSIDElevationEntry>("elevation", () => new COMCLSIDElevationEntry());
+                Elevation = elevation.FirstOrDefault();
+            }
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -839,7 +944,8 @@ namespace OleViewDotNet
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
             writer.WriteBool("loaded", m_loaded_interfaces);
-            writer.WriteBool("elevate", CanElevate);
+            writer.WriteBool("elevate", Elevation != null);
+            
             writer.WriteOptionalAttributeString("name", Name);
             if (m_loaded_interfaces)
             {
@@ -847,6 +953,10 @@ namespace OleViewDotNet
                 writer.WriteSerializableObjects("facts", m_factory_interfaces);
             }
             writer.WriteSerializableObjects("servers", Servers.Values);
+            if (Elevation != null)
+            {
+                writer.WriteSerializableObjects("elevation", new COMCLSIDElevationEntry[] { Elevation });
+            }
         }
     }
 }
