@@ -101,6 +101,9 @@
             System.Windows.Forms.ColumnHeader columnHeaderElevationVsoName;
             System.Windows.Forms.ColumnHeader columnHeaderElevationVsoClsid;
             System.Windows.Forms.Label label54;
+            System.Windows.Forms.Label label57;
+            System.Windows.Forms.ColumnHeader columnHeaderElevationEnabled;
+            System.Windows.Forms.ColumnHeader columnHeaderElevationAutoApproval;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -201,6 +204,7 @@
             this.textBoxElevationIconReference = new System.Windows.Forms.TextBox();
             this.listViewElevationVSOs = new System.Windows.Forms.ListView();
             this.textBoxElevationEnabled = new System.Windows.Forms.TextBox();
+            this.textBoxElevationAutoApproval = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -273,6 +277,9 @@
             columnHeaderElevationVsoName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderElevationVsoClsid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             label54 = new System.Windows.Forms.Label();
+            label57 = new System.Windows.Forms.Label();
+            columnHeaderElevationEnabled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderElevationAutoApproval = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -1910,11 +1917,12 @@
             // 
             label56.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label56.AutoSize = true;
+            this.tableLayoutPanelElevation.SetColumnSpan(label56, 2);
             label56.Location = new System.Drawing.Point(3, 52);
             label56.Name = "label56";
-            label56.Size = new System.Drawing.Size(37, 13);
+            label56.Size = new System.Drawing.Size(112, 13);
             label56.TabIndex = 4;
-            label56.Text = "VSOs:";
+            label56.Text = "Virtual Server Objects:";
             // 
             // columnHeaderElevationVsoName
             // 
@@ -2222,15 +2230,19 @@
             // 
             // tableLayoutPanelElevation
             // 
-            this.tableLayoutPanelElevation.ColumnCount = 2;
+            this.tableLayoutPanelElevation.ColumnCount = 4;
             this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelElevation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanelElevation.Controls.Add(label55, 0, 1);
             this.tableLayoutPanelElevation.Controls.Add(this.textBoxElevationIconReference, 1, 1);
             this.tableLayoutPanelElevation.Controls.Add(label56, 0, 2);
             this.tableLayoutPanelElevation.Controls.Add(this.listViewElevationVSOs, 0, 3);
             this.tableLayoutPanelElevation.Controls.Add(label54, 0, 0);
             this.tableLayoutPanelElevation.Controls.Add(this.textBoxElevationEnabled, 1, 0);
+            this.tableLayoutPanelElevation.Controls.Add(label57, 2, 0);
+            this.tableLayoutPanelElevation.Controls.Add(this.textBoxElevationAutoApproval, 3, 0);
             this.tableLayoutPanelElevation.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelElevation.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanelElevation.Name = "tableLayoutPanelElevation";
@@ -2244,6 +2256,7 @@
             // 
             // textBoxElevationIconReference
             // 
+            this.tableLayoutPanelElevation.SetColumnSpan(this.textBoxElevationIconReference, 3);
             this.textBoxElevationIconReference.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxElevationIconReference.Location = new System.Drawing.Point(93, 29);
             this.textBoxElevationIconReference.Name = "textBoxElevationIconReference";
@@ -2255,9 +2268,12 @@
             // 
             this.listViewElevationVSOs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             columnHeaderElevationVsoName,
-            columnHeaderElevationVsoClsid});
-            this.tableLayoutPanelElevation.SetColumnSpan(this.listViewElevationVSOs, 2);
+            columnHeaderElevationVsoClsid,
+            columnHeaderElevationEnabled,
+            columnHeaderElevationAutoApproval});
+            this.tableLayoutPanelElevation.SetColumnSpan(this.listViewElevationVSOs, 4);
             this.listViewElevationVSOs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewElevationVSOs.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewElevationVSOs.FullRowSelect = true;
             this.listViewElevationVSOs.Location = new System.Drawing.Point(3, 68);
             this.listViewElevationVSOs.MultiSelect = false;
@@ -2274,8 +2290,35 @@
             this.textBoxElevationEnabled.Location = new System.Drawing.Point(93, 3);
             this.textBoxElevationEnabled.Name = "textBoxElevationEnabled";
             this.textBoxElevationEnabled.ReadOnly = true;
-            this.textBoxElevationEnabled.Size = new System.Drawing.Size(473, 20);
+            this.textBoxElevationEnabled.Size = new System.Drawing.Size(192, 20);
             this.textBoxElevationEnabled.TabIndex = 8;
+            // 
+            // label57
+            // 
+            label57.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label57.AutoSize = true;
+            label57.Location = new System.Drawing.Point(291, 6);
+            label57.Name = "label57";
+            label57.Size = new System.Drawing.Size(77, 13);
+            label57.TabIndex = 9;
+            label57.Text = "Auto Approval:";
+            // 
+            // textBoxElevationAutoApproval
+            // 
+            this.textBoxElevationAutoApproval.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxElevationAutoApproval.Location = new System.Drawing.Point(374, 3);
+            this.textBoxElevationAutoApproval.Name = "textBoxElevationAutoApproval";
+            this.textBoxElevationAutoApproval.ReadOnly = true;
+            this.textBoxElevationAutoApproval.Size = new System.Drawing.Size(192, 20);
+            this.textBoxElevationAutoApproval.TabIndex = 10;
+            // 
+            // columnHeaderElevationEnabled
+            // 
+            columnHeaderElevationEnabled.Text = "Enabled";
+            // 
+            // columnHeaderElevationAutoApproval
+            // 
+            columnHeaderElevationAutoApproval.Text = "Auto Approval";
             // 
             // PropertiesControl
             // 
@@ -2427,5 +2470,6 @@
         private System.Windows.Forms.TextBox textBoxElevationIconReference;
         private System.Windows.Forms.ListView listViewElevationVSOs;
         private System.Windows.Forms.TextBox textBoxElevationEnabled;
+        private System.Windows.Forms.TextBox textBoxElevationAutoApproval;
     }
 }

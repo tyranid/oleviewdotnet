@@ -149,6 +149,14 @@ namespace OleViewDotNet
         void LockServer(bool fLock);
     }
 
+    [Guid("804bd226-af47-4d71-b492-443a57610b08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IElevatedFactoryServer
+    {
+        void ServerCreateElevatedObject(ref Guid clsid, 
+            ref Guid iid, 
+            [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+    }
+
     [Guid("965FC360-16FF-11d0-91CB-00AA00BBB723"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComVisible(true)]
     interface ISecurityInformation
     {

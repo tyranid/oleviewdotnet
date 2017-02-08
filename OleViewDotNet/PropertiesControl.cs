@@ -163,11 +163,14 @@ namespace OleViewDotNet
             if (entry.Elevation != null)
             {
                 textBoxElevationEnabled.Text = entry.Elevation.Enabled.ToString();
+                textBoxElevationAutoApproval.Text = entry.Elevation.AutoApproval.ToString();
                 textBoxElevationIconReference.Text = GetStringValue(entry.Elevation.IconReference);
                 foreach (COMCLSIDEntry vso in entry.Elevation.VirtualServerObjects.Select(v => m_registry.MapClsidToEntry(v)))
                 {
                     ListViewItem item = listViewElevationVSOs.Items.Add(vso.Name);
                     item.SubItems.Add(vso.Clsid.ToString());
+                    item.SubItems.Add(vso.CanElevate.ToString());
+                    item.SubItems.Add(vso.AutoElevation.ToString());
                     item.Tag = vso;
                 }
                 listViewElevationVSOs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);

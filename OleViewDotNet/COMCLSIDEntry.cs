@@ -52,8 +52,9 @@ namespace OleViewDotNet
         public bool Enabled { get; private set; }
         public string IconReference { get; private set; }
         public IEnumerable<Guid> VirtualServerObjects { get; private set; }
+        public bool AutoApproval { get; private set; }
 
-        internal COMCLSIDElevationEntry(RegistryKey key, RegistryKey vso_key)
+        internal COMCLSIDElevationEntry(RegistryKey key, RegistryKey vso_key, bool auto_approval)
         {
             Enabled = COMUtilities.ReadIntFromKey(key, null, "Enabled") != 0;
             IconReference = COMUtilities.ReadStringFromKey(key, null, "IconReference");
@@ -68,6 +69,7 @@ namespace OleViewDotNet
                     }
                 }
             }
+            AutoApproval = auto_approval;
             VirtualServerObjects = new List<Guid>(vsos).AsReadOnly();
         }
 
@@ -83,6 +85,7 @@ namespace OleViewDotNet
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
             Enabled = reader.ReadBool("enabled");
+            AutoApproval = reader.ReadBool("auto");
             IconReference = reader.ReadString("icon");
             VirtualServerObjects = reader.ReadGuids("vsos");
         }
@@ -90,6 +93,7 @@ namespace OleViewDotNet
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             writer.WriteBool("enabled", Enabled);
+            writer.WriteBool("auto", AutoApproval);
             writer.WriteOptionalAttributeString("icon", IconReference);
             writer.WriteGuids("vsos", VirtualServerObjects);
         }
@@ -107,12 +111,14 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Enabled == right.Enabled && IconReference == right.IconReference && VirtualServerObjects.SequenceEqual(right.VirtualServerObjects);
+            return Enabled == right.Enabled && IconReference == right.IconReference 
+                && AutoApproval == right.AutoApproval && VirtualServerObjects.SequenceEqual(right.VirtualServerObjects);
         }
 
         public override int GetHashCode()
         {
-            return Enabled.GetHashCode() ^ IconReference.GetHashCode() ^ VirtualServerObjects.GetEnumHashCode();
+            return Enabled.GetHashCode() ^ IconReference.GetHashCode() 
+                ^ AutoApproval.GetHashCode() ^ VirtualServerObjects.GetEnumHashCode();
         }
     }
 
@@ -521,11 +527,13 @@ namespace OleViewDotNet
             Categories = categories.ToList().AsReadOnly();
             TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
 
-            using (RegistryKey elev_key = key.OpenSubKey("Elevation"), vso_key = key.OpenSubKey("VirtualServerObjects"))
+            using (RegistryKey elev_key = key.OpenSubKey("Elevation"),
+                vso_key = key.OpenSubKey("VirtualServerObjects"))
             {
                 if (elev_key != null)
                 {
-                    Elevation = new COMCLSIDElevationEntry(elev_key, vso_key);
+                    int auto_approval = COMUtilities.ReadIntFromKey(Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
+                    Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
                 }
             }
         }
@@ -592,6 +600,14 @@ namespace OleViewDotNet
             get
             {
                 return Elevation != null && Elevation.Enabled;
+            }
+        }
+
+        public bool AutoElevation
+        {
+            get
+            {
+                return CanElevate && Elevation.AutoApproval;
             }
         }
 

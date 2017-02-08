@@ -204,6 +204,10 @@ namespace OleViewDotNet
             return filter_types;
         }
 
+        private void UpdateStatusLabel()
+        {
+            toolStripStatusLabelCount.Text = String.Format("Showing {0} of {1} entries", treeComRegistry.Nodes.Count, m_originalNodes.Length);
+        }
 
         /// <summary>
         /// Constructor
@@ -231,7 +235,8 @@ namespace OleViewDotNet
             m_originalNodes = nodes.ToArray();
             treeComRegistry.SuspendLayout();
             treeComRegistry.Nodes.AddRange(m_originalNodes);
-            treeComRegistry.ResumeLayout();            
+            treeComRegistry.ResumeLayout();
+            UpdateStatusLabel();
         }
 
         private static TreeNode CreateNode(string text, string image_key)
@@ -1689,6 +1694,7 @@ namespace OleViewDotNet
                 treeComRegistry.Nodes.Clear();
                 treeComRegistry.Nodes.AddRange(nodes);
                 treeComRegistry.ResumeLayout();
+                UpdateStatusLabel();
             }
             catch(Exception ex)
             {

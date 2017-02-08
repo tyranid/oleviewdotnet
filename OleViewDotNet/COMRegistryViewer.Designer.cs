@@ -73,10 +73,13 @@
             this.textBoxFilter = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.btnApply = new System.Windows.Forms.Button();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabelCount = new System.Windows.Forms.ToolStripStatusLabel();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
             this.tableLayoutPanel.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // labelFilter
@@ -111,7 +114,7 @@
             this.treeComRegistry.Name = "treeComRegistry";
             this.treeComRegistry.SelectedImageIndex = 0;
             this.treeComRegistry.ShowNodeToolTips = true;
-            this.treeComRegistry.Size = new System.Drawing.Size(1046, 495);
+            this.treeComRegistry.Size = new System.Drawing.Size(1046, 473);
             this.treeComRegistry.TabIndex = 0;
             this.treeComRegistry.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterCollapse);
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
@@ -444,12 +447,14 @@
             this.tableLayoutPanel.Controls.Add(labelMode, 2, 0);
             this.tableLayoutPanel.Controls.Add(this.comboBoxMode, 3, 0);
             this.tableLayoutPanel.Controls.Add(this.btnApply, 4, 0);
+            this.tableLayoutPanel.Controls.Add(this.statusStrip, 0, 2);
             this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel.Name = "tableLayoutPanel";
-            this.tableLayoutPanel.RowCount = 2;
+            this.tableLayoutPanel.RowCount = 3;
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel.Size = new System.Drawing.Size(1052, 530);
             this.tableLayoutPanel.TabIndex = 6;
             // 
@@ -465,6 +470,23 @@
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
             // 
+            // statusStrip
+            // 
+            this.tableLayoutPanel.SetColumnSpan(this.statusStrip, 5);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelCount});
+            this.statusStrip.Location = new System.Drawing.Point(0, 508);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(1052, 22);
+            this.statusStrip.TabIndex = 7;
+            this.statusStrip.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabelCount
+            // 
+            this.toolStripStatusLabelCount.Name = "toolStripStatusLabelCount";
+            this.toolStripStatusLabelCount.Size = new System.Drawing.Size(131, 17);
+            this.toolStripStatusLabelCount.Text = "Showing N of M Entries";
+            // 
             // COMRegistryViewer
             // 
             this.Controls.Add(this.tableLayoutPanel);
@@ -474,6 +496,8 @@
             this.contextMenuStrip.ResumeLayout(false);
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -521,5 +545,7 @@
         private System.Windows.Forms.ToolStripMenuItem allVisibleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem filteredToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelCount;
     }
 }
