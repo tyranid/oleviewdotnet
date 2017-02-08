@@ -32,6 +32,7 @@ namespace OleViewDotNet
     {
         private DockPanel   m_dockPanel;
         private COMRegistry m_registry;
+        private PropertyGrid m_property_grid;
 
         private void UpdateTitle()
         {
@@ -773,6 +774,34 @@ namespace OleViewDotNet
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public void UpdatePropertyGrid(object obj)
+        {
+            if (m_property_grid != null && !m_property_grid.IsDisposed)
+            {
+                m_property_grid.SelectedObject = obj;
+            }            
+        }
+
+        public void CreatePropertyGrid()
+        {
+            if (m_property_grid == null || m_property_grid.IsDisposed)
+            {
+                m_property_grid = new PropertyGrid();
+                m_property_grid.ToolbarVisible = false;
+                m_property_grid.PropertySort = PropertySort.Alphabetical;
+                
+                DocumentForm frm = new DocumentForm(m_property_grid);
+
+                frm.ShowHint = DockState.DockRight;
+                frm.Show(m_dockPanel);
+            }
+        }
+
+        private void menuRegistryEntryViewer_Click(object sender, EventArgs e)
+        {
+            CreatePropertyGrid();
         }
     }
 }

@@ -67,12 +67,12 @@
             this.cloneTreeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.allVisibleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filteredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.btnApply = new System.Windows.Forms.Button();
-            this.filteredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -116,6 +116,7 @@
             this.treeComRegistry.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterCollapse);
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
             this.treeComRegistry.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterExpand);
+            this.treeComRegistry.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterSelect);
             this.treeComRegistry.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeComRegistry_MouseDown);
             // 
             // contextMenuStrip
@@ -350,21 +351,21 @@
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
             // 
             // toFileToolStripMenuItem
             // 
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.toFileToolStripMenuItem.Text = "To File";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
             // 
             // toObjectToolStripMenuItem
             // 
             this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
-            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.toObjectToolStripMenuItem.Text = "To Object";
             this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
             // 
@@ -381,16 +382,23 @@
             // allVisibleToolStripMenuItem
             // 
             this.allVisibleToolStripMenuItem.Name = "allVisibleToolStripMenuItem";
-            this.allVisibleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.allVisibleToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.allVisibleToolStripMenuItem.Text = "All Visible";
             this.allVisibleToolStripMenuItem.Click += new System.EventHandler(this.allVisibleToolStripMenuItem_Click);
             // 
             // selectedToolStripMenuItem
             // 
             this.selectedToolStripMenuItem.Name = "selectedToolStripMenuItem";
-            this.selectedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.selectedToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.selectedToolStripMenuItem.Text = "Selected";
             this.selectedToolStripMenuItem.Click += new System.EventHandler(this.selectedToolStripMenuItem_Click);
+            // 
+            // filteredToolStripMenuItem
+            // 
+            this.filteredToolStripMenuItem.Name = "filteredToolStripMenuItem";
+            this.filteredToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.filteredToolStripMenuItem.Text = "Filtered";
+            this.filteredToolStripMenuItem.Click += new System.EventHandler(this.filteredToolStripMenuItem_Click);
             // 
             // treeImageList
             // 
@@ -456,13 +464,6 @@
             this.btnApply.Text = "Apply";
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
-            // 
-            // filteredToolStripMenuItem
-            // 
-            this.filteredToolStripMenuItem.Name = "filteredToolStripMenuItem";
-            this.filteredToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.filteredToolStripMenuItem.Text = "Filtered";
-            this.filteredToolStripMenuItem.Click += new System.EventHandler(this.filteredToolStripMenuItem_Click);
             // 
             // COMRegistryViewer
             // 

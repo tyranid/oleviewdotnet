@@ -2141,5 +2141,10 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private void treeComRegistry_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            Program.GetMainForm(m_registry).UpdatePropertyGrid(treeComRegistry.SelectedNode?.Tag);
+        }
     }
 }

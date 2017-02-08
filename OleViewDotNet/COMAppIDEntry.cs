@@ -126,6 +126,11 @@ namespace OleViewDotNet
         {
             return DisplayName.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ ServiceType.GetHashCode() ^ UserName.GetSafeHashCode();
         }
+
+        public override string ToString()
+        {
+            return String.Format("{0}", DisplayName);
+        }
     }
 
     public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable

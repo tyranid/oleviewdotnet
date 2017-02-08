@@ -34,6 +34,7 @@
             this.menuFile = new System.Windows.Forms.MenuItem();
             this.menuFilePythonConsole = new System.Windows.Forms.MenuItem();
             this.menuFileOpenViewer = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenAsAdmin = new System.Windows.Forms.MenuItem();
             this.menuItem10 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenDatabase = new System.Windows.Forms.MenuItem();
             this.menuFileSaveDatabase = new System.Windows.Forms.MenuItem();
@@ -99,7 +100,7 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuFileOpenAsAdmin = new System.Windows.Forms.MenuItem();
+            this.menuRegistryEntryViewer = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -147,6 +148,12 @@
             this.menuFileOpenViewer.Index = 1;
             this.menuFileOpenViewer.Text = "Open &32 Bit Viewer";
             this.menuFileOpenViewer.Click += new System.EventHandler(this.menuFileOpenViewer_Click);
+            // 
+            // menuFileOpenAsAdmin
+            // 
+            this.menuFileOpenAsAdmin.Index = 2;
+            this.menuFileOpenAsAdmin.Text = "Open as Administrator";
+            this.menuFileOpenAsAdmin.Click += new System.EventHandler(this.menuFileOpenAsAdmin_Click);
             // 
             // menuItem10
             // 
@@ -268,7 +275,8 @@
             this.menuRegistryTypeLibraries,
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
-            this.menuRegistryProperties});
+            this.menuRegistryProperties,
+            this.menuRegistryEntryViewer});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -402,7 +410,7 @@
             // menuRegistryProperties
             // 
             this.menuRegistryProperties.Index = 22;
-            this.menuRegistryProperties.Text = "Properties";
+            this.menuRegistryProperties.Text = "Registry Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
             // 
             // menuObject
@@ -574,11 +582,11 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuFileOpenAsAdmin
+            // menuRegistryEntryViewer
             // 
-            this.menuFileOpenAsAdmin.Index = 2;
-            this.menuFileOpenAsAdmin.Text = "Open as Administrator";
-            this.menuFileOpenAsAdmin.Click += new System.EventHandler(this.menuFileOpenAsAdmin_Click);
+            this.menuRegistryEntryViewer.Index = 23;
+            this.menuRegistryEntryViewer.Text = "Open Entry Viewer";
+            this.menuRegistryEntryViewer.Click += new System.EventHandler(this.menuRegistryEntryViewer_Click);
             // 
             // MainForm
             // 
@@ -668,6 +676,7 @@
         private System.Windows.Forms.MenuItem menuObjectProcessesByName;
         private System.Windows.Forms.MenuItem menuObjectProcessByUser;
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
+        private System.Windows.Forms.MenuItem menuRegistryEntryViewer;
     }
 }
 
