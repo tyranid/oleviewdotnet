@@ -166,7 +166,7 @@ namespace OleViewDotNet
             }
             else
             {
-                Name = AppId.FormatGuid();
+                Name = AppId.FormatGuidDefault();
             }
 
             AccessPermission = ConvertSD(key.GetValue("AccessPermission") as byte[]);

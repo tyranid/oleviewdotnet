@@ -149,7 +149,7 @@ namespace OleViewDotNet
         void LockServer(bool fLock);
     }
 
-    [Guid("804bd226-af47-4d71-b492-443a57610b08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport, Guid("804bd226-af47-4d71-b492-443a57610b08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IElevatedFactoryServer
     {
         void ServerCreateElevatedObject(ref Guid clsid, 

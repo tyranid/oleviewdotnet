@@ -70,5 +70,17 @@ namespace OleViewDotNet.Properties {
                 this["SymbolsConfigured"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GuidFormat {
+            get {
+                return ((string)(this["GuidFormat"]));
+            }
+            set {
+                this["GuidFormat"] = value;
+            }
+        }
     }
 }

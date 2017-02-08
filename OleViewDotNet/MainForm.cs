@@ -133,7 +133,7 @@ namespace OleViewDotNet
 
             IEnumerable<COMInterfaceInstance> intfs = factory ? ent.FactoryInterfaces : ent.Interfaces;
 
-            ObjectInformation view = new ObjectInformation(m_registry, ent.Name, obj,
+            ObjectInformation view = new ObjectInformation(m_registry, ent, ent.Name, obj,
                 props, intfs.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
             HostControl(view);
         }
@@ -204,6 +204,7 @@ namespace OleViewDotNet
                 {
                     try
                     {
+                        COMCLSIDEntry ent = null;
                         Guid g = frm.Clsid;
                         Dictionary<string, string> props = new Dictionary<string, string>();
                         object comObj = null;
@@ -212,7 +213,7 @@ namespace OleViewDotNet
 
                         if (m_registry.Clsids.ContainsKey(g))
                         {
-                            COMCLSIDEntry ent = m_registry.Clsids[g];
+                            ent = m_registry.Clsids[g];
                             strObjName = ent.Name;
                             props.Add("CLSID", ent.Clsid.FormatGuid());
                             props.Add("Name", ent.Name);
@@ -267,7 +268,7 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
 
-                            HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));                            
+                            HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));                            
                         }
                     }
                     catch (Exception ex)
@@ -329,6 +330,7 @@ namespace OleViewDotNet
         {
             if (comObj != null)
             {
+                COMCLSIDEntry ent = null;
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 string strObjName = "";
                 IEnumerable<COMInterfaceEntry> ints = null;
@@ -336,7 +338,7 @@ namespace OleViewDotNet
 
                 if (m_registry.Clsids.ContainsKey(clsid))
                 {
-                    COMCLSIDEntry ent = m_registry.Clsids[clsid];
+                    ent = m_registry.Clsids[clsid];
                     strObjName = ent.Name;
                     props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
@@ -352,7 +354,7 @@ namespace OleViewDotNet
                 }
 
                 Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
-                HostControl(new ObjectInformation(m_registry, strObjName, comObj, props, ints.ToArray()));
+                HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
             }
         }
 

@@ -32,6 +32,7 @@ namespace OleViewDotNet
         private COMInterfaceEntry[] m_interfaces;        
         private string m_objName;
         private COMRegistry m_registry;
+        private COMCLSIDEntry m_entry;
 
         /// <summary>
         /// Constructor
@@ -40,14 +41,25 @@ namespace OleViewDotNet
         /// <param name="pObject">Managed wrapper to the object</param>
         /// <param name="properties">List of textual properties to display</param>
         /// <param name="interfaces">List of available interfaces</param>
-        public ObjectInformation(COMRegistry registry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
+        public ObjectInformation(COMRegistry registry, COMCLSIDEntry entry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
         {
+            m_entry = entry;
+            if (m_entry == null)
+            {
+                Guid clsid = COMUtilities.GetObjectClass(pObject);
+                if (registry.Clsids.ContainsKey(clsid))
+                {
+                    m_entry = registry.MapClsidToEntry(clsid);
+                }
+            }
+
             m_registry = registry;
             m_pEntry = ObjectCache.Add(registry, objName, pObject, interfaces);
             m_pObject = pObject;
             m_properties = properties;
             m_interfaces = interfaces;            
             m_objName = objName;
+            
             InitializeComponent();
 
             LoadProperties();
@@ -156,7 +168,7 @@ namespace OleViewDotNet
                 {
                     if (factory != null)
                     {
-                        Control frm = factory.CreateInstance(m_registry, m_objName, m_pEntry);
+                        Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
                             Program.GetMainForm(m_registry).HostControl(frm);                            
@@ -255,7 +267,8 @@ namespace OleViewDotNet
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 props.Add("Name", m_objName);
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
-                ObjectInformation view = new ObjectInformation(m_registry, m_objName, new_object,
+                ObjectInformation view = new ObjectInformation(m_registry,
+                    m_entry, m_objName, new_object,
                     props, m_registry.GetInterfacesForObject(new_object));
                 Program.GetMainForm(m_registry).HostControl(view);
             }

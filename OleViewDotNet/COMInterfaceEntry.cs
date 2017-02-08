@@ -52,7 +52,7 @@ namespace OleViewDotNet
             }
             else
             {
-                Name = Iid.FormatGuid();
+                Name = Iid.FormatGuidDefault();
             }
               
             ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);

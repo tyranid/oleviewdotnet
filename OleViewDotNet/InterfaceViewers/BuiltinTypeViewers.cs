@@ -46,9 +46,21 @@ namespace OleViewDotNet.InterfaceViewers
         {
         }
 
-        public override Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
+        public override Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject)
         {
-            return new ClassFactoryTypeViewer(registry, strObjName, pObject.Instance);
+            return new ClassFactoryTypeViewer(registry, entry, strObjName, pObject.Instance);
+        }
+    }
+
+    class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
+    {
+        public ElevatedFactoryServerViewerFactory() : base(typeof(IElevatedFactoryServer))
+        {
+        }
+
+        public override Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject)
+        {
+            return new ElevatedFactoryServerTypeViewer(registry, entry, strObjName, pObject.Instance);
         }
     }
 
@@ -64,7 +76,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStream"; }
         }
 
-        public Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }
@@ -82,7 +94,7 @@ namespace OleViewDotNet.InterfaceViewers
             get { return "IPersistStreamInit"; }
         }
 
-        public Control CreateInstance(COMRegistry registry, string strObjName, ObjectEntry pObject)
+        public Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject)
         {
             return new PersistStreamTypeViewer(strObjName, pObject.Instance);
         }

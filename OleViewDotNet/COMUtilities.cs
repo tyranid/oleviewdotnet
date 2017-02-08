@@ -1737,6 +1737,11 @@ namespace OleViewDotNet
 
         internal static string FormatGuid(this Guid guid)
         {
+            return guid.ToString(Properties.Settings.Default.GuidFormat).ToUpper();
+        }
+
+        internal static string FormatGuidDefault(this Guid guid)
+        {
             return guid.ToString().ToUpper();
         }
 

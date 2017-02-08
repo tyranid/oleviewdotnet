@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.InterfaceViewers;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -26,13 +25,15 @@ namespace OleViewDotNet
         private object _obj;
         private string _name;
         private COMRegistry _registry;
+        private COMCLSIDEntry _entry;
 
-        public ClassFactoryTypeViewer(COMRegistry registry, string objName, object obj)
+        public ClassFactoryTypeViewer(COMRegistry registry, COMCLSIDEntry entry, string objName, object obj)
         {
             InitializeComponent();
             _obj = obj;
             _name = objName;
             _registry = registry;
+            _entry = entry;
             Text = objName + " ClassFactory";
         }
 
@@ -46,7 +47,7 @@ namespace OleViewDotNet
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 props.Add("Name", _name);
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
-                ObjectInformation view = new ObjectInformation(_registry, _name, new_object,
+                ObjectInformation view = new ObjectInformation(_registry, _entry, _name, new_object,
                     props, _registry.GetInterfacesForObject(new_object));
                 Program.GetMainForm(_registry).HostControl(view);
             }

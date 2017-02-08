@@ -465,7 +465,7 @@ namespace OleViewDotNet
             if (Name == null)
             {
                 fake_name = true;
-                Name = Clsid.FormatGuid();
+                Name = Clsid.FormatGuidDefault();
             }
 
             Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
