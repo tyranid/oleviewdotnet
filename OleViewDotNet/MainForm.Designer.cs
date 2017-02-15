@@ -75,6 +75,7 @@
             this.menuRegistryInterfaceProxies = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.menuRegistryProperties = new System.Windows.Forms.MenuItem();
+            this.menuPropertiesViewer = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuObjectProcesses = new System.Windows.Forms.MenuItem();
@@ -100,7 +101,6 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryEntryViewer = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -276,7 +276,7 @@
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
             this.menuRegistryProperties,
-            this.menuRegistryEntryViewer});
+            this.menuPropertiesViewer});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -412,6 +412,12 @@
             this.menuRegistryProperties.Index = 22;
             this.menuRegistryProperties.Text = "Registry Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
+            // 
+            // menuPropertiesViewer
+            // 
+            this.menuPropertiesViewer.Index = 23;
+            this.menuPropertiesViewer.Text = "Open Properties Viewer";
+            this.menuPropertiesViewer.Click += new System.EventHandler(this.menuObjectPropertiesViewer_Click);
             // 
             // menuObject
             // 
@@ -582,12 +588,6 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryEntryViewer
-            // 
-            this.menuRegistryEntryViewer.Index = 23;
-            this.menuRegistryEntryViewer.Text = "Open Entry Viewer";
-            this.menuRegistryEntryViewer.Click += new System.EventHandler(this.menuRegistryEntryViewer_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -676,7 +676,7 @@
         private System.Windows.Forms.MenuItem menuObjectProcessesByName;
         private System.Windows.Forms.MenuItem menuObjectProcessByUser;
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
-        private System.Windows.Forms.MenuItem menuRegistryEntryViewer;
+        private System.Windows.Forms.MenuItem menuPropertiesViewer;
     }
 }
 

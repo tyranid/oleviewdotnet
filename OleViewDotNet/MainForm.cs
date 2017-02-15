@@ -73,6 +73,7 @@ namespace OleViewDotNet
             m_dockPanel.Name = "dockPanel";
             Controls.Add(m_dockPanel);
             m_dockPanel.BringToFront();
+            CreatePropertyGrid(true);
 
             if (!Environment.Is64BitOperatingSystem)
             {
@@ -786,7 +787,7 @@ namespace OleViewDotNet
             }            
         }
 
-        public void CreatePropertyGrid()
+        public void CreatePropertyGrid(bool autohide)
         {
             if (m_property_grid == null || m_property_grid.IsDisposed)
             {
@@ -795,15 +796,15 @@ namespace OleViewDotNet
                 m_property_grid.PropertySort = PropertySort.Alphabetical;
                 
                 DocumentForm frm = new DocumentForm(m_property_grid);
-
-                frm.ShowHint = DockState.DockRight;
+                frm.TabText = "Object Properties";
+                frm.ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight;
                 frm.Show(m_dockPanel);
             }
         }
 
-        private void menuRegistryEntryViewer_Click(object sender, EventArgs e)
+        private void menuObjectPropertiesViewer_Click(object sender, EventArgs e)
         {
-            CreatePropertyGrid();
+            CreatePropertyGrid(false);
         }
     }
 }
