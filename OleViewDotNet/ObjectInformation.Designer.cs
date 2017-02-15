@@ -31,17 +31,23 @@
             System.Windows.Forms.Label label1;
             System.Windows.Forms.Label label2;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectInformation));
             this.listViewProperties = new System.Windows.Forms.ListView();
             this.listViewInterfaces = new System.Windows.Forms.ListView();
-            this.btnCreate = new System.Windows.Forms.Button();
-            this.btnOleContainer = new System.Windows.Forms.Button();
-            this.btnMarshal = new System.Windows.Forms.Button();
-            this.btnDispatch = new System.Windows.Forms.Button();
-            this.btnSaveStream = new System.Windows.Forms.Button();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripDropDownButtonOperations = new System.Windows.Forms.ToolStripDropDownButton();
+            this.openOLEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.marshalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDispatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanel.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -58,7 +64,7 @@
             // 
             label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(3, 233);
+            label2.Location = new System.Drawing.Point(3, 236);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(57, 13);
             label2.TabIndex = 2;
@@ -73,16 +79,11 @@
             tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             tableLayoutPanel.Controls.Add(label2, 0, 2);
             tableLayoutPanel.Controls.Add(this.listViewProperties, 0, 1);
             tableLayoutPanel.Controls.Add(this.listViewInterfaces, 0, 3);
             tableLayoutPanel.Controls.Add(label1, 0, 0);
-            tableLayoutPanel.Controls.Add(this.btnCreate, 4, 4);
-            tableLayoutPanel.Controls.Add(this.btnOleContainer, 0, 4);
-            tableLayoutPanel.Controls.Add(this.btnMarshal, 3, 4);
-            tableLayoutPanel.Controls.Add(this.btnDispatch, 1, 4);
-            tableLayoutPanel.Controls.Add(this.btnSaveStream, 2, 4);
+            tableLayoutPanel.Controls.Add(this.statusStrip, 0, 4);
             tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             tableLayoutPanel.Name = "tableLayoutPanel";
@@ -92,6 +93,7 @@
             tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             tableLayoutPanel.Size = new System.Drawing.Size(728, 495);
             tableLayoutPanel.TabIndex = 5;
             // 
@@ -104,7 +106,7 @@
             this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.listViewProperties.Location = new System.Drawing.Point(3, 16);
             this.listViewProperties.Name = "listViewProperties";
-            this.listViewProperties.Size = new System.Drawing.Size(722, 214);
+            this.listViewProperties.Size = new System.Drawing.Size(722, 217);
             this.listViewProperties.TabIndex = 1;
             this.listViewProperties.UseCompatibleStateImageBehavior = false;
             this.listViewProperties.View = System.Windows.Forms.View.Details;
@@ -115,78 +117,91 @@
             this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewInterfaces.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewInterfaces.FullRowSelect = true;
-            this.listViewInterfaces.Location = new System.Drawing.Point(3, 249);
+            this.listViewInterfaces.Location = new System.Drawing.Point(3, 252);
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(722, 214);
+            this.listViewInterfaces.Size = new System.Drawing.Size(722, 217);
             this.listViewInterfaces.TabIndex = 3;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
             this.listViewInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewInterfaces_ColumnClick);
             this.listViewInterfaces.DoubleClick += new System.EventHandler(this.listViewInterfaces_DoubleClick);
             // 
-            // btnCreate
+            // statusStrip
             // 
-            this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnCreate.AutoSize = true;
-            this.btnCreate.Enabled = false;
-            this.btnCreate.Location = new System.Drawing.Point(349, 469);
-            this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(66, 23);
-            this.btnCreate.TabIndex = 8;
-            this.btnCreate.Text = "Create";
-            this.btnCreate.UseVisualStyleBackColor = true;
-            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+            tableLayoutPanel.SetColumnSpan(this.statusStrip, 5);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripDropDownButtonOperations});
+            this.statusStrip.Location = new System.Drawing.Point(0, 473);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(728, 22);
+            this.statusStrip.TabIndex = 9;
+            this.statusStrip.Text = "statusStrip1";
             // 
-            // btnOleContainer
+            // toolStripDropDownButtonOperations
             // 
-            this.btnOleContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnOleContainer.AutoSize = true;
-            this.btnOleContainer.Enabled = false;
-            this.btnOleContainer.Location = new System.Drawing.Point(3, 469);
-            this.btnOleContainer.Name = "btnOleContainer";
-            this.btnOleContainer.Size = new System.Drawing.Size(81, 23);
-            this.btnOleContainer.TabIndex = 4;
-            this.btnOleContainer.Text = "Open OLE";
-            this.btnOleContainer.UseVisualStyleBackColor = true;
-            this.btnOleContainer.Click += new System.EventHandler(this.btnOleContainer_Click);
+            this.toolStripDropDownButtonOperations.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButtonOperations.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openDispatchToolStripMenuItem,
+            this.openOLEToolStripMenuItem,
+            this.createToolStripMenuItem,
+            this.marshalToolStripMenuItem,
+            this.saveStreamToolStripMenuItem});
+            this.toolStripDropDownButtonOperations.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButtonOperations.Image")));
+            this.toolStripDropDownButtonOperations.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButtonOperations.Name = "toolStripDropDownButtonOperations";
+            this.toolStripDropDownButtonOperations.Size = new System.Drawing.Size(78, 20);
+            this.toolStripDropDownButtonOperations.Text = "Operations";
             // 
-            // btnMarshal
+            // openOLEToolStripMenuItem
             // 
-            this.btnMarshal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnMarshal.AutoSize = true;
-            this.btnMarshal.Location = new System.Drawing.Point(276, 469);
-            this.btnMarshal.Name = "btnMarshal";
-            this.btnMarshal.Size = new System.Drawing.Size(67, 23);
-            this.btnMarshal.TabIndex = 7;
-            this.btnMarshal.Text = "Marshal";
-            this.btnMarshal.UseVisualStyleBackColor = true;
-            this.btnMarshal.Click += new System.EventHandler(this.btnMarshal_Click);
+            this.openOLEToolStripMenuItem.Name = "openOLEToolStripMenuItem";
+            this.openOLEToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.openOLEToolStripMenuItem.Text = "Open OLE Container";
+            this.openOLEToolStripMenuItem.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
-            // btnDispatch
+            // saveStreamToolStripMenuItem
             // 
-            this.btnDispatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDispatch.AutoSize = true;
-            this.btnDispatch.Enabled = false;
-            this.btnDispatch.Location = new System.Drawing.Point(90, 469);
-            this.btnDispatch.Name = "btnDispatch";
-            this.btnDispatch.Size = new System.Drawing.Size(81, 23);
-            this.btnDispatch.TabIndex = 5;
-            this.btnDispatch.Text = "Open Disp";
-            this.btnDispatch.UseVisualStyleBackColor = true;
-            this.btnDispatch.Click += new System.EventHandler(this.btnDispatch_Click);
+            this.saveStreamToolStripMenuItem.Name = "saveStreamToolStripMenuItem";
+            this.saveStreamToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.saveStreamToolStripMenuItem.Text = "Save Stream";
+            this.saveStreamToolStripMenuItem.Click += new System.EventHandler(this.btnSaveStream_Click);
             // 
-            // btnSaveStream
+            // marshalToolStripMenuItem
             // 
-            this.btnSaveStream.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSaveStream.AutoSize = true;
-            this.btnSaveStream.Enabled = false;
-            this.btnSaveStream.Location = new System.Drawing.Point(177, 469);
-            this.btnSaveStream.Name = "btnSaveStream";
-            this.btnSaveStream.Size = new System.Drawing.Size(93, 23);
-            this.btnSaveStream.TabIndex = 6;
-            this.btnSaveStream.Text = "Save Stream";
-            this.btnSaveStream.UseVisualStyleBackColor = true;
-            this.btnSaveStream.Click += new System.EventHandler(this.btnSaveStream_Click);
+            this.marshalToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toHexEditorToolStripMenuItem,
+            this.viewPropertiesToolStripMenuItem});
+            this.marshalToolStripMenuItem.Name = "marshalToolStripMenuItem";
+            this.marshalToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.marshalToolStripMenuItem.Text = "Marshal";
+            // 
+            // createToolStripMenuItem
+            // 
+            this.createToolStripMenuItem.Name = "createToolStripMenuItem";
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.createToolStripMenuItem.Text = "Create Instance";
+            this.createToolStripMenuItem.Click += new System.EventHandler(this.btnCreate_Click);
+            // 
+            // openDispatchToolStripMenuItem
+            // 
+            this.openDispatchToolStripMenuItem.Name = "openDispatchToolStripMenuItem";
+            this.openDispatchToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.openDispatchToolStripMenuItem.Text = "Open Dispatch";
+            this.openDispatchToolStripMenuItem.Click += new System.EventHandler(this.btnDispatch_Click);
+            // 
+            // toHexEditorToolStripMenuItem
+            // 
+            this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
+            this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.btnMarshal_Click);
+            // 
+            // viewPropertiesToolStripMenuItem
+            // 
+            this.viewPropertiesToolStripMenuItem.Name = "viewPropertiesToolStripMenuItem";
+            this.viewPropertiesToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.viewPropertiesToolStripMenuItem.Text = "View Properties";
+            this.viewPropertiesToolStripMenuItem.Click += new System.EventHandler(this.viewPropertiesToolStripMenuItem_Click);
             // 
             // ObjectInformation
             // 
@@ -196,6 +211,8 @@
             this.Size = new System.Drawing.Size(728, 495);
             tableLayoutPanel.ResumeLayout(false);
             tableLayoutPanel.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -204,10 +221,14 @@
         #endregion
         private System.Windows.Forms.ListView listViewProperties;
         private System.Windows.Forms.ListView listViewInterfaces;
-        private System.Windows.Forms.Button btnOleContainer;
-        private System.Windows.Forms.Button btnDispatch;
-        private System.Windows.Forms.Button btnSaveStream;
-        private System.Windows.Forms.Button btnMarshal;
-        private System.Windows.Forms.Button btnCreate;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButtonOperations;
+        private System.Windows.Forms.ToolStripMenuItem openDispatchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openOLEToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem marshalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveStreamToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toHexEditorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewPropertiesToolStripMenuItem;
     }
 }

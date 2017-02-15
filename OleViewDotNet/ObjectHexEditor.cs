@@ -67,5 +67,18 @@ namespace OleViewDotNet
                 Program.ShowError(this, ex);
             }
         }
+
+        private void btnMarshalProps_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                COMObjRef objref = COMObjRef.FromArray(hexEditor.Bytes);
+                Program.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, objref));
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
+        }
     }
 }

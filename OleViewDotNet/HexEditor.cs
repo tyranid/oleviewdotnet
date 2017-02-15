@@ -46,6 +46,19 @@ namespace OleViewDotNet
             }
         }
 
+        public bool ReadOnly
+        {
+            get
+            {
+                return hexBox.ReadOnly;
+            }
+
+            set
+            {
+                hexBox.ReadOnly = value;
+            }
+        }
+
         private void loadFromFileToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
@@ -109,7 +122,7 @@ namespace OleViewDotNet
                 hexBox.PasteHex();
             }
         }
-
+        
         private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             pasteToolStripMenuItem.Enabled = hexBox.CanPaste();
@@ -159,5 +172,6 @@ namespace OleViewDotNet
         {
             hexBox.SelectAll();
         }
+
     }
 }

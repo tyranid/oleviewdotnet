@@ -1136,6 +1136,11 @@ namespace OleViewDotNet
             return Convert.FromBase64String(name);
         }
 
+        public static COMObjRef MarshalObjectToObjRef(object obj)
+        {
+            return COMObjRef.FromArray(MarshalObject(obj));
+        }
+
         private static string ConvertTypeToName(Type t)
         {
             if (t == typeof(string))
@@ -1364,6 +1369,38 @@ namespace OleViewDotNet
                 throw new EndOfStreamException();
             }
             return ret;
+        }
+
+        internal static Guid ReadGuid(this BinaryReader reader)
+        {
+            return new Guid(reader.ReadAll(16));
+        }
+
+        internal static char ReadUnicodeChar(this BinaryReader reader)
+        {
+            return BitConverter.ToChar(reader.ReadAll(2), 0);
+        }
+
+        internal static void Write(this BinaryWriter writer, Guid guid)
+        {
+            writer.Write(guid.ToByteArray());
+        }
+
+        internal static string ReadZString(this BinaryReader reader)
+        {
+            StringBuilder builder = new StringBuilder();
+            char ch = reader.ReadUnicodeChar();
+            while (ch != 0)
+            {
+                builder.Append(ch);
+                ch = reader.ReadUnicodeChar();
+            }
+            return builder.ToString();
+        }
+
+        internal static void WriteZString(this BinaryWriter writer, string str)
+        {
+            writer.Write(Encoding.Unicode.GetBytes(str + "\0"));
         }
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -1880,6 +1917,15 @@ namespace OleViewDotNet
             }
         }
 
+        internal static int GetProcessIdFromIPid(Guid ipid)
+        {
+            return BitConverter.ToUInt16(ipid.ToByteArray(), 4);
+        }
+
+        internal static int GetApartmentIdFromIPid(Guid ipid)
+        {
+            return BitConverter.ToInt16(ipid.ToByteArray(), 6);
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

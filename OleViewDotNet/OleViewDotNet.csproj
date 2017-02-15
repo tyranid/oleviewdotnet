@@ -134,6 +134,7 @@
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMInterfaces.cs" />
+    <Compile Include="COMObjRef.cs" />
     <Compile Include="COMProcessParser.cs" />
     <Compile Include="COMProxyInstance.cs" />
     <Compile Include="ConfigureSymbolsForm.cs">
@@ -141,6 +142,12 @@
     </Compile>
     <Compile Include="ConfigureSymbolsForm.Designer.cs">
       <DependentUpon>ConfigureSymbolsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomMarshalEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomMarshalEditorControl.Designer.cs">
+      <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="DiffRegistryForm.cs">
       <SubType>Form</SubType>
@@ -153,6 +160,12 @@
     </Compile>
     <Compile Include="ElevatedFactoryServerTypeViewer.Designer.cs">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MarshalEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MarshalEditorControl.Designer.cs">
+      <DependentUpon>MarshalEditorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="NdrParser.cs" />
     <Compile Include="ObjectHexEditor.cs">
@@ -175,6 +188,12 @@
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </Compile>
     <Compile Include="SafeHandles.cs" />
+    <Compile Include="StandardMarshalEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="StandardMarshalEditorControl.Designer.cs">
+      <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="SymbolResolver.cs" />
     <Compile Include="ViewFilterControl.cs">
       <SubType>UserControl</SubType>
@@ -353,6 +372,9 @@
     <EmbeddedResource Include="CreateIStreamForm.resx">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CustomMarshalEditorControl.resx">
+      <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DiffRegistryForm.resx">
       <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -374,6 +396,9 @@
     <EmbeddedResource Include="InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MarshalEditorControl.resx">
+      <DependentUpon>MarshalEditorControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ObjectHexEditor.resx">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -382,6 +407,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="RegistryPropertiesControl.resx">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StandardMarshalEditorControl.resx">
+      <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ViewFilterControl.resx">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>

@@ -119,6 +119,11 @@ namespace OleViewDotNet
             listViewInterfaces.Columns.Add("IID");
             listViewInterfaces.Columns.Add("Viewer");
 
+            bool has_dispatch = false;
+            bool has_olecontrol = false;
+            bool has_persiststream = false;
+            bool has_classfactory = false;
+
             foreach (COMInterfaceEntry ent in m_interfaces)
             {
                 ListViewItem item = listViewInterfaces.Items.Add(ent.Name);
@@ -137,21 +142,27 @@ namespace OleViewDotNet
 
                 if (ent.IsDispatch)
                 {
-                    btnDispatch.Enabled = true;
+                    has_dispatch = true;
                 }
                 else if (ent.IsOleControl)
                 {
-                    btnOleContainer.Enabled = true;
+                    has_olecontrol = true;
                 }
                 else if (ent.IsPersistStream)
                 {
-                    btnSaveStream.Enabled = true;
+                    has_persiststream = true;
                 }
                 else if (ent.IsClassFactory)
                 {
-                    btnCreate.Enabled = true;
+                    has_classfactory = true;
                 }
             }
+
+
+            openDispatchToolStripMenuItem.Visible = has_dispatch;
+            openOLEToolStripMenuItem.Visible = has_olecontrol;
+            saveStreamToolStripMenuItem.Visible = has_persiststream;
+            createToolStripMenuItem.Visible = has_classfactory;
 
             listViewInterfaces.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewInterfaces.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -275,6 +286,18 @@ namespace OleViewDotNet
             catch (Exception ex)
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void viewPropertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Program.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, COMUtilities.MarshalObjectToObjRef(m_pObject)));
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
             }
         }
     }

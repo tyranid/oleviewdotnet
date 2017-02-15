@@ -273,9 +273,9 @@ namespace OleViewDotNet
             textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
             textBoxIPIDReferences.Text = String.Format("Strong: {0}, Weak: {1}, Private: {2}",
                 obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);
-            byte[] ipid = obj.Ipid.ToByteArray();
-            textBoxIPIDProcessId.Text = BitConverter.ToUInt16(ipid, 4).ToString();
-            textBoxIPIDApartment.Text = BitConverter.ToInt16(ipid, 6).ToString();
+            
+            textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
+            textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdFromIPid(obj.Ipid).ToString();
             tabControlProperties.TabPages.Add(tabPageIPID);
         }
 
