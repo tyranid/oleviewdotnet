@@ -37,11 +37,23 @@ namespace OleViewDotNet
             comboBoxClsCtx.SelectedIndex = 0;
         }
 
+        private bool GetClsid(string name, out Guid clsid)
+        {
+            if (!Guid.TryParse(name, out clsid))
+            {
+                if (COMUtilities.CLSIDFromProgID(name, out clsid) == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void btnOK_Click(object sender, EventArgs e)
         {
             Guid clsid;
 
-            if ((Guid.TryParse(textBoxCLSID.Text.Trim(), out clsid) && (comboBoxClsCtx.SelectedItem != null)))
+            if ((GetClsid(textBoxCLSID.Text.Trim(), out clsid) && (comboBoxClsCtx.SelectedItem != null)))
             {
                 Clsid = clsid;
                 ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;

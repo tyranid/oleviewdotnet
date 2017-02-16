@@ -349,6 +349,9 @@ namespace OleViewDotNet
                                                     out IMoniker ppmk,
                                                     CreateUrlMonikerFlags dwFlags);
 
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern int CLSIDFromProgID(string lpszProgID, out Guid lpclsid);
+
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
         private static Dictionary<Guid, Type> m_iidtypes;
