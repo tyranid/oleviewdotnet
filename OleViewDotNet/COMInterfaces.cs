@@ -184,73 +184,73 @@ namespace OleViewDotNet
         void PropertySheetPageCallback(IntPtr hwnd, uint uMsg, int uPage);
     }
 
-}
 
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-struct CATEGORYINFO
-{
-    public Guid catid;
-    public int lcid;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-    public string szDescription;
-}
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct CATEGORYINFO
+    {
+        public Guid catid;
+        public int lcid;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string szDescription;
+    }
 
-[Guid("0002E011-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface IEnumCATEGORYINFO
-{
-    int Next(
-        int celt,
-        [Out] CATEGORYINFO[] rgelt,
-        out int pceltFetched);
-    int Skip(int celt);
-    int Reset();
-    int Clone(out IEnumCATEGORYINFO ppenum);
-}
+    [Guid("0002E011-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IEnumCATEGORYINFO
+    {
+        int Next(
+            int celt,
+            [Out] CATEGORYINFO[] rgelt,
+            out int pceltFetched);
+        int Skip(int celt);
+        int Reset();
+        int Clone(out IEnumCATEGORYINFO ppenum);
+    }
 
-[Guid("0002E000-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface IEnumGUID
-{
-    int Next(
-        int celt,
-        [Out] Guid[] rgelt,
-        out int pceltFetched);
-    int Skip(int celt);
-    int Reset();
-    int Clone(out IEnumCATEGORYINFO ppenum);
-}
+    [Guid("0002E000-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IEnumGUID
+    {
+        int Next(
+            int celt,
+            [Out] Guid[] rgelt,
+            out int pceltFetched);
+        int Skip(int celt);
+        int Reset();
+        int Clone(out IEnumCATEGORYINFO ppenum);
+    }
 
-[Guid("0002E013-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface ICatInformation
-{
-    int EnumCategories(int lcid, out IEnumCATEGORYINFO ppenumCategoryInfo);
-    int GetCategoryDesc(ref Guid rcatid, int lcid, out IntPtr pszDesc);
-    void EnumClassesOfCategories(int cImplemented,
-        Guid[] rgcatidImpl,
-        int cRequired,
-        Guid[] rgcatidReq,
-        out IEnumGUID ppenumClsid);
+    [Guid("0002E013-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface ICatInformation
+    {
+        int EnumCategories(int lcid, out IEnumCATEGORYINFO ppenumCategoryInfo);
+        int GetCategoryDesc(ref Guid rcatid, int lcid, out IntPtr pszDesc);
+        void EnumClassesOfCategories(int cImplemented,
+            Guid[] rgcatidImpl,
+            int cRequired,
+            Guid[] rgcatidReq,
+            out IEnumGUID ppenumClsid);
 
-    void IsClassOfCategories(ref Guid rclsid,
-        int cImplemented,
-        Guid[] rgcatidImpl,
-        int cRequired,
-        Guid[] rgcatidReq);
+        void IsClassOfCategories(ref Guid rclsid,
+            int cImplemented,
+            Guid[] rgcatidImpl,
+            int cRequired,
+            Guid[] rgcatidReq);
 
-    void EnumImplCategoriesOfClass(
-        ref Guid rclsid,
-        out IEnumGUID ppenumCatid);
+        void EnumImplCategoriesOfClass(
+            ref Guid rclsid,
+            out IEnumGUID ppenumCatid);
 
-    void EnumReqCategoriesOfClass(
-        ref Guid rclsid,
-        out IEnumGUID ppenumCatid);
-}
+        void EnumReqCategoriesOfClass(
+            ref Guid rclsid,
+            out IEnumGUID ppenumCatid);
+    }
 
-[Guid("00020400-0000-0000-c000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IDispatch
-{
-    void GetTypeInfoCount(out uint pctinfo);
-    void GetTypeInfo(uint iTypeInfo, uint lcid, out IntPtr pTypeInfo);
-    void GetIDsOfNames(ref Guid riid, string[] rszNames, uint cNames, uint lcid, ref int[] dispIDs);
-    void Invoke(int dispIdMember, ref Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
-                out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);
+    [Guid("00020400-0000-0000-c000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IDispatch
+    {
+        void GetTypeInfoCount(out uint pctinfo);
+        void GetTypeInfo(uint iTypeInfo, uint lcid, out IntPtr pTypeInfo);
+        void GetIDsOfNames(ref Guid riid, string[] rszNames, uint cNames, uint lcid, ref int[] dispIDs);
+        void Invoke(int dispIdMember, ref Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
+                    out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);
+    }
 }

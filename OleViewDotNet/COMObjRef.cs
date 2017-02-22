@@ -53,9 +53,21 @@ namespace OleViewDotNet
         Default     = -1,
     }
 
+    public enum RpcTowerId : short
+    {
+        None = 0,
+        Udp = 0x08,
+	    Tcp = 0x07,
+	    Ipx = 0x0E,
+	    Spx = 0x0C,
+	    NetBIOS = 0x12,
+	    DNetNSP = 0x04,
+	    LRPC = 0x10,
+    }
+
     public class COMStringBinding
     {
-        public int TowerId { get; set; }
+        public RpcTowerId TowerId { get; set; }
         public string NetworkAddr { get; set; }
 
         public COMStringBinding()
@@ -66,8 +78,8 @@ namespace OleViewDotNet
 
         internal COMStringBinding(BinaryReader reader)
         {
-            TowerId = reader.ReadInt16();
-            if (TowerId != 0)
+            TowerId = (RpcTowerId)reader.ReadInt16();
+            if (TowerId != RpcTowerId.None)
             {
                 NetworkAddr = reader.ReadZString();
             }
