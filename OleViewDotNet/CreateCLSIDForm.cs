@@ -45,8 +45,9 @@ namespace OleViewDotNet
                 {
                     return true;
                 }
+                return false;
             }
-            return false;
+            return true;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
