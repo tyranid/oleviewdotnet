@@ -137,6 +137,7 @@ namespace OleViewDotNet
                 {
                     ListViewItem item = listViewProxies.Items.Add(intf.Name);
                     item.SubItems.Add(intf.Iid.FormatGuid());
+                    item.Tag = intf;
                 }
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -151,6 +152,7 @@ namespace OleViewDotNet
                     item.SubItems.Add(server.Server);
                     item.SubItems.Add(server.CommandLine);
                     item.SubItems.Add(server.ThreadingModel.ToString());
+                    item.Tag = server;
                 }
 
                 listViewCLSIDServers.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -265,6 +267,7 @@ namespace OleViewDotNet
         {
             textBoxIPID.Text = obj.Ipid.FormatGuid();
             textBoxIPIDIID.Text = obj.Iid.FormatGuid();
+            textBoxIPIDIIDName.Text = m_registry.MapIidToInterface(obj.Iid).Name;
             textBoxIPIDFlags.Text = obj.Flags.ToString();
             textBoxIPIDInterface.Text = String.Format("0x{0:X}", obj.Interface.ToInt64());
             textBoxIPIDInterfaceVTable.Text = GetStringValue(obj.InterfaceVTable);
@@ -593,6 +596,15 @@ namespace OleViewDotNet
             {
                 Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
                         clsid.Name, clsid));
+            }
+        }
+
+        private void listView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ListView list_view = sender as ListView;
+            if (list_view != null && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+            {
+                Program.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
             }
         }
     }

@@ -96,6 +96,7 @@
             System.Windows.Forms.Label label51;
             System.Windows.Forms.Label label52;
             System.Windows.Forms.Label label53;
+            System.Windows.Forms.Label label58;
             System.Windows.Forms.Label label55;
             System.Windows.Forms.Label label56;
             System.Windows.Forms.ColumnHeader columnHeaderElevationVsoName;
@@ -178,6 +179,7 @@
             this.textBoxIPIDApartment = new System.Windows.Forms.TextBox();
             this.textBoxIPIDInterfaceVTable = new System.Windows.Forms.TextBox();
             this.textBoxIPIDStubVTable = new System.Windows.Forms.TextBox();
+            this.textBoxIPIDIIDName = new System.Windows.Forms.TextBox();
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.tabPageNoProperties = new System.Windows.Forms.TabPage();
@@ -272,6 +274,7 @@
             label51 = new System.Windows.Forms.Label();
             label52 = new System.Windows.Forms.Label();
             label53 = new System.Windows.Forms.Label();
+            label58 = new System.Windows.Forms.Label();
             label55 = new System.Windows.Forms.Label();
             label56 = new System.Windows.Forms.Label();
             columnHeaderElevationVsoName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -1010,6 +1013,7 @@
             this.listViewFactoryInterfaces.TabIndex = 10;
             this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewFactoryInterfaces.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // contextMenuStripInterfaces
             // 
@@ -1082,6 +1086,7 @@
             this.listViewInterfaces.TabIndex = 8;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewInterfaces.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // btnRefreshInterfaces
             // 
@@ -1155,10 +1160,10 @@
             // 
             this.btnCreate.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnCreate.AutoSize = true;
-            this.btnCreate.Location = new System.Drawing.Point(508, 23);
+            this.btnCreate.Location = new System.Drawing.Point(506, 23);
             this.btnCreate.Margin = new System.Windows.Forms.Padding(1);
             this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(55, 23);
+            this.btnCreate.Size = new System.Drawing.Size(66, 23);
             this.btnCreate.TabIndex = 16;
             this.btnCreate.Text = "Create";
             this.btnCreate.UseVisualStyleBackColor = true;
@@ -1189,6 +1194,7 @@
             this.listViewCategories.TabIndex = 8;
             this.listViewCategories.UseCompatibleStateImageBehavior = false;
             this.listViewCategories.View = System.Windows.Forms.View.Details;
+            this.listViewCategories.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // textBoxTreatAs
             // 
@@ -1197,7 +1203,7 @@
             this.textBoxTreatAs.Margin = new System.Windows.Forms.Padding(1);
             this.textBoxTreatAs.Name = "textBoxTreatAs";
             this.textBoxTreatAs.ReadOnly = true;
-            this.textBoxTreatAs.Size = new System.Drawing.Size(413, 20);
+            this.textBoxTreatAs.Size = new System.Drawing.Size(411, 20);
             this.textBoxTreatAs.TabIndex = 15;
             // 
             // listViewProgIDs
@@ -1215,6 +1221,7 @@
             this.listViewProgIDs.TabIndex = 6;
             this.listViewProgIDs.UseCompatibleStateImageBehavior = false;
             this.listViewProgIDs.View = System.Windows.Forms.View.Details;
+            this.listViewProgIDs.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // contextMenuStripProgids
             // 
@@ -1238,7 +1245,7 @@
             this.textBoxClsid.Margin = new System.Windows.Forms.Padding(1);
             this.textBoxClsid.Name = "textBoxClsid";
             this.textBoxClsid.ReadOnly = true;
-            this.textBoxClsid.Size = new System.Drawing.Size(413, 20);
+            this.textBoxClsid.Size = new System.Drawing.Size(411, 20);
             this.textBoxClsid.TabIndex = 1;
             // 
             // textBoxCmdLine
@@ -1268,7 +1275,7 @@
             this.btnTreatAsProps.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnTreatAsProps.AutoSize = true;
             this.btnTreatAsProps.Enabled = false;
-            this.btnTreatAsProps.Location = new System.Drawing.Point(508, 116);
+            this.btnTreatAsProps.Location = new System.Drawing.Point(506, 116);
             this.btnTreatAsProps.Margin = new System.Windows.Forms.Padding(1);
             this.btnTreatAsProps.Name = "btnTreatAsProps";
             this.btnTreatAsProps.Size = new System.Drawing.Size(64, 23);
@@ -1546,6 +1553,7 @@
             this.listViewProcessIPids.TabIndex = 13;
             this.listViewProcessIPids.UseCompatibleStateImageBehavior = false;
             this.listViewProcessIPids.View = System.Windows.Forms.View.Details;
+            this.listViewProcessIPids.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // columnHeaderIPid
             // 
@@ -1673,6 +1681,8 @@
             tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDInterfaceVTable, 3, 3);
             tableLayoutPanelIPID.Controls.Add(label53, 2, 4);
             tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDStubVTable, 3, 4);
+            tableLayoutPanelIPID.Controls.Add(label58, 2, 1);
+            tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDIIDName, 3, 1);
             tableLayoutPanelIPID.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelIPID.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelIPID.Name = "tableLayoutPanelIPID";
@@ -1721,12 +1731,11 @@
             // 
             // textBoxIPIDIID
             // 
-            tableLayoutPanelIPID.SetColumnSpan(this.textBoxIPIDIID, 3);
             this.textBoxIPIDIID.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxIPIDIID.Location = new System.Drawing.Point(74, 29);
             this.textBoxIPIDIID.Name = "textBoxIPIDIID";
             this.textBoxIPIDIID.ReadOnly = true;
-            this.textBoxIPIDIID.Size = new System.Drawing.Size(492, 20);
+            this.textBoxIPIDIID.Size = new System.Drawing.Size(204, 20);
             this.textBoxIPIDIID.TabIndex = 3;
             // 
             // label45
@@ -1903,6 +1912,25 @@
             this.textBoxIPIDStubVTable.Size = new System.Drawing.Size(204, 20);
             this.textBoxIPIDStubVTable.TabIndex = 21;
             // 
+            // label58
+            // 
+            label58.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label58.AutoSize = true;
+            label58.Location = new System.Drawing.Point(284, 32);
+            label58.Name = "label58";
+            label58.Size = new System.Drawing.Size(55, 13);
+            label58.TabIndex = 22;
+            label58.Text = "IID Name:";
+            // 
+            // textBoxIPIDIIDName
+            // 
+            this.textBoxIPIDIIDName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxIPIDIIDName.Location = new System.Drawing.Point(362, 29);
+            this.textBoxIPIDIIDName.Name = "textBoxIPIDIIDName";
+            this.textBoxIPIDIIDName.ReadOnly = true;
+            this.textBoxIPIDIIDName.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDIIDName.TabIndex = 23;
+            // 
             // label55
             // 
             label55.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -1941,6 +1969,24 @@
             label54.Size = new System.Drawing.Size(49, 13);
             label54.TabIndex = 7;
             label54.Text = "Enabled:";
+            // 
+            // label57
+            // 
+            label57.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label57.AutoSize = true;
+            label57.Location = new System.Drawing.Point(291, 6);
+            label57.Name = "label57";
+            label57.Size = new System.Drawing.Size(77, 13);
+            label57.TabIndex = 9;
+            label57.Text = "Auto Approval:";
+            // 
+            // columnHeaderElevationEnabled
+            // 
+            columnHeaderElevationEnabled.Text = "Enabled";
+            // 
+            // columnHeaderElevationAutoApproval
+            // 
+            columnHeaderElevationAutoApproval.Text = "Auto Approval";
             // 
             // tabControlProperties
             // 
@@ -2051,6 +2097,7 @@
             this.listViewProxies.TabIndex = 0;
             this.listViewProxies.UseCompatibleStateImageBehavior = false;
             this.listViewProxies.View = System.Windows.Forms.View.Details;
+            this.listViewProxies.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // tabPageServers
             // 
@@ -2080,6 +2127,7 @@
             this.listViewCLSIDServers.TabIndex = 0;
             this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
             this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
+            this.listViewCLSIDServers.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // tabPageService
             // 
@@ -2282,6 +2330,7 @@
             this.listViewElevationVSOs.TabIndex = 6;
             this.listViewElevationVSOs.UseCompatibleStateImageBehavior = false;
             this.listViewElevationVSOs.View = System.Windows.Forms.View.Details;
+            this.listViewElevationVSOs.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             this.listViewElevationVSOs.DoubleClick += new System.EventHandler(this.listViewElevationVSOs_DoubleClick);
             // 
             // textBoxElevationEnabled
@@ -2293,16 +2342,6 @@
             this.textBoxElevationEnabled.Size = new System.Drawing.Size(192, 20);
             this.textBoxElevationEnabled.TabIndex = 8;
             // 
-            // label57
-            // 
-            label57.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label57.AutoSize = true;
-            label57.Location = new System.Drawing.Point(291, 6);
-            label57.Name = "label57";
-            label57.Size = new System.Drawing.Size(77, 13);
-            label57.TabIndex = 9;
-            label57.Text = "Auto Approval:";
-            // 
             // textBoxElevationAutoApproval
             // 
             this.textBoxElevationAutoApproval.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -2311,14 +2350,6 @@
             this.textBoxElevationAutoApproval.ReadOnly = true;
             this.textBoxElevationAutoApproval.Size = new System.Drawing.Size(192, 20);
             this.textBoxElevationAutoApproval.TabIndex = 10;
-            // 
-            // columnHeaderElevationEnabled
-            // 
-            columnHeaderElevationEnabled.Text = "Enabled";
-            // 
-            // columnHeaderElevationAutoApproval
-            // 
-            columnHeaderElevationAutoApproval.Text = "Auto Approval";
             // 
             // PropertiesControl
             // 
@@ -2471,5 +2502,6 @@
         private System.Windows.Forms.ListView listViewElevationVSOs;
         private System.Windows.Forms.TextBox textBoxElevationEnabled;
         private System.Windows.Forms.TextBox textBoxElevationAutoApproval;
+        private System.Windows.Forms.TextBox textBoxIPIDIIDName;
     }
 }
