@@ -92,6 +92,94 @@
             label2.TabIndex = 2;
             label2.Text = "Public Refs:";
             // 
+            // label3
+            // 
+            label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(3, 32);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(36, 13);
+            label3.TabIndex = 4;
+            label3.Text = "OXID:";
+            // 
+            // label4
+            // 
+            label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(366, 32);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(29, 13);
+            label4.TabIndex = 6;
+            label4.Text = "OID:";
+            // 
+            // label5
+            // 
+            label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point(3, 58);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(31, 13);
+            label5.TabIndex = 8;
+            label5.Text = "IPID:";
+            // 
+            // label6
+            // 
+            label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(366, 58);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(72, 13);
+            label6.TabIndex = 10;
+            label6.Text = "Apartment ID:";
+            // 
+            // label7
+            // 
+            label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(3, 84);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(62, 13);
+            label7.TabIndex = 12;
+            label7.Text = "Process ID:";
+            // 
+            // label8
+            // 
+            label8.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(366, 84);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(79, 13);
+            label8.TabIndex = 14;
+            label8.Text = "Process Name:";
+            // 
+            // label11
+            // 
+            label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            label11.AutoSize = true;
+            label11.Location = new System.Drawing.Point(3, 130);
+            label11.Name = "label11";
+            label11.Size = new System.Drawing.Size(80, 13);
+            label11.TabIndex = 20;
+            label11.Text = "String Bindings:";
+            // 
+            // label12
+            // 
+            label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            label12.AutoSize = true;
+            label12.Location = new System.Drawing.Point(366, 130);
+            label12.Name = "label12";
+            label12.Size = new System.Drawing.Size(91, 13);
+            label12.TabIndex = 21;
+            label12.Text = "Security Bindings:";
+            // 
+            // columnHeaderTowerId
+            // 
+            columnHeaderTowerId.Text = "Tower ID";
+            // 
+            // columnHeaderAddress
+            // 
+            columnHeaderAddress.Text = "Network Address";
+            // 
             // tableLayoutPanel
             // 
             this.tableLayoutPanel.ColumnCount = 4;
@@ -155,16 +243,6 @@
             this.textBoxPublicRefs.Size = new System.Drawing.Size(270, 20);
             this.textBoxPublicRefs.TabIndex = 3;
             // 
-            // label3
-            // 
-            label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(3, 32);
-            label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(36, 13);
-            label3.TabIndex = 4;
-            label3.Text = "OXID:";
-            // 
             // textBoxOxid
             // 
             this.textBoxOxid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -173,16 +251,6 @@
             this.textBoxOxid.ReadOnly = true;
             this.textBoxOxid.Size = new System.Drawing.Size(270, 20);
             this.textBoxOxid.TabIndex = 5;
-            // 
-            // label4
-            // 
-            label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(366, 32);
-            label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(29, 13);
-            label4.TabIndex = 6;
-            label4.Text = "OID:";
             // 
             // textBoxOid
             // 
@@ -193,16 +261,6 @@
             this.textBoxOid.Size = new System.Drawing.Size(270, 20);
             this.textBoxOid.TabIndex = 7;
             // 
-            // label5
-            // 
-            label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(3, 58);
-            label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(31, 13);
-            label5.TabIndex = 8;
-            label5.Text = "IPID:";
-            // 
             // textBoxIpid
             // 
             this.textBoxIpid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -211,16 +269,6 @@
             this.textBoxIpid.ReadOnly = true;
             this.textBoxIpid.Size = new System.Drawing.Size(270, 20);
             this.textBoxIpid.TabIndex = 9;
-            // 
-            // label6
-            // 
-            label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(366, 58);
-            label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(72, 13);
-            label6.TabIndex = 10;
-            label6.Text = "Apartment ID:";
             // 
             // textBoxApartmentId
             // 
@@ -231,16 +279,6 @@
             this.textBoxApartmentId.Size = new System.Drawing.Size(270, 20);
             this.textBoxApartmentId.TabIndex = 11;
             // 
-            // label7
-            // 
-            label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(3, 84);
-            label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(62, 13);
-            label7.TabIndex = 12;
-            label7.Text = "Process ID:";
-            // 
             // textBoxProcessId
             // 
             this.textBoxProcessId.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -249,16 +287,6 @@
             this.textBoxProcessId.ReadOnly = true;
             this.textBoxProcessId.Size = new System.Drawing.Size(270, 20);
             this.textBoxProcessId.TabIndex = 13;
-            // 
-            // label8
-            // 
-            label8.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(366, 84);
-            label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(79, 13);
-            label8.TabIndex = 14;
-            label8.Text = "Process Name:";
             // 
             // textBoxProcessName
             // 
@@ -307,26 +335,6 @@
             this.textBoxHandlerName.Size = new System.Drawing.Size(270, 20);
             this.textBoxHandlerName.TabIndex = 19;
             // 
-            // label11
-            // 
-            label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(3, 130);
-            label11.Name = "label11";
-            label11.Size = new System.Drawing.Size(80, 13);
-            label11.TabIndex = 20;
-            label11.Text = "String Bindings:";
-            // 
-            // label12
-            // 
-            label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(366, 130);
-            label12.Name = "label12";
-            label12.Size = new System.Drawing.Size(91, 13);
-            label12.TabIndex = 21;
-            label12.Text = "Security Bindings:";
-            // 
             // listViewStringBindings
             // 
             this.listViewStringBindings.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -342,6 +350,7 @@
             this.listViewStringBindings.TabIndex = 22;
             this.listViewStringBindings.UseCompatibleStateImageBehavior = false;
             this.listViewStringBindings.View = System.Windows.Forms.View.Details;
+            this.listViewStringBindings.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // listViewSecurityBindings
             // 
@@ -358,14 +367,6 @@
             this.listViewSecurityBindings.TabIndex = 23;
             this.listViewSecurityBindings.UseCompatibleStateImageBehavior = false;
             this.listViewSecurityBindings.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeaderTowerId
-            // 
-            columnHeaderTowerId.Text = "Tower ID";
-            // 
-            // columnHeaderAddress
-            // 
-            columnHeaderAddress.Text = "Network Address";
             // 
             // columnHeaderAuthnSvc
             // 

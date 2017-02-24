@@ -84,5 +84,14 @@ namespace OleViewDotNet
             listViewSecurityBindings.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewSecurityBindings.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
+
+        private void listView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ListView list_view = sender as ListView;
+            if (list_view != null && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+            {
+                Program.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
+            }
+        }
     }
 }
