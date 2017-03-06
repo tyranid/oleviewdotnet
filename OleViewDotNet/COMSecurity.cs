@@ -309,6 +309,109 @@ namespace OleViewDotNet
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
         private extern static int GetSecurityDescriptorLength(IntPtr sd);
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct GenericMapping
+        {
+            public uint GenericRead;
+            public uint GenericWrite;
+            public uint GenericExecute;
+            public uint GenericAll;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct PrivilegeSet
+        {
+            public int PrivilegeCount;
+            public int Control;
+            public int LowLuid;
+            public int HighLuid;
+            public int Attributes;
+        }
+        
+        [DllImport("advapi32.dll", SetLastError = true)]
+        static extern bool AccessCheckByType(
+          byte[] pSecurityDescriptor,
+          byte[] PrincipalSelfSid,
+          SafeTokenHandle ClientToken,
+          uint DesiredAccess,
+          IntPtr ObjectTypeList,
+          int ObjectTypeListLength,
+          ref GenericMapping GenericMapping,
+          ref PrivilegeSet PrivilegeSet,
+          ref int PrivilegeSetLength,
+          out uint GrantedAccess,
+          out bool AccessStatus
+        );
+
+        const uint MaximumAllowed = 0x02000000;
+
+        internal static string GetSaclForSddl(string sddl)
+        {
+            return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
+        }
+
+        internal static bool IsAccessGranted(string sddl, string principal, SafeTokenHandle token, bool launch, bool check_il, COMAccessRights desired_access)
+        {
+            COMAccessRights maximum_rights;
+
+            if (check_il)
+            {
+                string sacl = GetSaclForSddl(sddl);
+                if (String.IsNullOrEmpty(sacl))
+                {
+                    // Add medium NX SACL
+                    sddl += "S:(ML;;NX;;;ME)";
+                }
+            }
+
+            if (!GetGrantedAccess(sddl, principal, token, launch, out maximum_rights))
+            {
+                return false;
+            }
+
+            // If old style SD then all accesses are granted.
+            if (maximum_rights == COMAccessRights.Execute)
+            {
+                return true;
+            }
+
+            return (maximum_rights & desired_access) == desired_access;
+        }
+
+        private static bool GetGrantedAccess(string sddl, string principal, SafeTokenHandle token, bool launch, out COMAccessRights maximum_rights)
+        {
+            GenericMapping mapping = new GenericMapping();
+            mapping.GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote);
+            if (launch)
+            {
+                mapping.GenericExecute = mapping.GenericExecute | (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote);
+            }
+
+            byte[] princ_bytes = null;
+            if (!String.IsNullOrWhiteSpace(principal))
+            {
+                System.Security.Principal.SecurityIdentifier sid = new System.Security.Principal.SecurityIdentifier(principal);
+                princ_bytes = new byte[sid.BinaryLength];
+                sid.GetBinaryForm(princ_bytes, 0);
+            }
+
+            maximum_rights = 0;
+            PrivilegeSet priv_set = new PrivilegeSet();
+            int priv_length = Marshal.SizeOf(priv_set);
+            uint granted_access = 0;
+            bool access_status = false;
+            byte[] sd = GetSDForStringSD(sddl);
+            if (!AccessCheckByType(sd, princ_bytes, token, MaximumAllowed, IntPtr.Zero, 0, ref mapping, ref priv_set, ref priv_length, out granted_access, out access_status))
+            {
+                throw new Win32Exception();
+            }
+            if (access_status)
+            {
+                maximum_rights = (COMAccessRights)granted_access;
+            }
+            return access_status;
+        }
+
         private static string GetSecurityPermissions(COMSD sdtype)
         {
             IntPtr sd = IntPtr.Zero;
@@ -419,15 +522,14 @@ namespace OleViewDotNet
                 return SecurityIntegrityLevel.Medium;
             }
 
-            // Check for a SACL string.
-            int index = sddl.IndexOf("S:");
-            if (index < 0)
+            string sacl = GetSaclForSddl(sddl);
+            if (!sacl.StartsWith("S:", StringComparison.OrdinalIgnoreCase))
             {
                 return SecurityIntegrityLevel.Medium;
             }
 
             Regex label_re = new Regex(@"\(ML;;[^;]*;;;([^)]+)\)");
-            Match m = label_re.Match(sddl);
+            Match m = label_re.Match(sacl);
             if (!m.Success || m.Groups.Count < 2)
             {
                 return SecurityIntegrityLevel.Medium;
