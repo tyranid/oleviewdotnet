@@ -1929,6 +1929,20 @@ namespace OleViewDotNet
         {
             return BitConverter.ToInt16(ipid.ToByteArray(), 6);
         }
+
+        internal static string GetApartmentIdStringFromIPid(Guid ipid)
+        {
+            int appid = GetApartmentIdFromIPid(ipid);
+            switch (appid)
+            {
+                case 0:
+                    return "NTA";
+                case -1:
+                    return "MTA";
+                default:
+                    return String.Format("STA (Thread ID {0})", appid);
+            }
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

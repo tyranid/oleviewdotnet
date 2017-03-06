@@ -35,7 +35,7 @@ namespace OleViewDotNet
             textBoxOxid.Text = String.Format("0x{0:X016}", objref.StdObjRef.Oxid);
             textBoxOid.Text = String.Format("0x{0:X016}", objref.StdObjRef.Oid);
             textBoxIpid.Text = objref.StdObjRef.Ipid.FormatGuid();
-            textBoxApartmentId.Text = COMUtilities.GetApartmentIdFromIPid(objref.StdObjRef.Ipid).ToString();
+            textBoxApartmentId.Text = COMUtilities.GetApartmentIdStringFromIPid(objref.StdObjRef.Ipid);
             int pid = COMUtilities.GetProcessIdFromIPid(objref.StdObjRef.Ipid);
             textBoxProcessId.Text = COMUtilities.GetProcessIdFromIPid(objref.StdObjRef.Ipid).ToString();
             try

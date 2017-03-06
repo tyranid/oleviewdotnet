@@ -348,7 +348,7 @@ namespace OleViewDotNet
             int Tid { get; }
             Guid MOxid { get; }
             long Mid { get; }
-
+            IntPtr ServerSTAHwnd { get; }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -414,6 +414,14 @@ namespace OleViewDotNet
                     return _mid;
                 }
             }
+
+            IntPtr IOXIDEntry.ServerSTAHwnd
+            {
+                get
+                {
+                    return _hServerSTA;
+                }
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -477,6 +485,14 @@ namespace OleViewDotNet
                 get
                 {
                     return _mid;
+                }
+            }
+
+            IntPtr IOXIDEntry.ServerSTAHwnd
+            {
+                get
+                {
+                    return new IntPtr(_hServerSTA);
                 }
             }
         }
@@ -1161,7 +1177,8 @@ namespace OleViewDotNet
                         ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
                         ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
                         ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
-                        ReadPointer(process, resolver, "gAccessControl"));
+                        ReadPointer(process, resolver, "gAccessControl"),
+                        ReadPointer(process, resolver, "ghwndOleMainThread"));
                 }
             }
         }
@@ -1225,12 +1242,13 @@ namespace OleViewDotNet
         public RPC_AUTHN_LEVEL AuthnLevel { get; private set; }
         public RPC_IMP_LEVEL ImpLevel { get; private set; }
         public IntPtr AccessControl { get; private set; }
+        public IntPtr STAMainHWnd { get; private set; }
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
             string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level,
-            IntPtr access_control)
+            IntPtr access_control, IntPtr sta_main_hwnd)
         {
             Pid = pid;
             ExecutablePath = path;
@@ -1252,6 +1270,7 @@ namespace OleViewDotNet
             AuthnLevel = authn_level;
             ImpLevel = imp_level;
             AccessControl = access_control;
+            STAMainHWnd = sta_main_hwnd;
         }
     }
 
@@ -1288,6 +1307,15 @@ namespace OleViewDotNet
         public int StrongRefs { get; private set; }
         public int WeakRefs { get; private set; }
         public int PrivateRefs { get; private set; }
+        public IntPtr ServerSTAHwnd { get; private set; }
+        public int ApartmentId
+        {
+            get
+            {
+                return COMUtilities.GetApartmentIdFromIPid(Ipid);
+            }
+        }
+        
         public bool IsRunning
         {
             get
@@ -1324,6 +1352,7 @@ namespace OleViewDotNet
             Stub = ipid.Stub;
             var oxid = ipid.GetOxidEntry(process);
             Oxid = oxid.MOxid;
+            ServerSTAHwnd = oxid.ServerSTAHwnd;
             StrongRefs = ipid.StrongRefs;
             WeakRefs = ipid.WeakRefs;
             PrivateRefs = ipid.PrivateRefs;

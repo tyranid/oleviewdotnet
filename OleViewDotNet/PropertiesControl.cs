@@ -278,7 +278,7 @@ namespace OleViewDotNet
                 obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);
             
             textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
-            textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdFromIPid(obj.Ipid).ToString();
+            textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
             tabControlProperties.TabPages.Add(tabPageIPID);
         }
 
