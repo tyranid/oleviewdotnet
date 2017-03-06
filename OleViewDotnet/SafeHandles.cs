@@ -17,6 +17,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 
 namespace OleViewDotNet
@@ -127,6 +128,126 @@ namespace OleViewDotNet
         }
     }
 
+    [Flags]
+    internal enum ProcessAccessRights : uint
+    {
+        None = 0,
+        CreateProcess = 0x0080,
+        CreateThread = 0x0002,
+        DupHandle = 0x0040,
+        QueryInformation = 0x0400,
+        QueryLimitedInformation = 0x1000,
+        SetInformation = 0x0200,
+        SetQuota = 0x0100,
+        SuspendResume = 0x0800,
+        Terminate = 0x0001,
+        VmOperation = 0x0008,
+        VmRead = 0x0010,
+        VmWrite = 0x0020,
+        GenericRead = 0x80000000,
+        GenericWrite = 0x40000000,
+        GenericExecute = 0x20000000,
+        GenericAll = 0x10000000,
+        Delete = 0x00010000,
+        ReadControl = 0x00020000,
+        WriteDac = 0x00040000,
+        WriteOwner = 0x00080000,
+        Synchronize = 0x00100000,
+        MaximumAllowed = 0x02000000,
+    };
+
+    enum SecurityImpersonationLevel
+    {
+        SecurityAnonymous,
+        SecurityIdentification,
+        SecurityImpersonation,
+        SecurityDelegation
+    }
+
+    internal class SafeTokenHandle : SafeKernelObjectHandle
+    {
+        private SafeTokenHandle()
+            : base(IntPtr.Zero, true)
+        {
+        }
+
+        public SafeTokenHandle(IntPtr handle, bool owns_handle)
+          : base(IntPtr.Zero, owns_handle)
+        {
+            SetHandle(handle);
+        }
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        public static extern bool DuplicateToken(
+            SafeTokenHandle ExistingTokenHandle,
+            SecurityImpersonationLevel ImpersonationLevel,
+            out SafeTokenHandle DuplicateTokenHandle
+        );
+
+        public SafeTokenHandle DuplicateImpersonation(SecurityImpersonationLevel imp_level)
+        {
+            SafeTokenHandle token;
+            if (!DuplicateToken(this, imp_level, out token))
+            {
+                throw new Win32Exception();
+            }
+            return token;
+        }
+
+        enum TokenInformationClass
+        {
+            TokenUser = 1,
+            TokenGroups,
+            TokenPrivileges,
+            TokenOwner,
+            TokenPrimaryGroup,
+            TokenDefaultDacl,
+            TokenSource,
+            TokenType,
+            TokenImpersonationLevel,
+            TokenStatistics,
+            TokenRestrictedSids,
+            TokenSessionId,
+            TokenGroupsAndPrivileges,
+            TokenSessionReference,
+            TokenSandBoxInert,
+            TokenAuditPolicy,
+            TokenOrigin,
+            TokenElevationType,
+            TokenLinkedToken,
+            TokenElevation,
+            TokenHasRestrictions,
+            TokenAccessInformation,
+            TokenVirtualizationAllowed,
+            TokenVirtualizationEnabled,
+            TokenIntegrityLevel,
+            TokenUIAccess,
+            TokenMandatoryPolicy,
+            TokenLogonSid,
+            TokenIsAppContainer,
+            TokenCapabilities,
+            TokenAppContainerSid,
+            TokenAppContainerNumber,
+            TokenUserClaimAttributes,
+            TokenDeviceClaimAttributes,
+            TokenRestrictedUserClaimAttributes,
+            TokenRestrictedDeviceClaimAttributes,
+            TokenDeviceGroups,
+            TokenRestrictedDeviceGroups,
+            TokenSecurityAttributes,
+            TokenIsRestricted,
+        }
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool GetTokenInformation(
+          SafeTokenHandle TokenHandle,
+          TokenInformationClass TokenInformationClass,
+          IntPtr TokenInformation,
+          int TokenInformationLength,
+          out int ReturnLength
+        );
+    }
+
     internal class SafeProcessHandle : SafeKernelObjectHandle
     {
         private SafeProcessHandle()
@@ -138,6 +259,11 @@ namespace OleViewDotNet
           : base(IntPtr.Zero, owns_handle)
         {
             SetHandle(handle);
+        }
+
+        public static SafeProcessHandle Current
+        {
+            get { return new SafeProcessHandle(new IntPtr(-1), false); }
         }
 
         private bool? _is64bit;
@@ -310,6 +436,73 @@ namespace OleViewDotNet
                 pos += 2;
             }
             return builder.ToString();
+        }
+
+
+        private const int MaximumAllowed = 0x02000000;
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool OpenProcessToken(
+              IntPtr ProcessHandle,
+              int DesiredAccess,
+              out SafeTokenHandle TokenHandle
+            );
+
+        public SafeTokenHandle OpenToken()
+        {
+            SafeTokenHandle token;
+            if (!OpenProcessToken(handle, MaximumAllowed, out token))
+            {
+                throw new Win32Exception();
+            }
+
+            return token;
+        }
+
+        public SafeTokenHandle OpenTokenAsImpersonation(SecurityImpersonationLevel imp_level)
+        {
+            using (SafeTokenHandle token = OpenToken())
+            {
+                return token.DuplicateImpersonation(imp_level);
+            }
+        }
+
+        public string GetProcessUser()
+        {
+            try
+            {
+                using (SafeTokenHandle token = OpenToken())
+                {
+                    using (WindowsIdentity id = new WindowsIdentity(token.DangerousGetHandle()))
+                    {
+                        SecurityIdentifier sid = id.User;
+                        try
+                        {
+                            NTAccount account = (NTAccount)sid.Translate(typeof(NTAccount));
+                            return account.Value;
+                        }
+                        catch (IdentityNotMappedException)
+                        {
+                            return sid.Value;
+                        }
+                    }
+                }
+            }
+            catch (Win32Exception)
+            {
+                return "Unknown";
+            }
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern SafeProcessHandle OpenProcess(ProcessAccessRights dwDesiredAccess,
+                                                                 bool bInheritHandle,
+                                                                 int dwProcessId
+                                                                );
+
+        public static SafeProcessHandle Open(int pid, ProcessAccessRights desired_access)
+        {
+            return OpenProcess(desired_access, false, pid);
         }
     }
 }

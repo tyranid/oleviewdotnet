@@ -1035,24 +1035,9 @@ namespace OleViewDotNet
               IntPtr ReturnLength
             );
 
-        private const int MaximumAllowed = 0x02000000;
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool OpenProcessToken(
-              IntPtr ProcessHandle,
-              int DesiredAccess,
-              out SafeKernelObjectHandle TokenHandle
-            );
-
         private static bool EnableDebugPrivilege()
         {
-            SafeKernelObjectHandle token;
-            if (!OpenProcessToken(new IntPtr(-1), MaximumAllowed, out token))
-            {
-                throw new Win32Exception();
-            }
-
-            using (token)
+            using (SafeKernelObjectHandle token = SafeProcessHandle.Current.OpenToken())
             {
                 TOKEN_PRIVILEGES privs = new TOKEN_PRIVILEGES();
                 if (!LookupPrivilegeValue(null, "SeDebugPrivilege", out privs.Luid))
@@ -1088,69 +1073,10 @@ namespace OleViewDotNet
             }
             return String.Empty;
         }
-
-        private static string GetProcessUser(SafeProcessHandle process)
-        {
-            SafeKernelObjectHandle token;
-            if (OpenProcessToken(process.DangerousGetHandle(), MaximumAllowed, out token))
-            {
-                using (token)
-                {
-                    using (WindowsIdentity id = new WindowsIdentity(token.DangerousGetHandle()))
-                    {
-                        SecurityIdentifier sid = id.User;
-                        try
-                        {
-                            NTAccount account = (NTAccount)sid.Translate(typeof(NTAccount));
-                            return account.Value;
-                        }
-                        catch (IdentityNotMappedException)
-                        {
-                            return sid.Value;
-                        }
-                    }
-                }
-            }
-            return "Unknown";
-        }
-
-        [Flags]
-        internal enum ProcessAccessRights : uint
-        {
-            None = 0,
-            CreateProcess = 0x0080,
-            CreateThread = 0x0002,
-            DupHandle = 0x0040,
-            QueryInformation = 0x0400,
-            QueryLimitedInformation = 0x1000,
-            SetInformation = 0x0200,
-            SetQuota = 0x0100,
-            SuspendResume = 0x0800,
-            Terminate = 0x0001,
-            VmOperation = 0x0008,
-            VmRead = 0x0010,
-            VmWrite = 0x0020,
-            GenericRead = 0x80000000,
-            GenericWrite = 0x40000000,
-            GenericExecute = 0x20000000,
-            GenericAll = 0x10000000,
-            Delete = 0x00010000,
-            ReadControl = 0x00020000,
-            WriteDac = 0x00040000,
-            WriteOwner = 0x00080000,
-            Synchronize = 0x00100000,
-            MaximumAllowed = 0x02000000,
-        };
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern SafeProcessHandle OpenProcess(ProcessAccessRights dwDesiredAccess,
-                                                                 bool bInheritHandle,
-                                                                 int dwProcessId
-                                                                );
-
+        
         public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path)
         {
-            using (SafeProcessHandle process = OpenProcess(ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false, pid))
+            using (SafeProcessHandle process = SafeProcessHandle.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation))
             {
                 if (process.IsInvalid)
                 {
@@ -1172,7 +1098,7 @@ namespace OleViewDotNet
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
                         GetLrpcSecurityDescriptor(process, resolver),
-                        GetProcessUser(process),
+                        process.GetProcessUser(),
                         ReadString(process, resolver, "gwszLRPCEndPoint"),
                         ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
                         ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
