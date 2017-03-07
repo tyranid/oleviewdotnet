@@ -128,9 +128,9 @@
             label6.AutoSize = true;
             label6.Location = new System.Drawing.Point(366, 58);
             label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(72, 13);
+            label6.Size = new System.Drawing.Size(58, 13);
             label6.TabIndex = 10;
-            label6.Text = "Apartment ID:";
+            label6.Text = "Apartment:";
             // 
             // label7
             // 

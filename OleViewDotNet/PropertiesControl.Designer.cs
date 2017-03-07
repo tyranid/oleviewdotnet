@@ -105,6 +105,8 @@
             System.Windows.Forms.Label label57;
             System.Windows.Forms.ColumnHeader columnHeaderElevationEnabled;
             System.Windows.Forms.ColumnHeader columnHeaderElevationAutoApproval;
+            System.Windows.Forms.Label label59;
+            System.Windows.Forms.Label label61;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -207,6 +209,8 @@
             this.listViewElevationVSOs = new System.Windows.Forms.ListView();
             this.textBoxElevationEnabled = new System.Windows.Forms.TextBox();
             this.textBoxElevationAutoApproval = new System.Windows.Forms.TextBox();
+            this.textBoxIPIDStaHwnd = new System.Windows.Forms.TextBox();
+            this.textBoxProcessStaHwnd = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -283,6 +287,8 @@
             label57 = new System.Windows.Forms.Label();
             columnHeaderElevationEnabled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderElevationAutoApproval = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            label59 = new System.Windows.Forms.Label();
+            label61 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -1385,15 +1391,18 @@
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessAccessPermissions, 1, 3);
             tableLayoutPanelProcess.Controls.Add(label40, 0, 5);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessUser, 1, 5);
-            tableLayoutPanelProcess.Controls.Add(label41, 0, 7);
-            tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 8);
+            tableLayoutPanelProcess.Controls.Add(label41, 0, 8);
+            tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 9);
             tableLayoutPanelProcess.Controls.Add(this.btnProcessViewAccessPermissions, 2, 3);
             tableLayoutPanelProcess.Controls.Add(label43, 0, 6);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessSecurity, 1, 6);
+            tableLayoutPanelProcess.Controls.Add(label61, 0, 7);
+            tableLayoutPanelProcess.Controls.Add(this.textBoxProcessStaHwnd, 1, 7);
             tableLayoutPanelProcess.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelProcess.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelProcess.Name = "tableLayoutPanelProcess";
-            tableLayoutPanelProcess.RowCount = 9;
+            tableLayoutPanelProcess.RowCount = 10;
+            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1403,7 +1412,6 @@
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            tableLayoutPanelProcess.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             tableLayoutPanelProcess.Size = new System.Drawing.Size(569, 357);
             tableLayoutPanelProcess.TabIndex = 0;
             // 
@@ -1530,7 +1538,7 @@
             // 
             label41.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label41.AutoSize = true;
-            label41.Location = new System.Drawing.Point(3, 185);
+            label41.Location = new System.Drawing.Point(3, 211);
             label41.Name = "label41";
             label41.Size = new System.Drawing.Size(36, 13);
             label41.TabIndex = 12;
@@ -1546,10 +1554,10 @@
             this.listViewProcessIPids.ContextMenuStrip = this.contextMenuStripIpids;
             this.listViewProcessIPids.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewProcessIPids.FullRowSelect = true;
-            this.listViewProcessIPids.Location = new System.Drawing.Point(3, 201);
+            this.listViewProcessIPids.Location = new System.Drawing.Point(3, 227);
             this.listViewProcessIPids.MultiSelect = false;
             this.listViewProcessIPids.Name = "listViewProcessIPids";
-            this.listViewProcessIPids.Size = new System.Drawing.Size(563, 153);
+            this.listViewProcessIPids.Size = new System.Drawing.Size(563, 127);
             this.listViewProcessIPids.TabIndex = 13;
             this.listViewProcessIPids.UseCompatibleStateImageBehavior = false;
             this.listViewProcessIPids.View = System.Windows.Forms.View.Details;
@@ -1683,10 +1691,13 @@
             tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDStubVTable, 3, 4);
             tableLayoutPanelIPID.Controls.Add(label58, 2, 1);
             tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDIIDName, 3, 1);
+            tableLayoutPanelIPID.Controls.Add(label59, 0, 8);
+            tableLayoutPanelIPID.Controls.Add(this.textBoxIPIDStaHwnd, 1, 8);
             tableLayoutPanelIPID.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelIPID.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelIPID.Name = "tableLayoutPanelIPID";
-            tableLayoutPanelIPID.RowCount = 9;
+            tableLayoutPanelIPID.RowCount = 10;
+            tableLayoutPanelIPID.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelIPID.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelIPID.RowStyles.Add(new System.Windows.Forms.RowStyle());
             tableLayoutPanelIPID.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1713,10 +1724,10 @@
             // 
             tableLayoutPanelIPID.SetColumnSpan(this.textBoxIPID, 3);
             this.textBoxIPID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPID.Location = new System.Drawing.Point(74, 3);
+            this.textBoxIPID.Location = new System.Drawing.Point(75, 3);
             this.textBoxIPID.Name = "textBoxIPID";
             this.textBoxIPID.ReadOnly = true;
-            this.textBoxIPID.Size = new System.Drawing.Size(492, 20);
+            this.textBoxIPID.Size = new System.Drawing.Size(491, 20);
             this.textBoxIPID.TabIndex = 1;
             // 
             // label44
@@ -1732,10 +1743,10 @@
             // textBoxIPIDIID
             // 
             this.textBoxIPIDIID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDIID.Location = new System.Drawing.Point(74, 29);
+            this.textBoxIPIDIID.Location = new System.Drawing.Point(75, 29);
             this.textBoxIPIDIID.Name = "textBoxIPIDIID";
             this.textBoxIPIDIID.ReadOnly = true;
-            this.textBoxIPIDIID.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDIID.Size = new System.Drawing.Size(210, 20);
             this.textBoxIPIDIID.TabIndex = 3;
             // 
             // label45
@@ -1752,10 +1763,10 @@
             // 
             tableLayoutPanelIPID.SetColumnSpan(this.textBoxIPIDFlags, 3);
             this.textBoxIPIDFlags.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDFlags.Location = new System.Drawing.Point(74, 55);
+            this.textBoxIPIDFlags.Location = new System.Drawing.Point(75, 55);
             this.textBoxIPIDFlags.Name = "textBoxIPIDFlags";
             this.textBoxIPIDFlags.ReadOnly = true;
-            this.textBoxIPIDFlags.Size = new System.Drawing.Size(492, 20);
+            this.textBoxIPIDFlags.Size = new System.Drawing.Size(491, 20);
             this.textBoxIPIDFlags.TabIndex = 5;
             // 
             // label46
@@ -1771,10 +1782,10 @@
             // textBoxIPIDInterface
             // 
             this.textBoxIPIDInterface.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDInterface.Location = new System.Drawing.Point(74, 81);
+            this.textBoxIPIDInterface.Location = new System.Drawing.Point(75, 81);
             this.textBoxIPIDInterface.Name = "textBoxIPIDInterface";
             this.textBoxIPIDInterface.ReadOnly = true;
-            this.textBoxIPIDInterface.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDInterface.Size = new System.Drawing.Size(210, 20);
             this.textBoxIPIDInterface.TabIndex = 7;
             // 
             // label47
@@ -1790,10 +1801,10 @@
             // textBoxIPIDStub
             // 
             this.textBoxIPIDStub.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDStub.Location = new System.Drawing.Point(74, 107);
+            this.textBoxIPIDStub.Location = new System.Drawing.Point(75, 107);
             this.textBoxIPIDStub.Name = "textBoxIPIDStub";
             this.textBoxIPIDStub.ReadOnly = true;
-            this.textBoxIPIDStub.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDStub.Size = new System.Drawing.Size(210, 20);
             this.textBoxIPIDStub.TabIndex = 9;
             // 
             // label48
@@ -1810,10 +1821,10 @@
             // 
             tableLayoutPanelIPID.SetColumnSpan(this.textBoxIPIDOXID, 3);
             this.textBoxIPIDOXID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDOXID.Location = new System.Drawing.Point(74, 133);
+            this.textBoxIPIDOXID.Location = new System.Drawing.Point(75, 133);
             this.textBoxIPIDOXID.Name = "textBoxIPIDOXID";
             this.textBoxIPIDOXID.ReadOnly = true;
-            this.textBoxIPIDOXID.Size = new System.Drawing.Size(492, 20);
+            this.textBoxIPIDOXID.Size = new System.Drawing.Size(491, 20);
             this.textBoxIPIDOXID.TabIndex = 11;
             // 
             // label49
@@ -1830,10 +1841,10 @@
             // 
             tableLayoutPanelIPID.SetColumnSpan(this.textBoxIPIDReferences, 3);
             this.textBoxIPIDReferences.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDReferences.Location = new System.Drawing.Point(74, 159);
+            this.textBoxIPIDReferences.Location = new System.Drawing.Point(75, 159);
             this.textBoxIPIDReferences.Name = "textBoxIPIDReferences";
             this.textBoxIPIDReferences.ReadOnly = true;
-            this.textBoxIPIDReferences.Size = new System.Drawing.Size(492, 20);
+            this.textBoxIPIDReferences.Size = new System.Drawing.Size(491, 20);
             this.textBoxIPIDReferences.TabIndex = 13;
             // 
             // label50
@@ -1849,36 +1860,36 @@
             // textBoxIPIDProcessId
             // 
             this.textBoxIPIDProcessId.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDProcessId.Location = new System.Drawing.Point(74, 185);
+            this.textBoxIPIDProcessId.Location = new System.Drawing.Point(75, 185);
             this.textBoxIPIDProcessId.Name = "textBoxIPIDProcessId";
             this.textBoxIPIDProcessId.ReadOnly = true;
-            this.textBoxIPIDProcessId.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDProcessId.Size = new System.Drawing.Size(210, 20);
             this.textBoxIPIDProcessId.TabIndex = 15;
             // 
             // label51
             // 
             label51.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label51.AutoSize = true;
-            label51.Location = new System.Drawing.Point(284, 188);
+            label51.Location = new System.Drawing.Point(291, 188);
             label51.Name = "label51";
-            label51.Size = new System.Drawing.Size(72, 13);
+            label51.Size = new System.Drawing.Size(58, 13);
             label51.TabIndex = 16;
-            label51.Text = "Apartment ID:";
+            label51.Text = "Apartment:";
             // 
             // textBoxIPIDApartment
             // 
             this.textBoxIPIDApartment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDApartment.Location = new System.Drawing.Point(362, 185);
+            this.textBoxIPIDApartment.Location = new System.Drawing.Point(355, 185);
             this.textBoxIPIDApartment.Name = "textBoxIPIDApartment";
             this.textBoxIPIDApartment.ReadOnly = true;
-            this.textBoxIPIDApartment.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDApartment.Size = new System.Drawing.Size(211, 20);
             this.textBoxIPIDApartment.TabIndex = 17;
             // 
             // label52
             // 
             label52.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label52.AutoSize = true;
-            label52.Location = new System.Drawing.Point(284, 84);
+            label52.Location = new System.Drawing.Point(291, 84);
             label52.Name = "label52";
             label52.Size = new System.Drawing.Size(44, 13);
             label52.TabIndex = 18;
@@ -1887,17 +1898,17 @@
             // textBoxIPIDInterfaceVTable
             // 
             this.textBoxIPIDInterfaceVTable.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDInterfaceVTable.Location = new System.Drawing.Point(362, 81);
+            this.textBoxIPIDInterfaceVTable.Location = new System.Drawing.Point(355, 81);
             this.textBoxIPIDInterfaceVTable.Name = "textBoxIPIDInterfaceVTable";
             this.textBoxIPIDInterfaceVTable.ReadOnly = true;
-            this.textBoxIPIDInterfaceVTable.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDInterfaceVTable.Size = new System.Drawing.Size(211, 20);
             this.textBoxIPIDInterfaceVTable.TabIndex = 19;
             // 
             // label53
             // 
             label53.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label53.AutoSize = true;
-            label53.Location = new System.Drawing.Point(284, 110);
+            label53.Location = new System.Drawing.Point(291, 110);
             label53.Name = "label53";
             label53.Size = new System.Drawing.Size(44, 13);
             label53.TabIndex = 20;
@@ -1906,17 +1917,17 @@
             // textBoxIPIDStubVTable
             // 
             this.textBoxIPIDStubVTable.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDStubVTable.Location = new System.Drawing.Point(362, 107);
+            this.textBoxIPIDStubVTable.Location = new System.Drawing.Point(355, 107);
             this.textBoxIPIDStubVTable.Name = "textBoxIPIDStubVTable";
             this.textBoxIPIDStubVTable.ReadOnly = true;
-            this.textBoxIPIDStubVTable.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDStubVTable.Size = new System.Drawing.Size(211, 20);
             this.textBoxIPIDStubVTable.TabIndex = 21;
             // 
             // label58
             // 
             label58.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label58.AutoSize = true;
-            label58.Location = new System.Drawing.Point(284, 32);
+            label58.Location = new System.Drawing.Point(291, 32);
             label58.Name = "label58";
             label58.Size = new System.Drawing.Size(55, 13);
             label58.TabIndex = 22;
@@ -1925,10 +1936,10 @@
             // textBoxIPIDIIDName
             // 
             this.textBoxIPIDIIDName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxIPIDIIDName.Location = new System.Drawing.Point(362, 29);
+            this.textBoxIPIDIIDName.Location = new System.Drawing.Point(355, 29);
             this.textBoxIPIDIIDName.Name = "textBoxIPIDIIDName";
             this.textBoxIPIDIIDName.ReadOnly = true;
-            this.textBoxIPIDIIDName.Size = new System.Drawing.Size(204, 20);
+            this.textBoxIPIDIIDName.Size = new System.Drawing.Size(211, 20);
             this.textBoxIPIDIIDName.TabIndex = 23;
             // 
             // label55
@@ -2351,6 +2362,45 @@
             this.textBoxElevationAutoApproval.Size = new System.Drawing.Size(192, 20);
             this.textBoxElevationAutoApproval.TabIndex = 10;
             // 
+            // label59
+            // 
+            label59.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label59.AutoSize = true;
+            label59.Location = new System.Drawing.Point(3, 214);
+            label59.Name = "label59";
+            label59.Size = new System.Drawing.Size(66, 13);
+            label59.TabIndex = 24;
+            label59.Text = "STA HWND";
+            // 
+            // textBoxIPIDStaHwnd
+            // 
+            this.textBoxIPIDStaHwnd.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxIPIDStaHwnd.Location = new System.Drawing.Point(75, 211);
+            this.textBoxIPIDStaHwnd.Name = "textBoxIPIDStaHwnd";
+            this.textBoxIPIDStaHwnd.ReadOnly = true;
+            this.textBoxIPIDStaHwnd.Size = new System.Drawing.Size(210, 20);
+            this.textBoxIPIDStaHwnd.TabIndex = 25;
+            // 
+            // label61
+            // 
+            label61.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label61.AutoSize = true;
+            label61.Location = new System.Drawing.Point(3, 191);
+            label61.Name = "label61";
+            label61.Size = new System.Drawing.Size(69, 13);
+            label61.TabIndex = 19;
+            label61.Text = "STA HWND:";
+            // 
+            // textBoxProcessStaHwnd
+            // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessStaHwnd, 2);
+            this.textBoxProcessStaHwnd.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProcessStaHwnd.Location = new System.Drawing.Point(112, 188);
+            this.textBoxProcessStaHwnd.Name = "textBoxProcessStaHwnd";
+            this.textBoxProcessStaHwnd.ReadOnly = true;
+            this.textBoxProcessStaHwnd.Size = new System.Drawing.Size(454, 20);
+            this.textBoxProcessStaHwnd.TabIndex = 20;
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2503,5 +2553,7 @@
         private System.Windows.Forms.TextBox textBoxElevationEnabled;
         private System.Windows.Forms.TextBox textBoxElevationAutoApproval;
         private System.Windows.Forms.TextBox textBoxIPIDIIDName;
+        private System.Windows.Forms.TextBox textBoxIPIDStaHwnd;
+        private System.Windows.Forms.TextBox textBoxProcessStaHwnd;
     }
 }

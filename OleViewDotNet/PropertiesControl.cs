@@ -247,6 +247,7 @@ namespace OleViewDotNet
             textBoxProcessUser.Text = GetStringValue(obj.User);
             textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}",
                 obj.Capabilities, obj.AuthnLevel, obj.ImpLevel);
+            textBoxProcessStaHwnd.Text = String.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
             foreach (COMIPIDEntry ipid in obj.Ipids)
             {
                 ListViewItem item = listViewProcessIPids.Items.Add(ipid.Ipid.ToString());
@@ -279,6 +280,7 @@ namespace OleViewDotNet
             
             textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
             textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
+            textBoxIPIDStaHwnd.Text = String.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
             tabControlProperties.TabPages.Add(tabPageIPID);
         }
 
