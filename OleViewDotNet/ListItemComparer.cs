@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -26,6 +27,25 @@ namespace OleViewDotNet
         {
             Column = column;
             Ascending = true;
+        }
+
+        private static IComparable GetComparableItem(string value)
+        {
+            long l;
+            if (long.TryParse(value, out l))
+            {
+                return l;
+            }
+            else if (value.StartsWith("0x") && long.TryParse(value.Substring(2), NumberStyles.HexNumber, null, out l))
+            {
+                return l;
+            }
+            Guid g;
+            if (Guid.TryParse(value, out g))
+            {
+                return g;
+            }
+            return value;
         }
 
         public int Compare(object x, object y)
@@ -43,13 +63,16 @@ namespace OleViewDotNet
                 throw new ArgumentException("Invalid item for comparer", "y");
             }
 
+            IComparable left = GetComparableItem(xi.SubItems[Column].Text);
+            IComparable right = GetComparableItem(yi.SubItems[Column].Text);
+
             if (Ascending)
             {
-                return String.Compare(xi.SubItems[Column].Text, yi.SubItems[Column].Text);
+                return left.CompareTo(right);
             }
             else
             {
-                return String.Compare(yi.SubItems[Column].Text, xi.SubItems[Column].Text);
+                return right.CompareTo(left);
             }
         }
 
@@ -63,6 +86,29 @@ namespace OleViewDotNet
         {
             get;
             set;
+        }
+
+        public static void UpdateListComparer(ListView view, int selected_column)
+        {
+            if (view != null)
+            {
+                ListItemComparer comparer = view.ListViewItemSorter as ListItemComparer;
+
+                if (comparer != null)
+                {
+                    if (selected_column != comparer.Column)
+                    {
+                        comparer.Column = selected_column;
+                        comparer.Ascending = true;
+                    }
+                    else
+                    {
+                        comparer.Ascending = !comparer.Ascending;
+                    }
+
+                    view.Sort();
+                }
+            }
         }
 
     }

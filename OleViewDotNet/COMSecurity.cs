@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -515,6 +516,18 @@ namespace OleViewDotNet
             }
         }
 
+        public static SecurityIntegrityLevel GetILFromSid(SecurityIdentifier sid)
+        {
+            int last_index = sid.Value.LastIndexOf('-');
+            int il;
+            if (int.TryParse(sid.Value.Substring(last_index + 1), out il))
+            {
+                return (SecurityIntegrityLevel)il;
+            }
+
+            return SecurityIntegrityLevel.Medium;
+        }
+
         public static SecurityIntegrityLevel GetILForSD(string sddl)
         {
             if (String.IsNullOrWhiteSpace(sddl))
@@ -535,15 +548,8 @@ namespace OleViewDotNet
                 return SecurityIntegrityLevel.Medium;
             }
 
-            System.Security.Principal.SecurityIdentifier sid = new System.Security.Principal.SecurityIdentifier(m.Groups[1].Value);
-            int last_index = sid.Value.LastIndexOf('-');
-            int il;
-            if (int.TryParse(sid.Value.Substring(last_index + 1), out il))
-            {
-                return (SecurityIntegrityLevel)il;
-            }
-
-            return SecurityIntegrityLevel.Medium;
+            SecurityIdentifier sid = new SecurityIdentifier(m.Groups[1].Value);
+            return GetILFromSid(sid);
         }
 
         public static bool SDHasAC(string sddl)
@@ -656,6 +662,21 @@ namespace OleViewDotNet
             }
 
             return sids;
+        }
+
+        public static string UserToSid(string username)
+        {
+            SecurityIdentifier sid;
+            if (username.StartsWith("S-", StringComparison.OrdinalIgnoreCase))
+            {
+                sid = new SecurityIdentifier(username);
+            }
+            else
+            {
+                NTAccount account = new NTAccount(username);
+                sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
+            }
+            return sid.Value;
         }
     }
 }

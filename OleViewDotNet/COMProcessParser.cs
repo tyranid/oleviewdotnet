@@ -1034,7 +1034,7 @@ namespace OleViewDotNet
               IntPtr ReturnLength
             );
 
-        private static bool EnableDebugPrivilege()
+        public static bool EnableDebugPrivilege()
         {
             using (SafeKernelObjectHandle token = SafeProcessHandle.Current.OpenToken())
             {

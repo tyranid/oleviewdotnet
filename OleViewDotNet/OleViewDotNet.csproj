@@ -161,6 +161,12 @@
     <Compile Include="ElevatedFactoryServerTypeViewer.Designer.cs">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="SelectSecurityCheckForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectSecurityCheckForm.Designer.cs">
+      <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -383,6 +389,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ElevatedFactoryServerTypeViewer.resx">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectSecurityCheckForm.resx">
+      <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GetTextForm.resx">
       <DependentUpon>GetTextForm.cs</DependentUpon>

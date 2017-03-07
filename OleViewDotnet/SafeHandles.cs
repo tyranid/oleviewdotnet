@@ -164,6 +164,12 @@ namespace OleViewDotNet
         SecurityDelegation
     }
 
+    enum TokenType
+    {
+        TokenPrimary = 1,
+        TokenImpersonation = 2,
+    }
+
     internal class SafeTokenHandle : SafeKernelObjectHandle
     {
         private SafeTokenHandle()
@@ -178,16 +184,19 @@ namespace OleViewDotNet
         }
 
         [DllImport("advapi32.dll", SetLastError = true)]
-        public static extern bool DuplicateToken(
+        public static extern bool DuplicateTokenEx(
             SafeTokenHandle ExistingTokenHandle,
+            int DesiredAccess,
+            IntPtr lpTokenAttributes,
             SecurityImpersonationLevel ImpersonationLevel,
+            TokenType TokenType,
             out SafeTokenHandle DuplicateTokenHandle
         );
 
         public SafeTokenHandle DuplicateImpersonation(SecurityImpersonationLevel imp_level)
         {
             SafeTokenHandle token;
-            if (!DuplicateToken(this, imp_level, out token))
+            if (!DuplicateTokenEx(this, 0x02000000, IntPtr.Zero, imp_level, TokenType.TokenImpersonation, out token))
             {
                 throw new Win32Exception();
             }
@@ -246,6 +255,68 @@ namespace OleViewDotNet
           int TokenInformationLength,
           out int ReturnLength
         );
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool SetTokenInformation(
+          SafeTokenHandle TokenHandle,
+          TokenInformationClass TokenInformationClass,
+          IntPtr TokenInformation,
+          int TokenInformationLength
+        );
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SID_AND_ATTRIBUTES
+        {
+            public IntPtr Sid;
+            public int Attributes;
+        }
+        
+        public SecurityIntegrityLevel GetIntegrityLevel()
+        {
+            IntPtr buffer = Marshal.AllocHGlobal(4096);
+            try
+            {
+                int size = 0;
+                if (GetTokenInformation(this, TokenInformationClass.TokenIntegrityLevel, buffer, 4096, out size))
+                {
+                    SID_AND_ATTRIBUTES sid_and_attr = Marshal.PtrToStructure<SID_AND_ATTRIBUTES>(buffer);
+                    return COMSecurity.GetILFromSid(new SecurityIdentifier(sid_and_attr.Sid));
+                }
+                else
+                {
+                    throw new Win32Exception();
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+
+        public void SetIntegrityLevel(SecurityIntegrityLevel level)
+        {
+            SecurityIdentifier sid = new SecurityIdentifier("S-1-16-" + (int)level);
+            int struct_size = Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES));
+            int total_size = struct_size + sid.BinaryLength;
+            byte[] sid_bytes = new byte[sid.BinaryLength];
+            sid.GetBinaryForm(sid_bytes, 0);
+            IntPtr buffer = Marshal.AllocHGlobal(total_size);
+            try
+            {
+                SID_AND_ATTRIBUTES sid_and_attrs = new SID_AND_ATTRIBUTES();
+                sid_and_attrs.Sid = buffer + struct_size;
+                Marshal.StructureToPtr(sid_and_attrs, buffer, false);
+                Marshal.Copy(sid_bytes, 0, sid_and_attrs.Sid, sid_bytes.Length);
+                if (!SetTokenInformation(this, TokenInformationClass.TokenIntegrityLevel, buffer, total_size))
+                {
+                    throw new Win32Exception();
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
     }
 
     internal class SafeProcessHandle : SafeKernelObjectHandle

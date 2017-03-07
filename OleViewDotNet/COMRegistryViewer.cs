@@ -1555,6 +1555,73 @@ namespace OleViewDotNet
             }
         }
 
+        private FilterResult RunAccessibleFilter(TreeNode node, 
+            Dictionary<string, bool> access_cache, 
+            Dictionary<string, bool> launch_cache, 
+            SafeTokenHandle token, 
+            string principal,
+            COMAccessRights access_rights, 
+            COMAccessRights launch_rights)
+        {
+            COMAppIDEntry appid = node.Tag as COMAppIDEntry;
+            if (appid == null && node.Tag is COMCLSIDEntry)
+            {
+                COMCLSIDEntry clsid = (COMCLSIDEntry)node.Tag;
+                if (!m_registry.AppIDs.ContainsKey(clsid.AppID))
+                {
+                    return FilterResult.Exclude;
+                }
+
+                appid = m_registry.AppIDs[clsid.AppID];
+            }
+
+            string launch_sddl = m_registry.DefaultLaunchPermission;
+            string access_sddl = m_registry.DefaultAccessPermission;
+
+            if (appid != null)
+            {
+                if (appid.HasLaunchPermission)
+                {
+                    launch_sddl = appid.LaunchPermission;
+                }
+                if (appid.HasAccessPermission)
+                {
+                    access_sddl = appid.AccessPermission;
+                }
+            }
+
+            if (!access_cache.ContainsKey(access_sddl))
+            {
+                if (access_rights == 0)
+                {
+                    access_cache[access_sddl] = true;
+                }
+                else
+                {
+                    access_cache[access_sddl] = COMSecurity.IsAccessGranted(access_sddl, principal, token, false, false, access_rights);
+                }
+            }
+
+            if (!launch_cache.ContainsKey(launch_sddl))
+            {
+                if (launch_rights == 0)
+                {
+                    launch_cache[launch_sddl] = true;
+                }
+                else
+                {
+                    launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(access_sddl, principal, token,
+                        true, true, access_rights);
+                }
+            }
+
+            if (access_cache[access_sddl] && launch_cache[launch_sddl])
+            {
+                return FilterResult.Include;
+            }
+            return FilterResult.Exclude;
+        }
+
         private enum FilterMode
         {
             Contains,
@@ -1564,6 +1631,7 @@ namespace OleViewDotNet
             Glob,
             Regex,
             Python,
+            Accessible,
             Complex,
         }
 
@@ -1649,11 +1717,13 @@ namespace OleViewDotNet
 
         private async void btnApply_Click(object sender, EventArgs e)
         {
+            SafeTokenHandle token = null;
             try
             {
                 TreeNode[] nodes = null;
                 Func<TreeNode, FilterResult> filterFunc = null;
                 FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
+
                 if (mode == FilterMode.Complex)
                 {
                     using (ViewFilterForm form = new ViewFilterForm(m_filter, m_filter_types))
@@ -1665,6 +1735,26 @@ namespace OleViewDotNet
                             {
                                 filterFunc = n => RunComplexFilter(n, m_filter);
                             }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                }
+                else if (mode == FilterMode.Accessible)
+                {
+                    using (SelectSecurityCheckForm form = new SelectSecurityCheckForm())
+                    {
+                        if (form.ShowDialog(this) == DialogResult.OK)
+                        {
+                            token = form.Token;
+                            string principal = form.Principal;
+                            COMAccessRights access_rights = form.AccessRights;
+                            COMAccessRights launch_rights = form.LaunchRights;
+                            Dictionary<string, bool> access_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                            Dictionary<string, bool> launch_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                            filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
                         }
                         else
                         {
@@ -1696,9 +1786,16 @@ namespace OleViewDotNet
                 treeComRegistry.ResumeLayout();
                 UpdateStatusLabel();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (token != null)
+                {
+                    token.Close();
+                }
             }
         }
 
@@ -1974,7 +2071,7 @@ namespace OleViewDotNet
             if (comboBoxMode.SelectedItem != null)
             {
                 FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
-                textBoxFilter.Enabled = mode != FilterMode.Complex;
+                textBoxFilter.Enabled = mode != FilterMode.Complex && mode != FilterMode.Accessible;
             }
         }
 

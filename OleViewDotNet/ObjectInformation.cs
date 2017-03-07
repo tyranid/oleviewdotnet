@@ -158,7 +158,6 @@ namespace OleViewDotNet
                 }
             }
 
-
             openDispatchToolStripMenuItem.Visible = has_dispatch;
             openOLEToolStripMenuItem.Visible = has_olecontrol;
             saveStreamToolStripMenuItem.Visible = has_persiststream;
@@ -246,26 +245,7 @@ namespace OleViewDotNet
         private void listViewInterfaces_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             ListView view = sender as ListView;
-
-            if (view != null)
-            {
-                ListItemComparer comparer = view.ListViewItemSorter as ListItemComparer;
-
-                if (comparer != null)
-                {
-                    if (e.Column != comparer.Column)
-                    {
-                        comparer.Column = e.Column;
-                        comparer.Ascending = true;
-                    }
-                    else
-                    {
-                        comparer.Ascending = !comparer.Ascending;
-                    }
-
-                    view.Sort();
-                }
-            }
+            ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
