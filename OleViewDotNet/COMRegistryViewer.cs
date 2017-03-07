@@ -1563,23 +1563,31 @@ namespace OleViewDotNet
             COMAccessRights access_rights, 
             COMAccessRights launch_rights)
         {
-            COMAppIDEntry appid = node.Tag as COMAppIDEntry;
-            if (appid == null && node.Tag is COMCLSIDEntry)
-            {
-                COMCLSIDEntry clsid = (COMCLSIDEntry)node.Tag;
-                if (!m_registry.AppIDs.ContainsKey(clsid.AppID))
-                {
-                    return FilterResult.Exclude;
-                }
-
-                appid = m_registry.AppIDs[clsid.AppID];
-            }
-
             string launch_sddl = m_registry.DefaultLaunchPermission;
             string access_sddl = m_registry.DefaultAccessPermission;
+            bool check_launch = true;
 
-            if (appid != null)
+            if (node.Tag is COMProcessEntry)
             {
+                COMProcessEntry process = (COMProcessEntry)node.Tag;
+                access_sddl = process.AccessPermissions;
+                principal = process.UserSid;
+                check_launch = false;
+            }
+            else if (node.Tag is COMAppIDEntry || node.Tag is COMCLSIDEntry)
+            {
+                COMAppIDEntry appid = node.Tag as COMAppIDEntry;
+                if (appid == null && node.Tag is COMCLSIDEntry)
+                {
+                    COMCLSIDEntry clsid = (COMCLSIDEntry)node.Tag;
+                    if (!m_registry.AppIDs.ContainsKey(clsid.AppID))
+                    {
+                        return FilterResult.Exclude;
+                    }
+
+                    appid = m_registry.AppIDs[clsid.AppID];
+                }
+
                 if (appid.HasLaunchPermission)
                 {
                     launch_sddl = appid.LaunchPermission;
@@ -1589,7 +1597,11 @@ namespace OleViewDotNet
                     access_sddl = appid.AccessPermission;
                 }
             }
-
+            else
+            {
+                return FilterResult.Exclude;
+            }
+            
             if (!access_cache.ContainsKey(access_sddl))
             {
                 if (access_rights == 0)
@@ -1602,7 +1614,7 @@ namespace OleViewDotNet
                 }
             }
 
-            if (!launch_cache.ContainsKey(launch_sddl))
+            if (check_launch && !launch_cache.ContainsKey(launch_sddl))
             {
                 if (launch_rights == 0)
                 {
@@ -1610,12 +1622,12 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(access_sddl, principal, token,
+                    launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(launch_sddl, principal, token,
                         true, true, access_rights);
                 }
             }
 
-            if (access_cache[access_sddl] && launch_cache[launch_sddl])
+            if (access_cache[access_sddl] && (!check_launch || launch_cache[launch_sddl]))
             {
                 return FilterResult.Include;
             }
@@ -1632,6 +1644,7 @@ namespace OleViewDotNet
             Regex,
             Python,
             Accessible,
+            NotAccessible,
             Complex,
         }
 
@@ -1742,9 +1755,9 @@ namespace OleViewDotNet
                         }
                     }
                 }
-                else if (mode == FilterMode.Accessible)
+                else if (mode == FilterMode.Accessible || mode == FilterMode.NotAccessible)
                 {
-                    using (SelectSecurityCheckForm form = new SelectSecurityCheckForm())
+                    using (SelectSecurityCheckForm form = new SelectSecurityCheckForm(m_mode == DisplayMode.Processes))
                     {
                         if (form.ShowDialog(this) == DialogResult.OK)
                         {
@@ -1755,6 +1768,11 @@ namespace OleViewDotNet
                             Dictionary<string, bool> access_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
                             Dictionary<string, bool> launch_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
                             filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
+                            if (mode == FilterMode.NotAccessible)
+                            {
+                                Func<TreeNode, FilterResult> last_filter = filterFunc;
+                                filterFunc = n => last_filter(n) == FilterResult.Exclude ? FilterResult.Include : FilterResult.Exclude;
+                            }
                         }
                         else
                         {
@@ -2071,7 +2089,7 @@ namespace OleViewDotNet
             if (comboBoxMode.SelectedItem != null)
             {
                 FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
-                textBoxFilter.Enabled = mode != FilterMode.Complex && mode != FilterMode.Accessible;
+                textBoxFilter.Enabled = mode != FilterMode.Complex && mode != FilterMode.Accessible && mode != FilterMode.NotAccessible;
             }
         }
 

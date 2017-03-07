@@ -1097,7 +1097,8 @@ namespace OleViewDotNet
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
                         GetLrpcSecurityDescriptor(process, resolver),
-                        process.GetProcessUser(),
+                        process.GetUser(),
+                        process.GetUserSid(),
                         ReadString(process, resolver, "gwszLRPCEndPoint"),
                         ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
                         ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
@@ -1162,6 +1163,7 @@ namespace OleViewDotNet
         public string AccessPermissions { get; private set; }
         public string LRpcPermissions { get; private set; }
         public string User { get; private set; }
+        public string UserSid { get; private set; }
         public string RpcEndpoint { get; private set; }
         public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; private set; }
         public RPC_AUTHN_LEVEL AuthnLevel { get; private set; }
@@ -1171,7 +1173,7 @@ namespace OleViewDotNet
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
-            string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
+            string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level,
             IntPtr access_control, IntPtr sta_main_hwnd)
         {
@@ -1183,6 +1185,7 @@ namespace OleViewDotNet
             AccessPermissions = access_perm;
             LRpcPermissions = lrpc_perm;
             User = user;
+            UserSid = user_sid;
             if (!String.IsNullOrWhiteSpace(rpc_endpoint))
             {
                 RpcEndpoint = "OLE" + rpc_endpoint;

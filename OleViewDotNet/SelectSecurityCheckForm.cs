@@ -14,8 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -25,13 +25,19 @@ namespace OleViewDotNet
 {
     internal partial class SelectSecurityCheckForm : Form
     {
-        public SelectSecurityCheckForm()
+        private bool _process_security;
+        private List<SafeTokenHandle> _tokens;
+
+        public SelectSecurityCheckForm(bool process_security)
         {
             InitializeComponent();
+            _process_security = process_security;
+            _tokens = new List<SafeTokenHandle>();
             Disposed += SelectSecurityCheckForm_Disposed;
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
             COMProcessParser.EnableDebugPrivilege();
+            
             foreach (Process p in Process.GetProcesses().OrderBy(p => p.Id))
             {
                 try
@@ -39,9 +45,10 @@ namespace OleViewDotNet
                     using (SafeProcessHandle process = SafeProcessHandle.Open(p.Id, ProcessAccessRights.QueryInformation))
                     {
                         SafeTokenHandle token = process.OpenToken();
+                        _tokens.Add(token);
                         ListViewItem item = listViewProcesses.Items.Add(p.Id.ToString());
                         item.SubItems.Add(p.ProcessName);
-                        item.SubItems.Add(process.GetProcessUser());
+                        item.SubItems.Add(process.GetUser());
                         item.SubItems.Add(token.GetIntegrityLevel().ToString());
                         item.Tag = token;
                     }
@@ -59,13 +66,20 @@ namespace OleViewDotNet
                 comboBoxIL.Items.Add(value);
             }
             comboBoxIL.SelectedItem = SecurityIntegrityLevel.Low;
+            if (process_security)
+            {
+                textBoxPrincipal.Enabled = false;
+                checkBoxLocalLaunch.Enabled = false;
+                checkBoxRemoteLaunch.Enabled = false;
+                checkBoxLocalActivate.Enabled = false;
+                checkBoxRemoteActivate.Enabled = false;
+            }
         }
 
         private void SelectSecurityCheckForm_Disposed(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in listViewProcesses.Items)
+            foreach (var token in _tokens)
             {
-                SafeTokenHandle token = (SafeTokenHandle)item.Tag;
                 token.Close();
             }
         }
@@ -110,7 +124,6 @@ namespace OleViewDotNet
                     Token.SetIntegrityLevel((SecurityIntegrityLevel)comboBoxIL.SelectedItem);
                 }
 
-                Principal = COMSecurity.UserToSid(textBoxPrincipal.Text);
                 if (checkBoxLocalAccess.Checked)
                 {
                     AccessRights |= COMAccessRights.ExecuteLocal;
@@ -119,21 +132,29 @@ namespace OleViewDotNet
                 {
                     AccessRights |= COMAccessRights.ExecuteRemote;
                 }
-                if (checkBoxLocalLaunch.Checked)
+
+                if (!_process_security)
                 {
-                    LaunchRights |= COMAccessRights.ExecuteLocal;
-                }
-                if (checkBoxRemoteLaunch.Checked)
-                {
-                    LaunchRights |= COMAccessRights.ExecuteRemote;
-                }
-                if (checkBoxLocalActivate.Checked)
-                {
-                    LaunchRights |= COMAccessRights.ActivateLocal;
-                }
-                if (checkBoxRemoteActivate.Checked)
-                {
-                    LaunchRights |= COMAccessRights.ActivateRemote;
+                    if (checkBoxLocalLaunch.Checked)
+                    {
+                        LaunchRights |= COMAccessRights.ExecuteLocal;
+                    }
+                    if (checkBoxRemoteLaunch.Checked)
+                    {
+                        LaunchRights |= COMAccessRights.ExecuteRemote;
+                    }
+                    if (checkBoxLocalActivate.Checked)
+                    {
+                        LaunchRights |= COMAccessRights.ActivateLocal;
+                    }
+                    if (checkBoxRemoteActivate.Checked)
+                    {
+                        LaunchRights |= COMAccessRights.ActivateRemote;
+                    }
+                    if (!_process_security)
+                    {
+                        Principal = COMSecurity.UserToSid(textBoxPrincipal.Text);
+                    }
                 }
 
                 DialogResult = DialogResult.OK;

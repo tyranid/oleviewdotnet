@@ -408,7 +408,7 @@ namespace OleViewDotNet
             }
             if (access_status)
             {
-                maximum_rights = (COMAccessRights)granted_access;
+                maximum_rights = (COMAccessRights)(granted_access & 0x1F);
             }
             return access_status;
         }

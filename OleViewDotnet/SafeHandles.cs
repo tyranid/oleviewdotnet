@@ -538,7 +538,7 @@ namespace OleViewDotNet
             }
         }
 
-        public string GetProcessUser()
+        private string GetUser(bool translate)
         {
             try
             {
@@ -547,15 +547,18 @@ namespace OleViewDotNet
                     using (WindowsIdentity id = new WindowsIdentity(token.DangerousGetHandle()))
                     {
                         SecurityIdentifier sid = id.User;
-                        try
+                        if (translate)
                         {
-                            NTAccount account = (NTAccount)sid.Translate(typeof(NTAccount));
-                            return account.Value;
+                            try
+                            {
+                                NTAccount account = (NTAccount)sid.Translate(typeof(NTAccount));
+                                return account.Value;
+                            }
+                            catch (IdentityNotMappedException)
+                            {
+                            }
                         }
-                        catch (IdentityNotMappedException)
-                        {
-                            return sid.Value;
-                        }
+                        return sid.Value;
                     }
                 }
             }
@@ -563,6 +566,16 @@ namespace OleViewDotNet
             {
                 return "Unknown";
             }
+        }
+
+        public string GetUserSid()
+        {
+            return GetUser(false);
+        }
+
+        public string GetUser()
+        {
+            return GetUser(true);
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
