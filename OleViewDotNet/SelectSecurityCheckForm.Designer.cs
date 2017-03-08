@@ -38,17 +38,18 @@
             this.radioSpecificProcess = new System.Windows.Forms.RadioButton();
             this.radioCurrentProcess = new System.Windows.Forms.RadioButton();
             this.listViewProcesses = new System.Windows.Forms.ListView();
+            this.checkBoxRemoteActivate = new System.Windows.Forms.CheckBox();
+            this.checkBoxLocalActivate = new System.Windows.Forms.CheckBox();
+            this.checkBoxRemoteLaunch = new System.Windows.Forms.CheckBox();
+            this.checkBoxLocalLaunch = new System.Windows.Forms.CheckBox();
+            this.textBoxPrincipal = new System.Windows.Forms.TextBox();
+            this.checkBoxRemoteAccess = new System.Windows.Forms.CheckBox();
+            this.checkBoxLocalAccess = new System.Windows.Forms.CheckBox();
+            this.comboBoxIL = new System.Windows.Forms.ComboBox();
+            this.checkBoxSetIL = new System.Windows.Forms.CheckBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.checkBoxSetIL = new System.Windows.Forms.CheckBox();
-            this.comboBoxIL = new System.Windows.Forms.ComboBox();
-            this.checkBoxLocalAccess = new System.Windows.Forms.CheckBox();
-            this.checkBoxRemoteAccess = new System.Windows.Forms.CheckBox();
-            this.textBoxPrincipal = new System.Windows.Forms.TextBox();
-            this.checkBoxLocalLaunch = new System.Windows.Forms.CheckBox();
-            this.checkBoxRemoteLaunch = new System.Windows.Forms.CheckBox();
-            this.checkBoxLocalActivate = new System.Windows.Forms.CheckBox();
-            this.checkBoxRemoteActivate = new System.Windows.Forms.CheckBox();
+            this.radioAnonymous = new System.Windows.Forms.RadioButton();
             columnHeaderPID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderUser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -78,6 +79,7 @@
             // 
             // groupBoxAccessToken
             // 
+            groupBoxAccessToken.Controls.Add(this.radioAnonymous);
             groupBoxAccessToken.Controls.Add(this.radioSpecificProcess);
             groupBoxAccessToken.Controls.Add(this.radioCurrentProcess);
             groupBoxAccessToken.Controls.Add(this.listViewProcesses);
@@ -123,7 +125,7 @@
             this.listViewProcesses.Location = new System.Drawing.Point(3, 62);
             this.listViewProcesses.MultiSelect = false;
             this.listViewProcesses.Name = "listViewProcesses";
-            this.listViewProcesses.Size = new System.Drawing.Size(627, 149);
+            this.listViewProcesses.Size = new System.Drawing.Size(627, 127);
             this.listViewProcesses.TabIndex = 0;
             this.listViewProcesses.UseCompatibleStateImageBehavior = false;
             this.listViewProcesses.View = System.Windows.Forms.View.Details;
@@ -148,6 +150,109 @@
             groupBoxOptions.TabStop = false;
             groupBoxOptions.Text = "Options";
             // 
+            // checkBoxRemoteActivate
+            // 
+            this.checkBoxRemoteActivate.AutoSize = true;
+            this.checkBoxRemoteActivate.Location = new System.Drawing.Point(514, 42);
+            this.checkBoxRemoteActivate.Name = "checkBoxRemoteActivate";
+            this.checkBoxRemoteActivate.Size = new System.Drawing.Size(105, 17);
+            this.checkBoxRemoteActivate.TabIndex = 9;
+            this.checkBoxRemoteActivate.Text = "Remote Activate";
+            this.checkBoxRemoteActivate.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxLocalActivate
+            // 
+            this.checkBoxLocalActivate.AutoSize = true;
+            this.checkBoxLocalActivate.Checked = true;
+            this.checkBoxLocalActivate.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxLocalActivate.Location = new System.Drawing.Point(414, 42);
+            this.checkBoxLocalActivate.Name = "checkBoxLocalActivate";
+            this.checkBoxLocalActivate.Size = new System.Drawing.Size(94, 17);
+            this.checkBoxLocalActivate.TabIndex = 8;
+            this.checkBoxLocalActivate.Text = "Local Activate";
+            this.checkBoxLocalActivate.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxRemoteLaunch
+            // 
+            this.checkBoxRemoteLaunch.AutoSize = true;
+            this.checkBoxRemoteLaunch.Location = new System.Drawing.Point(306, 42);
+            this.checkBoxRemoteLaunch.Name = "checkBoxRemoteLaunch";
+            this.checkBoxRemoteLaunch.Size = new System.Drawing.Size(102, 17);
+            this.checkBoxRemoteLaunch.TabIndex = 7;
+            this.checkBoxRemoteLaunch.Text = "Remote Launch";
+            this.checkBoxRemoteLaunch.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxLocalLaunch
+            // 
+            this.checkBoxLocalLaunch.AutoSize = true;
+            this.checkBoxLocalLaunch.Checked = true;
+            this.checkBoxLocalLaunch.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxLocalLaunch.Location = new System.Drawing.Point(209, 42);
+            this.checkBoxLocalLaunch.Name = "checkBoxLocalLaunch";
+            this.checkBoxLocalLaunch.Size = new System.Drawing.Size(91, 17);
+            this.checkBoxLocalLaunch.TabIndex = 6;
+            this.checkBoxLocalLaunch.Text = "Local Launch";
+            this.checkBoxLocalLaunch.UseVisualStyleBackColor = true;
+            // 
+            // textBoxPrincipal
+            // 
+            this.textBoxPrincipal.Location = new System.Drawing.Point(318, 17);
+            this.textBoxPrincipal.Name = "textBoxPrincipal";
+            this.textBoxPrincipal.Size = new System.Drawing.Size(306, 20);
+            this.textBoxPrincipal.TabIndex = 5;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(262, 19);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(50, 13);
+            label1.TabIndex = 4;
+            label1.Text = "Principal:";
+            // 
+            // checkBoxRemoteAccess
+            // 
+            this.checkBoxRemoteAccess.AutoSize = true;
+            this.checkBoxRemoteAccess.Location = new System.Drawing.Point(102, 42);
+            this.checkBoxRemoteAccess.Name = "checkBoxRemoteAccess";
+            this.checkBoxRemoteAccess.Size = new System.Drawing.Size(101, 17);
+            this.checkBoxRemoteAccess.TabIndex = 3;
+            this.checkBoxRemoteAccess.Text = "Remote Access";
+            this.checkBoxRemoteAccess.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxLocalAccess
+            // 
+            this.checkBoxLocalAccess.AutoSize = true;
+            this.checkBoxLocalAccess.Checked = true;
+            this.checkBoxLocalAccess.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxLocalAccess.Location = new System.Drawing.Point(6, 42);
+            this.checkBoxLocalAccess.Name = "checkBoxLocalAccess";
+            this.checkBoxLocalAccess.Size = new System.Drawing.Size(90, 17);
+            this.checkBoxLocalAccess.TabIndex = 2;
+            this.checkBoxLocalAccess.Text = "Local Access";
+            this.checkBoxLocalAccess.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxIL
+            // 
+            this.comboBoxIL.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxIL.Enabled = false;
+            this.comboBoxIL.FormattingEnabled = true;
+            this.comboBoxIL.Location = new System.Drawing.Point(126, 15);
+            this.comboBoxIL.Name = "comboBoxIL";
+            this.comboBoxIL.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxIL.TabIndex = 1;
+            // 
+            // checkBoxSetIL
+            // 
+            this.checkBoxSetIL.AutoSize = true;
+            this.checkBoxSetIL.Location = new System.Drawing.Point(6, 19);
+            this.checkBoxSetIL.Name = "checkBoxSetIL";
+            this.checkBoxSetIL.Size = new System.Drawing.Size(114, 17);
+            this.checkBoxSetIL.TabIndex = 0;
+            this.checkBoxSetIL.Text = "Set Integrity Level:";
+            this.checkBoxSetIL.UseVisualStyleBackColor = true;
+            this.checkBoxSetIL.CheckedChanged += new System.EventHandler(this.checkBoxSetIL_CheckedChanged);
+            // 
             // btnOK
             // 
             this.btnOK.Location = new System.Drawing.Point(231, 320);
@@ -168,108 +273,16 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // checkBoxSetIL
+            // radioAnonymous
             // 
-            this.checkBoxSetIL.AutoSize = true;
-            this.checkBoxSetIL.Location = new System.Drawing.Point(6, 19);
-            this.checkBoxSetIL.Name = "checkBoxSetIL";
-            this.checkBoxSetIL.Size = new System.Drawing.Size(114, 17);
-            this.checkBoxSetIL.TabIndex = 0;
-            this.checkBoxSetIL.Text = "Set Integrity Level:";
-            this.checkBoxSetIL.UseVisualStyleBackColor = true;
-            this.checkBoxSetIL.CheckedChanged += new System.EventHandler(this.checkBoxSetIL_CheckedChanged);
-            // 
-            // comboBoxIL
-            // 
-            this.comboBoxIL.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxIL.Enabled = false;
-            this.comboBoxIL.FormattingEnabled = true;
-            this.comboBoxIL.Location = new System.Drawing.Point(126, 15);
-            this.comboBoxIL.Name = "comboBoxIL";
-            this.comboBoxIL.Size = new System.Drawing.Size(121, 21);
-            this.comboBoxIL.TabIndex = 1;
-            // 
-            // checkBoxLocalAccess
-            // 
-            this.checkBoxLocalAccess.AutoSize = true;
-            this.checkBoxLocalAccess.Checked = true;
-            this.checkBoxLocalAccess.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalAccess.Location = new System.Drawing.Point(6, 42);
-            this.checkBoxLocalAccess.Name = "checkBoxLocalAccess";
-            this.checkBoxLocalAccess.Size = new System.Drawing.Size(90, 17);
-            this.checkBoxLocalAccess.TabIndex = 2;
-            this.checkBoxLocalAccess.Text = "Local Access";
-            this.checkBoxLocalAccess.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxRemoteAccess
-            // 
-            this.checkBoxRemoteAccess.AutoSize = true;
-            this.checkBoxRemoteAccess.Location = new System.Drawing.Point(102, 42);
-            this.checkBoxRemoteAccess.Name = "checkBoxRemoteAccess";
-            this.checkBoxRemoteAccess.Size = new System.Drawing.Size(101, 17);
-            this.checkBoxRemoteAccess.TabIndex = 3;
-            this.checkBoxRemoteAccess.Text = "Remote Access";
-            this.checkBoxRemoteAccess.UseVisualStyleBackColor = true;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(262, 19);
-            label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(50, 13);
-            label1.TabIndex = 4;
-            label1.Text = "Principal:";
-            // 
-            // textBoxPrincipal
-            // 
-            this.textBoxPrincipal.Location = new System.Drawing.Point(318, 17);
-            this.textBoxPrincipal.Name = "textBoxPrincipal";
-            this.textBoxPrincipal.Size = new System.Drawing.Size(306, 20);
-            this.textBoxPrincipal.TabIndex = 5;
-            // 
-            // checkBoxLocalLaunch
-            // 
-            this.checkBoxLocalLaunch.AutoSize = true;
-            this.checkBoxLocalLaunch.Checked = true;
-            this.checkBoxLocalLaunch.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalLaunch.Location = new System.Drawing.Point(209, 42);
-            this.checkBoxLocalLaunch.Name = "checkBoxLocalLaunch";
-            this.checkBoxLocalLaunch.Size = new System.Drawing.Size(91, 17);
-            this.checkBoxLocalLaunch.TabIndex = 6;
-            this.checkBoxLocalLaunch.Text = "Local Launch";
-            this.checkBoxLocalLaunch.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxRemoteLaunch
-            // 
-            this.checkBoxRemoteLaunch.AutoSize = true;
-            this.checkBoxRemoteLaunch.Location = new System.Drawing.Point(306, 42);
-            this.checkBoxRemoteLaunch.Name = "checkBoxRemoteLaunch";
-            this.checkBoxRemoteLaunch.Size = new System.Drawing.Size(102, 17);
-            this.checkBoxRemoteLaunch.TabIndex = 7;
-            this.checkBoxRemoteLaunch.Text = "Remote Launch";
-            this.checkBoxRemoteLaunch.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxLocalActivate
-            // 
-            this.checkBoxLocalActivate.AutoSize = true;
-            this.checkBoxLocalActivate.Checked = true;
-            this.checkBoxLocalActivate.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalActivate.Location = new System.Drawing.Point(414, 42);
-            this.checkBoxLocalActivate.Name = "checkBoxLocalActivate";
-            this.checkBoxLocalActivate.Size = new System.Drawing.Size(94, 17);
-            this.checkBoxLocalActivate.TabIndex = 8;
-            this.checkBoxLocalActivate.Text = "Local Activate";
-            this.checkBoxLocalActivate.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxRemoteActivate
-            // 
-            this.checkBoxRemoteActivate.AutoSize = true;
-            this.checkBoxRemoteActivate.Location = new System.Drawing.Point(514, 42);
-            this.checkBoxRemoteActivate.Name = "checkBoxRemoteActivate";
-            this.checkBoxRemoteActivate.Size = new System.Drawing.Size(105, 17);
-            this.checkBoxRemoteActivate.TabIndex = 9;
-            this.checkBoxRemoteActivate.Text = "Remote Activate";
-            this.checkBoxRemoteActivate.UseVisualStyleBackColor = true;
+            this.radioAnonymous.AutoSize = true;
+            this.radioAnonymous.Location = new System.Drawing.Point(6, 194);
+            this.radioAnonymous.Name = "radioAnonymous";
+            this.radioAnonymous.Size = new System.Drawing.Size(114, 17);
+            this.radioAnonymous.TabIndex = 5;
+            this.radioAnonymous.TabStop = true;
+            this.radioAnonymous.Text = "Anonymous Token";
+            this.radioAnonymous.UseVisualStyleBackColor = true;
             // 
             // SelectSecurityCheckForm
             // 
@@ -312,5 +325,6 @@
         private System.Windows.Forms.TextBox textBoxPrincipal;
         private System.Windows.Forms.CheckBox checkBoxRemoteAccess;
         private System.Windows.Forms.CheckBox checkBoxLocalAccess;
+        private System.Windows.Forms.RadioButton radioAnonymous;
     }
 }

@@ -353,30 +353,37 @@ namespace OleViewDotNet
 
         internal static bool IsAccessGranted(string sddl, string principal, SafeTokenHandle token, bool launch, bool check_il, COMAccessRights desired_access)
         {
-            COMAccessRights maximum_rights;
-
-            if (check_il)
+            try
             {
-                string sacl = GetSaclForSddl(sddl);
-                if (String.IsNullOrEmpty(sacl))
-                {
-                    // Add medium NX SACL
-                    sddl += "S:(ML;;NX;;;ME)";
-                }
-            }
+                COMAccessRights maximum_rights;
 
-            if (!GetGrantedAccess(sddl, principal, token, launch, out maximum_rights))
+                if (check_il)
+                {
+                    string sacl = GetSaclForSddl(sddl);
+                    if (String.IsNullOrEmpty(sacl))
+                    {
+                        // Add medium NX SACL
+                        sddl += "S:(ML;;NX;;;ME)";
+                    }
+                }
+
+                if (!GetGrantedAccess(sddl, principal, token, launch, out maximum_rights))
+                {
+                    return false;
+                }
+
+                // If old style SD then all accesses are granted.
+                if (maximum_rights == COMAccessRights.Execute)
+                {
+                    return true;
+                }
+
+                return (maximum_rights & desired_access) == desired_access;
+            }
+            catch (Win32Exception)
             {
                 return false;
             }
-
-            // If old style SD then all accesses are granted.
-            if (maximum_rights == COMAccessRights.Execute)
-            {
-                return true;
-            }
-
-            return (maximum_rights & desired_access) == desired_access;
         }
 
         private static bool GetGrantedAccess(string sddl, string principal, SafeTokenHandle token, bool launch, out COMAccessRights maximum_rights)
@@ -388,10 +395,17 @@ namespace OleViewDotNet
                 mapping.GenericExecute = mapping.GenericExecute | (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote);
             }
 
+            // If SD is only a NULL DACL we get maximum rights.
+            if (sddl == "D:NO_ACCESS_CONTROL")
+            {
+                maximum_rights = (COMAccessRights) mapping.GenericExecute;
+                return true;
+            }
+
             byte[] princ_bytes = null;
             if (!String.IsNullOrWhiteSpace(principal))
             {
-                System.Security.Principal.SecurityIdentifier sid = new System.Security.Principal.SecurityIdentifier(principal);
+                SecurityIdentifier sid = new SecurityIdentifier(principal);
                 princ_bytes = new byte[sid.BinaryLength];
                 sid.GetBinaryForm(princ_bytes, 0);
             }
@@ -402,9 +416,10 @@ namespace OleViewDotNet
             uint granted_access = 0;
             bool access_status = false;
             byte[] sd = GetSDForStringSD(sddl);
-            if (!AccessCheckByType(sd, princ_bytes, token, MaximumAllowed, IntPtr.Zero, 0, ref mapping, ref priv_set, ref priv_length, out granted_access, out access_status))
+            if (!AccessCheckByType(sd, princ_bytes, token, MaximumAllowed, IntPtr.Zero, 
+                0, ref mapping, ref priv_set, ref priv_length, out granted_access, out access_status))
             {
-                throw new Win32Exception();
+                throw new Win32Exception(sddl);
             }
             if (access_status)
             {

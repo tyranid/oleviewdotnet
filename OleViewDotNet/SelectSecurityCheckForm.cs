@@ -118,6 +118,13 @@ namespace OleViewDotNet
 
                     Token = ((SafeTokenHandle)listViewProcesses.SelectedItems[0].Tag).DuplicateImpersonation(SecurityImpersonationLevel.SecurityIdentification);
                 }
+                else if (radioAnonymous.Checked)
+                {
+                    using (SafeTokenHandle token = SafeTokenHandle.AnonymousToken)
+                    {
+                        Token = token.DuplicateImpersonation(SecurityImpersonationLevel.SecurityIdentification);
+                    }
+                }
 
                 if (checkBoxSetIL.Checked)
                 {

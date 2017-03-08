@@ -164,6 +164,21 @@ namespace OleViewDotNet
         SecurityDelegation
     }
 
+    [Flags]
+    enum TokenAccessRights : uint
+    {
+        AssignPrimary = 0x0001,
+        Duplicate = 0x0002,
+        Impersonate = 0x0004,
+        Query = 0x0008,
+        QuerySource = 0x0010,
+        AdjustPrivileges = 0x0020,
+        AdjustGroups = 0x0040,
+        AdjustDefault = 0x0080,
+        AdjustSessionId = 0x0100,
+        MaximumAllowed = 0x02000000
+    }
+
     enum TokenType
     {
         TokenPrimary = 1,
@@ -201,6 +216,47 @@ namespace OleViewDotNet
                 throw new Win32Exception();
             }
             return token;
+        }
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool OpenThreadToken(
+              IntPtr ThreadHandle,
+              TokenAccessRights DesiredAccess,
+              [MarshalAs(UnmanagedType.Bool)] bool OpenAsSelf,
+              out SafeTokenHandle TokenHandle
+            );
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool ImpersonateAnonymousToken(
+              IntPtr ThreadHandle
+            );
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool RevertToSelf();
+
+        public static SafeTokenHandle AnonymousToken
+        {
+            get
+            {
+                if (!ImpersonateAnonymousToken(new IntPtr(-2)))
+                {
+                    throw new Win32Exception();
+                }
+
+                try
+                {
+                    SafeTokenHandle token;
+                    if (!OpenThreadToken(new IntPtr(-2), TokenAccessRights.MaximumAllowed, true, out token))
+                    {
+                        throw new Win32Exception();
+                    }
+                    return token;
+                }
+                finally
+                {
+                    RevertToSelf();
+                }
+            }
         }
 
         enum TokenInformationClass
@@ -509,20 +565,17 @@ namespace OleViewDotNet
             return builder.ToString();
         }
 
-
-        private const int MaximumAllowed = 0x02000000;
-
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern bool OpenProcessToken(
               IntPtr ProcessHandle,
-              int DesiredAccess,
+              TokenAccessRights DesiredAccess,
               out SafeTokenHandle TokenHandle
             );
 
         public SafeTokenHandle OpenToken()
         {
             SafeTokenHandle token;
-            if (!OpenProcessToken(handle, MaximumAllowed, out token))
+            if (!OpenProcessToken(handle, TokenAccessRights.MaximumAllowed, out token))
             {
                 throw new Win32Exception();
             }
