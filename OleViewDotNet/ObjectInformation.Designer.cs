@@ -36,13 +36,13 @@
             this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripDropDownButtonOperations = new System.Windows.Forms.ToolStripDropDownButton();
-            this.openOLEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.marshalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openDispatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openOLEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.marshalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -152,6 +152,13 @@
             this.toolStripDropDownButtonOperations.Size = new System.Drawing.Size(78, 20);
             this.toolStripDropDownButtonOperations.Text = "Operations";
             // 
+            // openDispatchToolStripMenuItem
+            // 
+            this.openDispatchToolStripMenuItem.Name = "openDispatchToolStripMenuItem";
+            this.openDispatchToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.openDispatchToolStripMenuItem.Text = "Open Dispatch";
+            this.openDispatchToolStripMenuItem.Click += new System.EventHandler(this.btnDispatch_Click);
+            // 
             // openOLEToolStripMenuItem
             // 
             this.openOLEToolStripMenuItem.Name = "openOLEToolStripMenuItem";
@@ -159,12 +166,12 @@
             this.openOLEToolStripMenuItem.Text = "Open OLE Container";
             this.openOLEToolStripMenuItem.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
-            // saveStreamToolStripMenuItem
+            // createToolStripMenuItem
             // 
-            this.saveStreamToolStripMenuItem.Name = "saveStreamToolStripMenuItem";
-            this.saveStreamToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.saveStreamToolStripMenuItem.Text = "Save Stream";
-            this.saveStreamToolStripMenuItem.Click += new System.EventHandler(this.btnSaveStream_Click);
+            this.createToolStripMenuItem.Name = "createToolStripMenuItem";
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.createToolStripMenuItem.Text = "Create Instance";
+            this.createToolStripMenuItem.Click += new System.EventHandler(this.btnCreate_Click);
             // 
             // marshalToolStripMenuItem
             // 
@@ -174,20 +181,6 @@
             this.marshalToolStripMenuItem.Name = "marshalToolStripMenuItem";
             this.marshalToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.marshalToolStripMenuItem.Text = "Marshal";
-            // 
-            // createToolStripMenuItem
-            // 
-            this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.createToolStripMenuItem.Text = "Create Instance";
-            this.createToolStripMenuItem.Click += new System.EventHandler(this.btnCreate_Click);
-            // 
-            // openDispatchToolStripMenuItem
-            // 
-            this.openDispatchToolStripMenuItem.Name = "openDispatchToolStripMenuItem";
-            this.openDispatchToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.openDispatchToolStripMenuItem.Text = "Open Dispatch";
-            this.openDispatchToolStripMenuItem.Click += new System.EventHandler(this.btnDispatch_Click);
             // 
             // toHexEditorToolStripMenuItem
             // 
@@ -202,6 +195,13 @@
             this.viewPropertiesToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.viewPropertiesToolStripMenuItem.Text = "View Properties";
             this.viewPropertiesToolStripMenuItem.Click += new System.EventHandler(this.viewPropertiesToolStripMenuItem_Click);
+            // 
+            // saveStreamToolStripMenuItem
+            // 
+            this.saveStreamToolStripMenuItem.Name = "saveStreamToolStripMenuItem";
+            this.saveStreamToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.saveStreamToolStripMenuItem.Text = "Save Stream";
+            this.saveStreamToolStripMenuItem.Click += new System.EventHandler(this.btnSaveStream_Click);
             // 
             // ObjectInformation
             // 

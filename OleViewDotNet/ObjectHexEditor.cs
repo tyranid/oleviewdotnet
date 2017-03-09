@@ -59,7 +59,7 @@ namespace OleViewDotNet
             try
             {
                 MemoryStream stm = new MemoryStream(hexEditor.Bytes);
-                object obj = COMUtilities.UnmarshalObject(new MemoryStream(hexEditor.Bytes));
+                object obj = COMUtilities.UnmarshalObject(hexEditor.Bytes);
                 await Program.GetMainForm(m_registry).OpenObjectInformation(obj, "Unmarshaled Object");
             }
             catch (Exception ex)

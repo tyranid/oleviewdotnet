@@ -316,7 +316,7 @@ namespace OleViewDotNet
                     try
                     {
                         byte[] data = File.ReadAllBytes(dlg.FileName);
-                        object comObj = COMUtilities.UnmarshalObject(new MemoryStream(data));
+                        object comObj = COMUtilities.UnmarshalObject(data);
                         await OpenObjectInformation(comObj, String.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
                     }
                     catch (Exception ex)

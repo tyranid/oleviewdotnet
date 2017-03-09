@@ -169,6 +169,23 @@ namespace OleViewDotNet
         DELEGATE     = 4,
     }
 
+    public enum MSHCTX
+    {
+        LOCAL = 0,
+        NOSHAREDMEM = 1,
+        DIFFERENTMACHINE = 2,
+        INPROC = 3,
+        CROSSCTX = 4
+    }
+
+    public enum MSHLFLAGS
+    {
+        NORMAL = 0,
+        TABLESTRONG = 1,
+        TABLEWEAK = 2,
+        NOPING = 4
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct OptionalGuid : IDisposable
     {
@@ -303,36 +320,36 @@ namespace OleViewDotNet
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
         private static extern void LoadTypeLibEx(String strTypeLibName, RegKind regKind,
             [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
-        [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]        
+        [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]
         public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
         [DllImport("ole32.dll", EntryPoint = "CoCreateInstanceEx", CallingConvention = CallingConvention.StdCall)]
         public static extern int CoCreateInstanceEx(ref Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
         [DllImport("ole32.dll", EntryPoint = "CoGetClassObject", CallingConvention = CallingConvention.StdCall)]
         public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, ref Guid riid, out IntPtr ppv);
-        [DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-        public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+        //[DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
+        //public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
-        [DllImport("ole32.dll", CharSet=CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
         [return: MarshalAs(UnmanagedType.Interface)]
-        [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
+        [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
         public static extern IBindCtx CreateBindCtx([In] uint reserved);
 
-        [DllImport("ole32.dll", ExactSpelling=true, PreserveSig=false)]
+        [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
         public static extern IMoniker CreateObjrefMoniker([MarshalAs(UnmanagedType.Interface)] object punk);
 
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public extern static void SHCreateStreamOnFile(string pszFile, STGM grfMode, out IntPtr ppStm);
 
-        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet=CharSet.Unicode)]
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         public static extern int CoGetInstanceFromFile(
             IntPtr pServerInfo,
             OptionalGuid pClsid,
-            IntPtr  punkOuter,
+            IntPtr punkOuter,
             CLSCTX dwClsCtx,
-            STGM   grfMode,
-            string  pwszName,
+            STGM grfMode,
+            string pwszName,
             int dwCount,
             [In, Out] MULTI_QI[] pResults
         );
@@ -351,6 +368,22 @@ namespace OleViewDotNet
 
         [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         public static extern int CLSIDFromProgID(string lpszProgID, out Guid lpclsid);
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern void CoMarshalInterface(IStream pStm, ref Guid riid,
+            [MarshalAs(UnmanagedType.Interface)] object pUnk, MSHCTX dwDestContext, IntPtr pvDestContext, MSHLFLAGS mshlflags);
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern void CoReleaseMarshalData(
+              IStream pStm
+            );
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
+        [return: MarshalAs(UnmanagedType.Interface)]
+        public static extern object CoUnmarshalInterface(
+            IStream pStm,
+            ref Guid riid
+        );
 
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
@@ -535,13 +568,13 @@ namespace OleViewDotNet
 
         private static void LoadBuiltinTypes(Assembly asm)
         {
-            foreach(Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
+            foreach (Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
             {
                 if (!m_iidtypes.ContainsKey(t.GUID))
                 {
                     m_iidtypes.Add(t.GUID, t);
                 }
-            }            
+            }
         }
 
         public static Type GetInterfaceType(Guid iid)
@@ -553,7 +586,7 @@ namespace OleViewDotNet
 
             if (m_iidtypes.ContainsKey(iid))
             {
-                return m_iidtypes[iid];                
+                return m_iidtypes[iid];
             }
             return null;
         }
@@ -687,7 +720,7 @@ namespace OleViewDotNet
                     ret = comObj.GetType();
                 }
                 else
-                {                     
+                {
                     IntPtr typeInfo = IntPtr.Zero;
 
                     try
@@ -714,11 +747,11 @@ namespace OleViewDotNet
                     }
                     finally
                     {
-                        if(typeInfo != IntPtr.Zero)
+                        if (typeInfo != IntPtr.Zero)
                         {
                             Marshal.Release(typeInfo);
                         }
-                    }                
+                    }
                 }
             }
             catch (Exception)
@@ -747,7 +780,7 @@ namespace OleViewDotNet
             return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0;
         }
 
-        private static Dictionary<Type, Type> _wrappers = new Dictionary<Type, Type>();        
+        private static Dictionary<Type, Type> _wrappers = new Dictionary<Type, Type>();
 
         private static CodeParameterDeclarationExpression GetParameter(ParameterInfo pi)
         {
@@ -866,9 +899,9 @@ namespace OleViewDotNet
                 }
             }
 
-            foreach(PropertyInfo pi in t.GetProperties())
+            foreach (PropertyInfo pi in t.GetProperties())
             {
-                type.Members.Add(CreateForwardingProperty(pi));                
+                type.Members.Add(CreateForwardingProperty(pi));
             }
 
             return type;
@@ -892,7 +925,7 @@ namespace OleViewDotNet
             CodeGeneratorOptions options = new CodeGeneratorOptions();
             options.IndentString = "    ";
             options.BlankLinesBetweenMembers = false;
-   
+
             TextWriter writer = new StringWriter(builder);
 
             provider.GenerateCodeFromCompileUnit(unit, writer, options);
@@ -913,7 +946,7 @@ namespace OleViewDotNet
                 compileParams.TempFiles = tempFiles;
                 compileParams.ReferencedAssemblies.Add("System.dll");
                 compileParams.ReferencedAssemblies.Add("Microsoft.CSharp.dll");
-                compileParams.ReferencedAssemblies.Add("System.Core.dll");                
+                compileParams.ReferencedAssemblies.Add("System.Core.dll");
                 compileParams.ReferencedAssemblies.Add(t.Assembly.Location);
 
                 CompilerResults results = provider.CompileAssemblyFromDom(compileParams, unit);
@@ -922,7 +955,7 @@ namespace OleViewDotNet
                 {
                     foreach (CompilerError e in results.Errors)
                     {
-                        System.Diagnostics.Debug.WriteLine(e.ToString());                        
+                        System.Diagnostics.Debug.WriteLine(e.ToString());
                     }
                 }
                 else
@@ -939,7 +972,7 @@ namespace OleViewDotNet
 
             }
             catch (Exception)
-            {                
+            {
             }
 
             return ret;
@@ -997,7 +1030,7 @@ namespace OleViewDotNet
             IPersistStream ps = obj as IPersistStream;
 
             if (ps != null)
-            {                
+            {
                 ps.Load(istm);
             }
             else
@@ -1063,17 +1096,14 @@ namespace OleViewDotNet
             return CreateFromMoniker(moniker, bind_opts);
         }
 
-        public static object UnmarshalObject(Stream stm)
+        public static object UnmarshalObject(Stream stm, Guid iid)
         {
-            Guid iid = COMInterfaceEntry.IID_IUnknown;
-            object obj;
-            CoUnmarshalInterface(new IStreamImpl(stm), ref iid, out obj);
-            return obj;
+            return CoUnmarshalInterface(new IStreamImpl(stm), ref iid);
         }
 
         public static object UnmarshalObject(byte[] objref)
         {
-            return UnmarshalObject(new MemoryStream(objref));
+            return UnmarshalObject(new MemoryStream(objref), COMInterfaceEntry.IID_IUnknown);
         }
 
         public static Guid GetObjectClass(object p)
@@ -1126,22 +1156,26 @@ namespace OleViewDotNet
             return strDisplayName;
         }
 
+        public static byte[] MarshalObject(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
+        {
+            MemoryStream stm = new MemoryStream();
+            CoMarshalInterface(new IStreamImpl(stm), ref iid, obj, mshctx, IntPtr.Zero, mshflags);
+            return stm.ToArray();
+        }
+
         public static byte[] MarshalObject(object obj)
         {
-            IMoniker mk;
+            return MarshalObject(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
+        }
 
-            mk = COMUtilities.CreateObjrefMoniker(obj);
-
-            string name = COMUtilities.GetMonikerDisplayName(mk).Substring(7).TrimEnd(':');
-
-            Marshal.ReleaseComObject(mk);
-
-            return Convert.FromBase64String(name);
+        public static COMObjRef MarshalObjectToObjRef(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
+        {
+            return COMObjRef.FromArray(MarshalObject(obj, iid, mshctx, mshflags));
         }
 
         public static COMObjRef MarshalObjectToObjRef(object obj)
         {
-            return COMObjRef.FromArray(MarshalObject(obj));
+            return MarshalObjectToObjRef(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
         }
 
         private static string ConvertTypeToName(Type t)

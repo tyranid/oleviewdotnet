@@ -230,11 +230,26 @@ namespace OleViewDotNet
             }
         }
 
+        private Guid GetSelectedIID()
+        {
+            if (listViewInterfaces.SelectedItems.Count > 0)
+            {
+                COMInterfaceEntry ent = listViewInterfaces.SelectedItems[0].Tag as COMInterfaceEntry;
+                if (ent != null)
+                {
+                    return ent.Iid;
+                }
+            }
+            return COMInterfaceEntry.IID_IUnknown;
+        }
+
         private void btnMarshal_Click(object sender, EventArgs e)
         {
             try
             {
-                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Marshal Editor", COMUtilities.MarshalObject(m_pObject)));
+                Program.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry,
+                    "Marshal Editor", COMUtilities.MarshalObject(m_pObject, GetSelectedIID(), 
+                    MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL)));
             }
             catch (Exception ex)
             {
@@ -273,7 +288,9 @@ namespace OleViewDotNet
         {
             try
             {
-                Program.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, COMUtilities.MarshalObjectToObjRef(m_pObject)));
+                Program.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, 
+                    COMUtilities.MarshalObjectToObjRef(m_pObject, GetSelectedIID(), 
+                    MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL)));
             }
             catch (Exception ex)
             {
