@@ -571,7 +571,7 @@ namespace OleViewDotNet
         {
             var servicesById = COMUtilities.GetServicePids();
             var appidsByService = registry.AppIDs.Values.Where(a => a.IsService).
-                GroupBy(a => a.LocalService.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g);
+                GroupBy(a => a.LocalService.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g, StringComparer.OrdinalIgnoreCase);
             var clsidsByAppId = registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
             var appsByPid = servicesById.ToDictionary(p => p.Key, p => p.Value.Where(v => appidsByService.ContainsKey(v)).SelectMany(v => appidsByService[v]));
 
