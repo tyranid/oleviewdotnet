@@ -1019,6 +1019,7 @@
             this.listViewFactoryInterfaces.TabIndex = 10;
             this.listViewFactoryInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewFactoryInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewFactoryInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewFactoryInterfaces.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // contextMenuStripInterfaces
@@ -1092,6 +1093,7 @@
             this.listViewInterfaces.TabIndex = 8;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewInterfaces.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewInterfaces.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // btnRefreshInterfaces
@@ -1561,6 +1563,7 @@
             this.listViewProcessIPids.TabIndex = 13;
             this.listViewProcessIPids.UseCompatibleStateImageBehavior = false;
             this.listViewProcessIPids.View = System.Windows.Forms.View.Details;
+            this.listViewProcessIPids.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewProcessIPids.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // columnHeaderIPid
@@ -2147,6 +2150,7 @@
             this.listViewProxies.TabIndex = 0;
             this.listViewProxies.UseCompatibleStateImageBehavior = false;
             this.listViewProxies.View = System.Windows.Forms.View.Details;
+            this.listViewProxies.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewProxies.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // tabPageServers
@@ -2178,6 +2182,7 @@
             this.listViewCLSIDServers.TabIndex = 0;
             this.listViewCLSIDServers.UseCompatibleStateImageBehavior = false;
             this.listViewCLSIDServers.View = System.Windows.Forms.View.Details;
+            this.listViewCLSIDServers.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewCLSIDServers.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // tabPageService
@@ -2381,6 +2386,7 @@
             this.listViewElevationVSOs.TabIndex = 6;
             this.listViewElevationVSOs.UseCompatibleStateImageBehavior = false;
             this.listViewElevationVSOs.View = System.Windows.Forms.View.Details;
+            this.listViewElevationVSOs.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewElevationVSOs.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             this.listViewElevationVSOs.DoubleClick += new System.EventHandler(this.listViewElevationVSOs_DoubleClick);
             // 

@@ -48,6 +48,7 @@ namespace OleViewDotNet
                 }
                 item.Tag = entry;
             }
+            view.ListViewItemSorter = new ListItemComparer(0);
             view.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             view.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
@@ -141,6 +142,7 @@ namespace OleViewDotNet
                 }
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewProxies.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                listViewProxies.ListViewItemSorter = new ListItemComparer(0);
                 tabControlProperties.TabPages.Add(tabPageProxies);
             }
 
@@ -157,6 +159,7 @@ namespace OleViewDotNet
 
                 listViewCLSIDServers.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewCLSIDServers.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                listViewCLSIDServers.ListViewItemSorter = new ListItemComparer(0);
                 tabControlProperties.TabPages.Add(tabPageServers);
             }
 
@@ -177,6 +180,7 @@ namespace OleViewDotNet
                 }
                 listViewElevationVSOs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listViewElevationVSOs.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                listViewElevationVSOs.ListViewItemSorter = new ListItemComparer(0);
                 tabControlProperties.TabPages.Add(tabPageElevation);
             }
 
@@ -257,6 +261,7 @@ namespace OleViewDotNet
             }
             listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
             tabControlProperties.TabPages.Add(tabPageProcess);
             if (m_registry.AppIDs.ContainsKey(obj.AppId))
             {
@@ -608,6 +613,11 @@ namespace OleViewDotNet
             {
                 Program.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
             }
+        }
+
+        private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
         }
     }
 }

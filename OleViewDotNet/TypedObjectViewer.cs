@@ -451,7 +451,6 @@ namespace OleViewDotNet
 
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            ListView view = sender as ListView;
             ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
         }
 
