@@ -315,7 +315,7 @@ namespace OleViewDotNet
                         return COMThreadingModel.Apartment;
                 }
             }
-            return COMThreadingModel.Apartment;
+            return COMThreadingModel.None;
         }
 
         internal COMCLSIDServerEntry(COMServerType server_type, string server)
