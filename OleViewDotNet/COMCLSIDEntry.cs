@@ -532,8 +532,13 @@ namespace OleViewDotNet
             {
                 if (elev_key != null)
                 {
-                    int auto_approval = COMUtilities.ReadIntFromKey(Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
-                    Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
+                    using (var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, 
+                        Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default))
+                    {
+                        int auto_approval = COMUtilities.ReadIntFromKey(base_key, 
+                            @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
+                        Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
+                    }
                 }
             }
         }
