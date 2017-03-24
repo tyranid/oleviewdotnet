@@ -62,7 +62,7 @@
             this.labelText.Name = "labelText";
             this.labelText.Size = new System.Drawing.Size(246, 26);
             this.labelText.TabIndex = 2;
-            this.labelText.Text = "OleView .NET v1.2 (c) James Forshaw 2014, 2016\r\nLicensed under GPLv3";
+            this.labelText.Text = "OleView .NET v1.3 (c) James Forshaw 2014, 2016\r\nLicensed under GPLv3";
             // 
             // AboutForm
             // 
