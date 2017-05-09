@@ -75,6 +75,7 @@
             this.btnApply = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelCount = new System.Windows.Forms.ToolStripStatusLabel();
+            this.allChildrenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -144,7 +145,7 @@
             this.unmarshalToolStripMenuItem,
             this.cloneTreeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(208, 378);
+            this.contextMenuStrip.Size = new System.Drawing.Size(208, 400);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -377,7 +378,8 @@
             this.cloneTreeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.allVisibleToolStripMenuItem,
             this.selectedToolStripMenuItem,
-            this.filteredToolStripMenuItem});
+            this.filteredToolStripMenuItem,
+            this.allChildrenToolStripMenuItem});
             this.cloneTreeToolStripMenuItem.Name = "cloneTreeToolStripMenuItem";
             this.cloneTreeToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.cloneTreeToolStripMenuItem.Text = "Clone Tree";
@@ -385,21 +387,21 @@
             // allVisibleToolStripMenuItem
             // 
             this.allVisibleToolStripMenuItem.Name = "allVisibleToolStripMenuItem";
-            this.allVisibleToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.allVisibleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.allVisibleToolStripMenuItem.Text = "All Visible";
             this.allVisibleToolStripMenuItem.Click += new System.EventHandler(this.allVisibleToolStripMenuItem_Click);
             // 
             // selectedToolStripMenuItem
             // 
             this.selectedToolStripMenuItem.Name = "selectedToolStripMenuItem";
-            this.selectedToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.selectedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.selectedToolStripMenuItem.Text = "Selected";
             this.selectedToolStripMenuItem.Click += new System.EventHandler(this.selectedToolStripMenuItem_Click);
             // 
             // filteredToolStripMenuItem
             // 
             this.filteredToolStripMenuItem.Name = "filteredToolStripMenuItem";
-            this.filteredToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.filteredToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.filteredToolStripMenuItem.Text = "Filtered";
             this.filteredToolStripMenuItem.Click += new System.EventHandler(this.filteredToolStripMenuItem_Click);
             // 
@@ -487,6 +489,13 @@
             this.toolStripStatusLabelCount.Size = new System.Drawing.Size(131, 17);
             this.toolStripStatusLabelCount.Text = "Showing N of M Entries";
             // 
+            // allChildrenToolStripMenuItem
+            // 
+            this.allChildrenToolStripMenuItem.Name = "allChildrenToolStripMenuItem";
+            this.allChildrenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.allChildrenToolStripMenuItem.Text = "All Children";
+            this.allChildrenToolStripMenuItem.Click += new System.EventHandler(this.allChildrenToolStripMenuItem_Click);
+            // 
             // COMRegistryViewer
             // 
             this.Controls.Add(this.tableLayoutPanel);
@@ -547,5 +556,6 @@
         private System.Windows.Forms.ToolStripMenuItem filteredToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelCount;
+        private System.Windows.Forms.ToolStripMenuItem allChildrenToolStripMenuItem;
     }
 }

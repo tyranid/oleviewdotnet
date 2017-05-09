@@ -2267,5 +2267,14 @@ namespace OleViewDotNet
         {
             Program.GetMainForm(m_registry).UpdatePropertyGrid(treeComRegistry.SelectedNode?.Tag);
         }
+
+        private void allChildrenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode selected = treeComRegistry.SelectedNode;
+            if (selected != null && selected.Nodes.Count > 0)
+            {
+                CreateClonedTree(selected.Nodes.OfType<TreeNode>());
+            }
+        }
     }
 }
