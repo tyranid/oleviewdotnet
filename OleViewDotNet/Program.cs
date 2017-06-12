@@ -125,6 +125,15 @@ namespace OleViewDotNet
             }
         }
 
+        class ActivationFilter : IActivationFilter
+        {
+            public void HandleActivation(uint dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+            {
+                pReplacementClsId = rclsid;
+                System.Diagnostics.Trace.WriteLine(String.Format("{0:X} {1}", dwActivationType, rclsid));
+            }
+        }
+
         static IEnumerable<COMServerType> ParseServerTypes(string servers)
         {
             string[] ss = servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -144,6 +153,7 @@ namespace OleViewDotNet
             bool query_interfaces = false;
             int concurrent_queries = Environment.ProcessorCount;
             bool refresh_interfaces = false;
+            bool enable_activation_filter = false;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
             
@@ -155,8 +165,9 @@ namespace OleViewDotNet
                 { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
                 { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
                 { "refresh", "Refresh interfaces in query", v => refresh_interfaces = v != null },
-                { "m",  "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
-                { "u",  "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
+                { "m", "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
+                { "u", "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
+                { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -219,6 +230,10 @@ namespace OleViewDotNet
                     }
 
                     _appContext = new MultiApplicationContext(new MainForm(registry));
+                    if (enable_activation_filter)
+                    {
+                        COMUtilities.CoRegisterActivationFilter(new ActivationFilter());
+                    }
                     Application.Run(_appContext);
                 }
                 catch (Exception ex)

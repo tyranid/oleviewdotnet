@@ -385,6 +385,9 @@ namespace OleViewDotNet
             ref Guid riid
         );
 
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern int CoRegisterActivationFilter(IActivationFilter pActivationFilter);
+
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
         private static Dictionary<Guid, Type> m_iidtypes;
