@@ -385,6 +385,9 @@ namespace OleViewDotNet
             ref Guid riid
         );
 
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern int CoRegisterActivationFilter(IActivationFilter pActivationFilter);
+
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
         private static Dictionary<Guid, Type> m_iidtypes;
@@ -1232,6 +1235,43 @@ namespace OleViewDotNet
             return t.Name;
         }
 
+        private static string FormatParameters(IEnumerable<ParameterInfo> pis)
+        {
+            List<string> pars = new List<string>();
+            foreach (ParameterInfo pi in pis)
+            {
+                List<string> dirs = new List<string>();
+
+                if (pi.IsOut)
+                {
+                    dirs.Add("Out");
+                    if (pi.IsIn)
+                    {
+                        dirs.Add("In");
+                    }
+                }
+
+                if (pi.IsRetval)
+                {
+                    dirs.Add("Retval");
+                }
+
+                if (pi.IsOptional)
+                {
+                    dirs.Add("Optional");
+                }
+
+                string text = String.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
+
+                if (dirs.Count > 0)
+                {
+                    text = String.Format("[{0}] {1}", string.Join(",", dirs), text);
+                }
+                pars.Add(text);
+            }
+            return String.Join(", ", pars);
+        }
+
         public static string MemberInfoToString(MemberInfo member)
         {
             MethodInfo mi = member as MethodInfo;
@@ -1240,42 +1280,9 @@ namespace OleViewDotNet
 
             if (mi != null)
             {
-                List<string> pars = new List<string>();
-                ParameterInfo[] pis = mi.GetParameters();
-
-                foreach (ParameterInfo pi in pis)
-                {
-                    List<string> dirs = new List<string>();
-
-                    if (pi.IsOut)
-                    {
-                        dirs.Add("Out");
-                        if (pi.IsIn)
-                        {
-                            dirs.Add("In");
-                        }
-                    }
-
-                    if (pi.IsRetval)
-                    {
-                        dirs.Add("Retval");
-                    }
-
-                    if (pi.IsOptional)
-                    {
-                        dirs.Add("Optional");
-                    }
-
-                    string text = String.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
-
-                    if (dirs.Count > 0)
-                    {
-                        text = String.Format("[{0}] {1}", string.Join(",", dirs), text);
-                    }
-                    pars.Add(text);
-                }
-
-                return String.Format("{0} {1}({2});", ConvertTypeToName(mi.ReturnType), mi.Name, String.Join(", ", pars));
+                return String.Format("{0} {1}({2});", 
+                    ConvertTypeToName(mi.ReturnType), 
+                    mi.Name, FormatParameters(mi.GetParameters()));
             }
             else if (prop != null)
             {
@@ -1290,7 +1297,14 @@ namespace OleViewDotNet
                     propdirs.Add("set;");
                 }
 
-                return String.Format("{0} {1} {{ {2} }}", ConvertTypeToName(prop.PropertyType), prop.Name, string.Join(" ", propdirs));
+                ParameterInfo[] index_params = prop.GetIndexParameters();
+                string ps = String.Empty;
+                if (index_params.Length > 0)
+                {
+                    ps = String.Format("({0})", FormatParameters(index_params));
+                }
+
+                return String.Format("{0} {1}{2} {{ {3} }}", ConvertTypeToName(prop.PropertyType), prop.Name, ps, string.Join(" ", propdirs));
             }
             else if (fi != null)
             {

@@ -253,4 +253,14 @@ namespace OleViewDotNet
         void Invoke(int dispIdMember, ref Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
                     out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);
     }
+
+    [Guid("00000017-0000-0000-C000-000000000046"), 
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IActivationFilter
+    {
+        void HandleActivation(
+            uint dwActivationType,
+            ref Guid rclsid,
+            out Guid pReplacementClsId);
+    };
 }

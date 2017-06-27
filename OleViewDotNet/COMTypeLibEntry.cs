@@ -26,6 +26,30 @@ namespace OleViewDotNet
 {
     public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable
     {
+        private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string version, RegistryKey key)
+        {
+            List<COMTypeLibVersionEntry> entries = new List<COMTypeLibVersionEntry>();
+            foreach (string locale in key.GetSubKeyNames())
+            {
+                int locale_int;
+                if (int.TryParse(locale, out locale_int))
+                {
+                    using (RegistryKey subkey = key.OpenSubKey(locale))
+                    {
+                        if (subkey != null)
+                        {
+                            COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(version, TypelibId, locale_int, subkey);
+                            if (!String.IsNullOrWhiteSpace(entry.NativePath))
+                            {
+                                entries.Add(entry);
+                            }
+                        }
+                    }
+                }
+            }
+            return entries;
+        }
+
         private List<COMTypeLibVersionEntry> LoadFromKey(RegistryKey key)
         {
             List<COMTypeLibVersionEntry> ret = new List<COMTypeLibVersionEntry>();
@@ -35,7 +59,7 @@ namespace OleViewDotNet
                 {
                     if (subKey != null)
                     {
-                        ret.Add(new COMTypeLibVersionEntry(version, TypelibId, subKey));
+                        ret.AddRange(LoadFromLocales(version, subKey));
                     }
                 }
             }
@@ -107,6 +131,7 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public string Win32Path { get; private set; }
         public string Win64Path { get; private set; }
+        public int Locale { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -122,7 +147,7 @@ namespace OleViewDotNet
             }
 
             return Version == right.Version && Name == right.Name 
-                && Win32Path == right.Win32Path && Win64Path == right.Win64Path;
+                && Win32Path == right.Win32Path && Win64Path == right.Win64Path && Locale == right.Locale;
         }
 
         public override int GetHashCode()
@@ -146,19 +171,19 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMTypeLibVersionEntry(string version, Guid typelibid, RegistryKey key) 
+        internal COMTypeLibVersionEntry(string version, Guid typelibid, int locale, RegistryKey key) 
             : this(typelibid)
         {
             Version = version;
+            Locale = locale;
             Name = key.GetValue(null) as string;
             if (String.IsNullOrWhiteSpace(Name))
             {
                 Name = typelibid.ToString();
             }
 
-            // TODO: Correctly handle locale specific typelibs
             // We can't be sure of there being a 0 LCID, leave for now
-            using (RegistryKey subKey = key.OpenSubKey("0\\win32"))
+            using (RegistryKey subKey = key.OpenSubKey("win32"))
             {
                 if (subKey != null)
                 {
@@ -166,7 +191,7 @@ namespace OleViewDotNet
                 }
             }
 
-            using (RegistryKey subKey = key.OpenSubKey("0\\win64"))
+            using (RegistryKey subKey = key.OpenSubKey("win64"))
             {
                 if (subKey != null)
                 {
@@ -191,6 +216,7 @@ namespace OleViewDotNet
             Name = reader.GetAttribute("name");
             Win32Path = reader.GetAttribute("win32");
             Win64Path = reader.GetAttribute("win64");
+            Locale = reader.ReadInt("locale");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -199,6 +225,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("name", Name);
             writer.WriteOptionalAttributeString("win32", Win32Path);
             writer.WriteOptionalAttributeString("win64", Win64Path);
+            writer.WriteInt("locale", Locale);
         }
     }
 }
