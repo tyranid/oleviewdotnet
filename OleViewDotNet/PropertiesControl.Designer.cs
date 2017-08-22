@@ -107,6 +107,11 @@
             System.Windows.Forms.Label label57;
             System.Windows.Forms.ColumnHeader columnHeaderElevationEnabled;
             System.Windows.Forms.ColumnHeader columnHeaderElevationAutoApproval;
+            System.Windows.Forms.TableLayoutPanel tableLayoutPanelDotNet;
+            System.Windows.Forms.Label label60;
+            System.Windows.Forms.Label label62;
+            System.Windows.Forms.Label label63;
+            System.Windows.Forms.Label label64;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -211,6 +216,11 @@
             this.listViewElevationVSOs = new System.Windows.Forms.ListView();
             this.textBoxElevationEnabled = new System.Windows.Forms.TextBox();
             this.textBoxElevationAutoApproval = new System.Windows.Forms.TextBox();
+            this.tabPageDotNet = new System.Windows.Forms.TabPage();
+            this.textBoxDotNetAssemblyName = new System.Windows.Forms.TextBox();
+            this.textBoxDotNetClassName = new System.Windows.Forms.TextBox();
+            this.textBoxDotNetCodeBase = new System.Windows.Forms.TextBox();
+            this.textBoxDotNetRuntimeVersion = new System.Windows.Forms.TextBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -289,6 +299,11 @@
             label57 = new System.Windows.Forms.Label();
             columnHeaderElevationEnabled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderElevationAutoApproval = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            tableLayoutPanelDotNet = new System.Windows.Forms.TableLayoutPanel();
+            label60 = new System.Windows.Forms.Label();
+            label62 = new System.Windows.Forms.Label();
+            label63 = new System.Windows.Forms.Label();
+            label64 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -314,6 +329,8 @@
             this.tabPageIPID.SuspendLayout();
             this.tabPageElevation.SuspendLayout();
             this.tableLayoutPanelElevation.SuspendLayout();
+            this.tabPageDotNet.SuspendLayout();
+            tableLayoutPanelDotNet.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblClsid
@@ -2055,6 +2072,7 @@
             this.tabControlProperties.Controls.Add(this.tabPageProcess);
             this.tabControlProperties.Controls.Add(this.tabPageIPID);
             this.tabControlProperties.Controls.Add(this.tabPageElevation);
+            this.tabControlProperties.Controls.Add(this.tabPageDotNet);
             this.tabControlProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlProperties.Location = new System.Drawing.Point(0, 0);
             this.tabControlProperties.Margin = new System.Windows.Forms.Padding(1);
@@ -2408,6 +2426,118 @@
             this.textBoxElevationAutoApproval.Size = new System.Drawing.Size(192, 20);
             this.textBoxElevationAutoApproval.TabIndex = 10;
             // 
+            // tabPageDotNet
+            // 
+            this.tabPageDotNet.Controls.Add(tableLayoutPanelDotNet);
+            this.tabPageDotNet.Location = new System.Drawing.Point(4, 22);
+            this.tabPageDotNet.Name = "tabPageDotNet";
+            this.tabPageDotNet.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageDotNet.Size = new System.Drawing.Size(575, 363);
+            this.tabPageDotNet.TabIndex = 12;
+            this.tabPageDotNet.Text = ".NET";
+            this.tabPageDotNet.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanelDotNet
+            // 
+            tableLayoutPanelDotNet.ColumnCount = 2;
+            tableLayoutPanelDotNet.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanelDotNet.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelDotNet.Controls.Add(label60, 0, 0);
+            tableLayoutPanelDotNet.Controls.Add(this.textBoxDotNetAssemblyName, 1, 0);
+            tableLayoutPanelDotNet.Controls.Add(label62, 0, 1);
+            tableLayoutPanelDotNet.Controls.Add(this.textBoxDotNetClassName, 1, 1);
+            tableLayoutPanelDotNet.Controls.Add(label63, 0, 2);
+            tableLayoutPanelDotNet.Controls.Add(this.textBoxDotNetCodeBase, 1, 2);
+            tableLayoutPanelDotNet.Controls.Add(label64, 0, 3);
+            tableLayoutPanelDotNet.Controls.Add(this.textBoxDotNetRuntimeVersion, 1, 3);
+            tableLayoutPanelDotNet.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanelDotNet.Location = new System.Drawing.Point(3, 3);
+            tableLayoutPanelDotNet.Name = "tableLayoutPanelDotNet";
+            tableLayoutPanelDotNet.RowCount = 5;
+            tableLayoutPanelDotNet.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelDotNet.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelDotNet.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelDotNet.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanelDotNet.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanelDotNet.Size = new System.Drawing.Size(569, 357);
+            tableLayoutPanelDotNet.TabIndex = 0;
+            // 
+            // label60
+            // 
+            label60.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label60.AutoSize = true;
+            label60.Location = new System.Drawing.Point(3, 6);
+            label60.Name = "label60";
+            label60.Size = new System.Drawing.Size(85, 13);
+            label60.TabIndex = 0;
+            label60.Text = "Assembly Name:";
+            // 
+            // textBoxDotNetAssemblyName
+            // 
+            this.textBoxDotNetAssemblyName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDotNetAssemblyName.Location = new System.Drawing.Point(96, 3);
+            this.textBoxDotNetAssemblyName.Name = "textBoxDotNetAssemblyName";
+            this.textBoxDotNetAssemblyName.ReadOnly = true;
+            this.textBoxDotNetAssemblyName.Size = new System.Drawing.Size(470, 20);
+            this.textBoxDotNetAssemblyName.TabIndex = 1;
+            // 
+            // label62
+            // 
+            label62.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label62.AutoSize = true;
+            label62.Location = new System.Drawing.Point(3, 32);
+            label62.Name = "label62";
+            label62.Size = new System.Drawing.Size(66, 13);
+            label62.TabIndex = 2;
+            label62.Text = "Class Name:";
+            // 
+            // textBoxDotNetClassName
+            // 
+            this.textBoxDotNetClassName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDotNetClassName.Location = new System.Drawing.Point(96, 29);
+            this.textBoxDotNetClassName.Name = "textBoxDotNetClassName";
+            this.textBoxDotNetClassName.ReadOnly = true;
+            this.textBoxDotNetClassName.Size = new System.Drawing.Size(470, 20);
+            this.textBoxDotNetClassName.TabIndex = 3;
+            // 
+            // label63
+            // 
+            label63.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label63.AutoSize = true;
+            label63.Location = new System.Drawing.Point(3, 58);
+            label63.Name = "label63";
+            label63.Size = new System.Drawing.Size(58, 13);
+            label63.TabIndex = 4;
+            label63.Text = "Codebase:";
+            // 
+            // textBoxDotNetCodeBase
+            // 
+            this.textBoxDotNetCodeBase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDotNetCodeBase.Location = new System.Drawing.Point(96, 55);
+            this.textBoxDotNetCodeBase.Name = "textBoxDotNetCodeBase";
+            this.textBoxDotNetCodeBase.ReadOnly = true;
+            this.textBoxDotNetCodeBase.Size = new System.Drawing.Size(470, 20);
+            this.textBoxDotNetCodeBase.TabIndex = 5;
+            // 
+            // label64
+            // 
+            label64.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label64.AutoSize = true;
+            label64.Location = new System.Drawing.Point(3, 84);
+            label64.Name = "label64";
+            label64.Size = new System.Drawing.Size(87, 13);
+            label64.TabIndex = 6;
+            label64.Text = "Runtime Version:";
+            // 
+            // textBoxDotNetRuntimeVersion
+            // 
+            this.textBoxDotNetRuntimeVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDotNetRuntimeVersion.Location = new System.Drawing.Point(96, 81);
+            this.textBoxDotNetRuntimeVersion.Name = "textBoxDotNetRuntimeVersion";
+            this.textBoxDotNetRuntimeVersion.ReadOnly = true;
+            this.textBoxDotNetRuntimeVersion.Size = new System.Drawing.Size(470, 20);
+            this.textBoxDotNetRuntimeVersion.TabIndex = 7;
+            // 
             // PropertiesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2452,6 +2582,9 @@
             this.tabPageElevation.ResumeLayout(false);
             this.tableLayoutPanelElevation.ResumeLayout(false);
             this.tableLayoutPanelElevation.PerformLayout();
+            this.tabPageDotNet.ResumeLayout(false);
+            tableLayoutPanelDotNet.ResumeLayout(false);
+            tableLayoutPanelDotNet.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2562,5 +2695,10 @@
         private System.Windows.Forms.TextBox textBoxIPIDIIDName;
         private System.Windows.Forms.TextBox textBoxIPIDStaHwnd;
         private System.Windows.Forms.TextBox textBoxProcessStaHwnd;
+        private System.Windows.Forms.TabPage tabPageDotNet;
+        private System.Windows.Forms.TextBox textBoxDotNetAssemblyName;
+        private System.Windows.Forms.TextBox textBoxDotNetClassName;
+        private System.Windows.Forms.TextBox textBoxDotNetCodeBase;
+        private System.Windows.Forms.TextBox textBoxDotNetRuntimeVersion;
     }
 }

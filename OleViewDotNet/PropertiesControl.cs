@@ -184,6 +184,16 @@ namespace OleViewDotNet
                 tabControlProperties.TabPages.Add(tabPageElevation);
             }
 
+            if (entry.Servers.ContainsKey(COMServerType.InProcServer32) && entry.Servers[COMServerType.InProcServer32].HasDotNet)
+            {
+                COMCLSIDServerDotNetEntry dotnet = entry.Servers[COMServerType.InProcServer32].DotNet;
+                textBoxDotNetAssemblyName.Text = dotnet.AssemblyName;
+                textBoxDotNetClassName.Text = dotnet.ClassName;
+                textBoxDotNetCodeBase.Text = dotnet.CodeBase;
+                textBoxDotNetRuntimeVersion.Text = dotnet.RuntimeVersion;
+                tabControlProperties.TabPages.Add(tabPageDotNet);
+            }
+
             m_clsid = entry;
         }
 
