@@ -49,11 +49,18 @@ namespace OleViewDotNet
         static string TypeToText(Type t)
         {
             StringBuilder builder = new StringBuilder();
-
             if (t.IsInterface)
             {
                 builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
                 builder.AppendFormat("interface {0}", t.Name).AppendLine();
+            }
+            else if (t.IsEnum)
+            {
+                builder.AppendFormat("enum {0}", t.Name).AppendLine();
+            }
+            else if (t.IsClass)
+            {
+                builder.AppendFormat("class {0}", t.Name).AppendLine();
             }
             else
             {
@@ -61,10 +68,10 @@ namespace OleViewDotNet
             }
             builder.AppendLine("{");
 
-            if (t.IsInterface)
+            if (t.IsInterface || t.IsClass)
             {
-                IEnumerable<MethodInfo> methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0);
-                if (methods.Count() > 0)
+                MethodInfo[] methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
+                if (methods.Length > 0)
                 {
                     builder.AppendLine("   /* Methods */");
                     foreach (MethodInfo mi in methods)
@@ -81,6 +88,22 @@ namespace OleViewDotNet
                     {
                         EmitMember(builder, pi);
                     }
+                }
+            }
+            else if (t.IsEnum)
+            {
+                foreach (var value in Enum.GetValues(t))
+                {
+                    builder.Append("   ");
+                    try
+                    {
+                        builder.AppendFormat("{0} = {1};", value, Convert.ToInt64(value));
+                    }
+                    catch
+                    {
+                        builder.AppendFormat("{0};");
+                    }
+                    builder.AppendLine();
                 }
             }
             else
@@ -146,7 +169,17 @@ namespace OleViewDotNet
 
         private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib)
         {
-            foreach (Type t in typelib.GetTypes().Where(t => t.IsValueType).OrderBy(t => t.Name))
+            foreach (Type t in typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum).OrderBy(t => t.Name))
+            {
+                ListViewItem item = new ListViewItem(t.Name);
+                item.Tag = t;
+                yield return item;
+            }
+        }
+
+        private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib)
+        {
+            foreach (Type t in typelib.GetTypes().Where(t => t.IsEnum).OrderBy(t => t.Name))
             {
                 ListViewItem item = new ListViewItem(t.Name);
                 item.Tag = t;
@@ -159,7 +192,8 @@ namespace OleViewDotNet
             string name, 
             Guid iid_to_view, 
             IEnumerable<ListViewItemWithIid> items, 
-            IEnumerable<ListViewItem> structs)
+            IEnumerable<ListViewItem> structs,
+            IEnumerable<ListViewItem> enums)
         {
             m_iids_to_names = iids_to_names;
             m_types_to_names = types_to_names;
@@ -174,8 +208,25 @@ namespace OleViewDotNet
                     item.EnsureVisible();
                 }
             }
-            listViewStructures.Items.AddRange(structs.ToArray());
-            listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            if (structs.Count() > 0)
+            {
+                listViewStructures.Items.AddRange(structs.ToArray());
+                listViewStructures.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            }
+            else
+            {
+                tabControl.TabPages.Remove(tabPageStructures);
+            }
+
+            if (enums.Count() > 0)
+            {
+                listViewEnums.Items.AddRange(enums.ToArray());
+                listViewEnums.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            }
+            else
+            {
+                tabControl.TabPages.Remove(tabPageEnums);
+            }
 
             textEditor.SetHighlighting("C#");
             textEditor.IsReadOnly = true;
@@ -183,33 +234,49 @@ namespace OleViewDotNet
         }
 
         public TypeLibControl(string name, Assembly typelib, Guid iid_to_view) 
-            : this(null, null, name, iid_to_view, FormatAssembly(typelib), FormatAssemblyStructs(typelib))
+            : this(null, null, name, iid_to_view, FormatAssembly(typelib), 
+                  FormatAssemblyStructs(typelib), FormatAssemblyEnums(typelib))
         {
         }
 
         public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid iid_to_view) 
-            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, iid_to_view, FormatProxyInstance(proxy), FormatProxyInstanceComplexTypes(proxy))
+            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, iid_to_view, FormatProxyInstance(proxy), 
+                  FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
         }
 
-        private void listViewTypes_SelectedIndexChanged(object sender, EventArgs e)
+        private string GetTextFromTag(object tag)
+        {
+            Type type = tag as Type;
+            COMProxyInstanceEntry proxy = tag as COMProxyInstanceEntry;
+            NdrComplexTypeReference str = tag as NdrComplexTypeReference;
+
+            if (type != null)
+            {
+                return TypeToText(type);
+            }
+            else if (proxy != null)
+            {
+                return proxy.Format(m_iids_to_names);
+            }
+            else if (str != null)
+            {
+                return str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names));
+            }
+
+            return String.Empty;
+        }
+
+        private void listView_SelectedIndexChanged(object sender, EventArgs e)
         {
             string text = String.Empty;
 
-            if (listViewTypes.SelectedItems.Count > 0)
-            {
-                ListViewItem item = listViewTypes.SelectedItems[0];
-                Type type = item.Tag as Type;
-                COMProxyInstanceEntry proxy = item.Tag as COMProxyInstanceEntry;
+            ListView list = sender as ListView;
 
-                if (type != null)
-                {
-                    text = TypeToText(type);
-                }
-                else if (proxy != null)
-                {
-                    text = proxy.Format(m_iids_to_names);
-                }
+            if (list.SelectedItems.Count > 0)
+            {
+                ListViewItem item = list.SelectedItems[0];
+                text = GetTextFromTag(item.Tag);
             }
 
             textEditor.Text = text;
@@ -248,31 +315,7 @@ namespace OleViewDotNet
         {
             CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsHexString);
         }
-
-        private void listViewStructures_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string text = String.Empty;
-
-            if (listViewStructures.SelectedItems.Count > 0)
-            {
-                ListViewItem item = listViewStructures.SelectedItems[0];
-                Type type = item.Tag as Type;
-                NdrComplexTypeReference str = item.Tag as NdrComplexTypeReference;
-
-                if (type != null)
-                {
-                    text = TypeToText(type);
-                }
-                else if (str != null)
-                {
-                    text = str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names));
-                }
-            }
-
-            textEditor.Text = text;
-            textEditor.Refresh();
-        }
-
+        
         public void SelectInterface(Guid iid)
         {
             foreach (ListViewItemWithIid item in listViewTypes.Items)

@@ -32,6 +32,7 @@
             System.Windows.Forms.ColumnHeader columnHeaderName;
             System.Windows.Forms.ColumnHeader columnHeaderGuid;
             System.Windows.Forms.ColumnHeader columnHeader1;
+            System.Windows.Forms.ColumnHeader columnHeader2;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageInterfaces = new System.Windows.Forms.TabPage();
@@ -43,10 +44,13 @@
             this.copyGIUDHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPageStructures = new System.Windows.Forms.TabPage();
             this.listViewStructures = new System.Windows.Forms.ListView();
+            this.tabPageEnums = new System.Windows.Forms.TabPage();
+            this.listViewEnums = new System.Windows.Forms.ListView();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -55,6 +59,7 @@
             this.tabPageInterfaces.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             this.tabPageStructures.SuspendLayout();
+            this.tabPageEnums.SuspendLayout();
             this.SuspendLayout();
             // 
             // columnHeaderName
@@ -70,6 +75,11 @@
             // 
             columnHeader1.Text = "Name";
             columnHeader1.Width = 278;
+            // 
+            // columnHeader2
+            // 
+            columnHeader2.Text = "Name";
+            columnHeader2.Width = 278;
             // 
             // splitContainer1
             // 
@@ -92,6 +102,7 @@
             // 
             this.tabControl.Controls.Add(this.tabPageInterfaces);
             this.tabControl.Controls.Add(this.tabPageStructures);
+            this.tabControl.Controls.Add(this.tabPageEnums);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
@@ -126,7 +137,7 @@
             this.listViewTypes.TabIndex = 0;
             this.listViewTypes.UseCompatibleStateImageBehavior = false;
             this.listViewTypes.View = System.Windows.Forms.View.Details;
-            this.listViewTypes.SelectedIndexChanged += new System.EventHandler(this.listViewTypes_SelectedIndexChanged);
+            this.listViewTypes.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // contextMenuStrip
             // 
@@ -192,7 +203,35 @@
             this.listViewStructures.TabIndex = 1;
             this.listViewStructures.UseCompatibleStateImageBehavior = false;
             this.listViewStructures.View = System.Windows.Forms.View.Details;
-            this.listViewStructures.SelectedIndexChanged += new System.EventHandler(this.listViewStructures_SelectedIndexChanged);
+            this.listViewStructures.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
+            // 
+            // tabPageEnums
+            // 
+            this.tabPageEnums.Controls.Add(this.listViewEnums);
+            this.tabPageEnums.Location = new System.Drawing.Point(4, 22);
+            this.tabPageEnums.Name = "tabPageEnums";
+            this.tabPageEnums.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageEnums.Size = new System.Drawing.Size(286, 392);
+            this.tabPageEnums.TabIndex = 2;
+            this.tabPageEnums.Text = "Enums";
+            this.tabPageEnums.UseVisualStyleBackColor = true;
+            // 
+            // listViewEnums
+            // 
+            this.listViewEnums.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnHeader2});
+            this.listViewEnums.ContextMenuStrip = this.contextMenuStrip;
+            this.listViewEnums.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewEnums.FullRowSelect = true;
+            this.listViewEnums.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewEnums.HideSelection = false;
+            this.listViewEnums.Location = new System.Drawing.Point(3, 3);
+            this.listViewEnums.Name = "listViewEnums";
+            this.listViewEnums.Size = new System.Drawing.Size(280, 386);
+            this.listViewEnums.TabIndex = 1;
+            this.listViewEnums.UseCompatibleStateImageBehavior = false;
+            this.listViewEnums.View = System.Windows.Forms.View.Details;
+            this.listViewEnums.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // textEditor
             // 
@@ -218,6 +257,7 @@
             this.tabPageInterfaces.ResumeLayout(false);
             this.contextMenuStrip.ResumeLayout(false);
             this.tabPageStructures.ResumeLayout(false);
+            this.tabPageEnums.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -236,5 +276,7 @@
         private System.Windows.Forms.TabPage tabPageInterfaces;
         private System.Windows.Forms.TabPage tabPageStructures;
         private System.Windows.Forms.ListView listViewStructures;
+        private System.Windows.Forms.TabPage tabPageEnums;
+        private System.Windows.Forms.ListView listViewEnums;
     }
 }
