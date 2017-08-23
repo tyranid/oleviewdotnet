@@ -46,6 +46,23 @@ namespace OleViewDotNet
             }
         }
 
+        static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
+        {
+            HashSet<string> matched_names = new HashSet<string>();
+            Dictionary<MethodInfo, string> ret = new Dictionary<MethodInfo, string>();
+            foreach (MethodInfo mi in mis.Reverse())
+            {
+                int count = 2;
+                string name = mi.Name;
+                while (!matched_names.Add(name))
+                {
+                    name = String.Format("{0}_{1}", mi.Name, count++);
+                }
+                ret.Add(mi, name);
+            }
+            return ret;
+        }
+
         static string TypeToText(Type t)
         {
             StringBuilder builder = new StringBuilder();
@@ -60,6 +77,12 @@ namespace OleViewDotNet
             }
             else if (t.IsClass)
             {
+                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
+                if (class_attr != null)
+                {
+                    builder.AppendFormat("[ClassInterface(ClassInterfaceType.{0})]", class_attr.Value).AppendLine();
+                }
                 builder.AppendFormat("class {0}", t.Name).AppendLine();
             }
             else
@@ -70,18 +93,30 @@ namespace OleViewDotNet
 
             if (t.IsInterface || t.IsClass)
             {
-                MethodInfo[] methods = t.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
+                MethodInfo[] methods = t.GetMethods().Where(m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
                 if (methods.Length > 0)
                 {
                     builder.AppendLine("   /* Methods */");
+
+                    Dictionary<MethodInfo, string> name_mapping = new Dictionary<MethodInfo, string>();
+                    if (t.IsClass)
+                    {
+                        name_mapping = MapMethodNamesToCOM(methods);
+                    }
+
                     foreach (MethodInfo mi in methods)
                     {
+                        if (name_mapping.ContainsKey(mi) && name_mapping[mi] != mi.Name)
+                        {
+                            builder.AppendFormat("    /* Exposed as {0} */", name_mapping[mi]).AppendLine();
+                        }
+
                         EmitMember(builder, mi);
                     }
                 }
 
-                PropertyInfo[] props = t.GetProperties();
-                if (props.Length > 0)
+                var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
+                if (props.Count() > 0)
                 {
                     builder.AppendLine("   /* Properties */");
                     foreach (PropertyInfo pi in props)

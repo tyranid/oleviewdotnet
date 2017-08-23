@@ -630,5 +630,29 @@ namespace OleViewDotNet
         {
             ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
         }
+
+        private void btnViewAssembly_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Assembly asm = null;
+
+                if (!string.IsNullOrWhiteSpace(textBoxDotNetCodeBase.Text))
+                {
+                    asm = Assembly.LoadFrom(textBoxDotNetCodeBase.Text);
+                }
+                else
+                {
+                    asm = Assembly.Load(textBoxDotNetAssemblyName.Text);
+                }
+
+                Program.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
+                        asm, m_clsid != null ? m_clsid.Clsid : Guid.Empty, true));
+            }
+            catch(Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
+        }
     }
 }
