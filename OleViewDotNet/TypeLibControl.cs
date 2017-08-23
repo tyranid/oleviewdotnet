@@ -124,31 +124,50 @@ namespace OleViewDotNet
             return builder.ToString();
         }
 
-        private class ListViewItemWithIid : ListViewItem
+        private class ListViewItemWithGuid : ListViewItem
         {
-            public Guid Iid { get; private set; }
-            public ListViewItemWithIid(string name, Guid iid) : base(name)
+            public Guid Guid { get; private set; }
+            public ListViewItemWithGuid(string name, Guid iid) : base(name)
             {
-                Iid = iid;
+                Guid = iid;
             }
         }
 
-        private static IEnumerable<ListViewItemWithIid> FormatAssembly(Assembly typelib)
+        private static IEnumerable<ListViewItemWithGuid> FormatTypes(IEnumerable<Type> types, bool com_visible)
         {
-            foreach (Type t in typelib.GetTypes().Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)) && t.IsInterface).OrderBy(t => t.Name))
+            if (com_visible)
             {
-                ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.GUID);
+                types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+            else
+            {
+                types = types.Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)));
+            }
+
+            foreach (Type t in types.OrderBy(t => t.Name))
+            {
+                ListViewItemWithGuid item = new ListViewItemWithGuid(t.Name, t.GUID);
                 item.SubItems.Add(t.GUID.FormatGuid());
                 item.Tag = t;
                 yield return item;
             }
         }
 
-        private static IEnumerable<ListViewItemWithIid> FormatProxyInstance(COMProxyInstance proxy)
+        private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(Assembly typelib, bool com_visible)
+        {
+            return FormatTypes(typelib.GetTypes().Where(t => t.IsInterface), com_visible);
+        }
+
+        private static IEnumerable<ListViewItemWithGuid> FormatClasses(Assembly typelib, bool com_visible)
+        {
+            return FormatTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
+        }
+        
+        private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy)
         {
             foreach (COMProxyInstanceEntry t in proxy.Entries.OrderBy(t => t.Name))
             {
-                ListViewItemWithIid item = new ListViewItemWithIid(t.Name, t.Iid);
+                ListViewItemWithGuid item = new ListViewItemWithGuid(t.Name, t.Iid);
                 item.SubItems.Add(t.Iid.FormatGuid());
                 item.Tag = t;
                 yield return item;
@@ -167,9 +186,15 @@ namespace OleViewDotNet
             }
         }
 
-        private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib)
+        private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib, bool com_visible)
         {
-            foreach (Type t in typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum).OrderBy(t => t.Name))
+            var types = typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum);
+            if (com_visible)
+            {
+                types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+
+            foreach (Type t in types.OrderBy(t => t.Name))
             {
                 ListViewItem item = new ListViewItem(t.Name);
                 item.Tag = t;
@@ -177,8 +202,14 @@ namespace OleViewDotNet
             }
         }
 
-        private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib)
+        private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
         {
+            var types = typelib.GetTypes().Where(t => t.IsEnum);
+            if (com_visible)
+            {
+                types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+
             foreach (Type t in typelib.GetTypes().Where(t => t.IsEnum).OrderBy(t => t.Name))
             {
                 ListViewItem item = new ListViewItem(t.Name);
@@ -187,27 +218,46 @@ namespace OleViewDotNet
             }
         }
 
+        private void AddGuidItems(ListView list, 
+            IEnumerable<ListViewItemWithGuid> items, 
+            TabPage tab_page, Guid guid_to_view)
+        {
+            if (items.Count() > 0)
+            {
+                list.Items.AddRange(items.ToArray());
+                list.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                foreach (ListViewItemWithGuid item in list.Items)
+                {
+                    if (item.Guid == guid_to_view)
+                    {
+                        item.Selected = true;
+                        item.EnsureVisible();
+                        tabControl.SelectedTab = tab_page;
+                    }
+                }
+            }
+            else
+            {
+                tabControl.TabPages.Remove(tab_page);
+            }
+        }
+
         private TypeLibControl(IDictionary<Guid, string> iids_to_names, 
             IDictionary<NdrComplexTypeReference, string> types_to_names,
             string name, 
-            Guid iid_to_view, 
-            IEnumerable<ListViewItemWithIid> items, 
+            Guid guid_to_view, 
+            IEnumerable<ListViewItemWithGuid> interfaces,
+            IEnumerable<ListViewItemWithGuid> classes,
             IEnumerable<ListViewItem> structs,
             IEnumerable<ListViewItem> enums)
         {
             m_iids_to_names = iids_to_names;
             m_types_to_names = types_to_names;
             InitializeComponent();
-            listViewTypes.Items.AddRange(items.ToArray());
-            listViewTypes.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            foreach (ListViewItemWithIid item in listViewTypes.Items)
-            {
-                if (item.Iid == iid_to_view)
-                {
-                    item.Selected = true;
-                    item.EnsureVisible();
-                }
-            }
+
+            AddGuidItems(listViewInterfaces, interfaces, tabPageInterfaces, guid_to_view);
+            AddGuidItems(listViewClasses, classes, tabPageClasses, guid_to_view);
+
             if (structs.Count() > 0)
             {
                 listViewStructures.Items.AddRange(structs.ToArray());
@@ -233,15 +283,18 @@ namespace OleViewDotNet
             Text = name;
         }
 
-        public TypeLibControl(string name, Assembly typelib, Guid iid_to_view) 
-            : this(null, null, name, iid_to_view, FormatAssembly(typelib), 
-                  FormatAssemblyStructs(typelib), FormatAssemblyEnums(typelib))
+        public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly) 
+            : this(null, null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly),
+                  dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : new ListViewItemWithGuid[0], 
+                  FormatAssemblyStructs(typelib, dotnet_assembly), 
+                  FormatAssemblyEnums(typelib, dotnet_assembly))
         {
         }
 
-        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid iid_to_view) 
-            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, iid_to_view, FormatProxyInstance(proxy), 
-                  FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
+        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view) 
+            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, guid_to_view, 
+                  FormatProxyInstance(proxy), 
+                  new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
         }
 
@@ -285,42 +338,47 @@ namespace OleViewDotNet
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listViewTypes.SelectedItems.Count > 0)
+            ListView list = sender as ListView;
+            if (list != null && list.SelectedItems.Count > 0)
             {
-                ListViewItem item = listViewTypes.SelectedItems[0];
+                ListViewItem item = listViewInterfaces.SelectedItems[0];
                 COMRegistryViewer.CopyTextToClipboard(item.Text);
             }
         }
 
-        private void CopyGuid(COMRegistryViewer.CopyGuidType copy_type)
+        private void CopyGuid(object sender, COMRegistryViewer.CopyGuidType copy_type)
         {
-            if (listViewTypes.SelectedItems.Count > 0)
+            ListView list = sender as ListView;
+            if (list != null && list.SelectedItems.Count > 0)
             {
-                ListViewItemWithIid item = (ListViewItemWithIid) listViewTypes.SelectedItems[0];
-                COMRegistryViewer.CopyGuidToClipboard(item.Iid, copy_type);
+                ListViewItemWithGuid item = list.SelectedItems[0] as ListViewItemWithGuid;
+                if (item != null)
+                {
+                    COMRegistryViewer.CopyGuidToClipboard(item.Guid, copy_type);
+                }
             }
         }
 
         private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsString);
+            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsString);
         }
 
         private void copyGUIDCStructureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsStructure);
+            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsStructure);
         }
 
         private void copyGIUDHexStringToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(COMRegistryViewer.CopyGuidType.CopyAsHexString);
+            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsHexString);
         }
         
         public void SelectInterface(Guid iid)
         {
-            foreach (ListViewItemWithIid item in listViewTypes.Items)
+            foreach (ListViewItemWithGuid item in listViewInterfaces.Items)
             {
-                if (item.Iid == iid)
+                if (item.Guid == iid)
                 {
                     item.Selected = true;
                     item.EnsureVisible();

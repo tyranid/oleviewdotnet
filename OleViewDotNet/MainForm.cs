@@ -670,7 +670,7 @@ namespace OleViewDotNet
                     Assembly typelib = COMUtilities.LoadTypeLib(this, dlg.FileName);
                     if (typelib != null)
                     {
-                        HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty));
+                        HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty, false));
                     }
                 }
             }

@@ -41,9 +41,9 @@ namespace OleViewDotNet
                 ListViewItem item = view.Items.Add(entry.Item2.Name);
                 item.SubItems.Add(entry.Item1.Iid.FormatGuid());
                 item.SubItems.Add(entry.Item2.NumMethods.ToString());
-                if (!String.IsNullOrWhiteSpace(entry.Item1.Module))
+                if (!string.IsNullOrWhiteSpace(entry.Item1.Module))
                 {
-                    item.SubItems.Add(String.Format("{0}+0x{1:X}", 
+                    item.SubItems.Add(string.Format("{0}+0x{1:X}", 
                         entry.Item1.Module, entry.Item1.VTableOffset));
                 }
                 item.Tag = entry;
@@ -420,7 +420,8 @@ namespace OleViewDotNet
                 Assembly typelib = COMUtilities.LoadTypeLib(this, m_typelib.NativePath);
                 if (typelib != null)
                 {
-                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, typelib, m_interface != null ? m_interface.Iid : Guid.Empty));
+                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, 
+                        typelib, m_interface != null ? m_interface.Iid : Guid.Empty, false));
                 }
             }
         }

@@ -33,10 +33,12 @@
             System.Windows.Forms.ColumnHeader columnHeaderGuid;
             System.Windows.Forms.ColumnHeader columnHeader1;
             System.Windows.Forms.ColumnHeader columnHeader2;
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            System.Windows.Forms.ColumnHeader columnHeader3;
+            System.Windows.Forms.ColumnHeader columnHeader4;
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageInterfaces = new System.Windows.Forms.TabPage();
-            this.listViewTypes = new System.Windows.Forms.ListView();
+            this.listViewInterfaces = new System.Windows.Forms.ListView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGUIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,19 +49,24 @@
             this.tabPageEnums = new System.Windows.Forms.TabPage();
             this.listViewEnums = new System.Windows.Forms.ListView();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.tabPageClasses = new System.Windows.Forms.TabPage();
+            this.listViewClasses = new System.Windows.Forms.ListView();
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
+            this.splitContainer.Panel1.SuspendLayout();
+            this.splitContainer.Panel2.SuspendLayout();
+            this.splitContainer.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPageInterfaces.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             this.tabPageStructures.SuspendLayout();
             this.tabPageEnums.SuspendLayout();
+            this.tabPageClasses.SuspendLayout();
             this.SuspendLayout();
             // 
             // columnHeaderName
@@ -81,26 +88,27 @@
             columnHeader2.Text = "Name";
             columnHeader2.Width = 278;
             // 
-            // splitContainer1
+            // splitContainer
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer.Name = "splitContainer";
             // 
-            // splitContainer1.Panel1
+            // splitContainer.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.tabControl);
+            this.splitContainer.Panel1.Controls.Add(this.tabControl);
             // 
-            // splitContainer1.Panel2
+            // splitContainer.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.textEditor);
-            this.splitContainer1.Size = new System.Drawing.Size(699, 418);
-            this.splitContainer1.SplitterDistance = 294;
-            this.splitContainer1.TabIndex = 0;
+            this.splitContainer.Panel2.Controls.Add(this.textEditor);
+            this.splitContainer.Size = new System.Drawing.Size(699, 418);
+            this.splitContainer.SplitterDistance = 294;
+            this.splitContainer.TabIndex = 0;
             // 
             // tabControl
             // 
             this.tabControl.Controls.Add(this.tabPageInterfaces);
+            this.tabControl.Controls.Add(this.tabPageClasses);
             this.tabControl.Controls.Add(this.tabPageStructures);
             this.tabControl.Controls.Add(this.tabPageEnums);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -112,7 +120,7 @@
             // 
             // tabPageInterfaces
             // 
-            this.tabPageInterfaces.Controls.Add(this.listViewTypes);
+            this.tabPageInterfaces.Controls.Add(this.listViewInterfaces);
             this.tabPageInterfaces.Location = new System.Drawing.Point(4, 22);
             this.tabPageInterfaces.Name = "tabPageInterfaces";
             this.tabPageInterfaces.Padding = new System.Windows.Forms.Padding(3);
@@ -121,23 +129,23 @@
             this.tabPageInterfaces.Text = "Interfaces";
             this.tabPageInterfaces.UseVisualStyleBackColor = true;
             // 
-            // listViewTypes
+            // listViewInterfaces
             // 
-            this.listViewTypes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.listViewInterfaces.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             columnHeaderName,
             columnHeaderGuid});
-            this.listViewTypes.ContextMenuStrip = this.contextMenuStrip;
-            this.listViewTypes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listViewTypes.FullRowSelect = true;
-            this.listViewTypes.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewTypes.HideSelection = false;
-            this.listViewTypes.Location = new System.Drawing.Point(3, 3);
-            this.listViewTypes.Name = "listViewTypes";
-            this.listViewTypes.Size = new System.Drawing.Size(280, 386);
-            this.listViewTypes.TabIndex = 0;
-            this.listViewTypes.UseCompatibleStateImageBehavior = false;
-            this.listViewTypes.View = System.Windows.Forms.View.Details;
-            this.listViewTypes.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
+            this.listViewInterfaces.ContextMenuStrip = this.contextMenuStrip;
+            this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewInterfaces.FullRowSelect = true;
+            this.listViewInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewInterfaces.HideSelection = false;
+            this.listViewInterfaces.Location = new System.Drawing.Point(3, 3);
+            this.listViewInterfaces.Name = "listViewInterfaces";
+            this.listViewInterfaces.Size = new System.Drawing.Size(280, 386);
+            this.listViewInterfaces.TabIndex = 0;
+            this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
+            this.listViewInterfaces.View = System.Windows.Forms.View.Details;
+            this.listViewInterfaces.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // contextMenuStrip
             // 
@@ -242,30 +250,69 @@
             this.textEditor.Size = new System.Drawing.Size(401, 418);
             this.textEditor.TabIndex = 0;
             // 
+            // tabPageClasses
+            // 
+            this.tabPageClasses.Controls.Add(this.listViewClasses);
+            this.tabPageClasses.Location = new System.Drawing.Point(4, 22);
+            this.tabPageClasses.Name = "tabPageClasses";
+            this.tabPageClasses.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageClasses.Size = new System.Drawing.Size(286, 392);
+            this.tabPageClasses.TabIndex = 3;
+            this.tabPageClasses.Text = "Classes";
+            this.tabPageClasses.UseVisualStyleBackColor = true;
+            // 
+            // columnHeader3
+            // 
+            columnHeader3.Text = "Name";
+            columnHeader3.Width = 278;
+            // 
+            // columnHeader4
+            // 
+            columnHeader4.Text = "GUID";
+            // 
+            // listViewClasses
+            // 
+            this.listViewClasses.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            columnHeader3,
+            columnHeader4});
+            this.listViewClasses.ContextMenuStrip = this.contextMenuStrip;
+            this.listViewClasses.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewClasses.FullRowSelect = true;
+            this.listViewClasses.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewClasses.HideSelection = false;
+            this.listViewClasses.Location = new System.Drawing.Point(3, 3);
+            this.listViewClasses.Name = "listViewClasses";
+            this.listViewClasses.Size = new System.Drawing.Size(280, 386);
+            this.listViewClasses.TabIndex = 1;
+            this.listViewClasses.UseCompatibleStateImageBehavior = false;
+            this.listViewClasses.View = System.Windows.Forms.View.Details;
+            this.listViewClasses.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
+            // 
             // TypeLibControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.splitContainer);
             this.Name = "TypeLibControl";
             this.Size = new System.Drawing.Size(699, 418);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer.Panel1.ResumeLayout(false);
+            this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
+            this.splitContainer.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPageInterfaces.ResumeLayout(false);
             this.contextMenuStrip.ResumeLayout(false);
             this.tabPageStructures.ResumeLayout(false);
             this.tabPageEnums.ResumeLayout(false);
+            this.tabPageClasses.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListView listViewTypes;
+        private System.Windows.Forms.SplitContainer splitContainer;
+        private System.Windows.Forms.ListView listViewInterfaces;
         private ICSharpCode.TextEditor.TextEditorControl textEditor;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
@@ -278,5 +325,7 @@
         private System.Windows.Forms.ListView listViewStructures;
         private System.Windows.Forms.TabPage tabPageEnums;
         private System.Windows.Forms.ListView listViewEnums;
+        private System.Windows.Forms.TabPage tabPageClasses;
+        private System.Windows.Forms.ListView listViewClasses;
     }
 }
