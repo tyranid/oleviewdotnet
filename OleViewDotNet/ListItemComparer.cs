@@ -66,6 +66,12 @@ namespace OleViewDotNet
             IComparable left = GetComparableItem(xi.SubItems[Column].Text);
             IComparable right = GetComparableItem(yi.SubItems[Column].Text);
 
+            if (left.GetType() != right.GetType())
+            {
+                left = left.ToString();
+                right = right.ToString();
+            }
+
             if (Ascending)
             {
                 return left.CompareTo(right);
