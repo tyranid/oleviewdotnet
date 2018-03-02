@@ -71,6 +71,7 @@ namespace OleViewDotNet
             AppIDsWithAC,
             ProxyCLSIDs,
             Processes,
+            RuntimeClasses,
         }
 
         private const string FolderKey = "folder.ico";
@@ -132,6 +133,8 @@ namespace OleViewDotNet
                     return "Proxy CLSIDs";
                 case DisplayMode.Processes:
                     return "COM Processes";
+                case DisplayMode.RuntimeClasses:
+                    return "Runtime Classes";
                 default:
                     throw new ArgumentException("Invalid mode value");
             }
@@ -197,6 +200,9 @@ namespace OleViewDotNet
                     filter_types.Add(FilterType.Process);
                     filter_types.Add(FilterType.Ipid);
                     filter_types.Add(FilterType.AppID);
+                    break;
+                case DisplayMode.RuntimeClasses:
+                    filter_types.Add(FilterType.RuntimeClass);
                     break;
                 default:
                     throw new ArgumentException("Invalid mode value");
@@ -291,6 +297,8 @@ namespace OleViewDotNet
                         return LoadCLSIDByServer(registry, ServerType.Proxies);
                     case DisplayMode.Processes:
                         return LoadProcesses(registry, processes);
+                    case DisplayMode.RuntimeClasses:
+                        return LoadRuntimeClasses(registry);
                     default:
                         break;
                 }
@@ -447,7 +455,17 @@ namespace OleViewDotNet
             }
             return clsidNodes;
         }
-        
+
+        private static IEnumerable<TreeNode> LoadRuntimeClasses(COMRegistry registry)
+        {
+            return registry.RuntimeClasses.Select(p => {
+                TreeNode n = CreateNode(p.Key, ClassKey);
+                n.Tag = p.Value;
+                return n;
+                }
+            );
+        }
+
         private static IEnumerable<TreeNode> LoadProgIDs(COMRegistry registry)
         {
             int i = 0;
@@ -1437,6 +1455,14 @@ namespace OleViewDotNet
 
                     contextMenuStrip.Items.Add(unmarshalToolStripMenuItem);
                 }
+                else if (node.Tag is COMRuntimeClassEntry)
+                {
+                    COMRuntimeClassEntry runtime_class = (COMRuntimeClassEntry)node.Tag;
+                    if (runtime_class.HasPermission)
+                    {
+                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+                    }
+                }
 
                 if (m_filter_types.Contains(FilterType.CLSID))
                 {
@@ -1827,7 +1853,7 @@ namespace OleViewDotNet
 
         private void treeComRegistry_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 TreeNode node = treeComRegistry.GetNodeAt(e.X, e.Y);
 
@@ -1899,6 +1925,11 @@ namespace OleViewDotNet
                 {
                     COMProcessEntry proc = (COMProcessEntry)node.Tag;
                     COMSecurity.ViewSecurity(this, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
+                }
+                else if (node.Tag is COMRuntimeClassEntry)
+                {
+                    COMRuntimeClassEntry runtime_entry = (COMRuntimeClassEntry)node.Tag;
+                    COMSecurity.ViewSecurity(this, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, true);
                 }
                 else
                 {

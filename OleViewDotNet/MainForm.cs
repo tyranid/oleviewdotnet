@@ -806,5 +806,10 @@ namespace OleViewDotNet
         {
             CreatePropertyGrid(false);
         }
+
+        private void menuRegistryRuntimeClasses_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.RuntimeClasses);
+        }
     }
 }

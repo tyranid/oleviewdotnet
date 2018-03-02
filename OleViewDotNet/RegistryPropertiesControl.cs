@@ -51,6 +51,7 @@ namespace OleViewDotNet
             AddListItem("MIME Types Count", registry.MimeTypes.Count());
             AddListItem("Pre-Approved Count", registry.PreApproved.Count());
             AddListItem("Type Libs Count", registry.Typelibs.Count);
+            AddListItem("Runtime Class Count", registry.RuntimeClasses.Count);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             Text = "Registry Properties";

@@ -10,3 +10,4 @@ packages/
 *.opendb
 *.db
 packages
+/.vs/OleViewDotNet/v15/Server/sqlite3
