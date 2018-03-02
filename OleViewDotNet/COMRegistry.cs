@@ -56,6 +56,7 @@ namespace OleViewDotNet
         private List<COMIELowRightsElevationPolicy> m_lowrights;
         private SortedDictionary<Guid, COMAppIDEntry> m_appid;
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
+        private SortedDictionary<string, COMRuntimeClassEntry> m_runtime_classes;
         private List<COMMimeType> m_mimetypes;
         private List<Guid> m_preapproved;
 
@@ -177,6 +178,11 @@ namespace OleViewDotNet
             get { return m_mimetypes; }
         }
 
+        public IDictionary<string, COMRuntimeClassEntry> RuntimeClasses
+        {
+            get { return m_runtime_classes; }
+        }
+
         public string CreatedDate
         {
             get; private set;
@@ -289,7 +295,7 @@ namespace OleViewDotNet
             XmlWriterSettings settings = new XmlWriterSettings();
             using (XmlTextWriter writer = new XmlTextWriter(path, Encoding.UTF8))
             {
-                const int total_count = 9;
+                const int total_count = 10;
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -323,6 +329,8 @@ namespace OleViewDotNet
                 writer.WriteStartElement("preapp");
                 writer.WriteGuids("clsids", m_preapproved);
                 writer.WriteEndElement();
+                Report(progress, "Runtime Classes", 10, total_count);
+                writer.WriteSerializableObjects("runtime", m_runtime_classes.Values);
                 writer.WriteEndElement();
             }
             FilePath = path;
@@ -374,7 +382,7 @@ namespace OleViewDotNet
 
         public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<Tuple<string, int>> progress)
         {
-            const int total_count = 9;
+            const int total_count = 10;
 
             COMRegistry ret = new COMRegistry(COMRegistryMode.Diff);
             Report(progress, "CLSIDs", 1, total_count);
@@ -395,6 +403,8 @@ namespace OleViewDotNet
             ret.m_typelibs = DiffDicts(left.m_typelibs, right.m_typelibs, mode, p => p.TypelibId);
             Report(progress, "PreApproved", 9, total_count);
             ret.m_preapproved = DiffLists(left.m_preapproved, right.m_preapproved, mode).ToList();
+            Report(progress, "Runtime Classes", 10, total_count);
+            ret.m_runtime_classes = DiffDicts(left.m_runtime_classes, right.m_runtime_classes, mode, p => p.Name);
             return ret;
         }
 
@@ -576,7 +586,7 @@ namespace OleViewDotNet
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
             {
-                const int total_count = 8;
+                const int total_count = 9;
                 LoadDefaultSecurity();
                 Report(progress, "CLSIDs", 1, total_count);
                 LoadCLSIDs(classes_key);
@@ -594,6 +604,18 @@ namespace OleViewDotNet
                 LoadLowRights(mode, user);
                 Report(progress, "TypeLibs", 8, total_count);
                 LoadTypelibs(classes_key);
+                Report(progress, "Runtime Classes", 9, total_count);
+                m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>();
+                if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
+                {
+                    using (RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime"))
+                    {
+                        if (runtime_key != null)
+                        {
+                            LoadRuntimeClasses(runtime_key);
+                        }
+                    }
+                }
             }
 
             try
@@ -655,6 +677,7 @@ namespace OleViewDotNet
                     m_preapproved = reader.ReadGuids("clsids").ToList();
                     reader.Read();
                 }
+                m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry()).ToSortedDictionary(p => p.Name);
                 reader.ReadEndElement();
             }
             FilePath = path;
@@ -995,6 +1018,28 @@ namespace OleViewDotNet
                             }
                         }
                     }             
+                }
+            }
+        }
+
+        private void LoadRuntimeClasses(RegistryKey runtime_key)
+        {
+            using (RegistryKey classes_key = runtime_key.OpenSubKey("ActivatableClassId"))
+            {
+                List<COMRuntimeClassEntry> entries = new List<COMRuntimeClassEntry>();
+                if (classes_key != null)
+                {
+                    foreach (string name in classes_key.GetSubKeyNames())
+                    {
+                        using (RegistryKey subkey = classes_key.OpenSubKey(name))
+                        {
+                            if (subkey != null)
+                            {
+                                entries.Add(new COMRuntimeClassEntry(name, subkey));
+                            }
+                        }
+                    }
+                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name);
                 }
             }
         }

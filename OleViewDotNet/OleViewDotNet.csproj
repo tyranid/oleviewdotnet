@@ -133,6 +133,7 @@
     <Compile Include="BuildMonikerForm.Designer.cs">
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="COMRuntimeClassEntry.cs" />
     <Compile Include="COMInterfaces.cs" />
     <Compile Include="COMObjRef.cs" />
     <Compile Include="COMProcessParser.cs" />

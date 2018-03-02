@@ -102,6 +102,7 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuRegistryRuntimeClasses = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -261,6 +262,7 @@
             this.menuViewCLSIDsWithSurrogate,
             this.menuViewProgIDs,
             this.menuRegistryMimeTypes,
+            this.menuRegistryRuntimeClasses,
             this.menuItem4,
             this.menuViewPreApproved,
             this.menuViewImplementedCategories,
@@ -324,99 +326,99 @@
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 7;
+            this.menuItem4.Index = 8;
             this.menuItem4.Text = "-";
             // 
             // menuViewPreApproved
             // 
-            this.menuViewPreApproved.Index = 8;
+            this.menuViewPreApproved.Index = 9;
             this.menuViewPreApproved.Text = "&Explorer PreApproved";
             this.menuViewPreApproved.Click += new System.EventHandler(this.menuViewPreApproved_Click);
             // 
             // menuViewImplementedCategories
             // 
-            this.menuViewImplementedCategories.Index = 9;
+            this.menuViewImplementedCategories.Index = 10;
             this.menuViewImplementedCategories.Text = "&Implemented Categories";
             this.menuViewImplementedCategories.Click += new System.EventHandler(this.menuViewImplementedCategories_Click);
             // 
             // menuViewIELowRights
             // 
-            this.menuViewIELowRights.Index = 10;
+            this.menuViewIELowRights.Index = 11;
             this.menuViewIELowRights.Text = "IE Low &Rights Elevation Policy";
             this.menuViewIELowRights.Click += new System.EventHandler(this.menuViewIELowRights_Click);
             // 
             // menuItem5
             // 
-            this.menuItem5.Index = 11;
+            this.menuItem5.Index = 12;
             this.menuItem5.Text = "-";
             // 
             // menuViewAppIDs
             // 
-            this.menuViewAppIDs.Index = 12;
+            this.menuViewAppIDs.Index = 13;
             this.menuViewAppIDs.Text = "&App IDs";
             this.menuViewAppIDs.Click += new System.EventHandler(this.menuViewAppIDs_Click);
             // 
             // menuRegistryAppIDsIL
             // 
-            this.menuRegistryAppIDsIL.Index = 13;
+            this.menuRegistryAppIDsIL.Index = 14;
             this.menuRegistryAppIDsIL.Text = "App IDs &With IL";
             this.menuRegistryAppIDsIL.Click += new System.EventHandler(this.menuRegistryAppIDsIL_Click);
             // 
             // menuRegistryAppIDsWithAC
             // 
-            this.menuRegistryAppIDsWithAC.Index = 14;
+            this.menuRegistryAppIDsWithAC.Index = 15;
             this.menuRegistryAppIDsWithAC.Text = "App IDs with AppContai&ner";
             this.menuRegistryAppIDsWithAC.Click += new System.EventHandler(this.menuRegistryAppIDsWithAC_Click);
             // 
             // menuViewLocalServices
             // 
-            this.menuViewLocalServices.Index = 15;
+            this.menuViewLocalServices.Index = 16;
             this.menuViewLocalServices.Text = "L&ocal Services";
             this.menuViewLocalServices.Click += new System.EventHandler(this.menuViewLocalServices_Click);
             // 
             // menuItem1
             // 
-            this.menuItem1.Index = 16;
+            this.menuItem1.Index = 17;
             this.menuItem1.Text = "-";
             // 
             // menuViewInterfaces
             // 
-            this.menuViewInterfaces.Index = 17;
+            this.menuViewInterfaces.Index = 18;
             this.menuViewInterfaces.Text = "Inter&faces";
             this.menuViewInterfaces.Click += new System.EventHandler(this.menuViewInterfaces_Click);
             // 
             // menuViewInterfacesByName
             // 
-            this.menuViewInterfacesByName.Index = 18;
+            this.menuViewInterfacesByName.Index = 19;
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
             // menuRegistryTypeLibraries
             // 
-            this.menuRegistryTypeLibraries.Index = 19;
+            this.menuRegistryTypeLibraries.Index = 20;
             this.menuRegistryTypeLibraries.Text = "&Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
             // menuRegistryInterfaceProxies
             // 
-            this.menuRegistryInterfaceProxies.Index = 20;
+            this.menuRegistryInterfaceProxies.Index = 21;
             this.menuRegistryInterfaceProxies.Text = "Interface Pro&xies";
             this.menuRegistryInterfaceProxies.Click += new System.EventHandler(this.menuRegistryInterfaceProxies_Click);
             // 
             // menuItem6
             // 
-            this.menuItem6.Index = 21;
+            this.menuItem6.Index = 22;
             this.menuItem6.Text = "-";
             // 
             // menuRegistryProperties
             // 
-            this.menuRegistryProperties.Index = 22;
+            this.menuRegistryProperties.Index = 23;
             this.menuRegistryProperties.Text = "Registry Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
             // 
             // menuPropertiesViewer
             // 
-            this.menuPropertiesViewer.Index = 23;
+            this.menuPropertiesViewer.Index = 24;
             this.menuPropertiesViewer.Text = "Open Properties Viewer";
             this.menuPropertiesViewer.Click += new System.EventHandler(this.menuObjectPropertiesViewer_Click);
             // 
@@ -596,6 +598,12 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuRegistryRuntimeClasses
+            // 
+            this.menuRegistryRuntimeClasses.Index = 7;
+            this.menuRegistryRuntimeClasses.Text = "Runtime Classes";
+            this.menuRegistryRuntimeClasses.Click += new System.EventHandler(this.menuRegistryRuntimeClasses_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
@@ -687,6 +695,7 @@
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
         private System.Windows.Forms.MenuItem menuPropertiesViewer;
         private System.Windows.Forms.MenuItem menuViewStorage;
+        private System.Windows.Forms.MenuItem menuRegistryRuntimeClasses;
     }
 }
 
