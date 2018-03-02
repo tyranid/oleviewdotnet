@@ -200,6 +200,12 @@
     <Compile Include="StandardMarshalEditorControl.Designer.cs">
       <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="StorageViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="StorageViewer.Designer.cs">
+      <DependentUpon>StorageViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="SymbolResolver.cs" />
     <Compile Include="ViewFilterControl.cs">
       <SubType>UserControl</SubType>
@@ -419,6 +425,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="StandardMarshalEditorControl.resx">
       <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StorageViewer.resx">
+      <DependentUpon>StorageViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ViewFilterControl.resx">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>

@@ -806,5 +806,26 @@ namespace OleViewDotNet
         {
             CreatePropertyGrid(false);
         }
+
+        private void menuViewStorage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, STGM.READ | STGM.SHARE_DENY_WRITE, IntPtr.Zero, 0);
+
+                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName)));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex, true);
+            }
+        }
     }
 }

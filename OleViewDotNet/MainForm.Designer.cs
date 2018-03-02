@@ -94,6 +94,7 @@
             this.menuHexEditor = new System.Windows.Forms.MenuItem();
             this.menuHexEditorFromFile = new System.Windows.Forms.MenuItem();
             this.menuHexEditorEmpty = new System.Windows.Forms.MenuItem();
+            this.menuViewStorage = new System.Windows.Forms.MenuItem();
             this.menuSecurity = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultAccess = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultAccessRestriction = new System.Windows.Forms.MenuItem();
@@ -434,7 +435,8 @@
             this.menuObjectParseMoniker,
             this.menuObjectBindMoniker,
             this.menuItem9,
-            this.menuHexEditor});
+            this.menuHexEditor,
+            this.menuViewStorage});
             this.menuObject.Text = "&Object";
             // 
             // menuObjectROT
@@ -541,6 +543,12 @@
             this.menuHexEditorEmpty.Text = "Empty";
             this.menuHexEditorEmpty.Click += new System.EventHandler(this.menuHexEditorEmpty_Click);
             // 
+            // menuViewStorage
+            // 
+            this.menuViewStorage.Index = 12;
+            this.menuViewStorage.Text = "View Storage";
+            this.menuViewStorage.Click += new System.EventHandler(this.menuViewStorage_Click);
+            // 
             // menuSecurity
             // 
             this.menuSecurity.Index = 3;
@@ -590,11 +598,12 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(823, 448);
+            this.ClientSize = new System.Drawing.Size(1920, 999);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
+            this.Margin = new System.Windows.Forms.Padding(7);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -677,6 +686,7 @@
         private System.Windows.Forms.MenuItem menuObjectProcessByUser;
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
         private System.Windows.Forms.MenuItem menuPropertiesViewer;
+        private System.Windows.Forms.MenuItem menuViewStorage;
     }
 }
 

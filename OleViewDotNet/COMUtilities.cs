@@ -308,6 +308,32 @@ namespace OleViewDotNet
         NoCanonicalize = 2,
     }
 
+    public enum STGFMT
+    {
+        Storage = 0,
+        File = 3,
+        Any = 4,
+        Docfile = 5
+    }
+
+    public enum STGTY
+    {
+        Storage = 1,
+        Stream = 2,
+        Lockbytes = 3,
+        Property = 4
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public class STGOPTIONS
+    {
+        public short usVersion;
+        public short reserved;
+        public int ulSectorSize;
+        [MarshalAs(UnmanagedType.LPWStr)]
+        public string pwcsTemplateFile;
+    }
+
     public static class COMUtilities
     {
         private enum RegKind
@@ -320,14 +346,36 @@ namespace OleViewDotNet
         [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
         private static extern void LoadTypeLibEx(String strTypeLibName, RegKind regKind,
             [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
-        [DllImport("ole32.dll", EntryPoint = "CoCreateInstance", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("ole32.dll")]
         public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
-        [DllImport("ole32.dll", EntryPoint = "CoCreateInstanceEx", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("ole32.dll")]
         public static extern int CoCreateInstanceEx(ref Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
-        [DllImport("ole32.dll", EntryPoint = "CoGetClassObject", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("ole32.dll")]
         public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, ref Guid riid, out IntPtr ppv);
-        //[DllImport("ole32.dll", EntryPoint = "CoUnmarshalInterface", CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-        //public static extern void CoUnmarshalInterface(IStream stm, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+        [DllImport("ole32.dll", PreserveSig = false)]
+        [return: MarshalAs(UnmanagedType.IUnknown)]
+        public static extern object CoUnmarshalInterface(IStream stm, ref Guid riid);
+
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
+        public static extern int StgOpenStorageEx(
+              string pwcsName,
+              STGM grfMode,
+              STGFMT stgfmt,
+              int grfAttrs,
+              [In, Out] STGOPTIONS pStgOptions,
+              IntPtr reserved2,
+              ref Guid riid,
+              [MarshalAs(UnmanagedType.IUnknown)] out object ppObjectOpen
+            );
+
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern IStorage StgOpenStorage(
+              string pwcsName,
+              IStorage pstgPriority,
+              STGM grfMode,
+              IntPtr snbExclude,
+              int reserved
+            );
 
         [DllImport("ole32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
@@ -377,13 +425,6 @@ namespace OleViewDotNet
         public static extern void CoReleaseMarshalData(
               IStream pStm
             );
-
-        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-        [return: MarshalAs(UnmanagedType.Interface)]
-        public static extern object CoUnmarshalInterface(
-            IStream pStm,
-            ref Guid riid
-        );
 
         [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         public static extern int CoRegisterActivationFilter(IActivationFilter pActivationFilter);

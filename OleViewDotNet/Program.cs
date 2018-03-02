@@ -248,7 +248,12 @@ namespace OleViewDotNet
 
         public static void ShowError(IWin32Window window, Exception ex)
         {
-            MessageBox.Show(window, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ShowError(window, ex, false);
+        }
+
+        public static void ShowError(IWin32Window window, Exception ex, bool stack_trace)
+        {
+            MessageBox.Show(window, stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
