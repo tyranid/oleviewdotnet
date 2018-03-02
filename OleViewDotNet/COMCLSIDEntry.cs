@@ -423,6 +423,29 @@ namespace OleViewDotNet
         private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
         private static Guid DocumentCategory = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 
+        private static HashSet<Guid> LoadAppActivatableClsids()
+        {
+            HashSet<Guid> app_activatable = new HashSet<Guid>();
+            using (RegistryKey activatable_key = Registry.LocalMachine.OpenSubKey(
+                @"SOFTWARE\Microsoft\WindowsRuntime\AllowedCOMCLSIDs"))
+            {
+                if (activatable_key != null)
+                {
+                    foreach (string clsid in activatable_key.GetSubKeyNames())
+                    {
+                        Guid guid;
+                        if (Guid.TryParse(clsid, out guid))
+                        {
+                            app_activatable.Add(guid);
+                        }
+                    }
+                }
+            }
+            return app_activatable;
+        }
+
+        private static HashSet<Guid> _app_activatable = LoadAppActivatableClsids();
+
         public int CompareTo(COMCLSIDEntry right)
         {
             return String.Compare(Name, right.Name);
@@ -541,6 +564,8 @@ namespace OleViewDotNet
                     }
                 }
             }
+
+            ActivatableFromApp = _app_activatable.Contains(Clsid);
         }
 
         public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
@@ -633,6 +658,11 @@ namespace OleViewDotNet
             }
         }
 
+        public bool ActivatableFromApp
+        {
+            get; private set;
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))
@@ -659,15 +689,16 @@ namespace OleViewDotNet
             }
 
             // We don't consider the loaded interfaces.
-            return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID 
-                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values);
+            return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID
+                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values) 
+                && ActivatableFromApp == right.ActivatableFromApp;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
                 ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() 
-                ^ Elevation.GetSafeHashCode();
+                ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode();
         }
 
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
@@ -938,6 +969,7 @@ namespace OleViewDotNet
             Categories = reader.ReadGuids("catids");
             TreatAs = reader.ReadGuid("treatas");
             m_loaded_interfaces = reader.ReadBool("loaded");
+            ActivatableFromApp = reader.ReadBool("activatable");
             bool elevate = reader.ReadBool("elevate");
 
             Name = reader.ReadString("name");
@@ -965,6 +997,7 @@ namespace OleViewDotNet
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
             writer.WriteBool("loaded", m_loaded_interfaces);
+            writer.WriteBool("activatabkle", ActivatableFromApp);
             writer.WriteBool("elevate", Elevation != null);
             
             writer.WriteOptionalAttributeString("name", Name);
