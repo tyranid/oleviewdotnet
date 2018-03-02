@@ -1929,7 +1929,7 @@ namespace OleViewDotNet
                 else if (node.Tag is COMRuntimeClassEntry)
                 {
                     COMRuntimeClassEntry runtime_entry = (COMRuntimeClassEntry)node.Tag;
-                    COMSecurity.ViewSecurity(this, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, true);
+                    COMSecurity.ViewSecurity(this, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, false);
                 }
                 else
                 {
