@@ -22,6 +22,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -334,6 +335,14 @@ namespace OleViewDotNet
         public string pwcsTemplateFile;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ServerInformation
+    {
+        public int dwServerPid;
+        public int dwServerTid;
+        public long ui64ServerAddress;
+    }
+    
     public static class COMUtilities
     {
         private enum RegKind
@@ -428,6 +437,9 @@ namespace OleViewDotNet
 
         [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         public static extern int CoRegisterActivationFilter(IActivationFilter pActivationFilter);
+
+        [DllImport("ole32.dll")]
+        public static extern int CoDecodeProxy(int dwClientPid, long ui64ProxyAddress, out ServerInformation pServerInformation);
 
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
@@ -2032,6 +2044,37 @@ namespace OleViewDotNet
                     return String.Format("STA (Thread ID {0})", appid);
             }
         }
+
+        public static ServerInformation GetServerInformation(object obj)
+        {
+            IntPtr intf = Marshal.GetIUnknownForObject(obj);
+            IntPtr proxy = IntPtr.Zero;
+            try
+            {
+                Guid iid = COMInterfaceEntry.IID_IDispatch;
+                if (Marshal.QueryInterface(intf, ref iid, out proxy) != 0)
+                {
+                    ServerInformation info = new ServerInformation();
+                    int hr = CoDecodeProxy(Process.GetCurrentProcess().Id, proxy.ToInt64(), out info);
+                    if (hr == 0)
+                    {
+                        return info;
+                    }
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                Marshal.Release(intf);
+                if (proxy != IntPtr.Zero)
+                {
+                    Marshal.Release(proxy);
+                }
+            }
+            return new ServerInformation();
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
@@ -2219,6 +2262,7 @@ namespace OleViewDotNet
 
             return _delayed_imports;
         }
+
     }
 
 }

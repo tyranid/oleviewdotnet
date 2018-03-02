@@ -57,7 +57,7 @@ namespace OleViewDotNet
             m_pEntry = ObjectCache.Add(registry, objName, pObject, interfaces);
             m_pObject = pObject;
             m_properties = properties;
-            m_interfaces = interfaces;            
+            m_interfaces = interfaces; 
             m_objName = objName;
             
             InitializeComponent();
@@ -104,9 +104,16 @@ namespace OleViewDotNet
                 }
             }
             catch 
-            {                
+            {
             }
 
+            ServerInformation info = COMUtilities.GetServerInformation(m_pObject);
+            if (info.dwServerPid != 0)
+            {
+                listViewProperties.Items.Add("Server PID").SubItems.Add(info.dwServerPid.ToString());
+                listViewProperties.Items.Add("Server TID").SubItems.Add(info.dwServerTid.ToString());
+                listViewProperties.Items.Add("Server Address").SubItems.Add(string.Format("0x{0:X}", info.ui64ServerAddress));
+            }
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
