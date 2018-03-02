@@ -826,6 +826,7 @@ namespace OleViewDotNet
             {
                 Program.ShowError(this, ex, true);
             }
+        }
 
         private void menuRegistryRuntimeClasses_Click(object sender, EventArgs e)
         {
