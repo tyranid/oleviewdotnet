@@ -17,7 +17,6 @@
 using NtApiDotNet;
 using NtApiDotNet.Win32;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -28,17 +27,17 @@ namespace OleViewDotNet
     internal partial class SelectSecurityCheckForm : Form
     {
         private bool _process_security;
-        private List<NtToken> _tokens;
+        private DisposableList<NtToken> _tokens;
 
         public SelectSecurityCheckForm(bool process_security)
         {
             InitializeComponent();
             _process_security = process_security;
-            _tokens = new List<NtToken>();
+            _tokens = new DisposableList<NtToken>();
             Disposed += SelectSecurityCheckForm_Disposed;
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
-            COMProcessParser.EnableDebugPrivilege();
+            NtToken.EnableDebugPrivilege();
             
             foreach (Process p in Process.GetProcesses().OrderBy(p => p.Id))
             {
@@ -80,10 +79,7 @@ namespace OleViewDotNet
 
         private void SelectSecurityCheckForm_Disposed(object sender, EventArgs e)
         {
-            foreach (var token in _tokens)
-            {
-                token.Close();
-            }
+            _tokens.Dispose();
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
