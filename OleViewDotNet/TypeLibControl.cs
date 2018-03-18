@@ -349,7 +349,7 @@ namespace OleViewDotNet
             }
             else if (str != null)
             {
-                return str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names));
+                return str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names, true));
             }
 
             return String.Empty;

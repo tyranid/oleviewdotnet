@@ -161,7 +161,7 @@ namespace OleViewDotNet
 
         public string Format(IDictionary<Guid, string> iids_to_names)
         {
-            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.ComplexTypesWithNames);
+            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.ComplexTypesWithNames, true);
             return Format(context);
         }
     }
