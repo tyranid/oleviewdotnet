@@ -70,16 +70,7 @@ namespace OleViewDotNet
             Server = COMUtilities.ReadStringFromKey(key, null, "Server");
             Permissions = string.Empty;
             byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
-            if (permissions != null && permissions.Length > 0)
-            {
-                try
-                {
-                    Permissions = COMSecurity.GetStringSDForSD(permissions);
-                }
-                catch (Win32Exception)
-                {
-                }
-            }
+            Permissions = COMSecurity.GetStringSDForSD(permissions);
         }
 
         public COMRuntimeClassEntry(string name, RegistryKey rootKey)

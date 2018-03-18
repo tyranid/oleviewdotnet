@@ -142,21 +142,6 @@ namespace OleViewDotNet
             LoadFromKey(key);
         }
 
-        private static string ConvertSD(byte[] sd)
-        {
-            if (sd != null && sd.Length > 0)
-            {
-                try
-                {
-                    return COMSecurity.GetStringSDForSD(sd);
-                }
-                catch (Win32Exception)
-                {
-                }
-            }
-            return String.Empty;
-        }
-
         private void LoadFromKey(RegistryKey key)
         {
             RunAs = key.GetValue("RunAs") as string;
@@ -170,8 +155,8 @@ namespace OleViewDotNet
                 Name = AppId.FormatGuidDefault();
             }
 
-            AccessPermission = ConvertSD(key.GetValue("AccessPermission") as byte[]);
-            LaunchPermission = ConvertSD(key.GetValue("LaunchPermission") as byte[]);
+            AccessPermission = COMSecurity.GetStringSDForSD(key.GetValue("AccessPermission") as byte[]);
+            LaunchPermission = COMSecurity.GetStringSDForSD(key.GetValue("LaunchPermission") as byte[]);
 
             DllSurrogate = key.GetValue("DllSurrogate") as string;
             if (DllSurrogate != null)
