@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,232 +27,15 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-    [StructLayout(LayoutKind.Sequential)]
-    struct SiObjectInfo
-    {
-        public SiObjectInfoFlags dwFlags;
-        public IntPtr hInstance;
-        public IntPtr pszServerName;
-        public IntPtr pszObjectName;
-        public IntPtr pszPageTitle;
-        public Guid guidObjectType;
-    }
-
-    enum SiObjectInfoFlags : uint
-    {
-        SI_EDIT_PERMS = 0x00000000, // always implied
-        SI_EDIT_OWNER = 0x00000001,
-        SI_EDIT_AUDITS = 0x00000002,
-        SI_CONTAINER = 0x00000004,
-        SI_READONLY = 0x00000008,
-        SI_ADVANCED = 0x00000010,
-        SI_RESET = 0x00000020, //equals to SI_RESET_DACL|SI_RESET_SACL|SI_RESET_OWNER
-        SI_OWNER_READONLY = 0x00000040,
-        SI_EDIT_PROPERTIES = 0x00000080,
-        SI_OWNER_RECURSE = 0x00000100,
-        SI_NO_ACL_PROTECT = 0x00000200,
-        SI_NO_TREE_APPLY = 0x00000400,
-        SI_PAGE_TITLE = 0x00000800,
-        SI_SERVER_IS_DC = 0x00001000,
-        SI_RESET_DACL_TREE = 0x00004000,
-        SI_RESET_SACL_TREE = 0x00008000,
-        SI_OBJECT_GUID = 0x00010000,
-        SI_EDIT_EFFECTIVE = 0x00020000,
-        SI_RESET_DACL = 0x00040000,
-        SI_RESET_SACL = 0x00080000,
-        SI_RESET_OWNER = 0x00100000,
-        SI_NO_ADDITIONAL_PERMISSION = 0x00200000,
-        SI_VIEW_ONLY = 0x00400000,
-        SI_PERMS_ELEVATION_REQUIRED = 0x01000000,
-        SI_AUDITS_ELEVATION_REQUIRED = 0x02000000,
-        SI_OWNER_ELEVATION_REQUIRED = 0x04000000,
-        SI_SCOPE_ELEVATION_REQUIRED = 0x08000000,
-        SI_MAY_WRITE = 0x10000000, //not sure if user can write permission
-        SI_ENABLE_EDIT_ATTRIBUTE_CONDITION = 0x20000000,
-        SI_ENABLE_CENTRAL_POLICY = 0x40000000,
-        SI_DISABLE_DENY_ACE = 0x80000000,
-        SI_EDIT_ALL = (SI_EDIT_PERMS | SI_EDIT_OWNER | SI_EDIT_AUDITS)
-    }
-
-    struct SiAccess
-    {
-        public IntPtr pguid; // Guid
-        public uint mask;
-        public IntPtr pszName;
-        public SiAccessFlags dwFlags;
-    }
-
-    enum SiAccessFlags
-    {
-        SI_ACCESS_SPECIFIC = 0x00010000,
-        SI_ACCESS_GENERAL = 0x00020000,
-        SI_ACCESS_CONTAINER = 0x00040000,
-        SI_ACCESS_PROPERTY = 0x00080000,
-    }
-
-    [Flags]
-    public enum SecurityInformation
-    {
-        Owner = 1,
-        Group = 2,
-        Dacl = 4,
-        Label = 0x10,
-        All = Owner | Group | Dacl | Label
-    }
-
-    //public enum SecurityIntegrityLevel
+    //[Flags]
+    //public enum SecurityInformation
     //{
-    //    Untrusted = 0,
-    //    Low = 0x1000,
-    //    Medium = 0x2000,
-    //    High = 0x3000,
-    //    System = 0x4000,
+    //    Owner = 1,
+    //    Group = 2,
+    //    Dacl = 4,
+    //    Label = 0x10,
+    //    All = Owner | Group | Dacl | Label
     //}
-
-
-    [ClassInterface(ClassInterfaceType.None), ComVisible(true)]
-    class SecurityInformationImpl : ISecurityInformation, IDisposable
-    {
-        private List<IntPtr> _names;
-        private IntPtr _access_map; // SI_ACCESS
-        private IntPtr _obj_name;
-        private byte[] _sd;
-
-        private static Dictionary<uint, string> GetNames(bool access)
-        {
-            string typename = access ? "Access" : "Launch";
-            Dictionary<uint, string> names = new Dictionary<uint, string>();
-            names[(uint)COMAccessRights.Execute] = typename;
-            names[(uint)COMAccessRights.ExecuteLocal] = String.Format("Local {0}", typename);
-            names[(uint)COMAccessRights.ExecuteRemote] = String.Format("Remote {0}", typename);
-            if (!access)
-            {
-                names[(uint)COMAccessRights.ActivateLocal] = "Local Activate";
-                names[(uint)COMAccessRights.ActivateRemote] = "Remote Activate";
-            }
-            return names;
-        }
-
-        public SecurityInformationImpl(string obj_name, string sddl, bool access)
-        {
-            Dictionary<uint, string> names = GetNames(access);
-            _sd = COMSecurity.GetSDForStringSD(sddl);
-            _obj_name = Marshal.StringToBSTR(obj_name);
-            _access_map = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SiAccess)) * names.Count);
-            SiAccess[] sis = new SiAccess[names.Count];
-            _names = new List<IntPtr>();
-            int i = 0;
-            IntPtr current = _access_map;
-            foreach (KeyValuePair<uint, string> pair in names)
-            {
-                _names.Add(Marshal.StringToBSTR(pair.Value));
-                SiAccess si = new SiAccess();
-                si.dwFlags = SiAccessFlags.SI_ACCESS_SPECIFIC | SiAccessFlags.SI_ACCESS_GENERAL;
-                si.mask = pair.Key;
-                si.pszName = _names[i];
-                si.pguid = IntPtr.Zero;
-                sis[i] = si;
-                i++;
-            }
-            IntPtr current_ptr = _access_map;
-            for (i = 0; i < sis.Length; ++i)
-            {
-                Marshal.StructureToPtr(sis[i], current_ptr, false);
-                current_ptr += Marshal.SizeOf(typeof(SiAccess));
-            }
-        }
-
-        public void GetAccessRights(ref Guid pguidObjectType, SiObjectInfoFlags dwFlags, out IntPtr ppAccess, out uint pcAccesses, out uint piDefaultAccess)
-        {
-            ppAccess = _access_map;
-            pcAccesses = (uint)_names.Count;
-            piDefaultAccess = 0;
-        }
-
-        public void GetInheritTypes(out IntPtr ppInheritTypes, out uint pcInheritTypes)
-        {
-            ppInheritTypes = IntPtr.Zero;
-            pcInheritTypes = 0;
-        }
-
-        public void GetObjectInformation(IntPtr pObjectInfo)
-        {
-            SiObjectInfo object_info = new SiObjectInfo();
-            object_info.dwFlags = SiObjectInfoFlags.SI_READONLY | SiObjectInfoFlags.SI_ADVANCED 
-                | SiObjectInfoFlags.SI_EDIT_OWNER | SiObjectInfoFlags.SI_EDIT_PROPERTIES | SiObjectInfoFlags.SI_NO_ADDITIONAL_PERMISSION;
-            object_info.pszObjectName = _obj_name;
-            Marshal.StructureToPtr(object_info, pObjectInfo, false);
-        }
-
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr LocalAlloc(int flags, IntPtr size);
-
-        public void GetSecurity(SecurityInformation RequestedInformation, out IntPtr ppSecurityDescriptor, [MarshalAs(UnmanagedType.Bool)] bool fDefault)
-        {
-            IntPtr ret = LocalAlloc(0, new IntPtr(_sd.Length));
-            Marshal.Copy(_sd, 0, ret, _sd.Length);
-            ppSecurityDescriptor = ret;
-        }
-
-        public void MapGeneric(ref Guid pguidObjectType, IntPtr pAceFlags, ref uint pMask)
-        {
-            // Do nothing.
-        }
-
-        public void PropertySheetPageCallback(IntPtr hwnd, uint uMsg, int uPage)
-        {
-            // Do nothing.
-        }
-
-        public void SetSecurity(SecurityInformation SecurityInformation, IntPtr pSecurityDescriptor)
-        {
-            throw new NotImplementedException();
-        }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (_names != null)
-                {
-                    foreach (IntPtr p in _names)
-                    {
-                        Marshal.FreeBSTR(p);
-                    }
-                    _names.Clear();
-                }
-                if (_access_map != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(_access_map);
-                    _access_map = IntPtr.Zero;
-                }
-                if (_obj_name != IntPtr.Zero)
-                {
-                    Marshal.FreeBSTR(_obj_name);
-                    _obj_name = IntPtr.Zero;
-                }
-                
-                disposedValue = true;
-            }
-        }
-
-        ~SecurityInformationImpl()
-        {
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
-    }
-
 
     [Flags]
     public enum COMAccessRights : uint
@@ -265,17 +49,13 @@ namespace OleViewDotNet
 
     public static class COMSecurity
     {
-        [DllImport("aclui.dll")]
-        static extern bool EditSecurity(IntPtr hwndOwner, ISecurityInformation psi);
-
         public static void ViewSecurity(IWin32Window parent, string name, string sddl, bool access)
         {
             if (!String.IsNullOrWhiteSpace(sddl))
             {
-                using (SecurityInformationImpl si = new SecurityInformationImpl(name, sddl, access))
-                {
-                    EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, si);
-                }
+                SecurityDescriptor sd = new SecurityDescriptor(sddl);
+                AccessMask valid_access = access ? 0x7 : 0x1F;
+                Win32Utils.EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, name, sd, typeof(COMAccessRights), valid_access, new GenericMapping());
             }
         }
 
@@ -285,14 +65,14 @@ namespace OleViewDotNet
                     access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
 
-        const uint SDDL_REVISION_1 = 1;
+        //const uint SDDL_REVISION_1 = 1;
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-        private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
+        //[DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
+        //private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
 
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-        private extern static bool ConvertStringSecurityDescriptorToSecurityDescriptor(string StringSecurityDescriptor, 
-            uint StringSDRevision, out IntPtr SecurityDescriptor, out int SecurityDescriptorSize);
+        //[DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
+        //private extern static bool ConvertStringSecurityDescriptorToSecurityDescriptor(string StringSecurityDescriptor, 
+        //    uint StringSDRevision, out IntPtr SecurityDescriptor, out int SecurityDescriptorSize);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         private extern static IntPtr LocalFree(IntPtr hMem);
@@ -310,43 +90,7 @@ namespace OleViewDotNet
 
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
         private extern static int GetSecurityDescriptorLength(IntPtr sd);
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct GenericMapping
-        {
-            public uint GenericRead;
-            public uint GenericWrite;
-            public uint GenericExecute;
-            public uint GenericAll;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct PrivilegeSet
-        {
-            public int PrivilegeCount;
-            public int Control;
-            public int LowLuid;
-            public int HighLuid;
-            public int Attributes;
-        }
         
-        [DllImport("advapi32.dll", SetLastError = true)]
-        static extern bool AccessCheckByType(
-          byte[] pSecurityDescriptor,
-          byte[] PrincipalSelfSid,
-          SafeKernelObjectHandle ClientToken,
-          uint DesiredAccess,
-          IntPtr ObjectTypeList,
-          int ObjectTypeListLength,
-          ref GenericMapping GenericMapping,
-          ref PrivilegeSet PrivilegeSet,
-          ref int PrivilegeSetLength,
-          out uint GrantedAccess,
-          out bool AccessStatus
-        );
-
-        const uint MaximumAllowed = 0x02000000;
-
         internal static string GetSaclForSddl(string sddl)
         {
             return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
@@ -399,34 +143,20 @@ namespace OleViewDotNet
             // If SD is only a NULL DACL we get maximum rights.
             if (sddl == "D:NO_ACCESS_CONTROL")
             {
-                maximum_rights = (COMAccessRights) mapping.GenericExecute;
+                maximum_rights = mapping.GenericExecute.ToSpecificAccess<COMAccessRights>();
                 return true;
             }
 
-            byte[] princ_bytes = null;
             if (!String.IsNullOrWhiteSpace(principal))
             {
-                SecurityIdentifier sid = new SecurityIdentifier(principal);
-                princ_bytes = new byte[sid.BinaryLength];
-                sid.GetBinaryForm(princ_bytes, 0);
+                maximum_rights = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, new Sid(principal), mapping).ToSpecificAccess<COMAccessRights>();
+            }
+            else
+            {
+                maximum_rights = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, mapping).ToSpecificAccess<COMAccessRights>();
             }
 
-            maximum_rights = 0;
-            PrivilegeSet priv_set = new PrivilegeSet();
-            int priv_length = Marshal.SizeOf(priv_set);
-            uint granted_access = 0;
-            bool access_status = false;
-            byte[] sd = GetSDForStringSD(sddl);
-            if (!AccessCheckByType(sd, princ_bytes, token.Handle, MaximumAllowed, IntPtr.Zero, 
-                0, ref mapping, ref priv_set, ref priv_length, out granted_access, out access_status))
-            {
-                throw new Win32Exception(sddl);
-            }
-            if (access_status)
-            {
-                maximum_rights = (COMAccessRights)(granted_access & 0x1F);
-            }
-            return access_status;
+            return maximum_rights != 0;
         }
 
         private static string GetSecurityPermissions(COMSD sdtype)
@@ -475,60 +205,35 @@ namespace OleViewDotNet
 
         public static string GetStringSDForSD(byte[] sd, SecurityInformation info)
         {
-            IntPtr sddl = IntPtr.Zero;
-            int length;
-
             try
             {
-                if (ConvertSecurityDescriptorToStringSecurityDescriptor(sd, SDDL_REVISION_1,
-                    info,
-                    out sddl, out length))
+                if (sd == null || sd.Length == 0)
                 {
-                    return Marshal.PtrToStringUni(sddl);
+                    return string.Empty;
                 }
-                else
-                {
-                    throw new Win32Exception();
-                }
+
+                return new SecurityDescriptor(sd).ToSddl(info);
             }
-            finally
+            catch (NtException)
             {
-                if (sddl != IntPtr.Zero)
-                {
-                    LocalFree(sddl);
-                }
+                return string.Empty;
             }
         }
 
         public static string GetStringSDForSD(byte[] sd)
         {
-            return GetStringSDForSD(sd, SecurityInformation.All);
+            return GetStringSDForSD(sd, SecurityInformation.AllBasic);
         }
 
         public static byte[] GetSDForStringSD(string sddl)
         {
-            IntPtr sd = IntPtr.Zero;
-            int length;
-
             try
             {
-                if (ConvertStringSecurityDescriptorToSecurityDescriptor(sddl, SDDL_REVISION_1, out sd, out length))
-                {
-                    byte[] ret = new byte[length];
-                    Marshal.Copy(sd, ret, 0, length);
-                    return ret;
-                }
-                else
-                {
-                    throw new Win32Exception();
-                }
+                return new SecurityDescriptor(sddl).ToByteArray();
             }
-            finally
+            catch (NtException)
             {
-                if (sd != IntPtr.Zero)
-                {
-                    LocalFree(sd);
-                }
+                return new byte[0];
             }
         }
 
