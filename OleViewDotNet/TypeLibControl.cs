@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,6 @@ namespace OleViewDotNet
     public partial class TypeLibControl : UserControl
     {
         private IDictionary<Guid, string> m_iids_to_names;
-        private IDictionary<NdrComplexTypeReference, string> m_types_to_names;
 
         static void EmitMember(StringBuilder builder, MemberInfo mi)
         {
@@ -211,12 +211,10 @@ namespace OleViewDotNet
 
         private static IEnumerable<ListViewItem> FormatProxyInstanceComplexTypes(COMProxyInstance proxy)
         {
-            var types_with_names = proxy.ComplexTypesWithNames;
-
-            foreach (var pair in types_with_names.OrderBy(p => p.Value))
+            foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
             {
-                ListViewItem item = new ListViewItem(pair.Value);
-                item.Tag = pair.Key;
+                ListViewItem item = new ListViewItem(type.Name);
+                item.Tag = type;
                 yield return item;
             }
         }
@@ -277,8 +275,7 @@ namespace OleViewDotNet
             }
         }
 
-        private TypeLibControl(IDictionary<Guid, string> iids_to_names, 
-            IDictionary<NdrComplexTypeReference, string> types_to_names,
+        private TypeLibControl(IDictionary<Guid, string> iids_to_names,
             string name, 
             Guid guid_to_view, 
             IEnumerable<ListViewItemWithGuid> interfaces,
@@ -287,7 +284,6 @@ namespace OleViewDotNet
             IEnumerable<ListViewItem> enums)
         {
             m_iids_to_names = iids_to_names;
-            m_types_to_names = types_to_names;
             InitializeComponent();
 
             AddGuidItems(listViewInterfaces, interfaces, tabPageInterfaces, guid_to_view);
@@ -319,7 +315,7 @@ namespace OleViewDotNet
         }
 
         public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly) 
-            : this(null, null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly),
+            : this(null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly),
                   dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : new ListViewItemWithGuid[0], 
                   FormatAssemblyStructs(typelib, dotnet_assembly), 
                   FormatAssemblyEnums(typelib, dotnet_assembly))
@@ -327,7 +323,7 @@ namespace OleViewDotNet
         }
 
         public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view) 
-            : this(registry.InterfacesToNames, proxy.ComplexTypesWithNames, name, guid_to_view, 
+            : this(registry.InterfacesToNames, name, guid_to_view, 
                   FormatProxyInstance(proxy), 
                   new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
@@ -349,7 +345,8 @@ namespace OleViewDotNet
             }
             else if (str != null)
             {
-                return str.FormatComplexType(new NdrFormatContext(m_iids_to_names, m_types_to_names, true));
+                INdrFormatter formatter = DefaultNdrFormatter.Create(m_iids_to_names);
+                return formatter.FormatComplexType(str);
             }
 
             return String.Empty;

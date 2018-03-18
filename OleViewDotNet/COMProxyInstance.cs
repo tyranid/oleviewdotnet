@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
+using NtApiDotNet.Ndr;
 
 namespace OleViewDotNet
 {
@@ -58,69 +59,9 @@ namespace OleViewDotNet
         public int DispatchTableCount;
         public IntPtr pDispatchTable;
 
-        public MIDL_SERVER_INFO GetServerInfo()
-        {
-            if (pServerInfo == IntPtr.Zero)
-            {
-                return new MIDL_SERVER_INFO();
-            }
-            return Marshal.PtrToStructure<MIDL_SERVER_INFO>(pServerInfo);
-        }
-
         public Guid GetIid()
         {
             return COMUtilities.ReadGuid(piid);
-        }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct MIDL_STUB_DESC
-    {
-        public IntPtr RpcInterfaceInformation;
-        public IntPtr pfnAllocate;
-        public IntPtr pfnFree;
-        public IntPtr pGenericBindingInfo;
-        public IntPtr apfnNdrRundownRoutines;
-        public IntPtr aGenericBindingRoutinePairs;
-        public IntPtr apfnExprEval;
-        public IntPtr aXmitQuintuple;
-        public IntPtr pFormatTypes;
-        public int fCheckBounds;
-        /* Ndr library version. */
-        public int Version;
-        public IntPtr pMallocFreeStruct;
-        public int MIDLVersion;
-        public IntPtr CommFaultOffsets;
-        // New fields for version 3.0+
-        public IntPtr aUserMarshalQuadruple;
-        // Notify routines - added for NT5, MIDL 5.0
-        public IntPtr NotifyRoutineTable;
-        public IntPtr mFlags;
-        // International support routines - added for 64bit post NT5
-        public IntPtr CsRoutineTables;
-        public IntPtr ProxyServerInfo;
-        public IntPtr pExprInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct MIDL_SERVER_INFO
-    {
-        public IntPtr pStubDesc;
-        public IntPtr DispatchTable;
-        public IntPtr ProcString;
-        public IntPtr FmtStringOffset;
-        public IntPtr ThunkTable;
-        public IntPtr pTransferSyntax;
-        public IntPtr nCount;
-        public IntPtr pSyntaxInfo;
-
-        public MIDL_STUB_DESC GetStubDesc()
-        {
-            if (pStubDesc == IntPtr.Zero)
-            {
-                return new MIDL_STUB_DESC();
-            }
-            return Marshal.PtrToStructure<MIDL_STUB_DESC>(pStubDesc);
         }
     }
 
@@ -144,25 +85,20 @@ namespace OleViewDotNet
             Procs = procs;
         }
 
-        public string Format(NdrFormatContext context)
+        public string Format(IDictionary<Guid, string> iids_to_names)
         {
+            INdrFormatter formatter = DefaultNdrFormatter.Create(iids_to_names);
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("[Guid(\"{0}\")]", Iid).AppendLine();
-            string base_name = context.IidsToNames.ContainsKey(BaseIid) ? 
-                context.IidsToNames[BaseIid] : String.Format("/* Unknown IID {0} */ IUnknown", BaseIid);
+            string base_name = iids_to_names.ContainsKey(BaseIid) ?
+                iids_to_names[BaseIid] : String.Format("/* Unknown IID {0} */ IUnknown", BaseIid);
             builder.AppendFormat("interface {0} : {1} {{", Name, base_name).AppendLine();
             foreach (NdrProcedureDefinition proc in Procs)
             {
-                builder.AppendFormat("    {0}", proc.FormatProcedure(context)).AppendLine();
+                builder.AppendFormat("    {0}", formatter.FormatProcedure(proc)).AppendLine();
             }
             builder.AppendLine("}").AppendLine();
             return builder.ToString();
-        }
-
-        public string Format(IDictionary<Guid, string> iids_to_names)
-        {
-            NdrFormatContext context = new NdrFormatContext(iids_to_names, _instance.ComplexTypesWithNames, true);
-            return Format(context);
         }
     }
 
@@ -177,54 +113,16 @@ namespace OleViewDotNet
         public IEnumerable<COMProxyInstanceEntry> Entries { get; private set; }
 
         public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
-
-        private static string GetComplexTypeName(NdrComplexTypeReference type, int index)
-        {
-            if (type is NdrBaseStructureTypeReference)
-            {
-                return String.Format("Struct_{0}", index);
-            }
-            else if (type is NdrUnionTypeReference)
-            {
-                return String.Format("Union_{0}", index);
-            }
-            else
-            {
-                return String.Format("UnknownType_{0}", index);
-            }
-        }
         
-        public Dictionary<NdrComplexTypeReference, string> ComplexTypesWithNames
+        private NdrProcedureDefinition[] ReadProcs(NdrParser parser, Guid base_iid, CInterfaceStubHeader stub)
         {
-            get
-            {
-                return ComplexTypes.Select((s, i) =>
-                    new Tuple<NdrComplexTypeReference, string>(s, GetComplexTypeName(s, i))).ToDictionary(v => v.Item1, v => v.Item2);
-            }
-        }
-        
-        private NdrProcedureDefinition[] ReadProcs(Dictionary<IntPtr, NdrBaseTypeReference> type_cache, Guid base_iid, CInterfaceStubHeader stub)
-        {
-            MIDL_SERVER_INFO server_info = stub.GetServerInfo();
-            MIDL_STUB_DESC stub_desc = server_info.GetStubDesc();
-            IntPtr type_desc = stub_desc.pFormatTypes;
             int start_ofs = 3;
             if (base_iid == COMInterfaceEntry.IID_IDispatch)
             {
                 start_ofs = 7;
             }
 
-            List<NdrProcedureDefinition> procs = new List<NdrProcedureDefinition>();
-            while (start_ofs < stub.DispatchTableCount)
-            {
-                int fmt_ofs = Marshal.ReadInt16(server_info.FmtStringOffset, start_ofs * 2);
-                if (fmt_ofs >= 0)
-                {
-                    procs.Add(new NdrProcedureDefinition(type_cache, stub_desc, server_info.ProcString + fmt_ofs, type_desc));
-                }
-                start_ofs++;
-            }
-            return procs.ToArray();
+            return parser.ReadFromMidlServerInfo(stub.pServerInfo, start_ofs, stub.DispatchTableCount).ToArray();
         }
 
         private static IntPtr FindProxyDllInfo(SafeLibraryHandle lib, Guid clsid)
@@ -289,22 +187,22 @@ namespace OleViewDotNet
         {
             List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
             List<NdrComplexTypeReference> complex_types = new List<NdrComplexTypeReference>();
+            NdrParser parser = new NdrParser();
 
             foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
             {
                 string[] names = file_info.GetNames();
                 CInterfaceStubHeader[] stubs = file_info.GetStubs();
                 Guid[] base_iids = file_info.GetBaseIids();
-                Dictionary<IntPtr, NdrBaseTypeReference> type_cache
-                    = new Dictionary<IntPtr, NdrBaseTypeReference>();
                 for (int i = 0; i < names.Length; ++i)
                 {
                     entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
-                        base_iids[i], stubs[i].DispatchTableCount, ReadProcs(type_cache, base_iids[i], stubs[i])));
+                        base_iids[i], stubs[i].DispatchTableCount, ReadProcs(parser, base_iids[i], stubs[i])));
                 }
-                complex_types.AddRange(type_cache.Values.OfType<NdrBaseStructureTypeReference>());
-                complex_types.AddRange(type_cache.Values.OfType<NdrUnionTypeReference>());
             }
+
+            complex_types.AddRange(parser.Types.OfType<NdrBaseStructureTypeReference>());
+            complex_types.AddRange(parser.Types.OfType<NdrUnionTypeReference>());
             Entries = entries.AsReadOnly();
             ComplexTypes = complex_types.AsReadOnly();
             return true;
