@@ -15,11 +15,11 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Text;
 using System.Xml;
 
@@ -257,7 +257,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static COMRegistry Load(COMRegistryMode mode, SecurityIdentifier user, IProgress<Tuple<string, int>> progress)
+        public static COMRegistry Load(COMRegistryMode mode, Sid user, IProgress<Tuple<string, int>> progress)
         {
             if (progress == null)
             {
@@ -266,10 +266,7 @@ namespace OleViewDotNet
 
             if (user == null)
             {
-                using (WindowsIdentity id = WindowsIdentity.GetCurrent())
-                {
-                    user = id.User;
-                }
+                user = NtProcess.Current.User;
             }
 
             return new COMRegistry(mode, user, progress);
@@ -558,7 +555,7 @@ namespace OleViewDotNet
 
         #region Private Methods
 
-        private static RegistryKey OpenClassesKey(COMRegistryMode mode, SecurityIdentifier user)
+        private static RegistryKey OpenClassesKey(COMRegistryMode mode, Sid user)
         {
             if (user == null)
             {
@@ -572,7 +569,7 @@ namespace OleViewDotNet
                 case COMRegistryMode.MachineOnly:
                     return Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes");
                 case COMRegistryMode.UserOnly:
-                    return Registry.Users.OpenSubKey(String.Format(@"{0}\SOFTWARE\Classes", user.Value));
+                    return Registry.Users.OpenSubKey(String.Format(@"{0}\SOFTWARE\Classes", user));
                 default:
                     throw new ArgumentException("Invalid mode", "mode");
             }
@@ -581,7 +578,7 @@ namespace OleViewDotNet
         /// <summary>
         /// Default constructor
         /// </summary>
-        private COMRegistry(COMRegistryMode mode, SecurityIdentifier user, IProgress<Tuple<string, int>> progress) 
+        private COMRegistry(COMRegistryMode mode, Sid user, IProgress<Tuple<string, int>> progress) 
             : this(mode)
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
@@ -620,12 +617,11 @@ namespace OleViewDotNet
 
             try
             {
-                NTAccount account = (NTAccount)user.Translate(typeof(NTAccount));
-                CreatedUser = account.Value;
+                CreatedUser = user.Name;
             }
             catch
             {
-                CreatedUser = user.Value;
+                CreatedUser = user.ToString();
             }
         }
 
@@ -854,10 +850,9 @@ namespace OleViewDotNet
                     foreach (string s in subkeys)
                     {
                         Guid g;
-
                         if(Guid.TryParse(s, out g))
                         {
-                            ret.Add(g);                            
+                            ret.Add(g);
                         }
                     }
                 }
@@ -865,7 +860,7 @@ namespace OleViewDotNet
             return ret;
         }
 
-        void LoadPreApproved(COMRegistryMode mode, SecurityIdentifier user)
+        void LoadPreApproved(COMRegistryMode mode, Sid user)
         {
             m_preapproved = new List<Guid>();
             if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
@@ -875,7 +870,7 @@ namespace OleViewDotNet
 
             if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
             {
-                using (RegistryKey key = Registry.Users.OpenSubKey(user.Value))
+                using (RegistryKey key = Registry.Users.OpenSubKey(user.ToString()))
                 {
                     if (key != null)
                     {
@@ -931,7 +926,7 @@ namespace OleViewDotNet
                         if (Guid.TryParse(s, out g))
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
-                            {                                
+                            {
                                 COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, rightsKey);
                                 if (entry.Clsid != Guid.Empty || !String.IsNullOrWhiteSpace(entry.AppPath))
                                 {
@@ -944,7 +939,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadLowRights(COMRegistryMode mode, SecurityIdentifier user)
+        private void LoadLowRights(COMRegistryMode mode, Sid user)
         {
             m_lowrights = new List<COMIELowRightsElevationPolicy>();
 
@@ -955,7 +950,7 @@ namespace OleViewDotNet
 
             if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
             {
-                using (RegistryKey key = Registry.Users.OpenSubKey(user.Value))
+                using (RegistryKey key = Registry.Users.OpenSubKey(user.ToString()))
                 {
                     if (key != null)
                     {

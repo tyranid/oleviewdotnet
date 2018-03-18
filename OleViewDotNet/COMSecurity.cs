@@ -20,23 +20,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Security.AccessControl;
-using System.Security.Principal;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-    //[Flags]
-    //public enum SecurityInformation
-    //{
-    //    Owner = 1,
-    //    Group = 2,
-    //    Dacl = 4,
-    //    Label = 0x10,
-    //    All = Owner | Group | Dacl | Label
-    //}
-
     [Flags]
     public enum COMAccessRights : uint
     {
@@ -64,15 +51,6 @@ namespace OleViewDotNet
             ViewSecurity(parent, String.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
                     access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
-
-        //const uint SDDL_REVISION_1 = 1;
-
-        //[DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-        //private extern static bool ConvertSecurityDescriptorToStringSecurityDescriptor(byte[] sd, uint rev, SecurityInformation secinfo, out IntPtr str, out int length);
-
-        //[DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-        //private extern static bool ConvertStringSecurityDescriptorToSecurityDescriptor(string StringSecurityDescriptor, 
-        //    uint StringSDRevision, out IntPtr SecurityDescriptor, out int SecurityDescriptorSize);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         private extern static IntPtr LocalFree(IntPtr hMem);
@@ -169,6 +147,7 @@ namespace OleViewDotNet
                 {
                     throw new Win32Exception(hr);
                 }
+
                 int length = GetSecurityDescriptorLength(sd);
                 byte[] ret = new byte[length];
                 Marshal.Copy(sd, ret, 0, length);
@@ -237,18 +216,6 @@ namespace OleViewDotNet
             }
         }
 
-        public static TokenIntegrityLevel GetILFromSid(SecurityIdentifier sid)
-        {
-            int last_index = sid.Value.LastIndexOf('-');
-            int il;
-            if (int.TryParse(sid.Value.Substring(last_index + 1), out il))
-            {
-                return (TokenIntegrityLevel)il;
-            }
-
-            return TokenIntegrityLevel.Medium;
-        }
-
         public static TokenIntegrityLevel GetILForSD(string sddl)
         {
             if (String.IsNullOrWhiteSpace(sddl))
@@ -256,71 +223,58 @@ namespace OleViewDotNet
                 return TokenIntegrityLevel.Medium;
             }
 
-            string sacl = GetSaclForSddl(sddl);
-            if (!sacl.StartsWith("S:", StringComparison.OrdinalIgnoreCase))
+            try
+            {
+                SecurityDescriptor sd = new SecurityDescriptor(sddl);
+                return sd.IntegrityLevel;
+            }
+            catch (NtException)
             {
                 return TokenIntegrityLevel.Medium;
             }
+        }
 
-            Regex label_re = new Regex(@"\(ML;;[^;]*;;;([^)]+)\)");
-            Match m = label_re.Match(sacl);
-            if (!m.Success || m.Groups.Count < 2)
+        private static bool SDHasAllowedAce(string sddl, bool allow_null_dacl, Func<Ace, bool> check_func)
+        {
+            if (String.IsNullOrWhiteSpace(sddl))
             {
-                return TokenIntegrityLevel.Medium;
+                return allow_null_dacl;
             }
 
-            SecurityIdentifier sid = new SecurityIdentifier(m.Groups[1].Value);
-            return GetILFromSid(sid);
+            try
+            {
+                SecurityDescriptor sd = new SecurityDescriptor(sddl);
+                if (allow_null_dacl && sd.Dacl == null && sd.Dacl.NullAcl)
+                {
+                    return true;
+                }
+                foreach (var ace in sd.Dacl)
+                {
+                    if (ace.Type == NtApiDotNet.AceType.Allowed)
+                    {
+                        if (check_func(ace))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (NtException)
+            {
+            }
+            return false;
         }
 
         public static bool SDHasAC(string sddl)
         {
-            if (String.IsNullOrWhiteSpace(sddl))
-            {
-                return false;
-            }
-
-            RawSecurityDescriptor sd = new RawSecurityDescriptor(sddl);
-
-            foreach (var ace in sd.DiscretionaryAcl)
-            {
-                CommonAce common_ace = ace as CommonAce;
-                if (common_ace != null)
-                {
-                    if (common_ace.AceType == System.Security.AccessControl.AceType.AccessAllowed 
-                        && common_ace.SecurityIdentifier.Value.StartsWith("S-1-15-"))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            SidIdentifierAuthority authority = new SidIdentifierAuthority(SecurityAuthority.Package);
+            return SDHasAllowedAce(sddl, false, ace => ace.Sid.Authority.Equals(authority));
         }
 
         public static bool SDHasRemoteAccess(string sddl)
         {
-            if (String.IsNullOrWhiteSpace(sddl))
-            {
-                // Asssume defaults give _someone_ remote access.
-                return true;
-            }
-
-            RawSecurityDescriptor sd = new RawSecurityDescriptor(sddl);
-
-            foreach (var ace in sd.DiscretionaryAcl)
-            {
-                CommonAce common_ace = ace as CommonAce;
-                if (common_ace != null)
-                {
-                    COMAccessRights access = (COMAccessRights)(uint)common_ace.AccessMask;
-                    if ((access == COMAccessRights.Execute) 
-                        || (access & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return SDHasAllowedAce(sddl, true, a => a.Mask == COMAccessRights.Execute || 
+                (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
         }
 
         enum WTS_CONNECTSTATE_CLASS
@@ -385,19 +339,16 @@ namespace OleViewDotNet
             return sids;
         }
 
-        public static string UserToSid(string username)
+        public static Sid UserToSid(string username)
         {
-            SecurityIdentifier sid;
-            if (username.StartsWith("S-", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                sid = new SecurityIdentifier(username);
+                return NtSecurity.LookupAccountName(username);
             }
-            else
+            catch (NtException)
             {
-                NTAccount account = new NTAccount(username);
-                sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
+                return new Sid(username);
             }
-            return sid.Value;
         }
     }
 }

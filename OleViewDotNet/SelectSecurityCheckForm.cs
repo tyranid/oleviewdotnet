@@ -38,24 +38,22 @@ namespace OleViewDotNet
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
             NtToken.EnableDebugPrivilege();
-            
-            foreach (Process p in Process.GetProcesses().OrderBy(p => p.Id))
+
+            using (var ps = NtProcess.GetProcesses(ProcessAccessRights.QueryLimitedInformation, true).ToDisposableList())
             {
-                try
+                foreach (var p in ps.OrderBy(p => p.ProcessId))
                 {
-                    using (var process = NtProcess.Open(p.Id, ProcessAccessRights.QueryLimitedInformation))
+                    var result = NtToken.OpenProcessToken(p, TokenAccessRights.MaximumAllowed, false);
+                    if (result.IsSuccess)
                     {
-                        var token = process.OpenToken();
+                        NtToken token = result.Result;
                         _tokens.Add(token);
-                        ListViewItem item = listViewProcesses.Items.Add(p.Id.ToString());
-                        item.SubItems.Add(p.ProcessName);
-                        item.SubItems.Add(process.User.Name);
+                        ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
+                        item.SubItems.Add(p.Name);
+                        item.SubItems.Add(p.User.Name);
                         item.SubItems.Add(token.IntegrityLevel.ToString());
                         item.Tag = token;
                     }
-                }
-                catch
-                {
                 }
             }
             listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -163,7 +161,7 @@ namespace OleViewDotNet
                     }
                     if (!_process_security)
                     {
-                        Principal = COMSecurity.UserToSid(textBoxPrincipal.Text);
+                        Principal = COMSecurity.UserToSid(textBoxPrincipal.Text).ToString();
                     }
                 }
 
