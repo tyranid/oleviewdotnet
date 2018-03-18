@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
+using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,13 +28,13 @@ namespace OleViewDotNet
     internal partial class SelectSecurityCheckForm : Form
     {
         private bool _process_security;
-        private List<SafeTokenHandle> _tokens;
+        private List<NtToken> _tokens;
 
         public SelectSecurityCheckForm(bool process_security)
         {
             InitializeComponent();
             _process_security = process_security;
-            _tokens = new List<SafeTokenHandle>();
+            _tokens = new List<NtToken>();
             Disposed += SelectSecurityCheckForm_Disposed;
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
@@ -42,14 +44,14 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    using (SafeProcessHandle process = SafeProcessHandle.Open(p.Id, ProcessAccessRights.QueryInformation))
+                    using (var process = NtProcess.Open(p.Id, ProcessAccessRights.QueryLimitedInformation))
                     {
-                        SafeTokenHandle token = process.OpenToken();
+                        var token = process.OpenToken();
                         _tokens.Add(token);
                         ListViewItem item = listViewProcesses.Items.Add(p.Id.ToString());
                         item.SubItems.Add(p.ProcessName);
-                        item.SubItems.Add(process.GetUser());
-                        item.SubItems.Add(token.GetIntegrityLevel().ToString());
+                        item.SubItems.Add(process.User.Name);
+                        item.SubItems.Add(token.IntegrityLevel.ToString());
                         item.Tag = token;
                     }
                 }
@@ -61,11 +63,11 @@ namespace OleViewDotNet
             listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             listViewProcesses.ListViewItemSorter = new ListItemComparer(0);
             
-            foreach (object value in Enum.GetValues(typeof(SecurityIntegrityLevel)))
+            foreach (object value in Enum.GetValues(typeof(TokenIntegrityLevel)))
             {
                 comboBoxIL.Items.Add(value);
             }
-            comboBoxIL.SelectedItem = SecurityIntegrityLevel.Low;
+            comboBoxIL.SelectedItem = TokenIntegrityLevel.Low;
             if (process_security)
             {
                 textBoxPrincipal.Enabled = false;
@@ -85,7 +87,7 @@ namespace OleViewDotNet
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-        internal SafeTokenHandle Token { get; private set; }
+        internal NtToken Token { get; private set; }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
         internal string Principal { get; private set; }
@@ -101,13 +103,21 @@ namespace OleViewDotNet
             listViewProcesses.Enabled = radioSpecificProcess.Checked;
         }
 
+        private NtToken OpenImpersonationToken()
+        {
+            using (NtToken token = NtToken.OpenProcessToken())
+            {
+                return token.DuplicateToken(SecurityImpersonationLevel.Identification);
+            }
+        }
+
         private void btnOK_Click(object sender, EventArgs e)
         {
             try
             {
                 if (radioCurrentProcess.Checked)
                 {
-                    Token = SafeProcessHandle.Current.OpenTokenAsImpersonation(SecurityImpersonationLevel.SecurityIdentification);
+                    Token = OpenImpersonationToken();
                 }
                 else if (radioSpecificProcess.Checked)
                 {
@@ -116,19 +126,16 @@ namespace OleViewDotNet
                         throw new InvalidOperationException("Please select a process from the list");
                     }
 
-                    Token = ((SafeTokenHandle)listViewProcesses.SelectedItems[0].Tag).DuplicateImpersonation(SecurityImpersonationLevel.SecurityIdentification);
+                    Token = ((NtToken)listViewProcesses.SelectedItems[0].Tag).DuplicateToken(SecurityImpersonationLevel.Identification);
                 }
                 else if (radioAnonymous.Checked)
                 {
-                    using (SafeTokenHandle token = SafeTokenHandle.AnonymousToken)
-                    {
-                        Token = token.DuplicateImpersonation(SecurityImpersonationLevel.SecurityIdentification);
-                    }
+                    Token = TokenUtils.GetAnonymousToken();
                 }
 
                 if (checkBoxSetIL.Checked)
                 {
-                    Token.SetIntegrityLevel((SecurityIntegrityLevel)comboBoxIL.SelectedItem);
+                    Token.SetIntegrityLevel((TokenIntegrityLevel)comboBoxIL.SelectedItem);
                 }
 
                 if (checkBoxLocalAccess.Checked)

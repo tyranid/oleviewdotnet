@@ -17,6 +17,7 @@
 using Microsoft.CSharp;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using NtApiDotNet;
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;

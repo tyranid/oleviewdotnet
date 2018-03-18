@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -98,14 +99,14 @@ namespace OleViewDotNet
         All = Owner | Group | Dacl | Label
     }
 
-    public enum SecurityIntegrityLevel
-    {
-        Untrusted = 0,
-        Low = 0x1000,
-        Medium = 0x2000,
-        High = 0x3000,
-        System = 0x4000,
-    }
+    //public enum SecurityIntegrityLevel
+    //{
+    //    Untrusted = 0,
+    //    Low = 0x1000,
+    //    Medium = 0x2000,
+    //    High = 0x3000,
+    //    System = 0x4000,
+    //}
 
 
     [ClassInterface(ClassInterfaceType.None), ComVisible(true)]
@@ -333,7 +334,7 @@ namespace OleViewDotNet
         static extern bool AccessCheckByType(
           byte[] pSecurityDescriptor,
           byte[] PrincipalSelfSid,
-          SafeTokenHandle ClientToken,
+          SafeKernelObjectHandle ClientToken,
           uint DesiredAccess,
           IntPtr ObjectTypeList,
           int ObjectTypeListLength,
@@ -351,7 +352,7 @@ namespace OleViewDotNet
             return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
         }
 
-        internal static bool IsAccessGranted(string sddl, string principal, SafeTokenHandle token, bool launch, bool check_il, COMAccessRights desired_access)
+        internal static bool IsAccessGranted(string sddl, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
         {
             try
             {
@@ -386,7 +387,7 @@ namespace OleViewDotNet
             }
         }
 
-        private static bool GetGrantedAccess(string sddl, string principal, SafeTokenHandle token, bool launch, out COMAccessRights maximum_rights)
+        private static bool GetGrantedAccess(string sddl, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
         {
             GenericMapping mapping = new GenericMapping();
             mapping.GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote);
@@ -416,7 +417,7 @@ namespace OleViewDotNet
             uint granted_access = 0;
             bool access_status = false;
             byte[] sd = GetSDForStringSD(sddl);
-            if (!AccessCheckByType(sd, princ_bytes, token, MaximumAllowed, IntPtr.Zero, 
+            if (!AccessCheckByType(sd, princ_bytes, token.Handle, MaximumAllowed, IntPtr.Zero, 
                 0, ref mapping, ref priv_set, ref priv_length, out granted_access, out access_status))
             {
                 throw new Win32Exception(sddl);
@@ -531,36 +532,36 @@ namespace OleViewDotNet
             }
         }
 
-        public static SecurityIntegrityLevel GetILFromSid(SecurityIdentifier sid)
+        public static TokenIntegrityLevel GetILFromSid(SecurityIdentifier sid)
         {
             int last_index = sid.Value.LastIndexOf('-');
             int il;
             if (int.TryParse(sid.Value.Substring(last_index + 1), out il))
             {
-                return (SecurityIntegrityLevel)il;
+                return (TokenIntegrityLevel)il;
             }
 
-            return SecurityIntegrityLevel.Medium;
+            return TokenIntegrityLevel.Medium;
         }
 
-        public static SecurityIntegrityLevel GetILForSD(string sddl)
+        public static TokenIntegrityLevel GetILForSD(string sddl)
         {
             if (String.IsNullOrWhiteSpace(sddl))
             {
-                return SecurityIntegrityLevel.Medium;
+                return TokenIntegrityLevel.Medium;
             }
 
             string sacl = GetSaclForSddl(sddl);
             if (!sacl.StartsWith("S:", StringComparison.OrdinalIgnoreCase))
             {
-                return SecurityIntegrityLevel.Medium;
+                return TokenIntegrityLevel.Medium;
             }
 
             Regex label_re = new Regex(@"\(ML;;[^;]*;;;([^)]+)\)");
             Match m = label_re.Match(sacl);
             if (!m.Success || m.Groups.Count < 2)
             {
-                return SecurityIntegrityLevel.Medium;
+                return TokenIntegrityLevel.Medium;
             }
 
             SecurityIdentifier sid = new SecurityIdentifier(m.Groups[1].Value);
@@ -581,7 +582,7 @@ namespace OleViewDotNet
                 CommonAce common_ace = ace as CommonAce;
                 if (common_ace != null)
                 {
-                    if (common_ace.AceType == AceType.AccessAllowed 
+                    if (common_ace.AceType == System.Security.AccessControl.AceType.AccessAllowed 
                         && common_ace.SecurityIdentifier.Value.StartsWith("S-1-15-"))
                     {
                         return true;

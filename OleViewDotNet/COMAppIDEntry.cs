@@ -23,6 +23,7 @@ using System.Xml.Serialization;
 using System.Xml.Schema;
 using System.ServiceProcess;
 using System.Collections.Generic;
+using NtApiDotNet;
 
 namespace OleViewDotNet
 {
@@ -235,7 +236,7 @@ namespace OleViewDotNet
             return AppId.CompareTo(other.AppId);
         }
 
-        public Guid AppId { get; private set; }        
+        public Guid AppId { get; private set; }
 
         public string DllSurrogate { get; private set; }
 
@@ -278,12 +279,12 @@ namespace OleViewDotNet
 
         public bool HasLowILAccess
         {
-            get { return COMSecurity.GetILForSD(AccessPermission) <= SecurityIntegrityLevel.Low; }
+            get { return COMSecurity.GetILForSD(AccessPermission) <= TokenIntegrityLevel.Low; }
         }
 
         public bool HasLowILLaunch
         {
-            get { return COMSecurity.GetILForSD(LaunchPermission) <= SecurityIntegrityLevel.Low; }
+            get { return COMSecurity.GetILForSD(LaunchPermission) <= TokenIntegrityLevel.Low; }
         }
 
         public bool HasACAccess

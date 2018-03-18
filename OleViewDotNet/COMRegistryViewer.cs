@@ -17,6 +17,7 @@
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -810,15 +811,15 @@ namespace OleViewDotNet
         private static IEnumerable<TreeNode> LoadAppIDs(COMRegistry registry, bool filterIL, bool filterAC)
         {
             IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId = registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
-            IDictionary<Guid, COMAppIDEntry> appids = registry.AppIDs;            
+            IDictionary<Guid, COMAppIDEntry> appids = registry.AppIDs;
 
             List<TreeNode> serverNodes = new List<TreeNode>();
             foreach (var pair in appids)
             {
                 COMAppIDEntry appidEnt = appids[pair.Key];
                     
-                if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == SecurityIntegrityLevel.Medium &&
-                    COMSecurity.GetILForSD(appidEnt.LaunchPermission) == SecurityIntegrityLevel.Medium)
+                if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == TokenIntegrityLevel.Medium &&
+                    COMSecurity.GetILForSD(appidEnt.LaunchPermission) == TokenIntegrityLevel.Medium)
                 {
                     continue;
                 }
@@ -1584,7 +1585,7 @@ namespace OleViewDotNet
         private FilterResult RunAccessibleFilter(TreeNode node, 
             Dictionary<string, bool> access_cache, 
             Dictionary<string, bool> launch_cache, 
-            SafeTokenHandle token, 
+            NtToken token, 
             string principal,
             COMAccessRights access_rights, 
             COMAccessRights launch_rights)
@@ -1756,7 +1757,7 @@ namespace OleViewDotNet
 
         private async void btnApply_Click(object sender, EventArgs e)
         {
-            SafeTokenHandle token = null;
+            NtToken token = null;
             try
             {
                 TreeNode[] nodes = null;
