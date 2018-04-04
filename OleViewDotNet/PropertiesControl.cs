@@ -361,12 +361,12 @@ namespace OleViewDotNet
 
         private void btnViewLaunchPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, m_appid, false);
+            COMSecurity.ViewSecurity(m_registry, m_appid, false);
         }
 
         private void btnViewAccessPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, m_appid, true);
+            COMSecurity.ViewSecurity(m_registry, m_appid, true);
         }
 
         private void copyProgIDToolStripMenuItem_Click(object sender, EventArgs e)
@@ -521,7 +521,7 @@ namespace OleViewDotNet
 
         private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, String.Format("{0} Access", m_process.Name), 
+            COMSecurity.ViewSecurity(m_registry, String.Format("{0} Access", m_process.Name), 
                 m_process.AccessPermissions, true);
         }
 

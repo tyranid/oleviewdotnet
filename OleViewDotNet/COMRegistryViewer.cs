@@ -1925,12 +1925,12 @@ namespace OleViewDotNet
                 if (node.Tag is COMProcessEntry)
                 {
                     COMProcessEntry proc = (COMProcessEntry)node.Tag;
-                    COMSecurity.ViewSecurity(this, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
+                    COMSecurity.ViewSecurity(m_registry, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
                 }
                 else if (node.Tag is COMRuntimeClassEntry)
                 {
                     COMRuntimeClassEntry runtime_entry = (COMRuntimeClassEntry)node.Tag;
-                    COMSecurity.ViewSecurity(this, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, false);
+                    COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, false);
                 }
                 else
                 {
@@ -1951,7 +1951,7 @@ namespace OleViewDotNet
 
                     if (appid != null)
                     {
-                        COMSecurity.ViewSecurity(this, appid, access);
+                        COMSecurity.ViewSecurity(m_registry, appid, access);
                     }
                 }
             }

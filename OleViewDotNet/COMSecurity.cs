@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
@@ -32,23 +33,32 @@ namespace OleViewDotNet
         ExecuteRemote = 4,
         ActivateLocal = 8,
         ActivateRemote = 16,
+        GenericRead = GenericAccessRights.GenericRead,
+        GenericWrite = GenericAccessRights.GenericWrite,
+        GenericExecute = GenericAccessRights.GenericExecute,
+        GenericAll = GenericAccessRights.GenericAll,
     }
 
     public static class COMSecurity
     {
-        public static void ViewSecurity(IWin32Window parent, string name, string sddl, bool access)
+        public static void ViewSecurity(COMRegistry registry, string name, string sddl, bool access)
         {
             if (!String.IsNullOrWhiteSpace(sddl))
             {
                 SecurityDescriptor sd = new SecurityDescriptor(sddl);
                 AccessMask valid_access = access ? 0x7 : 0x1F;
-                Win32Utils.EditSecurity(parent != null ? parent.Handle : IntPtr.Zero, name, sd, typeof(COMAccessRights), valid_access, new GenericMapping());
+
+                SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
+                Program.GetMainForm(registry).HostControl(control, name);
+                control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
+                    { GenericExecute = valid_access, GenericRead = valid_access,
+                    GenericWrite = valid_access, GenericAll = valid_access }, valid_access);
             }
         }
 
-        public static void ViewSecurity(IWin32Window parent, COMAppIDEntry appid, bool access)
+        public static void ViewSecurity(COMRegistry registry, COMAppIDEntry appid, bool access)
         {
-            ViewSecurity(parent, String.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
+            ViewSecurity(registry, String.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
                     access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
 

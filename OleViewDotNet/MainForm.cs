@@ -106,10 +106,20 @@ namespace OleViewDotNet
 
         public void HostControl(Control c)
         {
-            DocumentForm frm = new DocumentForm(c);
+            HostControl(c, null);
+        }
 
-            frm.ShowHint = DockState.Document;
+        public void HostControl(Control c, string name)
+        {
+            DocumentForm frm = new DocumentForm(c)
+            {
+                ShowHint = DockState.Document
+            };
             frm.Show(m_dockPanel);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                frm.TabText = name;
+            }
         }
 
         public async Task HostObject(COMCLSIDEntry ent, object obj, bool factory)
@@ -534,22 +544,22 @@ namespace OleViewDotNet
 
         private void menuSecurityDefaultAccess_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Access", m_registry.DefaultAccessPermission, true);
+            COMSecurity.ViewSecurity(m_registry, "Default Access", m_registry.DefaultAccessPermission, true);
         }
 
         private void menuSecurityDefaultAccessRestriction_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Access Restrictions", m_registry.DefaultAccessRestriction, true);
+            COMSecurity.ViewSecurity(m_registry, "Default Access Restrictions", m_registry.DefaultAccessRestriction, true);
         }
 
         private void menuSecurityDefaultLaunch_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Launch", m_registry.DefaultLaunchPermission, false);
+            COMSecurity.ViewSecurity(m_registry, "Default Launch", m_registry.DefaultLaunchPermission, false);
         }
 
         private void menuSecurityDefaultLaunchRestriction_Click(object sender, EventArgs e)
         {
-            COMSecurity.ViewSecurity(this, "Default Launch Restrictions", m_registry.DefaultLaunchRestriction, false);
+            COMSecurity.ViewSecurity(m_registry, "Default Launch Restrictions", m_registry.DefaultLaunchRestriction, false);
         }
 
         public COMRegistry Registry { get { return m_registry; } }
