@@ -203,7 +203,8 @@ namespace OleViewDotNet
             textBoxIID.Text = GetGuidValue(entry.Iid);
             textBoxInterfaceBase.Text = GetStringValue(entry.Base);
             textBoxInterfaceProxy.Text = GetGuidValue(entry.ProxyClsid);
-            btnProxyProperties.Enabled = m_registry.Clsids.ContainsKey(entry.ProxyClsid);                           
+            txtMethods.Text = entry.NumMethods.ToString();
+            btnProxyProperties.Enabled = m_registry.Clsids.ContainsKey(entry.ProxyClsid);
             tabControlProperties.TabPages.Add(tabPageInterface);
             SetupTypeLibVersionEntry(m_registry.GetTypeLibVersionEntry(entry.TypeLib, entry.TypeLibVersion));
             m_interface = entry;
