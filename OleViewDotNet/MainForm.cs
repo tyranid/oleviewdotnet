@@ -766,8 +766,9 @@ namespace OleViewDotNet
         {
             try
             {
-                OpenView(COMRegistryViewer.DisplayMode.Processes, 
-                    new COMProcessEntry[] { COMUtilities.LoadProcess(pid) });
+                ConfigureSymbols();
+                OpenView(COMRegistryViewer.DisplayMode.Processes,
+                    COMUtilities.LoadProcesses(new int[] { pid }, this));
             }
             catch (Exception ex)
             {

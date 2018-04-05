@@ -93,5 +93,10 @@ namespace OleViewDotNet
                 Program.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
             }
         }
+
+        private void btnViewProcess_Click(object sender, EventArgs e)
+        {
+            Program.GetMainForm(m_registry).LoadProcessByProcessId(COMUtilities.GetProcessIdFromIPid(m_objref.StdObjRef.Ipid));
+        }
     }
 }

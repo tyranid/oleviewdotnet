@@ -795,12 +795,10 @@ namespace OleViewDotNet
             }
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(string dbghelp_path, string symbol_path, IProgress<Tuple<string, int>> progress)
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, string dbghelp_path, string symbol_path, IProgress<Tuple<string, int>> progress)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
-            int current_pid = Process.GetCurrentProcess().Id;
             NtToken.EnableDebugPrivilege();
-            IEnumerable<Process> procs = Process.GetProcesses().Where(p => p.Id != current_pid).OrderBy(p => p.ProcessName);
             int total_count = procs.Count();
             int current_count = 0;
             foreach (Process p in procs)

@@ -1795,22 +1795,13 @@ namespace OleViewDotNet
             }
         }
 
-        internal static COMProcessEntry LoadProcess(int pid)
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window)
         {
             string dbghelp = Environment.Is64BitProcess
                     ? Properties.Settings.Default.DbgHelpPath64
                     : Properties.Settings.Default.DbgHelpPath32;
             string symbol_path = Properties.Settings.Default.SymbolPath;
-            return COMProcessParser.ParseProcess(pid, dbghelp, symbol_path);
-        }
-
-        internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window)
-        {
-            string dbghelp = Environment.Is64BitProcess
-                    ? Properties.Settings.Default.DbgHelpPath64
-                    : Properties.Settings.Default.DbgHelpPath32;
-            string symbol_path = Properties.Settings.Default.SymbolPath;
-            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(dbghelp, symbol_path, progress), s => s))
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, dbghelp, symbol_path, progress), s => s))
             {
                 dlg.Text = "Loading Processes";
                 if (dlg.ShowDialog(window) == DialogResult.OK)
@@ -1823,6 +1814,18 @@ namespace OleViewDotNet
                 }
                 return null;
             }
+        }
+
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<int> pids, IWin32Window window)
+        {
+            return LoadProcesses(pids.Select(p => Process.GetProcessById(p)), window);
+        }
+
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window)
+        {
+            int current_pid = Process.GetCurrentProcess().Id;
+            var procs = Process.GetProcesses().Where(p => p.Id != current_pid).OrderBy(p => p.ProcessName);
+            return LoadProcesses(procs, window);
         }
 
         private class ReportQueryProgress
