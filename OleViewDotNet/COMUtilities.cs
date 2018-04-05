@@ -1795,6 +1795,15 @@ namespace OleViewDotNet
             }
         }
 
+        internal static COMProcessEntry LoadProcess(int pid)
+        {
+            string dbghelp = Environment.Is64BitProcess
+                    ? Properties.Settings.Default.DbgHelpPath64
+                    : Properties.Settings.Default.DbgHelpPath32;
+            string symbol_path = Properties.Settings.Default.SymbolPath;
+            return COMProcessParser.ParseProcess(pid, dbghelp, symbol_path);
+        }
+
         internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window)
         {
             string dbghelp = Environment.Is64BitProcess

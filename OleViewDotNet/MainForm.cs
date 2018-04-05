@@ -737,7 +737,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)
+        private void ConfigureSymbols()
         {
             if (!Properties.Settings.Default.SymbolsConfigured)
             {
@@ -750,11 +750,28 @@ namespace OleViewDotNet
                     }
                 }
             }
+        }
 
+        private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)
+        {
+            ConfigureSymbols();
             IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this);
             if (processes != null && processes.Count() > 0)
             {
                 OpenView(COMRegistryViewer.DisplayMode.Processes, processes.OrderBy(orderby_selector));
+            }
+        }
+
+        internal void LoadProcessByProcessId(int pid)
+        {
+            try
+            {
+                OpenView(COMRegistryViewer.DisplayMode.Processes, 
+                    new COMProcessEntry[] { COMUtilities.LoadProcess(pid) });
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
             }
         }
 
