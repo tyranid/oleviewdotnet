@@ -762,6 +762,27 @@ namespace OleViewDotNet
             }
         }
 
+        internal void LoadIPid(Guid ipid)
+        {
+            try
+            {
+                ConfigureSymbols();
+                var proc = COMUtilities.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this).FirstOrDefault();
+                if (proc != null)
+                {
+                    COMIPIDEntry ipid_entry = proc.Ipids.Where(e => e.Ipid == ipid).FirstOrDefault();
+                    if (ipid_entry != null)
+                    {
+                        HostControl(new PropertiesControl(m_registry, string.Format("IPID: {0}", ipid.FormatGuid()), ipid_entry));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
+        }
+
         internal void LoadProcessByProcessId(int pid)
         {
             try

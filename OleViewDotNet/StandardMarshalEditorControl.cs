@@ -96,7 +96,7 @@ namespace OleViewDotNet
 
         private void btnViewProcess_Click(object sender, EventArgs e)
         {
-            Program.GetMainForm(m_registry).LoadProcessByProcessId(COMUtilities.GetProcessIdFromIPid(m_objref.StdObjRef.Ipid));
+            Program.GetMainForm(m_registry).LoadIPid(m_objref.StdObjRef.Ipid);
         }
     }
 }
