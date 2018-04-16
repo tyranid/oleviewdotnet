@@ -335,7 +335,7 @@ namespace OleViewDotNet
             }
             if (ent.AppID != Guid.Empty)
             {
-                AppendFormatLine(strRet, "AppID: {0}", ent.AppID.FormatGuid());            
+                AppendFormatLine(strRet, "AppID: {0}", ent.AppID.FormatGuid());
             }
             if (ent.TypeLib != Guid.Empty)
             {
@@ -451,7 +451,7 @@ namespace OleViewDotNet
             TreeNode[] clsidNodes = new TreeNode[registry.Clsids.Count];
             foreach (COMCLSIDEntry ent in registry.Clsids.Values)
             {
-                clsidNodes[i] = CreateCLSIDNode(registry, ent);                
+                clsidNodes[i] = CreateCLSIDNode(registry, ent);
                 i++;
             }
             return clsidNodes;
@@ -461,6 +461,7 @@ namespace OleViewDotNet
         {
             return registry.RuntimeClasses.Select(p => {
                 TreeNode n = CreateNode(p.Key, ClassKey);
+                n.Nodes.Add("IUnknown");
                 n.Tag = p.Value;
                 return n;
                 }
@@ -992,14 +993,9 @@ namespace OleViewDotNet
 
         private async Task SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
         {
-            COMCLSIDEntry clsid = null;
+            ICOMEnumerableInterfaces clsid = node.Tag as ICOMEnumerableInterfaces;
 
-            if (node.Tag is COMCLSIDEntry)
-            {
-                clsid = (COMCLSIDEntry)node.Tag;
-
-            }
-            else if (node.Tag is COMProgIDEntry)
+            if (clsid == null && node.Tag is COMProgIDEntry)
             {
                 clsid = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
             }

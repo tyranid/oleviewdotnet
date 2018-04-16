@@ -413,7 +413,45 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable
+    public interface ICOMEnumerableInterfaces
+    {
+        /// <summary>
+        /// Get list of supported Interface IIDs (that we know about)
+        /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
+        /// The returned array is cached so subsequent calls to this function return without calling into COM
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>Returns true if supported interfaces were refreshed.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        Task<bool> LoadSupportedInterfacesAsync(bool refresh);
+
+        /// <summary>
+        /// Get list of supported Interface IIDs Synchronously
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>Returns true if supported interfaces were refreshed.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        bool LoadSupportedInterfaces(bool refresh);
+
+        /// <summary>
+        /// Indicates that the class' interface list has been loaded.
+        /// </summary>
+        bool InterfacesLoaded {  get; }
+
+        /// <summary>
+        /// Get list of interfaces.
+        /// </summary>
+        /// <remarks>You must have called LoadSupportedInterfaces before this call to get any useful output.</remarks>
+        IEnumerable<COMInterfaceInstance> Interfaces { get; }
+
+        /// <summary>
+        /// Get list of factory interfaces.
+        /// </summary>
+        /// <remarks>You must have called LoadSupportedFactoryInterfaces before this call to get any useful output.</remarks>
+        IEnumerable<COMInterfaceInstance> FactoryInterfaces { get; }
+    }
+
+    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMEnumerableInterfaces
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;

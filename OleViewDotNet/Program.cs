@@ -204,7 +204,7 @@ namespace OleViewDotNet
                 Environment.Exit(1);
             }
 
-            if (enum_clsid)
+            if (enum_clsid || enum_runtime)
             {
                 try
                 {

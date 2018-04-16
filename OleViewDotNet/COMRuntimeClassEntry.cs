@@ -16,7 +16,9 @@
 
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -36,8 +38,11 @@ namespace OleViewDotNet
         OutOfProcess = 1
     }
 
-    public class COMRuntimeClassEntry : IXmlSerializable
+    public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMEnumerableInterfaces
     {
+        private List<COMInterfaceInstance> m_interfaces;
+        private List<COMInterfaceInstance> m_factory_interfaces;
+
         public string Name { get; private set; }
         public Guid Clsid { get; private set; }
         public string DllPath { get; private set; }
@@ -135,6 +140,101 @@ namespace OleViewDotNet
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
                 ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
                 ^ Permissions.GetSafeHashCode() & Threading.GetHashCode();
+        }
+
+        int IComparable<COMRuntimeClassEntry>.CompareTo(COMRuntimeClassEntry other)
+        {
+            return Server.CompareTo(other.Server);
+        }
+
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
+        {
+            try
+            {
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this);
+            }
+            catch (Win32Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
+        {
+            if (Clsid == Guid.Empty)
+            {
+                return false;
+            }
+
+            if (refresh || !InterfacesLoaded)
+            {
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
+                m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
+                m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
+                InterfacesLoaded = true;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get list of supported Interface IIDs Synchronously
+        /// </summary>        
+        /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <returns>Returns true if supported interfaces were refreshed.</returns>
+        /// <exception cref="Win32Exception">Thrown on error.</exception>
+        public bool LoadSupportedInterfaces(bool refresh)
+        {
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh);
+            result.Wait();
+            if (result.IsFaulted)
+            {
+                throw result.Exception.InnerException;
+            }
+            return result.Result;
+        }
+
+        /// <summary>
+        /// Indicates that the class' interface list has been loaded.
+        /// </summary>
+        public bool InterfacesLoaded { get; private set; }
+
+        /// <summary>
+        /// Get list of interfaces.
+        /// </summary>
+        /// <remarks>You must have called LoadSupportedInterfaces before this call to get any useful output.</remarks>
+        public IEnumerable<COMInterfaceInstance> Interfaces
+        {
+            get
+            {
+                if (InterfacesLoaded)
+                {
+                    return m_interfaces.AsReadOnly();
+                }
+                else
+                {
+                    return new COMInterfaceInstance[0];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get list of factory interfaces.
+        /// </summary>
+        /// <remarks>You must have called LoadSupportedFactoryInterfaces before this call to get any useful output.</remarks>
+        public IEnumerable<COMInterfaceInstance> FactoryInterfaces
+        {
+            get
+            {
+                if (InterfacesLoaded)
+                {
+                    return m_factory_interfaces.AsReadOnly();
+                }
+                else
+                {
+                    return new COMInterfaceInstance[0];
+                }
+            }
         }
     }
 }
