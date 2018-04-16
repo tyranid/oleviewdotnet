@@ -28,16 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ColumnHeader columnHeaderPID;
-            System.Windows.Forms.ColumnHeader columnHeaderName;
-            System.Windows.Forms.ColumnHeader columnHeaderUser;
-            System.Windows.Forms.ColumnHeader columnHeaderIL;
             System.Windows.Forms.GroupBox groupBoxAccessToken;
             System.Windows.Forms.GroupBox groupBoxOptions;
             System.Windows.Forms.Label label1;
+            this.selectProcessControl = new OleViewDotNet.SelectProcessControl();
+            this.radioAnonymous = new System.Windows.Forms.RadioButton();
             this.radioSpecificProcess = new System.Windows.Forms.RadioButton();
             this.radioCurrentProcess = new System.Windows.Forms.RadioButton();
-            this.listViewProcesses = new System.Windows.Forms.ListView();
             this.checkBoxRemoteActivate = new System.Windows.Forms.CheckBox();
             this.checkBoxLocalActivate = new System.Windows.Forms.CheckBox();
             this.checkBoxRemoteLaunch = new System.Windows.Forms.CheckBox();
@@ -49,11 +46,6 @@
             this.checkBoxSetIL = new System.Windows.Forms.CheckBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.radioAnonymous = new System.Windows.Forms.RadioButton();
-            columnHeaderPID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            columnHeaderUser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            columnHeaderIL = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             groupBoxAccessToken = new System.Windows.Forms.GroupBox();
             groupBoxOptions = new System.Windows.Forms.GroupBox();
             label1 = new System.Windows.Forms.Label();
@@ -61,41 +53,51 @@
             groupBoxOptions.SuspendLayout();
             this.SuspendLayout();
             // 
-            // columnHeaderPID
-            // 
-            columnHeaderPID.Text = "PID";
-            // 
-            // columnHeaderName
-            // 
-            columnHeaderName.Text = "Name";
-            // 
-            // columnHeaderUser
-            // 
-            columnHeaderUser.Text = "User";
-            // 
-            // columnHeaderIL
-            // 
-            columnHeaderIL.Text = "Integrity";
-            // 
             // groupBoxAccessToken
             // 
+            groupBoxAccessToken.Controls.Add(this.selectProcessControl);
             groupBoxAccessToken.Controls.Add(this.radioAnonymous);
             groupBoxAccessToken.Controls.Add(this.radioSpecificProcess);
             groupBoxAccessToken.Controls.Add(this.radioCurrentProcess);
-            groupBoxAccessToken.Controls.Add(this.listViewProcesses);
-            groupBoxAccessToken.Location = new System.Drawing.Point(9, 12);
+            groupBoxAccessToken.Location = new System.Drawing.Point(12, 15);
+            groupBoxAccessToken.Margin = new System.Windows.Forms.Padding(4);
             groupBoxAccessToken.Name = "groupBoxAccessToken";
-            groupBoxAccessToken.Size = new System.Drawing.Size(634, 217);
+            groupBoxAccessToken.Padding = new System.Windows.Forms.Padding(4);
+            groupBoxAccessToken.Size = new System.Drawing.Size(845, 267);
             groupBoxAccessToken.TabIndex = 4;
             groupBoxAccessToken.TabStop = false;
             groupBoxAccessToken.Text = "Access Token";
             // 
+            // selectProcessControl
+            // 
+            this.selectProcessControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.selectProcessControl.Enabled = false;
+            this.selectProcessControl.Location = new System.Drawing.Point(7, 80);
+            this.selectProcessControl.Name = "selectProcessControl";
+            this.selectProcessControl.Size = new System.Drawing.Size(831, 152);
+            this.selectProcessControl.TabIndex = 6;
+            // 
+            // radioAnonymous
+            // 
+            this.radioAnonymous.AutoSize = true;
+            this.radioAnonymous.Location = new System.Drawing.Point(8, 239);
+            this.radioAnonymous.Margin = new System.Windows.Forms.Padding(4);
+            this.radioAnonymous.Name = "radioAnonymous";
+            this.radioAnonymous.Size = new System.Drawing.Size(147, 21);
+            this.radioAnonymous.TabIndex = 5;
+            this.radioAnonymous.TabStop = true;
+            this.radioAnonymous.Text = "Anonymous Token";
+            this.radioAnonymous.UseVisualStyleBackColor = true;
+            // 
             // radioSpecificProcess
             // 
             this.radioSpecificProcess.AutoSize = true;
-            this.radioSpecificProcess.Location = new System.Drawing.Point(6, 42);
+            this.radioSpecificProcess.Location = new System.Drawing.Point(8, 52);
+            this.radioSpecificProcess.Margin = new System.Windows.Forms.Padding(4);
             this.radioSpecificProcess.Name = "radioSpecificProcess";
-            this.radioSpecificProcess.Size = new System.Drawing.Size(104, 17);
+            this.radioSpecificProcess.Size = new System.Drawing.Size(133, 21);
             this.radioSpecificProcess.TabIndex = 4;
             this.radioSpecificProcess.Text = "Specific Process";
             this.radioSpecificProcess.UseVisualStyleBackColor = true;
@@ -105,31 +107,14 @@
             // 
             this.radioCurrentProcess.AutoSize = true;
             this.radioCurrentProcess.Checked = true;
-            this.radioCurrentProcess.Location = new System.Drawing.Point(6, 19);
+            this.radioCurrentProcess.Location = new System.Drawing.Point(8, 23);
+            this.radioCurrentProcess.Margin = new System.Windows.Forms.Padding(4);
             this.radioCurrentProcess.Name = "radioCurrentProcess";
-            this.radioCurrentProcess.Size = new System.Drawing.Size(100, 17);
+            this.radioCurrentProcess.Size = new System.Drawing.Size(131, 21);
             this.radioCurrentProcess.TabIndex = 3;
             this.radioCurrentProcess.TabStop = true;
             this.radioCurrentProcess.Text = "Current Process";
             this.radioCurrentProcess.UseVisualStyleBackColor = true;
-            // 
-            // listViewProcesses
-            // 
-            this.listViewProcesses.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            columnHeaderPID,
-            columnHeaderName,
-            columnHeaderUser,
-            columnHeaderIL});
-            this.listViewProcesses.Enabled = false;
-            this.listViewProcesses.FullRowSelect = true;
-            this.listViewProcesses.Location = new System.Drawing.Point(3, 62);
-            this.listViewProcesses.MultiSelect = false;
-            this.listViewProcesses.Name = "listViewProcesses";
-            this.listViewProcesses.Size = new System.Drawing.Size(627, 127);
-            this.listViewProcesses.TabIndex = 0;
-            this.listViewProcesses.UseCompatibleStateImageBehavior = false;
-            this.listViewProcesses.View = System.Windows.Forms.View.Details;
-            this.listViewProcesses.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewProcesses_ColumnClick);
             // 
             // groupBoxOptions
             // 
@@ -143,9 +128,11 @@
             groupBoxOptions.Controls.Add(this.checkBoxLocalAccess);
             groupBoxOptions.Controls.Add(this.comboBoxIL);
             groupBoxOptions.Controls.Add(this.checkBoxSetIL);
-            groupBoxOptions.Location = new System.Drawing.Point(9, 235);
+            groupBoxOptions.Location = new System.Drawing.Point(12, 289);
+            groupBoxOptions.Margin = new System.Windows.Forms.Padding(4);
             groupBoxOptions.Name = "groupBoxOptions";
-            groupBoxOptions.Size = new System.Drawing.Size(630, 79);
+            groupBoxOptions.Padding = new System.Windows.Forms.Padding(4);
+            groupBoxOptions.Size = new System.Drawing.Size(840, 97);
             groupBoxOptions.TabIndex = 5;
             groupBoxOptions.TabStop = false;
             groupBoxOptions.Text = "Options";
@@ -153,9 +140,10 @@
             // checkBoxRemoteActivate
             // 
             this.checkBoxRemoteActivate.AutoSize = true;
-            this.checkBoxRemoteActivate.Location = new System.Drawing.Point(514, 42);
+            this.checkBoxRemoteActivate.Location = new System.Drawing.Point(685, 52);
+            this.checkBoxRemoteActivate.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxRemoteActivate.Name = "checkBoxRemoteActivate";
-            this.checkBoxRemoteActivate.Size = new System.Drawing.Size(105, 17);
+            this.checkBoxRemoteActivate.Size = new System.Drawing.Size(133, 21);
             this.checkBoxRemoteActivate.TabIndex = 9;
             this.checkBoxRemoteActivate.Text = "Remote Activate";
             this.checkBoxRemoteActivate.UseVisualStyleBackColor = true;
@@ -165,9 +153,10 @@
             this.checkBoxLocalActivate.AutoSize = true;
             this.checkBoxLocalActivate.Checked = true;
             this.checkBoxLocalActivate.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalActivate.Location = new System.Drawing.Point(414, 42);
+            this.checkBoxLocalActivate.Location = new System.Drawing.Point(552, 52);
+            this.checkBoxLocalActivate.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxLocalActivate.Name = "checkBoxLocalActivate";
-            this.checkBoxLocalActivate.Size = new System.Drawing.Size(94, 17);
+            this.checkBoxLocalActivate.Size = new System.Drawing.Size(118, 21);
             this.checkBoxLocalActivate.TabIndex = 8;
             this.checkBoxLocalActivate.Text = "Local Activate";
             this.checkBoxLocalActivate.UseVisualStyleBackColor = true;
@@ -175,9 +164,10 @@
             // checkBoxRemoteLaunch
             // 
             this.checkBoxRemoteLaunch.AutoSize = true;
-            this.checkBoxRemoteLaunch.Location = new System.Drawing.Point(306, 42);
+            this.checkBoxRemoteLaunch.Location = new System.Drawing.Point(408, 52);
+            this.checkBoxRemoteLaunch.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxRemoteLaunch.Name = "checkBoxRemoteLaunch";
-            this.checkBoxRemoteLaunch.Size = new System.Drawing.Size(102, 17);
+            this.checkBoxRemoteLaunch.Size = new System.Drawing.Size(130, 21);
             this.checkBoxRemoteLaunch.TabIndex = 7;
             this.checkBoxRemoteLaunch.Text = "Remote Launch";
             this.checkBoxRemoteLaunch.UseVisualStyleBackColor = true;
@@ -187,35 +177,39 @@
             this.checkBoxLocalLaunch.AutoSize = true;
             this.checkBoxLocalLaunch.Checked = true;
             this.checkBoxLocalLaunch.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalLaunch.Location = new System.Drawing.Point(209, 42);
+            this.checkBoxLocalLaunch.Location = new System.Drawing.Point(279, 52);
+            this.checkBoxLocalLaunch.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxLocalLaunch.Name = "checkBoxLocalLaunch";
-            this.checkBoxLocalLaunch.Size = new System.Drawing.Size(91, 17);
+            this.checkBoxLocalLaunch.Size = new System.Drawing.Size(115, 21);
             this.checkBoxLocalLaunch.TabIndex = 6;
             this.checkBoxLocalLaunch.Text = "Local Launch";
             this.checkBoxLocalLaunch.UseVisualStyleBackColor = true;
             // 
             // textBoxPrincipal
             // 
-            this.textBoxPrincipal.Location = new System.Drawing.Point(318, 17);
+            this.textBoxPrincipal.Location = new System.Drawing.Point(424, 21);
+            this.textBoxPrincipal.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxPrincipal.Name = "textBoxPrincipal";
-            this.textBoxPrincipal.Size = new System.Drawing.Size(306, 20);
+            this.textBoxPrincipal.Size = new System.Drawing.Size(407, 22);
             this.textBoxPrincipal.TabIndex = 5;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(262, 19);
+            label1.Location = new System.Drawing.Point(349, 23);
+            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(50, 13);
+            label1.Size = new System.Drawing.Size(66, 17);
             label1.TabIndex = 4;
             label1.Text = "Principal:";
             // 
             // checkBoxRemoteAccess
             // 
             this.checkBoxRemoteAccess.AutoSize = true;
-            this.checkBoxRemoteAccess.Location = new System.Drawing.Point(102, 42);
+            this.checkBoxRemoteAccess.Location = new System.Drawing.Point(136, 52);
+            this.checkBoxRemoteAccess.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxRemoteAccess.Name = "checkBoxRemoteAccess";
-            this.checkBoxRemoteAccess.Size = new System.Drawing.Size(101, 17);
+            this.checkBoxRemoteAccess.Size = new System.Drawing.Size(128, 21);
             this.checkBoxRemoteAccess.TabIndex = 3;
             this.checkBoxRemoteAccess.Text = "Remote Access";
             this.checkBoxRemoteAccess.UseVisualStyleBackColor = true;
@@ -225,9 +219,10 @@
             this.checkBoxLocalAccess.AutoSize = true;
             this.checkBoxLocalAccess.Checked = true;
             this.checkBoxLocalAccess.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalAccess.Location = new System.Drawing.Point(6, 42);
+            this.checkBoxLocalAccess.Location = new System.Drawing.Point(8, 52);
+            this.checkBoxLocalAccess.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxLocalAccess.Name = "checkBoxLocalAccess";
-            this.checkBoxLocalAccess.Size = new System.Drawing.Size(90, 17);
+            this.checkBoxLocalAccess.Size = new System.Drawing.Size(113, 21);
             this.checkBoxLocalAccess.TabIndex = 2;
             this.checkBoxLocalAccess.Text = "Local Access";
             this.checkBoxLocalAccess.UseVisualStyleBackColor = true;
@@ -237,17 +232,19 @@
             this.comboBoxIL.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxIL.Enabled = false;
             this.comboBoxIL.FormattingEnabled = true;
-            this.comboBoxIL.Location = new System.Drawing.Point(126, 15);
+            this.comboBoxIL.Location = new System.Drawing.Point(168, 18);
+            this.comboBoxIL.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxIL.Name = "comboBoxIL";
-            this.comboBoxIL.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxIL.Size = new System.Drawing.Size(160, 24);
             this.comboBoxIL.TabIndex = 1;
             // 
             // checkBoxSetIL
             // 
             this.checkBoxSetIL.AutoSize = true;
-            this.checkBoxSetIL.Location = new System.Drawing.Point(6, 19);
+            this.checkBoxSetIL.Location = new System.Drawing.Point(8, 23);
+            this.checkBoxSetIL.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxSetIL.Name = "checkBoxSetIL";
-            this.checkBoxSetIL.Size = new System.Drawing.Size(114, 17);
+            this.checkBoxSetIL.Size = new System.Drawing.Size(147, 21);
             this.checkBoxSetIL.TabIndex = 0;
             this.checkBoxSetIL.Text = "Set Integrity Level:";
             this.checkBoxSetIL.UseVisualStyleBackColor = true;
@@ -255,9 +252,10 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(231, 320);
+            this.btnOK.Location = new System.Drawing.Point(308, 394);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 23);
+            this.btnOK.Size = new System.Drawing.Size(100, 28);
             this.btnOK.TabIndex = 1;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -266,35 +264,26 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(342, 320);
+            this.btnCancel.Location = new System.Drawing.Point(456, 394);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.Size = new System.Drawing.Size(100, 28);
             this.btnCancel.TabIndex = 2;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // radioAnonymous
-            // 
-            this.radioAnonymous.AutoSize = true;
-            this.radioAnonymous.Location = new System.Drawing.Point(6, 194);
-            this.radioAnonymous.Name = "radioAnonymous";
-            this.radioAnonymous.Size = new System.Drawing.Size(114, 17);
-            this.radioAnonymous.TabIndex = 5;
-            this.radioAnonymous.TabStop = true;
-            this.radioAnonymous.Text = "Anonymous Token";
-            this.radioAnonymous.UseVisualStyleBackColor = true;
-            // 
             // SelectSecurityCheckForm
             // 
             this.AcceptButton = this.btnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(648, 355);
+            this.ClientSize = new System.Drawing.Size(864, 437);
             this.Controls.Add(groupBoxOptions);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(groupBoxAccessToken);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectSecurityCheckForm";
@@ -310,8 +299,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.ListView listViewProcesses;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.RadioButton radioCurrentProcess;
@@ -326,5 +313,6 @@
         private System.Windows.Forms.CheckBox checkBoxRemoteAccess;
         private System.Windows.Forms.CheckBox checkBoxLocalAccess;
         private System.Windows.Forms.RadioButton radioAnonymous;
+        private SelectProcessControl selectProcessControl;
     }
 }

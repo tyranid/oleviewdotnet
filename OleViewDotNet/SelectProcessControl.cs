@@ -24,6 +24,8 @@ namespace OleViewDotNet
 {
     public partial class SelectProcessControl : UserControl
     {
+        DisposableList<NtProcess> _processes;
+
         public SelectProcessControl()
         {
             InitializeComponent();
@@ -42,14 +44,8 @@ namespace OleViewDotNet
 
         private void ClearListView()
         {
-            foreach (ListViewItem item in listViewProcesses.Items)
-            {
-                IDisposable tag = item.Tag as IDisposable;
-                if (tag != null)
-                {
-                    tag.Dispose();
-                }
-            }
+            _processes?.Dispose();
+            _processes = new DisposableList<NtProcess>();
             listViewProcesses.Items.Clear();
         }
 
@@ -76,7 +72,7 @@ namespace OleViewDotNet
                             item.SubItems.Add(p.User.Name);
                             item.SubItems.Add(token.IntegrityLevel.ToString());
                         }
-                        item.Tag = p.Duplicate();
+                        item.Tag = _processes.AddResource(p.Duplicate());
                     }
                 }
             }

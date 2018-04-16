@@ -26,39 +26,15 @@ namespace OleViewDotNet
     internal partial class SelectSecurityCheckForm : Form
     {
         private bool _process_security;
-        private DisposableList<NtToken> _tokens;
 
         public SelectSecurityCheckForm(bool process_security)
         {
             InitializeComponent();
             _process_security = process_security;
-            _tokens = new DisposableList<NtToken>();
             Disposed += SelectSecurityCheckForm_Disposed;
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
-            NtToken.EnableDebugPrivilege();
-
-            using (var ps = NtProcess.GetProcesses(ProcessAccessRights.QueryLimitedInformation, true).ToDisposableList())
-            {
-                foreach (var p in ps.OrderBy(p => p.ProcessId))
-                {
-                    var result = NtToken.OpenProcessToken(p, TokenAccessRights.MaximumAllowed, false);
-                    if (result.IsSuccess)
-                    {
-                        NtToken token = result.Result;
-                        _tokens.Add(token);
-                        ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
-                        item.SubItems.Add(p.Name);
-                        item.SubItems.Add(p.User.Name);
-                        item.SubItems.Add(token.IntegrityLevel.ToString());
-                        item.Tag = token;
-                    }
-                }
-            }
-            listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-            listViewProcesses.ListViewItemSorter = new ListItemComparer(0);
-            
+            selectProcessControl.UpdateProcessList(ProcessAccessRights.None, true);
             foreach (object value in Enum.GetValues(typeof(TokenIntegrityLevel)))
             {
                 comboBoxIL.Items.Add(value);
@@ -76,7 +52,7 @@ namespace OleViewDotNet
 
         private void SelectSecurityCheckForm_Disposed(object sender, EventArgs e)
         {
-            _tokens.Dispose();
+            selectProcessControl.Dispose();
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
@@ -93,7 +69,7 @@ namespace OleViewDotNet
 
         private void radioSpecificProcess_CheckedChanged(object sender, EventArgs e)
         {
-            listViewProcesses.Enabled = radioSpecificProcess.Checked;
+            selectProcessControl.Enabled = radioSpecificProcess.Checked;
         }
 
         private NtToken OpenImpersonationToken()
@@ -114,12 +90,16 @@ namespace OleViewDotNet
                 }
                 else if (radioSpecificProcess.Checked)
                 {
-                    if (listViewProcesses.SelectedItems.Count < 1)
+                    NtProcess process = selectProcessControl.SelectedProcess;
+                    if (process == null)
                     {
                         throw new InvalidOperationException("Please select a process from the list");
                     }
 
-                    Token = ((NtToken)listViewProcesses.SelectedItems[0].Tag).DuplicateToken(SecurityImpersonationLevel.Identification);
+                    using (var token = NtToken.OpenProcessToken(process, false, TokenAccessRights.Duplicate))
+                    {
+                        Token = token.DuplicateToken(TokenType.Impersonation, SecurityImpersonationLevel.Impersonation, TokenAccessRights.GenericAll);
+                    }
                 }
                 else if (radioAnonymous.Checked)
                 {

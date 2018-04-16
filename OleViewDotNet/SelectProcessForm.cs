@@ -28,6 +28,12 @@ namespace OleViewDotNet
             InitializeComponent();
             selectProcessControl.UpdateProcessList(desired_access, false);
             selectProcessControl.ProcessSelected += btnOK_Click;
+            Disposed += SelectProcessForm_Disposed;
+        }
+
+        private void SelectProcessForm_Disposed(object sender, EventArgs e)
+        {
+            selectProcessControl.Dispose();
         }
 
         private void btnOK_Click(object sender, EventArgs e)
