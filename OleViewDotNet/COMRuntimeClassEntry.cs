@@ -55,6 +55,14 @@ namespace OleViewDotNet
         public Guid Clsid { get; private set; }
         public string DllPath { get; private set; }
         public string Server { get; private set; }
+        public bool HasServer
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(Server);
+            }
+        }
+
         public ActivationType ActivationType { get; private set; }
         public string Permissions
         {
@@ -62,7 +70,7 @@ namespace OleViewDotNet
         }
         public bool HasPermission
         {
-            get { return !String.IsNullOrWhiteSpace(Permissions); }
+            get { return !string.IsNullOrWhiteSpace(Permissions); }
         }
         public TrustLevel TrustLevel
         {

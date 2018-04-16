@@ -31,11 +31,13 @@ namespace OleViewDotNet
         private COMInterfaceEntry m_interface;
         private COMTypeLibVersionEntry m_typelib;
         private COMProcessEntry m_process;
+        private COMRuntimeClassEntry m_runtime_class;
+        private COMRuntimeServerEntry m_runtime_server;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
             view.Items.Clear();
-            foreach (Tuple<COMInterfaceInstance, COMInterfaceEntry> entry in 
+            foreach (Tuple<COMInterfaceInstance, COMInterfaceEntry> entry in
                 entries.Select(e => new Tuple<COMInterfaceInstance, COMInterfaceEntry>(e, m_registry.MapIidToInterface(e.Iid))).OrderBy(e => e.Item2.Name))
             {
                 ListViewItem item = view.Items.Add(entry.Item2.Name);
@@ -43,7 +45,7 @@ namespace OleViewDotNet
                 item.SubItems.Add(entry.Item2.NumMethods.ToString());
                 if (!string.IsNullOrWhiteSpace(entry.Item1.Module))
                 {
-                    item.SubItems.Add(string.Format("{0}+0x{1:X}", 
+                    item.SubItems.Add(string.Format("{0}+0x{1:X}",
                         entry.Item1.Module, entry.Item1.VTableOffset));
                 }
                 item.Tag = entry;
@@ -210,6 +212,45 @@ namespace OleViewDotNet
             m_interface = entry;
         }
 
+        private void SetupRuntimeServerEntry(COMRuntimeServerEntry entry)
+        {
+            textBoxRuntimeServerName.Text = entry.Name;
+            textBoxRuntimeServerExePath.Text = GetStringValue(entry.ExePath);
+            textBoxRuntimeServerPermissions.Text = GetStringValue(entry.Permissions);
+            btnRuntimeServerViewPermissions.Enabled = entry.HasPermission;
+            textBoxRuntimeServerServiceName.Text = GetStringValue(entry.ServiceName);
+            textBoxRuntimeServerType.Text = entry.ServerType.ToString();
+            textBoxRuntimeServerIdentity.Text = GetStringValue(entry.Identity);
+            textBoxRuntimeServerIdentityType.Text = entry.IdentityType.ToString();
+            textBoxRuntimeServerInstancing.Text = entry.InstancingType.ToString();
+            m_runtime_server = entry;
+            tabControlProperties.TabPages.Add(tabPageRuntimeServer);
+        }
+
+        private void SetupRuntimeClassEntry(COMRuntimeClassEntry entry)
+        {
+            textBoxRuntimeClassName.Text = entry.Name;
+            textBoxRuntimeClassCLSID.Text = GetGuidValue(entry.Clsid);
+            textBoxRuntimeClassServer.Text = GetStringValue(entry.Server);
+            textBoxRuntimeClassPermissions.Text = GetStringValue(entry.Permissions);
+            textBoxRuntimeClassDllPath.Text = GetStringValue(entry.DllPath);
+            textBoxRuntimeClassActivationType.Text = entry.ActivationType.ToString();
+            textBoxRuntimeClassTrustLevel.Text = entry.TrustLevel.ToString();
+            textBoxRuntimeClassThreading.Text = entry.Threading.ToString();
+            LoadInterfaceList(entry.Interfaces, listViewInterfaces);
+            LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
+            btnRuntimeClassViewPermissions.Enabled = entry.HasPermission;
+            tabPageSupportedInterfaces.Tag = entry;
+            m_runtime_class = entry;
+            tabControlProperties.TabPages.Add(tabPageRuntimeClass);
+            tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
+            string server_name = entry.Server.ToLower();
+            if (m_registry.RuntimeServers.ContainsKey(server_name))
+            {
+                SetupRuntimeServerEntry(m_registry.RuntimeServers[server_name]);
+            }
+        }
+
         private void SetupProperties(object obj)
         {
             if (obj is COMCLSIDEntry)
@@ -247,6 +288,16 @@ namespace OleViewDotNet
             if (obj is COMIPIDEntry)
             {
                 SetupIPIDEntry((COMIPIDEntry)obj);
+            }
+
+            if (obj is COMRuntimeClassEntry)
+            {
+                SetupRuntimeClassEntry((COMRuntimeClassEntry)obj);
+            }
+
+            if (obj is COMRuntimeServerEntry)
+            {
+                SetupRuntimeServerEntry((COMRuntimeServerEntry)obj);
             }
         }
 
@@ -324,9 +375,9 @@ namespace OleViewDotNet
 
         public static bool SupportsProperties(object obj)
         {
-            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry 
+            return obj is COMCLSIDEntry || obj is COMProgIDEntry || obj is COMAppIDEntry
                 || obj is COMInterfaceEntry || obj is COMTypeLibVersionEntry || obj is COMProcessEntry
-                || obj is COMIPIDEntry;
+                || obj is COMIPIDEntry || obj is COMRuntimeClassEntry || obj is COMRuntimeServerEntry;
         }
 
         public PropertiesControl(COMRegistry registry, string name, object obj)
@@ -356,9 +407,9 @@ namespace OleViewDotNet
         {
             try
             {
-                COMCLSIDEntry entry = (COMCLSIDEntry)tabPageSupportedInterfaces.Tag;
+                ICOMEnumerableInterfaces entry = (ICOMEnumerableInterfaces)tabPageSupportedInterfaces.Tag;
                 await entry.LoadSupportedInterfacesAsync(true);
-                LoadInterfaceList(entry.Interfaces, listViewInterfaces);                
+                LoadInterfaceList(entry.Interfaces, listViewInterfaces);
                 LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
             }
             catch (Exception ex)
@@ -666,6 +717,16 @@ namespace OleViewDotNet
         private void checkBoxShowDisconnected_CheckedChanged(object sender, EventArgs e)
         {
             SetupIpidEntries(m_process.Ipids, checkBoxShowDisconnected.Checked);
+        }
+
+        private void btnRuntimeClassViewPermissions_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(m_registry, string.Format("{0} Permissions", m_runtime_class.Name), m_runtime_class.Permissions, false);
+        }
+
+        private void btnRuntimeServerViewPermissions_Click(object sender, EventArgs e)
+        {
+            COMSecurity.ViewSecurity(m_registry, string.Format("{0} Permissions", m_runtime_server.Name), m_runtime_server.Permissions, false);
         }
     }
 }
