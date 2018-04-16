@@ -59,6 +59,7 @@
             this.menuViewCLSIDsWithSurrogate = new System.Windows.Forms.MenuItem();
             this.menuViewProgIDs = new System.Windows.Forms.MenuItem();
             this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
+            this.menuRegistryRuntimeClasses = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuViewPreApproved = new System.Windows.Forms.MenuItem();
             this.menuViewImplementedCategories = new System.Windows.Forms.MenuItem();
@@ -102,7 +103,7 @@
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryRuntimeClasses = new System.Windows.Forms.MenuItem();
+            this.menuObjectProcessesSelectProcess = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -324,6 +325,12 @@
             this.menuRegistryMimeTypes.Text = "&MIME Types";
             this.menuRegistryMimeTypes.Click += new System.EventHandler(this.menuRegistryMimeTypes_Click);
             // 
+            // menuRegistryRuntimeClasses
+            // 
+            this.menuRegistryRuntimeClasses.Index = 7;
+            this.menuRegistryRuntimeClasses.Text = "Runtime Classes";
+            this.menuRegistryRuntimeClasses.Click += new System.EventHandler(this.menuRegistryRuntimeClasses_Click);
+            // 
             // menuItem4
             // 
             this.menuItem4.Index = 8;
@@ -453,7 +460,8 @@
             this.menuObjectProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuObjectProcessesByPid,
             this.menuObjectProcessesByName,
-            this.menuObjectProcessByUser});
+            this.menuObjectProcessByUser,
+            this.menuObjectProcessesSelectProcess});
             this.menuObjectProcesses.Text = "Processes";
             // 
             // menuObjectProcessesByPid
@@ -598,20 +606,20 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryRuntimeClasses
+            // menuObjectProcessesSelectProcess
             // 
-            this.menuRegistryRuntimeClasses.Index = 7;
-            this.menuRegistryRuntimeClasses.Text = "Runtime Classes";
-            this.menuRegistryRuntimeClasses.Click += new System.EventHandler(this.menuRegistryRuntimeClasses_Click);
+            this.menuObjectProcessesSelectProcess.Index = 3;
+            this.menuObjectProcessesSelectProcess.Text = "Select Process";
+            this.menuObjectProcessesSelectProcess.Click += new System.EventHandler(this.menuObjectProcessesSelectProcess_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1920, 999);
+            this.ClientSize = new System.Drawing.Size(1097, 551);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(7);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -696,6 +704,7 @@
         private System.Windows.Forms.MenuItem menuPropertiesViewer;
         private System.Windows.Forms.MenuItem menuViewStorage;
         private System.Windows.Forms.MenuItem menuRegistryRuntimeClasses;
+        private System.Windows.Forms.MenuItem menuObjectProcessesSelectProcess;
     }
 }
 

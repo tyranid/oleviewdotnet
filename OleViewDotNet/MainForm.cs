@@ -788,8 +788,13 @@ namespace OleViewDotNet
             try
             {
                 ConfigureSymbols();
-                OpenView(COMRegistryViewer.DisplayMode.Processes,
-                    COMUtilities.LoadProcesses(new int[] { pid }, this));
+                var processes = COMUtilities.LoadProcesses(new int[] { pid }, this);
+                if (processes.Count() == 0)
+                {
+                    throw new ArgumentException(string.Format("Process {0} has not initialized COM, or is inaccessible", pid));
+                }
+
+                HostControl(new PropertiesControl(m_registry, string.Format("Process {0}", pid), processes.First()));
             }
             catch (Exception ex)
             {
@@ -880,6 +885,17 @@ namespace OleViewDotNet
         private void menuRegistryRuntimeClasses_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.RuntimeClasses);
+        }
+
+        private void menuObjectProcessesSelectProcess_Click(object sender, EventArgs e)
+        {
+            using (SelectProcessForm form = new SelectProcessForm())
+            {
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    LoadProcessByProcessId(form.SelectedProcess.ProcessId);
+                }
+            }
         }
     }
 }

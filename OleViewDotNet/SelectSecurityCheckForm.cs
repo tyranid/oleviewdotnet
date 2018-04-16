@@ -18,7 +18,6 @@ using NtApiDotNet;
 using NtApiDotNet.Win32;
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -181,7 +180,6 @@ namespace OleViewDotNet
 
         private void listViewProcesses_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            ListView view = sender as ListView;
             ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
         }
     }

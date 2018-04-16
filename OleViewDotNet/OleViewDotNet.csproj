@@ -164,6 +164,18 @@
     <Compile Include="ElevatedFactoryServerTypeViewer.Designer.cs">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="SelectProcessControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SelectProcessControl.Designer.cs">
+      <DependentUpon>SelectProcessControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectProcessForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectProcessForm.Designer.cs">
+      <DependentUpon>SelectProcessForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SelectSecurityCheckForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -395,6 +407,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ElevatedFactoryServerTypeViewer.resx">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectProcessControl.resx">
+      <DependentUpon>SelectProcessControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectProcessForm.resx">
+      <DependentUpon>SelectProcessForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SelectSecurityCheckForm.resx">
       <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
