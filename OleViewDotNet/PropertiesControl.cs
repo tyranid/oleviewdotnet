@@ -250,6 +250,21 @@ namespace OleViewDotNet
             }
         }
 
+        private void SetupIpidEntries(IEnumerable<COMIPIDEntry> ipids, bool show_disconnected)
+        {
+            listViewProcessIPids.Items.Clear();
+            listViewProcessIPids.Items.AddRange(ipids.Where(ipid => ipid.IsRunning || show_disconnected).Select(ipid =>
+            {
+                ListViewItem item = new ListViewItem(ipid.Ipid.ToString());
+                item.SubItems.Add(m_registry.MapIidToInterface(ipid.Iid).Name);
+                item.SubItems.Add(ipid.Flags.ToString());
+                item.Tag = ipid;
+                return item;
+            }).ToArray());
+            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        }
+
         private void SetupProcessEntry(COMProcessEntry obj)
         {
             m_process = obj;
@@ -263,15 +278,7 @@ namespace OleViewDotNet
             textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}",
                 obj.Capabilities, obj.AuthnLevel, obj.ImpLevel);
             textBoxProcessStaHwnd.Text = String.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
-            foreach (COMIPIDEntry ipid in obj.Ipids)
-            {
-                ListViewItem item = listViewProcessIPids.Items.Add(ipid.Ipid.ToString());
-                item.SubItems.Add(m_registry.MapIidToInterface(ipid.Iid).Name);
-                item.SubItems.Add(ipid.Flags.ToString());
-                item.Tag = ipid;
-            }
-            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listViewProcessIPids.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            SetupIpidEntries(obj.Ipids, false);
             listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
             tabControlProperties.TabPages.Add(tabPageProcess);
             if (m_registry.AppIDs.ContainsKey(obj.AppId))
@@ -654,6 +661,11 @@ namespace OleViewDotNet
             {
                 Program.ShowError(this, ex);
             }
+        }
+
+        private void checkBoxShowDisconnected_CheckedChanged(object sender, EventArgs e)
+        {
+            SetupIpidEntries(m_process.Ipids, checkBoxShowDisconnected.Checked);
         }
     }
 }

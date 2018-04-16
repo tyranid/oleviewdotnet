@@ -62,6 +62,7 @@
             System.Windows.Forms.Label label28;
             System.Windows.Forms.Label label29;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelInterface;
+            System.Windows.Forms.Label lblMethods;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelAppID;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelSupportedInterfaces;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelClsid;
@@ -112,13 +113,13 @@
             System.Windows.Forms.Label label62;
             System.Windows.Forms.Label label63;
             System.Windows.Forms.Label label64;
-            System.Windows.Forms.Label lblMethods;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
             this.textBoxServiceName = new System.Windows.Forms.TextBox();
             this.textBoxServiceType = new System.Windows.Forms.TextBox();
             this.textBoxServiceUserName = new System.Windows.Forms.TextBox();
+            this.txtMethods = new System.Windows.Forms.TextBox();
             this.btnProxyProperties = new System.Windows.Forms.Button();
             this.textBoxInterfaceProxy = new System.Windows.Forms.TextBox();
             this.textBoxInterfaceBase = new System.Windows.Forms.TextBox();
@@ -223,7 +224,7 @@
             this.textBoxElevationEnabled = new System.Windows.Forms.TextBox();
             this.textBoxElevationAutoApproval = new System.Windows.Forms.TextBox();
             this.tabPageDotNet = new System.Windows.Forms.TabPage();
-            this.txtMethods = new System.Windows.Forms.TextBox();
+            this.checkBoxShowDisconnected = new System.Windows.Forms.CheckBox();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -257,6 +258,7 @@
             label28 = new System.Windows.Forms.Label();
             label29 = new System.Windows.Forms.Label();
             tableLayoutPanelInterface = new System.Windows.Forms.TableLayoutPanel();
+            lblMethods = new System.Windows.Forms.Label();
             tableLayoutPanelAppID = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanelSupportedInterfaces = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanelClsid = new System.Windows.Forms.TableLayoutPanel();
@@ -307,7 +309,6 @@
             label62 = new System.Windows.Forms.Label();
             label63 = new System.Windows.Forms.Label();
             label64 = new System.Windows.Forms.Label();
-            lblMethods = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -759,6 +760,16 @@
             tableLayoutPanelInterface.Size = new System.Drawing.Size(573, 357);
             tableLayoutPanelInterface.TabIndex = 22;
             // 
+            // txtMethods
+            // 
+            this.txtMethods.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtMethods.Location = new System.Drawing.Point(73, 105);
+            this.txtMethods.Margin = new System.Windows.Forms.Padding(1);
+            this.txtMethods.Name = "txtMethods";
+            this.txtMethods.ReadOnly = true;
+            this.txtMethods.Size = new System.Drawing.Size(414, 23);
+            this.txtMethods.TabIndex = 20;
+            // 
             // btnProxyProperties
             // 
             this.btnProxyProperties.AutoSize = true;
@@ -814,6 +825,16 @@
             this.textBoxIID.ReadOnly = true;
             this.textBoxIID.Size = new System.Drawing.Size(499, 23);
             this.textBoxIID.TabIndex = 7;
+            // 
+            // lblMethods
+            // 
+            lblMethods.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            lblMethods.AutoSize = true;
+            lblMethods.Location = new System.Drawing.Point(3, 108);
+            lblMethods.Name = "lblMethods";
+            lblMethods.Size = new System.Drawing.Size(66, 17);
+            lblMethods.TabIndex = 19;
+            lblMethods.Text = "Methods:";
             // 
             // tableLayoutPanelAppID
             // 
@@ -1423,6 +1444,7 @@
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessSecurity, 1, 6);
             tableLayoutPanelProcess.Controls.Add(label61, 0, 7);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessStaHwnd, 1, 7);
+            tableLayoutPanelProcess.Controls.Add(this.checkBoxShowDisconnected, 1, 8);
             tableLayoutPanelProcess.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelProcess.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelProcess.Name = "tableLayoutPanelProcess";
@@ -1563,7 +1585,7 @@
             // 
             label41.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label41.AutoSize = true;
-            label41.Location = new System.Drawing.Point(3, 236);
+            label41.Location = new System.Drawing.Point(3, 241);
             label41.Name = "label41";
             label41.Size = new System.Drawing.Size(44, 17);
             label41.TabIndex = 12;
@@ -1579,10 +1601,10 @@
             this.listViewProcessIPids.ContextMenuStrip = this.contextMenuStripIpids;
             this.listViewProcessIPids.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewProcessIPids.FullRowSelect = true;
-            this.listViewProcessIPids.Location = new System.Drawing.Point(3, 256);
+            this.listViewProcessIPids.Location = new System.Drawing.Point(3, 266);
             this.listViewProcessIPids.MultiSelect = false;
             this.listViewProcessIPids.Name = "listViewProcessIPids";
-            this.listViewProcessIPids.Size = new System.Drawing.Size(563, 94);
+            this.listViewProcessIPids.Size = new System.Drawing.Size(563, 84);
             this.listViewProcessIPids.TabIndex = 13;
             this.listViewProcessIPids.UseCompatibleStateImageBehavior = false;
             this.listViewProcessIPids.View = System.Windows.Forms.View.Details;
@@ -2560,25 +2582,16 @@
             this.tabPageDotNet.Text = ".NET";
             this.tabPageDotNet.UseVisualStyleBackColor = true;
             // 
-            // lblMethods
+            // checkBoxShowDisconnected
             // 
-            lblMethods.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            lblMethods.AutoSize = true;
-            lblMethods.Location = new System.Drawing.Point(3, 108);
-            lblMethods.Name = "lblMethods";
-            lblMethods.Size = new System.Drawing.Size(66, 17);
-            lblMethods.TabIndex = 19;
-            lblMethods.Text = "Methods:";
-            // 
-            // txtMethods
-            // 
-            this.txtMethods.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMethods.Location = new System.Drawing.Point(73, 105);
-            this.txtMethods.Margin = new System.Windows.Forms.Padding(1);
-            this.txtMethods.Name = "txtMethods";
-            this.txtMethods.ReadOnly = true;
-            this.txtMethods.Size = new System.Drawing.Size(414, 23);
-            this.txtMethods.TabIndex = 20;
+            this.checkBoxShowDisconnected.AutoSize = true;
+            this.checkBoxShowDisconnected.Location = new System.Drawing.Point(146, 239);
+            this.checkBoxShowDisconnected.Name = "checkBoxShowDisconnected";
+            this.checkBoxShowDisconnected.Size = new System.Drawing.Size(190, 21);
+            this.checkBoxShowDisconnected.TabIndex = 21;
+            this.checkBoxShowDisconnected.Text = "Show Disconnected IPIDs";
+            this.checkBoxShowDisconnected.UseVisualStyleBackColor = true;
+            this.checkBoxShowDisconnected.CheckedChanged += new System.EventHandler(this.checkBoxShowDisconnected_CheckedChanged);
             // 
             // PropertiesControl
             // 
@@ -2744,5 +2757,6 @@
         private System.Windows.Forms.TextBox textBoxDotNetRuntimeVersion;
         private System.Windows.Forms.Button btnViewAssembly;
         private System.Windows.Forms.TextBox txtMethods;
+        private System.Windows.Forms.CheckBox checkBoxShowDisconnected;
     }
 }
