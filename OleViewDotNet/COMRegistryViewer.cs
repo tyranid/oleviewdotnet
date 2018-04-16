@@ -1489,6 +1489,14 @@ namespace OleViewDotNet
                         contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
                     }
                 }
+                else if (node.Tag is COMRuntimeServerEntry)
+                {
+                    COMRuntimeServerEntry runtime_server = (COMRuntimeServerEntry)node.Tag;
+                    if (runtime_server.HasPermission)
+                    {
+                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+                    }
+                }
 
                 if (m_filter_types.Contains(FilterType.CLSID))
                 {
@@ -1979,10 +1987,14 @@ namespace OleViewDotNet
                     COMProcessEntry proc = (COMProcessEntry)node.Tag;
                     COMSecurity.ViewSecurity(m_registry, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
                 }
-                else if (node.Tag is COMRuntimeClassEntry)
+                else if (node.Tag is COMRuntimeClassEntry || node.Tag is COMRuntimeServerEntry)
                 {
-                    COMRuntimeClassEntry runtime_entry = (COMRuntimeClassEntry)node.Tag;
-                    COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", runtime_entry.Name), runtime_entry.Permissions, false);
+                    COMRuntimeServerEntry runtime_server = node.Tag as COMRuntimeServerEntry;
+                    COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
+                    string name = runtime_class != null ? runtime_class.Name : runtime_server.Name;
+                    string perms = runtime_class != null ? runtime_class.Permissions : runtime_server.Permissions;
+
+                    COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", name), perms, false);
                 }
                 else
                 {
