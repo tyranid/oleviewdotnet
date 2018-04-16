@@ -54,36 +54,45 @@ namespace OleViewDotNet
             return (MainForm)_appContext.MainForm;
         }
 
-        static int EnumInterfaces(List<string> args)
+        static int EnumInterfaces(Queue<string> args, bool runtime_class)
         {
-            using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args[0]))
+            using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args.Dequeue()))
             {
                 using (StreamWriter writer = new StreamWriter(client))
                 {
-                    Guid clsid;
-                    if (!Guid.TryParse(args[1], out clsid))
+                    Guid clsid = Guid.Empty;
+                    CLSCTX clsctx = 0;
+                    bool sta = false;
+                    string activatable_class = string.Empty;
+                    if (runtime_class)
                     {
-                        return 1;
+                        activatable_class = args.Dequeue();
                     }
-
-                    bool sta = args[2] == "s";
-
-                    CLSCTX clsctx;
-                    if (!Enum.TryParse(args[3], true, out clsctx))
+                    else
                     {
-                        return 1;
-                    }
+                        if (!Guid.TryParse(args.Dequeue(), out clsid))
+                        {
+                            return 1;
+                        }
 
-                    int timeout = 10000;
-                    if (args.Count > 4)
-                    {
-                        if (!int.TryParse(args[4], out timeout) || timeout < 0)
+                        sta = args.Dequeue() == "s";
+
+                        if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
                         {
                             return 1;
                         }
                     }
 
-                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, sta, timeout);
+                    int timeout = 10000;
+                    if (args.Count > 0)
+                    {
+                        if (!int.TryParse(args.Dequeue(), out timeout) || timeout < 0)
+                        {
+                            return 1;
+                        }
+                    }
+
+                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, activatable_class, sta, timeout);
                     if (intf.Exception != null)
                     {
                         writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
@@ -149,6 +158,7 @@ namespace OleViewDotNet
             string database_file = null;
             string save_file = null;
             bool enum_clsid = false;
+            bool enum_runtime = false;
             bool show_help = false;
             bool query_interfaces = false;
             int concurrent_queries = Environment.ProcessorCount;
@@ -161,6 +171,7 @@ namespace OleViewDotNet
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },
                 { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
+                { "r|rt",  "Enumerate the provided Runtime Class.", v => enum_runtime = v != null },
                 { "q|query", "Query all interfaces for database", v => query_interfaces = v != null },
                 { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
                 { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
@@ -182,7 +193,7 @@ namespace OleViewDotNet
                 show_help = true;
             }
 
-            if (show_help || (enum_clsid && additional_args.Count < 4))
+            if (show_help || (enum_clsid && additional_args.Count < 4) || (enum_runtime && additional_args.Count < 2))
             {
                 StringWriter writer = new StringWriter();
                 writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
@@ -197,7 +208,7 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    Environment.Exit(EnumInterfaces(additional_args));
+                    Environment.Exit(EnumInterfaces(new Queue<string>(additional_args), enum_runtime));
                 }
                 catch
                 {

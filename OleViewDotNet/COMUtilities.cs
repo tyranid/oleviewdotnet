@@ -366,6 +366,17 @@ namespace OleViewDotNet
         [return: MarshalAs(UnmanagedType.IUnknown)]
         public static extern object CoUnmarshalInterface(IStream stm, ref Guid riid);
 
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)]
+        public static extern int RoGetActivationFactory([MarshalAs(UnmanagedType.HString)] string activatableClassId,
+            ref Guid iid,
+            out IntPtr factory
+        );
+
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)]
+        public static extern int RoActivateInstance(
+            [MarshalAs(UnmanagedType.HString)] string activatableClassId,
+            out IntPtr instance);
+
         [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
         public static extern int StgOpenStorageEx(
               string pwcsName,

@@ -86,7 +86,9 @@ namespace OleViewDotNet
         private List<COMInterfaceInstance> _factory_interfaces;
         private Guid _clsid;
         private CLSCTX _clsctx;
+        private string _activatable_classid;
         private Win32Exception _ex;
+        private bool _winrt_component;
 
         const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 
@@ -128,19 +130,33 @@ namespace OleViewDotNet
         private void GetInterfacesInternal()
         {
             IntPtr punk = IntPtr.Zero;
-            IntPtr pfactory = IntPtr.Zero;           
+            IntPtr pfactory = IntPtr.Zero;
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
 
             int hr = 0;
-            hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, null, ref IID_IUnknown, out pfactory);
+            if (_winrt_component)
+            {
+                hr = COMUtilities.RoGetActivationFactory(_activatable_classid, ref IID_IUnknown, out pfactory);
+            }
+            else
+            {
+                hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, null, ref IID_IUnknown, out pfactory);
+            }
             // If we can't get class object, no chance we'll get object.
             if (hr != 0)
             {
                 throw new Win32Exception(hr);
             }
 
-            hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, _clsctx,
+            if (_winrt_component)
+            {
+                hr = COMUtilities.RoActivateInstance(_activatable_classid, out punk);
+            }
+            else
+            {
+                hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, _clsctx,
                                                ref IID_IUnknown, out punk);
+            }
             if (hr != 0)
             {
                 punk = IntPtr.Zero;
@@ -221,23 +237,38 @@ namespace OleViewDotNet
         public IEnumerable<COMInterfaceInstance> FactoryInterfaces { get { return _factory_interfaces; } }
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, bool sta, int timeout) 
-            : this(clsid, clsctx, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
+        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout) 
+            : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
         {
             GetInterfaces(sta, timeout);
         }
 
-        private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, List<COMInterfaceInstance> interfaces, List<COMInterfaceInstance> factory_interfaces)
+        private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, List<COMInterfaceInstance> interfaces, List<COMInterfaceInstance> factory_interfaces)
         {
             _interfaces = interfaces;
             _factory_interfaces = factory_interfaces;
             _clsid = clsid;
             _clsctx = clsctx;
+            _activatable_classid = activatable_classid;
+            _winrt_component = !string.IsNullOrWhiteSpace(_activatable_classid);
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent)
         {
-            using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(System.IO.Pipes.PipeDirection.In,
+            string command_line = ent.Server;
+            var interfaces = await GetInterfacesOOP(command_line, true);
+            return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Server, interfaces.Interfaces, interfaces.FactoryInterfaces);
+        }
+
+        private class InterfaceLists
+        {
+            public List<COMInterfaceInstance> Interfaces { get; set; }
+            public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
+        }
+
+        private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class)
+        {
+            using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
             {
                 string process = null;
@@ -250,28 +281,21 @@ namespace OleViewDotNet
                     process = COMUtilities.Get32bitExePath();
                 }
 
-                string apartment = "s";
-                if (ent.DefaultThreadingModel == COMThreadingModel.Both 
-                    || ent.DefaultThreadingModel == COMThreadingModel.Free)
-                {
-                    apartment = "m";
-                }
-
                 Process proc = new Process();
-                ProcessStartInfo info = new ProcessStartInfo(process, String.Format("{0} {1} {2} {3} \"{4}\"",
-                    "-e", server.GetClientHandleAsString(), ent.Clsid.ToString("B"), apartment, ent.CreateContext));
+                ProcessStartInfo info = new ProcessStartInfo(process, string.Format("{0} {1} {2}",
+                    runtime_class ? "-r" : "-e", server.GetClientHandleAsString(), command_line));
                 info.UseShellExecute = false;
                 info.CreateNoWindow = true;
                 proc.StartInfo = info;
                 proc.Start();
                 try
                 {
+                    List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
+                    List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
                     server.DisposeLocalCopyOfClientHandle();
 
                     using (StreamReader reader = new StreamReader(server))
                     {
-                        List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
-                        List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
                         while (true)
                         {
                             string line = await reader.ReadLineAsync();
@@ -339,8 +363,7 @@ namespace OleViewDotNet
                             interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
                             factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
                         }
-
-                        return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, interfaces, factory_interfaces);
+                        return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
                     }
                 }
                 finally
@@ -348,6 +371,20 @@ namespace OleViewDotNet
                     proc.Close();
                 }
             }
+        }
+
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent)
+        {
+            string apartment = "s";
+            if (ent.DefaultThreadingModel == COMThreadingModel.Both 
+                || ent.DefaultThreadingModel == COMThreadingModel.Free)
+            {
+                apartment = "m";
+            }
+
+            string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, ent.CreateContext);
+            var interfaces = await GetInterfacesOOP(command_line, false);
+            return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
     }
 }
