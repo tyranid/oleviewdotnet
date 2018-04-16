@@ -23,10 +23,10 @@ namespace OleViewDotNet
 {
     public partial class SelectProcessForm : Form
     {
-        public SelectProcessForm()
+        public SelectProcessForm(ProcessAccessRights desired_access, bool require_token)
         {
             InitializeComponent();
-            selectProcessControl.UpdateProcessList(NtApiDotNet.ProcessAccessRights.QueryLimitedInformation, false);
+            selectProcessControl.UpdateProcessList(desired_access, false);
             selectProcessControl.ProcessSelected += btnOK_Click;
         }
 

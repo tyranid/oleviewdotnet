@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -838,7 +839,7 @@ namespace OleViewDotNet
             if (m_property_grid != null && !m_property_grid.IsDisposed)
             {
                 m_property_grid.SelectedObject = obj;
-            }            
+            }
         }
 
         public void CreatePropertyGrid(bool autohide)
@@ -889,7 +890,7 @@ namespace OleViewDotNet
 
         private void menuObjectProcessesSelectProcess_Click(object sender, EventArgs e)
         {
-            using (SelectProcessForm form = new SelectProcessForm())
+            using (SelectProcessForm form = new SelectProcessForm(ProcessAccessRights.VmRead, false))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
