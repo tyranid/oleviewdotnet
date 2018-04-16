@@ -52,6 +52,7 @@ namespace OleViewDotNet
             AddListItem("Pre-Approved Count", registry.PreApproved.Count());
             AddListItem("Type Libs Count", registry.Typelibs.Count);
             AddListItem("Runtime Class Count", registry.RuntimeClasses.Count);
+            AddListItem("Runtime Server Count", registry.RuntimeServers.Count);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             Text = "Registry Properties";

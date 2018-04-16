@@ -57,6 +57,7 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMAppIDEntry> m_appid;
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
         private SortedDictionary<string, COMRuntimeClassEntry> m_runtime_classes;
+        private SortedDictionary<string, COMRuntimeServerEntry> m_runtime_servers;
         private List<COMMimeType> m_mimetypes;
         private List<Guid> m_preapproved;
 
@@ -181,6 +182,11 @@ namespace OleViewDotNet
         public IDictionary<string, COMRuntimeClassEntry> RuntimeClasses
         {
             get { return m_runtime_classes; }
+        }
+
+        public IDictionary<string, COMRuntimeServerEntry> RuntimeServers
+        {
+            get { return m_runtime_servers; }
         }
 
         public string CreatedDate
@@ -402,6 +408,7 @@ namespace OleViewDotNet
             ret.m_preapproved = DiffLists(left.m_preapproved, right.m_preapproved, mode).ToList();
             Report(progress, "Runtime Classes", 10, total_count);
             ret.m_runtime_classes = DiffDicts(left.m_runtime_classes, right.m_runtime_classes, mode, p => p.Name);
+            ret.m_runtime_servers = DiffDicts(left.m_runtime_servers, right.m_runtime_servers, mode, p => p.Name);
             return ret;
         }
 
@@ -603,6 +610,7 @@ namespace OleViewDotNet
                 LoadTypelibs(classes_key);
                 Report(progress, "Runtime Classes", 9, total_count);
                 m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>();
+                m_runtime_servers = new SortedDictionary<string, COMRuntimeServerEntry>();
                 if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
                 {
                     using (RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime"))
@@ -610,6 +618,7 @@ namespace OleViewDotNet
                         if (runtime_key != null)
                         {
                             LoadRuntimeClasses(runtime_key);
+                            LoadRuntimeServers(runtime_key);
                         }
                     }
                 }
@@ -674,6 +683,7 @@ namespace OleViewDotNet
                     reader.Read();
                 }
                 m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry()).ToSortedDictionary(p => p.Name);
+                m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry()).ToSortedDictionary(p => p.Name);
                 reader.ReadEndElement();
             }
             FilePath = path;
@@ -1034,7 +1044,29 @@ namespace OleViewDotNet
                             }
                         }
                     }
-                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name);
+                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name.ToLower());
+                }
+            }
+        }
+
+        private void LoadRuntimeServers(RegistryKey runtime_key)
+        {
+            using (RegistryKey server_key = runtime_key.OpenSubKey("Server"))
+            {
+                List<COMRuntimeServerEntry> entries = new List<COMRuntimeServerEntry>();
+                if (server_key != null)
+                {
+                    foreach (string name in server_key.GetSubKeyNames())
+                    {
+                        using (RegistryKey subkey = server_key.OpenSubKey(name))
+                        {
+                            if (subkey != null)
+                            {
+                                entries.Add(new COMRuntimeServerEntry(name, subkey));
+                            }
+                        }
+                    }
+                    m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower());
                 }
             }
         }

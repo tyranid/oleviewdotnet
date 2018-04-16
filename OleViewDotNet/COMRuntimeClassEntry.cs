@@ -35,7 +35,8 @@ namespace OleViewDotNet
     public enum ActivationType
     {
         InProcess = 0,
-        OutOfProcess = 1
+        OutOfProcess = 1,
+        RemoteProcess = 2,
     }
 
     public enum ThreadingType
@@ -71,6 +72,10 @@ namespace OleViewDotNet
         {
             get; private set;
         }
+        public bool ActivateInSharedBroker
+        {
+            get; private set;
+        }
 
         private void LoadFromKey(RegistryKey key)
         {
@@ -83,6 +88,7 @@ namespace OleViewDotNet
             Permissions = string.Empty;
             byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
             Permissions = COMSecurity.GetStringSDForSD(permissions);
+            ActivateInSharedBroker = COMUtilities.ReadIntFromKey(key, null, "ActivateInSharedBroker") != 0;
         }
 
         public COMRuntimeClassEntry(string name, RegistryKey rootKey)
@@ -110,6 +116,7 @@ namespace OleViewDotNet
             Permissions = reader.ReadString("perms");
             TrustLevel = reader.ReadEnum<TrustLevel>("trust");
             Threading = reader.ReadEnum<ThreadingType>("thread");
+            ActivateInSharedBroker = reader.ReadBool("shared");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -122,6 +129,7 @@ namespace OleViewDotNet
             writer.WriteEnum("trust", TrustLevel);
             writer.WriteOptionalAttributeString("perms", Permissions);
             writer.WriteEnum("thread", Threading);
+            writer.WriteBool("shared", ActivateInSharedBroker);
         }
 
         public override bool Equals(object obj)
@@ -139,14 +147,14 @@ namespace OleViewDotNet
 
             return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
                 && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
-                Permissions == right.Permissions && Threading == right.Threading;
+                Permissions == right.Permissions && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
                 ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
-                ^ Permissions.GetSafeHashCode() & Threading.GetHashCode();
+                ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode();
         }
 
         int IComparable<COMRuntimeClassEntry>.CompareTo(COMRuntimeClassEntry other)
@@ -186,7 +194,7 @@ namespace OleViewDotNet
 
         /// <summary>
         /// Get list of supported Interface IIDs Synchronously
-        /// </summary>        
+        /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>

@@ -140,6 +140,7 @@
     <Compile Include="COMObjRef.cs" />
     <Compile Include="COMProcessParser.cs" />
     <Compile Include="COMProxyInstance.cs" />
+    <Compile Include="COMRuntimeServerEntry.cs" />
     <Compile Include="ConfigureSymbolsForm.cs">
       <SubType>Form</SubType>
     </Compile>

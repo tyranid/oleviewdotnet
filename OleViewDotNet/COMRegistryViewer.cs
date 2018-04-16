@@ -460,7 +460,7 @@ namespace OleViewDotNet
         private static IEnumerable<TreeNode> LoadRuntimeClasses(COMRegistry registry)
         {
             return registry.RuntimeClasses.Select(p => {
-                TreeNode n = CreateNode(p.Key, ClassKey);
+                TreeNode n = CreateNode(p.Value.Name, ClassKey);
                 n.Nodes.Add("IUnknown");
                 n.Tag = p.Value;
                 return n;
