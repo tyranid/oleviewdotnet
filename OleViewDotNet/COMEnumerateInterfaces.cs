@@ -255,7 +255,13 @@ namespace OleViewDotNet
 
         public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent)
         {
-            string command_line = ent.Name;
+            string apartment = "s";
+            if (ent.Threading == ThreadingType.Both
+                || ent.Threading == ThreadingType.Mta)
+            {
+                apartment = "m";
+            }
+            string command_line = string.Format("{0} {1}", ent.Name, apartment);
             var interfaces = await GetInterfacesOOP(command_line, true);
             return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }

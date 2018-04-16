@@ -38,6 +38,13 @@ namespace OleViewDotNet
         OutOfProcess = 1
     }
 
+    public enum ThreadingType
+    {
+        Both = 0,
+        Sta = 1,
+        Mta = 2
+    }
+
     public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMEnumerableInterfaces
     {
         private List<COMInterfaceInstance> m_interfaces;
@@ -60,7 +67,7 @@ namespace OleViewDotNet
         {
             get; private set;
         }
-        public int Threading
+        public ThreadingType Threading
         {
             get; private set;
         }
@@ -70,7 +77,7 @@ namespace OleViewDotNet
             Clsid = COMUtilities.ReadGuidFromKey(key, null, "CLSID");
             ActivationType = (ActivationType)COMUtilities.ReadIntFromKey(key, null, "ActivationType");
             TrustLevel = (TrustLevel)COMUtilities.ReadIntFromKey(key, null, "TrustLevel");
-            Threading = COMUtilities.ReadIntFromKey(key, null, "Threading");
+            Threading = (ThreadingType)COMUtilities.ReadIntFromKey(key, null, "Threading");
             DllPath = COMUtilities.ReadStringFromKey(key, null, "DllPath");
             Server = COMUtilities.ReadStringFromKey(key, null, "Server");
             Permissions = string.Empty;
@@ -102,7 +109,7 @@ namespace OleViewDotNet
             ActivationType = reader.ReadEnum<ActivationType>("type");
             Permissions = reader.ReadString("perms");
             TrustLevel = reader.ReadEnum<TrustLevel>("trust");
-            Threading = reader.ReadInt("thread");
+            Threading = reader.ReadEnum<ThreadingType>("thread");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -114,7 +121,7 @@ namespace OleViewDotNet
             writer.WriteEnum("type", ActivationType);
             writer.WriteEnum("trust", TrustLevel);
             writer.WriteOptionalAttributeString("perms", Permissions);
-            writer.WriteInt("thread", Threading);
+            writer.WriteEnum("thread", Threading);
         }
 
         public override bool Equals(object obj)
