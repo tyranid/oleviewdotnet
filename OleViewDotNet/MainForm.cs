@@ -898,5 +898,10 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        private void menuRegistryRuntimeServers_Click(object sender, EventArgs e)
+        {
+            OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
+        }
     }
 }

@@ -73,6 +73,7 @@ namespace OleViewDotNet
             ProxyCLSIDs,
             Processes,
             RuntimeClasses,
+            RuntimeServers,
         }
 
         private const string FolderKey = "folder.ico";
@@ -136,6 +137,8 @@ namespace OleViewDotNet
                     return "COM Processes";
                 case DisplayMode.RuntimeClasses:
                     return "Runtime Classes";
+                case DisplayMode.RuntimeServers:
+                    return "Runtime Servers";
                 default:
                     throw new ArgumentException("Invalid mode value");
             }
@@ -204,6 +207,9 @@ namespace OleViewDotNet
                     break;
                 case DisplayMode.RuntimeClasses:
                     filter_types.Add(FilterType.RuntimeClass);
+                    break;
+                case DisplayMode.RuntimeServers:
+                    filter_types.Add(FilterType.RuntimeServer);
                     break;
                 default:
                     throw new ArgumentException("Invalid mode value");
@@ -300,6 +306,8 @@ namespace OleViewDotNet
                         return LoadProcesses(registry, processes);
                     case DisplayMode.RuntimeClasses:
                         return LoadRuntimeClasses(registry);
+                    case DisplayMode.RuntimeServers:
+                        return LoadRuntimeServers(registry);
                     default:
                         break;
                 }
@@ -457,15 +465,36 @@ namespace OleViewDotNet
             return clsidNodes;
         }
 
+        private static TreeNode CreateRuntimeClassNode(COMRuntimeClassEntry ent)
+        {
+            TreeNode n = CreateNode(ent.Name, ClassKey);
+            n.Nodes.Add("IUnknown");
+            n.Tag = ent;
+            return n;
+        }
+
         private static IEnumerable<TreeNode> LoadRuntimeClasses(COMRegistry registry)
         {
-            return registry.RuntimeClasses.Select(p => {
-                TreeNode n = CreateNode(p.Value.Name, ClassKey);
-                n.Nodes.Add("IUnknown");
-                n.Tag = p.Value;
-                return n;
+            return registry.RuntimeClasses.Select(p => CreateRuntimeClassNode(p.Value));
+        }
+
+        private static IEnumerable<TreeNode> LoadRuntimeServers(COMRegistry registry)
+        {
+            List<TreeNode> serverNodes = new List<TreeNode>(registry.Clsids.Count);
+            foreach (var group in registry.RuntimeClasses.Values.GroupBy(p => p.Server.ToLower()))
+            {
+                if (!registry.RuntimeServers.ContainsKey(group.Key))
+                {
+                    continue;
                 }
-            );
+
+                COMRuntimeServerEntry server = registry.RuntimeServers[group.Key];
+                TreeNode node = CreateNode(server.Name, FolderKey);
+                node.Tag = server;
+                node.Nodes.AddRange(group.Select(p => CreateRuntimeClassNode(p)).ToArray());
+                serverNodes.Add(node);
+            }
+            return serverNodes.OrderBy(n => n.Text);
         }
 
         private static IEnumerable<TreeNode> LoadProgIDs(COMRegistry registry)
@@ -1056,7 +1085,7 @@ namespace OleViewDotNet
             CopyAsString,
             CopyAsStructure,
             CopyAsObject,
-            CopyAsHexString,            
+            CopyAsHexString,
         }
 
         public static void CopyTextToClipboard(string text)
@@ -1098,9 +1127,9 @@ namespace OleViewDotNet
                 case CopyGuidType.CopyAsHexString:
                     {
                         byte[] data = guid.ToByteArray();
-                        strCopy = String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));                        
+                        strCopy = String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));
                     }
-                    break;                
+                    break;
             }
 
             if (strCopy != null)

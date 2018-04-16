@@ -41,6 +41,7 @@ namespace OleViewDotNet
         Process,
         Ipid,
         RuntimeClass,
+        RuntimeServer,
     }
 
     public enum FilterComparison
@@ -185,6 +186,8 @@ namespace OleViewDotNet
                     return typeof(COMIPIDEntry);
                 case FilterType.RuntimeClass:
                     return typeof(COMRuntimeClassEntry);
+                case FilterType.RuntimeServer:
+                    return typeof(COMRuntimeServerEntry);
                 default:
                     throw new ArgumentException("Invalid filter type", nameof(type));
             }
