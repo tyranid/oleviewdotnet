@@ -1649,6 +1649,33 @@ namespace OleViewDotNet
                     access_sddl = appid.AccessPermission;
                 }
             }
+            else if (node.Tag is COMRuntimeClassEntry)
+            {
+                COMRuntimeClassEntry runtime_class = (COMRuntimeClassEntry)node.Tag;
+                if (runtime_class.HasPermission)
+                {
+                    launch_sddl = runtime_class.Permissions;
+                }
+                else
+                {
+                    // Set to denied access.
+                    launch_sddl = "O:SYG:SYD:";
+                }
+                access_sddl = launch_sddl;
+            }
+            else if (node.Tag is COMRuntimeServerEntry)
+            {
+                COMRuntimeServerEntry runtime_class = (COMRuntimeServerEntry)node.Tag;
+                if (runtime_class.HasPermission)
+                {
+                    launch_sddl = runtime_class.Permissions;
+                }
+                else
+                {
+                    launch_sddl = "O:SYG:SYD:";
+                }
+                access_sddl = launch_sddl;
+            }
             else
             {
                 return FilterResult.Exclude;
@@ -1701,7 +1728,7 @@ namespace OleViewDotNet
         }
 
         private static Func<TreeNode, bool> CreateFilter(string filter, FilterMode mode, bool caseSensitive)
-        {                        
+        {
             StringComparison comp;
 
             filter = filter.Trim();
