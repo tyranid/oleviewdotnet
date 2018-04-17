@@ -63,6 +63,11 @@ namespace OleViewDotNet
             return ret;
         }
 
+        static Dictionary<string, object> GetEnumValues(Type enum_type)
+        {
+            return enum_type.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(e => e.Name, e => e.GetRawConstantValue());
+        }
+
         static string TypeToText(Type t)
         {
             try
@@ -126,19 +131,29 @@ namespace OleViewDotNet
                             EmitMember(builder, pi);
                         }
                     }
+
+                    var evs = t.GetEvents();
+                    if (evs.Length > 0)
+                    {
+                        builder.AppendLine("   / Events */");
+                        foreach (EventInfo ei in evs)
+                        {
+                            EmitMember(builder, ei);
+                        }
+                    }
                 }
                 else if (t.IsEnum)
                 {
-                    foreach (var value in Enum.GetValues(t))
+                    foreach (var pair in GetEnumValues(t))
                     {
                         builder.Append("   ");
                         try
                         {
-                            builder.AppendFormat("{0} = {1};", value, Convert.ToInt64(value));
+                            builder.AppendFormat("{0} = {1},", pair.Key, pair.Value);
                         }
                         catch
                         {
-                            builder.AppendFormat("{0};");
+                            builder.AppendFormat("{0},");
                         }
                         builder.AppendLine();
                     }
@@ -247,10 +262,10 @@ namespace OleViewDotNet
             // There seems to be no way, without calling an internal method to get the list of
             // Enum values from a reflection only assembly as it tries to construct a typed array
             // which fails.
-            if (typelib.ReflectionOnly)
-            {
-                yield break;
-            }
+            //if (typelib.ReflectionOnly)
+            //{
+            //    yield break;
+            //}
             var types = typelib.GetTypes().Where(t => t.IsEnum);
             if (com_visible)
             {

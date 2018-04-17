@@ -1328,11 +1328,12 @@ namespace OleViewDotNet
             MethodInfo mi = member as MethodInfo;
             PropertyInfo prop = member as PropertyInfo;
             FieldInfo fi = member as FieldInfo;
+            EventInfo ei = member as EventInfo;
 
             if (mi != null)
             {
-                return String.Format("{0} {1}({2});", 
-                    ConvertTypeToName(mi.ReturnType), 
+                return String.Format("{0} {1}({2});",
+                    ConvertTypeToName(mi.ReturnType),
                     mi.Name, FormatParameters(mi.GetParameters()));
             }
             else if (prop != null)
@@ -1360,6 +1361,10 @@ namespace OleViewDotNet
             else if (fi != null)
             {
                 return String.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
+            }
+            else if (ei != null)
+            {
+                return string.Format("event {0} {1}", ei.EventHandlerType, ei.Name);
             }
             else
             {
