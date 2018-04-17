@@ -93,15 +93,21 @@ namespace OleViewDotNet
             Threading = (ThreadingType)COMUtilities.ReadIntFromKey(key, null, "Threading");
             DllPath = COMUtilities.ReadStringFromKey(key, null, "DllPath");
             Server = COMUtilities.ReadStringFromKey(key, null, "Server");
-            Permissions = string.Empty;
             byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
             Permissions = COMSecurity.GetStringSDForSD(permissions);
             ActivateInSharedBroker = COMUtilities.ReadIntFromKey(key, null, "ActivateInSharedBroker") != 0;
         }
 
-        public COMRuntimeClassEntry(string name, RegistryKey rootKey)
+        internal COMRuntimeClassEntry(string name)
         {
             Name = name;
+            DllPath = string.Empty;
+            Server = string.Empty;
+            Permissions = string.Empty;
+        }
+
+        public COMRuntimeClassEntry(string name, RegistryKey rootKey) : this(name)
+        {
             LoadFromKey(rootKey);
         }
 

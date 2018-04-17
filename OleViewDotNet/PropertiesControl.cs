@@ -244,10 +244,10 @@ namespace OleViewDotNet
             m_runtime_class = entry;
             tabControlProperties.TabPages.Add(tabPageRuntimeClass);
             tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
-            string server_name = entry.Server.ToLower();
-            if (m_registry.RuntimeServers.ContainsKey(server_name))
+            COMRuntimeServerEntry server = m_registry.MapRuntimeClassToServerEntry(entry);
+            if (server != null)
             {
-                SetupRuntimeServerEntry(m_registry.RuntimeServers[server_name]);
+                SetupRuntimeServerEntry(server);
             }
         }
 

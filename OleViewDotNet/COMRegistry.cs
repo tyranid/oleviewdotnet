@@ -49,7 +49,7 @@ namespace OleViewDotNet
         private string m_name;
 
         // These are loaded from the registry.
-        private SortedDictionary<Guid, COMCLSIDEntry> m_clsids;        
+        private SortedDictionary<Guid, COMCLSIDEntry> m_clsids;
         private SortedDictionary<Guid, COMInterfaceEntry> m_interfaces;
         private SortedDictionary<string, COMProgIDEntry> m_progids;
         private SortedDictionary<Guid, COMCategory> m_categories;
@@ -497,6 +497,31 @@ namespace OleViewDotNet
             }
 
             return new COMCLSIDEntry(clsid, COMServerType.UnknownServer);
+        }
+
+        public COMRuntimeServerEntry MapRuntimeClassToServerEntry(COMRuntimeClassEntry runtime_class)
+        {
+            return MapServerNameToEntry(runtime_class.Server);
+        }
+
+        public COMRuntimeServerEntry MapServerNameToEntry(string server_name)
+        {
+            string name = server_name.ToLower();
+            if (m_runtime_servers.ContainsKey(name))
+            {
+                return m_runtime_servers[name];
+            }
+            return null;
+        }
+
+        public COMRuntimeClassEntry MapActivableClassToEntry(string activable_class)
+        {
+            string name = activable_class.ToLower();
+            if (m_runtime_classes.ContainsKey(name))
+            {
+                return m_runtime_classes[name];
+            }
+            return new COMRuntimeClassEntry(activable_class);
         }
 
         public COMTypeLibVersionEntry GetTypeLibVersionEntry(Guid typelib, string version)

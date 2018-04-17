@@ -9,7 +9,7 @@ namespace OleViewDotNet.InterfaceViewers
     interface ITypeViewerFactory
     {
         Guid Iid { get; }
-        string IidName { get; }        
+        string IidName { get; }
         Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject);
     }
 
@@ -32,7 +32,7 @@ namespace OleViewDotNet.InterfaceViewers
 
         public string IidName { get; private set; }
         public Guid Iid { get; private set; }
-        abstract public Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject);            
+        abstract public Control CreateInstance(COMRegistry registry, COMCLSIDEntry entry, string strObjName, ObjectEntry pObject);
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ namespace OleViewDotNet.InterfaceViewers
                             }
                             break;
                         }
-                    }                                   
+                    }
                 }
             }
         }

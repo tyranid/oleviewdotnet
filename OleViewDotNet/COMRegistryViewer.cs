@@ -483,12 +483,11 @@ namespace OleViewDotNet
             List<TreeNode> serverNodes = new List<TreeNode>(registry.Clsids.Count);
             foreach (var group in registry.RuntimeClasses.Values.GroupBy(p => p.Server.ToLower()))
             {
-                if (!registry.RuntimeServers.ContainsKey(group.Key))
+                COMRuntimeServerEntry server = registry.MapServerNameToEntry(group.Key);
+                if (server == null)
                 {
                     continue;
                 }
-
-                COMRuntimeServerEntry server = registry.RuntimeServers[group.Key];
                 TreeNode node = CreateNode(server.Name, FolderKey);
                 node.Tag = server;
                 node.Nodes.AddRange(group.Select(p => CreateRuntimeClassNode(p)).ToArray());

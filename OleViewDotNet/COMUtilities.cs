@@ -59,7 +59,7 @@ namespace OleViewDotNet
     {
         public Assembly ResolveRef(object tl)
         {
-            return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);            
+            return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);
         }
 
         public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)

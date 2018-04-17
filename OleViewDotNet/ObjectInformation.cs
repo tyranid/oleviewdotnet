@@ -29,7 +29,7 @@ namespace OleViewDotNet
         private ObjectEntry m_pEntry;
         private Object m_pObject;
         private Dictionary<string, string> m_properties;
-        private COMInterfaceEntry[] m_interfaces;        
+        private COMInterfaceEntry[] m_interfaces;
         private string m_objName;
         private COMRegistry m_registry;
         private COMCLSIDEntry m_entry;
@@ -188,7 +188,7 @@ namespace OleViewDotNet
                         Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, m_pEntry);
                         if ((frm != null) && !frm.IsDisposed)
                         {
-                            Program.GetMainForm(m_registry).HostControl(frm);                            
+                            Program.GetMainForm(m_registry).HostControl(frm);
                         }
                     }
                 }
