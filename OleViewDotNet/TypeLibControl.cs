@@ -65,98 +65,105 @@ namespace OleViewDotNet
 
         static string TypeToText(Type t)
         {
-            StringBuilder builder = new StringBuilder();
-            if (t.IsInterface)
+            try
             {
-                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
-                builder.AppendFormat("interface {0}", t.Name).AppendLine();
-            }
-            else if (t.IsEnum)
-            {
-                builder.AppendFormat("enum {0}", t.Name).AppendLine();
-            }
-            else if (t.IsClass)
-            {
-                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
-                ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
-                if (class_attr != null)
+                StringBuilder builder = new StringBuilder();
+                if (t.IsInterface)
                 {
-                    builder.AppendFormat("[ClassInterface(ClassInterfaceType.{0})]", class_attr.Value).AppendLine();
+                    builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                    builder.AppendFormat("interface {0}", t.Name).AppendLine();
                 }
-                builder.AppendFormat("class {0}", t.Name).AppendLine();
-            }
-            else
-            {
-                builder.AppendFormat("struct {0}", t.Name).AppendLine();
-            }
-            builder.AppendLine("{");
-
-            if (t.IsInterface || t.IsClass)
-            {
-                MethodInfo[] methods = t.GetMethods().Where(m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
-                if (methods.Length > 0)
+                else if (t.IsEnum)
                 {
-                    builder.AppendLine("   /* Methods */");
-
-                    Dictionary<MethodInfo, string> name_mapping = new Dictionary<MethodInfo, string>();
-                    if (t.IsClass)
+                    builder.AppendFormat("enum {0}", t.Name).AppendLine();
+                }
+                else if (t.IsClass)
+                {
+                    builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                    ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
+                    if (class_attr != null)
                     {
-                        name_mapping = MapMethodNamesToCOM(methods);
+                        builder.AppendFormat("[ClassInterface(ClassInterfaceType.{0})]", class_attr.Value).AppendLine();
                     }
+                    builder.AppendFormat("class {0}", t.Name).AppendLine();
+                }
+                else
+                {
+                    builder.AppendFormat("struct {0}", t.Name).AppendLine();
+                }
+                builder.AppendLine("{");
 
-                    foreach (MethodInfo mi in methods)
+                if (t.IsInterface || t.IsClass)
+                {
+                    MethodInfo[] methods = t.GetMethods().Where(m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
+                    if (methods.Length > 0)
                     {
-                        if (name_mapping.ContainsKey(mi) && name_mapping[mi] != mi.Name)
+                        builder.AppendLine("   /* Methods */");
+
+                        Dictionary<MethodInfo, string> name_mapping = new Dictionary<MethodInfo, string>();
+                        if (t.IsClass)
                         {
-                            builder.AppendFormat("    /* Exposed as {0} */", name_mapping[mi]).AppendLine();
+                            name_mapping = MapMethodNamesToCOM(methods);
                         }
 
-                        EmitMember(builder, mi);
+                        foreach (MethodInfo mi in methods)
+                        {
+                            if (name_mapping.ContainsKey(mi) && name_mapping[mi] != mi.Name)
+                            {
+                                builder.AppendFormat("    /* Exposed as {0} */", name_mapping[mi]).AppendLine();
+                            }
+
+                            EmitMember(builder, mi);
+                        }
+                    }
+
+                    var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
+                    if (props.Count() > 0)
+                    {
+                        builder.AppendLine("   /* Properties */");
+                        foreach (PropertyInfo pi in props)
+                        {
+                            EmitMember(builder, pi);
+                        }
+                    }
+                }
+                else if (t.IsEnum)
+                {
+                    foreach (var value in Enum.GetValues(t))
+                    {
+                        builder.Append("   ");
+                        try
+                        {
+                            builder.AppendFormat("{0} = {1};", value, Convert.ToInt64(value));
+                        }
+                        catch
+                        {
+                            builder.AppendFormat("{0};");
+                        }
+                        builder.AppendLine();
+                    }
+                }
+                else
+                {
+                    FieldInfo[] fields = t.GetFields();
+                    if (fields.Length > 0)
+                    {
+                        builder.AppendLine("   /* Fields */");
+                        foreach (FieldInfo fi in fields)
+                        {
+                            EmitMember(builder, fi);
+                        }
                     }
                 }
 
-                var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
-                if (props.Count() > 0)
-                {
-                    builder.AppendLine("   /* Properties */");
-                    foreach (PropertyInfo pi in props)
-                    {
-                        EmitMember(builder, pi);
-                    }
-                }
+                builder.AppendLine("}");
+
+                return builder.ToString();
             }
-            else if (t.IsEnum)
+            catch (InvalidOperationException ex)
             {
-                foreach (var value in Enum.GetValues(t))
-                {
-                    builder.Append("   ");
-                    try
-                    {
-                        builder.AppendFormat("{0} = {1};", value, Convert.ToInt64(value));
-                    }
-                    catch
-                    {
-                        builder.AppendFormat("{0};");
-                    }
-                    builder.AppendLine();
-                }
+                return ex.ToString();
             }
-            else
-            {
-                FieldInfo[] fields = t.GetFields();
-                if (fields.Length > 0)
-                {
-                    builder.AppendLine("   /* Fields */");
-                    foreach (FieldInfo fi in fields)
-                    {
-                        EmitMember(builder, fi);
-                    }
-                }
-            }
-
-            builder.AppendLine("}");
-
-            return builder.ToString();
         }
 
         private class ListViewItemWithGuid : ListViewItem
@@ -237,6 +244,10 @@ namespace OleViewDotNet
 
         private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
         {
+            if (typelib.ReflectionOnly)
+            {
+                yield break;
+            }
             var types = typelib.GetTypes().Where(t => t.IsEnum);
             if (com_visible)
             {

@@ -2085,13 +2085,13 @@ namespace OleViewDotNet
             return new ServerInformation();
         }
 
-        static Dictionary<string, Assembly> _cached_assemblies = new Dictionary<string, Assembly>();
+        static Dictionary<string, Assembly> _cached_reflection_assemblies = new Dictionary<string, Assembly>();
 
         private static Assembly ResolveAssembly(string base_path, string name)
         {
-            if (_cached_assemblies.ContainsKey(name))
+            if (_cached_reflection_assemblies.ContainsKey(name))
             {
-                return _cached_assemblies[name];
+                return _cached_reflection_assemblies[name];
             }
 
             Assembly asm = null;
@@ -2117,8 +2117,8 @@ namespace OleViewDotNet
                 }
             }
 
-            _cached_assemblies[name] = asm;
-            return _cached_assemblies[name];
+            _cached_reflection_assemblies[name] = asm;
+            return _cached_reflection_assemblies[name];
         }
 
         private static void WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(string base_path, NamespaceResolveEventArgs e)

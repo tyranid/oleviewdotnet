@@ -1475,6 +1475,11 @@ namespace OleViewDotNet
                     {
                         contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                     }
+
+                    if (COMUtilities.RuntimeInterfaceMetadata.ContainsKey(intf.Iid))
+                    {
+                        contextMenuStrip.Items.Add(viewRuntimeInterfaceToolStripMenuItem);
+                    }
                 }
                 else if (node.Tag is COMProcessEntry)
                 {
@@ -2387,6 +2392,21 @@ namespace OleViewDotNet
             if (selected != null && selected.Nodes.Count > 0)
             {
                 CreateClonedTree(selected.Nodes.OfType<TreeNode>());
+            }
+        }
+
+        private void viewRuntimeInterfaceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = treeComRegistry.SelectedNode;
+            if (node != null)
+            {
+                COMInterfaceEntry ent = node.Tag as COMInterfaceEntry;
+                if (ent != null && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(ent.Iid))
+                {
+                    Assembly asm = COMUtilities.RuntimeInterfaceMetadata[ent.Iid].Assembly;
+                    Program.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name, 
+                        COMUtilities.RuntimeInterfaceMetadata[ent.Iid].Assembly, ent.Iid, false));
+                }
             }
         }
     }
