@@ -244,6 +244,9 @@ namespace OleViewDotNet
 
         private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
         {
+            // There seems to be no way, without calling an internal method to get the list of
+            // Enum values from a reflection only assembly as it tries to construct a typed array
+            // which fails.
             if (typelib.ReflectionOnly)
             {
                 yield break;
