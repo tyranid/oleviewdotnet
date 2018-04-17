@@ -275,4 +275,17 @@ namespace OleViewDotNet
             ref Guid rclsid,
             out Guid pReplacementClsId);
     };
+
+    [Guid("6040ec14-6557-41f9-a3f7-b1cab7b42120")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
+    interface IRuntimeBroker
+    {
+        [return: MarshalAs(UnmanagedType.IInspectable)] object ActivateInstance([MarshalAs(UnmanagedType.LPWStr)] string instanceName);
+        [return: MarshalAs(UnmanagedType.IUnknown)] object GetActivationFactory([MarshalAs(UnmanagedType.LPWStr)] string instanceName, ref Guid uuid);
+        void SetErrorFlags(uint error_flags);
+        uint GetErrorFlags();
+        void DebuggerAddRef();
+        void DebuggerRelease();
+        [return: MarshalAs(UnmanagedType.IUnknown)] object GetClipboardBroker();
+    }
 }

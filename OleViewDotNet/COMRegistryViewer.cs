@@ -1429,6 +1429,14 @@ namespace OleViewDotNet
                         createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
                     }
 
+                    if (entry is COMRuntimeClassEntry && ((COMRuntimeClassEntry)entry).HasPermission)
+                    {
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createInRuntimeBrokerToolStripMenuItem);
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createInPerUserRuntimeBrokerToolStripMenuItem);
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createFactoryInRuntimeBrokerToolStripMenuItem);
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createFactoryInPerUserRuntimeBrokerToolStripMenuItem);
+                    }
+
                     contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
@@ -2408,6 +2416,78 @@ namespace OleViewDotNet
                         COMUtilities.RuntimeInterfaceMetadata[ent.Iid].Assembly, ent.Iid, false));
                 }
             }
+        }
+
+        [Guid("D63B10C5-BB46-4990-A94F-E40B9D520160")]
+        [ComImport]
+        class RuntimeBroker
+        {
+        }
+
+        [Guid("2593F8B9-4EAF-457C-B68A-50F6B8EA6B54")]
+        [ComImport]
+        class PerUserRuntimeBroker
+        {
+        }
+
+        private IRuntimeBroker CreateBroker(bool per_user)
+        {
+            if (per_user)
+            {
+                return (IRuntimeBroker)new PerUserRuntimeBroker();
+            }
+            else
+            {
+                return (IRuntimeBroker)new RuntimeBroker();
+            }
+        }
+
+        private async void CreateInRuntimeBroker(bool per_user, bool factory)
+        {
+            try
+            {
+                COMRuntimeClassEntry runtime_class = GetSelectedClassEntry() as COMRuntimeClassEntry;
+                if (runtime_class != null)
+                {
+                    IRuntimeBroker broker = CreateBroker(per_user);
+                    object comObj;
+                    if (factory)
+                    {
+                        Guid iid = COMInterfaceEntry.IID_IUnknown;
+                        comObj = broker.GetActivationFactory(runtime_class.Name, ref iid);
+                    }
+                    else
+                    {
+                        comObj = broker.ActivateInstance(runtime_class.Name);
+                    }
+
+                    await SetupObjectView(runtime_class, comObj, factory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
+        }
+
+        private void createInRuntimeBrokerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateInRuntimeBroker(false, false);
+        }
+
+        private void createInPerUserRuntimeBrokerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateInRuntimeBroker(true, false);
+        }
+
+        private void createFactoryInRuntimeBrokerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateInRuntimeBroker(false, true);
+        }
+
+        private void createFactoryInPerUserRuntimeBrokerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateInRuntimeBroker(false, true);
         }
     }
 }
