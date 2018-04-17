@@ -30,6 +30,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -2082,6 +2083,102 @@ namespace OleViewDotNet
                 }
             }
             return new ServerInformation();
+        }
+
+        static Dictionary<string, Assembly> _cached_assemblies = new Dictionary<string, Assembly>();
+
+        private static Assembly ResolveAssembly(string base_path, string name)
+        {
+            if (_cached_assemblies.ContainsKey(name))
+            {
+                return _cached_assemblies[name];
+            }
+
+            Assembly asm = null;
+            if (name.Contains(","))
+            {
+                asm = Assembly.ReflectionOnlyLoad(name);
+            }
+            else
+            {
+                string full_path = Path.Combine(base_path, string.Format("{0}.winmd", name));
+                if (File.Exists(full_path))
+                {
+                    asm = Assembly.ReflectionOnlyLoadFrom(full_path);
+                }
+                else
+                {
+                    int last_index = name.LastIndexOf('.');
+                    if (last_index < 0)
+                    {
+                        return null;
+                    }
+                    asm = ResolveAssembly(base_path, name.Substring(0, last_index));
+                }
+            }
+
+            _cached_assemblies[name] = asm;
+            return _cached_assemblies[name];
+        }
+
+        private static void WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(string base_path, NamespaceResolveEventArgs e)
+        {
+            e.ResolvedAssemblies.Add(ResolveAssembly(base_path, e.NamespaceName));
+        }
+
+        private static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(string base_path, ResolveEventArgs args)
+        {
+            return ResolveAssembly(base_path, args.Name);
+        }
+
+        private static IReadOnlyDictionary<Guid, Type> m_runtime_interface_metadata;
+
+        public static IReadOnlyDictionary<Guid, Type> RuntimeInterfaceMetadata
+        {
+            get
+            {
+                if (m_runtime_interface_metadata == null)
+                {
+                    m_runtime_interface_metadata = LoadRuntimeIntefaceMetadata();
+                }
+                return m_runtime_interface_metadata;
+            }
+        }
+
+        private static IReadOnlyDictionary<Guid, Type> LoadRuntimeIntefaceMetadata()
+        {
+            string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
+            Dictionary<Guid, Type> ret = new Dictionary<Guid, Type>();
+            if (!Directory.Exists(base_path))
+            {
+                return ret;
+            }
+
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (s, a) => CurrentDomain_ReflectionOnlyAssemblyResolve(base_path, a);
+            WindowsRuntimeMetadata.ReflectionOnlyNamespaceResolve += (s, a) => WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(base_path, a);
+            DirectoryInfo dir = new DirectoryInfo(base_path);
+            foreach (FileInfo file in dir.GetFiles("*.winmd"))
+            {
+                try
+                {
+                    Assembly asm = Assembly.ReflectionOnlyLoadFrom(file.FullName);
+                    Type[] types = asm.GetTypes();
+                    foreach (Type t in types.Where(x => x.IsInterface))
+                    {
+                        foreach (var attr in t.GetCustomAttributesData())
+                        {
+                            if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
+                            {
+                                ret[t.GUID] = t;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            return ret;
         }
     }
 

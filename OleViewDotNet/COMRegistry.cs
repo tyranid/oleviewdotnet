@@ -193,11 +193,6 @@ namespace OleViewDotNet
             get { return m_runtime_servers; }
         }
 
-        public static IDictionary<Guid, Type> RuntimeInterfaceMetadata
-        {
-            get; private set;
-        }
-
         public string CreatedDate
         {
             get; private set;
@@ -655,7 +650,6 @@ namespace OleViewDotNet
                             LoadRuntimeServers(runtime_key);
                         }
                     }
-                    LoadRuntimeIntefaceMetadata();
                 }
             }
 
@@ -881,8 +875,7 @@ namespace OleViewDotNet
                 }
             }
 
-            LoadRuntimeIntefaceMetadata();
-            foreach (var pair in RuntimeInterfaceMetadata)
+            foreach (var pair in COMUtilities.RuntimeInterfaceMetadata)
             {
                 if (!interfaces.ContainsKey(pair.Key))
                 {
@@ -1111,92 +1104,6 @@ namespace OleViewDotNet
                         }
                     }
                     m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower());
-                }
-            }
-        }
-
-        static Dictionary<string, Assembly> _cached_assemblies = new Dictionary<string, Assembly>();
-
-        private static Assembly ResolveAssembly(string base_path, string name)
-        {
-            if (_cached_assemblies.ContainsKey(name))
-            {
-                return _cached_assemblies[name];
-            }
-
-            Assembly asm = null;
-            if (name.Contains(","))
-            {
-                asm = Assembly.ReflectionOnlyLoad(name);
-            }
-            else
-            {
-                string full_path = Path.Combine(base_path, string.Format("{0}.winmd", name));
-                if (File.Exists(full_path))
-                {
-                    asm = Assembly.ReflectionOnlyLoadFrom(full_path);
-                }
-                else
-                {
-                    int last_index = name.LastIndexOf('.');
-                    if (last_index < 0)
-                    {
-                        return null;
-                    }
-                    asm = ResolveAssembly(base_path, name.Substring(0, last_index));
-                }
-            }
-
-            _cached_assemblies[name] = asm;
-            return _cached_assemblies[name];
-        }
-
-        private static void WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(string base_path, NamespaceResolveEventArgs e)
-        {
-            e.ResolvedAssemblies.Add(ResolveAssembly(base_path, e.NamespaceName));
-        }
-
-        private static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(string base_path, ResolveEventArgs args)
-        {
-            return ResolveAssembly(base_path, args.Name);
-        }
-
-        private static void LoadRuntimeIntefaceMetadata()
-        {
-            if (RuntimeInterfaceMetadata != null)
-            {
-                return;
-            }
-
-            string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
-            RuntimeInterfaceMetadata = new Dictionary<Guid, Type>();
-            if (!Directory.Exists(base_path))
-            {
-                return;
-            }
-
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (s, a) => CurrentDomain_ReflectionOnlyAssemblyResolve(base_path, a);
-            WindowsRuntimeMetadata.ReflectionOnlyNamespaceResolve += (s, a) => WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(base_path, a);
-            DirectoryInfo dir = new DirectoryInfo(base_path);
-            foreach (FileInfo file in dir.GetFiles("*.winmd"))
-            {
-                try
-                {
-                    Assembly asm = Assembly.ReflectionOnlyLoadFrom(file.FullName);
-                    Type[] types = asm.GetTypes();
-                    foreach (Type t in types.Where(x => x.IsInterface))
-                    {
-                        foreach (var attr in t.GetCustomAttributesData())
-                        {
-                            if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
-                            {
-                                RuntimeInterfaceMetadata[t.GUID] = t;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
                 }
             }
         }
