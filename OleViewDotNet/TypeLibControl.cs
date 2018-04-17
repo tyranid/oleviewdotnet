@@ -135,7 +135,7 @@ namespace OleViewDotNet
                     var evs = t.GetEvents();
                     if (evs.Length > 0)
                     {
-                        builder.AppendLine("   / Events */");
+                        builder.AppendLine("   /* Events */");
                         foreach (EventInfo ei in evs)
                         {
                             EmitMember(builder, ei);
