@@ -32,7 +32,7 @@ namespace OleViewDotNet
         private COMInterfaceEntry[] m_interfaces;
         private string m_objName;
         private COMRegistry m_registry;
-        private COMCLSIDEntry m_entry;
+        private ICOMClassEntry m_entry;
 
         /// <summary>
         /// Constructor
@@ -41,7 +41,7 @@ namespace OleViewDotNet
         /// <param name="pObject">Managed wrapper to the object</param>
         /// <param name="properties">List of textual properties to display</param>
         /// <param name="interfaces">List of available interfaces</param>
-        public ObjectInformation(COMRegistry registry, COMCLSIDEntry entry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
+        public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
         {
             m_entry = entry;
             if (m_entry == null)

@@ -25,9 +25,9 @@ namespace OleViewDotNet
         private object _obj;
         private string _name;
         private COMRegistry _registry;
-        private COMCLSIDEntry _entry;
+        private ICOMClassEntry _entry;
 
-        public ClassFactoryTypeViewer(COMRegistry registry, COMCLSIDEntry entry, string objName, object obj)
+        public ClassFactoryTypeViewer(COMRegistry registry, ICOMClassEntry entry, string objName, object obj)
         {
             InitializeComponent();
             _obj = obj;
