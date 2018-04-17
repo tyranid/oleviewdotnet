@@ -75,7 +75,7 @@ namespace OleViewDotNet
 
             Type type = COMUtilities.GetInterfaceType(iid);
             if (type != null)
-            {                
+            {
                 o = new DynamicComObjectWrapper(m_registry, type, Instance);
             }
 

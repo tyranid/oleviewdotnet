@@ -2367,7 +2367,5 @@ namespace OleViewDotNet
 
             return _delayed_imports;
         }
-
     }
-
 }

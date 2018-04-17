@@ -127,7 +127,7 @@ namespace OleViewDotNet
                         }
 
                         item.SubItems.Add(String.Join(", ", pars));
-                    }                    
+                    }
                 }
                 else if (info.MemberType == MemberTypes.Property)
                 {
@@ -332,7 +332,7 @@ namespace OleViewDotNet
             }
 
             public override void ErrorReported(ScriptSource source, string message, SourceSpan span, int errorCode, Severity severity)
-            {                
+            {
                 Errors.Add(String.Format("{0}: {1}/{2} - {3}", severity, span.Start.Line, span.Start.Column, message));
             }
         }

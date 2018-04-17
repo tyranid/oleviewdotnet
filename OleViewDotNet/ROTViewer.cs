@@ -117,7 +117,7 @@ namespace OleViewDotNet
 
                 try
                 {
-                    IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);                                        
+                    IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);
                     Guid unk = COMInterfaceEntry.IID_IUnknown;
                     object comObj;
                     Type dispType;
