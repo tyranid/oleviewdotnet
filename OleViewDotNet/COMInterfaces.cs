@@ -20,6 +20,29 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet
 {
+    public enum ObjectSafetyFlags
+    {
+        INTERFACESAFE_FOR_UNTRUSTED_CALLER = 0x00000001,
+        INTERFACESAFE_FOR_UNTRUSTED_DATA = 0x00000002,
+        INTERFACE_USES_DISPEX = 0x00000004,
+        INTERFACE_USES_SECURITY_MANAGER = 0x00000008
+    }
+
+    [ComImport, Guid("CB5BDC81-93C1-11CF-8F20-00805F2CD064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IObjectSafety
+    {
+        void GetInterfaceSafetyOptions(ref Guid riid, out uint pdwSupportedOptions, out uint pdwEnabledOptions);
+        void SetInterfaceSafetyOptions(ref Guid riid, uint dwOptionSetMask, uint dwEnabledOptions);
+    }
+
+    [ComImport, Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IInspectable
+    {
+        void GetIids(out int iidCount, out IntPtr iids);
+        void GetRuntimeClassName([MarshalAs(UnmanagedType.HString)] out string className);
+        void GetTrustLevel(out TrustLevel trustLevel);
+    };
+
     [ComImport, Guid("0000010C-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IPersist
     {

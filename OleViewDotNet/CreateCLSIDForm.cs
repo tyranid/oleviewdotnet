@@ -27,7 +27,7 @@ namespace OleViewDotNet
 
         public CreateCLSIDForm()
         {
-            InitializeComponent();            
+            InitializeComponent();
             ClsCtx = CLSCTX.SERVER;
             comboBoxClsCtx.Items.Add(CLSCTX.SERVER);
             comboBoxClsCtx.Items.Add(CLSCTX.INPROC_SERVER);
