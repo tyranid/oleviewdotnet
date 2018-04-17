@@ -91,9 +91,14 @@ namespace OleViewDotNet
             TypeLibVersion = String.Empty;
         }
 
+        internal COMInterfaceEntry(Type type) : this(type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
+        {
+            CacheIidToName(Iid, Name);
+        }
+
         public COMInterfaceEntry(Guid iid, RegistryKey rootKey) 
             : this(iid, Guid.Empty, 3, "IUnknown", "")
-        {            
+        {
             LoadFromKey(rootKey);
         }
 
@@ -213,12 +218,12 @@ namespace OleViewDotNet
 
         public Guid Iid
         {
-            get; private set;        
+            get; private set;
         }
 
         public Guid ProxyClsid
         {
-            get; private set;        
+            get; private set;
         }
 
         public int NumMethods

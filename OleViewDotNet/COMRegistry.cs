@@ -61,7 +61,6 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
         private SortedDictionary<string, COMRuntimeClassEntry> m_runtime_classes;
         private SortedDictionary<string, COMRuntimeServerEntry> m_runtime_servers;
-        private SortedDictionary<Guid, Type> m_runtime_interface_metadata;
         private List<COMMimeType> m_mimetypes;
         private List<Guid> m_preapproved;
 
@@ -194,9 +193,9 @@ namespace OleViewDotNet
             get { return m_runtime_servers; }
         }
 
-        public IDictionary<Guid, Type> RuntimeInterfaceMetadata
+        public static IDictionary<Guid, Type> RuntimeInterfaceMetadata
         {
-            get { return m_runtime_interface_metadata; }
+            get; private set;
         }
 
         public string CreatedDate
@@ -356,7 +355,7 @@ namespace OleViewDotNet
                 throw new ArgumentNullException("progress");
             }
 
-            return new COMRegistry(path, progress);   
+            return new COMRegistry(path, progress);
         }
 
         public static COMRegistry Load(string path)
@@ -882,6 +881,15 @@ namespace OleViewDotNet
                 }
             }
 
+            LoadRuntimeIntefaceMetadata();
+            foreach (var pair in RuntimeInterfaceMetadata)
+            {
+                if (!interfaces.ContainsKey(pair.Key))
+                {
+                    interfaces.Add(pair.Key, new COMInterfaceEntry(pair.Value));
+                }
+            }
+
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
@@ -1153,13 +1161,17 @@ namespace OleViewDotNet
             return ResolveAssembly(base_path, args.Name);
         }
 
-        private void LoadRuntimeIntefaceMetadata()
+        private static void LoadRuntimeIntefaceMetadata()
         {
-            Dictionary<Guid, Type> runtime_interface_metadata = new Dictionary<Guid, Type>();
+            if (RuntimeInterfaceMetadata != null)
+            {
+                return;
+            }
+
             string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
+            RuntimeInterfaceMetadata = new Dictionary<Guid, Type>();
             if (!Directory.Exists(base_path))
             {
-                m_runtime_interface_metadata = new SortedDictionary<Guid, Type>();
                 return;
             }
 
@@ -1178,8 +1190,7 @@ namespace OleViewDotNet
                         {
                             if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
                             {
-                                runtime_interface_metadata[t.GUID] = t;
-                                COMInterfaceEntry.CacheIidToName(t.GUID, t.FullName);
+                                RuntimeInterfaceMetadata[t.GUID] = t;
                             }
                         }
                     }
@@ -1188,7 +1199,6 @@ namespace OleViewDotNet
                 {
                 }
             }
-            m_runtime_interface_metadata = new SortedDictionary<Guid, Type>(runtime_interface_metadata);
         }
 
         #endregion

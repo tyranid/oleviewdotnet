@@ -139,9 +139,8 @@ namespace OleViewDotNet.InterfaceViewers
                             Assembly a = Assembly.LoadFile(p);
                             LoadInterfaceViewersFromAssembly(a);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
-                            System.Diagnostics.Debug.WriteLine(e.ToString());
                         }
                     }
                 }
