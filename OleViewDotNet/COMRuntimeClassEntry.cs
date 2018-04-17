@@ -272,6 +272,8 @@ namespace OleViewDotNet
             return CreateInstance(server, true);
         }
 
+        public bool SupportsRemoteActivation { get { return false; } }
+
         /// <summary>
         /// Indicates that the class' interface list has been loaded.
         /// </summary>

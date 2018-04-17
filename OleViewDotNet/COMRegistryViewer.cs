@@ -1265,15 +1265,15 @@ namespace OleViewDotNet
             await Program.GetMainForm(m_registry).HostObject(ent, obj, factory);
         }
 
-        private COMCLSIDEntry GetSelectedClsidEntry()
+        private ICOMClassEntry GetSelectedClassEntry()
         {
-            COMCLSIDEntry ent = null;
+            ICOMClassEntry ent = null;
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                if (node.Tag is COMCLSIDEntry)
+                if (node.Tag is ICOMClassEntry)
                 {
-                    ent = (COMCLSIDEntry)node.Tag;
+                    ent = (ICOMClassEntry)node.Tag;
                 }
                 else if (node.Tag is COMProgIDEntry)
                 {
@@ -1285,7 +1285,7 @@ namespace OleViewDotNet
 
         private async Task CreateInstance(CLSCTX clsctx, string server)
         {
-            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            ICOMClassEntry ent = GetSelectedClassEntry();
             if (ent != null)
             {
                 try
@@ -1305,7 +1305,7 @@ namespace OleViewDotNet
 
         private async Task CreateClassFactory(string server)
         {
-            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            ICOMClassEntry ent = GetSelectedClassEntry();
             if (ent != null)
             {
                 try
@@ -1356,6 +1356,11 @@ namespace OleViewDotNet
 
         private static bool HasServerType(COMCLSIDEntry clsid, COMServerType type)
         {
+            if (clsid == null)
+            {
+                return false;
+            }
+
             if (clsid.DefaultServerType == COMServerType.UnknownServer)
             {
                 // If we have no servers we assume anything is possible.
@@ -1380,16 +1385,19 @@ namespace OleViewDotNet
                     contextMenuStrip.Items.Add(copyGUIDCStructureToolStripMenuItem);
                 }
 
-                if ((node.Tag is COMCLSIDEntry) || (node.Tag is COMProgIDEntry))
+                if ((node.Tag is ICOMClassEntry) || (node.Tag is COMProgIDEntry))
                 {
                     contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                     contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
 
                     COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+                    COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
+                    ICOMClassEntry entry = node.Tag as ICOMClassEntry;
                     if (progid != null && m_registry.Clsids.ContainsKey(progid.Clsid))
                     {
                         clsid = m_registry.MapClsidToEntry(progid.Clsid);
+                        entry = clsid;
                     }
 
                     createSpecialToolStripMenuItem.DropDownItems.Clear();
@@ -1416,10 +1424,12 @@ namespace OleViewDotNet
                     }
 
                     createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryToolStripMenuItem);
-                    createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
+                    if (entry.SupportsRemoteActivation)
+                    {
+                        createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
+                    }
 
                     contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
-
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
                     if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
@@ -1435,6 +1445,11 @@ namespace OleViewDotNet
                     if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                     {
                         EnableViewPermissions(m_registry.AppIDs[clsid.AppID]);
+                    }
+
+                    if (runtime_class != null && runtime_class.HasPermission)
+                    {
+                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
                     }
                 }
                 else if (node.Tag is COMTypeLibVersionEntry)
@@ -2067,7 +2082,7 @@ namespace OleViewDotNet
         private async void consoleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem item = sender as ToolStripMenuItem;
-            COMCLSIDEntry ent = GetSelectedClsidEntry();
+            COMCLSIDEntry ent = GetSelectedClassEntry() as COMCLSIDEntry;
             if (ent != null && item != null && item.Tag is string)
             {
                 await CreateInSession(ent, (string)item.Tag);
@@ -2163,7 +2178,7 @@ namespace OleViewDotNet
 
         private async void instanceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            COMCLSIDEntry clsid = GetSelectedClsidEntry();
+            COMCLSIDEntry clsid = GetSelectedClassEntry() as COMCLSIDEntry;
             if (clsid != null)
             {
                 await CreateElevated(clsid, false);
@@ -2172,7 +2187,7 @@ namespace OleViewDotNet
 
         private async void classFactoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            COMCLSIDEntry clsid = GetSelectedClsidEntry();
+            COMCLSIDEntry clsid = GetSelectedClassEntry() as COMCLSIDEntry;
             if (clsid != null)
             {
                 await CreateElevated(clsid, true);

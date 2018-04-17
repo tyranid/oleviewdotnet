@@ -477,6 +477,11 @@ namespace OleViewDotNet
         /// <param name="server">The remote server address.</param>
         /// <returns>The instance of the object.</returns>
         object CreateClassFactory(string server);
+
+        /// <summary>
+        /// True if this class supports remote activation.
+        /// </summary>
+        bool SupportsRemoteActivation { get; }
     }
 
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry
@@ -1012,6 +1017,8 @@ namespace OleViewDotNet
             Marshal.Release(obj);
             return ret;
         }
+
+        public bool SupportsRemoteActivation { get { return true; } }
 
         public override string ToString()
         {
