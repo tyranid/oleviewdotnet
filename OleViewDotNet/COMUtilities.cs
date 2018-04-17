@@ -2180,6 +2180,17 @@ namespace OleViewDotNet
             }
             return ret;
         }
+
+        private static Lazy<string> _assembly_version = new Lazy<string>(() =>
+        {
+            Assembly asm = Assembly.GetCallingAssembly();
+            return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+        });
+
+        public static string GetVersion()
+        {
+            return _assembly_version.Value;
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

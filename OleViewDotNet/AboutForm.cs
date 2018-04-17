@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -24,12 +25,30 @@ namespace OleViewDotNet
         public AboutForm()
         {
             InitializeComponent();
+            labelText.Text = string.Format(labelText.Text, COMUtilities.GetVersion());
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ProcessStartInfo start_info = new ProcessStartInfo(linkLabel.Text);
+            start_info.UseShellExecute = true;
+            start_info.Verb = "open";
+            try
+            {
+                using (Process.Start(start_info))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
         }
     }
 }

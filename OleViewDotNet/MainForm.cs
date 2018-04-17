@@ -37,7 +37,7 @@ namespace OleViewDotNet
 
         private void UpdateTitle()
         {
-            Text = "OleViewDotNet";
+            Text = string.Format("OleViewDotNet v{0}", COMUtilities.GetVersion());
             if (COMUtilities.IsAdministrator())
             {
                 Text += " - Administrator -";
@@ -48,12 +48,12 @@ namespace OleViewDotNet
             {
                 if (!Environment.Is64BitProcess)
                 {
-                    Text += " 32bit";
+                    Text += " - 32bit";
                     menuFileOpenViewer.Text = "Open 64bit Viewer";
                 }
                 else
                 {
-                    Text += " 64bit";
+                    Text += " - 64bit";
                     menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
