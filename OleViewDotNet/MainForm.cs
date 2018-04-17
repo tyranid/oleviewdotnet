@@ -123,7 +123,7 @@ namespace OleViewDotNet
             }
         }
 
-        public async Task HostObject(COMCLSIDEntry ent, object obj, bool factory)
+        public async Task HostObject(ICOMClassEntry ent, object obj, bool factory)
         {
             Dictionary<string, string> props = new Dictionary<string, string>();
 

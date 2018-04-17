@@ -41,7 +41,7 @@ namespace OleViewDotNet
         {
             try
             {
-                IClassFactory factory = (IClassFactory)_obj;            
+                IClassFactory factory = (IClassFactory)_obj;
                 object new_object;
                 Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
                 Dictionary<string, string> props = new Dictionary<string, string>();

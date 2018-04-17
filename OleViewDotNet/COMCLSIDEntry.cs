@@ -416,10 +416,23 @@ namespace OleViewDotNet
     public interface ICOMClassEntry
     {
         /// <summary>
+        /// The name of the class entry.
+        /// </summary>
+        string Name { get; }
+        /// <summary>
+        /// The clsid of the class entry.
+        /// </summary>
+        Guid Clsid { get; }
+        /// <summary>
+        /// The default server name.
+        /// </summary>
+        string DefaultServer { get; }
+
+        /// <summary>
         /// Get list of supported Interface IIDs (that we know about)
         /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
         /// The returned array is cached so subsequent calls to this function return without calling into COM
-        /// </summary>        
+        /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
@@ -449,6 +462,21 @@ namespace OleViewDotNet
         /// </summary>
         /// <remarks>You must have called LoadSupportedFactoryInterfaces before this call to get any useful output.</remarks>
         IEnumerable<COMInterfaceInstance> FactoryInterfaces { get; }
+
+        /// <summary>
+        /// Create an instance of this object.
+        /// </summary>
+        /// <param name="dwContext">The class context.</param>
+        /// <param name="server">The remote server address.</param>
+        /// <returns>The instance of the object.</returns>
+        object CreateInstanceAsObject(CLSCTX dwContext, string server);
+
+        /// <summary>
+        /// Create an instance of this object's class factory.
+        /// </summary>
+        /// <param name="server">The remote server address.</param>
+        /// <returns>The instance of the object.</returns>
+        object CreateClassFactory(string server);
     }
 
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry

@@ -1260,7 +1260,7 @@ namespace OleViewDotNet
             }
         }
 
-        private async Task SetupObjectView(COMCLSIDEntry ent, object obj, bool factory)
+        private async Task SetupObjectView(ICOMClassEntry ent, object obj, bool factory)
         {
             await Program.GetMainForm(m_registry).HostObject(ent, obj, factory);
         }

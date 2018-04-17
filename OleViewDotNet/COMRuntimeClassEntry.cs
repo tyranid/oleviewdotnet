@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
@@ -55,6 +56,7 @@ namespace OleViewDotNet
         public Guid Clsid { get; private set; }
         public string DllPath { get; private set; }
         public string Server { get; private set; }
+        public string DefaultServer { get { return Server; } }
         public bool HasServer
         {
             get
@@ -221,6 +223,53 @@ namespace OleViewDotNet
                 throw result.Exception.InnerException;
             }
             return result.Result;
+        }
+
+        private object CreateInstance(string server, bool factory)
+        {
+            if (!string.IsNullOrWhiteSpace(server))
+            {
+                throw new ArgumentException("Specifying a remote server is not valid for this class type.", "server");
+            }
+
+            IntPtr pObject = IntPtr.Zero;
+            try
+            {
+                int hr;
+
+                if (factory)
+                {
+                    Guid iid = COMInterfaceEntry.IID_IUnknown;
+                    hr = COMUtilities.RoGetActivationFactory(Name, ref iid, out pObject);
+                }
+                else
+                {
+                    hr = COMUtilities.RoActivateInstance(Name, out pObject);
+                }
+                if (hr != 0)
+                {
+                    throw new Win32Exception(hr);
+                }
+
+                return Marshal.GetObjectForIUnknown(pObject);
+            }
+            finally
+            {
+                if (pObject != IntPtr.Zero)
+                {
+                    Marshal.Release(pObject);
+                }
+            }
+        }
+
+        public object CreateInstanceAsObject(CLSCTX dwContext, string server)
+        {
+            return CreateInstance(server, false);
+        }
+
+        public object CreateClassFactory(string server)
+        {
+            return CreateInstance(server, true);
         }
 
         /// <summary>
