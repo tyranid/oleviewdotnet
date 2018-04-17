@@ -38,18 +38,20 @@
             // pictureBoxLogo
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
-            this.pictureBoxLogo.Location = new System.Drawing.Point(12, 12);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(16, 15);
+            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
-            this.pictureBoxLogo.Size = new System.Drawing.Size(32, 32);
+            this.pictureBoxLogo.Size = new System.Drawing.Size(43, 39);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxLogo.TabIndex = 0;
             this.pictureBoxLogo.TabStop = false;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(215, 41);
+            this.btnOK.Location = new System.Drawing.Point(287, 50);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 23);
+            this.btnOK.Size = new System.Drawing.Size(100, 28);
             this.btnOK.TabIndex = 1;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -58,22 +60,24 @@
             // labelText
             // 
             this.labelText.AutoSize = true;
-            this.labelText.Location = new System.Drawing.Point(50, 12);
+            this.labelText.Location = new System.Drawing.Point(67, 15);
+            this.labelText.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelText.Name = "labelText";
-            this.labelText.Size = new System.Drawing.Size(246, 26);
+            this.labelText.Size = new System.Drawing.Size(322, 34);
             this.labelText.TabIndex = 2;
-            this.labelText.Text = "OleView .NET v1.4 (c) James Forshaw 2014, 2016\r\nLicensed under GPLv3";
+            this.labelText.Text = "OleView .NET v1.4 (c) James Forshaw 2014-2018\r\nLicensed under GPLv3";
             // 
             // AboutForm
             // 
             this.AcceptButton = this.btnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(302, 72);
+            this.ClientSize = new System.Drawing.Size(403, 89);
             this.Controls.Add(this.labelText);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.pictureBoxLogo);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutForm";
