@@ -1432,19 +1432,22 @@ namespace OleViewDotNet
                     contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                     contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
-                    if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
+                    if (clsid != null)
                     {
-                        contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
-                    }
+                        if (m_registry.Typelibs.ContainsKey(clsid.TypeLib))
+                        {
+                            contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                        }
 
-                    if (clsid != null && m_registry.GetProxiesForClsid(clsid).Length > 0)
-                    {
-                        contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
-                    }
+                        if (m_registry.GetProxiesForClsid(clsid).Length > 0)
+                        {
+                            contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                        }
 
-                    if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
-                    {
-                        EnableViewPermissions(m_registry.AppIDs[clsid.AppID]);
+                        if (m_registry.AppIDs.ContainsKey(clsid.AppID))
+                        {
+                            EnableViewPermissions(m_registry.AppIDs[clsid.AppID]);
+                        }
                     }
 
                     if (runtime_class != null && runtime_class.HasPermission)
