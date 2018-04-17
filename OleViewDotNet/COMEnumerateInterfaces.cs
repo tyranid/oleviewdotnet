@@ -82,8 +82,8 @@ namespace OleViewDotNet
 
     public class COMEnumerateInterfaces
     {
-        private List<COMInterfaceInstance> _interfaces;
-        private List<COMInterfaceInstance> _factory_interfaces;
+        private HashSet<COMInterfaceInstance> _interfaces;
+        private HashSet<COMInterfaceInstance> _factory_interfaces;
         private Guid _clsid;
         private CLSCTX _clsctx;
         private string _activatable_classid;
@@ -92,7 +92,7 @@ namespace OleViewDotNet
 
         const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 
-        private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, List<COMInterfaceInstance> list)
+        private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
         {
             if (punk != IntPtr.Zero)
             {
@@ -110,8 +110,8 @@ namespace OleViewDotNet
                             {
                                 module_names[module.DangerousGetHandle()] = module.GetModuleFileName();
                             }
-                            intf = new COMInterfaceInstance(iid, 
-                                module_names[module.DangerousGetHandle()], 
+                            intf = new COMInterfaceInstance(iid,
+                                module_names[module.DangerousGetHandle()],
                                 vtable.ToInt64() - module.DangerousGetHandle().ToInt64());
                         }
                         else
@@ -123,6 +123,41 @@ namespace OleViewDotNet
 
                     list.Add(intf);
                     Marshal.Release(ppout);
+                }
+            }
+        }
+
+        private static void QueryInspectableInterfaces(IntPtr punk, HashSet<COMInterfaceInstance> list)
+        {
+            if (punk == IntPtr.Zero)
+            {
+                return;
+            }
+            object obj = Marshal.GetObjectForIUnknown(punk);
+            IInspectable inspectable = obj as IInspectable;
+            if (inspectable != null)
+            {
+                IntPtr iids = IntPtr.Zero;
+                try
+                {
+                    int iid_count;
+                    inspectable.GetIids(out iid_count, out iids);
+                    for (int i = 0; i < iid_count; ++i)
+                    {
+                        byte[] buffer = new byte[16];
+                        Marshal.Copy(iids + i * 16, buffer, 0, buffer.Length);
+                        list.Add(new COMInterfaceInstance(new Guid(buffer)));
+                    }
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    if (iids != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(iids);
+                    }
                 }
             }
         }
@@ -182,6 +217,9 @@ namespace OleViewDotNet
                         }
                     }
                 }
+
+                QueryInspectableInterfaces(punk, _interfaces);
+                QueryInspectableInterfaces(pfactory, _factory_interfaces);
             }
             finally
             {
@@ -237,16 +275,29 @@ namespace OleViewDotNet
         public IEnumerable<COMInterfaceInstance> FactoryInterfaces { get { return _factory_interfaces; } }
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout) 
+        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout)
             : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
         {
             GetInterfaces(sta, timeout);
         }
 
+        private class InterfaceInstanceComparer : IEqualityComparer<COMInterfaceInstance>
+        {
+            public bool Equals(COMInterfaceInstance x, COMInterfaceInstance y)
+            {
+                return x.Iid == y.Iid;
+            }
+
+            public int GetHashCode(COMInterfaceInstance obj)
+            {
+                return obj.Iid.GetHashCode();
+            }
+        }
+
         private COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, List<COMInterfaceInstance> interfaces, List<COMInterfaceInstance> factory_interfaces)
         {
-            _interfaces = interfaces;
-            _factory_interfaces = factory_interfaces;
+            _interfaces = new HashSet<COMInterfaceInstance>(interfaces, new InterfaceInstanceComparer());
+            _factory_interfaces = new HashSet<COMInterfaceInstance>(factory_interfaces, new InterfaceInstanceComparer());
             _clsid = clsid;
             _clsctx = clsctx;
             _activatable_classid = activatable_classid;
