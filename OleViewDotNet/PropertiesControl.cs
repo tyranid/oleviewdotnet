@@ -407,7 +407,7 @@ namespace OleViewDotNet
         {
             try
             {
-                ICOMEnumerableInterfaces entry = (ICOMEnumerableInterfaces)tabPageSupportedInterfaces.Tag;
+                ICOMClassEntry entry = (ICOMClassEntry)tabPageSupportedInterfaces.Tag;
                 await entry.LoadSupportedInterfacesAsync(true);
                 LoadInterfaceList(entry.Interfaces, listViewInterfaces);
                 LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);

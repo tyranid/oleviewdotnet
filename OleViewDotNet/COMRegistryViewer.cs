@@ -1021,7 +1021,7 @@ namespace OleViewDotNet
 
         private async Task SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
         {
-            ICOMEnumerableInterfaces clsid = node.Tag as ICOMEnumerableInterfaces;
+            ICOMClassEntry clsid = node.Tag as ICOMClassEntry;
 
             if (clsid == null && node.Tag is COMProgIDEntry)
             {

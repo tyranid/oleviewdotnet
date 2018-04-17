@@ -46,7 +46,7 @@ namespace OleViewDotNet
         Mta = 2
     }
 
-    public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMEnumerableInterfaces
+    public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;

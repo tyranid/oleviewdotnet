@@ -413,7 +413,7 @@ namespace OleViewDotNet
         }
     }
 
-    public interface ICOMEnumerableInterfaces
+    public interface ICOMClassEntry
     {
         /// <summary>
         /// Get list of supported Interface IIDs (that we know about)
@@ -451,7 +451,7 @@ namespace OleViewDotNet
         IEnumerable<COMInterfaceInstance> FactoryInterfaces { get; }
     }
 
-    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMEnumerableInterfaces
+    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
