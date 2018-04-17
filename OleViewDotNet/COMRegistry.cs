@@ -18,8 +18,11 @@ using Microsoft.Win32;
 using NtApiDotNet;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Xml;
 
@@ -36,7 +39,7 @@ namespace OleViewDotNet
     public enum COMRegistryDiffMode
     {
         LeftOnly,
-        RightOnly,        
+        RightOnly,
     }
 
     /// <summary>
@@ -58,6 +61,7 @@ namespace OleViewDotNet
         private SortedDictionary<Guid, COMTypeLibEntry> m_typelibs;
         private SortedDictionary<string, COMRuntimeClassEntry> m_runtime_classes;
         private SortedDictionary<string, COMRuntimeServerEntry> m_runtime_servers;
+        private SortedDictionary<Guid, Type> m_runtime_interface_metadata;
         private List<COMMimeType> m_mimetypes;
         private List<Guid> m_preapproved;
 
@@ -66,6 +70,7 @@ namespace OleViewDotNet
         private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
         private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
         private Dictionary<Guid, string> m_iids_to_names;
+
 
         #endregion
 
@@ -187,6 +192,11 @@ namespace OleViewDotNet
         public IDictionary<string, COMRuntimeServerEntry> RuntimeServers
         {
             get { return m_runtime_servers; }
+        }
+
+        public IDictionary<Guid, Type> RuntimeInterfaceMetadata
+        {
+            get { return m_runtime_interface_metadata; }
         }
 
         public string CreatedDate
@@ -646,6 +656,7 @@ namespace OleViewDotNet
                             LoadRuntimeServers(runtime_key);
                         }
                     }
+                    LoadRuntimeIntefaceMetadata();
                 }
             }
 
@@ -826,7 +837,7 @@ namespace OleViewDotNet
                     }
                 }
                 catch (FormatException)
-                {                    
+                {
                 }
             }
         }
@@ -1047,7 +1058,7 @@ namespace OleViewDotNet
                                 }
                             }
                         }
-                    }             
+                    }
                 }
             }
         }
@@ -1094,6 +1105,90 @@ namespace OleViewDotNet
                     m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower());
                 }
             }
+        }
+
+        static Dictionary<string, Assembly> _cached_assemblies = new Dictionary<string, Assembly>();
+
+        private static Assembly ResolveAssembly(string base_path, string name)
+        {
+            if (_cached_assemblies.ContainsKey(name))
+            {
+                return _cached_assemblies[name];
+            }
+
+            Assembly asm = null;
+            if (name.Contains(","))
+            {
+                asm = Assembly.ReflectionOnlyLoad(name);
+            }
+            else
+            {
+                string full_path = Path.Combine(base_path, string.Format("{0}.winmd", name));
+                if (File.Exists(full_path))
+                {
+                    asm = Assembly.ReflectionOnlyLoadFrom(full_path);
+                }
+                else
+                {
+                    int last_index = name.LastIndexOf('.');
+                    if (last_index < 0)
+                    {
+                        return null;
+                    }
+                    asm = ResolveAssembly(base_path, name.Substring(0, last_index));
+                }
+            }
+
+            _cached_assemblies[name] = asm;
+            return _cached_assemblies[name];
+        }
+
+        private static void WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(string base_path, NamespaceResolveEventArgs e)
+        {
+            e.ResolvedAssemblies.Add(ResolveAssembly(base_path, e.NamespaceName));
+        }
+
+        private static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(string base_path, ResolveEventArgs args)
+        {
+            return ResolveAssembly(base_path, args.Name);
+        }
+
+        private void LoadRuntimeIntefaceMetadata()
+        {
+            Dictionary<Guid, Type> runtime_interface_metadata = new Dictionary<Guid, Type>();
+            string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
+            if (!Directory.Exists(base_path))
+            {
+                m_runtime_interface_metadata = new SortedDictionary<Guid, Type>();
+                return;
+            }
+
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (s, a) => CurrentDomain_ReflectionOnlyAssemblyResolve(base_path, a);
+            WindowsRuntimeMetadata.ReflectionOnlyNamespaceResolve += (s, a) => WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(base_path, a);
+            DirectoryInfo dir = new DirectoryInfo(base_path);
+            foreach (FileInfo file in dir.GetFiles("*.winmd"))
+            {
+                try
+                {
+                    Assembly asm = Assembly.ReflectionOnlyLoadFrom(file.FullName);
+                    Type[] types = asm.GetTypes();
+                    foreach (Type t in types.Where(x => x.IsInterface))
+                    {
+                        foreach (var attr in t.GetCustomAttributesData())
+                        {
+                            if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
+                            {
+                                runtime_interface_metadata[t.GUID] = t;
+                                COMInterfaceEntry.CacheIidToName(t.GUID, t.FullName);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            m_runtime_interface_metadata = new SortedDictionary<Guid, Type>(runtime_interface_metadata);
         }
 
         #endregion

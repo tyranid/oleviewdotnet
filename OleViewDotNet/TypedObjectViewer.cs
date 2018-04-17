@@ -69,7 +69,7 @@ namespace OleViewDotNet
         }
 
         private void LoadDispatch()
-        {            
+        {
             listViewMethods.Columns.Add("Name");
             listViewMethods.Columns.Add("Return");
             listViewMethods.Columns.Add("Params");
@@ -195,14 +195,13 @@ namespace OleViewDotNet
                 }
 
                 if (val != null)
-                {                    
+                {
                     item.SubItems[2].Text = val.ToString();
                 }
                 else
                 {
                     item.SubItems[2].Text = "<null>";
                 }
-
             }
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -214,7 +213,7 @@ namespace OleViewDotNet
         }
 
         private void OpenObjectViewer(DynamicComObjectWrapper wrapper)
-        {           
+        {
             Program.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, wrapper.Instance, wrapper.InstanceType));
         }
 
@@ -251,7 +250,7 @@ namespace OleViewDotNet
 
         private void openObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenObject(listViewProperties);            
+            OpenObject(listViewProperties);
         }
 
         private void openObjectToolStripMenuItem1_Click(object sender, EventArgs e)

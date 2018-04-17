@@ -27,7 +27,7 @@ namespace OleViewDotNet
     {
         private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
 
-        private static string MapIidToName(Guid iid)
+        internal static string MapIidToName(Guid iid)
         {
             string ret;
             if (m_iidtoname.TryGetValue(iid, out ret))
@@ -35,6 +35,11 @@ namespace OleViewDotNet
                 return ret;
             }
             return iid.FormatGuid();
+        }
+
+        internal static void CacheIidToName(Guid iid, string name)
+        {
+            m_iidtoname.TryAdd(iid, name);
         }
 
         public int CompareTo(COMInterfaceEntry right)
@@ -48,7 +53,7 @@ namespace OleViewDotNet
             if (!String.IsNullOrWhiteSpace(name))
             {
                 Name = COMUtilities.DemangleWinRTName(name.ToString());
-                m_iidtoname.TryAdd(Iid, Name);
+                CacheIidToName(Iid, Name);
             }
             else
             {
