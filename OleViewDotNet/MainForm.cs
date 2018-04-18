@@ -862,16 +862,30 @@ namespace OleViewDotNet
             CreatePropertyGrid(false);
         }
 
-        private void menuViewStorage_Click(object sender, EventArgs e)
+        private static STGM GetStorageAccess(bool read_only)
+        {
+            if (read_only)
+            {
+                return STGM.READ | STGM.SHARE_DENY_WRITE;
+            }
+            else
+            {
+                return STGM.SHARE_EXCLUSIVE | STGM.READWRITE;
+            }
+        }
+
+        private void menuStorageOpenStorage_Click(object sender, EventArgs e)
         {
             try
             {
                 using (OpenFileDialog dlg = new OpenFileDialog())
                 {
+                    dlg.ShowReadOnly = true;
+                    dlg.ReadOnlyChecked = true;
                     dlg.Filter = "All Files (*.*)|*.*";
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                     {
-                        IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, STGM.READ | STGM.SHARE_DENY_WRITE, IntPtr.Zero, 0);
+                        IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
 
                         HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName)));
                     }
@@ -902,6 +916,28 @@ namespace OleViewDotNet
         private void menuRegistryRuntimeServers_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
+        }
+
+        private void menuStorageNewStorage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "All Files (*.*)|*.*|Doc Files (*.doc)|*.doc";
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        Guid iid = typeof(IStorage).GUID;
+                        IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName, 
+                            STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
+                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName)));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex, true);
+            }
         }
     }
 }

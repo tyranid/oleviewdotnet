@@ -384,6 +384,27 @@ namespace OleViewDotNet
               int reserved
             );
 
+        [StructLayout(LayoutKind.Sequential)]
+        public class STGOPTIONS
+        {
+            public ushort usVersion;
+            public ushort reserved;
+            public ulong ulSectorSize;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pwcsTemplateFile;
+        }
+
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern IStorage StgCreateStorageEx(
+              string pwcsName,
+              STGM grfMode,
+              STGFMT stgfmt,
+              int grfAttrs,
+              [In] STGOPTIONS pStgOptions,
+              IntPtr pSecurityDescriptor,
+              ref Guid riid
+            );
+
         [DllImport("ole32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
         public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
@@ -400,11 +421,22 @@ namespace OleViewDotNet
         [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         public static extern int CoGetInstanceFromFile(
             IntPtr pServerInfo,
-            OptionalGuid pClsid,
-            IntPtr punkOuter,
+            [In] OptionalGuid pClsid,
+            [In, MarshalAs(UnmanagedType.IUnknown)] object punkOuter,
             CLSCTX dwClsCtx,
             STGM grfMode,
             string pwszName,
+            int dwCount,
+            [In, Out] MULTI_QI[] pResults
+        );
+
+        [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern int CoGetInstanceFromIStorage(
+            IntPtr pServerInfo,
+            [In] OptionalGuid pClsid,
+            [In, MarshalAs(UnmanagedType.IUnknown)] object punkOuter,
+            CLSCTX dwClsCtx,
+            IStorage pstg,
             int dwCount,
             [In, Out] MULTI_QI[] pResults
         );

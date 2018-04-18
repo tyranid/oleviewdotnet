@@ -60,6 +60,7 @@
             this.menuViewProgIDs = new System.Windows.Forms.MenuItem();
             this.menuRegistryMimeTypes = new System.Windows.Forms.MenuItem();
             this.menuRegistryRuntimeClasses = new System.Windows.Forms.MenuItem();
+            this.menuRegistryRuntimeServers = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuViewPreApproved = new System.Windows.Forms.MenuItem();
             this.menuViewImplementedCategories = new System.Windows.Forms.MenuItem();
@@ -96,15 +97,16 @@
             this.menuHexEditor = new System.Windows.Forms.MenuItem();
             this.menuHexEditorFromFile = new System.Windows.Forms.MenuItem();
             this.menuHexEditorEmpty = new System.Windows.Forms.MenuItem();
-            this.menuViewStorage = new System.Windows.Forms.MenuItem();
             this.menuSecurity = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultAccess = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultAccessRestriction = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultLaunch = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
+            this.menuItem11 = new System.Windows.Forms.MenuItem();
+            this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuRegistryRuntimeServers = new System.Windows.Forms.MenuItem();
+            this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -114,6 +116,7 @@
             this.menuRegistry,
             this.menuObject,
             this.menuSecurity,
+            this.menuItem11,
             this.menuHelp});
             // 
             // menuFile
@@ -333,6 +336,12 @@
             this.menuRegistryRuntimeClasses.Text = "Runtime Classes";
             this.menuRegistryRuntimeClasses.Click += new System.EventHandler(this.menuRegistryRuntimeClasses_Click);
             // 
+            // menuRegistryRuntimeServers
+            // 
+            this.menuRegistryRuntimeServers.Index = 8;
+            this.menuRegistryRuntimeServers.Text = "Runtime Servers";
+            this.menuRegistryRuntimeServers.Click += new System.EventHandler(this.menuRegistryRuntimeServers_Click);
+            // 
             // menuItem4
             // 
             this.menuItem4.Index = 9;
@@ -446,8 +455,7 @@
             this.menuObjectParseMoniker,
             this.menuObjectBindMoniker,
             this.menuItem9,
-            this.menuHexEditor,
-            this.menuViewStorage});
+            this.menuHexEditor});
             this.menuObject.Text = "&Object";
             // 
             // menuObjectROT
@@ -561,12 +569,6 @@
             this.menuHexEditorEmpty.Text = "Empty";
             this.menuHexEditorEmpty.Click += new System.EventHandler(this.menuHexEditorEmpty_Click);
             // 
-            // menuViewStorage
-            // 
-            this.menuViewStorage.Index = 12;
-            this.menuViewStorage.Text = "View Storage";
-            this.menuViewStorage.Click += new System.EventHandler(this.menuViewStorage_Click);
-            // 
             // menuSecurity
             // 
             this.menuSecurity.Index = 3;
@@ -601,9 +603,23 @@
             this.menuSecurityDefaultLaunchRestriction.Text = "View Default Launch &Restriction";
             this.menuSecurityDefaultLaunchRestriction.Click += new System.EventHandler(this.menuSecurityDefaultLaunchRestriction_Click);
             // 
+            // menuItem11
+            // 
+            this.menuItem11.Index = 4;
+            this.menuItem11.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuStorageNewStorage,
+            this.menuStorageOpenStorage});
+            this.menuItem11.Text = "Storage";
+            // 
+            // menuStorageOpenStorage
+            // 
+            this.menuStorageOpenStorage.Index = 1;
+            this.menuStorageOpenStorage.Text = "Open Storage";
+            this.menuStorageOpenStorage.Click += new System.EventHandler(this.menuStorageOpenStorage_Click);
+            // 
             // menuHelp
             // 
-            this.menuHelp.Index = 4;
+            this.menuHelp.Index = 5;
             this.menuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHelpAbout});
             this.menuHelp.Text = "&Help";
@@ -614,20 +630,20 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuRegistryRuntimeServers
+            // menuStorageNewStorage
             // 
-            this.menuRegistryRuntimeServers.Index = 8;
-            this.menuRegistryRuntimeServers.Text = "Runtime Servers";
-            this.menuRegistryRuntimeServers.Click += new System.EventHandler(this.menuRegistryRuntimeServers_Click);
+            this.menuStorageNewStorage.Index = 0;
+            this.menuStorageNewStorage.Text = "New Storage";
+            this.menuStorageNewStorage.Click += new System.EventHandler(this.menuStorageNewStorage_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1097, 551);
+            this.ClientSize = new System.Drawing.Size(1234, 689);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -710,10 +726,12 @@
         private System.Windows.Forms.MenuItem menuObjectProcessByUser;
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
         private System.Windows.Forms.MenuItem menuPropertiesViewer;
-        private System.Windows.Forms.MenuItem menuViewStorage;
+        private System.Windows.Forms.MenuItem menuStorageOpenStorage;
         private System.Windows.Forms.MenuItem menuRegistryRuntimeClasses;
         private System.Windows.Forms.MenuItem menuObjectProcessesSelectProcess;
         private System.Windows.Forms.MenuItem menuRegistryRuntimeServers;
+        private System.Windows.Forms.MenuItem menuItem11;
+        private System.Windows.Forms.MenuItem menuStorageNewStorage;
     }
 }
 

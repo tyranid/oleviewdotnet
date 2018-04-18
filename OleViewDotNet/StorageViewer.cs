@@ -113,9 +113,15 @@ namespace OleViewDotNet
         public StorageViewer(IStorage stg, string filename)
         {
             _stg = stg;
+            Disposed += StorageViewer_Disposed;
             InitializeComponent();
             PopulateTree();
             Text = string.Format("Storage {0}", filename);
+        }
+
+        private void StorageViewer_Disposed(object sender, EventArgs e)
+        {
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(_stg);
         }
 
         private void treeViewStorage_AfterSelect(object sender, TreeViewEventArgs e)
