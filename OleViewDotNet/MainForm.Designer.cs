@@ -614,7 +614,7 @@
             // menuStorageOpenStorage
             // 
             this.menuStorageOpenStorage.Index = 1;
-            this.menuStorageOpenStorage.Text = "Open Storage";
+            this.menuStorageOpenStorage.Text = "Open";
             this.menuStorageOpenStorage.Click += new System.EventHandler(this.menuStorageOpenStorage_Click);
             // 
             // menuHelp
@@ -633,7 +633,7 @@
             // menuStorageNewStorage
             // 
             this.menuStorageNewStorage.Index = 0;
-            this.menuStorageNewStorage.Text = "New Storage";
+            this.menuStorageNewStorage.Text = "New";
             this.menuStorageNewStorage.Click += new System.EventHandler(this.menuStorageNewStorage_Click);
             // 
             // MainForm

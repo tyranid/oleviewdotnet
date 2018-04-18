@@ -31,6 +31,8 @@ namespace OleViewDotNet
             Bytes = new byte[0];
         }
 
+        public event EventHandler BytesChanged;
+
         public byte[] Bytes
         {
             get
@@ -42,8 +44,14 @@ namespace OleViewDotNet
             {
                 _bytes = new DynamicByteProvider(value);
                 hexBox.ByteProvider = _bytes;
+                _bytes.Changed += Bytes_Changed;
                 hexBox.Invalidate();
             }
+        }
+
+        private void Bytes_Changed(object sender, EventArgs e)
+        {
+            BytesChanged?.Invoke(this, new EventArgs());
         }
 
         public bool ReadOnly

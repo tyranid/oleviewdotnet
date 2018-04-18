@@ -37,7 +37,7 @@ namespace OleViewDotNet
 
         private void UpdateTitle()
         {
-            Text = string.Format("OleViewDotNet v{0}", COMUtilities.GetVersion());
+            Text = string.Format("OleView .NET v{0}", COMUtilities.GetVersion());
             if (COMUtilities.IsAdministrator())
             {
                 Text += " - Administrator -";
@@ -874,6 +874,8 @@ namespace OleViewDotNet
             }
         }
 
+        const string STORAGE_FILTER = "All Files (*.*)|*.*|Doc Files (*.doc)|*.doc";
+
         private void menuStorageOpenStorage_Click(object sender, EventArgs e)
         {
             try
@@ -882,12 +884,34 @@ namespace OleViewDotNet
                 {
                     dlg.ShowReadOnly = true;
                     dlg.ReadOnlyChecked = true;
-                    dlg.Filter = "All Files (*.*)|*.*";
+                    dlg.Filter = STORAGE_FILTER;
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                     {
                         IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
 
-                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName)));
+                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), dlg.ReadOnlyChecked));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex, true);
+            }
+        }
+
+        private void menuStorageNewStorage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = STORAGE_FILTER;
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        Guid iid = typeof(IStorage).GUID;
+                        IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName,
+                            STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
+                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), false));
                     }
                 }
             }
@@ -918,26 +942,5 @@ namespace OleViewDotNet
             OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
         }
 
-        private void menuStorageNewStorage_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                using (SaveFileDialog dlg = new SaveFileDialog())
-                {
-                    dlg.Filter = "All Files (*.*)|*.*|Doc Files (*.doc)|*.doc";
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
-                    {
-                        Guid iid = typeof(IStorage).GUID;
-                        IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName, 
-                            STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
-                        HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName)));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Program.ShowError(this, ex, true);
-            }
-        }
     }
 }

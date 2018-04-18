@@ -16,7 +16,9 @@
 
 using System;
 using System.ComponentModel;
+using IS = System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -33,7 +35,7 @@ namespace OleViewDotNet
 
             public STATSTGWrapper(STATSTG stat, byte[] bytes)
             {
-                Name = stat.pwcsName;
+                Name = EscapeStorageName(stat.pwcsName);
                 Type = (STGTY)stat.type;
                 Size = stat.cbSize;
                 ModifiedTime = FromFileTime(stat.mtime);
@@ -60,18 +62,148 @@ namespace OleViewDotNet
             public byte[] Bytes { get; private set; }
         }
 
+        private static string EscapeStorageName(string name)
+        {
+            if (name == null)
+            {
+                return name;
+            }
+            StringBuilder builder = new StringBuilder();
+            foreach (char ch in name)
+            {
+                if (ch < 32)
+                {
+                    switch (ch)
+                    {
+                        case '\0':
+                            builder.Append(@"#0");
+                            break;
+                        case '\n':
+                            builder.Append(@"#n");
+                            break;
+                        case '\r':
+                            builder.Append(@"#r");
+                            break;
+                        case '\t':
+                            builder.Append(@"#t");
+                            break;
+                        case '#':
+                            builder.Append(@"##");
+                            break;
+
+                    }
+                    builder.AppendFormat(@"#x{0:X02}", (int)ch);
+                }
+                else
+                {
+                    builder.Append(ch);
+                }
+            }
+            return builder.ToString();
+        }
+
+        private enum ParserState
+        {
+            None,
+            InEscape,
+            InHexCode
+        }
+
+        private static string UnescapeStorageName(string name)
+        {
+            if (name == null)
+            {
+                return name;
+            }
+            StringBuilder builder = new StringBuilder();
+            ParserState current_state = ParserState.None;
+            string hexcode = string.Empty;
+            foreach (char ch in name)
+            {
+                if (current_state == ParserState.InEscape)
+                {
+                    switch (ch)
+                    {
+                        case '0':
+                            builder.Append('\0');
+                            break;
+                        case 'n':
+                            builder.Append('\n');
+                            break;
+                        case 'r':
+                            builder.Append('\r');
+                            break;
+                        case 't':
+                            builder.Append('\t');
+                            break;
+                        case '#':
+                            builder.Append('#');
+                            break;
+                        case 'x':
+                            current_state = ParserState.InHexCode;
+                            hexcode = string.Empty;
+                            break;
+                        default:
+                            throw new ArgumentException(string.Format("Invalid escape character {0}", ch));
+                    }
+                    if (current_state == ParserState.InEscape)
+                    {
+                        current_state = ParserState.None;
+                    }
+                }
+                else if (current_state == ParserState.InHexCode)
+                {
+                    hexcode += ch;
+                    if (hexcode.Length == 2)
+                    {
+                        builder.Append((char)int.Parse(hexcode, System.Globalization.NumberStyles.HexNumber));
+                        current_state = ParserState.None;
+                    }
+                }
+                else
+                {
+                    if (ch == '#')
+                    {
+                        current_state = ParserState.InEscape;
+                    }
+                    else
+                    {
+                        builder.Append(ch);
+                    }
+                }
+            }
+
+            if (current_state != ParserState.None)
+            {
+                throw new ArgumentException("Trailing escape at end of string");
+            }
+
+            return name;
+        }
+
         private byte[] ReadStream(IStorage stg, string name, int size)
         {
             IStream stm = stg.OpenStream(name, IntPtr.Zero, STGM.READ | STGM.SHARE_EXCLUSIVE, 0);
-            byte[] ret = new byte[size];
-            stm.Read(ret, size, IntPtr.Zero);
-            return ret;
+            try
+            {
+                byte[] ret = new byte[size];
+                stm.Read(ret, size, IntPtr.Zero);
+                return ret;
+            }
+            finally
+            {
+                IS.Marshal.ReleaseComObject(stm);
+            }
         }
 
-        IStorage _stg;
+        private readonly IStorage _stg;
+        private readonly bool _read_only;
 
         private void PopulateTree(IStorage stg, TreeNode root)
         {
+            STATSTG stg_stat = new STATSTG();
+            stg.Stat(stg_stat, 0);
+            root.Tag = new STATSTGWrapper(stg_stat, new byte[0]);
             IEnumSTATSTG enum_stg;
             stg.EnumElements(0, IntPtr.Zero, 0, out enum_stg);
             STATSTG[] stat = new STATSTG[1];
@@ -79,14 +211,22 @@ namespace OleViewDotNet
             while (enum_stg.Next(1, stat, out fetched) == 0)
             {
                 STGTY type = (STGTY)stat[0].type;
-                TreeNode node = new TreeNode(stat[0].pwcsName);
+                TreeNode node = new TreeNode(EscapeStorageName(stat[0].pwcsName));
                 byte[] bytes = new byte[0];
                 node.ImageIndex = 2;
                 node.SelectedImageIndex = 2;
                 switch (type)
                 {
                     case STGTY.Storage:
-                        PopulateTree(stg.OpenStorage(stat[0].pwcsName, IntPtr.Zero, STGM.READ | STGM.SHARE_EXCLUSIVE, IntPtr.Zero, 0), node);
+                        IStorage child_stg = stg.OpenStorage(stat[0].pwcsName, IntPtr.Zero, STGM.READ | STGM.SHARE_EXCLUSIVE, IntPtr.Zero, 0);
+                        try
+                        {
+                            PopulateTree(child_stg, node);
+                        }
+                        finally
+                        {
+                            IS.Marshal.ReleaseComObject(child_stg);
+                        }
                         node.ImageIndex = 0;
                         node.SelectedImageIndex = 0;
                         break;
@@ -110,18 +250,20 @@ namespace OleViewDotNet
             root.Expand();
         }
 
-        public StorageViewer(IStorage stg, string filename)
+        public StorageViewer(IStorage stg, string filename, bool read_only)
         {
             _stg = stg;
+            _read_only = read_only;
             Disposed += StorageViewer_Disposed;
             InitializeComponent();
             PopulateTree();
-            Text = string.Format("Storage {0}", filename);
+            Text = string.Format("{0}", filename);
+            hexEditorStream.ReadOnly = read_only;
         }
 
         private void StorageViewer_Disposed(object sender, EventArgs e)
         {
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(_stg);
+            IS.Marshal.ReleaseComObject(_stg);
         }
 
         private void treeViewStorage_AfterSelect(object sender, TreeViewEventArgs e)

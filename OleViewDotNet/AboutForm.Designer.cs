@@ -39,20 +39,20 @@
             // pictureBoxLogo
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
-            this.pictureBoxLogo.Location = new System.Drawing.Point(16, 15);
-            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(18, 19);
+            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
-            this.pictureBoxLogo.Size = new System.Drawing.Size(43, 39);
+            this.pictureBoxLogo.Size = new System.Drawing.Size(48, 49);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxLogo.TabIndex = 0;
             this.pictureBoxLogo.TabStop = false;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(287, 50);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4);
+            this.btnOK.Location = new System.Drawing.Point(323, 62);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(100, 28);
+            this.btnOK.Size = new System.Drawing.Size(112, 35);
             this.btnOK.TabIndex = 1;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -61,36 +61,36 @@
             // labelText
             // 
             this.labelText.AutoSize = true;
-            this.labelText.Location = new System.Drawing.Point(67, 15);
+            this.labelText.Location = new System.Drawing.Point(75, 19);
             this.labelText.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelText.Name = "labelText";
-            this.labelText.Size = new System.Drawing.Size(320, 34);
+            this.labelText.Size = new System.Drawing.Size(355, 40);
             this.labelText.TabIndex = 2;
             this.labelText.Text = "OleView .NET v{0} (c) James Forshaw 2014-2018\r\nLicensed under GPLv3";
             // 
             // linkLabel
             // 
             this.linkLabel.AutoSize = true;
-            this.linkLabel.Location = new System.Drawing.Point(13, 63);
+            this.linkLabel.Location = new System.Drawing.Point(15, 79);
             this.linkLabel.Name = "linkLabel";
-            this.linkLabel.Size = new System.Drawing.Size(257, 17);
+            this.linkLabel.Size = new System.Drawing.Size(127, 20);
             this.linkLabel.TabIndex = 3;
             this.linkLabel.TabStop = true;
-            this.linkLabel.Text = "https://github.com/tyranid/oleviewdotnet";
+            this.linkLabel.Text = "http://oleview.net";
             this.linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_LinkClicked);
             // 
             // AboutForm
             // 
             this.AcceptButton = this.btnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(403, 89);
+            this.ClientSize = new System.Drawing.Size(453, 111);
             this.Controls.Add(this.linkLabel);
             this.Controls.Add(this.labelText);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.pictureBoxLogo);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutForm";
