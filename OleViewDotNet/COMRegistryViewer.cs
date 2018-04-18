@@ -1394,7 +1394,7 @@ namespace OleViewDotNet
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
                     COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
                     ICOMClassEntry entry = node.Tag as ICOMClassEntry;
-                    if (progid != null && m_registry.Clsids.ContainsKey(progid.Clsid))
+                    if (progid != null)
                     {
                         clsid = m_registry.MapClsidToEntry(progid.Clsid);
                         entry = clsid;
@@ -1424,7 +1424,7 @@ namespace OleViewDotNet
                     }
 
                     createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryToolStripMenuItem);
-                    if (entry.SupportsRemoteActivation)
+                    if (entry != null && entry.SupportsRemoteActivation)
                     {
                         createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
                     }

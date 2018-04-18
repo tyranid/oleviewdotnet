@@ -648,6 +648,8 @@ namespace OleViewDotNet
         {
             Clsid = clsid;
             Servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+            Name = string.Empty;
+            Categories = new Guid[0];
         }
 
         public COMCLSIDEntry(Guid clsid, COMServerType type)
