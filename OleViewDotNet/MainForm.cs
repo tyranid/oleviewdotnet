@@ -803,17 +803,17 @@ namespace OleViewDotNet
             }
         }
 
-        private void menuObjectProcessesByPid_Click(object sender, EventArgs e)
+        private void menuProcessesAllProcessesByPid_Click(object sender, EventArgs e)
         {
             LoadProcesses(p => p.Pid);
         }
 
-        private void menuObjectProcessesByName_Click(object sender, EventArgs e)
+        private void menuProcessesAllProcessesByName_Click(object sender, EventArgs e)
         {
             LoadProcesses(p => p.Name);
         }
 
-        private void menuObjectProcessByUser_Click(object sender, EventArgs e)
+        private void menuProcessesAllProcessesByUser_Click(object sender, EventArgs e)
         {
             LoadProcesses(p => p.User);
         }
@@ -926,7 +926,7 @@ namespace OleViewDotNet
             OpenView(COMRegistryViewer.DisplayMode.RuntimeClasses);
         }
 
-        private void menuObjectProcessesSelectProcess_Click(object sender, EventArgs e)
+        private void menuProcessesSelectProcess_Click(object sender, EventArgs e)
         {
             using (SelectProcessForm form = new SelectProcessForm(ProcessAccessRights.VmRead, false))
             {

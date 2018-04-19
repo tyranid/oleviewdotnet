@@ -80,11 +80,11 @@
             this.menuPropertiesViewer = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcesses = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessesByPid = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessesByName = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessByUser = new System.Windows.Forms.MenuItem();
-            this.menuObjectProcessesSelectProcess = new System.Windows.Forms.MenuItem();
+            this.menuProcesses = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
+            this.menuProcessesSelectProcess = new System.Windows.Forms.MenuItem();
             this.menuItem13 = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
             this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
@@ -103,10 +103,11 @@
             this.menuSecurityDefaultLaunch = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
+            this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
+            this.menuItemProcessesAllProcesses = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -116,6 +117,7 @@
             this.menuRegistry,
             this.menuObject,
             this.menuSecurity,
+            this.menuProcesses,
             this.menuItem11,
             this.menuHelp});
             // 
@@ -445,7 +447,6 @@
             this.menuObject.Index = 2;
             this.menuObject.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuObjectROT,
-            this.menuObjectProcesses,
             this.menuItem13,
             this.menuObjectCreateInstanceFromCLSID,
             this.menuObjectFromMarshalledStream,
@@ -464,94 +465,92 @@
             this.menuObjectROT.Text = "&Running Object Table";
             this.menuObjectROT.Click += new System.EventHandler(this.menuViewROT_Click);
             // 
-            // menuObjectProcesses
+            // menuProcesses
             // 
-            this.menuObjectProcesses.Index = 1;
-            this.menuObjectProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuObjectProcessesByPid,
-            this.menuObjectProcessesByName,
-            this.menuObjectProcessByUser,
-            this.menuObjectProcessesSelectProcess});
-            this.menuObjectProcesses.Text = "Processes";
+            this.menuProcesses.Index = 4;
+            this.menuProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuProcessesSelectProcess,
+            this.menuItemProcessesAllProcesses});
+            this.menuProcesses.Text = "Processes";
             // 
-            // menuObjectProcessesByPid
+            // menuProcessesAllProcessesByPid
             // 
-            this.menuObjectProcessesByPid.Index = 0;
-            this.menuObjectProcessesByPid.Text = "By PID";
-            this.menuObjectProcessesByPid.Click += new System.EventHandler(this.menuObjectProcessesByPid_Click);
+            this.menuProcessesAllProcessesByPid.Index = 0;
+            this.menuProcessesAllProcessesByPid.Text = "By PID";
+            this.menuProcessesAllProcessesByPid.Click += new System.EventHandler(this.menuProcessesAllProcessesByPid_Click);
             // 
-            // menuObjectProcessesByName
+            // menuProcessesAllProcessesByName
             // 
-            this.menuObjectProcessesByName.Index = 1;
-            this.menuObjectProcessesByName.Text = "By Name";
-            this.menuObjectProcessesByName.Click += new System.EventHandler(this.menuObjectProcessesByName_Click);
+            this.menuProcessesAllProcessesByName.Index = 1;
+            this.menuProcessesAllProcessesByName.Text = "By Name";
+            this.menuProcessesAllProcessesByName.Click += new System.EventHandler(this.menuProcessesAllProcessesByName_Click);
             // 
-            // menuObjectProcessByUser
+            // menuProcessesAllProcessesByUser
             // 
-            this.menuObjectProcessByUser.Index = 2;
-            this.menuObjectProcessByUser.Text = "By User";
-            this.menuObjectProcessByUser.Click += new System.EventHandler(this.menuObjectProcessByUser_Click);
+            this.menuProcessesAllProcessesByUser.Index = 2;
+            this.menuProcessesAllProcessesByUser.Text = "By User";
+            this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
             // 
-            // menuObjectProcessesSelectProcess
+            // menuProcessesSelectProcess
             // 
-            this.menuObjectProcessesSelectProcess.Index = 3;
-            this.menuObjectProcessesSelectProcess.Text = "Select Process";
-            this.menuObjectProcessesSelectProcess.Click += new System.EventHandler(this.menuObjectProcessesSelectProcess_Click);
+            this.menuProcessesSelectProcess.Index = 0;
+            this.menuProcessesSelectProcess.Text = "Select Process";
+            this.menuProcessesSelectProcess.Click += new System.EventHandler(this.menuProcessesSelectProcess_Click);
             // 
             // menuItem13
             // 
-            this.menuItem13.Index = 2;
+            this.menuItem13.Index = 1;
             this.menuItem13.Text = "-";
             // 
             // menuObjectCreateInstanceFromCLSID
             // 
-            this.menuObjectCreateInstanceFromCLSID.Index = 3;
+            this.menuObjectCreateInstanceFromCLSID.Index = 2;
             this.menuObjectCreateInstanceFromCLSID.Text = "&Create Instance from CLSID";
             this.menuObjectCreateInstanceFromCLSID.Click += new System.EventHandler(this.menuViewCreateInstanceFromCLSID_Click);
             // 
             // menuObjectFromMarshalledStream
             // 
-            this.menuObjectFromMarshalledStream.Index = 4;
+            this.menuObjectFromMarshalledStream.Index = 3;
             this.menuObjectFromMarshalledStream.Text = "From &Marshalled Stream";
             this.menuObjectFromMarshalledStream.Click += new System.EventHandler(this.menuObjectFromMarshalledStream_Click);
             // 
             // menuObjectFromSerializedStream
             // 
-            this.menuObjectFromSerializedStream.Index = 5;
+            this.menuObjectFromSerializedStream.Index = 4;
             this.menuObjectFromSerializedStream.Text = "From &Serialized Stream";
             this.menuObjectFromSerializedStream.Click += new System.EventHandler(this.menuObjectFromSerializedStream_Click);
             // 
             // menuObjectFromFile
             // 
-            this.menuObjectFromFile.Index = 6;
+            this.menuObjectFromFile.Index = 5;
             this.menuObjectFromFile.Text = "From &File";
             this.menuObjectFromFile.Click += new System.EventHandler(this.menuObjectFromFile_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 7;
+            this.menuItem3.Index = 6;
             this.menuItem3.Text = "-";
             // 
             // menuObjectParseMoniker
             // 
-            this.menuObjectParseMoniker.Index = 8;
+            this.menuObjectParseMoniker.Index = 7;
             this.menuObjectParseMoniker.Text = "&Parse Moniker";
             this.menuObjectParseMoniker.Click += new System.EventHandler(this.menuObjectParseMoniker_Click);
             // 
             // menuObjectBindMoniker
             // 
-            this.menuObjectBindMoniker.Index = 9;
+            this.menuObjectBindMoniker.Index = 8;
             this.menuObjectBindMoniker.Text = "&Bind Moniker";
             this.menuObjectBindMoniker.Click += new System.EventHandler(this.menuObjectBindMoniker_Click);
             // 
             // menuItem9
             // 
-            this.menuItem9.Index = 10;
+            this.menuItem9.Index = 9;
             this.menuItem9.Text = "-";
             // 
             // menuHexEditor
             // 
-            this.menuHexEditor.Index = 11;
+            this.menuHexEditor.Index = 10;
             this.menuHexEditor.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHexEditorFromFile,
             this.menuHexEditorEmpty});
@@ -605,11 +604,17 @@
             // 
             // menuItem11
             // 
-            this.menuItem11.Index = 4;
+            this.menuItem11.Index = 5;
             this.menuItem11.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuStorageNewStorage,
             this.menuStorageOpenStorage});
             this.menuItem11.Text = "Storage";
+            // 
+            // menuStorageNewStorage
+            // 
+            this.menuStorageNewStorage.Index = 0;
+            this.menuStorageNewStorage.Text = "New";
+            this.menuStorageNewStorage.Click += new System.EventHandler(this.menuStorageNewStorage_Click);
             // 
             // menuStorageOpenStorage
             // 
@@ -619,7 +624,7 @@
             // 
             // menuHelp
             // 
-            this.menuHelp.Index = 5;
+            this.menuHelp.Index = 6;
             this.menuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHelpAbout});
             this.menuHelp.Text = "&Help";
@@ -630,20 +635,23 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuStorageNewStorage
+            // menuItemProcessesAllProcesses
             // 
-            this.menuStorageNewStorage.Index = 0;
-            this.menuStorageNewStorage.Text = "New";
-            this.menuStorageNewStorage.Click += new System.EventHandler(this.menuStorageNewStorage_Click);
+            this.menuItemProcessesAllProcesses.Index = 1;
+            this.menuItemProcessesAllProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuProcessesAllProcessesByPid,
+            this.menuProcessesAllProcessesByName,
+            this.menuProcessesAllProcessesByUser});
+            this.menuItemProcessesAllProcesses.Text = "All Processes";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1234, 689);
+            this.ClientSize = new System.Drawing.Size(1097, 551);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -719,19 +727,20 @@
         private System.Windows.Forms.MenuItem menuFileSaveAsDatabase;
         private System.Windows.Forms.MenuItem menuFileConfigureSymbols;
         private System.Windows.Forms.MenuItem menuItem12;
-        private System.Windows.Forms.MenuItem menuObjectProcesses;
+        private System.Windows.Forms.MenuItem menuProcesses;
         private System.Windows.Forms.MenuItem menuItem13;
-        private System.Windows.Forms.MenuItem menuObjectProcessesByPid;
-        private System.Windows.Forms.MenuItem menuObjectProcessesByName;
-        private System.Windows.Forms.MenuItem menuObjectProcessByUser;
+        private System.Windows.Forms.MenuItem menuProcessesAllProcessesByPid;
+        private System.Windows.Forms.MenuItem menuProcessesAllProcessesByName;
+        private System.Windows.Forms.MenuItem menuProcessesAllProcessesByUser;
         private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
         private System.Windows.Forms.MenuItem menuPropertiesViewer;
         private System.Windows.Forms.MenuItem menuStorageOpenStorage;
         private System.Windows.Forms.MenuItem menuRegistryRuntimeClasses;
-        private System.Windows.Forms.MenuItem menuObjectProcessesSelectProcess;
+        private System.Windows.Forms.MenuItem menuProcessesSelectProcess;
         private System.Windows.Forms.MenuItem menuRegistryRuntimeServers;
         private System.Windows.Forms.MenuItem menuItem11;
         private System.Windows.Forms.MenuItem menuStorageNewStorage;
+        private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
     }
 }
 
