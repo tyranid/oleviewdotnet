@@ -30,6 +30,7 @@ namespace OleViewDotNet
                 Properties.Settings.Default.DbgHelpPath32;
             textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
             checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
+            checkBoxResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -79,6 +80,7 @@ namespace OleViewDotNet
             Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
             Properties.Settings.Default.SymbolsConfigured = true;
             Properties.Settings.Default.ParseStubMethods = checkBoxParseStubMethods.Checked;
+            Properties.Settings.Default.ResolveMethodNames = checkBoxResolveMethodNames.Checked;
             try
             {
                 Properties.Settings.Default.Save();

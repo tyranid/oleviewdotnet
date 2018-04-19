@@ -362,6 +362,7 @@ namespace OleViewDotNet
                 ListViewItem item = new ListViewItem(i.ToString());
                 item.SubItems.Add(method.Name);
                 item.SubItems.Add(method.Address);
+                item.SubItems.Add(method.Symbol);
                 return item;
             }
             ).ToArray());

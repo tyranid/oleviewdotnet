@@ -94,5 +94,17 @@ namespace OleViewDotNet.Properties {
                 this["ParseStubMethods"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ResolveMethodNames {
+            get {
+                return ((bool)(this["ResolveMethodNames"]));
+            }
+            set {
+                this["ResolveMethodNames"] = value;
+            }
+        }
     }
 }
