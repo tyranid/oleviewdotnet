@@ -2269,14 +2269,8 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null && node.Tag is COMProcessEntry)
             {
-                
                 COMProcessEntry process = (COMProcessEntry)node.Tag;
-                string dbghelp = Environment.Is64BitProcess
-                    ? Properties.Settings.Default.DbgHelpPath64
-                    : Properties.Settings.Default.DbgHelpPath32;
-                string symbol_path = Properties.Settings.Default.SymbolPath;
-                bool resolve_symbols = Properties.Settings.Default.ResolveSymbols;
-                process = COMProcessParser.ParseProcess(process.Pid, dbghelp, symbol_path, resolve_symbols, m_registry);
+                process = COMProcessParser.ParseProcess(process.Pid, COMUtilities.GetProcessParserConfig(), m_registry);
                 if (process == null)
                 {
                     treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);

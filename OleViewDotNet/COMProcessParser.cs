@@ -28,6 +28,20 @@ using System.Text;
 
 namespace OleViewDotNet
 {
+    internal class COMProcessParserConfig
+    {
+        public string DbgHelpPath { get; private set; }
+        public string SymbolPath { get; private set; }
+        public bool ParseStubMethods { get; private set; }
+
+        public COMProcessParserConfig(string dbghelp_path, string symbol_path, bool parse_stubs_methods)
+        {
+            DbgHelpPath = dbghelp_path;
+            SymbolPath = symbol_path;
+            ParseStubMethods = parse_stubs_methods;
+        }
+    }
+
     internal static class COMProcessParser
     {
         private static T ReadStruct<T>(this NtProcess process, long address) where T : new()
@@ -538,7 +552,7 @@ namespace OleViewDotNet
             }
         }
         
-        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry) 
+        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, bool parse_stub_methods, COMRegistry registry) 
             where T : struct, IPIDEntryNativeInterface
         {
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
@@ -564,7 +578,7 @@ namespace OleViewDotNet
                         IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
-                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, resolve_symbols, registry));
+                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, parse_stub_methods, registry));
                         }
                     }
                 }
@@ -605,7 +619,7 @@ namespace OleViewDotNet
             return String.Format("0x{0:X}", address.ToInt64());
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry)
+        static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, bool parse_stub_methods, COMRegistry registry)
         {
             IntPtr ipid_table = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("CIPIDTable::_palloc"));
             if (ipid_table == IntPtr.Zero)
@@ -615,11 +629,11 @@ namespace OleViewDotNet
 
             if (process.Is64Bit)
             {
-                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver, resolve_symbols, registry);
+                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver, parse_stub_methods, registry);
             }
             else
             {
-                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver, resolve_symbols, registry);
+                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver, parse_stub_methods, registry);
             }
         }
 
@@ -772,7 +786,7 @@ namespace OleViewDotNet
             return process.GetImageFilePath(false);
         }
         
-        public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path, bool resolve_symbols, COMRegistry registry)
+        public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry)
         {
             using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
             {
@@ -788,13 +802,13 @@ namespace OleViewDotNet
                     return null;
                 }
 
-                using (ISymbolResolver resolver = SymbolResolver.Create(process, dbghelp_path, symbol_path))
+                using (ISymbolResolver resolver = SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath))
                 {
                     Sid user = process.User;
                     return new COMProcessEntry(
                         pid,
                         GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver, resolve_symbols, registry),
+                        ParseIPIDEntries(process, resolver, config.ParseStubMethods, registry),
                         process.Is64Bit,
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
@@ -811,7 +825,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, string dbghelp_path, string symbol_path, bool resolve_symbols, IProgress<Tuple<string, int>> progress, COMRegistry registry)
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config, IProgress<Tuple<string, int>> progress, COMRegistry registry)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
             NtToken.EnableDebugPrivilege();
@@ -827,7 +841,7 @@ namespace OleViewDotNet
                             100 * current_count++ / total_count));
                     }
                     COMProcessEntry proc = COMProcessParser.ParseProcess(p.Id,
-                        dbghelp_path, symbol_path, resolve_symbols, registry);
+                        config, registry);
                     if (proc != null)
                     {
                         ret.Add(proc);
@@ -998,12 +1012,12 @@ namespace OleViewDotNet
             }
         }
 
-        private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, bool resolve_symbols)
+        private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, bool parse_stub_methods)
         {
             if (!_method_cache.ContainsKey(method_ptr))
             {
                 string address = resolver.GetModuleRelativeAddress(method_ptr);
-                string name = resolve_symbols ? resolver.GetSymbolForAddress(method_ptr) : null;
+                string name = parse_stub_methods ? resolver.GetSymbolForAddress(method_ptr) : null;
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     switch (index)
@@ -1027,7 +1041,7 @@ namespace OleViewDotNet
             return _method_cache[method_ptr];
         }
 
-        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry)
+        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, ISymbolResolver resolver, bool parse_stub_methods, COMRegistry registry)
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
@@ -1053,8 +1067,10 @@ namespace OleViewDotNet
                 InterfaceVTable = resolver.GetModuleRelativeAddress(vtable_ptr);
                 long count = 0;
 
-                // The count of the number of methods is placed 2 * sizeof(void*) before the vtable
-                // for standard dispatch stubs.
+                // For standard stubs the following exists before the vtable pointer:
+                // PMIDL_SERVER_INFO ServerInfo - If ForwardingDispatchTable is NULL
+                // DWORD_PTR DispatchTableCount
+                // PVOID ForwardingDispatchTable - Used presumably when there's code implementation.
                 if (stub_vptr != IntPtr.Zero)
                 {
                     long base_ptr = stub_vptr.ToInt64() - (GetPointerSize(process) * 2);
@@ -1074,7 +1090,7 @@ namespace OleViewDotNet
                 IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, (int)count);
                 if (method_ptrs != null)
                 {
-                    methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, resolve_symbols)));
+                    methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, parse_stub_methods)));
                 }
             }
             Methods = methods.AsReadOnly();

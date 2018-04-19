@@ -20,16 +20,16 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
-    public partial class ConfigureSymbolsForm : Form
+    public partial class ConfigureProcessAnalysisForm : Form
     {
-        public ConfigureSymbolsForm()
+        public ConfigureProcessAnalysisForm()
         {
             InitializeComponent();
             textBoxDbgHelp.Text = Environment.Is64BitProcess ?
                 Properties.Settings.Default.DbgHelpPath64 :
                 Properties.Settings.Default.DbgHelpPath32;
             textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
-            checkBoxResolveSymbols.Checked = Properties.Settings.Default.ResolveSymbols;
+            checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -78,7 +78,7 @@ namespace OleViewDotNet
             }
             Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
             Properties.Settings.Default.SymbolsConfigured = true;
-            Properties.Settings.Default.ResolveSymbols = checkBoxResolveSymbols.Checked;
+            Properties.Settings.Default.ParseStubMethods = checkBoxParseStubMethods.Checked;
             try
             {
                 Properties.Settings.Default.Save();

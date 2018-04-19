@@ -86,12 +86,12 @@ namespace OleViewDotNet.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ResolveSymbols {
+        public bool ParseStubMethods {
             get {
-                return ((bool)(this["ResolveSymbols"]));
+                return ((bool)(this["ParseStubMethods"]));
             }
             set {
-                this["ResolveSymbols"] = value;
+                this["ParseStubMethods"] = value;
             }
         }
     }

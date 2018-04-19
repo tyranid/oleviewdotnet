@@ -47,7 +47,6 @@
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
-            this.menuProcessesConfigureSymbols = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuRegistry = new System.Windows.Forms.MenuItem();
@@ -102,12 +101,13 @@
             this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
+            this.menuItem14 = new System.Windows.Forms.MenuItem();
+            this.menuProcessConfigureProcessAnalysis = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuItem14 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -232,12 +232,6 @@
             this.menuFileOpenProxyDll.Index = 14;
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
-            // 
-            // menuProcessesConfigureSymbols
-            // 
-            this.menuProcessesConfigureSymbols.Index = 3;
-            this.menuProcessesConfigureSymbols.Text = "Configure Symbols";
-            this.menuProcessesConfigureSymbols.Click += new System.EventHandler(this.menuFileConfigureSymbols_Click);
             // 
             // menuItem12
             // 
@@ -570,7 +564,7 @@
             this.menuProcessesSelectProcess,
             this.menuItemProcessesAllProcesses,
             this.menuItem14,
-            this.menuProcessesConfigureSymbols});
+            this.menuProcessConfigureProcessAnalysis});
             this.menuProcesses.Text = "Processes";
             // 
             // menuProcessesSelectProcess
@@ -606,6 +600,17 @@
             this.menuProcessesAllProcessesByUser.Text = "By User";
             this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
             // 
+            // menuItem14
+            // 
+            this.menuItem14.Index = 2;
+            this.menuItem14.Text = "-";
+            // 
+            // menuProcessConfigureProcessAnalysis
+            // 
+            this.menuProcessConfigureProcessAnalysis.Index = 3;
+            this.menuProcessConfigureProcessAnalysis.Text = "Configure Process Analysis";
+            this.menuProcessConfigureProcessAnalysis.Click += new System.EventHandler(this.menuFileProcessAnalysis_Click);
+            // 
             // menuItem11
             // 
             this.menuItem11.Index = 5;
@@ -638,11 +643,6 @@
             this.menuHelpAbout.Index = 0;
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
-            // 
-            // menuItem14
-            // 
-            this.menuItem14.Index = 2;
-            this.menuItem14.Text = "-";
             // 
             // MainForm
             // 
@@ -724,7 +724,7 @@
         private System.Windows.Forms.MenuItem menuFileQueryAllInterfaces;
         private System.Windows.Forms.MenuItem menuItem10;
         private System.Windows.Forms.MenuItem menuFileSaveAsDatabase;
-        private System.Windows.Forms.MenuItem menuProcessesConfigureSymbols;
+        private System.Windows.Forms.MenuItem menuProcessConfigureProcessAnalysis;
         private System.Windows.Forms.MenuItem menuItem12;
         private System.Windows.Forms.MenuItem menuProcesses;
         private System.Windows.Forms.MenuItem menuItem13;

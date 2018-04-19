@@ -1,6 +1,6 @@
 ﻿namespace OleViewDotNet
 {
-    partial class ConfigureSymbolsForm
+    partial class ConfigureProcessAnalysisForm
     {
         /// <summary>
         /// Required designer variable.
@@ -32,22 +32,28 @@
             System.Windows.Forms.Label label1;
             System.Windows.Forms.Label label2;
             System.Windows.Forms.Label label3;
+            System.Windows.Forms.GroupBox groupBoxSymbols;
+            System.Windows.Forms.GroupBox groupBoxParserConfig;
             this.textBoxDbgHelp = new System.Windows.Forms.TextBox();
             this.btnBrowse = new System.Windows.Forms.Button();
             this.textBoxSymbolPath = new System.Windows.Forms.TextBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.checkBoxResolveSymbols = new System.Windows.Forms.CheckBox();
+            this.checkBoxParseStubMethods = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
+            groupBoxSymbols = new System.Windows.Forms.GroupBox();
+            groupBoxParserConfig = new System.Windows.Forms.GroupBox();
+            groupBoxSymbols.SuspendLayout();
+            groupBoxParserConfig.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(16, 52);
+            label1.Location = new System.Drawing.Point(7, 66);
             label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(98, 17);
@@ -57,7 +63,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(16, 84);
+            label2.Location = new System.Drawing.Point(7, 98);
             label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(91, 17);
@@ -67,7 +73,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(16, 11);
+            label3.Location = new System.Drawing.Point(7, 25);
             label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(641, 34);
@@ -79,7 +85,7 @@
             // 
             this.textBoxDbgHelp.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.textBoxDbgHelp.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
-            this.textBoxDbgHelp.Location = new System.Drawing.Point(124, 48);
+            this.textBoxDbgHelp.Location = new System.Drawing.Point(115, 62);
             this.textBoxDbgHelp.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxDbgHelp.Name = "textBoxDbgHelp";
             this.textBoxDbgHelp.Size = new System.Drawing.Size(421, 22);
@@ -87,7 +93,7 @@
             // 
             // btnBrowse
             // 
-            this.btnBrowse.Location = new System.Drawing.Point(556, 46);
+            this.btnBrowse.Location = new System.Drawing.Point(547, 60);
             this.btnBrowse.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(100, 28);
@@ -98,7 +104,7 @@
             // 
             // textBoxSymbolPath
             // 
-            this.textBoxSymbolPath.Location = new System.Drawing.Point(124, 80);
+            this.textBoxSymbolPath.Location = new System.Drawing.Point(115, 94);
             this.textBoxSymbolPath.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxSymbolPath.Name = "textBoxSymbolPath";
             this.textBoxSymbolPath.Size = new System.Drawing.Size(531, 22);
@@ -106,7 +112,7 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(203, 123);
+            this.btnOK.Location = new System.Drawing.Point(206, 226);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(100, 28);
@@ -118,7 +124,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(371, 123);
+            this.btnCancel.Location = new System.Drawing.Point(376, 226);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(100, 28);
@@ -126,44 +132,67 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // checkBoxResolveSymbols
+            // checkBoxParseStubMethods
             // 
-            this.checkBoxResolveSymbols.AutoSize = true;
-            this.checkBoxResolveSymbols.Location = new System.Drawing.Point(19, 128);
-            this.checkBoxResolveSymbols.Name = "checkBoxResolveSymbols";
-            this.checkBoxResolveSymbols.Size = new System.Drawing.Size(138, 21);
-            this.checkBoxResolveSymbols.TabIndex = 8;
-            this.checkBoxResolveSymbols.Text = "Resolve Symbols";
-            this.toolTip.SetToolTip(this.checkBoxResolveSymbols, "Check to resolve symbols for all information. *WARNING* can make process parsing " +
-        "slow.");
-            this.checkBoxResolveSymbols.UseVisualStyleBackColor = true;
+            this.checkBoxParseStubMethods.AutoSize = true;
+            this.checkBoxParseStubMethods.Location = new System.Drawing.Point(10, 21);
+            this.checkBoxParseStubMethods.Name = "checkBoxParseStubMethods";
+            this.checkBoxParseStubMethods.Size = new System.Drawing.Size(158, 21);
+            this.checkBoxParseStubMethods.TabIndex = 8;
+            this.checkBoxParseStubMethods.Text = "Parse Stub Methods";
+            this.toolTip.SetToolTip(this.checkBoxParseStubMethods, "Check to parse stub methods in each IPID entry.\r\n*WARNING* can make process parsi" +
+        "ng slow.");
+            this.checkBoxParseStubMethods.UseVisualStyleBackColor = true;
             // 
-            // ConfigureSymbolsForm
+            // groupBoxSymbols
+            // 
+            groupBoxSymbols.Controls.Add(this.textBoxDbgHelp);
+            groupBoxSymbols.Controls.Add(label1);
+            groupBoxSymbols.Controls.Add(label3);
+            groupBoxSymbols.Controls.Add(this.btnBrowse);
+            groupBoxSymbols.Controls.Add(label2);
+            groupBoxSymbols.Controls.Add(this.textBoxSymbolPath);
+            groupBoxSymbols.Location = new System.Drawing.Point(12, 12);
+            groupBoxSymbols.Name = "groupBoxSymbols";
+            groupBoxSymbols.Size = new System.Drawing.Size(658, 134);
+            groupBoxSymbols.TabIndex = 9;
+            groupBoxSymbols.TabStop = false;
+            groupBoxSymbols.Text = "Symbols";
+            // 
+            // groupBoxParserConfig
+            // 
+            groupBoxParserConfig.Controls.Add(this.checkBoxParseStubMethods);
+            groupBoxParserConfig.Location = new System.Drawing.Point(12, 152);
+            groupBoxParserConfig.Name = "groupBoxParserConfig";
+            groupBoxParserConfig.Size = new System.Drawing.Size(658, 57);
+            groupBoxParserConfig.TabIndex = 10;
+            groupBoxParserConfig.TabStop = false;
+            groupBoxParserConfig.Text = "Parser Configuration";
+            // 
+            // ConfigureProcessAnalysisForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(672, 170);
-            this.Controls.Add(this.checkBoxResolveSymbols);
-            this.Controls.Add(label3);
+            this.ClientSize = new System.Drawing.Size(683, 267);
+            this.Controls.Add(groupBoxSymbols);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
-            this.Controls.Add(this.textBoxSymbolPath);
-            this.Controls.Add(label2);
-            this.Controls.Add(this.btnBrowse);
-            this.Controls.Add(this.textBoxDbgHelp);
-            this.Controls.Add(label1);
+            this.Controls.Add(groupBoxParserConfig);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ConfigureSymbolsForm";
+            this.Name = "ConfigureProcessAnalysisForm";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Configure Symbols";
+            this.Text = "Configure Process Analysis";
+            groupBoxSymbols.ResumeLayout(false);
+            groupBoxSymbols.PerformLayout();
+            groupBoxParserConfig.ResumeLayout(false);
+            groupBoxParserConfig.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -173,7 +202,7 @@
         private System.Windows.Forms.TextBox textBoxSymbolPath;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.CheckBox checkBoxResolveSymbols;
+        private System.Windows.Forms.CheckBox checkBoxParseStubMethods;
         private System.Windows.Forms.ToolTip toolTip;
     }
 }

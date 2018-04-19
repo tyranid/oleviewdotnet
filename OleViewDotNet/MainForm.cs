@@ -730,9 +730,9 @@ namespace OleViewDotNet
             SaveDatabase(false);
         }
 
-        private void menuFileConfigureSymbols_Click(object sender, EventArgs e)
+        private void menuFileProcessAnalysis_Click(object sender, EventArgs e)
         {
-            using (ConfigureSymbolsForm frm = new ConfigureSymbolsForm())
+            using (ConfigureProcessAnalysisForm frm = new ConfigureProcessAnalysisForm())
             {
                 frm.ShowDialog(this);
             }
@@ -745,7 +745,7 @@ namespace OleViewDotNet
                 if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
                     "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    using (ConfigureSymbolsForm frm = new ConfigureSymbolsForm())
+                    using (ConfigureProcessAnalysisForm frm = new ConfigureProcessAnalysisForm())
                     {
                         frm.ShowDialog(this);
                     }

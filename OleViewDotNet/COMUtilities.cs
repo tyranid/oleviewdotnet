@@ -1829,14 +1829,20 @@ namespace OleViewDotNet
             }
         }
 
-        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
+        internal static COMProcessParserConfig GetProcessParserConfig()
         {
             string dbghelp = Environment.Is64BitProcess
                     ? Properties.Settings.Default.DbgHelpPath64
                     : Properties.Settings.Default.DbgHelpPath32;
             string symbol_path = Properties.Settings.Default.SymbolPath;
-            bool resolve_symbols = Properties.Settings.Default.ResolveSymbols;
-            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, dbghelp, symbol_path, resolve_symbols, progress, registry), s => s))
+            bool parse_stub_methods = Properties.Settings.Default.ParseStubMethods;
+
+            return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods);
+        }
+
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
+        {
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s))
             {
                 dlg.Text = "Loading Processes";
                 if (dlg.ShowDialog(window) == DialogResult.OK)
