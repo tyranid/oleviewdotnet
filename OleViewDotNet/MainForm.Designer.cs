@@ -47,8 +47,7 @@
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
-            this.menuItem2 = new System.Windows.Forms.MenuItem();
-            this.menuFileConfigureSymbols = new System.Windows.Forms.MenuItem();
+            this.menuProcessesConfigureSymbols = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuRegistry = new System.Windows.Forms.MenuItem();
@@ -80,11 +79,6 @@
             this.menuPropertiesViewer = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
-            this.menuProcesses = new System.Windows.Forms.MenuItem();
-            this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
-            this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
-            this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
-            this.menuProcessesSelectProcess = new System.Windows.Forms.MenuItem();
             this.menuItem13 = new System.Windows.Forms.MenuItem();
             this.menuObjectCreateInstanceFromCLSID = new System.Windows.Forms.MenuItem();
             this.menuObjectFromMarshalledStream = new System.Windows.Forms.MenuItem();
@@ -102,12 +96,18 @@
             this.menuSecurityDefaultAccessRestriction = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultLaunch = new System.Windows.Forms.MenuItem();
             this.menuSecurityDefaultLaunchRestriction = new System.Windows.Forms.MenuItem();
+            this.menuProcesses = new System.Windows.Forms.MenuItem();
+            this.menuProcessesSelectProcess = new System.Windows.Forms.MenuItem();
+            this.menuItemProcessesAllProcesses = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
+            this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuItemProcessesAllProcesses = new System.Windows.Forms.MenuItem();
+            this.menuItem14 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -140,8 +140,6 @@
             this.menuItem8,
             this.menuFileOpenTypeLib,
             this.menuFileOpenProxyDll,
-            this.menuItem2,
-            this.menuFileConfigureSymbols,
             this.menuItem12,
             this.menuFileExit});
             this.menuFile.Text = "&File";
@@ -235,25 +233,20 @@
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
-            // menuItem2
+            // menuProcessesConfigureSymbols
             // 
-            this.menuItem2.Index = 15;
-            this.menuItem2.Text = "-";
-            // 
-            // menuFileConfigureSymbols
-            // 
-            this.menuFileConfigureSymbols.Index = 16;
-            this.menuFileConfigureSymbols.Text = "Configure Symbols";
-            this.menuFileConfigureSymbols.Click += new System.EventHandler(this.menuFileConfigureSymbols_Click);
+            this.menuProcessesConfigureSymbols.Index = 3;
+            this.menuProcessesConfigureSymbols.Text = "Configure Symbols";
+            this.menuProcessesConfigureSymbols.Click += new System.EventHandler(this.menuFileConfigureSymbols_Click);
             // 
             // menuItem12
             // 
-            this.menuItem12.Index = 17;
+            this.menuItem12.Index = 15;
             this.menuItem12.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 18;
+            this.menuFileExit.Index = 16;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -465,38 +458,6 @@
             this.menuObjectROT.Text = "&Running Object Table";
             this.menuObjectROT.Click += new System.EventHandler(this.menuViewROT_Click);
             // 
-            // menuProcesses
-            // 
-            this.menuProcesses.Index = 4;
-            this.menuProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuProcessesSelectProcess,
-            this.menuItemProcessesAllProcesses});
-            this.menuProcesses.Text = "Processes";
-            // 
-            // menuProcessesAllProcessesByPid
-            // 
-            this.menuProcessesAllProcessesByPid.Index = 0;
-            this.menuProcessesAllProcessesByPid.Text = "By PID";
-            this.menuProcessesAllProcessesByPid.Click += new System.EventHandler(this.menuProcessesAllProcessesByPid_Click);
-            // 
-            // menuProcessesAllProcessesByName
-            // 
-            this.menuProcessesAllProcessesByName.Index = 1;
-            this.menuProcessesAllProcessesByName.Text = "By Name";
-            this.menuProcessesAllProcessesByName.Click += new System.EventHandler(this.menuProcessesAllProcessesByName_Click);
-            // 
-            // menuProcessesAllProcessesByUser
-            // 
-            this.menuProcessesAllProcessesByUser.Index = 2;
-            this.menuProcessesAllProcessesByUser.Text = "By User";
-            this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
-            // 
-            // menuProcessesSelectProcess
-            // 
-            this.menuProcessesSelectProcess.Index = 0;
-            this.menuProcessesSelectProcess.Text = "Select Process";
-            this.menuProcessesSelectProcess.Click += new System.EventHandler(this.menuProcessesSelectProcess_Click);
-            // 
             // menuItem13
             // 
             this.menuItem13.Index = 1;
@@ -602,6 +563,49 @@
             this.menuSecurityDefaultLaunchRestriction.Text = "View Default Launch &Restriction";
             this.menuSecurityDefaultLaunchRestriction.Click += new System.EventHandler(this.menuSecurityDefaultLaunchRestriction_Click);
             // 
+            // menuProcesses
+            // 
+            this.menuProcesses.Index = 4;
+            this.menuProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuProcessesSelectProcess,
+            this.menuItemProcessesAllProcesses,
+            this.menuItem14,
+            this.menuProcessesConfigureSymbols});
+            this.menuProcesses.Text = "Processes";
+            // 
+            // menuProcessesSelectProcess
+            // 
+            this.menuProcessesSelectProcess.Index = 0;
+            this.menuProcessesSelectProcess.Text = "Select Process";
+            this.menuProcessesSelectProcess.Click += new System.EventHandler(this.menuProcessesSelectProcess_Click);
+            // 
+            // menuItemProcessesAllProcesses
+            // 
+            this.menuItemProcessesAllProcesses.Index = 1;
+            this.menuItemProcessesAllProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuProcessesAllProcessesByPid,
+            this.menuProcessesAllProcessesByName,
+            this.menuProcessesAllProcessesByUser});
+            this.menuItemProcessesAllProcesses.Text = "All Processes";
+            // 
+            // menuProcessesAllProcessesByPid
+            // 
+            this.menuProcessesAllProcessesByPid.Index = 0;
+            this.menuProcessesAllProcessesByPid.Text = "By PID";
+            this.menuProcessesAllProcessesByPid.Click += new System.EventHandler(this.menuProcessesAllProcessesByPid_Click);
+            // 
+            // menuProcessesAllProcessesByName
+            // 
+            this.menuProcessesAllProcessesByName.Index = 1;
+            this.menuProcessesAllProcessesByName.Text = "By Name";
+            this.menuProcessesAllProcessesByName.Click += new System.EventHandler(this.menuProcessesAllProcessesByName_Click);
+            // 
+            // menuProcessesAllProcessesByUser
+            // 
+            this.menuProcessesAllProcessesByUser.Index = 2;
+            this.menuProcessesAllProcessesByUser.Text = "By User";
+            this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
+            // 
             // menuItem11
             // 
             this.menuItem11.Index = 5;
@@ -635,14 +639,10 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuItemProcessesAllProcesses
+            // menuItem14
             // 
-            this.menuItemProcessesAllProcesses.Index = 1;
-            this.menuItemProcessesAllProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuProcessesAllProcessesByPid,
-            this.menuProcessesAllProcessesByName,
-            this.menuProcessesAllProcessesByUser});
-            this.menuItemProcessesAllProcesses.Text = "All Processes";
+            this.menuItem14.Index = 2;
+            this.menuItem14.Text = "-";
             // 
             // MainForm
             // 
@@ -651,7 +651,7 @@
             this.ClientSize = new System.Drawing.Size(1097, 551);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -678,7 +678,6 @@
         private System.Windows.Forms.MenuItem menuViewPreApproved;
         private System.Windows.Forms.MenuItem menuItem1;
         private System.Windows.Forms.MenuItem menuObjectCreateInstanceFromCLSID;
-        private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem menuObject;
         private System.Windows.Forms.MenuItem menuViewCLSIDsByLocalServer;
         private System.Windows.Forms.MenuItem menuViewIELowRights;
@@ -725,7 +724,7 @@
         private System.Windows.Forms.MenuItem menuFileQueryAllInterfaces;
         private System.Windows.Forms.MenuItem menuItem10;
         private System.Windows.Forms.MenuItem menuFileSaveAsDatabase;
-        private System.Windows.Forms.MenuItem menuFileConfigureSymbols;
+        private System.Windows.Forms.MenuItem menuProcessesConfigureSymbols;
         private System.Windows.Forms.MenuItem menuItem12;
         private System.Windows.Forms.MenuItem menuProcesses;
         private System.Windows.Forms.MenuItem menuItem13;
@@ -741,6 +740,7 @@
         private System.Windows.Forms.MenuItem menuItem11;
         private System.Windows.Forms.MenuItem menuStorageNewStorage;
         private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
+        private System.Windows.Forms.MenuItem menuItem14;
     }
 }
 
