@@ -511,7 +511,6 @@ namespace OleViewDotNet
             }
         }
 
-
         private class PageAllocator
         {
             public IntPtr[] Pages { get; private set; }
@@ -987,6 +986,18 @@ namespace OleViewDotNet
 
         private Dictionary<IntPtr, COMMethodEntry> _method_cache = new Dictionary<IntPtr, COMMethodEntry>();
 
+        private static int GetPointerSize(NtProcess process)
+        {
+            if (process.Is64Bit)
+            {
+                return 8;
+            }
+            else
+            {
+                return 4;
+            }
+        }
+
         private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, bool resolve_symbols)
         {
             if (!_method_cache.ContainsKey(method_ptr))
@@ -1030,30 +1041,44 @@ namespace OleViewDotNet
             WeakRefs = ipid.WeakRefs;
             PrivateRefs = ipid.PrivateRefs;
             List<COMMethodEntry> methods = new List<COMMethodEntry>();
+            IntPtr stub_vptr = IntPtr.Zero;
+            if (Stub != IntPtr.Zero)
+            {
+                stub_vptr = COMProcessParser.ReadPointer(process, Stub);
+                StubVTable = resolver.GetModuleRelativeAddress(stub_vptr);
+            }
             if (Interface != IntPtr.Zero)
             {
                 IntPtr vtable_ptr = COMProcessParser.ReadPointer(process, Interface);
                 InterfaceVTable = resolver.GetModuleRelativeAddress(vtable_ptr);
-                int count = 0;
-                if (registry.Interfaces.ContainsKey(Iid))
+                long count = 0;
+
+                // The count of the number of methods is placed 2 * sizeof(void*) before the vtable
+                // for standard dispatch stubs.
+                if (stub_vptr != IntPtr.Zero)
+                {
+                    long base_ptr = stub_vptr.ToInt64() - (GetPointerSize(process) * 2);
+                    count = COMProcessParser.ReadPointer(process, new IntPtr(base_ptr)).ToInt64();
+                }
+                else if (registry.Interfaces.ContainsKey(Iid))
                 {
                     count = registry.Interfaces[Iid].NumMethods;
                 }
-                if (count < 3)
+
+                // Sanity check, 256 methods should be enough for anyone ;-)
+                if (count < 3 || count > 256)
                 {
                     count = 3;
                 }
-                IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, count);
+
+                IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, (int)count);
                 if (method_ptrs != null)
                 {
                     methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, resolve_symbols)));
                 }
             }
             Methods = methods.AsReadOnly();
-            if (Stub != IntPtr.Zero)
-            {
-                StubVTable = resolver.GetModuleRelativeAddress(COMProcessParser.ReadPointer(process, Stub));
-            }
+
         }
     }
 }

@@ -2230,6 +2230,11 @@ namespace OleViewDotNet
         {
             return _assembly_version.Value;
         }
+
+        public static string FormatBitness(bool is64bit)
+        {
+            return is64bit ? "64 bit" : "32 bit";
+        }
     }
 
     internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid

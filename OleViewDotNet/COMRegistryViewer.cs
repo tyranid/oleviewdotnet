@@ -551,6 +551,7 @@ namespace OleViewDotNet
             {
                 builder.AppendFormat("Access Control: 0x{0:X}", proc.AccessControl.ToInt64());
             }
+            builder.Append(COMUtilities.FormatBitness(proc.Is64Bit));
             return builder.ToString();
         }
 

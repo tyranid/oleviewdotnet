@@ -33,6 +33,7 @@ namespace OleViewDotNet
         private COMProcessEntry m_process;
         private COMRuntimeClassEntry m_runtime_class;
         private COMRuntimeServerEntry m_runtime_server;
+        private object m_obj;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -331,6 +332,7 @@ namespace OleViewDotNet
             textBoxProcessStaHwnd.Text = String.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
             SetupIpidEntries(obj.Ipids, false);
             listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
+            lblProcess64bit.Text = COMUtilities.FormatBitness(obj.Is64Bit);
             tabControlProperties.TabPages.Add(tabPageProcess);
             if (m_registry.AppIDs.ContainsKey(obj.AppId))
             {
@@ -355,6 +357,16 @@ namespace OleViewDotNet
             textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
             textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
             textBoxIPIDStaHwnd.Text = String.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
+            listViewIpidMethods.Items.AddRange(obj.Methods.Select((method, i) =>
+            {
+                ListViewItem item = new ListViewItem(i.ToString());
+                item.SubItems.Add(method.Name);
+                item.SubItems.Add(method.Address);
+                return item;
+            }
+            ).ToArray());
+            listViewIpidMethods.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listViewIpidMethods.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             tabControlProperties.TabPages.Add(tabPageIPID);
         }
 
@@ -394,12 +406,7 @@ namespace OleViewDotNet
             listViewFactoryInterfaces.Columns.Add("IID", 100);
             listViewFactoryInterfaces.Columns.Add("Methods", 100);
             listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
-            tabControlProperties.TabPages.Clear();
-            SetupProperties(obj);
-            if (tabControlProperties.TabCount == 0)
-            {
-                tabControlProperties.TabPages.Add(tabPageNoProperties);
-            }
+            m_obj = obj;
             this.Text = String.Format("{0} Properties", name.Replace("&", "&&"));
         }
 
@@ -727,6 +734,44 @@ namespace OleViewDotNet
         private void btnRuntimeServerViewPermissions_Click(object sender, EventArgs e)
         {
             COMSecurity.ViewSecurity(m_registry, string.Format("{0} Permissions", m_runtime_server.Name), m_runtime_server.Permissions, false);
+        }
+
+        private void copyIPIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                COMRegistryViewer.CopyGuidToClipboard(ipid.Ipid, COMRegistryViewer.CopyGuidType.CopyAsString);
+            }
+        }
+
+        private void copyIPIDIIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                COMRegistryViewer.CopyGuidToClipboard(ipid.Iid, COMRegistryViewer.CopyGuidType.CopyAsString);
+            }
+        }
+
+        private void listViewProcessIPids_DoubleClick(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
+                        string.Format("IPID: {0}", COMUtilities.FormatGuid(ipid.Ipid)), ipid));
+            }
+        }
+
+        private void PropertiesControl_Load(object sender, EventArgs e)
+        {
+            tabControlProperties.TabPages.Clear();
+            SetupProperties(m_obj);
+            if (tabControlProperties.TabCount == 0)
+            {
+                tabControlProperties.TabPages.Add(tabPageNoProperties);
+            }
         }
     }
 }

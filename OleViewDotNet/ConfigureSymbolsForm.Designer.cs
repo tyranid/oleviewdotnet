@@ -131,9 +131,9 @@
             this.checkBoxResolveSymbols.AutoSize = true;
             this.checkBoxResolveSymbols.Location = new System.Drawing.Point(19, 128);
             this.checkBoxResolveSymbols.Name = "checkBoxResolveSymbols";
-            this.checkBoxResolveSymbols.Size = new System.Drawing.Size(157, 21);
+            this.checkBoxResolveSymbols.Size = new System.Drawing.Size(138, 21);
             this.checkBoxResolveSymbols.TabIndex = 8;
-            this.checkBoxResolveSymbols.Text = "Resolve All Symbols";
+            this.checkBoxResolveSymbols.Text = "Resolve Symbols";
             this.toolTip.SetToolTip(this.checkBoxResolveSymbols, "Check to resolve symbols for all information. *WARNING* can make process parsing " +
         "slow.");
             this.checkBoxResolveSymbols.UseVisualStyleBackColor = true;
