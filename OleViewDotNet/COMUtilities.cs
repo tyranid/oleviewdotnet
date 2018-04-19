@@ -1829,13 +1829,14 @@ namespace OleViewDotNet
             }
         }
 
-        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window)
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
         {
             string dbghelp = Environment.Is64BitProcess
                     ? Properties.Settings.Default.DbgHelpPath64
                     : Properties.Settings.Default.DbgHelpPath32;
             string symbol_path = Properties.Settings.Default.SymbolPath;
-            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, dbghelp, symbol_path, progress), s => s))
+            bool resolve_symbols = Properties.Settings.Default.ResolveSymbols;
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, dbghelp, symbol_path, resolve_symbols, progress, registry), s => s))
             {
                 dlg.Text = "Loading Processes";
                 if (dlg.ShowDialog(window) == DialogResult.OK)
@@ -1850,16 +1851,16 @@ namespace OleViewDotNet
             }
         }
 
-        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<int> pids, IWin32Window window)
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<int> pids, IWin32Window window, COMRegistry registry)
         {
-            return LoadProcesses(pids.Select(p => Process.GetProcessById(p)), window);
+            return LoadProcesses(pids.Select(p => Process.GetProcessById(p)), window, registry);
         }
 
-        internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window)
+        internal static IEnumerable<COMProcessEntry> LoadProcesses(IWin32Window window, COMRegistry registry)
         {
             int current_pid = Process.GetCurrentProcess().Id;
             var procs = Process.GetProcesses().Where(p => p.Id != current_pid).OrderBy(p => p.ProcessName);
-            return LoadProcesses(procs, window);
+            return LoadProcesses(procs, window, registry);
         }
 
         private class ReportQueryProgress

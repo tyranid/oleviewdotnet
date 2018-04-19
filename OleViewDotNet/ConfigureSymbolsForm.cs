@@ -29,6 +29,7 @@ namespace OleViewDotNet
                 Properties.Settings.Default.DbgHelpPath64 :
                 Properties.Settings.Default.DbgHelpPath32;
             textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
+            checkBoxResolveSymbols.Checked = Properties.Settings.Default.ResolveSymbols;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -77,6 +78,7 @@ namespace OleViewDotNet
             }
             Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
             Properties.Settings.Default.SymbolsConfigured = true;
+            Properties.Settings.Default.ResolveSymbols = checkBoxResolveSymbols.Checked;
             try
             {
                 Properties.Settings.Default.Save();

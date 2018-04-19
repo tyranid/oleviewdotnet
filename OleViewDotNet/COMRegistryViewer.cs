@@ -2274,7 +2274,8 @@ namespace OleViewDotNet
                     ? Properties.Settings.Default.DbgHelpPath64
                     : Properties.Settings.Default.DbgHelpPath32;
                 string symbol_path = Properties.Settings.Default.SymbolPath;
-                process = COMProcessParser.ParseProcess(process.Pid, dbghelp, symbol_path);
+                bool resolve_symbols = Properties.Settings.Default.ResolveSymbols;
+                process = COMProcessParser.ParseProcess(process.Pid, dbghelp, symbol_path, resolve_symbols, m_registry);
                 if (process == null)
                 {
                     treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);

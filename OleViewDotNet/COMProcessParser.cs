@@ -539,7 +539,7 @@ namespace OleViewDotNet
             }
         }
         
-        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver) 
+        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry) 
             where T : struct, IPIDEntryNativeInterface
         {
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
@@ -565,7 +565,7 @@ namespace OleViewDotNet
                         IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
-                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver));
+                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, resolve_symbols, registry));
                         }
                     }
                 }
@@ -606,7 +606,7 @@ namespace OleViewDotNet
             return String.Format("0x{0:X}", address.ToInt64());
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver)
+        static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry)
         {
             IntPtr ipid_table = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("CIPIDTable::_palloc"));
             if (ipid_table == IntPtr.Zero)
@@ -616,11 +616,11 @@ namespace OleViewDotNet
 
             if (process.Is64Bit)
             {
-                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver);
+                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver, resolve_symbols, registry);
             }
             else
             {
-                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver);
+                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver, resolve_symbols, registry);
             }
         }
 
@@ -751,12 +751,29 @@ namespace OleViewDotNet
             return IntPtr.Zero;
         }
 
+        public static IntPtr[] ReadPointerArray(NtProcess process, IntPtr p, int count)
+        {
+            if (p == IntPtr.Zero)
+            {
+                return null;
+            }
+            if (process.Is64Bit)
+            {
+                return process.ReadMemoryArray<IntPtr>(p.ToInt64(), count);
+            }
+            else
+            {
+                var ptrs = process.ReadMemoryArray<int>(p.ToInt64(), count);
+                return ptrs.Select(i => new IntPtr(i)).ToArray();
+            }
+        }
+
         private static string GetProcessFileName(NtProcess process)
         {
             return process.GetImageFilePath(false);
         }
         
-        public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path)
+        public static COMProcessEntry ParseProcess(int pid, string dbghelp_path, string symbol_path, bool resolve_symbols, COMRegistry registry)
         {
             using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
             {
@@ -778,7 +795,7 @@ namespace OleViewDotNet
                     return new COMProcessEntry(
                         pid,
                         GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver),
+                        ParseIPIDEntries(process, resolver, resolve_symbols, registry),
                         process.Is64Bit,
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
@@ -795,7 +812,7 @@ namespace OleViewDotNet
             }
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, string dbghelp_path, string symbol_path, IProgress<Tuple<string, int>> progress)
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, string dbghelp_path, string symbol_path, bool resolve_symbols, IProgress<Tuple<string, int>> progress, COMRegistry registry)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
             NtToken.EnableDebugPrivilege();
@@ -811,7 +828,7 @@ namespace OleViewDotNet
                             100 * current_count++ / total_count));
                     }
                     COMProcessEntry proc = COMProcessParser.ParseProcess(p.Id,
-                        dbghelp_path, symbol_path);
+                        dbghelp_path, symbol_path, resolve_symbols, registry);
                     if (proc != null)
                     {
                         ret.Add(proc);
@@ -906,6 +923,18 @@ namespace OleViewDotNet
         IPIDF_UNSECURECALLSALLOWED = 0x10000,
     }
 
+    public class COMMethodEntry
+    {
+        public string Name { get; private set; }
+        public string Address { get; private set; }
+
+        internal COMMethodEntry(string name, string address)
+        {
+            Name = name;
+            Address = address;
+        }
+    }
+
     public class COMIPIDEntry
     {
         public Guid Ipid { get; private set; }
@@ -913,6 +942,7 @@ namespace OleViewDotNet
         public IPIDFlags Flags { get; private set; }
         public IntPtr Interface { get; private set; }
         public string InterfaceVTable { get; private set; }
+        public IEnumerable<COMMethodEntry> Methods { get; private set; }
         public IntPtr Stub { get; private set; }
         public string StubVTable { get; private set; }
         public Guid Oxid { get; private set; }
@@ -955,7 +985,38 @@ namespace OleViewDotNet
             return stm.ToArray();
         }
 
-        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, ISymbolResolver resolver)
+        private Dictionary<IntPtr, COMMethodEntry> _method_cache = new Dictionary<IntPtr, COMMethodEntry>();
+
+        private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, bool resolve_symbols)
+        {
+            if (!_method_cache.ContainsKey(method_ptr))
+            {
+                string address = resolver.GetModuleRelativeAddress(method_ptr);
+                string name = resolve_symbols ? resolver.GetSymbolForAddress(method_ptr) : null;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    switch (index)
+                    {
+                        case 0:
+                            name = "QueryInterface";
+                            break;
+                        case 1:
+                            name = "AddRef";
+                            break;
+                        case 2:
+                            name = "Release";
+                            break;
+                        default:
+                            name = string.Format("Method{0}", index);
+                            break;
+                    }
+                }
+                _method_cache[method_ptr] = new COMMethodEntry(name, address);
+            }
+            return _method_cache[method_ptr];
+        }
+
+        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, ISymbolResolver resolver, bool resolve_symbols, COMRegistry registry)
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
@@ -968,10 +1029,27 @@ namespace OleViewDotNet
             StrongRefs = ipid.StrongRefs;
             WeakRefs = ipid.WeakRefs;
             PrivateRefs = ipid.PrivateRefs;
+            List<COMMethodEntry> methods = new List<COMMethodEntry>();
             if (Interface != IntPtr.Zero)
             {
-                InterfaceVTable = resolver.GetModuleRelativeAddress(COMProcessParser.ReadPointer(process, Interface));
+                IntPtr vtable_ptr = COMProcessParser.ReadPointer(process, Interface);
+                InterfaceVTable = resolver.GetModuleRelativeAddress(vtable_ptr);
+                int count = 0;
+                if (registry.Interfaces.ContainsKey(Iid))
+                {
+                    count = registry.Interfaces[Iid].NumMethods;
+                }
+                if (count < 3)
+                {
+                    count = 3;
+                }
+                IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, count);
+                if (method_ptrs != null)
+                {
+                    methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, resolve_symbols)));
+                }
             }
+            Methods = methods.AsReadOnly();
             if (Stub != IntPtr.Zero)
             {
                 StubVTable = resolver.GetModuleRelativeAddress(COMProcessParser.ReadPointer(process, Stub));

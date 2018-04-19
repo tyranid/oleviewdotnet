@@ -756,7 +756,7 @@ namespace OleViewDotNet
         private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)
         {
             ConfigureSymbols();
-            IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this);
+            IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this, m_registry);
             if (processes != null && processes.Count() > 0)
             {
                 OpenView(COMRegistryViewer.DisplayMode.Processes, processes.OrderBy(orderby_selector));
@@ -768,7 +768,7 @@ namespace OleViewDotNet
             try
             {
                 ConfigureSymbols();
-                var proc = COMUtilities.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this).FirstOrDefault();
+                var proc = COMUtilities.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this, m_registry).FirstOrDefault();
                 if (proc != null)
                 {
                     COMIPIDEntry ipid_entry = proc.Ipids.Where(e => e.Ipid == ipid).FirstOrDefault();
@@ -789,7 +789,7 @@ namespace OleViewDotNet
             try
             {
                 ConfigureSymbols();
-                var processes = COMUtilities.LoadProcesses(new int[] { pid }, this);
+                var processes = COMUtilities.LoadProcesses(new int[] { pid }, this, m_registry);
                 if (processes.Count() == 0)
                 {
                     throw new ArgumentException(string.Format("Process {0} has not initialized COM, or is inaccessible", pid));
