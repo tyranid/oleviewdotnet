@@ -106,5 +106,17 @@ namespace OleViewDotNet.Properties {
                 this["ResolveMethodNames"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ProxyParserResolveSymbols {
+            get {
+                return ((bool)(this["ProxyParserResolveSymbols"]));
+            }
+            set {
+                this["ProxyParserResolveSymbols"] = value;
+            }
+        }
     }
 }

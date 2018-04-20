@@ -15,6 +15,8 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NDesk.Options;
+using NtApiDotNet;
+using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -268,6 +270,22 @@ namespace OleViewDotNet
         public static void ShowError(IWin32Window window, Exception ex, bool stack_trace)
         {
             MessageBox.Show(window, stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public static ISymbolResolver GetProxyParserSymbolResolver()
+        {
+            if (!Properties.Settings.Default.ProxyParserResolveSymbols)
+            {
+                return null;
+            }
+
+            string dbghelp = Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32;
+            if (string.IsNullOrWhiteSpace(dbghelp))
+            {
+                return null;
+            }
+
+            return SymbolResolver.Create(NtProcess.Current, dbghelp, Properties.Settings.Default.SymbolPath);
         }
     }
 }

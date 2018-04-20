@@ -143,11 +143,11 @@
     <Compile Include="COMProcessParser.cs" />
     <Compile Include="COMProxyInstance.cs" />
     <Compile Include="COMRuntimeServerEntry.cs" />
-    <Compile Include="ConfigureProcessAnalysisForm.cs">
+    <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConfigureProcessAnalysisForm.Designer.cs">
-      <DependentUpon>ConfigureProcessAnalysisForm.cs</DependentUpon>
+    <Compile Include="SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CustomMarshalEditorControl.cs">
       <SubType>UserControl</SubType>
@@ -387,8 +387,8 @@
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConfigureProcessAnalysisForm.resx">
-      <DependentUpon>ConfigureProcessAnalysisForm.cs</DependentUpon>
+    <EmbeddedResource Include="SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ConsoleControl.resx">
       <DependentUpon>ConsoleControl.cs</DependentUpon>

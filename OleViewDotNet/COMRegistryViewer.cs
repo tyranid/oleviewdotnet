@@ -2138,8 +2138,12 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, 
-                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid), selected_iid));
+                        using (var resolver = Program.GetProxyParserSymbolResolver())
+                        {
+                            Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
+                                Path.GetFileName(clsid.DefaultServer), 
+                                COMProxyInstance.GetFromCLSID(clsid, resolver), selected_iid));
+                        }
                     }
                     catch (Exception ex)
                     {

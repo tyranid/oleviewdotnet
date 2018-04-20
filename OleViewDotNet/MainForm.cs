@@ -701,8 +701,11 @@ namespace OleViewDotNet
                 {
                     try
                     {
-                        COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName);
-                        HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
+                        using (var resolver = Program.GetProxyParserSymbolResolver())
+                        {
+                            COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver);
+                            HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -730,9 +733,9 @@ namespace OleViewDotNet
             SaveDatabase(false);
         }
 
-        private void menuFileProcessAnalysis_Click(object sender, EventArgs e)
+        private void menuFileSettings_Click(object sender, EventArgs e)
         {
-            using (ConfigureProcessAnalysisForm frm = new ConfigureProcessAnalysisForm())
+            using (SettingsForm frm = new SettingsForm())
             {
                 frm.ShowDialog(this);
             }
@@ -745,7 +748,7 @@ namespace OleViewDotNet
                 if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
                     "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    using (ConfigureProcessAnalysisForm frm = new ConfigureProcessAnalysisForm())
+                    using (SettingsForm frm = new SettingsForm())
                     {
                         frm.ShowDialog(this);
                     }
@@ -941,6 +944,5 @@ namespace OleViewDotNet
         {
             OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
         }
-
     }
 }

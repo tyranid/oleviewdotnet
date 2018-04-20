@@ -1,6 +1,6 @@
 ﻿namespace OleViewDotNet
 {
-    partial class ConfigureProcessAnalysisForm
+    partial class SettingsForm
     {
         /// <summary>
         /// Required designer variable.
@@ -33,7 +33,7 @@
             System.Windows.Forms.Label label2;
             System.Windows.Forms.Label label3;
             System.Windows.Forms.GroupBox groupBoxSymbols;
-            System.Windows.Forms.GroupBox groupBoxParserConfig;
+            System.Windows.Forms.GroupBox groupBoxProcessParserConfig;
             this.textBoxDbgHelp = new System.Windows.Forms.TextBox();
             this.btnBrowse = new System.Windows.Forms.Button();
             this.textBoxSymbolPath = new System.Windows.Forms.TextBox();
@@ -42,13 +42,16 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.groupBoxProxyParserConfig = new System.Windows.Forms.GroupBox();
+            this.checkBoxProxyParserResolveSymbols = new System.Windows.Forms.CheckBox();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             groupBoxSymbols = new System.Windows.Forms.GroupBox();
-            groupBoxParserConfig = new System.Windows.Forms.GroupBox();
+            groupBoxProcessParserConfig = new System.Windows.Forms.GroupBox();
             groupBoxSymbols.SuspendLayout();
-            groupBoxParserConfig.SuspendLayout();
+            groupBoxProcessParserConfig.SuspendLayout();
+            this.groupBoxProxyParserConfig.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -128,18 +131,18 @@
             this.textBoxSymbolPath.Size = new System.Drawing.Size(597, 26);
             this.textBoxSymbolPath.TabIndex = 4;
             // 
-            // groupBoxParserConfig
+            // groupBoxProcessParserConfig
             // 
-            groupBoxParserConfig.Controls.Add(this.checkBoxResolveMethodNames);
-            groupBoxParserConfig.Controls.Add(this.checkBoxParseStubMethods);
-            groupBoxParserConfig.Location = new System.Drawing.Point(14, 190);
-            groupBoxParserConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxParserConfig.Name = "groupBoxParserConfig";
-            groupBoxParserConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxParserConfig.Size = new System.Drawing.Size(740, 71);
-            groupBoxParserConfig.TabIndex = 10;
-            groupBoxParserConfig.TabStop = false;
-            groupBoxParserConfig.Text = "Parser Configuration";
+            groupBoxProcessParserConfig.Controls.Add(this.checkBoxResolveMethodNames);
+            groupBoxProcessParserConfig.Controls.Add(this.checkBoxParseStubMethods);
+            groupBoxProcessParserConfig.Location = new System.Drawing.Point(14, 190);
+            groupBoxProcessParserConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBoxProcessParserConfig.Name = "groupBoxProcessParserConfig";
+            groupBoxProcessParserConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBoxProcessParserConfig.Size = new System.Drawing.Size(740, 60);
+            groupBoxProcessParserConfig.TabIndex = 10;
+            groupBoxProcessParserConfig.TabStop = false;
+            groupBoxProcessParserConfig.Text = "Process Parser Configuration";
             // 
             // checkBoxResolveMethodNames
             // 
@@ -165,11 +168,10 @@
             this.toolTip.SetToolTip(this.checkBoxParseStubMethods, "Check to parse stub methods in each IPID entry.\r\n*WARNING* can make process parsi" +
         "ng slow.");
             this.checkBoxParseStubMethods.UseVisualStyleBackColor = true;
-            this.checkBoxParseStubMethods.Visible = false;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(232, 282);
+            this.btnOK.Location = new System.Drawing.Point(236, 322);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(112, 35);
@@ -181,7 +183,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(423, 282);
+            this.btnCancel.Location = new System.Drawing.Point(429, 322);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(112, 35);
@@ -189,29 +191,54 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // ConfigureProcessAnalysisForm
+            // groupBoxProxyParserConfig
+            // 
+            this.groupBoxProxyParserConfig.Controls.Add(this.checkBoxProxyParserResolveSymbols);
+            this.groupBoxProxyParserConfig.Location = new System.Drawing.Point(14, 257);
+            this.groupBoxProxyParserConfig.Name = "groupBoxProxyParserConfig";
+            this.groupBoxProxyParserConfig.Size = new System.Drawing.Size(740, 57);
+            this.groupBoxProxyParserConfig.TabIndex = 11;
+            this.groupBoxProxyParserConfig.TabStop = false;
+            this.groupBoxProxyParserConfig.Text = "Proxy Parser Configuration";
+            // 
+            // checkBoxProxyParserResolveSymbols
+            // 
+            this.checkBoxProxyParserResolveSymbols.AutoSize = true;
+            this.checkBoxProxyParserResolveSymbols.Location = new System.Drawing.Point(12, 27);
+            this.checkBoxProxyParserResolveSymbols.Name = "checkBoxProxyParserResolveSymbols";
+            this.checkBoxProxyParserResolveSymbols.Size = new System.Drawing.Size(156, 24);
+            this.checkBoxProxyParserResolveSymbols.TabIndex = 0;
+            this.checkBoxProxyParserResolveSymbols.Text = "Resolve Symbols";
+            this.toolTip.SetToolTip(this.checkBoxProxyParserResolveSymbols, "Check to resolve symbols during proxy parsing which is useful for things like unk" +
+        "nown user marshaller.\r\n*WARNING* can make proxy parsing slow.");
+            this.checkBoxProxyParserResolveSymbols.UseVisualStyleBackColor = true;
+            // 
+            // ConfigurationForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(768, 334);
+            this.ClientSize = new System.Drawing.Size(768, 365);
+            this.Controls.Add(this.groupBoxProxyParserConfig);
             this.Controls.Add(groupBoxSymbols);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
-            this.Controls.Add(groupBoxParserConfig);
+            this.Controls.Add(groupBoxProcessParserConfig);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ConfigureProcessAnalysisForm";
+            this.Name = "ConfigurationForm";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Configure Process Analysis";
             groupBoxSymbols.ResumeLayout(false);
             groupBoxSymbols.PerformLayout();
-            groupBoxParserConfig.ResumeLayout(false);
-            groupBoxParserConfig.PerformLayout();
+            groupBoxProcessParserConfig.ResumeLayout(false);
+            groupBoxProcessParserConfig.PerformLayout();
+            this.groupBoxProxyParserConfig.ResumeLayout(false);
+            this.groupBoxProxyParserConfig.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -225,5 +252,7 @@
         private System.Windows.Forms.CheckBox checkBoxParseStubMethods;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.CheckBox checkBoxResolveMethodNames;
+        private System.Windows.Forms.GroupBox groupBoxProxyParserConfig;
+        private System.Windows.Forms.CheckBox checkBoxProxyParserResolveSymbols;
     }
 }

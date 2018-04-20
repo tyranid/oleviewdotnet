@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
 using NtApiDotNet.Ndr;
+using NtApiDotNet.Win32;
 
 namespace OleViewDotNet
 {
@@ -183,11 +184,11 @@ namespace OleViewDotNet
             }
         }
 
-        private bool InitFromFileInfo(IntPtr pInfo)
+        private bool InitFromFileInfo(IntPtr pInfo, ISymbolResolver resolver)
         {
             List<COMProxyInstanceEntry> entries = new List<COMProxyInstanceEntry>();
             List<NdrComplexTypeReference> complex_types = new List<NdrComplexTypeReference>();
-            NdrParser parser = new NdrParser();
+            NdrParser parser = new NdrParser(resolver);
 
             foreach (var file_info in COMUtilities.EnumeratePointerList<ProxyFileInfo>(pInfo))
             {
@@ -208,7 +209,7 @@ namespace OleViewDotNet
             return true;
         }
 
-        private bool InitFromFile(string path, Guid clsid)
+        private bool InitFromFile(string path, Guid clsid, ISymbolResolver resolver)
         {
             using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(path))
             {
@@ -218,21 +219,21 @@ namespace OleViewDotNet
                     return false;
                 }
 
-                return InitFromFileInfo(pInfo);
+                return InitFromFileInfo(pInfo, resolver);
             }
         }
 
-        public COMProxyInstance(string path)
+        public COMProxyInstance(string path, ISymbolResolver resolver)
         {
-            if (!InitFromFile(path, Guid.Empty))
+            if (!InitFromFile(path, Guid.Empty, resolver))
             {
                 throw new ArgumentException("Can't find proxy information in server DLL");
             }
         }
 
-        private COMProxyInstance(COMCLSIDEntry clsid)
+        private COMProxyInstance(COMCLSIDEntry clsid, ISymbolResolver resolver)
         {
-            if (!InitFromFile(clsid.DefaultServer, clsid.Clsid))
+            if (!InitFromFile(clsid.DefaultServer, clsid.Clsid, resolver))
             {
                 throw new ArgumentException("Can't find proxy information in server DLL");
             }
@@ -241,7 +242,7 @@ namespace OleViewDotNet
         private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
         private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new Dictionary<string, COMProxyInstance>(StringComparer.OrdinalIgnoreCase);
 
-        public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid)
+        public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
         {
             if (m_proxies.ContainsKey(clsid.Clsid))
             {
@@ -249,13 +250,13 @@ namespace OleViewDotNet
             }
             else
             {
-                COMProxyInstance proxy = new COMProxyInstance(clsid);
+                COMProxyInstance proxy = new COMProxyInstance(clsid, resolver);
                 m_proxies[clsid.Clsid] = proxy;
                 return proxy;
             }
         }
 
-        public static COMProxyInstance GetFromFile(string path)
+        public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver)
         {
             if (m_proxies_by_file.ContainsKey(path))
             {
@@ -263,7 +264,7 @@ namespace OleViewDotNet
             }
             else
             {
-                COMProxyInstance proxy = new COMProxyInstance(path);
+                COMProxyInstance proxy = new COMProxyInstance(path, resolver);
                 m_proxies_by_file[path] = proxy;
                 return proxy;
             }

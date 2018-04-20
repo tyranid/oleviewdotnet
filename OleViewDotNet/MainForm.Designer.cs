@@ -48,6 +48,8 @@
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
+            this.menuFileSettings = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuFileExit = new System.Windows.Forms.MenuItem();
             this.menuRegistry = new System.Windows.Forms.MenuItem();
             this.menuViewCLSIDs = new System.Windows.Forms.MenuItem();
@@ -101,8 +103,6 @@
             this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
-            this.menuItem14 = new System.Windows.Forms.MenuItem();
-            this.menuProcessConfigureProcessAnalysis = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
@@ -141,6 +141,8 @@
             this.menuFileOpenTypeLib,
             this.menuFileOpenProxyDll,
             this.menuItem12,
+            this.menuFileSettings,
+            this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
             // 
@@ -238,9 +240,20 @@
             this.menuItem12.Index = 15;
             this.menuItem12.Text = "-";
             // 
+            // menuFileSettings
+            // 
+            this.menuFileSettings.Index = 16;
+            this.menuFileSettings.Text = "Settings";
+            this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.Index = 17;
+            this.menuItem2.Text = "-";
+            // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 16;
+            this.menuFileExit.Index = 18;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -562,9 +575,7 @@
             this.menuProcesses.Index = 4;
             this.menuProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuProcessesSelectProcess,
-            this.menuItemProcessesAllProcesses,
-            this.menuItem14,
-            this.menuProcessConfigureProcessAnalysis});
+            this.menuItemProcessesAllProcesses});
             this.menuProcesses.Text = "Processes";
             // 
             // menuProcessesSelectProcess
@@ -599,17 +610,6 @@
             this.menuProcessesAllProcessesByUser.Index = 2;
             this.menuProcessesAllProcessesByUser.Text = "By User";
             this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
-            // 
-            // menuItem14
-            // 
-            this.menuItem14.Index = 2;
-            this.menuItem14.Text = "-";
-            // 
-            // menuProcessConfigureProcessAnalysis
-            // 
-            this.menuProcessConfigureProcessAnalysis.Index = 3;
-            this.menuProcessConfigureProcessAnalysis.Text = "Configure Process Analysis";
-            this.menuProcessConfigureProcessAnalysis.Click += new System.EventHandler(this.menuFileProcessAnalysis_Click);
             // 
             // menuItem11
             // 
@@ -646,12 +646,12 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1097, 551);
+            this.ClientSize = new System.Drawing.Size(1234, 689);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -724,7 +724,7 @@
         private System.Windows.Forms.MenuItem menuFileQueryAllInterfaces;
         private System.Windows.Forms.MenuItem menuItem10;
         private System.Windows.Forms.MenuItem menuFileSaveAsDatabase;
-        private System.Windows.Forms.MenuItem menuProcessConfigureProcessAnalysis;
+        private System.Windows.Forms.MenuItem menuFileSettings;
         private System.Windows.Forms.MenuItem menuItem12;
         private System.Windows.Forms.MenuItem menuProcesses;
         private System.Windows.Forms.MenuItem menuItem13;
@@ -740,7 +740,7 @@
         private System.Windows.Forms.MenuItem menuItem11;
         private System.Windows.Forms.MenuItem menuStorageNewStorage;
         private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
-        private System.Windows.Forms.MenuItem menuItem14;
+        private System.Windows.Forms.MenuItem menuItem2;
     }
 }
 

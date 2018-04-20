@@ -575,8 +575,11 @@ namespace OleViewDotNet
                     if (m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid))
                     {
                         COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
-                        Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid), intf.Item1.Iid));
+                        using (var resolver = Program.GetProxyParserSymbolResolver())
+                        {
+                            Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
+                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
+                        }
                     }
                 }
             }
