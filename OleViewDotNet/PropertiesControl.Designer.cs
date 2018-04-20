@@ -103,6 +103,7 @@
             System.Windows.Forms.ColumnHeader columnHeaderIpidMethodIndex;
             System.Windows.Forms.ColumnHeader columnHeaderIpidMethodName;
             System.Windows.Forms.ColumnHeader columnHeaderIpidMethodAddress;
+            System.Windows.Forms.ColumnHeader columnHeaderIpidMethodSymbol;
             System.Windows.Forms.Label label55;
             System.Windows.Forms.Label label56;
             System.Windows.Forms.ColumnHeader columnHeaderElevationVsoName;
@@ -133,7 +134,7 @@
             System.Windows.Forms.Label label77;
             System.Windows.Forms.Label label78;
             System.Windows.Forms.Label label79;
-            System.Windows.Forms.ColumnHeader columnHeaderMethodSymbol;
+            System.Windows.Forms.ColumnHeader columnHeaderIpidMethodParametersCount;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -346,6 +347,7 @@
             columnHeaderIpidMethodIndex = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderIpidMethodName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderIpidMethodAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderIpidMethodSymbol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             label55 = new System.Windows.Forms.Label();
             label56 = new System.Windows.Forms.Label();
             columnHeaderElevationVsoName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -376,7 +378,7 @@
             label77 = new System.Windows.Forms.Label();
             label78 = new System.Windows.Forms.Label();
             label79 = new System.Windows.Forms.Label();
-            columnHeaderMethodSymbol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderIpidMethodParametersCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -2209,7 +2211,8 @@
             columnHeaderIpidMethodIndex,
             columnHeaderIpidMethodName,
             columnHeaderIpidMethodAddress,
-            columnHeaderMethodSymbol});
+            columnHeaderIpidMethodSymbol,
+            columnHeaderIpidMethodParametersCount});
             tableLayoutPanelIPID.SetColumnSpan(this.listViewIpidMethods, 4);
             this.listViewIpidMethods.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewIpidMethods.FullRowSelect = true;
@@ -2220,6 +2223,7 @@
             this.listViewIpidMethods.TabIndex = 26;
             this.listViewIpidMethods.UseCompatibleStateImageBehavior = false;
             this.listViewIpidMethods.View = System.Windows.Forms.View.Details;
+            this.listViewIpidMethods.DoubleClick += new System.EventHandler(this.listViewIpidMethods_DoubleClick);
             // 
             // columnHeaderIpidMethodIndex
             // 
@@ -2232,6 +2236,10 @@
             // columnHeaderIpidMethodAddress
             // 
             columnHeaderIpidMethodAddress.Text = "Address";
+            // 
+            // columnHeaderIpidMethodSymbol
+            // 
+            columnHeaderIpidMethodSymbol.Text = "Symbol";
             // 
             // label55
             // 
@@ -3258,9 +3266,9 @@
             this.tabPageDotNet.Text = ".NET";
             this.tabPageDotNet.UseVisualStyleBackColor = true;
             // 
-            // columnHeaderMethodSymbol
+            // columnHeaderIpidMethodParametersCount
             // 
-            columnHeaderMethodSymbol.Text = "Symbol";
+            columnHeaderIpidMethodParametersCount.Text = "Parameters";
             // 
             // PropertiesControl
             // 

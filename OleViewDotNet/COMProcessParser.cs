@@ -944,14 +944,13 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public string Address { get; private set; }
         public string Symbol { get; private set; }
-        public NdrProcedureDefinition Procedure { get; private set; }
+        public NdrProcedureDefinition Procedure { get; internal set; }
 
-        internal COMMethodEntry(string name, string address, string symbol, NdrProcedureDefinition proc)
+        internal COMMethodEntry(string name, string address, string symbol)
         {
             Name = name;
             Address = address;
             Symbol = symbol;
-            Procedure = proc;
         }
     }
 
@@ -963,6 +962,7 @@ namespace OleViewDotNet
         public IntPtr Interface { get; private set; }
         public string InterfaceVTable { get; private set; }
         public IEnumerable<COMMethodEntry> Methods { get; private set; }
+        public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
         public IntPtr Stub { get; private set; }
         public string StubVTable { get; private set; }
         public Guid Oxid { get; private set; }
@@ -1036,7 +1036,7 @@ namespace OleViewDotNet
         }
 
         private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, 
-            COMProcessParserConfig config, NdrProcedureDefinition proc)
+            COMProcessParserConfig config)
         {
             if (!_method_cache.ContainsKey(method_ptr))
             {
@@ -1061,7 +1061,7 @@ namespace OleViewDotNet
                             break;
                     }
                 }
-                _method_cache[method_ptr] = new COMMethodEntry(name, address, symbol, proc);
+                _method_cache[method_ptr] = new COMMethodEntry(name, address, symbol);
             }
             return _method_cache[method_ptr];
         }
@@ -1081,6 +1081,7 @@ namespace OleViewDotNet
             WeakRefs = ipid.WeakRefs;
             PrivateRefs = ipid.PrivateRefs;
             List<COMMethodEntry> methods = new List<COMMethodEntry>();
+            List<NdrComplexTypeReference> complex_types = new List<NdrComplexTypeReference>();
             IntPtr stub_vptr = IntPtr.Zero;
             if (Stub != IntPtr.Zero)
             {
@@ -1122,23 +1123,31 @@ namespace OleViewDotNet
                 IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, (int)count);
                 if (method_ptrs != null)
                 {
-                    List<NdrProcedureDefinition> procs = new List<NdrProcedureDefinition>();
-                    procs.AddRange(new NdrProcedureDefinition[3]);
+                    methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, config)));
                     if (config.ParseStubMethods && server_info != IntPtr.Zero && count > 3)
                     {
                         NdrParser parser = new NdrParser(process, resolver);
-                        procs.AddRange(parser.ReadFromMidlServerInfo(server_info, 3, (int)count));
+                        var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count).ToArray();
+                        // TODO: When new NtApiDotNet comes out add this to name the methods correctly.
+                        //var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count, methods.Skip(3).Select(m => m.Name).ToList()).ToArray();
+                        for (int i = 0; i < procs.Length; ++i)
+                        {
+                            methods[i + 3].Procedure = procs[i];
+                        }
+                        complex_types.AddRange(parser.ComplexTypes);
                     }
-                    else
-                    {
-                        procs.AddRange(new NdrProcedureDefinition[count - 3]);
-                    }
-                    
-                    methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, config, procs[i])));
                 }
             }
             Methods = methods.AsReadOnly();
+            ComplexTypes = complex_types.AsReadOnly();
+        }
 
+        internal COMProxyInstance ToProxyInstance(string name)
+        {
+            IEnumerable<COMMethodEntry> methods = Methods.SkipWhile(m => m.Procedure == null);
+            COMProxyInstanceEntry entry = new COMProxyInstanceEntry(name, Iid, COMInterfaceEntry.IID_IUnknown,
+                methods.Count(), methods.Select(m => m.Procedure).ToArray());
+            return new COMProxyInstance(new COMProxyInstanceEntry[] { entry }, ComplexTypes);
         }
     }
 }

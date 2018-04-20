@@ -381,11 +381,9 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
-        private void listView_SelectedIndexChanged(object sender, EventArgs e)
+        private void UpdateFromListView(ListView list)
         {
             string text = String.Empty;
-
-            ListView list = sender as ListView;
 
             if (list.SelectedItems.Count > 0)
             {
@@ -395,6 +393,11 @@ namespace OleViewDotNet
 
             textEditor.Text = text;
             textEditor.Refresh();
+        }
+
+        private void listView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateFromListView(sender as ListView);
         }
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
@@ -444,6 +447,14 @@ namespace OleViewDotNet
                     item.Selected = true;
                     item.EnsureVisible();
                 }
+            }
+        }
+
+        private void tabControl_Selected(object sender, TabControlEventArgs e)
+        {
+            if (e.TabPage.Controls.Count > 0 && e.TabPage.Controls[0] is ListView)
+            {
+                UpdateFromListView((ListView)e.TabPage.Controls[0]);
             }
         }
     }

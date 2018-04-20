@@ -34,6 +34,7 @@ namespace OleViewDotNet
         private COMRuntimeClassEntry m_runtime_class;
         private COMRuntimeServerEntry m_runtime_server;
         private object m_obj;
+        private COMIPIDEntry m_ipid;
 
         private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)
         {
@@ -363,11 +364,18 @@ namespace OleViewDotNet
                 item.SubItems.Add(method.Name);
                 item.SubItems.Add(method.Address);
                 item.SubItems.Add(method.Symbol);
+                int count = method.Procedure != null ? method.Procedure.Params.Count : 0;
+                if (i == 0)
+                {
+                    count = 3;
+                }
+                item.SubItems.Add(count.ToString());
                 return item;
             }
             ).ToArray());
             listViewIpidMethods.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewIpidMethods.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            m_ipid = obj;
             tabControlProperties.TabPages.Add(tabPageIPID);
         }
 
@@ -775,6 +783,25 @@ namespace OleViewDotNet
             if (tabControlProperties.TabCount == 0)
             {
                 tabControlProperties.TabPages.Add(tabPageNoProperties);
+            }
+        }
+
+        private void listViewIpidMethods_DoubleClick(object sender, EventArgs e)
+        {
+            bool has_ndr = false;
+            foreach (var method in m_ipid.Methods)
+            {
+                if (method.Procedure != null)
+                {
+                    has_ndr = true;
+                    break;
+                }
+            }
+
+            if (has_ndr)
+            {
+                string name = m_registry.MapIidToInterface(m_ipid.Iid).Name;
+                Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, name, m_ipid.ToProxyInstance(name), m_ipid.Iid));
             }
         }
     }

@@ -68,17 +68,15 @@ namespace OleViewDotNet
 
     public class COMProxyInstanceEntry
     {
-        private COMProxyInstance _instance;
-
         public string Name { get; private set; }
         public Guid Iid { get; private set; }
         public Guid BaseIid { get; private set; }
         public int DispatchCount { get; private set; }
         public NdrProcedureDefinition[] Procs { get; private set; }
 
-        internal COMProxyInstanceEntry(COMProxyInstance instance, string name, Guid iid, Guid base_iid, int dispatch_count, NdrProcedureDefinition[] procs)
+        internal COMProxyInstanceEntry(string name, 
+            Guid iid, Guid base_iid, int dispatch_count, NdrProcedureDefinition[] procs)
         {
-            _instance = instance;
             Name = COMUtilities.DemangleWinRTName(name);
             Iid = iid;
             BaseIid = base_iid == Guid.Empty ? COMInterfaceEntry.IID_IUnknown : base_iid;
@@ -114,6 +112,13 @@ namespace OleViewDotNet
         public IEnumerable<COMProxyInstanceEntry> Entries { get; private set; }
 
         public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
+
+        internal COMProxyInstance(IEnumerable<COMProxyInstanceEntry> entries, 
+                                  IEnumerable<NdrComplexTypeReference> complex_types)
+        {
+            Entries = new List<COMProxyInstanceEntry>(entries).AsReadOnly();
+            ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
+        }
         
         private NdrProcedureDefinition[] ReadProcs(NdrParser parser, Guid base_iid, CInterfaceStubHeader stub)
         {
@@ -197,7 +202,7 @@ namespace OleViewDotNet
                 Guid[] base_iids = file_info.GetBaseIids();
                 for (int i = 0; i < names.Length; ++i)
                 {
-                    entries.Add(new COMProxyInstanceEntry(this, names[i], stubs[i].GetIid(),
+                    entries.Add(new COMProxyInstanceEntry(names[i], stubs[i].GetIid(),
                         base_iids[i], stubs[i].DispatchTableCount, ReadProcs(parser, base_iids[i], stubs[i])));
                 }
             }
