@@ -1127,9 +1127,7 @@ namespace OleViewDotNet
                     if (config.ParseStubMethods && server_info != IntPtr.Zero && count > 3)
                     {
                         NdrParser parser = new NdrParser(process, resolver);
-                        var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count).ToArray();
-                        // TODO: When new NtApiDotNet comes out add this to name the methods correctly.
-                        //var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count, methods.Skip(3).Select(m => m.Name).ToList()).ToArray();
+                        var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count, methods.Skip(3).Select(m => m.Name).ToList()).ToArray();
                         for (int i = 0; i < procs.Length; ++i)
                         {
                             methods[i + 3].Procedure = procs[i];
