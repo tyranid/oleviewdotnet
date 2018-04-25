@@ -35,6 +35,7 @@ namespace OleViewDotNet
             comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_32_BIT_SERVER | CLSCTX.LOCAL_SERVER);
             comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_64_BIT_SERVER | CLSCTX.LOCAL_SERVER);
             comboBoxClsCtx.SelectedIndex = 0;
+            textBoxCLSID.Text = "Specify CLSID or ProgID";
         }
 
         private bool GetClsid(string name, out Guid clsid)
