@@ -236,6 +236,7 @@ namespace OleViewDotNet
             foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
             {
                 ListViewItem item = new ListViewItem(type.Name);
+                item.SubItems.Add(type.GetSize().ToString());
                 item.Tag = type;
                 yield return item;
             }

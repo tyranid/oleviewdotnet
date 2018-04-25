@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ColumnHeader columnHeaderName;
             System.Windows.Forms.ColumnHeader columnHeaderGuid;
-            System.Windows.Forms.ColumnHeader columnHeader1;
+            System.Windows.Forms.ColumnHeader columnHeaderStructuresName;
             System.Windows.Forms.ColumnHeader columnHeader2;
             System.Windows.Forms.ColumnHeader columnHeader3;
             System.Windows.Forms.ColumnHeader columnHeader4;
@@ -51,9 +51,10 @@
             this.tabPageEnums = new System.Windows.Forms.TabPage();
             this.listViewEnums = new System.Windows.Forms.ListView();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.columnHeaderStructuresSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderGuid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderStructuresName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -78,10 +79,10 @@
             // 
             columnHeaderGuid.Text = "IID";
             // 
-            // columnHeader1
+            // columnHeaderStructuresName
             // 
-            columnHeader1.Text = "Name";
-            columnHeader1.Width = 278;
+            columnHeaderStructuresName.Text = "Name";
+            columnHeaderStructuresName.Width = 278;
             // 
             // columnHeader2
             // 
@@ -101,7 +102,7 @@
             // 
             this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.splitContainer.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.splitContainer.Name = "splitContainer";
             // 
             // splitContainer.Panel1
@@ -111,9 +112,9 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this.textEditor);
-            this.splitContainer.Size = new System.Drawing.Size(1048, 643);
-            this.splitContainer.SplitterDistance = 440;
-            this.splitContainer.SplitterWidth = 6;
+            this.splitContainer.Size = new System.Drawing.Size(1281, 772);
+            this.splitContainer.SplitterDistance = 537;
+            this.splitContainer.SplitterWidth = 7;
             this.splitContainer.TabIndex = 0;
             // 
             // tabControl
@@ -124,21 +125,21 @@
             this.tabControl.Controls.Add(this.tabPageEnums);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(440, 643);
+            this.tabControl.Size = new System.Drawing.Size(537, 772);
             this.tabControl.TabIndex = 1;
             this.tabControl.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl_Selected);
             // 
             // tabPageInterfaces
             // 
             this.tabPageInterfaces.Controls.Add(this.listViewInterfaces);
-            this.tabPageInterfaces.Location = new System.Drawing.Point(4, 29);
-            this.tabPageInterfaces.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPageInterfaces.Location = new System.Drawing.Point(4, 33);
+            this.tabPageInterfaces.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.tabPageInterfaces.Name = "tabPageInterfaces";
-            this.tabPageInterfaces.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageInterfaces.Size = new System.Drawing.Size(432, 610);
+            this.tabPageInterfaces.Padding = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.tabPageInterfaces.Size = new System.Drawing.Size(529, 735);
             this.tabPageInterfaces.TabIndex = 0;
             this.tabPageInterfaces.Text = "Interfaces";
             this.tabPageInterfaces.UseVisualStyleBackColor = true;
@@ -153,10 +154,10 @@
             this.listViewInterfaces.FullRowSelect = true;
             this.listViewInterfaces.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewInterfaces.HideSelection = false;
-            this.listViewInterfaces.Location = new System.Drawing.Point(4, 5);
-            this.listViewInterfaces.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listViewInterfaces.Location = new System.Drawing.Point(5, 6);
+            this.listViewInterfaces.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(424, 600);
+            this.listViewInterfaces.Size = new System.Drawing.Size(519, 723);
             this.listViewInterfaces.TabIndex = 0;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
@@ -171,45 +172,45 @@
             this.copyGUIDCStructureToolStripMenuItem,
             this.copyGIUDHexStringToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(265, 124);
+            this.contextMenuStrip.Size = new System.Drawing.Size(297, 140);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(264, 30);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(296, 34);
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // copyGUIDToolStripMenuItem
             // 
             this.copyGUIDToolStripMenuItem.Name = "copyGUIDToolStripMenuItem";
-            this.copyGUIDToolStripMenuItem.Size = new System.Drawing.Size(264, 30);
+            this.copyGUIDToolStripMenuItem.Size = new System.Drawing.Size(296, 34);
             this.copyGUIDToolStripMenuItem.Text = "Copy GUID";
             this.copyGUIDToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDToolStripMenuItem_Click);
             // 
             // copyGUIDCStructureToolStripMenuItem
             // 
             this.copyGUIDCStructureToolStripMenuItem.Name = "copyGUIDCStructureToolStripMenuItem";
-            this.copyGUIDCStructureToolStripMenuItem.Size = new System.Drawing.Size(264, 30);
+            this.copyGUIDCStructureToolStripMenuItem.Size = new System.Drawing.Size(296, 34);
             this.copyGUIDCStructureToolStripMenuItem.Text = "Copy GUID C Structure";
             this.copyGUIDCStructureToolStripMenuItem.Click += new System.EventHandler(this.copyGUIDCStructureToolStripMenuItem_Click);
             // 
             // copyGIUDHexStringToolStripMenuItem
             // 
             this.copyGIUDHexStringToolStripMenuItem.Name = "copyGIUDHexStringToolStripMenuItem";
-            this.copyGIUDHexStringToolStripMenuItem.Size = new System.Drawing.Size(264, 30);
+            this.copyGIUDHexStringToolStripMenuItem.Size = new System.Drawing.Size(296, 34);
             this.copyGIUDHexStringToolStripMenuItem.Text = "Copy GIUD Hex String";
             this.copyGIUDHexStringToolStripMenuItem.Click += new System.EventHandler(this.copyGIUDHexStringToolStripMenuItem_Click);
             // 
             // tabPageClasses
             // 
             this.tabPageClasses.Controls.Add(this.listViewClasses);
-            this.tabPageClasses.Location = new System.Drawing.Point(4, 29);
-            this.tabPageClasses.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPageClasses.Location = new System.Drawing.Point(4, 33);
+            this.tabPageClasses.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.tabPageClasses.Name = "tabPageClasses";
-            this.tabPageClasses.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageClasses.Size = new System.Drawing.Size(433, 610);
+            this.tabPageClasses.Padding = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.tabPageClasses.Size = new System.Drawing.Size(529, 735);
             this.tabPageClasses.TabIndex = 3;
             this.tabPageClasses.Text = "Classes";
             this.tabPageClasses.UseVisualStyleBackColor = true;
@@ -224,10 +225,10 @@
             this.listViewClasses.FullRowSelect = true;
             this.listViewClasses.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewClasses.HideSelection = false;
-            this.listViewClasses.Location = new System.Drawing.Point(4, 5);
-            this.listViewClasses.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listViewClasses.Location = new System.Drawing.Point(5, 6);
+            this.listViewClasses.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.listViewClasses.Name = "listViewClasses";
-            this.listViewClasses.Size = new System.Drawing.Size(425, 600);
+            this.listViewClasses.Size = new System.Drawing.Size(519, 723);
             this.listViewClasses.TabIndex = 1;
             this.listViewClasses.UseCompatibleStateImageBehavior = false;
             this.listViewClasses.View = System.Windows.Forms.View.Details;
@@ -236,11 +237,11 @@
             // tabPageStructures
             // 
             this.tabPageStructures.Controls.Add(this.listViewStructures);
-            this.tabPageStructures.Location = new System.Drawing.Point(4, 29);
-            this.tabPageStructures.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPageStructures.Location = new System.Drawing.Point(4, 33);
+            this.tabPageStructures.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.tabPageStructures.Name = "tabPageStructures";
-            this.tabPageStructures.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageStructures.Size = new System.Drawing.Size(432, 610);
+            this.tabPageStructures.Padding = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.tabPageStructures.Size = new System.Drawing.Size(529, 735);
             this.tabPageStructures.TabIndex = 1;
             this.tabPageStructures.Text = "Structures";
             this.tabPageStructures.UseVisualStyleBackColor = true;
@@ -248,15 +249,16 @@
             // listViewStructures
             // 
             this.listViewStructures.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            columnHeader1});
+            columnHeaderStructuresName,
+            this.columnHeaderStructuresSize});
             this.listViewStructures.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewStructures.FullRowSelect = true;
             this.listViewStructures.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewStructures.HideSelection = false;
-            this.listViewStructures.Location = new System.Drawing.Point(4, 5);
-            this.listViewStructures.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listViewStructures.Location = new System.Drawing.Point(5, 6);
+            this.listViewStructures.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.listViewStructures.Name = "listViewStructures";
-            this.listViewStructures.Size = new System.Drawing.Size(424, 600);
+            this.listViewStructures.Size = new System.Drawing.Size(519, 723);
             this.listViewStructures.TabIndex = 1;
             this.listViewStructures.UseCompatibleStateImageBehavior = false;
             this.listViewStructures.View = System.Windows.Forms.View.Details;
@@ -265,11 +267,11 @@
             // tabPageEnums
             // 
             this.tabPageEnums.Controls.Add(this.listViewEnums);
-            this.tabPageEnums.Location = new System.Drawing.Point(4, 29);
-            this.tabPageEnums.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPageEnums.Location = new System.Drawing.Point(4, 33);
+            this.tabPageEnums.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.tabPageEnums.Name = "tabPageEnums";
-            this.tabPageEnums.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageEnums.Size = new System.Drawing.Size(433, 610);
+            this.tabPageEnums.Padding = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.tabPageEnums.Size = new System.Drawing.Size(529, 735);
             this.tabPageEnums.TabIndex = 2;
             this.tabPageEnums.Text = "Enums";
             this.tabPageEnums.UseVisualStyleBackColor = true;
@@ -283,10 +285,10 @@
             this.listViewEnums.FullRowSelect = true;
             this.listViewEnums.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listViewEnums.HideSelection = false;
-            this.listViewEnums.Location = new System.Drawing.Point(4, 5);
-            this.listViewEnums.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listViewEnums.Location = new System.Drawing.Point(5, 6);
+            this.listViewEnums.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.listViewEnums.Name = "listViewEnums";
-            this.listViewEnums.Size = new System.Drawing.Size(425, 600);
+            this.listViewEnums.Size = new System.Drawing.Size(519, 723);
             this.listViewEnums.TabIndex = 1;
             this.listViewEnums.UseCompatibleStateImageBehavior = false;
             this.listViewEnums.View = System.Windows.Forms.View.Details;
@@ -297,19 +299,23 @@
             this.textEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textEditor.IsReadOnly = false;
             this.textEditor.Location = new System.Drawing.Point(0, 0);
-            this.textEditor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.textEditor.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(602, 643);
+            this.textEditor.Size = new System.Drawing.Size(737, 772);
             this.textEditor.TabIndex = 0;
+            // 
+            // columnHeaderStructuresSize
+            // 
+            this.columnHeaderStructuresSize.Text = "Size";
             // 
             // TypeLibControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.Name = "TypeLibControl";
-            this.Size = new System.Drawing.Size(1048, 643);
+            this.Size = new System.Drawing.Size(1281, 772);
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
@@ -342,5 +348,6 @@
         private System.Windows.Forms.ListView listViewEnums;
         private System.Windows.Forms.TabPage tabPageClasses;
         private System.Windows.Forms.ListView listViewClasses;
+        private System.Windows.Forms.ColumnHeader columnHeaderStructuresSize;
     }
 }
