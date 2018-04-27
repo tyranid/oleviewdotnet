@@ -554,7 +554,190 @@ namespace OleViewDotNet
                 }
             }
         }
-        
+
+        interface ICClassEntry
+        {
+            Guid[] GetGuids();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CClassEntry : ICClassEntry
+        {
+            public IntPtr vfptr; // CClassCache::CCollectableVtbl* 
+            public IntPtr _pNextCollectee; // CClassCache::CCollectable* 
+            public ulong _qwTickLastTouched;
+
+            // SMultiGUIDHashNode _hashNode;
+            public IntPtr pNext; // SHashChain* 
+            public IntPtr pPrev; // SHashChain* 
+            public int cGUID;
+            public IntPtr aGUID; // _GUID* 
+            // END SMultiGUIDHashNode _hashNode;
+            public Guid guids1;
+            public Guid guids2;
+            public uint _dwSig;
+            public uint _dwFlags;
+            public IntPtr _pTreatAsList; // CClassCache::CClassEntry* 
+            public IntPtr _pBCEListFront; // CClassCache::CBaseClassEntry* 
+            public IntPtr _pBCEListBack; // CClassCache::CBaseClassEntry* 
+            public uint _cLocks;
+            public uint _dwFailedContexts;
+            public IntPtr _pCI; // IComClassInfo* 
+
+            Guid[] ICClassEntry.GetGuids()
+            {
+                Guid[] ret = new Guid[2];
+                ret[0] = guids1;
+                ret[1] = guids2;
+                return ret;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CClassEntry32 : ICClassEntry
+        {
+            public int vfptr; // CClassCache::CCollectableVtbl* 
+            public int _pNextCollectee; // CClassCache::CCollectable* 
+            public ulong _qwTickLastTouched;
+
+            // SMultiGUIDHashNode _hashNode;
+            public int pNext; // SHashChain* 
+            public int pPrev; // SHashChain* 
+            public int cGUID;
+            public int aGUID; // _GUID* 
+            // END SMultiGUIDHashNode _hashNode;
+            public Guid guids1;
+            public Guid guids2;
+            public uint _dwSig;
+            public uint _dwFlags;
+            public int _pTreatAsList; // CClassCache::CClassEntry* 
+            public int _pBCEListFront; // CClassCache::CBaseClassEntry* 
+            public int _pBCEListBack; // CClassCache::CBaseClassEntry* 
+            public uint _cLocks;
+            public uint _dwFailedContexts;
+            public int _pCI; // IComClassInfo* 
+
+            Guid[] ICClassEntry.GetGuids()
+            {
+                Guid[] ret = new Guid[2];
+                ret[0] = guids1;
+                ret[1] = guids2;
+                return ret;
+            }
+        }
+
+        interface ICLSvrClassEntry
+        {
+            IntPtr GetNext();
+            IntPtr GetIUnknown();
+            ICClassEntry GetClassEntry(NtProcess process);
+            REGCLS GetRegFlags();
+            uint GetCookie();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CLSvrClassEntry : ICLSvrClassEntry
+        {
+            public IntPtr vfptr; // CClassCache::CBaseClassEntryVtbl*
+            public IntPtr _pNext; // CClassCache::CBaseClassEntry*
+            public IntPtr _pPrev; // CClassCache::CBaseClassEntry* 
+            public IntPtr _pClassEntry; // CClassCache::CClassEntry* 
+            public int _dwContext;
+            public int _dwSig;
+            public IntPtr _pNextLSvr; // CClassCache::CLSvrClassEntry* 
+            public IntPtr _pPrevLSvr; // CClassCache::CLSvrClassEntry*
+            public IntPtr _pUnk; // IUnknown* 
+            public REGCLS _dwRegFlags;
+            public uint _dwFlags;
+            public uint _dwScmReg;
+            public uint _hApt;
+            public IntPtr _hWndDdeServer;
+            public IntPtr _pObjServer; // CObjServer*
+            public uint _dwCookie;
+            public uint _cUsing;
+            public uint _ulServiceId;
+
+            ICClassEntry ICLSvrClassEntry.GetClassEntry(NtProcess process)
+            {
+                if (_pClassEntry == IntPtr.Zero)
+                {
+                    return null;
+                }
+                return process.ReadStruct<CClassEntry>(_pClassEntry.ToInt64());
+            }
+
+            uint ICLSvrClassEntry.GetCookie()
+            {
+                return _dwCookie;
+            }
+
+            IntPtr ICLSvrClassEntry.GetIUnknown()
+            {
+                return _pUnk;
+            }
+
+            IntPtr ICLSvrClassEntry.GetNext()
+            {
+                return _pNextLSvr;
+            }
+
+            REGCLS ICLSvrClassEntry.GetRegFlags()
+            {
+                return _dwRegFlags;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CLSvrClassEntry32 : ICLSvrClassEntry
+        {
+            public int vfptr; // CClassCache::CBaseClassEntryVtbl*
+            public int _pNext; // CClassCache::CBaseClassEntry*
+            public int _pPrev; // CClassCache::CBaseClassEntry* 
+            public int _pClassEntry; // CClassCache::CClassEntry* 
+            public int _dwContext;
+            public int _dwSig;
+            public int _pNextLSvr; // CClassCache::CLSvrClassEntry* 
+            public int _pPrevLSvr; // CClassCache::CLSvrClassEntry*
+            public int _pUnk; // IUnknown* 
+            public REGCLS _dwRegFlags;
+            public uint _dwFlags;
+            public uint _dwScmReg;
+            public uint _hApt;
+            public int _hWndDdeServer;
+            public int _pObjServer; // CObjServer*
+            public uint _dwCookie;
+            public uint _cUsing;
+            public uint _ulServiceId;
+
+            public ICClassEntry GetClassEntry(NtProcess process)
+            {
+                if (_pClassEntry == 0)
+                {
+                    return null;
+                }
+                return process.ReadStruct<CClassEntry32>(_pClassEntry);
+            }
+
+            IntPtr ICLSvrClassEntry.GetIUnknown()
+            {
+                return new IntPtr(_pUnk);
+            }
+
+            IntPtr ICLSvrClassEntry.GetNext()
+            {
+                return new IntPtr(_pNextLSvr);
+            }
+            uint ICLSvrClassEntry.GetCookie()
+            {
+                return _dwCookie;
+            }
+
+            REGCLS ICLSvrClassEntry.GetRegFlags()
+            {
+                return _dwRegFlags;
+            }
+        }
+
         static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) 
             where T : struct, IPIDEntryNativeInterface
         {
@@ -697,6 +880,88 @@ namespace OleViewDotNet
             return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
         }
 
+        private static ICLSvrClassEntry ReadCLSvrClassEntry(NtProcess process, IntPtr address)
+        {
+            return process.Is64Bit ? (ICLSvrClassEntry)process.ReadStruct<CLSvrClassEntry>(address.ToInt64())
+                : process.ReadStruct<CLSvrClassEntry32>(address.ToInt64());
+        }
+
+        private static void ReadRegisteredClasses(NtProcess process, ISymbolResolver resolver, 
+            IntPtr base_address, COMProcessClassApartment apartment, 
+            int thread_id, List<COMProcessClassRegistration> classes)
+        {
+            if (base_address == IntPtr.Zero)
+            {
+                return;
+            }
+
+            IntPtr next = base_address;
+
+            do
+            {
+                ICLSvrClassEntry entry = ReadCLSvrClassEntry(process, next);
+                var class_entry = entry.GetClassEntry(process);
+                if (class_entry != null)
+                {
+                    IntPtr vtable_ptr = ReadPointer(process, entry.GetIUnknown());
+                    string vtable = resolver.GetModuleRelativeAddress(vtable_ptr);
+
+                    classes.Add(new COMProcessClassRegistration(class_entry.GetGuids()[0], 
+                        entry.GetIUnknown(), vtable,
+                        entry.GetRegFlags(), entry.GetCookie(), thread_id, apartment));
+                }
+
+                next = entry.GetNext();
+            }
+            while (next != base_address);
+        }
+
+        private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver)
+        {
+            var classes = new List<COMProcessClassRegistration>();
+            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_MTALSvrsFront"), COMProcessClassApartment.MTA, -1, classes);
+            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_NTALSvrsFront"), COMProcessClassApartment.NTA, 0, classes);
+            using (var list = process.GetThreads(ThreadAccessRights.QueryLimitedInformation).ToDisposableList())
+            {
+                foreach (var th in list)
+                {
+                    IntPtr sta = GetSTALSvrsFront(process, th);
+                    if (sta == IntPtr.Zero)
+                    {
+                        continue;
+                    }
+
+                    ReadRegisteredClasses(process, resolver, sta, COMProcessClassApartment.STA, th.ThreadId, classes);
+                }
+            }
+            return classes;
+        }
+
+        private static IntPtr GetSTALSvrsFront(NtProcess process, NtThread thread)
+        {
+            IntPtr p = GetReservedForOle(process, thread);
+            if (p == IntPtr.Zero)
+            {
+                return IntPtr.Zero;
+            }
+
+            if (process.Is64Bit)
+            {
+                return ReadPointer(process, p + 0x118);
+            }
+            return ReadPointer(process, p + 0xa8);
+        }
+
+        private static IntPtr GetReservedForOle(NtProcess process, NtThread thread)
+        {
+            IntPtr teb = thread.TebBaseAddress;
+            if (process.Is64Bit)
+            {
+                return ReadPointer(process, teb + 0x1758);
+            }
+            return ReadPointer(process, teb + 0xF80);
+        }
+
         private static string ReadUnicodeString(NtProcess process, IntPtr ptr)
         {
             StringBuilder builder = new StringBuilder();
@@ -823,7 +1088,8 @@ namespace OleViewDotNet
                         ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
                         ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
                         ReadPointer(process, resolver, "gAccessControl"),
-                        ReadPointer(process, resolver, "ghwndOleMainThread"));
+                        ReadPointer(process, resolver, "ghwndOleMainThread"),
+                        GetRegisteredClasses(process, resolver));
                 }
             }
         }
@@ -863,6 +1129,37 @@ namespace OleViewDotNet
         }
     }
 
+    public enum COMProcessClassApartment
+    {
+        STA,
+        MTA,
+        NTA
+    }
+
+    public class COMProcessClassRegistration
+    {
+        public Guid Clsid { get; private set; }
+        public IntPtr ClassFactory { get; private set; }
+        public string VTable { get; private set; }
+        public COMProcessClassApartment Apartment { get; private set; }
+        public REGCLS RegFlags { get; private set; }
+        public uint Cookie { get; private set; }
+        public int ThreadId { get; private set; }
+        internal COMProcessClassRegistration(
+            Guid clsid, IntPtr class_factory, string vtable,
+            REGCLS regflags, uint cookie, int thread_id, 
+            COMProcessClassApartment apartment)
+        {
+            Clsid = clsid;
+            ClassFactory = class_factory;
+            VTable = vtable;
+            Apartment = apartment;
+            RegFlags = regflags;
+            Cookie = cookie;
+            ThreadId = thread_id;
+        }
+    }
+
     public class COMProcessEntry
     {
         public int Pid { get; private set; }
@@ -887,12 +1184,13 @@ namespace OleViewDotNet
         public RPC_IMP_LEVEL ImpLevel { get; private set; }
         public IntPtr AccessControl { get; private set; }
         public IntPtr STAMainHWnd { get; private set; }
+        public IEnumerable<COMProcessClassRegistration> Classes { get; private set; } 
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level,
-            IntPtr access_control, IntPtr sta_main_hwnd)
+            IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes)
         {
             Pid = pid;
             ExecutablePath = path;
@@ -916,6 +1214,7 @@ namespace OleViewDotNet
             ImpLevel = imp_level;
             AccessControl = access_control;
             STAMainHWnd = sta_main_hwnd;
+            Classes = classes.AsReadOnly();
         }
     }
 

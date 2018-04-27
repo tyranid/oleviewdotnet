@@ -95,6 +95,17 @@ namespace OleViewDotNet
     }
 
     [Flags]
+    public enum REGCLS
+    {
+        SINGLEUSE = 0,
+        MULTIPLEUSE = 1,
+        MULTI_SEPARATE = 2,
+        SUSPENDED = 4,
+        SURROGATE = 8,
+        AGILE = 0x10,
+    }
+
+    [Flags]
     public enum STGM
     {
         READ = 0x00000000,
