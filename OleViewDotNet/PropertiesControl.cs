@@ -339,6 +339,23 @@ namespace OleViewDotNet
             {
                 SetupAppIdEntry((COMAppIDEntry)m_registry.AppIDs[obj.AppId]);
             }
+            if (obj.Classes.Count() > 0)
+            {
+                tabControlProperties.TabPages.Add(tabPageRegisteredClasses);
+                foreach (var c in obj.Classes)
+                {
+                    COMCLSIDEntry clsid = m_registry.MapClsidToEntry(c.Clsid);
+                    ListViewItem item = listViewRegisteredClasses.Items.Add(c.Clsid.FormatGuid());
+                    item.SubItems.Add(clsid.Name);
+                    item.SubItems.Add(c.VTable);
+                    item.SubItems.Add(c.RegFlags.ToString());
+                    item.SubItems.Add(c.Apartment.ToString());
+                    item.Tag = c;
+                }
+                listViewRegisteredClasses.ListViewItemSorter = new ListItemComparer(0);
+                listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            }
         }
 
         private void SetupIPIDEntry(COMIPIDEntry obj)
@@ -802,6 +819,25 @@ namespace OleViewDotNet
             {
                 string name = m_registry.MapIidToInterface(m_ipid.Iid).Name;
                 Program.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, name, m_ipid.ToProxyInstance(name), m_ipid.Iid));
+            }
+        }
+
+        private COMProcessClassRegistration GetRegisteredClass()
+        {
+            if (listViewRegisteredClasses.SelectedItems.Count == 0)
+            {
+                return null;
+            }
+
+            return listViewRegisteredClasses.SelectedItems[0].Tag as COMProcessClassRegistration;
+        }
+
+        private void copyCLSIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMProcessClassRegistration c = GetRegisteredClass();
+            if (c != null)
+            {
+                COMRegistryViewer.CopyGuidToClipboard(c.Clsid, COMRegistryViewer.CopyGuidType.CopyAsString);
             }
         }
     }
