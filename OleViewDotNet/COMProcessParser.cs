@@ -35,13 +35,15 @@ namespace OleViewDotNet
         public string SymbolPath { get; private set; }
         public bool ParseStubMethods { get; private set; }
         public bool ResolveMethodNames { get; private set; }
+        public bool ParseRegisteredClasses { get; private set; }
 
-        public COMProcessParserConfig(string dbghelp_path, string symbol_path, bool parse_stubs_methods, bool resolve_method_names)
+        public COMProcessParserConfig(string dbghelp_path, string symbol_path, bool parse_stubs_methods, bool resolve_method_names, bool parse_registered_classes)
         {
             DbgHelpPath = dbghelp_path;
             SymbolPath = symbol_path;
             ParseStubMethods = parse_stubs_methods;
             ResolveMethodNames = resolve_method_names;
+            ParseRegisteredClasses = parse_registered_classes;
         }
     }
 
@@ -928,9 +930,13 @@ namespace OleViewDotNet
             while (next != base_address);
         }
 
-        private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver)
+        private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config)
         {
             var classes = new List<COMProcessClassRegistration>();
+            if (!config.ParseRegisteredClasses)
+            {
+                return classes;
+            }
             ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_MTALSvrsFront"), COMProcessClassApartment.MTA, -1, classes);
             ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_NTALSvrsFront"), COMProcessClassApartment.NTA, 0, classes);
             using (var list = process.GetThreads(ThreadAccessRights.QueryLimitedInformation).ToDisposableList())
@@ -1101,7 +1107,7 @@ namespace OleViewDotNet
                         ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
                         ReadPointer(process, resolver, "gAccessControl"),
                         ReadPointer(process, resolver, "ghwndOleMainThread"),
-                        GetRegisteredClasses(process, resolver));
+                        GetRegisteredClasses(process, resolver, config));
                 }
             }
         }

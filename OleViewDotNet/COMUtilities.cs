@@ -1848,8 +1848,9 @@ namespace OleViewDotNet
             string symbol_path = Properties.Settings.Default.SymbolPath;
             bool parse_stub_methods = Properties.Settings.Default.ParseStubMethods;
             bool resolve_method_names = Properties.Settings.Default.ResolveMethodNames;
+            bool parse_registered_classes = Properties.Settings.Default.ParseRegisteredClasses;
 
-            return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods, resolve_method_names);
+            return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods, resolve_method_names, parse_registered_classes);
         }
 
         internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)

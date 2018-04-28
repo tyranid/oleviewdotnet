@@ -42,8 +42,9 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.groupBoxProxyParserConfig = new System.Windows.Forms.GroupBox();
             this.checkBoxProxyParserResolveSymbols = new System.Windows.Forms.CheckBox();
+            this.groupBoxProxyParserConfig = new System.Windows.Forms.GroupBox();
+            this.checkBoxParseRegisteredClasses = new System.Windows.Forms.CheckBox();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
@@ -57,30 +58,30 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(8, 82);
-            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label1.Location = new System.Drawing.Point(10, 98);
+            label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(110, 20);
+            label1.Size = new System.Drawing.Size(136, 25);
             label1.TabIndex = 0;
             label1.Text = "Dbghelp Path:";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(8, 122);
-            label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label2.Location = new System.Drawing.Point(10, 146);
+            label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(102, 20);
+            label2.Size = new System.Drawing.Size(129, 25);
             label2.TabIndex = 3;
             label2.Text = "Symbol Path:";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(8, 31);
-            label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label3.Location = new System.Drawing.Point(10, 37);
+            label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(715, 40);
+            label3.Size = new System.Drawing.Size(883, 50);
             label3.TabIndex = 7;
             label3.Text = "Specify path to dbghelp.dll. \r\nIdeally use the one which comes with Debugging Too" +
     "ls for Windows as that supports symbol servers.";
@@ -93,11 +94,11 @@
             groupBoxSymbols.Controls.Add(this.btnBrowse);
             groupBoxSymbols.Controls.Add(label2);
             groupBoxSymbols.Controls.Add(this.textBoxSymbolPath);
-            groupBoxSymbols.Location = new System.Drawing.Point(14, 15);
-            groupBoxSymbols.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBoxSymbols.Location = new System.Drawing.Point(17, 18);
+            groupBoxSymbols.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             groupBoxSymbols.Name = "groupBoxSymbols";
-            groupBoxSymbols.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxSymbols.Size = new System.Drawing.Size(740, 168);
+            groupBoxSymbols.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            groupBoxSymbols.Size = new System.Drawing.Size(904, 202);
             groupBoxSymbols.TabIndex = 9;
             groupBoxSymbols.TabStop = false;
             groupBoxSymbols.Text = "Symbols";
@@ -106,18 +107,18 @@
             // 
             this.textBoxDbgHelp.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.textBoxDbgHelp.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
-            this.textBoxDbgHelp.Location = new System.Drawing.Point(129, 78);
-            this.textBoxDbgHelp.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.textBoxDbgHelp.Location = new System.Drawing.Point(158, 94);
+            this.textBoxDbgHelp.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.textBoxDbgHelp.Name = "textBoxDbgHelp";
-            this.textBoxDbgHelp.Size = new System.Drawing.Size(473, 26);
+            this.textBoxDbgHelp.Size = new System.Drawing.Size(577, 29);
             this.textBoxDbgHelp.TabIndex = 1;
             // 
             // btnBrowse
             // 
-            this.btnBrowse.Location = new System.Drawing.Point(615, 75);
-            this.btnBrowse.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnBrowse.Location = new System.Drawing.Point(752, 90);
+            this.btnBrowse.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.btnBrowse.Name = "btnBrowse";
-            this.btnBrowse.Size = new System.Drawing.Size(112, 35);
+            this.btnBrowse.Size = new System.Drawing.Size(137, 42);
             this.btnBrowse.TabIndex = 2;
             this.btnBrowse.Text = "Browse";
             this.btnBrowse.UseVisualStyleBackColor = true;
@@ -125,21 +126,22 @@
             // 
             // textBoxSymbolPath
             // 
-            this.textBoxSymbolPath.Location = new System.Drawing.Point(129, 118);
-            this.textBoxSymbolPath.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.textBoxSymbolPath.Location = new System.Drawing.Point(158, 142);
+            this.textBoxSymbolPath.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.textBoxSymbolPath.Name = "textBoxSymbolPath";
-            this.textBoxSymbolPath.Size = new System.Drawing.Size(597, 26);
+            this.textBoxSymbolPath.Size = new System.Drawing.Size(729, 29);
             this.textBoxSymbolPath.TabIndex = 4;
             // 
             // groupBoxProcessParserConfig
             // 
+            groupBoxProcessParserConfig.Controls.Add(this.checkBoxParseRegisteredClasses);
             groupBoxProcessParserConfig.Controls.Add(this.checkBoxResolveMethodNames);
             groupBoxProcessParserConfig.Controls.Add(this.checkBoxParseStubMethods);
-            groupBoxProcessParserConfig.Location = new System.Drawing.Point(14, 190);
-            groupBoxProcessParserConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBoxProcessParserConfig.Location = new System.Drawing.Point(17, 228);
+            groupBoxProcessParserConfig.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             groupBoxProcessParserConfig.Name = "groupBoxProcessParserConfig";
-            groupBoxProcessParserConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxProcessParserConfig.Size = new System.Drawing.Size(740, 60);
+            groupBoxProcessParserConfig.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            groupBoxProcessParserConfig.Size = new System.Drawing.Size(904, 72);
             groupBoxProcessParserConfig.TabIndex = 10;
             groupBoxProcessParserConfig.TabStop = false;
             groupBoxProcessParserConfig.Text = "Process Parser Configuration";
@@ -147,9 +149,10 @@
             // checkBoxResolveMethodNames
             // 
             this.checkBoxResolveMethodNames.AutoSize = true;
-            this.checkBoxResolveMethodNames.Location = new System.Drawing.Point(12, 26);
+            this.checkBoxResolveMethodNames.Location = new System.Drawing.Point(15, 31);
+            this.checkBoxResolveMethodNames.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBoxResolveMethodNames.Name = "checkBoxResolveMethodNames";
-            this.checkBoxResolveMethodNames.Size = new System.Drawing.Size(204, 24);
+            this.checkBoxResolveMethodNames.Size = new System.Drawing.Size(246, 29);
             this.checkBoxResolveMethodNames.TabIndex = 9;
             this.checkBoxResolveMethodNames.Text = "Resolve Method Names";
             this.toolTip.SetToolTip(this.checkBoxResolveMethodNames, "Check to resolve the symbols for interface methods.\r\nWARNING* can make process pa" +
@@ -159,10 +162,10 @@
             // checkBoxParseStubMethods
             // 
             this.checkBoxParseStubMethods.AutoSize = true;
-            this.checkBoxParseStubMethods.Location = new System.Drawing.Point(222, 26);
-            this.checkBoxParseStubMethods.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.checkBoxParseStubMethods.Location = new System.Drawing.Point(271, 31);
+            this.checkBoxParseStubMethods.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBoxParseStubMethods.Name = "checkBoxParseStubMethods";
-            this.checkBoxParseStubMethods.Size = new System.Drawing.Size(180, 24);
+            this.checkBoxParseStubMethods.Size = new System.Drawing.Size(216, 29);
             this.checkBoxParseStubMethods.TabIndex = 8;
             this.checkBoxParseStubMethods.Text = "Parse Stub Methods";
             this.toolTip.SetToolTip(this.checkBoxParseStubMethods, "Check to parse stub methods in each IPID entry.\r\n*WARNING* can make process parsi" +
@@ -171,10 +174,10 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(236, 322);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnOK.Location = new System.Drawing.Point(288, 386);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(112, 35);
+            this.btnOK.Size = new System.Drawing.Size(137, 42);
             this.btnOK.TabIndex = 5;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -183,53 +186,66 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(429, 322);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCancel.Location = new System.Drawing.Point(524, 386);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(112, 35);
+            this.btnCancel.Size = new System.Drawing.Size(137, 42);
             this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // groupBoxProxyParserConfig
-            // 
-            this.groupBoxProxyParserConfig.Controls.Add(this.checkBoxProxyParserResolveSymbols);
-            this.groupBoxProxyParserConfig.Location = new System.Drawing.Point(14, 257);
-            this.groupBoxProxyParserConfig.Name = "groupBoxProxyParserConfig";
-            this.groupBoxProxyParserConfig.Size = new System.Drawing.Size(740, 57);
-            this.groupBoxProxyParserConfig.TabIndex = 11;
-            this.groupBoxProxyParserConfig.TabStop = false;
-            this.groupBoxProxyParserConfig.Text = "Proxy Parser Configuration";
-            // 
             // checkBoxProxyParserResolveSymbols
             // 
             this.checkBoxProxyParserResolveSymbols.AutoSize = true;
-            this.checkBoxProxyParserResolveSymbols.Location = new System.Drawing.Point(12, 27);
+            this.checkBoxProxyParserResolveSymbols.Location = new System.Drawing.Point(15, 32);
+            this.checkBoxProxyParserResolveSymbols.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBoxProxyParserResolveSymbols.Name = "checkBoxProxyParserResolveSymbols";
-            this.checkBoxProxyParserResolveSymbols.Size = new System.Drawing.Size(156, 24);
+            this.checkBoxProxyParserResolveSymbols.Size = new System.Drawing.Size(189, 29);
             this.checkBoxProxyParserResolveSymbols.TabIndex = 0;
             this.checkBoxProxyParserResolveSymbols.Text = "Resolve Symbols";
             this.toolTip.SetToolTip(this.checkBoxProxyParserResolveSymbols, "Check to resolve symbols during proxy parsing which is useful for things like unk" +
         "nown user marshaller.\r\n*WARNING* can make proxy parsing slow.");
             this.checkBoxProxyParserResolveSymbols.UseVisualStyleBackColor = true;
             // 
-            // ConfigurationForm
+            // groupBoxProxyParserConfig
+            // 
+            this.groupBoxProxyParserConfig.Controls.Add(this.checkBoxProxyParserResolveSymbols);
+            this.groupBoxProxyParserConfig.Location = new System.Drawing.Point(17, 308);
+            this.groupBoxProxyParserConfig.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBoxProxyParserConfig.Name = "groupBoxProxyParserConfig";
+            this.groupBoxProxyParserConfig.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBoxProxyParserConfig.Size = new System.Drawing.Size(904, 68);
+            this.groupBoxProxyParserConfig.TabIndex = 11;
+            this.groupBoxProxyParserConfig.TabStop = false;
+            this.groupBoxProxyParserConfig.Text = "Proxy Parser Configuration";
+            // 
+            // checkBoxParseRegisteredClasses
+            // 
+            this.checkBoxParseRegisteredClasses.AutoSize = true;
+            this.checkBoxParseRegisteredClasses.Location = new System.Drawing.Point(494, 31);
+            this.checkBoxParseRegisteredClasses.Name = "checkBoxParseRegisteredClasses";
+            this.checkBoxParseRegisteredClasses.Size = new System.Drawing.Size(263, 29);
+            this.checkBoxParseRegisteredClasses.TabIndex = 10;
+            this.checkBoxParseRegisteredClasses.Text = "Parse Registered Classes";
+            this.checkBoxParseRegisteredClasses.UseVisualStyleBackColor = true;
+            // 
+            // SettingsForm
             // 
             this.AcceptButton = this.btnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(768, 365);
+            this.ClientSize = new System.Drawing.Size(939, 438);
             this.Controls.Add(this.groupBoxProxyParserConfig);
             this.Controls.Add(groupBoxSymbols);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(groupBoxProcessParserConfig);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ConfigurationForm";
+            this.Name = "SettingsForm";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Configure Process Analysis";
@@ -254,5 +270,6 @@
         private System.Windows.Forms.CheckBox checkBoxResolveMethodNames;
         private System.Windows.Forms.GroupBox groupBoxProxyParserConfig;
         private System.Windows.Forms.CheckBox checkBoxProxyParserResolveSymbols;
+        private System.Windows.Forms.CheckBox checkBoxParseRegisteredClasses;
     }
 }

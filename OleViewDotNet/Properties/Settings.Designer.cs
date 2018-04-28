@@ -118,5 +118,17 @@ namespace OleViewDotNet.Properties {
                 this["ProxyParserResolveSymbols"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ParseRegisteredClasses {
+            get {
+                return ((bool)(this["ParseRegisteredClasses"]));
+            }
+            set {
+                this["ParseRegisteredClasses"] = value;
+            }
+        }
     }
 }

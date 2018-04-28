@@ -32,6 +32,7 @@ namespace OleViewDotNet
             checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
             checkBoxResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
             checkBoxProxyParserResolveSymbols.Checked = Properties.Settings.Default.ProxyParserResolveSymbols;
+            checkBoxParseRegisteredClasses.Checked = Properties.Settings.Default.ParseRegisteredClasses;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -83,6 +84,7 @@ namespace OleViewDotNet
             Properties.Settings.Default.ParseStubMethods = checkBoxParseStubMethods.Checked;
             Properties.Settings.Default.ResolveMethodNames = checkBoxResolveMethodNames.Checked;
             Properties.Settings.Default.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
+            Properties.Settings.Default.ParseRegisteredClasses = checkBoxParseRegisteredClasses.Checked;
             try
             {
                 Properties.Settings.Default.Save();
