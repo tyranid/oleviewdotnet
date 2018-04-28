@@ -612,6 +612,19 @@ namespace OleViewDotNet
                 node.Nodes.Add(services_node);
             }
 
+            var server_classes = proc.Classes.Where(c => (c.Context & CLSCTX.LOCAL_SERVER) != 0);
+
+            if (server_classes.Count() > 0)
+            {
+                TreeNode classes_node = CreateNode("Classes", FolderKey);
+                foreach (var c in server_classes)
+                {
+                    classes_node.Nodes.Add(CreateCLSIDNode(registry, registry.MapClsidToEntry(c.Clsid)));
+                }
+
+                node.Nodes.Add(classes_node);
+            }
+
             PopulatorIpids(registry, node, proc);
             return node;
         }
