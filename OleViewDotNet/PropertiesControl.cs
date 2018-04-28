@@ -350,6 +350,7 @@ namespace OleViewDotNet
                     item.SubItems.Add(c.VTable);
                     item.SubItems.Add(c.RegFlags.ToString());
                     item.SubItems.Add(c.Apartment.ToString());
+                    item.SubItems.Add(c.Context.ToString());
                     item.Tag = c;
                 }
                 listViewRegisteredClasses.ListViewItemSorter = new ListItemComparer(0);
@@ -839,6 +840,22 @@ namespace OleViewDotNet
             {
                 COMRegistryViewer.CopyGuidToClipboard(c.Clsid, COMRegistryViewer.CopyGuidType.CopyAsString);
             }
+        }
+
+        private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMProcessClassRegistration c = GetRegisteredClass();
+            if (c != null && m_registry.Clsids.ContainsKey(c.Clsid))
+            {
+                COMCLSIDEntry clsid = m_registry.MapClsidToEntry(c.Clsid);
+                Program.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, clsid.Name, clsid));
+            }
+        }
+
+        private void contextMenuStripRegisteredClasses_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            COMProcessClassRegistration c = GetRegisteredClass();
+            propertiesToolStripMenuItem.Visible = c != null && m_registry.Clsids.ContainsKey(c.Clsid);
         }
     }
 }

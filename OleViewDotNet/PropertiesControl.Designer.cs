@@ -138,6 +138,7 @@
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesClsid;
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesVTable;
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesName;
+            System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesContext;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
@@ -282,6 +283,7 @@
             this.columnHeaderRegisteredClassesApartment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStripRegisteredClasses = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyCLSIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -391,6 +393,7 @@
             columnHeaderRegisteredClassesClsid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderRegisteredClassesVTable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderRegisteredClassesName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            columnHeaderRegisteredClassesContext = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -2736,6 +2739,25 @@
             label79.TabIndex = 9;
             label79.Text = "Identity:";
             // 
+            // columnHeaderRegisteredClassesClsid
+            // 
+            columnHeaderRegisteredClassesClsid.Text = "CLSID";
+            columnHeaderRegisteredClassesClsid.Width = 174;
+            // 
+            // columnHeaderRegisteredClassesVTable
+            // 
+            columnHeaderRegisteredClassesVTable.Text = "VTable";
+            columnHeaderRegisteredClassesVTable.Width = 126;
+            // 
+            // columnHeaderRegisteredClassesName
+            // 
+            columnHeaderRegisteredClassesName.Text = "Name";
+            columnHeaderRegisteredClassesName.Width = 142;
+            // 
+            // columnHeaderRegisteredClassesContext
+            // 
+            columnHeaderRegisteredClassesContext.Text = "Context";
+            // 
             // tabControlProperties
             // 
             this.tabControlProperties.Controls.Add(this.tabPageClsid);
@@ -3303,7 +3325,8 @@
             columnHeaderRegisteredClassesName,
             columnHeaderRegisteredClassesVTable,
             this.columnHeaderRegisteredClassesRegFlags,
-            this.columnHeaderRegisteredClassesApartment});
+            this.columnHeaderRegisteredClassesApartment,
+            columnHeaderRegisteredClassesContext});
             this.listViewRegisteredClasses.ContextMenuStrip = this.contextMenuStripRegisteredClasses;
             this.listViewRegisteredClasses.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewRegisteredClasses.FullRowSelect = true;
@@ -3314,16 +3337,7 @@
             this.listViewRegisteredClasses.TabIndex = 0;
             this.listViewRegisteredClasses.UseCompatibleStateImageBehavior = false;
             this.listViewRegisteredClasses.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeaderRegisteredClassesClsid
-            // 
-            columnHeaderRegisteredClassesClsid.Text = "CLSID";
-            columnHeaderRegisteredClassesClsid.Width = 174;
-            // 
-            // columnHeaderRegisteredClassesVTable
-            // 
-            columnHeaderRegisteredClassesVTable.Text = "VTable";
-            columnHeaderRegisteredClassesVTable.Width = 126;
+            this.listViewRegisteredClasses.DoubleClick += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
             // columnHeaderRegisteredClassesRegFlags
             // 
@@ -3334,25 +3348,29 @@
             // 
             this.columnHeaderRegisteredClassesApartment.Text = "Apartment";
             // 
-            // columnHeaderRegisteredClassesName
-            // 
-            columnHeaderRegisteredClassesName.Text = "Name";
-            columnHeaderRegisteredClassesName.Width = 142;
-            // 
             // contextMenuStripRegisteredClasses
             // 
             this.contextMenuStripRegisteredClasses.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStripRegisteredClasses.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyCLSIDToolStripMenuItem});
+            this.copyCLSIDToolStripMenuItem,
+            this.propertiesToolStripMenuItem});
             this.contextMenuStripRegisteredClasses.Name = "contextMenuStripRegisteredClasses";
-            this.contextMenuStripRegisteredClasses.Size = new System.Drawing.Size(195, 38);
+            this.contextMenuStripRegisteredClasses.Size = new System.Drawing.Size(271, 110);
+            this.contextMenuStripRegisteredClasses.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripRegisteredClasses_Opening);
             // 
             // copyCLSIDToolStripMenuItem
             // 
             this.copyCLSIDToolStripMenuItem.Name = "copyCLSIDToolStripMenuItem";
-            this.copyCLSIDToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.copyCLSIDToolStripMenuItem.Size = new System.Drawing.Size(194, 34);
             this.copyCLSIDToolStripMenuItem.Text = "Copy CLSID";
             this.copyCLSIDToolStripMenuItem.Click += new System.EventHandler(this.copyCLSIDToolStripMenuItem_Click);
+            // 
+            // propertiesToolStripMenuItem
+            // 
+            this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
+            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(194, 34);
+            this.propertiesToolStripMenuItem.Text = "Properties";
+            this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
             // PropertiesControl
             // 
@@ -3560,5 +3578,6 @@
         private System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesApartment;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripRegisteredClasses;
         private System.Windows.Forms.ToolStripMenuItem copyCLSIDToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
     }
 }
