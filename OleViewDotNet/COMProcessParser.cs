@@ -633,6 +633,7 @@ namespace OleViewDotNet
             ICClassEntry GetClassEntry(NtProcess process);
             REGCLS GetRegFlags();
             uint GetCookie();
+            CLSCTX GetContext();
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -642,7 +643,7 @@ namespace OleViewDotNet
             public IntPtr _pNext; // CClassCache::CBaseClassEntry*
             public IntPtr _pPrev; // CClassCache::CBaseClassEntry* 
             public IntPtr _pClassEntry; // CClassCache::CClassEntry* 
-            public int _dwContext;
+            public CLSCTX _dwContext;
             public int _dwSig;
             public IntPtr _pNextLSvr; // CClassCache::CLSvrClassEntry* 
             public IntPtr _pPrevLSvr; // CClassCache::CLSvrClassEntry*
@@ -664,6 +665,11 @@ namespace OleViewDotNet
                     return null;
                 }
                 return process.ReadStruct<CClassEntry>(_pClassEntry.ToInt64());
+            }
+
+            CLSCTX ICLSvrClassEntry.GetContext()
+            {
+                return _dwContext;
             }
 
             uint ICLSvrClassEntry.GetCookie()
@@ -694,7 +700,7 @@ namespace OleViewDotNet
             public int _pNext; // CClassCache::CBaseClassEntry*
             public int _pPrev; // CClassCache::CBaseClassEntry* 
             public int _pClassEntry; // CClassCache::CClassEntry* 
-            public int _dwContext;
+            public CLSCTX _dwContext;
             public int _dwSig;
             public int _pNextLSvr; // CClassCache::CLSvrClassEntry* 
             public int _pPrevLSvr; // CClassCache::CLSvrClassEntry*
@@ -709,7 +715,7 @@ namespace OleViewDotNet
             public uint _cUsing;
             public uint _ulServiceId;
 
-            public ICClassEntry GetClassEntry(NtProcess process)
+            ICClassEntry ICLSvrClassEntry.GetClassEntry(NtProcess process)
             {
                 if (_pClassEntry == 0)
                 {
@@ -735,6 +741,11 @@ namespace OleViewDotNet
             REGCLS ICLSvrClassEntry.GetRegFlags()
             {
                 return _dwRegFlags;
+            }
+
+            CLSCTX ICLSvrClassEntry.GetContext()
+            {
+                return _dwContext;
             }
         }
 
@@ -908,7 +919,8 @@ namespace OleViewDotNet
 
                     classes.Add(new COMProcessClassRegistration(class_entry.GetGuids()[0], 
                         entry.GetIUnknown(), vtable,
-                        entry.GetRegFlags(), entry.GetCookie(), thread_id, apartment));
+                        entry.GetRegFlags(), entry.GetCookie(), thread_id, 
+                        entry.GetContext(), apartment));
                 }
 
                 next = entry.GetNext();
@@ -1145,10 +1157,11 @@ namespace OleViewDotNet
         public REGCLS RegFlags { get; private set; }
         public uint Cookie { get; private set; }
         public int ThreadId { get; private set; }
+        public CLSCTX Context { get; private set; }
         internal COMProcessClassRegistration(
             Guid clsid, IntPtr class_factory, string vtable,
             REGCLS regflags, uint cookie, int thread_id, 
-            COMProcessClassApartment apartment)
+            CLSCTX context, COMProcessClassApartment apartment)
         {
             Clsid = clsid;
             ClassFactory = class_factory;
@@ -1157,6 +1170,7 @@ namespace OleViewDotNet
             RegFlags = regflags;
             Cookie = cookie;
             ThreadId = thread_id;
+            Context = context;
         }
     }
 
