@@ -127,7 +127,7 @@ namespace OleViewDotNet
             }
         }
 
-        private static void QueryInspectableInterfaces(IntPtr punk, HashSet<COMInterfaceInstance> list)
+        private void QueryInspectableInterfaces(IntPtr punk, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
         {
             if (punk == IntPtr.Zero)
             {
@@ -146,7 +146,7 @@ namespace OleViewDotNet
                     {
                         byte[] buffer = new byte[16];
                         Marshal.Copy(iids + i * 16, buffer, 0, buffer.Length);
-                        list.Add(new COMInterfaceInstance(new Guid(buffer)));
+                        QueryInterface(punk, new Guid(buffer), module_names, list);
                     }
                 }
                 catch
@@ -218,8 +218,8 @@ namespace OleViewDotNet
                     }
                 }
 
-                QueryInspectableInterfaces(punk, _interfaces);
-                QueryInspectableInterfaces(pfactory, _factory_interfaces);
+                QueryInspectableInterfaces(punk, module_names, _interfaces);
+                QueryInspectableInterfaces(pfactory, module_names, _factory_interfaces);
             }
             finally
             {
@@ -312,7 +312,8 @@ namespace OleViewDotNet
             {
                 apartment = "m";
             }
-            string command_line = string.Format("{0} {1}", ent.Name, apartment);
+            string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
+                ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
             var interfaces = await GetInterfacesOOP(command_line, true);
             return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }

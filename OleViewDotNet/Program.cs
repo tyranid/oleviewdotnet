@@ -79,13 +79,9 @@ namespace OleViewDotNet
                     }
 
                     sta = args.Dequeue() == "s";
-
-                    if (!runtime_class)
+                    if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
                     {
-                        if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
-                        {
-                            return 1;
-                        }
+                        return 1;
                     }
 
                     int timeout = 10000;
@@ -162,6 +158,7 @@ namespace OleViewDotNet
         {
             string database_file = null;
             string save_file = null;
+            bool do_enum = false;
             bool enum_clsid = false;
             bool enum_runtime = false;
             bool show_help = false;
@@ -198,7 +195,9 @@ namespace OleViewDotNet
                 show_help = true;
             }
 
-            if (show_help || (enum_clsid && additional_args.Count < 4) || (enum_runtime && additional_args.Count < 3))
+            do_enum = enum_clsid || enum_runtime;
+
+            if (show_help || (do_enum && additional_args.Count < 4))
             {
                 StringWriter writer = new StringWriter();
                 writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
@@ -209,7 +208,7 @@ namespace OleViewDotNet
                 Environment.Exit(1);
             }
 
-            if (enum_clsid || enum_runtime)
+            if (do_enum)
             {
                 try
                 {
