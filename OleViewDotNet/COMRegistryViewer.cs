@@ -1443,7 +1443,7 @@ namespace OleViewDotNet
                         createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
                     }
 
-                    if (entry is COMRuntimeClassEntry && ((COMRuntimeClassEntry)entry).HasPermission)
+                    if (runtime_class != null && runtime_class.HasPermission)
                     {
                         createSpecialToolStripMenuItem.DropDownItems.Add(createInRuntimeBrokerToolStripMenuItem);
                         createSpecialToolStripMenuItem.DropDownItems.Add(createInPerUserRuntimeBrokerToolStripMenuItem);
@@ -1472,9 +1472,15 @@ namespace OleViewDotNet
                         }
                     }
 
-                    if (runtime_class != null && runtime_class.HasPermission)
+                    if (runtime_class != null)
                     {
-                        contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+                        COMRuntimeServerEntry server = 
+                            runtime_class.HasServer 
+                                ? m_registry.MapServerNameToEntry(runtime_class.Server) : null;
+                        if (runtime_class.HasPermission || (server != null && server.HasPermission))
+                        {
+                            contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
+                        }
                     }
                 }
                 else if (node.Tag is COMTypeLibVersionEntry)
@@ -2036,7 +2042,12 @@ namespace OleViewDotNet
                     COMRuntimeServerEntry runtime_server = node.Tag as COMRuntimeServerEntry;
                     COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
                     string name = runtime_class != null ? runtime_class.Name : runtime_server.Name;
-                    string perms = runtime_class != null ? runtime_class.Permissions : runtime_server.Permissions;
+                    if (runtime_class != null && runtime_class.HasServer)
+                    {
+                        runtime_server = m_registry.MapServerNameToEntry(runtime_class.Server);
+                    }
+                    
+                    string perms = runtime_server != null ? runtime_server.Permissions : runtime_class.Permissions;
 
                     COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", name), perms, false);
                 }
