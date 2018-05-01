@@ -21,6 +21,7 @@ using NtApiDotNet;
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1740,6 +1741,8 @@ namespace OleViewDotNet
             }
         }
 
+        private static ConcurrentDictionary<string, string> _demangled_names = new ConcurrentDictionary<string, string>();
+
         private static string DemangleGenericType(string name)
         {
             name = name.Replace("__F", "~").Replace("__C", "::");
@@ -1750,23 +1753,30 @@ namespace OleViewDotNet
         internal static string DemangleWinRTName(string name)
         {
             name = name.Trim();
-            if (name.StartsWith("__x_"))
+            string result;
+            if (_demangled_names.TryGetValue(name, out result))
             {
-                return name.Substring(4).Replace("_", "::");
+                return result;
             }
 
-            if (name.StartsWith("__F"))
+            result = name;
+
+            if (name.StartsWith("__x_"))
+            {
+                result = name.Substring(4).Replace("_", "::");
+            }
+            else if (name.StartsWith("__F"))
             {
                 try
                 {
-                    return DemangleGenericType(name);
+                    result = DemangleGenericType(name);
                 }
                 catch (InvalidDataException)
                 {
                 }
             }
 
-            return name;
+            return _demangled_names.GetOrAdd(name, result);
         }
 
         internal static COMRegistry LoadRegistry(IWin32Window window,

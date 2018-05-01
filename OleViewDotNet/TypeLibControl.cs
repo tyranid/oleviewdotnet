@@ -222,9 +222,9 @@ namespace OleViewDotNet
         
         private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy)
         {
-            foreach (COMProxyInstanceEntry t in proxy.Entries.OrderBy(t => t.Name))
+            foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name)))
             {
-                ListViewItemWithGuid item = new ListViewItemWithGuid(t.Name, t.Iid);
+                ListViewItemWithGuid item = new ListViewItemWithGuid(COMUtilities.DemangleWinRTName(t.Name), t.Iid);
                 item.SubItems.Add(t.Iid.FormatGuid());
                 item.Tag = t;
                 yield return item;
@@ -260,13 +260,6 @@ namespace OleViewDotNet
 
         private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
         {
-            // There seems to be no way, without calling an internal method to get the list of
-            // Enum values from a reflection only assembly as it tries to construct a typed array
-            // which fails.
-            //if (typelib.ReflectionOnly)
-            //{
-            //    yield break;
-            //}
             var types = typelib.GetTypes().Where(t => t.IsEnum);
             if (com_visible)
             {
@@ -361,8 +354,8 @@ namespace OleViewDotNet
 
         private string GetTextFromTag(object tag)
         {
-            Type type = tag as Type;
-            COMProxyInstanceEntry proxy = tag as COMProxyInstanceEntry;
+            var type = tag as Type;
+            var proxy = tag as NdrComProxyDefinition;
             NdrComplexTypeReference str = tag as NdrComplexTypeReference;
 
             if (type != null)
@@ -371,7 +364,8 @@ namespace OleViewDotNet
             }
             else if (proxy != null)
             {
-                return proxy.Format(m_iids_to_names);
+                INdrFormatter formatter = DefaultNdrFormatter.Create(m_iids_to_names, COMUtilities.DemangleWinRTName);
+                return formatter.FormatComProxy(proxy);
             }
             else if (str != null)
             {

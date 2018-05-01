@@ -1461,10 +1461,9 @@ namespace OleViewDotNet
 
         internal COMProxyInstance ToProxyInstance(string name)
         {
-            IEnumerable<COMMethodEntry> methods = Methods.SkipWhile(m => m.Procedure == null);
-            COMProxyInstanceEntry entry = new COMProxyInstanceEntry(name, Iid, COMInterfaceEntry.IID_IUnknown,
-                methods.Count(), methods.Select(m => m.Procedure).ToArray());
-            return new COMProxyInstance(new COMProxyInstanceEntry[] { entry }, ComplexTypes);
+            NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(name, Iid, COMInterfaceEntry.IID_IUnknown,
+                Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
+            return new COMProxyInstance(new NdrComProxyDefinition[] { }, ComplexTypes);
         }
     }
 }
