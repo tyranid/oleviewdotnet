@@ -94,6 +94,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
+            Name = reader.ReadString("name");
             IdentityType = reader.ReadEnum<IdentityType>("idtype");
             ServerType = reader.ReadEnum<ServerType>("servertype");
             InstancingType = reader.ReadEnum<InstancingType>("instancetype");
@@ -105,6 +106,7 @@ namespace OleViewDotNet
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteEnum("idtype", IdentityType);
             writer.WriteEnum("servertype", ServerType);
             writer.WriteEnum("instancetype", InstancingType);

@@ -338,6 +338,7 @@ namespace OleViewDotNet
                 writer.WriteEndElement();
                 Report(progress, "Runtime Classes", 10, total_count);
                 writer.WriteSerializableObjects("runtime", m_runtime_classes.Values);
+                writer.WriteSerializableObjects("rtservers", m_runtime_servers.Values);
                 writer.WriteEndElement();
             }
             FilePath = path;
