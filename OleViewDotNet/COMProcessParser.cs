@@ -1463,7 +1463,7 @@ namespace OleViewDotNet
         {
             NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(name, Iid, COMInterfaceEntry.IID_IUnknown,
                 Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
-            return new COMProxyInstance(new NdrComProxyDefinition[] { }, ComplexTypes);
+            return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes);
         }
     }
 }
