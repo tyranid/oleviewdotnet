@@ -259,19 +259,21 @@ namespace OleViewDotNet
                                             ref unk, out pObj);
                             }
 
-                            if (hr == 0)
+                            if (hr != 0)
                             {
-                                try
-                                {
-                                    ints = m_registry.GetInterfacesForIUnknown(pObj);
-                                    comObj = Marshal.GetObjectForIUnknown(pObj);
-                                    strObjName = g.FormatGuid();
-                                    props.Add("CLSID", g.FormatGuid());
-                                }
-                                finally
-                                {
-                                    Marshal.Release(pObj);
-                                }
+                                Marshal.ThrowExceptionForHR(hr);
+                            }
+
+                            try
+                            {
+                                ints = m_registry.GetInterfacesForIUnknown(pObj);
+                                comObj = Marshal.GetObjectForIUnknown(pObj);
+                                strObjName = g.FormatGuid();
+                                props.Add("CLSID", g.FormatGuid());
+                            }
+                            finally
+                            {
+                                Marshal.Release(pObj);
                             }
                         }
 
@@ -280,7 +282,7 @@ namespace OleViewDotNet
                             /* Need to implement a type library reader */
                             Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
 
-                            HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));                            
+                            HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
                         }
                     }
                     catch (Exception ex)
