@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32;
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -53,9 +54,9 @@ namespace OleViewDotNet
             bool valid_dll = false;
             try
             {
-                using (SafeLibraryHandle lib = COMUtilities.SafeLoadLibrary(textBoxDbgHelp.Text))
+                using (SafeLoadLibraryHandle lib = SafeLoadLibraryHandle.LoadLibrary(textBoxDbgHelp.Text))
                 {
-                    if (lib.GetFunctionPointer("SymInitializeW") != IntPtr.Zero)
+                    if (lib.GetProcAddress("SymInitializeW") != IntPtr.Zero)
                     {
                         valid_dll = true;
                     }

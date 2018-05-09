@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -102,13 +103,13 @@ namespace OleViewDotNet
                     IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
                     COMInterfaceInstance intf;
 
-                    using (SafeLibraryHandle module = COMUtilities.SafeGetModuleHandle(vtable))
+                    using (SafeLoadLibraryHandle module = SafeLoadLibraryHandle.GetModuleHandle(vtable))
                     {
                         if (_clsctx == CLSCTX.INPROC_SERVER && module != null)
                         {
                             if (!module_names.ContainsKey(module.DangerousGetHandle()))
                             {
-                                module_names[module.DangerousGetHandle()] = module.GetModuleFileName();
+                                module_names[module.DangerousGetHandle()] = module.Name;
                             }
                             intf = new COMInterfaceInstance(iid,
                                 module_names[module.DangerousGetHandle()],
