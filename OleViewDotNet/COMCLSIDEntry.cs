@@ -1072,7 +1072,7 @@ namespace OleViewDotNet
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
             writer.WriteBool("loaded", m_loaded_interfaces);
-            writer.WriteBool("activatabkle", ActivatableFromApp);
+            writer.WriteBool("activatable", ActivatableFromApp);
             writer.WriteBool("elevate", Elevation != null);
             
             writer.WriteOptionalAttributeString("name", Name);
