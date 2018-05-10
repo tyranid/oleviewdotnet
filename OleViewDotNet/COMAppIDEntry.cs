@@ -39,6 +39,10 @@ namespace OleViewDotNet
         IUServerActivateInClientSessionOnly = 0x20,
         Reserved1 = 0x40,
         Reserved2 = 0x80,
+        SessionVirtualAccountServer = 0x100,
+        IUServerUnmodifiedClientLogonTokenUser = 0x200,
+        IUServerUnmodifiedSessionLogonTokenUser = 0x400,
+        AAANoImplicitActivateAsIU = 0x800,
     }
 
     [Flags]
