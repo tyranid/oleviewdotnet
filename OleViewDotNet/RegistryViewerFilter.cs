@@ -141,7 +141,7 @@ namespace OleViewDotNet
                 }
 
                 var include_filters = Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include);
-                if (include_filters.Count() == 0)
+                if (!include_filters.Any())
                 {
                     return FilterResult.Include;
                 }

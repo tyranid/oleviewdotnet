@@ -333,7 +333,7 @@ namespace OleViewDotNet
             AppendFormatLine(strRet, "Name: {0}", ent.Name);
             AppendFormatLine(strRet, "{0}: {1}", ent.DefaultServerType.ToString(), ent.DefaultServer);
             IEnumerable<string> progids = registry.GetProgIdsForClsid(ent.Clsid).Select(p => p.ProgID);
-            if (progids.Count() > 0)
+            if (progids.Any())
             {
                 strRet.AppendLine("ProgIDs:");
                 foreach (string progid in progids)
@@ -614,7 +614,7 @@ namespace OleViewDotNet
 
             var server_classes = proc.Classes.Where(c => (c.Context & CLSCTX.LOCAL_SERVER) != 0);
 
-            if (server_classes.Count() > 0)
+            if (server_classes.Any())
             {
                 TreeNode classes_node = CreateNode("Classes", FolderKey);
                 foreach (var c in server_classes)
@@ -637,7 +637,7 @@ namespace OleViewDotNet
             var clsidsByAppId = registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
             var appsByPid = servicesById.ToDictionary(p => p.Key, p => p.Value.Where(v => appidsByService.ContainsKey(v)).SelectMany(v => appidsByService[v]));
 
-            return processes.Where(p => p.Ipids.Count() > 0).Select(p => CreateCOMProcessNode(registry, p, appsByPid, clsidsByAppId));
+            return processes.Where(p => p.Ipids.Any()).Select(p => CreateCOMProcessNode(registry, p, appsByPid, clsidsByAppId));
         }
 
         enum ServerType
@@ -650,7 +650,7 @@ namespace OleViewDotNet
 
         private static bool IsProxyClsid(COMRegistry registry, COMCLSIDEntry ent)
         {
-            return ent.DefaultServerType == COMServerType.InProcServer32 && registry.GetProxiesForClsid(ent).Count() > 0;
+            return ent.DefaultServerType == COMServerType.InProcServer32 && registry.GetProxiesForClsid(ent).Length > 0;
         }
 
         private static bool HasSurrogate(COMRegistry registry, COMCLSIDEntry ent)

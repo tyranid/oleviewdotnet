@@ -124,7 +124,7 @@ namespace OleViewDotNet
             protected override void OnMainFormClosed(object sender, EventArgs e)
             {
                 IEnumerable<MainForm> forms = Application.OpenForms.OfType<MainForm>();
-                if (forms.Count() == 0)
+                if (!forms.Any())
                 {
                     base.OnMainFormClosed(sender, e);
                 }

@@ -72,7 +72,7 @@ namespace OleViewDotNet
 
         internal static void WriteGuids(this XmlWriter writer, string name, IEnumerable<Guid> guids)
         {
-            if (guids.Count() > 0)
+            if (guids.Any())
             {
                 writer.WriteAttributeString(name, String.Join(",", guids.Select(g => g.ToString())));
             }

@@ -762,7 +762,7 @@ namespace OleViewDotNet
         {
             ConfigureSymbols();
             IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this, m_registry);
-            if (processes != null && processes.Count() > 0)
+            if (processes != null && processes.Any())
             {
                 OpenView(COMRegistryViewer.DisplayMode.Processes, processes.OrderBy(orderby_selector));
             }
@@ -795,7 +795,7 @@ namespace OleViewDotNet
             {
                 ConfigureSymbols();
                 var processes = COMUtilities.LoadProcesses(new int[] { pid }, this, m_registry);
-                if (processes.Count() == 0)
+                if (!processes.Any())
                 {
                     throw new ArgumentException(string.Format("Process {0} has not initialized COM, or is inaccessible", pid));
                 }

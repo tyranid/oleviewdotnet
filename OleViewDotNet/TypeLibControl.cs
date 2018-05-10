@@ -123,7 +123,7 @@ namespace OleViewDotNet
                     }
 
                     var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
-                    if (props.Count() > 0)
+                    if (props.Any())
                     {
                         builder.AppendLine("   /* Properties */");
                         foreach (PropertyInfo pi in props)
@@ -278,7 +278,7 @@ namespace OleViewDotNet
             IEnumerable<ListViewItemWithGuid> items, 
             TabPage tab_page, Guid guid_to_view)
         {
-            if (items.Count() > 0)
+            if (items.Any())
             {
                 list.Items.AddRange(items.ToArray());
                 list.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -312,7 +312,7 @@ namespace OleViewDotNet
             AddGuidItems(listViewInterfaces, interfaces, tabPageInterfaces, guid_to_view);
             AddGuidItems(listViewClasses, classes, tabPageClasses, guid_to_view);
 
-            if (structs.Count() > 0)
+            if (structs.Any())
             {
                 listViewStructures.Items.AddRange(structs.ToArray());
                 listViewStructures.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -322,7 +322,7 @@ namespace OleViewDotNet
                 tabControl.TabPages.Remove(tabPageStructures);
             }
 
-            if (enums.Count() > 0)
+            if (enums.Any())
             {
                 listViewEnums.Items.AddRange(enums.ToArray());
                 listViewEnums.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);

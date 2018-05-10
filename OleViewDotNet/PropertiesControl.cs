@@ -136,7 +136,7 @@ namespace OleViewDotNet
             }
 
             IEnumerable<COMInterfaceEntry> proxies = m_registry.GetProxiesForClsid(entry);
-            if (proxies.Count() > 0)
+            if (proxies.Any())
             {
                 foreach (COMInterfaceEntry intf in proxies.OrderBy(i => i.Name))
                 {
@@ -339,7 +339,7 @@ namespace OleViewDotNet
             {
                 SetupAppIdEntry((COMAppIDEntry)m_registry.AppIDs[obj.AppId]);
             }
-            if (obj.Classes.Count() > 0)
+            if (obj.Classes.Any())
             {
                 tabControlProperties.TabPages.Add(tabPageRegisteredClasses);
                 foreach (var c in obj.Classes)
