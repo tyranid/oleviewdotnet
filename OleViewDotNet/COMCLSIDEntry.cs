@@ -639,7 +639,7 @@ namespace OleViewDotNet
             ActivatableFromApp = _app_activatable.Contains(Clsid);
             using (RegistryKey trustkey = Registry.LocalMachine.OpenSubKey(@"Software\Classes\Unmarshalers\System\" + Clsid.ToString("B")))
             {
-                TrustedMarshaller = trustkey != null;
+                TrustedMarshaller = trustkey != null ? true : categories.Contains(COMCategory.CATID_TrustedMarshaler);
             }
         }
 
@@ -665,7 +665,8 @@ namespace OleViewDotNet
 
         public string Name { get; private set; }
 
-        public string DefaultServer {
+        public string DefaultServer
+        {
             get
             {
                 return GetDefaultServer().Server;
@@ -746,6 +747,28 @@ namespace OleViewDotNet
         public bool TrustedMarshaller
         {
             get; private set;
+        }
+
+        /// <summary>
+        /// True if this class is marked as safe to script.
+        /// </summary>
+        public bool SafeForScripting
+        {
+            get
+            {
+                return Categories.Contains(COMCategory.CATID_SafeForScripting);
+            }
+        }
+
+        /// <summary>
+        /// True if this class is marked as safe to initialize.
+        /// </summary>
+        public bool SafeForInitializing
+        {
+            get
+            {
+                return Categories.Contains(COMCategory.CATID_SafeForInitializing);
+            }
         }
 
         public override bool Equals(object obj)
