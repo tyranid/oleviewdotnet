@@ -26,7 +26,7 @@ namespace OleViewDotNet
 {
     public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable
     {
-        private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string version, RegistryKey key)
+        private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string name, string version, RegistryKey key)
         {
             List<COMTypeLibVersionEntry> entries = new List<COMTypeLibVersionEntry>();
             foreach (string locale in key.GetSubKeyNames())
@@ -38,7 +38,7 @@ namespace OleViewDotNet
                     {
                         if (subkey != null)
                         {
-                            COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(version, TypelibId, locale_int, subkey);
+                            COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(name, version, TypelibId, locale_int, subkey);
                             if (!String.IsNullOrWhiteSpace(entry.NativePath))
                             {
                                 entries.Add(entry);
@@ -59,7 +59,7 @@ namespace OleViewDotNet
                 {
                     if (subKey != null)
                     {
-                        ret.AddRange(LoadFromLocales(version, subKey));
+                        ret.AddRange(LoadFromLocales(subKey.GetValue(null, string.Empty).ToString(), version, subKey));
                     }
                 }
             }
@@ -171,16 +171,12 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMTypeLibVersionEntry(string version, Guid typelibid, int locale, RegistryKey key) 
+        internal COMTypeLibVersionEntry(string name, string version, Guid typelibid, int locale, RegistryKey key) 
             : this(typelibid)
         {
             Version = version;
             Locale = locale;
-            Name = key.GetValue(null) as string;
-            if (String.IsNullOrWhiteSpace(Name))
-            {
-                Name = typelibid.ToString();
-            }
+            Name = name;
 
             // We can't be sure of there being a 0 LCID, leave for now
             using (RegistryKey subKey = key.OpenSubKey("win32"))
@@ -226,6 +222,11 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("win32", Win32Path);
             writer.WriteOptionalAttributeString("win64", Win64Path);
             writer.WriteInt("locale", Locale);
+        }
+
+        public override string ToString()
+        {
+            return string.IsNullOrWhiteSpace(Name) ? TypelibId.FormatGuid() : Name;
         }
     }
 }
