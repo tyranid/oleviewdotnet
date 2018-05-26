@@ -109,12 +109,8 @@ namespace OleViewDotNet
         {
             Guid iid = Guid.Empty;
             object o = null;
-            if (COMUtilities.IsValidGUID(name))
+            if (!Guid.TryParse(name, out iid))
             {
-                iid = new Guid(name);
-            }
-            else
-            {                
                 foreach (COMInterfaceEntry ent in GetInterfaces())
                 {
                     if (String.Equals(ent.Name, name, StringComparison.OrdinalIgnoreCase))

@@ -57,11 +57,7 @@ namespace OleViewDotNet
         {
             Guid iid = Guid.Empty;
             object o = null;
-            if (COMUtilities.IsValidGUID(name))
-            {
-                iid = new Guid(name);
-            }
-            else
+            if (!Guid.TryParse(name, out iid))
             {
                 foreach (KeyValuePair<Guid, string> pair in Interfaces)
                 {

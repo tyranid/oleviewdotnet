@@ -558,10 +558,12 @@ namespace OleViewDotNet
         public static Guid ReadGuidFromKey(RegistryKey rootKey, string keyName, string valueName)
         {
             string guid = ReadStringFromKey(rootKey, keyName, valueName);
-            if (guid != null && IsValidGUID(guid))
+            Guid ret = Guid.Empty;
+            if (guid != null && Guid.TryParse(guid, out ret))
             {
-                return new Guid(guid);
+                return ret;
             }
+            
             return Guid.Empty;
         }
 
@@ -634,18 +636,6 @@ namespace OleViewDotNet
         public static string GetPluginDirectory()
         {
             return Path.Combine(GetAppDirectory(), "plugin");
-        }
-
-        private static Regex m_guidRegex = null;
-
-        public static bool IsValidGUID(string guid)
-        {
-            if (m_guidRegex == null)
-            {
-                m_guidRegex = new Regex("[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}");
-            }
-
-            return m_guidRegex.IsMatch(guid);
         }
 
         private static void RegisterTypeInterfaces(Assembly a)

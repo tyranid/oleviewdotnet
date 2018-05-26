@@ -59,10 +59,10 @@ namespace OleViewDotNet
         {
             string clsid = key.GetValue("CLSID") as string;
             string extension = key.GetValue("Extension") as string;
-
-            if ((clsid != null) && (COMUtilities.IsValidGUID(clsid)))
+            Guid guid;
+            if ((clsid != null) && Guid.TryParse(clsid, out guid))
             {
-                Clsid = Guid.Parse(clsid);
+                Clsid = guid;
             }
             Extension = extension;
             MimeType = mime_type;

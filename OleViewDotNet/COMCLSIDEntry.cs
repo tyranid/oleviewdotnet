@@ -63,9 +63,10 @@ namespace OleViewDotNet
             {
                 foreach (string value in vso_key.GetValueNames())
                 {
-                    if (COMUtilities.IsValidGUID(value))
+                    Guid guid;
+                    if (Guid.TryParse(value, out guid))
                     {
-                        vsos.Add(new Guid(value));
+                        vsos.Add(guid);
                     }
                 }
             }

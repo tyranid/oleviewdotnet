@@ -100,11 +100,12 @@ namespace OleViewDotNet
         internal static Guid ReadGuid(this XmlReader reader, string name)
         {
             string value = reader.GetAttribute(name);
-            if (value == null)
+            Guid guid;
+            if (value == null || !Guid.TryParse(value, out guid))
             {
                 return Guid.Empty;
             }
-            return new Guid(value);
+            return guid;
         }
 
         internal static void WriteOptionalAttributeString(this XmlWriter writer, string name, string value)
