@@ -57,7 +57,7 @@ namespace OleViewDotNet
             {
                 foreach (var p in ps.OrderBy(p => p.ProcessId))
                 {
-                    using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.MaximumAllowed, false))
+                    using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false))
                     {
                         if (!result.IsSuccess && require_token)
                         {
