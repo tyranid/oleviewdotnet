@@ -1016,7 +1016,7 @@ namespace OleViewDotNet
             TreeNode[] typelibNodes = new TreeNode[registry.Typelibs.Values.Count];
             foreach (COMTypeLibEntry ent in registry.Typelibs.Values)
             {
-                typelibNodes[i] = CreateNode(ent.TypelibId.ToString(), FolderKey);
+                typelibNodes[i] = CreateNode(ent.Name, FolderKey);
                 typelibNodes[i].Tag = ent;
                 foreach (COMTypeLibVersionEntry ver in ent.Versions)
                 {
@@ -1025,7 +1025,7 @@ namespace OleViewDotNet
                 i++;
             }
 
-            return typelibNodes;
+            return typelibNodes.OrderBy(n => n.Text);
         }
 
         private void AddInterfaceNodes(TreeNode node, IEnumerable<COMInterfaceInstance> intfs)

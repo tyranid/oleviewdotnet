@@ -68,6 +68,7 @@ namespace OleViewDotNet
 
         public Guid TypelibId { get; private set; }
         public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
+        public string Name { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -94,6 +95,7 @@ namespace OleViewDotNet
         {
             TypelibId = typelibid;
             Versions = LoadFromKey(rootKey).AsReadOnly();
+            Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
         }
 
         internal COMTypeLibEntry()
