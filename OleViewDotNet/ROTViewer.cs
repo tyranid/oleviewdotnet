@@ -45,17 +45,17 @@ namespace OleViewDotNet
             InitializeComponent();
         }
 
-        void LoadROT()
+        void LoadROT(bool trusted_only)
         {
             IBindCtx bindCtx;
 
             listViewROT.Items.Clear();
             try
             {
-                bindCtx = COMUtilities.CreateBindCtx(0);                
+                bindCtx = COMUtilities.CreateBindCtx(trusted_only ? 1U : 0U);
                 IRunningObjectTable rot;
                 IEnumMoniker enumMoniker;
-                IMoniker[] moniker = new IMoniker[1];                    
+                IMoniker[] moniker = new IMoniker[1];
 
                 bindCtx.GetRunningObjectTable(out rot);
                 rot.EnumRunning(out enumMoniker);
@@ -77,11 +77,11 @@ namespace OleViewDotNet
                     {
                         item.SubItems.Add(clsid.FormatGuid());
                     }
-                }                
+                }
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
+                Program.ShowError(this, e);
             }
 
             listViewROT.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -91,18 +91,13 @@ namespace OleViewDotNet
         {
             listViewROT.Columns.Add("Display Name");
             listViewROT.Columns.Add("CLSID");
-            LoadROT();
+            LoadROT(false);
             Text = "ROT";
-        }
-
-        private void menuROT_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void menuROTRefresh_Click(object sender, EventArgs e)
         {
-            LoadROT();
+            LoadROT(checkBoxTrustedOnly.Checked);
         }
 
         private void menuROTBindToObject_Click(object sender, EventArgs e)
