@@ -89,6 +89,7 @@ namespace OleViewDotNet
                 textBoxServiceImagePath.Text = entry.LocalService.ImagePath;
                 textBoxServiceDll.Text = GetStringValue(entry.LocalService.ServiceDll);
                 textBoxServiceUserName.Text = GetStringValue(entry.LocalService.UserName);
+                textBoxServiceProtectionLevel.Text = entry.LocalService.ProtectionLevel.ToString();
                 tabControlProperties.TabPages.Add(tabPageService);
             }
 
