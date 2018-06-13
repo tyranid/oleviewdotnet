@@ -1105,6 +1105,7 @@ namespace OleViewDotNet
                         ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
                         ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
                         ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
+                        ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
                         ReadPointer(process, resolver, "gAccessControl"),
                         ReadPointer(process, resolver, "ghwndOleMainThread"),
                         GetRegisteredClasses(process, resolver, config));
@@ -1204,12 +1205,49 @@ namespace OleViewDotNet
         public RPC_IMP_LEVEL ImpLevel { get; private set; }
         public IntPtr AccessControl { get; private set; }
         public IntPtr STAMainHWnd { get; private set; }
-        public IEnumerable<COMProcessClassRegistration> Classes { get; private set; } 
+        public IEnumerable<COMProcessClassRegistration> Classes { get; private set; }
+        public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
+
+        private bool CustomMarshalAllowedInternal(bool ac)
+        {
+            if ((Capabilities & EOLE_AUTHENTICATION_CAPABILITIES.NO_CUSTOM_MARSHAL) != 0)
+            {
+                return false;
+            }
+
+            switch (UnmarshalPolicy)
+            {
+                case GLOBALOPT_UNMARSHALING_POLICY_VALUES.NORMAL:
+                    return true;
+                case GLOBALOPT_UNMARSHALING_POLICY_VALUES.HYBRID:
+                    return !ac;
+                case GLOBALOPT_UNMARSHALING_POLICY_VALUES.STRONG:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        public bool CustomMarshalAllowed
+        {
+            get
+            {
+                return CustomMarshalAllowedInternal(false);
+            }
+        }
+
+        public bool CustomMarshalAllowedFromAppContainer
+        {
+            get
+            {
+                return CustomMarshalAllowedInternal(true);
+            }
+        }
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
-            RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level,
+            RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes)
         {
             Pid = pid;
@@ -1235,6 +1273,7 @@ namespace OleViewDotNet
             AccessControl = access_control;
             STAMainHWnd = sta_main_hwnd;
             Classes = classes.AsReadOnly();
+            UnmarshalPolicy = unmarshal_policy;
         }
     }
 

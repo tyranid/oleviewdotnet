@@ -169,6 +169,13 @@ namespace OleViewDotNet
         DELEGATE     = 4,
     }
 
+    public enum GLOBALOPT_UNMARSHALING_POLICY_VALUES
+    {
+        NORMAL = 0,
+        STRONG = 1,
+        HYBRID = 2
+    }
+
     public enum MSHCTX
     {
         LOCAL = 0,

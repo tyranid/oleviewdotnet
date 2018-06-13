@@ -329,8 +329,8 @@ namespace OleViewDotNet
             btnProcessViewAccessPermissions.Enabled = !String.IsNullOrWhiteSpace(obj.AccessPermissions);
             textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions);
             textBoxProcessUser.Text = GetStringValue(obj.User);
-            textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}",
-                obj.Capabilities, obj.AuthnLevel, obj.ImpLevel);
+            textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}, Unmarshal Policy: {3}",
+                obj.Capabilities, obj.AuthnLevel, obj.ImpLevel, obj.UnmarshalPolicy);
             textBoxProcessStaHwnd.Text = String.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
             SetupIpidEntries(obj.Ipids, false);
             listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
