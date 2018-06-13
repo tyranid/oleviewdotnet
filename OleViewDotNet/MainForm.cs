@@ -782,6 +782,10 @@ namespace OleViewDotNet
                         HostControl(new PropertiesControl(m_registry, string.Format("IPID: {0}", ipid.FormatGuid()), ipid_entry));
                     }
                 }
+                else
+                {
+                    throw new Exception($"Couldn't load process for IPID: {ipid.FormatGuid()}");
+                }
             }
             catch (Exception ex)
             {
