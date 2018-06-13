@@ -43,6 +43,7 @@
             this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewInterfaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -56,7 +57,7 @@
             label1.AutoSize = true;
             label1.Location = new System.Drawing.Point(3, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(57, 13);
+            label1.Size = new System.Drawing.Size(77, 17);
             label1.TabIndex = 0;
             label1.Text = "Properties:";
             // 
@@ -64,9 +65,9 @@
             // 
             label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(3, 236);
+            label2.Location = new System.Drawing.Point(3, 234);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(57, 13);
+            label2.Size = new System.Drawing.Size(74, 17);
             label2.TabIndex = 2;
             label2.Text = "Interfaces:";
             // 
@@ -104,9 +105,9 @@
             this.listViewProperties.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewProperties.FullRowSelect = true;
             this.listViewProperties.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listViewProperties.Location = new System.Drawing.Point(3, 16);
+            this.listViewProperties.Location = new System.Drawing.Point(3, 20);
             this.listViewProperties.Name = "listViewProperties";
-            this.listViewProperties.Size = new System.Drawing.Size(722, 217);
+            this.listViewProperties.Size = new System.Drawing.Size(722, 211);
             this.listViewProperties.TabIndex = 1;
             this.listViewProperties.UseCompatibleStateImageBehavior = false;
             this.listViewProperties.View = System.Windows.Forms.View.Details;
@@ -117,9 +118,9 @@
             this.listViewInterfaces.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewInterfaces.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewInterfaces.FullRowSelect = true;
-            this.listViewInterfaces.Location = new System.Drawing.Point(3, 252);
+            this.listViewInterfaces.Location = new System.Drawing.Point(3, 254);
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(722, 217);
+            this.listViewInterfaces.Size = new System.Drawing.Size(722, 211);
             this.listViewInterfaces.TabIndex = 3;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
@@ -129,11 +130,12 @@
             // statusStrip
             // 
             tableLayoutPanel.SetColumnSpan(this.statusStrip, 5);
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButtonOperations});
-            this.statusStrip.Location = new System.Drawing.Point(0, 473);
+            this.statusStrip.Location = new System.Drawing.Point(0, 469);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(728, 22);
+            this.statusStrip.Size = new System.Drawing.Size(728, 26);
             this.statusStrip.TabIndex = 9;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -145,31 +147,32 @@
             this.openOLEToolStripMenuItem,
             this.createToolStripMenuItem,
             this.marshalToolStripMenuItem,
+            this.viewInterfaceToolStripMenuItem,
             this.saveStreamToolStripMenuItem});
             this.toolStripDropDownButtonOperations.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButtonOperations.Image")));
             this.toolStripDropDownButtonOperations.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButtonOperations.Name = "toolStripDropDownButtonOperations";
-            this.toolStripDropDownButtonOperations.Size = new System.Drawing.Size(78, 20);
+            this.toolStripDropDownButtonOperations.Size = new System.Drawing.Size(96, 24);
             this.toolStripDropDownButtonOperations.Text = "Operations";
             // 
             // openDispatchToolStripMenuItem
             // 
             this.openDispatchToolStripMenuItem.Name = "openDispatchToolStripMenuItem";
-            this.openDispatchToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.openDispatchToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.openDispatchToolStripMenuItem.Text = "Open Dispatch";
             this.openDispatchToolStripMenuItem.Click += new System.EventHandler(this.btnDispatch_Click);
             // 
             // openOLEToolStripMenuItem
             // 
             this.openOLEToolStripMenuItem.Name = "openOLEToolStripMenuItem";
-            this.openOLEToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.openOLEToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.openOLEToolStripMenuItem.Text = "Open OLE Container";
             this.openOLEToolStripMenuItem.Click += new System.EventHandler(this.btnOleContainer_Click);
             // 
             // createToolStripMenuItem
             // 
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.createToolStripMenuItem.Text = "Create Instance";
             this.createToolStripMenuItem.Click += new System.EventHandler(this.btnCreate_Click);
             // 
@@ -179,29 +182,36 @@
             this.toHexEditorToolStripMenuItem,
             this.viewPropertiesToolStripMenuItem});
             this.marshalToolStripMenuItem.Name = "marshalToolStripMenuItem";
-            this.marshalToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.marshalToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.marshalToolStripMenuItem.Text = "Marshal";
             // 
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(187, 26);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.btnMarshal_Click);
             // 
             // viewPropertiesToolStripMenuItem
             // 
             this.viewPropertiesToolStripMenuItem.Name = "viewPropertiesToolStripMenuItem";
-            this.viewPropertiesToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.viewPropertiesToolStripMenuItem.Size = new System.Drawing.Size(187, 26);
             this.viewPropertiesToolStripMenuItem.Text = "View Properties";
             this.viewPropertiesToolStripMenuItem.Click += new System.EventHandler(this.viewPropertiesToolStripMenuItem_Click);
             // 
             // saveStreamToolStripMenuItem
             // 
             this.saveStreamToolStripMenuItem.Name = "saveStreamToolStripMenuItem";
-            this.saveStreamToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.saveStreamToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.saveStreamToolStripMenuItem.Text = "Save Stream";
             this.saveStreamToolStripMenuItem.Click += new System.EventHandler(this.btnSaveStream_Click);
+            // 
+            // viewInterfaceToolStripMenuItem
+            // 
+            this.viewInterfaceToolStripMenuItem.Name = "viewInterfaceToolStripMenuItem";
+            this.viewInterfaceToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
+            this.viewInterfaceToolStripMenuItem.Text = "View Interface";
+            this.viewInterfaceToolStripMenuItem.Click += new System.EventHandler(this.viewInterfaceToolStripMenuItem_Click);
             // 
             // ObjectInformation
             // 
@@ -230,5 +240,6 @@
         private System.Windows.Forms.ToolStripMenuItem saveStreamToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toHexEditorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewPropertiesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewInterfaceToolStripMenuItem;
     }
 }

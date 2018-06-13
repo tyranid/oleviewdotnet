@@ -304,5 +304,24 @@ namespace OleViewDotNet
                 Program.ShowError(this, ex);
             }
         }
+
+        private void viewInterfaceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                COMObjRefStandard objref = COMUtilities.MarshalObjectToObjRef(m_pObject, 
+                    GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) as COMObjRefStandard;
+                if (objref == null)
+                {
+                    throw new Exception("Object must be standard marshaled to view the interface");
+                }
+
+                Program.GetMainForm(m_registry).LoadIPid(objref.StdObjRef.Ipid);
+            }
+            catch (Exception ex)
+            {
+                Program.ShowError(this, ex);
+            }
+        }
     }
 }
