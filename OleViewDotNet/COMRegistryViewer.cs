@@ -1760,7 +1760,7 @@ namespace OleViewDotNet
                 else
                 {
                     launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(launch_sddl, principal, token,
-                        true, true, access_rights);
+                        true, true, launch_rights);
                 }
             }
 
