@@ -858,5 +858,15 @@ namespace OleViewDotNet
             COMProcessClassRegistration c = GetRegisteredClass();
             propertiesToolStripMenuItem.Visible = c != null && m_registry.Clsids.ContainsKey(c.Clsid);
         }
+
+        private void toClipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            COMIPIDEntry ipid = GetSelectedIpid();
+            if (ipid != null)
+            {
+                var objref = $"objref:{Convert.ToBase64String(ipid.ToObjref())}:";
+                COMRegistryViewer.CopyTextToClipboard(objref);
+            }
+        }
     }
 }

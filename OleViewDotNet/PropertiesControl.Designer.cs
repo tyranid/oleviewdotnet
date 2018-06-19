@@ -61,6 +61,7 @@
             System.Windows.Forms.Label label22;
             System.Windows.Forms.Label label28;
             System.Windows.Forms.Label label29;
+            System.Windows.Forms.Label label80;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelInterface;
             System.Windows.Forms.Label lblMethods;
             System.Windows.Forms.TableLayoutPanel tableLayoutPanelAppID;
@@ -139,13 +140,13 @@
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesVTable;
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesName;
             System.Windows.Forms.ColumnHeader columnHeaderRegisteredClassesContext;
-            System.Windows.Forms.Label label80;
             this.textBoxServiceDll = new System.Windows.Forms.TextBox();
             this.textBoxServiceImagePath = new System.Windows.Forms.TextBox();
             this.textBoxServiceDisplayName = new System.Windows.Forms.TextBox();
             this.textBoxServiceName = new System.Windows.Forms.TextBox();
             this.textBoxServiceType = new System.Windows.Forms.TextBox();
             this.textBoxServiceUserName = new System.Windows.Forms.TextBox();
+            this.textBoxServiceProtectionLevel = new System.Windows.Forms.TextBox();
             this.txtMethods = new System.Windows.Forms.TextBox();
             this.btnProxyProperties = new System.Windows.Forms.Button();
             this.textBoxInterfaceProxy = new System.Windows.Forms.TextBox();
@@ -285,7 +286,7 @@
             this.contextMenuStripRegisteredClasses = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyCLSIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.textBoxServiceProtectionLevel = new System.Windows.Forms.TextBox();
+            this.toClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -318,6 +319,7 @@
             label22 = new System.Windows.Forms.Label();
             label28 = new System.Windows.Forms.Label();
             label29 = new System.Windows.Forms.Label();
+            label80 = new System.Windows.Forms.Label();
             tableLayoutPanelInterface = new System.Windows.Forms.TableLayoutPanel();
             lblMethods = new System.Windows.Forms.Label();
             tableLayoutPanelAppID = new System.Windows.Forms.TableLayoutPanel();
@@ -396,7 +398,6 @@
             columnHeaderRegisteredClassesVTable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderRegisteredClassesName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             columnHeaderRegisteredClassesContext = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            label80 = new System.Windows.Forms.Label();
             tableLayoutPanelService.SuspendLayout();
             tableLayoutPanelInterface.SuspendLayout();
             tableLayoutPanelAppID.SuspendLayout();
@@ -825,6 +826,27 @@
             this.textBoxServiceUserName.ReadOnly = true;
             this.textBoxServiceUserName.Size = new System.Drawing.Size(534, 23);
             this.textBoxServiceUserName.TabIndex = 18;
+            // 
+            // label80
+            // 
+            label80.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            label80.AutoSize = true;
+            label80.Location = new System.Drawing.Point(1, 163);
+            label80.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label80.Name = "label80";
+            label80.Size = new System.Drawing.Size(76, 17);
+            label80.TabIndex = 19;
+            label80.Text = "Protection:";
+            // 
+            // textBoxServiceProtectionLevel
+            // 
+            this.textBoxServiceProtectionLevel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxServiceProtectionLevel.Location = new System.Drawing.Point(102, 160);
+            this.textBoxServiceProtectionLevel.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
+            this.textBoxServiceProtectionLevel.Name = "textBoxServiceProtectionLevel";
+            this.textBoxServiceProtectionLevel.ReadOnly = true;
+            this.textBoxServiceProtectionLevel.Size = new System.Drawing.Size(534, 23);
+            this.textBoxServiceProtectionLevel.TabIndex = 20;
             // 
             // tableLayoutPanelInterface
             // 
@@ -1748,14 +1770,15 @@
             this.copyIPIDIIDToolStripMenuItem,
             this.ipidPropertiesToolStripMenuItem});
             this.contextMenuStripIpids.Name = "contextMenuStripIpids";
-            this.contextMenuStripIpids.Size = new System.Drawing.Size(225, 148);
+            this.contextMenuStripIpids.Size = new System.Drawing.Size(225, 176);
             // 
             // marshalStreamToolStripMenuItem
             // 
             this.marshalStreamToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toHexEditorToolStripMenuItem,
             this.toFileToolStripMenuItem,
-            this.toObjectToolStripMenuItem});
+            this.toObjectToolStripMenuItem,
+            this.toClipboardToolStripMenuItem});
             this.marshalStreamToolStripMenuItem.Name = "marshalStreamToolStripMenuItem";
             this.marshalStreamToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
             this.marshalStreamToolStripMenuItem.Text = "Unmarshal Stream";
@@ -1763,21 +1786,21 @@
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
             // 
             // toFileToolStripMenuItem
             // 
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.toFileToolStripMenuItem.Text = "To File";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
             // 
             // toObjectToolStripMenuItem
             // 
             this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
-            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.toObjectToolStripMenuItem.Text = "To Object";
             this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
             // 
@@ -3374,26 +3397,12 @@
             this.propertiesToolStripMenuItem.Text = "Properties";
             this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
-            // label80
+            // toClipboardToolStripMenuItem
             // 
-            label80.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            label80.AutoSize = true;
-            label80.Location = new System.Drawing.Point(1, 163);
-            label80.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            label80.Name = "label80";
-            label80.Size = new System.Drawing.Size(76, 17);
-            label80.TabIndex = 19;
-            label80.Text = "Protection:";
-            // 
-            // textBoxServiceProtectionLevel
-            // 
-            this.textBoxServiceProtectionLevel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxServiceProtectionLevel.Location = new System.Drawing.Point(102, 160);
-            this.textBoxServiceProtectionLevel.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            this.textBoxServiceProtectionLevel.Name = "textBoxServiceProtectionLevel";
-            this.textBoxServiceProtectionLevel.ReadOnly = true;
-            this.textBoxServiceProtectionLevel.Size = new System.Drawing.Size(534, 23);
-            this.textBoxServiceProtectionLevel.TabIndex = 20;
+            this.toClipboardToolStripMenuItem.Name = "toClipboardToolStripMenuItem";
+            this.toClipboardToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.toClipboardToolStripMenuItem.Text = "To Clipboard";
+            this.toClipboardToolStripMenuItem.Click += new System.EventHandler(this.toClipboardToolStripMenuItem_Click);
             // 
             // PropertiesControl
             // 
@@ -3603,5 +3612,6 @@
         private System.Windows.Forms.ToolStripMenuItem copyCLSIDToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxServiceProtectionLevel;
+        private System.Windows.Forms.ToolStripMenuItem toClipboardToolStripMenuItem;
     }
 }
