@@ -201,6 +201,7 @@
             this.toHexEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyInterfacePointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyStubPointerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyIPIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -286,7 +287,6 @@
             this.contextMenuStripRegisteredClasses = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyCLSIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblClsid = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
@@ -1770,7 +1770,7 @@
             this.copyIPIDIIDToolStripMenuItem,
             this.ipidPropertiesToolStripMenuItem});
             this.contextMenuStripIpids.Name = "contextMenuStripIpids";
-            this.contextMenuStripIpids.Size = new System.Drawing.Size(225, 176);
+            this.contextMenuStripIpids.Size = new System.Drawing.Size(225, 148);
             // 
             // marshalStreamToolStripMenuItem
             // 
@@ -1786,23 +1786,30 @@
             // toHexEditorToolStripMenuItem
             // 
             this.toHexEditorToolStripMenuItem.Name = "toHexEditorToolStripMenuItem";
-            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.toHexEditorToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
             this.toHexEditorToolStripMenuItem.Text = "To Hex Editor";
             this.toHexEditorToolStripMenuItem.Click += new System.EventHandler(this.toHexEditorToolStripMenuItem_Click);
             // 
             // toFileToolStripMenuItem
             // 
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.toFileToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
             this.toFileToolStripMenuItem.Text = "To File";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.toFileToolStripMenuItem_Click);
             // 
             // toObjectToolStripMenuItem
             // 
             this.toObjectToolStripMenuItem.Name = "toObjectToolStripMenuItem";
-            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.toObjectToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
             this.toObjectToolStripMenuItem.Text = "To Object";
             this.toObjectToolStripMenuItem.Click += new System.EventHandler(this.toObjectToolStripMenuItem_Click);
+            // 
+            // toClipboardToolStripMenuItem
+            // 
+            this.toClipboardToolStripMenuItem.Name = "toClipboardToolStripMenuItem";
+            this.toClipboardToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.toClipboardToolStripMenuItem.Text = "To Clipboard";
+            this.toClipboardToolStripMenuItem.Click += new System.EventHandler(this.toClipboardToolStripMenuItem_Click);
             // 
             // copyInterfacePointerToolStripMenuItem
             // 
@@ -3362,6 +3369,7 @@
             this.listViewRegisteredClasses.TabIndex = 0;
             this.listViewRegisteredClasses.UseCompatibleStateImageBehavior = false;
             this.listViewRegisteredClasses.View = System.Windows.Forms.View.Details;
+            this.listViewRegisteredClasses.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_ColumnClick);
             this.listViewRegisteredClasses.DoubleClick += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
             // columnHeaderRegisteredClassesRegFlags
@@ -3396,13 +3404,6 @@
             this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(155, 24);
             this.propertiesToolStripMenuItem.Text = "Properties";
             this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
-            // 
-            // toClipboardToolStripMenuItem
-            // 
-            this.toClipboardToolStripMenuItem.Name = "toClipboardToolStripMenuItem";
-            this.toClipboardToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
-            this.toClipboardToolStripMenuItem.Text = "To Clipboard";
-            this.toClipboardToolStripMenuItem.Click += new System.EventHandler(this.toClipboardToolStripMenuItem_Click);
             // 
             // PropertiesControl
             // 
