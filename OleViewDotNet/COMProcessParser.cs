@@ -158,6 +158,16 @@ namespace OleViewDotNet
         {
             _resolver.Dispose();
         }
+
+        public void ReloadModuleList()
+        {
+            _resolver.ReloadModuleList();
+        }
+
+        public void LoadModule(string module_path, IntPtr base_address)
+        {
+            _resolver.LoadModule(module_path, base_address);
+        }
     }
 
     internal static class COMProcessParser
