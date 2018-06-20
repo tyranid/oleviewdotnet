@@ -70,10 +70,7 @@ namespace OleViewDotNet
                 }
             }
 
-            if (_base_module != null)
-            {
-                _resolved = is64bit ? _resolved_64bit : _resolved_32bit;
-            }
+            _resolved = is64bit ? _resolved_64bit : _resolved_32bit;
         }
 
         internal static Dictionary<string, int> GetResolved32Bit()
@@ -174,6 +171,10 @@ namespace OleViewDotNet
     {
         private static T ReadStruct<T>(this NtProcess process, long address) where T : new()
         {
+            if (address < 0)
+            {
+                return new T();
+            }
             try
             {
                 return process.ReadMemory<T>(address);
@@ -1076,6 +1077,10 @@ namespace OleViewDotNet
         private static IntPtr GetReservedForOle(NtProcess process, NtThread thread)
         {
             IntPtr teb = thread.TebBaseAddress;
+            if (teb == IntPtr.Zero)
+            {
+                return IntPtr.Zero;
+            }
             if (process.Is64Bit)
             {
                 return ReadPointer(process, teb + 0x1758);
