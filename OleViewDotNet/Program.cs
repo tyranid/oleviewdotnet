@@ -19,9 +19,11 @@ using NtApiDotNet;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -150,6 +152,43 @@ namespace OleViewDotNet
             return ss.Select(s => (COMServerType)Enum.Parse(typeof(COMServerType), s, true)).ToArray();
         }
 
+        static bool GenerateSymbolFile(string symbol_dir)
+        {
+            try
+            {
+                Process proc = Process.GetCurrentProcess();
+                var procs = COMUtilities.LoadProcesses(new Process[] { proc }, null, COMRegistry.Load(COMRegistryMode.UserOnly));
+                if (!procs.Any())
+                {
+                    throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
+                }
+
+                Dictionary<string, int> entries;
+                if (Environment.Is64BitProcess)
+                {
+                    entries = SymbolResolverWrapper.GetResolvedNative();
+                }
+                else
+                {
+                    entries = SymbolResolverWrapper.GetResolved32Bit();
+                }
+
+                string dll_name = COMUtilities.GetCOMDllName();
+                var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
+                string output_file = Path.Combine(symbol_dir, $"{COMUtilities.GetFileMD5(module.FullPath)}.sym");
+                List<string> lines = new List<string>();
+                lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
+                lines.AddRange(entries.Where(p => p.Key.StartsWith(dll_name)).Select(p => $"{p.Value} {p.Key}"));
+                File.WriteAllLines(output_file, lines);
+            }
+            catch (Exception ex)
+            {
+                ShowError(null, ex);
+                return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -166,6 +205,7 @@ namespace OleViewDotNet
             int concurrent_queries = Environment.ProcessorCount;
             bool refresh_interfaces = false;
             bool enable_activation_filter = false;
+            string symbol_dir = null;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
             
@@ -181,6 +221,7 @@ namespace OleViewDotNet
                 { "m", "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
                 { "u", "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
                 { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
+                { "g=", "Generate a symbol file in the specified directory.", v => symbol_dir = v },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -197,7 +238,7 @@ namespace OleViewDotNet
 
             do_enum = enum_clsid || enum_runtime;
 
-            if (show_help || (do_enum && additional_args.Count < 4))
+            if (show_help || (do_enum && additional_args.Count < 4) || (symbol_dir != null && !Directory.Exists(symbol_dir)))
             {
                 StringWriter writer = new StringWriter();
                 writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
@@ -218,6 +259,10 @@ namespace OleViewDotNet
                 {
                     Environment.Exit(42);
                 }
+            }
+            else if (symbol_dir != null)
+            {
+                Environment.Exit(GenerateSymbolFile(symbol_dir) ? 0 : 1);
             }
             else
             {

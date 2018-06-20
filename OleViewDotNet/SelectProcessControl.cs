@@ -49,7 +49,7 @@ namespace OleViewDotNet
             listViewProcesses.Items.Clear();
         }
 
-        public void UpdateProcessList(ProcessAccessRights desired_access, bool require_token)
+        public void UpdateProcessList(ProcessAccessRights desired_access, bool require_token, bool filter_native)
         {
             NtToken.EnableDebugPrivilege();
             ClearListView();
@@ -57,6 +57,11 @@ namespace OleViewDotNet
             {
                 foreach (var p in ps.OrderBy(p => p.ProcessId))
                 {
+                    if (p.Is64Bit && !Environment.Is64BitProcess && filter_native)
+                    {
+                        continue;
+                    }
+
                     using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false))
                     {
                         if (!result.IsSuccess && require_token)

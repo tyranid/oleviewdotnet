@@ -34,7 +34,7 @@ namespace OleViewDotNet
             Disposed += SelectSecurityCheckForm_Disposed;
             string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
             textBoxPrincipal.Text = username;
-            selectProcessControl.UpdateProcessList(ProcessAccessRights.None, true);
+            selectProcessControl.UpdateProcessList(ProcessAccessRights.None, true, false);
             foreach (object value in Enum.GetValues(typeof(TokenIntegrityLevel)))
             {
                 comboBoxIL.Items.Add(value);

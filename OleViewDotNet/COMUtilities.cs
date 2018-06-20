@@ -16,14 +16,12 @@
 
 using Microsoft.CSharp;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 using NtApiDotNet;
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,9 +31,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.AccessControl;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -617,7 +615,7 @@ namespace OleViewDotNet
 
         public static string GetAppDirectory()
         {
-            return Path.GetDirectoryName(new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath);
+            return Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
         }
 
         public static string Get32bitExePath()
@@ -643,6 +641,34 @@ namespace OleViewDotNet
         public static string GetPluginDirectory()
         {
             return Path.Combine(GetAppDirectory(), "plugin");
+        }
+
+        public static Dictionary<string, int> GetSymbolFile(bool native)
+        {
+            var ret = new Dictionary<string, int>();
+            try
+            {
+                string system_path = native ? Environment.SystemDirectory : Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
+                string dll_path = Path.Combine(system_path, $"{GetCOMDllName()}.dll");
+                string symbol_path = Path.Combine(GetAppDirectory(), "symbol_cache", $"{GetFileMD5(dll_path)}.sym");
+                foreach (var line in File.ReadAllLines(symbol_path).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith("#")))
+                {
+                    string[] parts = line.Split(new char[] { ' ' }, 2);
+                    if (parts.Length != 2)
+                    {
+                        continue;
+                    }
+                    if (!int.TryParse(parts[0], out int address))
+                    {
+                        continue;
+                    }
+                    ret[parts[1]] = address;
+                }
+            }
+            catch
+            {
+            }
+            return ret;
         }
 
         private static void RegisterTypeInterfaces(Assembly a)
@@ -2146,6 +2172,14 @@ namespace OleViewDotNet
         public static string FormatBitness(bool is64bit)
         {
             return is64bit ? "64 bit" : "32 bit";
+        }
+
+        public static string GetFileMD5(string file)
+        {
+            using (var stm = File.OpenRead(file))
+            {
+                return BitConverter.ToString(MD5Cng.Create().ComputeHash(stm)).Replace("-", string.Empty);
+            }
         }
     }
 }

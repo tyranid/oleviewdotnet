@@ -47,6 +47,119 @@ namespace OleViewDotNet
         }
     }
 
+    internal class SymbolResolverWrapper : ISymbolResolver
+    {
+        private readonly ISymbolResolver _resolver;
+        private readonly SymbolLoadedModule _base_module;
+        private readonly Dictionary<string, int> _resolved;
+
+        static readonly Dictionary<string, int> _resolved_32bit = new Dictionary<string, int>();
+        static readonly Dictionary<string, int> _resolved_64bit = new Dictionary<string, int>();
+        static readonly string _dllname = COMUtilities.GetCOMDllName();
+        static readonly string _dllprefix = $"{_dllname}!";
+
+        public SymbolResolverWrapper(bool is64bit, ISymbolResolver resolver)
+        {
+            _resolver = resolver;
+            foreach (var module in _resolver.GetLoadedModules())
+            {
+                if (module.Name.Equals(_dllname, StringComparison.OrdinalIgnoreCase))
+                {
+                    _base_module = module;
+                    break;
+                }
+            }
+
+            if (_base_module != null)
+            {
+                _resolved = is64bit ? _resolved_64bit : _resolved_32bit;
+            }
+        }
+
+        internal static Dictionary<string, int> GetResolved32Bit()
+        {
+            return _resolved_32bit;
+        }
+
+        internal static Dictionary<string, int> GetResolvedNative()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return _resolved_64bit;
+            }
+            else
+            {
+                return _resolved_32bit;
+            }
+        }
+
+        public IEnumerable<SymbolLoadedModule> GetLoadedModules()
+        {
+            return _resolver.GetLoadedModules();
+        }
+
+        public IEnumerable<SymbolLoadedModule> GetLoadedModules(bool refresh)
+        {
+            return _resolver.GetLoadedModules(refresh);
+        }
+
+        public SymbolLoadedModule GetModuleForAddress(IntPtr address)
+        {
+            return _resolver.GetModuleForAddress(address);
+        }
+
+        public SymbolLoadedModule GetModuleForAddress(IntPtr address, bool refresh)
+        {
+            return _resolver.GetModuleForAddress(address, refresh);
+        }
+
+        public string GetModuleRelativeAddress(IntPtr address)
+        {
+            return _resolver.GetModuleRelativeAddress(address);
+        }
+
+        public string GetModuleRelativeAddress(IntPtr address, bool refresh)
+        {
+            return _resolver.GetModuleRelativeAddress(address, refresh);
+        }
+
+        public IntPtr GetAddressOfSymbol(string symbol)
+        {
+            if (_resolved.ContainsKey(symbol) && _base_module != null && symbol.StartsWith(_dllprefix))
+            {
+                return _base_module.BaseAddress + _resolved[symbol];
+            }
+
+            IntPtr ret = _resolver.GetAddressOfSymbol(symbol);
+            if (ret != IntPtr.Zero && symbol.StartsWith(_dllprefix))
+            {
+                _resolved[symbol] = (int)(ret.ToInt64() - _base_module.BaseAddress.ToInt64());
+            }
+
+            return ret;
+        }
+
+        public string GetSymbolForAddress(IntPtr address)
+        {
+            return _resolver.GetSymbolForAddress(address);
+        }
+
+        public string GetSymbolForAddress(IntPtr address, bool generate_fake_symbol)
+        {
+            return _resolver.GetSymbolForAddress(address, generate_fake_symbol);
+        }
+
+        public string GetSymbolForAddress(IntPtr address, bool generate_fake_symbol, bool return_name_only)
+        {
+            return _resolver.GetSymbolForAddress(address, generate_fake_symbol, return_name_only);
+        }
+
+        public void Dispose()
+        {
+            _resolver.Dispose();
+        }
+    }
+
     internal static class COMProcessParser
     {
         private static T ReadStruct<T>(this NtProcess process, long address) where T : new()
@@ -786,31 +899,11 @@ namespace OleViewDotNet
             return entries;
         }
 
-        static Dictionary<string, IntPtr> _resolved_32bit = new Dictionary<string, IntPtr>();
-        static Dictionary<string, IntPtr> _resolved_64bit = new Dictionary<string, IntPtr>();
-
-        static string _dllname = COMUtilities.GetCOMDllName();
+        static readonly string _dllname = COMUtilities.GetCOMDllName();
 
         static string GetSymbolName(string name)
         {
-            return String.Format("{0}!{1}", _dllname, name);
-        }
-
-        internal static IntPtr AddressFromSymbol(ISymbolResolver resolver, bool is64bit, string symbol)
-        {
-            Dictionary<string, IntPtr> resolved = is64bit ? _resolved_64bit : _resolved_32bit;
-            if (resolved.ContainsKey(symbol))
-            {
-                return resolved[symbol];
-            }
-
-            IntPtr ret = resolver.GetAddressOfSymbol(symbol);
-            if (ret != IntPtr.Zero)
-            {
-                resolved[symbol] = ret;
-            }
-
-            return ret;
+            return $"{_dllname}!{name}";
         }
 
         internal static string SymbolFromAddress(ISymbolResolver resolver, bool is64bit, IntPtr address)
@@ -820,7 +913,7 @@ namespace OleViewDotNet
 
         static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
-            IntPtr ipid_table = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("CIPIDTable::_palloc"));
+            IntPtr ipid_table = resolver.GetAddressOfSymbol(GetSymbolName("CIPIDTable::_palloc"));
             if (ipid_table == IntPtr.Zero)
             {
                 return new List<COMIPIDEntry>();
@@ -838,7 +931,7 @@ namespace OleViewDotNet
 
         private static Guid GetProcessAppId(NtProcess process, ISymbolResolver resolver)
         {
-            IntPtr appid = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName("g_AppId"));
+            IntPtr appid = resolver.GetAddressOfSymbol(GetSymbolName("g_AppId"));
             if (appid == IntPtr.Zero)
             {
                 return Guid.Empty;
@@ -860,7 +953,7 @@ namespace OleViewDotNet
 
         private static string ReadSecurityDescriptor(NtProcess process, ISymbolResolver resolver, string symbol)
         {
-            IntPtr sd = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
+            IntPtr sd = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
             if (sd == IntPtr.Zero)
             {
                 return String.Empty;
@@ -1005,7 +1098,7 @@ namespace OleViewDotNet
 
         private static string ReadString(NtProcess process, ISymbolResolver resolver, string symbol)
         {
-            IntPtr str = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
+            IntPtr str = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
             if (str != IntPtr.Zero)
             {
                 return ReadUnicodeString(process, str);
@@ -1015,7 +1108,7 @@ namespace OleViewDotNet
 
         public static int ReadInt(NtProcess process, ISymbolResolver resolver, string symbol)
         {
-            IntPtr p = AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol));
+            IntPtr p = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
             if (p != IntPtr.Zero)
             {
                 return process.ReadStruct<int>(p.ToInt64());
@@ -1031,7 +1124,7 @@ namespace OleViewDotNet
 
         public static IntPtr ReadPointer(NtProcess process, ISymbolResolver resolver, string symbol)
         {
-            return ReadPointer(process, AddressFromSymbol(resolver, process.Is64Bit, GetSymbolName(symbol)));
+            return ReadPointer(process, resolver.GetAddressOfSymbol(GetSymbolName(symbol)));
         }
 
         public static IntPtr ReadPointer(NtProcess process, IntPtr p)
@@ -1088,7 +1181,8 @@ namespace OleViewDotNet
                     return null;
                 }
 
-                using (ISymbolResolver resolver = SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath))
+                using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit, 
+                    SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
                 {
                     Sid user = process.User;
                     return new COMProcessEntry(
@@ -1128,7 +1222,7 @@ namespace OleViewDotNet
                         progress.Report(new Tuple<string, int>(String.Format("Parsing process {0}", p.ProcessName),
                             100 * current_count++ / total_count));
                     }
-                    COMProcessEntry proc = COMProcessParser.ParseProcess(p.Id,
+                    COMProcessEntry proc = ParseProcess(p.Id,
                         config, registry);
                     if (proc != null)
                     {

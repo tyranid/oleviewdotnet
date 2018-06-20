@@ -520,6 +520,12 @@
     <Compile Include="ROTViewer.Designer.cs">
       <DependentUpon>ROTViewer.cs</DependentUpon>
     </Compile>
+    <None Include="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="interface.ico" />

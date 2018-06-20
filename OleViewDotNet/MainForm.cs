@@ -743,8 +743,25 @@ namespace OleViewDotNet
             }
         }
 
+        private void AddToDictionary(Dictionary<string, int> base_dict, Dictionary<string, int> add_dict)
+        {
+            foreach (var pair in add_dict)
+            {
+                base_dict[pair.Key] = pair.Value;
+            }
+        }
+
+        private static bool _configured_symbols = false;
+
         private void ConfigureSymbols()
         {
+            if (_configured_symbols)
+            {
+                return;
+            }
+
+            _configured_symbols = true;
+
             if (!Properties.Settings.Default.SymbolsConfigured)
             {
                 if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
@@ -755,6 +772,13 @@ namespace OleViewDotNet
                         frm.ShowDialog(this);
                     }
                 }
+            }
+
+            // Load any supported symbol files.
+            AddToDictionary(SymbolResolverWrapper.GetResolvedNative(), COMUtilities.GetSymbolFile(true));
+            if (Environment.Is64BitProcess)
+            {
+                AddToDictionary(SymbolResolverWrapper.GetResolved32Bit(), COMUtilities.GetSymbolFile(false));
             }
         }
 
@@ -937,7 +961,7 @@ namespace OleViewDotNet
 
         private void menuProcessesSelectProcess_Click(object sender, EventArgs e)
         {
-            using (SelectProcessForm form = new SelectProcessForm(ProcessAccessRights.VmRead, false))
+            using (SelectProcessForm form = new SelectProcessForm(ProcessAccessRights.VmRead, false, true))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
