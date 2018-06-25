@@ -208,87 +208,91 @@ namespace OleViewDotNet
             OpenView(COMRegistryViewer.DisplayMode.PreApproved);
         }
 
+        public async Task CreateInstanceFromCLSID(Guid clsid, CLSCTX clsctx, bool class_factory)
+        {
+            try
+            {
+                COMCLSIDEntry ent = null;
+                Dictionary<string, string> props = new Dictionary<string, string>();
+                object comObj = null;
+                string strObjName = "";
+                IEnumerable<COMInterfaceEntry> ints = null;
+
+                if (m_registry.Clsids.ContainsKey(clsid))
+                {
+                    ent = m_registry.Clsids[clsid];
+                    strObjName = ent.Name;
+                    props.Add("CLSID", ent.Clsid.FormatGuid());
+                    props.Add("Name", ent.Name);
+                    props.Add("Server", ent.DefaultServer);
+                    await ent.LoadSupportedInterfacesAsync(false);
+
+                    if (class_factory)
+                    {
+                        comObj = ent.CreateClassFactory();
+                        ints = ent.FactoryInterfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
+                    }
+                    else
+                    {
+                        comObj = ent.CreateInstanceAsObject(clsctx, null);
+                        ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
+                    }
+                }
+                else
+                {
+                    Guid unk = COMInterfaceEntry.IID_IUnknown;
+                    IntPtr pObj;
+                    int hr;
+
+                    if (class_factory)
+                    {
+                        hr = COMUtilities.CoGetClassObject(ref clsid, clsctx, null, ref unk, out pObj);
+                    }
+                    else
+                    {
+                        hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, clsctx,
+                                    ref unk, out pObj);
+                    }
+
+                    if (hr != 0)
+                    {
+                        Marshal.ThrowExceptionForHR(hr);
+                    }
+
+                    try
+                    {
+                        ints = m_registry.GetInterfacesForIUnknown(pObj);
+                        comObj = Marshal.GetObjectForIUnknown(pObj);
+                        strObjName = clsid.FormatGuid();
+                        props.Add("CLSID", clsid.FormatGuid());
+                    }
+                    finally
+                    {
+                        Marshal.Release(pObj);
+                    }
+                }
+
+                if (comObj != null)
+                {
+                    /* Need to implement a type library reader */
+                    Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
+
+                    HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private async void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
         {
             using (CreateCLSIDForm frm = new CreateCLSIDForm())
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    try
-                    {
-                        COMCLSIDEntry ent = null;
-                        Guid g = frm.Clsid;
-                        Dictionary<string, string> props = new Dictionary<string, string>();
-                        object comObj = null;
-                        string strObjName = "";
-                        IEnumerable<COMInterfaceEntry> ints = null;
-
-                        if (m_registry.Clsids.ContainsKey(g))
-                        {
-                            ent = m_registry.Clsids[g];
-                            strObjName = ent.Name;
-                            props.Add("CLSID", ent.Clsid.FormatGuid());
-                            props.Add("Name", ent.Name);
-                            props.Add("Server", ent.DefaultServer);
-                            await ent.LoadSupportedInterfacesAsync(false);
-
-                            if (frm.ClassFactory)
-                            {
-                                comObj = ent.CreateClassFactory();
-                                ints = ent.FactoryInterfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
-                            }
-                            else
-                            {
-                                comObj = ent.CreateInstanceAsObject(frm.ClsCtx, null);
-                                ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
-                            }
-                        }
-                        else
-                        {
-                            Guid unk = COMInterfaceEntry.IID_IUnknown;
-                            IntPtr pObj;
-                            int hr;
-
-                            if (frm.ClassFactory)
-                            {
-                                hr = COMUtilities.CoGetClassObject(ref g, frm.ClsCtx, null, ref unk, out pObj);
-                            }
-                            else
-                            {
-                                hr = COMUtilities.CoCreateInstance(ref g, IntPtr.Zero, frm.ClsCtx,
-                                            ref unk, out pObj);
-                            }
-
-                            if (hr != 0)
-                            {
-                                Marshal.ThrowExceptionForHR(hr);
-                            }
-
-                            try
-                            {
-                                ints = m_registry.GetInterfacesForIUnknown(pObj);
-                                comObj = Marshal.GetObjectForIUnknown(pObj);
-                                strObjName = g.FormatGuid();
-                                props.Add("CLSID", g.FormatGuid());
-                            }
-                            finally
-                            {
-                                Marshal.Release(pObj);
-                            }
-                        }
-
-                        if (comObj != null)
-                        {
-                            /* Need to implement a type library reader */
-                            Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
-
-                            HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    await CreateInstanceFromCLSID(frm.Clsid, frm.ClsCtx, frm.ClassFactory);
                 }
             }
         }

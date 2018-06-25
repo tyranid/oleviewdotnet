@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -867,6 +868,25 @@ namespace OleViewDotNet
                 var objref = $"objref:{Convert.ToBase64String(ipid.ToObjref())}:";
                 COMRegistryViewer.CopyTextToClipboard(objref);
             }
+        }
+
+        private async Task CreateInstance(bool class_factory)
+        {
+            COMProcessClassRegistration c = GetRegisteredClass();
+            if (c != null)
+            {
+                await Program.GetMainForm(m_registry).CreateInstanceFromCLSID(c.Clsid, CLSCTX.LOCAL_SERVER, class_factory);
+            }
+        }
+
+        private async void createInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(false);
+        }
+
+        private async void createClassFactoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await CreateInstance(true);
         }
     }
 }
