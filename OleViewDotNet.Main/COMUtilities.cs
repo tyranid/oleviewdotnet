@@ -2187,21 +2187,4 @@ namespace OleViewDotNet
             }
         }
     }
-
-    public class LoadCallbackProgress : IProgress<Tuple<string, int>>
-    {
-        private readonly string _activity;
-        private readonly Action<string, string, int> _callback;
-
-        public LoadCallbackProgress(string activity, Action<string, string, int> callback)
-        {
-            _callback = callback;
-            _activity = activity;
-        }
-
-        public void Report(Tuple<string, int> value)
-        {
-            _callback(_activity, value.Item1, value.Item2);
-        }
-    }
 }
