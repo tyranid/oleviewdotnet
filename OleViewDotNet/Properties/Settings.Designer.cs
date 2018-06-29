@@ -12,7 +12,7 @@ namespace OleViewDotNet.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.6.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.7.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,114 +20,6 @@ namespace OleViewDotNet.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("dbghelp.dll")]
-        public string DbgHelpPath32 {
-            get {
-                return ((string)(this["DbgHelpPath32"]));
-            }
-            set {
-                this["DbgHelpPath32"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("dbghelp.dll")]
-        public string DbgHelpPath64 {
-            get {
-                return ((string)(this["DbgHelpPath64"]));
-            }
-            set {
-                this["DbgHelpPath64"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("srv*https://msdl.microsoft.com/download/symbols")]
-        public string SymbolPath {
-            get {
-                return ((string)(this["SymbolPath"]));
-            }
-            set {
-                this["SymbolPath"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SymbolsConfigured {
-            get {
-                return ((bool)(this["SymbolsConfigured"]));
-            }
-            set {
-                this["SymbolsConfigured"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GuidFormat {
-            get {
-                return ((string)(this["GuidFormat"]));
-            }
-            set {
-                this["GuidFormat"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ParseStubMethods {
-            get {
-                return ((bool)(this["ParseStubMethods"]));
-            }
-            set {
-                this["ParseStubMethods"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ResolveMethodNames {
-            get {
-                return ((bool)(this["ResolveMethodNames"]));
-            }
-            set {
-                this["ResolveMethodNames"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ProxyParserResolveSymbols {
-            get {
-                return ((bool)(this["ProxyParserResolveSymbols"]));
-            }
-            set {
-                this["ProxyParserResolveSymbols"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ParseRegisteredClasses {
-            get {
-                return ((bool)(this["ParseRegisteredClasses"]));
-            }
-            set {
-                this["ParseRegisteredClasses"] = value;
             }
         }
     }
