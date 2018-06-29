@@ -137,3 +137,98 @@ function Compare-ComDatabase {
     $callback = New-CallbackProgress -Activity "Comparing COM Registries"
     [OleViewDotNet.COMRegistry]::Diff($Left, $Right, $DiffMode, $callback)
 }
+
+function Where-HasComServer {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [OleViewDotNet.COMCLSIDEntry]$ClassEntry,
+        [string]$ServerName,
+        [OleViewDotNet.COMServerType]$ServerType
+    )
+
+    PROCESS {
+        $write_to_output = $false
+        if ($ServerType -eq "UnknownServer") {
+            foreach($server in $ClassEntry.Servers.Values) {
+                if ($server.Server -match $ServerName) {
+                    $write_to_output = $true
+                    break
+                }
+            }
+        } else {
+            $write_to_output = $ClassEntry.Servers.ContainsKey($ServerType) -and $ClassEntry.Servers[$ServerType].Server -match $ServerName
+        }
+
+        if ($write_to_output) {
+            Write-Output $ClassEntry
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM classes from a database.
+.DESCRIPTION
+This cmdlet gets COM classes from the database based on a set of criteria. The default is to return all registered classes.
+.PARAMETER Database
+The database to use.
+.PARAMETER Clsid
+Specify a CLSID to lookup.
+.PARAMETER Name
+Specify a name to match against the class name.
+.PARAMETER ServerName
+Specify a server name to match against.
+.PARAMETER ServerType
+Specify a type of server to match against. If specified as UnknownServer will search all servers.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMCLSIDEntry
+.EXAMPLE
+Get-ComClass -Database $db
+Get all COM classes from a database.
+.EXAMPLE
+Get-ComClass -Database $db -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
+Get a COM class with a specified CLSID.
+.EXAMPLE
+Get-ComClass -Database $db -Name "TestClass"
+Get COM classes which contain TestClass in their name.
+.EXAMPLE
+Get-ComClass -Database $db -ServerName "obj.ocx"
+Get COM classes which are implemented in a server containing the string "obj.ocx"
+.EXAMPLE
+Get-ComClass -Database $db -ServerType InProcServer32
+Get COM classes which are registered with an in-process server.
+#>
+function Get-ComClass {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Guid]$Clsid,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(ParameterSetName = "FromServer")]
+        [string]$ServerName = "",
+        [Parameter(ParameterSetName = "FromServer")]
+        [OleViewDotNet.COMServerType]$ServerType = "UnknownServer"
+    )
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.Clsids.Values
+        }
+        "FromClsid" {
+            if ($Database.Clsids.ContainsKey($Clsid)) {
+                Write-Output $Database.Clsids[$Clsid]
+            }
+        }
+        "FromName" {
+            Get-ComClass $Database | ? Name -Match $Name | Write-Output
+        }
+        "FromServer" {
+            Get-ComClass $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
+        }
+    }
+}
