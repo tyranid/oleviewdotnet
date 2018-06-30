@@ -933,7 +933,7 @@ namespace OleViewDotNet
             {
                 StringBuilder tooltip = new StringBuilder();
                 List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
-                COMCLSIDEntry entry = ent.Class;
+                COMCLSIDEntry entry = ent.ClassEntry;
                 if (entry != null)
                 {
                     clsids.Add(entry);

@@ -523,7 +523,7 @@ namespace OleViewDotNet
             {
                 return m_runtime_classes[name];
             }
-            return new COMRuntimeClassEntry(activable_class);
+            return new COMRuntimeClassEntry(this, activable_class);
         }
 
         public COMTypeLibVersionEntry GetTypeLibVersionEntry(Guid typelib, string version)
@@ -709,7 +709,7 @@ namespace OleViewDotNet
                     m_preapproved = reader.ReadGuids("clsids").ToList();
                     reader.Read();
                 }
-                m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry()).ToSortedDictionary(p => p.Name);
+                m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name);
                 m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry()).ToSortedDictionary(p => p.Name);
                 reader.ReadEndElement();
             }
@@ -1074,7 +1074,7 @@ namespace OleViewDotNet
                         {
                             if (subkey != null)
                             {
-                                entries.Add(new COMRuntimeClassEntry(name, subkey));
+                                entries.Add(new COMRuntimeClassEntry(this, name, subkey));
                             }
                         }
                     }

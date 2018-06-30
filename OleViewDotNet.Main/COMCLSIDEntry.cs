@@ -798,6 +798,42 @@ namespace OleViewDotNet
             }
         }
 
+        public bool HasLaunchPermission
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.HasLaunchPermission : false;
+            }
+        }
+
+        public bool HasAccessPermission
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.HasAccessPermission : false;
+            }
+        }
+
+        public string LaunchPermission
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.LaunchPermission : string.Empty;
+            }
+        }
+
+        public string AccessPermission
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.AccessPermission : string.Empty;
+            }
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))

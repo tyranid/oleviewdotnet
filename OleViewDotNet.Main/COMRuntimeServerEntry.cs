@@ -141,5 +141,10 @@ namespace OleViewDotNet
                 ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSafeHashCode() ^
                 Identity.GetSafeHashCode();
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

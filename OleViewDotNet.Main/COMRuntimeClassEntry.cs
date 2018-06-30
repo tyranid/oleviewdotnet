@@ -51,6 +51,7 @@ namespace OleViewDotNet
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
+        private readonly COMRegistry m_registry;
 
         public string Name { get; private set; }
         public Guid Clsid { get; private set; }
@@ -65,7 +66,16 @@ namespace OleViewDotNet
             }
         }
 
+        public COMRuntimeServerEntry ServerEntry
+        {
+            get
+            {
+                return m_registry.MapRuntimeClassToServerEntry(this);
+            }
+        }
+
         public ActivationType ActivationType { get; private set; }
+
         public string Permissions
         {
             get; private set;
@@ -100,7 +110,7 @@ namespace OleViewDotNet
             ActivateInSharedBroker = COMUtilities.ReadIntFromKey(key, null, "ActivateInSharedBroker") != 0;
         }
 
-        internal COMRuntimeClassEntry(string name)
+        internal COMRuntimeClassEntry(COMRegistry registry, string name) : this(registry)
         {
             Name = name;
             DllPath = string.Empty;
@@ -108,13 +118,15 @@ namespace OleViewDotNet
             Permissions = string.Empty;
         }
 
-        public COMRuntimeClassEntry(string name, RegistryKey rootKey) : this(name)
+        public COMRuntimeClassEntry(COMRegistry registry, string name, RegistryKey rootKey) 
+            : this(registry, name)
         {
             LoadFromKey(rootKey);
         }
 
-        internal COMRuntimeClassEntry()
+        internal COMRuntimeClassEntry(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()
@@ -171,6 +183,11 @@ namespace OleViewDotNet
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
                 ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
                 ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
 
         int IComparable<COMRuntimeClassEntry>.CompareTo(COMRuntimeClassEntry other)

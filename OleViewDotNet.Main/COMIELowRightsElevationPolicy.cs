@@ -41,7 +41,7 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public Guid Uuid { get; private set; }
         public Guid Clsid { get; private set; }
-        public COMCLSIDEntry Class
+        public COMCLSIDEntry ClassEntry
         {
             get
             {
