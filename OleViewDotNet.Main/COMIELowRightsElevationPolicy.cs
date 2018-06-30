@@ -24,23 +24,32 @@ using System.Xml.Schema;
 
 namespace OleViewDotNet
 {
+    public enum IEElevationPolicy
+    {
+        NoRun = 0,
+        RunAtCurrent = 1,
+        RunAfterPrompt = 2,
+        RunAtMedium = 3,
+        BlockCOM = 0x10,
+        KillBit = 0x20,
+    }
+
     public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
     {
-        public enum ElevationPolicy
-        {
-            NoRun = 0,
-            RunAtCurrent = 1,
-            RunAfterPrompt = 2,
-            RunAtMedium = 3,
-            BlockCOM = 0x10,
-            KillBit = 0x20,
-        }
-
+        private readonly COMRegistry m_registry;
+        
         public string Name { get; private set; }
         public Guid Uuid { get; private set; }
         public Guid Clsid { get; private set; }
+        public COMCLSIDEntry Class
+        {
+            get
+            {
+                return m_registry.MapClsidToEntry(Clsid);
+            }
+        }
         public string AppPath { get; private set; }
-        public ElevationPolicy Policy { get; private set; }
+        public IEElevationPolicy Policy { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -85,16 +94,15 @@ namespace OleViewDotNet
             object policyValue = key.GetValue("Policy", 0);
 
             if (policyValue != null)
-            {                
-                Policy = (ElevationPolicy)Enum.ToObject(typeof(ElevationPolicy), key.GetValue("Policy", 0));
+            {
+                Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), key.GetValue("Policy", 0));
             }
             
             string clsid = (string)key.GetValue("CLSID");
             if (clsid != null)
             {
-                Guid cls;
 
-                if (Guid.TryParse(clsid, out cls))
+                if (Guid.TryParse(clsid, out Guid cls))
                 {
                     Clsid = cls;
                 }
@@ -116,15 +124,17 @@ namespace OleViewDotNet
             }
         }
 
-        public COMIELowRightsElevationPolicy(Guid guid, RegistryKey key)
-        {            
+        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, RegistryKey key) 
+            : this(registry)
+        {
             Uuid = guid;
             Name = Uuid.FormatGuidDefault();
             LoadFromRegistry(key);
         }
 
-        internal COMIELowRightsElevationPolicy()
+        internal COMIELowRightsElevationPolicy(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         public int CompareTo(COMIELowRightsElevationPolicy other)
@@ -143,7 +153,7 @@ namespace OleViewDotNet
             Uuid = reader.ReadGuid("uuid");
             Clsid = reader.ReadGuid("clsid");
             AppPath = reader.GetAttribute("path");
-            Policy = reader.ReadEnum<ElevationPolicy>("policy");
+            Policy = reader.ReadEnum<IEElevationPolicy>("policy");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -152,7 +162,7 @@ namespace OleViewDotNet
             writer.WriteGuid("uuid", Uuid);
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("path", AppPath);
-            writer.WriteEnum("policy", Policy);            
+            writer.WriteEnum("policy", Policy);
         }
     }
 }

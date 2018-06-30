@@ -900,7 +900,7 @@ namespace OleViewDotNet
                 currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.FormatGuid());
                 sortedNodes.Add(currNode.Text, currNode);
 
-                IEnumerable<COMCLSIDEntry> clsids = pair.Clsids.OrderBy(c => c.Name);
+                IEnumerable<COMCLSIDEntry> clsids = pair.ClassEntries.OrderBy(c => c.Name);
                 IEnumerable<TreeNode> clsidNodes = clsids.Select(n => CreateClsidNode(registry, n));
                 currNode.Nodes.AddRange(clsidNodes.ToArray());
             }
@@ -933,9 +933,10 @@ namespace OleViewDotNet
             {
                 StringBuilder tooltip = new StringBuilder();
                 List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
-                if (ent.Clsid != Guid.Empty)
+                COMCLSIDEntry entry = ent.Class;
+                if (entry != null)
                 {
-                    clsids.Add(registry.MapClsidToEntry(ent.Clsid));
+                    clsids.Add(entry);
                 }
 
                 if (!String.IsNullOrWhiteSpace(ent.AppPath) && registry.ClsidsByServer.ContainsKey(ent.AppPath))

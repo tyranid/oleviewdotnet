@@ -412,6 +412,11 @@ namespace OleViewDotNet
                     new COMCLSIDServerDotNetEntry[] { DotNet });
             }
         }
+
+        public override string ToString()
+        {
+            return Server;
+        }
     }
 
     public interface ICOMClassEntry
@@ -487,13 +492,10 @@ namespace OleViewDotNet
 
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry
     {
+        private readonly COMRegistry m_registry;
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
         private bool m_loaded_interfaces;
-
-        private static Guid ControlCategory = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
-        private static Guid InsertableCategory = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
-        private static Guid DocumentCategory = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 
         private static HashSet<Guid> LoadAppActivatableClsids()
         {
@@ -589,17 +591,17 @@ namespace OleViewDotNet
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             if (key.HasSubkey("Control"))
             {
-                categories.Add(ControlCategory);
+                categories.Add(COMCategory.CATID_Control);
             }
 
             if (key.HasSubkey("Insertable"))
             {
-                categories.Add(InsertableCategory);
+                categories.Add(COMCategory.CATID_Insertable);
             }
 
             if (key.HasSubkey("DocObject"))
             {
-                categories.Add(DocumentCategory);
+                categories.Add(COMCategory.CATID_Document);
             }
 
             using (RegistryKey catkey = key.OpenSubKey("Implemented Categories"))
@@ -644,12 +646,12 @@ namespace OleViewDotNet
             }
         }
 
-        public COMCLSIDEntry(Guid clsid, RegistryKey rootKey) : this(clsid)
+        public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
         {
             LoadFromKey(rootKey);
         }
 
-        private COMCLSIDEntry(Guid clsid)
+        private COMCLSIDEntry(COMRegistry registry, Guid clsid) : this(registry)
         {
             Clsid = clsid;
             Servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
@@ -657,8 +659,8 @@ namespace OleViewDotNet
             Categories = new Guid[0];
         }
 
-        public COMCLSIDEntry(Guid clsid, COMServerType type)
-            : this(clsid)
+        public COMCLSIDEntry(COMRegistry registry, Guid clsid, COMServerType type)
+            : this(registry, clsid)
         {
         }
 
@@ -694,7 +696,23 @@ namespace OleViewDotNet
 
         public Guid AppID { get; private set; }
 
+        public COMAppIDEntry AppIDEntry
+        {
+            get
+            {
+                return m_registry.AppIDs.GetGuidEntry(AppID);
+            }
+        }
+
         public Guid TypeLib { get; private set; }
+
+        public COMTypeLibEntry TypeLibEntry
+        {
+            get
+            {
+                return m_registry.Typelibs.GetGuidEntry(TypeLib);
+            }
+        }
 
         public bool HasTypeLib
         {
@@ -727,6 +745,14 @@ namespace OleViewDotNet
         public IEnumerable<Guid> Categories
         {
             get; private set;
+        }
+
+        public IEnumerable<COMCategory> CategoryEntries
+        {
+            get
+            {
+                return Categories.Select(c => m_registry.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
+            }
         }
 
         public COMThreadingModel DefaultThreadingModel
@@ -951,7 +977,7 @@ namespace OleViewDotNet
                 }
 
                 return dwContext;
-            }           
+            }
         }
 
         public IntPtr CreateInstance(CLSCTX dwContext, string server)
@@ -978,7 +1004,7 @@ namespace OleViewDotNet
                 }
             }
             
-            Guid iid = COMInterfaceEntry.CreateKnownInterface(COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
+            Guid iid = COMInterfaceEntry.CreateKnownInterface(m_registry, COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
             Guid clsid = Clsid;
 
             int hr = 0;
@@ -1060,11 +1086,12 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("COMCLSIDEntry: {0}", Name);
+            return Name;
         }
 
-        internal COMCLSIDEntry()
+        internal COMCLSIDEntry(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

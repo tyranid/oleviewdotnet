@@ -129,7 +129,7 @@ namespace OleViewDotNet
 
             if (ent == null)
             {
-                ent = new COMCLSIDEntry(Guid.Empty, COMServerType.UnknownServer);
+                ent = new COMCLSIDEntry(m_registry, Guid.Empty, COMServerType.UnknownServer);
             }
             props.Add("CLSID", ent.Clsid.FormatGuid());
             props.Add("Name", ent.Name);

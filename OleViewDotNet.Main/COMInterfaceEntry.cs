@@ -26,6 +26,7 @@ namespace OleViewDotNet
     public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable
     {
         private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
+        private readonly COMRegistry m_registry;
 
         internal static string MapIidToName(Guid iid)
         {
@@ -77,11 +78,12 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMInterfaceEntry()
+        internal COMInterfaceEntry(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
-        private COMInterfaceEntry(Guid iid, Guid proxyclsid, int nummethods, string baseName, string name)
+        private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, int nummethods, string baseName, string name) : this(registry)
         {
             Iid = iid;
             ProxyClsid = proxyclsid;
@@ -91,19 +93,19 @@ namespace OleViewDotNet
             TypeLibVersion = String.Empty;
         }
 
-        internal COMInterfaceEntry(Type type) : this(type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
+        internal COMInterfaceEntry(COMRegistry registry, Type type) : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
         {
             CacheIidToName(Iid, Name);
         }
 
-        public COMInterfaceEntry(Guid iid, RegistryKey rootKey) 
-            : this(iid, Guid.Empty, 3, "IUnknown", "")
+        public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey) 
+            : this(registry, iid, Guid.Empty, 3, "IUnknown", "")
         {
             LoadFromKey(rootKey);
         }
 
-        public COMInterfaceEntry(Guid iid)
-            : this(iid, Guid.Empty, 3, "IUnknown", MapIidToName(iid))
+        public COMInterfaceEntry(COMRegistry registry, Guid iid)
+            : this(registry, iid, Guid.Empty, 3, "IUnknown", MapIidToName(iid))
         {
         }
 
@@ -174,13 +176,13 @@ namespace OleViewDotNet
             get { return Iid == typeof(IClassFactory).GUID; }
         }
 
-        public static COMInterfaceEntry CreateKnownInterface(KnownInterfaces known)
+        public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, KnownInterfaces known)
         {
             COMInterfaceEntry ent = null;
             switch (known)
             {
                 case KnownInterfaces.IUnknown:
-                    ent = new COMInterfaceEntry();
+                    ent = new COMInterfaceEntry(registry);
                     ent.Base = "";
                     ent.Iid = IID_IUnknown;
                     ent.ProxyClsid = Guid.Empty;
@@ -189,7 +191,7 @@ namespace OleViewDotNet
                     ent.TypeLibVersion = String.Empty;
                     break;
                 case KnownInterfaces.IMarshal:
-                    ent = new COMInterfaceEntry();
+                    ent = new COMInterfaceEntry(registry);
                     ent.Base = "";
                     ent.Iid = IID_IMarshal;
                     ent.ProxyClsid = Guid.Empty;
@@ -198,7 +200,7 @@ namespace OleViewDotNet
                     ent.TypeLibVersion = String.Empty;
                     break;
                 case KnownInterfaces.IPSFactoryBuffer:
-                    ent = new COMInterfaceEntry();
+                    ent = new COMInterfaceEntry(registry);
                     ent.Base = "";
                     ent.Iid = IID_IPSFactoryBuffer;
                     ent.ProxyClsid = Guid.Empty;

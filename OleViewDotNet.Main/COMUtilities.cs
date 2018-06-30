@@ -2186,5 +2186,14 @@ namespace OleViewDotNet
                 return BitConverter.ToString(MD5Cng.Create().ComputeHash(stm)).Replace("-", string.Empty);
             }
         }
+
+        public static T GetGuidEntry<T>(this IDictionary<Guid, T> dict, Guid guid)
+        {
+            if (dict.ContainsKey(guid))
+            {
+                return dict[guid];
+            }
+            return default(T);
+        }
     }
 }

@@ -477,7 +477,7 @@ namespace OleViewDotNet
             }
             else
             {
-                return new COMInterfaceEntry(iid);
+                return new COMInterfaceEntry(this, iid);
             }
         }
 
@@ -498,7 +498,7 @@ namespace OleViewDotNet
                 return null;
             }
 
-            return new COMCLSIDEntry(clsid, COMServerType.UnknownServer);
+            return new COMCLSIDEntry(this, clsid, COMServerType.UnknownServer);
         }
 
         public COMRuntimeServerEntry MapRuntimeClassToServerEntry(COMRuntimeClassEntry runtime_class)
@@ -688,7 +688,7 @@ namespace OleViewDotNet
                 DefaultLaunchPermission = reader.ReadString("launch");
                 DefaultLaunchRestriction = reader.ReadString("launchr");
                 Report(progress, "CLSIDs", 1, total_count);
-                m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry()).ToSortedDictionary(p => p.Clsid);
+                m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
                 Report(progress, "ProgIDs", 2, total_count);
                 m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry()).ToSortedDictionary(p => p.ProgID);
                 Report(progress, "MIME Types", 3, total_count);
@@ -696,11 +696,11 @@ namespace OleViewDotNet
                 Report(progress, "AppIDs", 4, total_count);
                 m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
                 Report(progress, "Interfaces", 5, total_count);
-                m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
+                m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry(this)).ToSortedDictionary(p => p.Iid);
                 Report(progress, "Categories", 6, total_count);
                 m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory(this)).ToSortedDictionary(p => p.CategoryID);
                 Report(progress, "LowRights", 7, total_count);
-                m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
+                m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy(this)).ToList();
                 Report(progress, "TypeLibs", 8, total_count);
                 m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry()).ToSortedDictionary(p => p.TypelibId);
                 Report(progress, "PreApproved", 9, total_count);
@@ -787,7 +787,7 @@ namespace OleViewDotNet
                                 {
                                     if (regKey != null)
                                     {
-                                        COMCLSIDEntry ent = new COMCLSIDEntry(clsid, regKey);
+                                        COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
                                         clsids.Add(clsid, ent);
                                         foreach (Guid catid in ent.Categories)
                                         {
@@ -842,7 +842,7 @@ namespace OleViewDotNet
             Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
             foreach (COMInterfaceEntry.KnownInterfaces known_infs in Enum.GetValues(typeof(COMInterfaceEntry.KnownInterfaces)))
             {
-                COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(known_infs);
+                COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(this, known_infs);
                 interfaces.Add(unk.Iid, unk);
             }
             using (RegistryKey iidKey = rootKey.OpenSubKey("Interface"))
@@ -862,7 +862,7 @@ namespace OleViewDotNet
                                 {
                                     if (regKey != null)
                                     {
-                                        COMInterfaceEntry ent = new COMInterfaceEntry(iid, regKey);
+                                        COMInterfaceEntry ent = new COMInterfaceEntry(this, iid, regKey);
                                         interfaces.Add(iid, ent);
                                     }
                                 }
@@ -877,7 +877,7 @@ namespace OleViewDotNet
             {
                 if (!interfaces.ContainsKey(pair.Key))
                 {
-                    interfaces.Add(pair.Key, new COMInterfaceEntry(pair.Value));
+                    interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value));
                 }
             }
 
@@ -966,13 +966,11 @@ namespace OleViewDotNet
                     string[] subkeys = key.GetSubKeyNames();
                     foreach (string s in subkeys)
                     {
-                        Guid g;
-
-                        if (Guid.TryParse(s, out g))
+                        if (Guid.TryParse(s, out Guid g))
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
                             {
-                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(g, rightsKey);
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, rightsKey);
                                 if (entry.Clsid != Guid.Empty || !String.IsNullOrWhiteSpace(entry.AppPath))
                                 {
                                     m_lowrights.Add(entry);
