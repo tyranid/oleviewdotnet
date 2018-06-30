@@ -690,9 +690,9 @@ namespace OleViewDotNet
                 Report(progress, "CLSIDs", 1, total_count);
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
                 Report(progress, "ProgIDs", 2, total_count);
-                m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry()).ToSortedDictionary(p => p.ProgID);
+                m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry(this)).ToSortedDictionary(p => p.ProgID);
                 Report(progress, "MIME Types", 3, total_count);
-                m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType()).ToList();
+                m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType(this)).ToList();
                 Report(progress, "AppIDs", 4, total_count);
                 m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
                 Report(progress, "Interfaces", 5, total_count);
@@ -776,32 +776,33 @@ namespace OleViewDotNet
                 {
                     string[] subkeys = clsidKey.GetSubKeyNames();
                     foreach (string key in subkeys)
-                    {              
-                        Guid clsid;
-
-                        if(Guid.TryParse(key, out clsid))
+                    {
+                        if (!Guid.TryParse(key, out Guid clsid))
                         {
-                            if (!clsids.ContainsKey(clsid))
+                            continue;
+                        }
+                        if (clsids.ContainsKey(clsid))
+                        {
+                            continue;
+                        }
+
+                        using (RegistryKey regKey = clsidKey.OpenSubKey(key))
+                        {
+                            if (regKey != null)
                             {
-                                using (RegistryKey regKey = clsidKey.OpenSubKey(key))
+                                COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
+                                clsids.Add(clsid, ent);
+                                foreach (Guid catid in ent.Categories)
                                 {
-                                    if (regKey != null)
+                                    if (!categories.ContainsKey(catid))
                                     {
-                                        COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
-                                        clsids.Add(clsid, ent);
-                                        foreach (Guid catid in ent.Categories)
-                                        {
-                                            if (!categories.ContainsKey(catid))
-                                            {
-                                                categories[catid] = new List<Guid>();
-                                            }
-                                            categories[catid].Add(ent.Clsid);
-                                        }
+                                        categories[catid] = new List<Guid>();
                                     }
+                                    categories[catid].Add(ent.Clsid);
                                 }
                             }
                         }
-                    }                    
+                    }
                 }
             }
             
@@ -822,7 +823,7 @@ namespace OleViewDotNet
                         Guid clsid = COMUtilities.ReadGuidFromKey(regKey, "CLSID", null);
                         if (clsid != Guid.Empty)
                         {
-                            COMProgIDEntry entry = new COMProgIDEntry(key, clsid, regKey);
+                            COMProgIDEntry entry = new COMProgIDEntry(this, key, clsid, regKey);
                             m_progids.Add(key, entry);
                         }
                     }
@@ -1019,7 +1020,7 @@ namespace OleViewDotNet
                 RegistryKey sub_key = key.OpenSubKey(mime_type);
                 if (sub_key != null)
                 {
-                    COMMimeType obj = new COMMimeType(mime_type, sub_key);
+                    COMMimeType obj = new COMMimeType(this, mime_type, sub_key);
                     if (obj.Clsid != Guid.Empty)
                     {
                         m_mimetypes.Add(obj);

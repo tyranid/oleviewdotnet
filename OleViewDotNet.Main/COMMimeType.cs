@@ -24,13 +24,23 @@ namespace OleViewDotNet
 {
     public class COMMimeType : IXmlSerializable
     {
+        private readonly COMRegistry m_registry;
+
         public string MimeType { get; private set; }
         public Guid Clsid { get; private set; }
+        public COMCLSIDEntry ClassEntry
+        {
+            get
+            {
+                return m_registry.Clsids.GetGuidEntry(Clsid);
+            }
+        }
+
         public string Extension { get; private set; }
 
         public override string ToString()
         {
-            return String.Format("MIME Type: {0}", MimeType);
+            return MimeType;
         }
 
         public override bool Equals(object obj)
@@ -55,7 +65,7 @@ namespace OleViewDotNet
             return MimeType.GetSafeHashCode() ^ Clsid.GetHashCode() ^ Extension.GetSafeHashCode();
         }
 
-        public COMMimeType(string mime_type, RegistryKey key)
+        internal COMMimeType(COMRegistry registry, string mime_type, RegistryKey key) : this(registry)
         {
             string clsid = key.GetValue("CLSID") as string;
             string extension = key.GetValue("Extension") as string;
@@ -68,8 +78,9 @@ namespace OleViewDotNet
             MimeType = mime_type;
         }
 
-        internal COMMimeType()
+        internal COMMimeType(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

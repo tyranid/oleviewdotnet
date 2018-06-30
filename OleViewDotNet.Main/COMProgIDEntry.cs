@@ -24,11 +24,18 @@ namespace OleViewDotNet
 {
     public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable
     {
-        public COMProgIDEntry(string progid, Guid clsid, RegistryKey rootKey)
+        private readonly COMRegistry m_registry;
+
+        public COMProgIDEntry(COMRegistry registry, string progid, Guid clsid, RegistryKey rootKey) : this(registry)
         {
             Clsid = clsid;
             ProgID = progid;
             Name = rootKey.GetValue(null, String.Empty).ToString();
+        }
+
+        internal COMProgIDEntry(COMRegistry registry)
+        {
+            m_registry = registry;
         }
 
         public int CompareTo(COMProgIDEntry right)
@@ -40,11 +47,19 @@ namespace OleViewDotNet
 
         public Guid Clsid { get; private set; }
 
+        public COMCLSIDEntry ClassEntry
+        {
+            get
+            {
+                return m_registry.Clsids.GetGuidEntry(Clsid);
+            }
+        }
+
         public string Name { get; private set; }
 
         public override string ToString()
         {
-            return String.Format("COMProgIDEntry: {0}", Name);
+            return Name;
         }
 
         public override bool Equals(object obj)
@@ -68,10 +83,6 @@ namespace OleViewDotNet
             return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode();
         }
 
-        internal COMProgIDEntry()
-        {
-        }
-
         XmlSchema IXmlSerializable.GetSchema()
         {
             return null;
@@ -81,7 +92,7 @@ namespace OleViewDotNet
         {
             ProgID = reader.ReadString("progid");
             Clsid = reader.ReadGuid("clsid");
-            Name = reader.ReadString("name");            
+            Name = reader.ReadString("name");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)

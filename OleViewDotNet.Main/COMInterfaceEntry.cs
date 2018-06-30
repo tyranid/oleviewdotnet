@@ -17,6 +17,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -223,6 +224,14 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public COMInterfaceEntry InterfaceEntry
+        {
+            get
+            {
+                return m_registry.Interfaces.GetGuidEntry(Iid);
+            }
+        }
+
         public Guid ProxyClsid
         {
             get; private set;
@@ -232,7 +241,7 @@ namespace OleViewDotNet
         {
             get
             {
-                m_registry.Clsids.GetGuidEntry(ProxyClsid);
+                return m_registry.Clsids.GetGuidEntry(ProxyClsid);
             }
         }
 
@@ -260,7 +269,20 @@ namespace OleViewDotNet
         {
             get
             {
-                m_registry.Typelibs.GetGuidEntry(TypeLib);
+                return m_registry.Typelibs.GetGuidEntry(TypeLib);
+            }
+        }
+
+        public COMTypeLibVersionEntry TypeLibVersionEntry
+        {
+            get
+            {
+                var typelib = TypeLibEntry;
+                if (typelib != null)
+                {
+                    return typelib.Versions.Where(v => v.Version == TypeLibVersion).FirstOrDefault();
+                }
+                return null;
             }
         }
 
@@ -299,7 +321,7 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("COMInterfaceEntry: {0}", Name);
+            return Name;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

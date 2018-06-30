@@ -29,7 +29,7 @@ using System.Text;
 
 namespace OleViewDotNet
 {
-    internal class COMProcessParserConfig
+    public class COMProcessParserConfig
     {
         public string DbgHelpPath { get; private set; }
         public string SymbolPath { get; private set; }
@@ -167,7 +167,7 @@ namespace OleViewDotNet
         }
     }
 
-    internal static class COMProcessParser
+    public static class COMProcessParser
     {
         private static T ReadStruct<T>(this NtProcess process, long address) where T : new()
         {
@@ -1111,7 +1111,7 @@ namespace OleViewDotNet
             return builder.ToString();
         }
 
-        private static string ReadString(NtProcess process, ISymbolResolver resolver, string symbol)
+        internal static string ReadString(NtProcess process, ISymbolResolver resolver, string symbol)
         {
             IntPtr str = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
             if (str != IntPtr.Zero)
@@ -1121,7 +1121,7 @@ namespace OleViewDotNet
             return String.Empty;
         }
 
-        public static int ReadInt(NtProcess process, ISymbolResolver resolver, string symbol)
+        internal static int ReadInt(NtProcess process, ISymbolResolver resolver, string symbol)
         {
             IntPtr p = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
             if (p != IntPtr.Zero)
@@ -1131,18 +1131,18 @@ namespace OleViewDotNet
             return 0;
         }
 
-        public static T ReadEnum<T>(NtProcess process, ISymbolResolver resolver, string symbol)
+        internal static T ReadEnum<T>(NtProcess process, ISymbolResolver resolver, string symbol)
         {
             int value = ReadInt(process, resolver, symbol);
             return (T)Enum.ToObject(typeof(T), value);
         }
 
-        public static IntPtr ReadPointer(NtProcess process, ISymbolResolver resolver, string symbol)
+        internal static IntPtr ReadPointer(NtProcess process, ISymbolResolver resolver, string symbol)
         {
             return ReadPointer(process, resolver.GetAddressOfSymbol(GetSymbolName(symbol)));
         }
 
-        public static IntPtr ReadPointer(NtProcess process, IntPtr p)
+        internal static IntPtr ReadPointer(NtProcess process, IntPtr p)
         {
             if (p != IntPtr.Zero)
             {
@@ -1158,7 +1158,7 @@ namespace OleViewDotNet
             return IntPtr.Zero;
         }
 
-        public static IntPtr[] ReadPointerArray(NtProcess process, IntPtr p, int count)
+        internal static IntPtr[] ReadPointerArray(NtProcess process, IntPtr p, int count)
         {
             if (p == IntPtr.Zero)
             {
