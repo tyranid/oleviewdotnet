@@ -816,6 +816,14 @@ namespace OleViewDotNet
             }
         }
 
+        public bool HasPermission
+        {
+            get
+            {
+                return HasLaunchPermission || HasAccessPermission;
+            }
+        }
+
         public string LaunchPermission
         {
             get
