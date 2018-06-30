@@ -60,15 +60,15 @@ namespace OleViewDotNet
             {
                 Name = Iid.FormatGuidDefault();
             }
-              
+
             ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
             NumMethods = COMUtilities.ReadIntFromKey(key, "NumMethods", null);
-            
+
             if (NumMethods < 3)
             {
                 NumMethods = 3;
             }
-            
+
             TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
             TypeLibVersion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
             Base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
@@ -98,7 +98,7 @@ namespace OleViewDotNet
             CacheIidToName(Iid, Name);
         }
 
-        public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey) 
+        public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
             : this(registry, iid, Guid.Empty, 3, "IUnknown", "")
         {
             LoadFromKey(rootKey);
@@ -228,6 +228,14 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public COMCLSIDEntry ProxyClassEntry
+        {
+            get
+            {
+                m_registry.Clsids.GetGuidEntry(ProxyClsid);
+            }
+        }
+
         public int NumMethods
         {
             get; private set;
@@ -246,6 +254,14 @@ namespace OleViewDotNet
         public string TypeLibVersion
         {
             get; private set;
+        }
+
+        public COMTypeLibEntry TypeLibEntry
+        {
+            get
+            {
+                m_registry.Typelibs.GetGuidEntry(TypeLib);
+            }
         }
 
         public bool HasTypeLib
