@@ -698,7 +698,7 @@ namespace OleViewDotNet
                 Report(progress, "Interfaces", 5, total_count);
                 m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry()).ToSortedDictionary(p => p.Iid);
                 Report(progress, "Categories", 6, total_count);
-                m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory()).ToSortedDictionary(p => p.CategoryID);
+                m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory(this)).ToSortedDictionary(p => p.CategoryID);
                 Report(progress, "LowRights", 7, total_count);
                 m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy()).ToList();
                 Report(progress, "TypeLibs", 8, total_count);
@@ -806,7 +806,7 @@ namespace OleViewDotNet
             }
             
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
-            m_categories = categories.ToSortedDictionary(p => p.Key, p => new COMCategory(p.Key, p.Value));
+            m_categories = categories.ToSortedDictionary(p => p.Key, p => new COMCategory(this, p.Key, p.Value));
         }
 
         private void LoadProgIDs(RegistryKey rootKey)

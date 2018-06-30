@@ -25,19 +25,30 @@ namespace OleViewDotNet
 {
     public class COMCategory : IXmlSerializable
     {
+        private readonly COMRegistry m_registry;
+        private Guid[] m_clsids;
+
         public Guid CategoryID { get; private set; }
         public string Name { get; private set; }
-        public IEnumerable<Guid> Clsids { get; private set; }
+        public IEnumerable<COMCLSIDEntry> Clsids
+        {
+            get
+            {
+                return m_clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
+            }
+        }
 
-        public COMCategory(Guid catid, IEnumerable<Guid> clsids)
+        internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
+            : this(registry)
         {
             CategoryID = catid;
-            Clsids = clsids.ToArray();
+            m_clsids = clsids.ToArray();
             Name = COMUtilities.GetCategoryName(catid);
         }
 
-        internal COMCategory()
+        internal COMCategory(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()
@@ -49,14 +60,14 @@ namespace OleViewDotNet
         {
             Name = reader.ReadString("name");
             CategoryID = reader.ReadGuid("catid");
-            Clsids = reader.ReadGuids("clsids").ToArray();
+            m_clsids = reader.ReadGuids("clsids").ToArray();
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             writer.WriteOptionalAttributeString("name", Name);
             writer.WriteGuid("catid", CategoryID);
-            writer.WriteGuids("clsids", Clsids);
+            writer.WriteGuids("clsids", m_clsids);
         }
 
         public override bool Equals(object obj)
@@ -72,13 +83,18 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
+            return m_clsids.SequenceEqual(right.m_clsids) && CategoryID == right.CategoryID && Name == right.Name;
         }
 
         public override int GetHashCode()
         {
             return CategoryID.GetHashCode() ^ Name.GetSafeHashCode() 
-                ^ Clsids.GetEnumHashCode();
+                ^ m_clsids.GetEnumHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
 
         public static readonly Guid CATID_TrustedMarshaler = new Guid("00000003-0000-0000-C000-000000000046");

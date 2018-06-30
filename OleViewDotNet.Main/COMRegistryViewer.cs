@@ -900,8 +900,7 @@ namespace OleViewDotNet
                 currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.FormatGuid());
                 sortedNodes.Add(currNode.Text, currNode);
 
-                IEnumerable<COMCLSIDEntry> clsids = pair.Clsids.Select(c => registry.MapClsidToEntry(c)).Where(c => c != null).OrderBy(c => c.Name);
-
+                IEnumerable<COMCLSIDEntry> clsids = pair.Clsids.OrderBy(c => c.Name);
                 IEnumerable<TreeNode> clsidNodes = clsids.Select(n => CreateClsidNode(registry, n));
                 currNode.Nodes.AddRange(clsidNodes.ToArray());
             }
