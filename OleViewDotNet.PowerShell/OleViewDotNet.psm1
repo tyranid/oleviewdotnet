@@ -200,6 +200,10 @@ Get COM classes which are implemented in a server containing the string "obj.ocx
 .EXAMPLE
 Get-ComClass -Database $db -ServerType InProcServer32
 Get COM classes which are registered with an in-process server.
+.EXAMPLE
+Get-ComClass -Database $db -Iid "00000001-0000-0000-C000-000000000046"
+Get COM class registered as an interface proxy.
+
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -213,7 +217,9 @@ function Get-ComClass {
         [Parameter(ParameterSetName = "FromServer")]
         [string]$ServerName = "",
         [Parameter(ParameterSetName = "FromServer")]
-        [OleViewDotNet.COMServerType]$ServerType = "UnknownServer"
+        [OleViewDotNet.COMServerType]$ServerType = "UnknownServer",
+        [Parameter(Mandatory, ParameterSetName = "FromIid")]
+        [Guid]$Iid
     )
     switch($PSCmdlet.ParameterSetName) {
         "All" {
@@ -229,6 +235,9 @@ function Get-ComClass {
         }
         "FromServer" {
             Get-ComClass $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
+        }
+        "FromIid" {
+            Write-Output $Database.MapIidToInterface($Iid).ProxyClassEntry
         }
     }
 }
