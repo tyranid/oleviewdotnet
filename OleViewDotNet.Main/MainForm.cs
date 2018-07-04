@@ -747,14 +747,6 @@ namespace OleViewDotNet
             }
         }
 
-        private void AddToDictionary(Dictionary<string, int> base_dict, Dictionary<string, int> add_dict)
-        {
-            foreach (var pair in add_dict)
-            {
-                base_dict[pair.Key] = pair.Value;
-            }
-        }
-
         private static bool _configured_symbols = false;
 
         private void ConfigureSymbols()
@@ -778,12 +770,7 @@ namespace OleViewDotNet
                 }
             }
 
-            // Load any supported symbol files.
-            AddToDictionary(SymbolResolverWrapper.GetResolvedNative(), COMUtilities.GetSymbolFile(true));
-            if (Environment.Is64BitProcess)
-            {
-                AddToDictionary(SymbolResolverWrapper.GetResolved32Bit(), COMUtilities.GetSymbolFile(false));
-            }
+            COMUtilities.SetupCachedSymbols();
         }
 
         private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)

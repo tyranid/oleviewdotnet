@@ -676,6 +676,30 @@ namespace OleViewDotNet
             return ret;
         }
 
+        private static void AddToDictionary(Dictionary<string, int> base_dict, Dictionary<string, int> add_dict)
+        {
+            foreach (var pair in add_dict)
+            {
+                base_dict[pair.Key] = pair.Value;
+            }
+        }
+
+        private static bool _cached_symbols_configured;
+
+        public static void SetupCachedSymbols()
+        {
+            if (!_cached_symbols_configured)
+            {
+                _cached_symbols_configured = true;
+                // Load any supported symbol files.
+                AddToDictionary(SymbolResolverWrapper.GetResolvedNative(), GetSymbolFile(true));
+                if (Environment.Is64BitProcess)
+                {
+                    AddToDictionary(SymbolResolverWrapper.GetResolved32Bit(), GetSymbolFile(false));
+                }
+            }
+        }
+
         private static void RegisterTypeInterfaces(Assembly a)
         {
             Type[] types = a.GetTypes();

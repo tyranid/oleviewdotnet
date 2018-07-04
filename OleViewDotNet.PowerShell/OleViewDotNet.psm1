@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+[OleViewDotNet.COMUtilities]::SetupCachedSymbols()
+
 function New-CallbackProgress {
     Param(
         [parameter(Mandatory)]
@@ -237,5 +239,81 @@ function Get-ComClass {
         "FromIid" {
             Write-Output $Database.MapIidToInterface($Iid).ProxyClassEntry
         }
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM process information.
+.DESCRIPTION
+This cmdlet opens a specified set of processes and extracts the COM information from them. For this to work you need symbol support.
+.PARAMETER Database
+The database to use to lookup information.
+.PARAMETER Process
+Specify a list of process objects to parse. You can get these from Get-Process cmdlet.
+.PARAMETER DbgHelpPath
+Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
+.PARAMETER SymbolPath
+Specify the location of symbols for the resolver.
+.PARAMETER ParseStubMethods
+Specify to parse the method parameter information on a process stub.
+.PARAMETER ResolveMethodNames
+Specify to try and resolve method names for interfaces.
+.PARAMETER ParseRegisteredClasses
+Specify to parse classes registered by the process.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMProcessEntry
+.EXAMPLE
+Get-ComProcess -Database $db
+Get all COM processes.
+.EXAMPLE
+Get-Process notepad | Get-ComProcess -Database $db
+Get COM process from a list of processes.
+#>
+function Get-ComProcess {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.COMRegistry]$Database,
+        [string]$DbgHelpPath = "dbghelp.dll",
+        [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols",
+        [switch]$ParseStubMethods,
+        [switch]$ResolveMethodNames,
+        [switch]$ParseRegisteredClasses,
+        [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
+        [System.Diagnostics.Process[]]$Process
+    )
+
+    BEGIN {
+        if ($DbgHelpPath -eq "") {
+            $DbgHelpPath = "dbghelp.dll"
+        }
+        if ($SymbolPath -eq "") {
+            $SymbolPath = $env:_NT_SYMBOL_PATH
+            if ($SymbolPath -eq "") {
+                $SymbolPath = 'srv*https://msdl.microsoft.com/download/symbols'
+            }
+        }
+        $procs = @()
+    }
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "All" {
+                $procs = Get-Process
+            }
+            "FromProcess" {
+                $procs += $Process
+            }
+        }
+    }
+
+    END {
+        $callback = New-CallbackProgress -Activity "Parsing COM Processes"
+        $config = [OleViewDotNet.COMProcessParserConfig]::new($DbgHelpPath, $SymbolPath, `
+                    $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
+        [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
     }
 }
