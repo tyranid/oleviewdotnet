@@ -226,9 +226,7 @@ function Get-ComClass {
             Write-Output $Database.Clsids.Values
         }
         "FromClsid" {
-            if ($Database.Clsids.ContainsKey($Clsid)) {
-                Write-Output $Database.Clsids[$Clsid]
-            }
+            Write-Output $Database.Clsids[$Clsid]
         }
         "FromName" {
             Get-ComClass $Database | ? Name -Match $Name | Write-Output
