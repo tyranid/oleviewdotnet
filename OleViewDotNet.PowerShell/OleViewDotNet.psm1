@@ -317,3 +317,59 @@ function Get-ComProcess {
         [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
     }
 }
+
+<#
+.SYNOPSIS
+Start a log of COM activations in the current process.
+.DESCRIPTION
+This cmdlet starts a COM activation log for the current process. It will write out all 
+COM classes created until Stop-ComActivationLog is called.
+.PARAMETER Database
+Optional database to lookup names for activated objects.
+.PARAMETER Path
+Specify a path for the log file.
+.PARAMETER Append
+If specified then new entries will be appended to the log rather than replacing the log file.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Start-ComActivationLog activations.log
+Start COM activation log to activations.log.
+.EXAMPLE
+Start-ComActivationLog activations.log -Database $db
+Start COM activation log to activations.log with a database for name lookup.
+.EXAMPLE
+Start-ComActivationLog activations.log -Append
+Start COM activation log to activations.log appending new entries to the end of the file.
+#>
+function Start-ComActivationLog {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Path,
+        [switch]$Append,
+        [OleViewDotNet.COMRegistry]$Database
+    )
+
+    $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+    [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
+}
+
+<#
+.SYNOPSIS
+Stop the log of COM activations in the current process.
+.DESCRIPTION
+This cmdlet stops a COM activation log for the current process.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Stop-ComActivationLog
+Stop COM activation log.
+#>
+function Stop-ComActivationLog {
+    [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Stop()
+}
