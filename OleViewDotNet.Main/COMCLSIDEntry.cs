@@ -755,6 +755,22 @@ namespace OleViewDotNet
             }
         }
 
+        public IEnumerable<string> ProgIds
+        {
+            get
+            {
+                return ProgIdEntries.Select(p => p.ProgID);
+            }
+        }
+
+        public IEnumerable<COMProgIDEntry> ProgIdEntries
+        {
+            get
+            {
+                return m_registry.GetProgIdsForClsid(Clsid);
+            }
+        }
+
         public COMThreadingModel DefaultThreadingModel
         {
             get
