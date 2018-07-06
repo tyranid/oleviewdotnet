@@ -812,7 +812,7 @@ namespace OleViewDotNet
 
         private void LoadProgIDs(RegistryKey rootKey)
         {
-            m_progids = new SortedDictionary<string, COMProgIDEntry>();
+            Dictionary<string, COMProgIDEntry> progids = new Dictionary<string, COMProgIDEntry>(StringComparer.OrdinalIgnoreCase);
             string[] subkeys = rootKey.GetSubKeyNames();
             foreach (string key in subkeys)
             {
@@ -824,7 +824,7 @@ namespace OleViewDotNet
                         if (clsid != Guid.Empty)
                         {
                             COMProgIDEntry entry = new COMProgIDEntry(this, key, clsid, regKey);
-                            m_progids.Add(key, entry);
+                            progids[key] = entry;
                         }
                     }
                 }
@@ -832,6 +832,7 @@ namespace OleViewDotNet
                 {
                 }
             }
+            m_progids = new SortedDictionary<string, COMProgIDEntry>(progids, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
