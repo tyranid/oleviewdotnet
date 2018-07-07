@@ -200,9 +200,14 @@ namespace OleViewDotNet
             return reader.GetAttribute(name) ?? String.Empty;
         }
 
+        internal static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> key_selector, IComparer<TKey> comparer)
+        {
+            return new SortedDictionary<TKey, TValue>(enumerable.ToDictionary(key_selector), comparer);
+        }
+
         internal static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> key_selector)
         {
-            return new SortedDictionary<TKey, TValue>(enumerable.ToDictionary(key_selector));
+            return ToSortedDictionary(enumerable, key_selector, Comparer<TKey>.Default);
         }
 
         internal static SortedDictionary<TKey, TElement> ToSortedDictionary<TKey, TValue, TElement>(this IEnumerable<TValue> enumerable, 

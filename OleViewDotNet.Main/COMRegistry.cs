@@ -369,9 +369,18 @@ namespace OleViewDotNet
             }
         }
 
+        static IComparer<S> GetComparer<S, T>(IDictionary<S, T> dict)
+        {
+            if (dict is SortedDictionary<S, T> sorted_dict)
+            {
+                return sorted_dict.Comparer;
+            }
+            return Comparer<S>.Default;
+        }
+
         static SortedDictionary<S, T> DiffDicts<S, T>(IDictionary<S, T> left, IDictionary<S, T> right, COMRegistryDiffMode mode, Func<T, S> key_selector)
         {
-            return DiffLists(left.Values, right.Values, mode).ToSortedDictionary(key_selector);
+            return DiffLists(left.Values, right.Values, mode).ToSortedDictionary(key_selector, GetComparer(left));
         }
 
         private static void Report(IProgress<Tuple<string, int>> progress, string report)
@@ -388,7 +397,6 @@ namespace OleViewDotNet
         public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<Tuple<string, int>> progress)
         {
             const int total_count = 10;
-
             COMRegistry ret = new COMRegistry(COMRegistryMode.Diff);
             Report(progress, "CLSIDs", 1, total_count);
             ret.m_clsids = DiffDicts(left.m_clsids, right.m_clsids, mode, p => p.Clsid);
@@ -690,7 +698,7 @@ namespace OleViewDotNet
                 Report(progress, "CLSIDs", 1, total_count);
                 m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
                 Report(progress, "ProgIDs", 2, total_count);
-                m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry(this)).ToSortedDictionary(p => p.ProgID);
+                m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry(this)).ToSortedDictionary(p => p.ProgID, StringComparer.OrdinalIgnoreCase);
                 Report(progress, "MIME Types", 3, total_count);
                 m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType(this)).ToList();
                 Report(progress, "AppIDs", 4, total_count);
