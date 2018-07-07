@@ -59,7 +59,7 @@ function Get-ComDatabase {
         [OleViewDotNet.COMRegistryMode]$LoadMode = "Merged",
         [Parameter(ParameterSetName = "FromRegistry")]
         [NtApiDotNet.Sid]$User,
-        [Parameter(Mandatory, ParameterSetName = "FromFile")]
+        [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path
     )
     $callback = New-CallbackProgress -Activity "Loading COM Registry"
@@ -221,7 +221,9 @@ function Get-ComClass {
         [Parameter(ParameterSetName = "FromServer")]
         [OleViewDotNet.COMServerType]$ServerType = "UnknownServer",
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
-        [Guid]$Iid
+        [Guid]$Iid,
+        [Parameter(Mandatory, ParameterSetName = "FromProgId")]
+        [string]$ProgId
     )
     switch($PSCmdlet.ParameterSetName) {
         "All" {
@@ -238,6 +240,9 @@ function Get-ComClass {
         }
         "FromIid" {
             Write-Output $Database.MapIidToInterface($Iid).ProxyClassEntry
+        }
+        "FromProgId" {
+            Write-Output $Database.MapProgIdToClsid($ProgId)
         }
     }
 }

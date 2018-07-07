@@ -577,6 +577,16 @@ namespace OleViewDotNet
             }
         }
 
+        public COMCLSIDEntry MapProgIdToClsid(string progid)
+        {
+            if (!m_progids.ContainsKey(progid))
+            {
+                return null;
+            }
+
+            return m_progids[progid].ClassEntry;
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
