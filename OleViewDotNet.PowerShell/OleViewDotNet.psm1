@@ -380,3 +380,59 @@ Stop COM activation log.
 function Stop-ComActivationLog {
     [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Stop()
 }
+
+<#
+.SYNOPSIS
+Get COM AppIDs from a database.
+.DESCRIPTION
+This cmdlet gets COM AppIDs from the database based on a set of criteria. The default is to return all registered AppIds.
+.PARAMETER Database
+The database to use.
+.PARAMETER AppId
+Specify a AppID to lookup.
+.PARAMETER Name
+Specify a name to match against the AppId name.
+.PARAMETER ServiceName
+Specify a service name to match against.
+.PARAMETER IsService
+Specify a returns AppIDs implemented by services.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMAppIDEntry
+.EXAMPLE
+Get-ComAppId -Database $db
+Get all COM AppIDs from a database.
+#>
+function Get-ComAppId {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromAppId")]
+        [Guid]$AppId,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(ParameterSetName = "FromServiceName")]
+        [string]$ServiceName = "",
+        [Parameter(ParameterSetName = "FromIsService")]
+        [switch]$IsService
+    )
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.AppIDs.Values
+        }
+        "FromAppId" {
+            Write-Output $Database.AppIDs[$AppId]
+        }
+        "FromName" {
+            Get-ComAppId $Database | ? Name -Match $Name | Write-Output
+        }
+        "FromServiceName" {
+            Get-ComAppId $Database | ? ServiceName -Match $ServiceName | Write-Output
+        }
+        "FromIsService" {
+            Get-ComAppId $Database | ? IsService | Write-Output
+        }
+    }
+}
