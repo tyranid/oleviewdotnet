@@ -205,7 +205,9 @@ Get COM classes which are registered with an in-process server.
 .EXAMPLE
 Get-ComClass -Database $db -Iid "00000001-0000-0000-C000-000000000046"
 Get COM class registered as an interface proxy.
-
+.EXAMPLE
+Get-ComClass -Database $db -ProgId htafile
+Get COM class from a Prog ID.
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
