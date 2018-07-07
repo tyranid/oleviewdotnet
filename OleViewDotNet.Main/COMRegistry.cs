@@ -66,6 +66,7 @@ namespace OleViewDotNet
         private Dictionary<Guid, List<COMProgIDEntry>> m_progidsbyclsid;
         private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
         private Dictionary<Guid, string> m_iids_to_names;
+        private Dictionary<Guid, IEnumerable<COMCLSIDEntry>> m_clsids_by_appid;
 
 
         #endregion
@@ -149,11 +150,16 @@ namespace OleViewDotNet
             get { return m_appid; }
         }
 
-        public IEnumerable<IGrouping<Guid, COMCLSIDEntry>> ClsidsByAppId
+        public IDictionary<Guid, IEnumerable<COMCLSIDEntry>> ClsidsByAppId
         {
             get
             {
-                return m_clsids.Values.Where(c => c.AppID != Guid.Empty).GroupBy(c => c.AppID);
+                if (m_clsids_by_appid == null)
+                {
+                    m_clsids_by_appid = m_clsids.Values.Where(c => c.AppID != Guid.Empty)
+                        .GroupBy(c => c.AppID).ToDictionary(g => g.Key, g => g.AsEnumerable());
+                }
+                return m_clsids_by_appid;
             }
         }
 
@@ -712,7 +718,7 @@ namespace OleViewDotNet
                 Report(progress, "MIME Types", 3, total_count);
                 m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType(this)).ToList();
                 Report(progress, "AppIDs", 4, total_count);
-                m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry()).ToSortedDictionary(p => p.AppId);
+                m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry(this)).ToSortedDictionary(p => p.AppId);
                 Report(progress, "Interfaces", 5, total_count);
                 m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry(this)).ToSortedDictionary(p => p.Iid);
                 Report(progress, "Categories", 6, total_count);
@@ -1069,7 +1075,7 @@ namespace OleViewDotNet
                                 {
                                     if (regKey != null)
                                     {
-                                        COMAppIDEntry ent = new COMAppIDEntry(appid, regKey);
+                                        COMAppIDEntry ent = new COMAppIDEntry(appid, regKey, this);
                                         m_appid.Add(appid, ent);
                                     }
                                 }

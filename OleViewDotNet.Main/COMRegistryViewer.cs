@@ -593,7 +593,7 @@ namespace OleViewDotNet
             }
         }
         
-        private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId)
+        private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, IEnumerable<COMCLSIDEntry>> clsidsByAppId)
         {
             TreeNode node = CreateNode(BuildCOMProcessName(proc), ApplicationKey);
             node.ToolTipText = BuildCOMProcessTooltip(proc);
@@ -634,7 +634,7 @@ namespace OleViewDotNet
             var servicesById = COMUtilities.GetServicePids();
             var appidsByService = registry.AppIDs.Values.Where(a => a.IsService).
                 GroupBy(a => a.LocalService.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g, StringComparer.OrdinalIgnoreCase);
-            var clsidsByAppId = registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
+            var clsidsByAppId = registry.ClsidsByAppId;
             var appsByPid = servicesById.ToDictionary(p => p.Key, p => p.Value.Where(v => appidsByService.ContainsKey(v)).SelectMany(v => appidsByService[v]));
 
             return processes.Where(p => p.Ipids.Any()).Select(p => CreateCOMProcessNode(registry, p, appsByPid, clsidsByAppId));
@@ -770,15 +770,15 @@ namespace OleViewDotNet
 
         private static IEnumerable<TreeNode> LoadLocalServices(COMRegistry registry)
         {
-            List<IGrouping<Guid, COMCLSIDEntry>> clsidsByAppId = registry.ClsidsByAppId.ToList();
-            IDictionary<Guid, COMAppIDEntry> appids = registry.AppIDs;
+            var clsidsByAppId = registry.ClsidsByAppId;
+            var appids = registry.AppIDs;
 
             List<TreeNode> serverNodes = new List<TreeNode>();
-            foreach (IGrouping<Guid, COMCLSIDEntry> pair in clsidsByAppId)
+            foreach (var pair in clsidsByAppId)
             {   
                 if(appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
                 {
-                    serverNodes.Add(CreateLocalServiceNode(registry, appids[pair.Key], pair));
+                    serverNodes.Add(CreateLocalServiceNode(registry, appids[pair.Key], pair.Value));
                 }
             }
 
@@ -853,8 +853,8 @@ namespace OleViewDotNet
 
         private static IEnumerable<TreeNode> LoadAppIDs(COMRegistry registry, bool filterIL, bool filterAC)
         {
-            IDictionary<Guid, List<COMCLSIDEntry>> clsidsByAppId = registry.ClsidsByAppId.ToDictionary(g => g.Key, g => g.ToList());
-            IDictionary<Guid, COMAppIDEntry> appids = registry.AppIDs;
+            var clsidsByAppId = registry.ClsidsByAppId;
+            var appids = registry.AppIDs;
 
             List<TreeNode> serverNodes = new List<TreeNode>();
             foreach (var pair in appids)

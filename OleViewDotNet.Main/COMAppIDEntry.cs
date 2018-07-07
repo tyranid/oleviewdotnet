@@ -150,8 +150,10 @@ namespace OleViewDotNet
     }
 
     public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable
-    {     
-        public COMAppIDEntry(Guid appId, RegistryKey key)
+    {
+        private readonly COMRegistry m_registry;
+
+        public COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
         {
             AppId = appId;
             LoadFromKey(key);
@@ -257,7 +259,19 @@ namespace OleViewDotNet
             get { return LocalService != null; }
         }
 
-        public ServiceProtectionLevel ProtectionLevel
+        public string ServiceName
+        {
+            get
+            {
+                if (IsService)
+                {
+                    return LocalService.Name;
+                }
+                return string.Empty;
+            }
+        }
+
+        public ServiceProtectionLevel ServiceProtectionLevel
         {
             get
             {
@@ -324,6 +338,18 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public IEnumerable<COMCLSIDEntry> ClassEntries
+        {
+            get
+            {
+                if (m_registry.ClsidsByAppId.ContainsKey(AppId))
+                {
+                    return m_registry.ClsidsByAppId[AppId];
+                }
+                return new COMCLSIDEntry[0];
+            }
+        }
+
         public override string ToString()
         {
             return Name;
@@ -366,8 +392,9 @@ namespace OleViewDotNet
                 LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode();
         }
 
-        internal COMAppIDEntry()
+        internal COMAppIDEntry(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()
