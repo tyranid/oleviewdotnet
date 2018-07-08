@@ -204,6 +204,7 @@ namespace OleViewDotNet
             bool refresh_interfaces = false;
             bool enable_activation_filter = false;
             string symbol_dir = null;
+            bool delete_database = false;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
             
@@ -220,6 +221,7 @@ namespace OleViewDotNet
                 { "u", "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
                 { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
                 { "g=", "Generate a symbol file in the specified directory.", v => symbol_dir = v },
+                { "d", "Delete the input database once loaded", v => delete_database = v != null },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -272,6 +274,10 @@ namespace OleViewDotNet
                 {
                     COMRegistry registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
                         : COMUtilities.LoadRegistry(null, mode);
+                    if (delete_database && database_file != null)
+                    {
+                        File.Delete(database_file);
+                    }
 
                     if (query_interfaces)
                     {
