@@ -900,7 +900,7 @@ namespace OleViewDotNet
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry);
             }
             catch (Win32Exception)
             {
@@ -1174,8 +1174,8 @@ namespace OleViewDotNet
             Name = reader.ReadString("name");
             if (m_loaded_interfaces)
             {
-                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance()).ToList();
-                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance()).ToList();
+                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(m_registry)).ToList();
+                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(m_registry)).ToList();
             }
             Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(
                     reader.ReadSerializableObjects("servers", () => new COMCLSIDServerEntry()).ToDictionary(e => e.ServerType));

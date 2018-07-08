@@ -199,7 +199,7 @@ namespace OleViewDotNet
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry);
             }
             catch (Win32Exception)
             {

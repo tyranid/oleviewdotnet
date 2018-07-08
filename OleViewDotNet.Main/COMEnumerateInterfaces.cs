@@ -33,23 +33,37 @@ namespace OleViewDotNet
 {
     public class COMInterfaceInstance : IXmlSerializable
     {
+        private COMRegistry m_registry;
+
         public Guid Iid { get; private set; }
         public string Module { get; private set; }
         public long VTableOffset { get; private set; }
+        public string Name
+        {
+            get
+            {
+                if (m_registry == null || !m_registry.InterfacesToNames.ContainsKey(Iid))
+                {
+                    return string.Empty;
+                }
+                return m_registry.InterfacesToNames[Iid];
+            }
+        }
 
-        public COMInterfaceInstance(Guid iid, string module, long vtable_offset)
+        public COMInterfaceInstance(Guid iid, string module, long vtable_offset, COMRegistry registry) : this(registry)
         {
             Iid = iid;
             Module = module;
             VTableOffset = vtable_offset;
         }
 
-        public COMInterfaceInstance(Guid iid) : this(iid, null, 0)
+        public COMInterfaceInstance(Guid iid, COMRegistry registry) : this(iid, null, 0, registry)
         {
         }
 
-        public COMInterfaceInstance()
+        public COMInterfaceInstance(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
         public override string ToString()
@@ -113,11 +127,11 @@ namespace OleViewDotNet
                             }
                             intf = new COMInterfaceInstance(iid,
                                 module_names[module.DangerousGetHandle()],
-                                vtable.ToInt64() - module.DangerousGetHandle().ToInt64());
+                                vtable.ToInt64() - module.DangerousGetHandle().ToInt64(), null);
                         }
                         else
                         {
-                            intf = new COMInterfaceInstance(iid);
+                            intf = new COMInterfaceInstance(iid, null);
                         }
                     }
 
@@ -305,7 +319,7 @@ namespace OleViewDotNet
             _winrt_component = !string.IsNullOrWhiteSpace(_activatable_classid);
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry)
         {
             string apartment = "s";
             if (ent.Threading == ThreadingType.Both
@@ -315,7 +329,7 @@ namespace OleViewDotNet
             }
             string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
                 ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
-            var interfaces = await GetInterfacesOOP(command_line, true);
+            var interfaces = await GetInterfacesOOP(command_line, true, registry);
             return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
 
@@ -325,7 +339,7 @@ namespace OleViewDotNet
             public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
         }
 
-        private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class)
+        private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry)
         {
             using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
@@ -402,11 +416,11 @@ namespace OleViewDotNet
 
                                     if (factory)
                                     {
-                                        factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset));
+                                        factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
                                     }
                                     else
                                     {
-                                        interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset));
+                                        interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
                                     }
                                 }
                             }
@@ -419,8 +433,8 @@ namespace OleViewDotNet
                         int exitCode = proc.ExitCode;
                         if (exitCode != 0)
                         {
-                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
-                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown) });
+                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
+                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
                         }
                         return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
                     }
@@ -432,7 +446,7 @@ namespace OleViewDotNet
             }
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry)
         {
             string apartment = "s";
             if (ent.DefaultThreadingModel == COMThreadingModel.Both 
@@ -442,7 +456,7 @@ namespace OleViewDotNet
             }
 
             string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, ent.CreateContext);
-            var interfaces = await GetInterfacesOOP(command_line, false);
+            var interfaces = await GetInterfacesOOP(command_line, false, registry);
             return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
     }
