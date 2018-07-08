@@ -19,12 +19,17 @@
 function New-CallbackProgress {
     Param(
         [parameter(Mandatory)]
-        [string]$Activity
+        [string]$Activity,
+        [switch]$NoProgress
     )
 
-    $callback = [Action[string, string, int]]{ Write-Progress -Activity $args[0] -Status "Processing $($args[1])" -PercentComplete $args[2] }
+    if ($NoProgress) {
+        $callback = {}
+    } else {
+        $callback = { Write-Progress -Activity $args[0] -Status "Processing $($args[1])" -PercentComplete $args[2] }
+    }
 
-    [OleViewDotNet.PowerShell.CallbackProgress]::new($Activity, $callback)
+    [OleViewDotNet.PowerShell.CallbackProgress]::new($Activity, [Action[string, string, int]]$callback)
 }
 
 <#
@@ -38,6 +43,8 @@ Specify what to load from the registry.
 Specify a user to load when loading user-specific COM registration information.
 .PARAMETER Path
 Specify a path to load a saved COM database.
+.PARAMETER NoProgress
+Don't show progress for load.
 .INPUTS
 None
 .OUTPUTS
@@ -60,9 +67,10 @@ function Get-ComDatabase {
         [Parameter(ParameterSetName = "FromRegistry")]
         [NtApiDotNet.Sid]$User,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
-        [string]$Path
+        [string]$Path,
+        [switch]$NoProgress
     )
-    $callback = New-CallbackProgress -Activity "Loading COM Registry"
+    $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
 
     switch($PSCmdlet.ParameterSetName) {
         "FromRegistry" {
@@ -84,6 +92,8 @@ This cmdlet saves a COM registration database to a file.
 The path to save the database to.
 .PARAMETER Database
 The database to save.
+.PARAMETER NoProgress
+Don't show progress for save.
 .INPUTS
 None
 .OUTPUTS
@@ -98,9 +108,10 @@ function Set-ComDatabase {
         [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, Position = 1)]
-        [string]$Path
+        [string]$Path,
+        [switch]$NoProgress
     )
-    $callback = New-CallbackProgress -Activity "Saving COM Registry"
+    $callback = New-CallbackProgress -Activity "Saving COM Registry" -NoProgress:$NoProgress
     $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
     $Database.Save($Path, $callback)
 }
@@ -116,6 +127,8 @@ The database to the left of the comparison.
 The database to the right of the comparison.
 .PARAMETER DiffMode
 Specify which database information to preserve in the diff, choice between left (default) or right.
+.PARAMETER NoProgress
+Don't show progress for compare.
 .INPUTS
 None
 .OUTPUTS
@@ -134,9 +147,10 @@ function Compare-ComDatabase {
         [OleViewDotNet.COMRegistry]$Left,
         [Parameter(Mandatory, Position = 1)]
         [OleViewDotNet.COMRegistry]$Right,
-        [OleViewDotNet.COMRegistryDiffMode]$DiffMode = "LeftOnly"
+        [OleViewDotNet.COMRegistryDiffMode]$DiffMode = "LeftOnly",
+        [switch]$NoProgresss
     )
-    $callback = New-CallbackProgress -Activity "Comparing COM Registries"
+    $callback = New-CallbackProgress -Activity "Comparing COM Registries" -NoProgress:$NoProgress
     [OleViewDotNet.COMRegistry]::Diff($Left, $Right, $DiffMode, $callback)
 }
 
@@ -268,6 +282,8 @@ Specify to parse the method parameter information on a process stub.
 Specify to try and resolve method names for interfaces.
 .PARAMETER ParseRegisteredClasses
 Specify to parse classes registered by the process.
+.PARAMETER NoProgress
+Don't show progress for process parsing.
 .INPUTS
 None
 .OUTPUTS
@@ -290,7 +306,8 @@ function Get-ComProcess {
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
-        [System.Diagnostics.Process[]]$Process
+        [System.Diagnostics.Process[]]$Process,
+        [switch]$NoProgress
     )
 
     BEGIN {
@@ -318,7 +335,7 @@ function Get-ComProcess {
     }
 
     END {
-        $callback = New-CallbackProgress -Activity "Parsing COM Processes"
+        $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
         $config = [OleViewDotNet.COMProcessParserConfig]::new($DbgHelpPath, $SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
         [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
