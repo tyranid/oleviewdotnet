@@ -502,3 +502,36 @@ function Show-ComDatabase {
     }
     Start-Process $exe $args
 }
+
+<#
+.SYNOPSIS
+Get a COM class or Runtime class instance interfaces.
+.DESCRIPTION
+This cmdlet enumerates the supported interfaces for a COM class or Runtime class and returns them.
+.PARAMETER ClassEntry
+The COM or Runtime class to enumerate.
+.PARAMETER Refresh
+Specify to force the interfaces to be refreshed.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMInterfaceInstance[]
+.EXAMPLE
+Get-ComClassInterface -ClassEntry $cls
+Get instance interfaces for a COM class.
+.EXAMPLE
+Get-ComClassInterface -ClassEntry $cls -Refresh
+Get instance interfaces for a COM class forcing them to be refreshed if necessary.
+#>
+function Get-ComClassInterface {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [OleViewDotNet.ICOMClassEntry]$ClassEntry,
+        [switch]$Refresh
+        )
+    PROCESS {
+        $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
+        $ClassEntry.Interfaces | Write-Output
+    }
+}
