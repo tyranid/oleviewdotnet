@@ -633,6 +633,15 @@ namespace OleViewDotNet
             return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
         }
 
+        public static string GetExePathForCurrentBitness()
+        {
+            if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
+            {
+                return GetExePath();
+            }
+            return Get32bitExePath();
+        }
+
         public static string GetAppDataDirectory()
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OleViewDotNet");

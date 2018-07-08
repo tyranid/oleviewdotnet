@@ -453,3 +453,52 @@ function Get-ComAppId {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Show a COM database in the main viewer.
+.DESCRIPTION
+This cmdlet starts the main viewer application and loads a specified database file.
+.PARAMETER Database
+The database to view.
+.PARAMETER Path
+The path to the database to view.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Show-ComDatabase -Database $db
+Show a COM database in the viewer.
+.EXAMPLE
+Show-ComDatabase -Path com.db
+Show a COM database in the viewer from a file.
+#>
+function Show-ComDatabase {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromDb")]
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFile")]
+        [string]$Path
+    )
+
+    $DeleteFile = $false
+
+    switch($PSCmdlet.ParameterSetName) {
+        "FromDb" {
+            $Path = (New-TemporaryFile).FullName
+            Set-ComDatabase $Database $Path -NoProgress
+            $DeleteFile = $true
+        }
+        "FromFile" {
+            # Do nothing.
+        }
+    }
+    $exe = [OleViewDotNet.COMUtilities]::GetExePathForCurrentBitness()
+    $args = @("`"-i=$Path`"")
+    if ($DeleteFile) {
+        $args += @("-d")
+    }
+    Start-Process $exe $args
+}
