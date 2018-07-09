@@ -303,6 +303,11 @@ namespace OleViewDotNet
             get { return !String.IsNullOrWhiteSpace(AccessPermission); }
         }
 
+        public bool HasPermission
+        {
+            get { return HasLaunchPermission || HasAccessPermission; }
+        }
+
         public bool HasLowILAccess
         {
             get { return COMSecurity.GetILForSD(AccessPermission) <= TokenIntegrityLevel.Low; }
