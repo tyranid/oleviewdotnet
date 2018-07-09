@@ -207,6 +207,7 @@ namespace OleViewDotNet
         public COMThreadingModel ThreadingModel { get; private set; }
         public COMCLSIDServerDotNetEntry DotNet { get; private set; }
         public bool HasDotNet { get { return DotNet != null; } }
+        public string RawServer { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -223,13 +224,16 @@ namespace OleViewDotNet
 
             return Server == right.Server
                 && CommandLine == right.CommandLine
-                && ServerType == right.ServerType && ThreadingModel == right.ThreadingModel;
+                && ServerType == right.ServerType 
+                && ThreadingModel == right.ThreadingModel
+                && RawServer == right.RawServer;
         }
 
         public override int GetHashCode()
         {
             return Server.GetHashCode() ^ CommandLine.GetHashCode() 
-                ^ ServerType.GetHashCode() ^ ThreadingModel.GetHashCode();
+                ^ ServerType.GetHashCode() ^ ThreadingModel.GetHashCode()
+                ^ RawServer.GetSafeHashCode();
         }
 
         private static bool IsInvalidFileName(string filename)
@@ -340,6 +344,7 @@ namespace OleViewDotNet
             : this(server_type)
         {
             string server_string = key.GetValue(null) as string;
+            RawServer = key.GetValue(null, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
 
             if (String.IsNullOrWhiteSpace(server_string))
             {
@@ -391,6 +396,7 @@ namespace OleViewDotNet
             CommandLine = reader.ReadString("cmdline");
             ServerType = reader.ReadEnum<COMServerType>("type");
             ThreadingModel = reader.ReadEnum<COMThreadingModel>("model");
+            RawServer = reader.ReadString("rawserver");
             if (reader.ReadBool("dotnet"))
             {
                 IEnumerable<COMCLSIDServerDotNetEntry> service = 
@@ -405,6 +411,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("cmdline", CommandLine);
             writer.WriteEnum("type", ServerType);
             writer.WriteEnum("model", ThreadingModel);
+            writer.WriteOptionalAttributeString("rawserver", RawServer);
             if (DotNet != null)
             {
                 writer.WriteBool("dotnet", true);
@@ -673,6 +680,25 @@ namespace OleViewDotNet
             get
             {
                 return GetDefaultServer().Server;
+            }
+        }
+
+        public string DefaultServerName
+        {
+            get
+            {
+                string server = DefaultServer;
+                int index = server.LastIndexOf('\\');
+                if (index < 0)
+                {
+                    index = server.LastIndexOf('/');
+                }
+                if (index < 0)
+                {
+                    return server;
+                }
+
+                return server.Substring(index + 1);
             }
         }
 
