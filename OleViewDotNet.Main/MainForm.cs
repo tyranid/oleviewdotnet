@@ -965,5 +965,28 @@ namespace OleViewDotNet
         {
             OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
         }
+
+        private void menuFileOpenPowershell_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string temp_file = Path.GetTempFileName();
+                m_registry.Save(temp_file);
+
+                string startup_script = Path.Combine(COMUtilities.GetAppDirectory(), "Startup-Module.ps1");
+                if (!File.Exists(startup_script))
+                {
+                    throw new ArgumentException("PowerShell startup script is missing");
+                }
+
+                using (Process.Start("powershell.exe", $"-NoExit -ExecutionPolicy Bypass -File \"{startup_script}\" \"{temp_file}\" -DeleteFile"))
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
+            }
+        }
     }
 }

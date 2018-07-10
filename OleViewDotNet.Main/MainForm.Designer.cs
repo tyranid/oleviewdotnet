@@ -108,6 +108,7 @@
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenPowershell = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -128,6 +129,7 @@
             this.menuFilePythonConsole,
             this.menuFileOpenViewer,
             this.menuFileOpenAsAdmin,
+            this.menuFileOpenPowershell,
             this.menuItem10,
             this.menuFileOpenDatabase,
             this.menuFileSaveDatabase,
@@ -166,94 +168,94 @@
             // 
             // menuItem10
             // 
-            this.menuItem10.Index = 3;
+            this.menuItem10.Index = 4;
             this.menuItem10.Text = "-";
             // 
             // menuFileOpenDatabase
             // 
-            this.menuFileOpenDatabase.Index = 4;
+            this.menuFileOpenDatabase.Index = 5;
             this.menuFileOpenDatabase.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.menuFileOpenDatabase.Text = "&Open Database";
             this.menuFileOpenDatabase.Click += new System.EventHandler(this.menuFileOpenDatabase_Click);
             // 
             // menuFileSaveDatabase
             // 
-            this.menuFileSaveDatabase.Index = 5;
+            this.menuFileSaveDatabase.Index = 6;
             this.menuFileSaveDatabase.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.menuFileSaveDatabase.Text = "&Save Database";
             this.menuFileSaveDatabase.Click += new System.EventHandler(this.menuFileSaveDatabase_Click);
             // 
             // menuFileSaveAsDatabase
             // 
-            this.menuFileSaveAsDatabase.Index = 6;
+            this.menuFileSaveAsDatabase.Index = 7;
             this.menuFileSaveAsDatabase.Text = "Save &as... Database";
             this.menuFileSaveAsDatabase.Click += new System.EventHandler(this.menuFileSaveAsDatabase_Click);
             // 
             // menuItem7
             // 
-            this.menuItem7.Index = 7;
+            this.menuItem7.Index = 8;
             this.menuItem7.Text = "-";
             // 
             // menuFileOpenMachineOnly
             // 
-            this.menuFileOpenMachineOnly.Index = 8;
+            this.menuFileOpenMachineOnly.Index = 9;
             this.menuFileOpenMachineOnly.Text = "Open &Machine Only";
             this.menuFileOpenMachineOnly.Click += new System.EventHandler(this.menuFileOpenMachineOnly_Click);
             // 
             // menuFileOpenUserOnly
             // 
-            this.menuFileOpenUserOnly.Index = 9;
+            this.menuFileOpenUserOnly.Index = 10;
             this.menuFileOpenUserOnly.Text = "Open &User Only";
             this.menuFileOpenUserOnly.Click += new System.EventHandler(this.menuFileOpenUserOnly_Click);
             // 
             // menuFileDiff
             // 
-            this.menuFileDiff.Index = 10;
+            this.menuFileDiff.Index = 11;
             this.menuFileDiff.Text = "&Diff Registries";
             this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
             // 
             // menuFileQueryAllInterfaces
             // 
-            this.menuFileQueryAllInterfaces.Index = 11;
+            this.menuFileQueryAllInterfaces.Index = 12;
             this.menuFileQueryAllInterfaces.Text = "&Query All Interfaces";
             this.menuFileQueryAllInterfaces.Click += new System.EventHandler(this.menuFileQueryAllInterfaces_Click);
             // 
             // menuItem8
             // 
-            this.menuItem8.Index = 12;
+            this.menuItem8.Index = 13;
             this.menuItem8.Text = "-";
             // 
             // menuFileOpenTypeLib
             // 
-            this.menuFileOpenTypeLib.Index = 13;
+            this.menuFileOpenTypeLib.Index = 14;
             this.menuFileOpenTypeLib.Text = "Open &TypeLib";
             this.menuFileOpenTypeLib.Click += new System.EventHandler(this.menuFileOpenTypeLib_Click);
             // 
             // menuFileOpenProxyDll
             // 
-            this.menuFileOpenProxyDll.Index = 14;
+            this.menuFileOpenProxyDll.Index = 15;
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
             // menuItem12
             // 
-            this.menuItem12.Index = 15;
+            this.menuItem12.Index = 16;
             this.menuItem12.Text = "-";
             // 
             // menuFileSettings
             // 
-            this.menuFileSettings.Index = 16;
+            this.menuFileSettings.Index = 17;
             this.menuFileSettings.Text = "Settings";
             this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 17;
+            this.menuItem2.Index = 18;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 18;
+            this.menuFileExit.Index = 19;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -644,6 +646,12 @@
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuFileOpenPowershell
+            // 
+            this.menuFileOpenPowershell.Index = 3;
+            this.menuFileOpenPowershell.Text = "Open Powershell";
+            this.menuFileOpenPowershell.Click += new System.EventHandler(this.menuFileOpenPowershell_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -741,6 +749,7 @@
         private System.Windows.Forms.MenuItem menuStorageNewStorage;
         private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
         private System.Windows.Forms.MenuItem menuItem2;
+        private System.Windows.Forms.MenuItem menuFileOpenPowershell;
     }
 }
 
