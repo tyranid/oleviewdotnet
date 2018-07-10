@@ -99,7 +99,7 @@ None
 .OUTPUTS
 None
 .EXAMPLE
-Set-ComRegistry -Database $db -Path output.db
+Set-ComRegistry -Database $comdb -Path output.db
 Save a database to the file output.db
 #>
 function Set-ComDatabase {
@@ -134,10 +134,10 @@ None
 .OUTPUTS
 OleViewDotNet.COMRegistry
 .EXAMPLE
-Compare-ComRegistry -Left $db1 -Right $db2
+Compare-ComRegistry -Left $comdb1 -Right $comdb2
 Compare two databases, returning the differences in the left database.
 .EXAMPLE
-Compare-ComRegistry -Left $db1 -Right $db2 -DiffMode RightOnly
+Compare-ComRegistry -Left $comdb1 -Right $comdb2 -DiffMode RightOnly
 Compare two databases, returning the differences in the right database.
 #>
 function Compare-ComDatabase {
@@ -202,25 +202,25 @@ None
 .OUTPUTS
 OleViewDotNet.COMCLSIDEntry
 .EXAMPLE
-Get-ComClass -Database $db
+Get-ComClass -Database $comdb
 Get all COM classes from a database.
 .EXAMPLE
-Get-ComClass -Database $db -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
+Get-ComClass -Database $comdb -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
 Get a COM class with a specified CLSID.
 .EXAMPLE
-Get-ComClass -Database $db -Name "TestClass"
+Get-ComClass -Database $comdb -Name "TestClass"
 Get COM classes which contain TestClass in their name.
 .EXAMPLE
-Get-ComClass -Database $db -ServerName "obj.ocx"
+Get-ComClass -Database $comdb -ServerName "obj.ocx"
 Get COM classes which are implemented in a server containing the string "obj.ocx"
 .EXAMPLE
-Get-ComClass -Database $db -ServerType InProcServer32
+Get-ComClass -Database $comdb -ServerType InProcServer32
 Get COM classes which are registered with an in-process server.
 .EXAMPLE
-Get-ComClass -Database $db -Iid "00000001-0000-0000-C000-000000000046"
+Get-ComClass -Database $comdb -Iid "00000001-0000-0000-C000-000000000046"
 Get COM class registered as an interface proxy.
 .EXAMPLE
-Get-ComClass -Database $db -ProgId htafile
+Get-ComClass -Database $comdb -ProgId htafile
 Get COM class from a Prog ID.
 #>
 function Get-ComClass {
@@ -289,10 +289,10 @@ None
 .OUTPUTS
 OleViewDotNet.COMProcessEntry
 .EXAMPLE
-Get-ComProcess -Database $db
+Get-ComProcess -Database $comdb
 Get all COM processes.
 .EXAMPLE
-Get-Process notepad | Get-ComProcess -Database $db
+Get-Process notepad | Get-ComProcess -Database $comdb
 Get COM process from a list of processes.
 #>
 function Get-ComProcess {
@@ -300,7 +300,7 @@ function Get-ComProcess {
     Param(
         [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
-        [string]$DbgHelpPath = "dbghelp.dll",
+        [string]$comdbgHelpPath = "dbghelp.dll",
         [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols",
         [switch]$ParseStubMethods,
         [switch]$ResolveMethodNames,
@@ -311,8 +311,8 @@ function Get-ComProcess {
     )
 
     BEGIN {
-        if ($DbgHelpPath -eq "") {
-            $DbgHelpPath = "dbghelp.dll"
+        if ($comdbgHelpPath -eq "") {
+            $comdbgHelpPath = "dbghelp.dll"
         }
         if ($SymbolPath -eq "") {
             $SymbolPath = $env:_NT_SYMBOL_PATH
@@ -336,7 +336,7 @@ function Get-ComProcess {
 
     END {
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
-        $config = [OleViewDotNet.COMProcessParserConfig]::new($DbgHelpPath, $SymbolPath, `
+        $config = [OleViewDotNet.COMProcessParserConfig]::new($comdbgHelpPath, $SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
         [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
     }
@@ -362,7 +362,7 @@ None
 Start-ComActivationLog activations.log
 Start COM activation log to activations.log.
 .EXAMPLE
-Start-ComActivationLog activations.log -Database $db
+Start-ComActivationLog activations.log -Database $comdb
 Start COM activation log to activations.log with a database for name lookup.
 .EXAMPLE
 Start-ComActivationLog activations.log -Append
@@ -418,7 +418,7 @@ None
 .OUTPUTS
 OleViewDotNet.COMAppIDEntry
 .EXAMPLE
-Get-ComAppId -Database $db
+Get-ComAppId -Database $comdb
 Get all COM AppIDs from a database.
 #>
 function Get-ComAppId {
@@ -468,7 +468,7 @@ None
 .OUTPUTS
 None
 .EXAMPLE
-Show-ComDatabase -Database $db
+Show-ComDatabase -Database $comdb
 Show a COM database in the viewer.
 .EXAMPLE
 Show-ComDatabase -Path com.db
@@ -533,5 +533,65 @@ function Get-ComClassInterface {
     PROCESS {
         $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
         $ClassEntry.Interfaces | Write-Output
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM Runtime classes from a database.
+.DESCRIPTION
+This cmdlet gets COM Runtime classes from the database based on a set of criteria. The default is to return all registered runtime classes.
+.PARAMETER Database
+The database to use.
+.PARAMETER Clsid
+Specify a CLSID to lookup.
+.PARAMETER Name
+Specify a name to match against the class name.
+.PARAMETER DllPath
+Specify the DLL path to match against.
+.PARAMETER ActivationType
+Specify a type of activation to match against.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMRuntimeClassEntry
+.EXAMPLE
+Get-ComRuntimeClass -Database $comdb
+Get all COM Runtime classes from a database.
+.EXAMPLE
+Get-ComRuntimeClass -Database $comdb -Name "TestClass"
+Get COM Runtime classes which contain TestClass in their name.
+.EXAMPLE
+Get-ComRuntimeClass -Database $comdb -DllPath "runtime.dll"
+Get COM Runtime classes which are implemented in a DLL containing the string "runtime.dll"
+.EXAMPLE
+Get-ComRuntimeClass -Database $comdb -ActivationType OutOfProcess
+Get COM Runtime classes which are implemented out-of-process.
+#>
+function Get-ComRuntimeClass {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromDllPath")]
+        [string]$DllPath,
+        [Parameter(Mandatory, ParameterSetName = "FromActivationType")]
+        [OleViewDotNet.ActivationType]$ActivationType 
+    )
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.RuntimeClasses.Values
+        }
+        "FromName" {
+            Get-ComRuntimeClass $Database | ? Name -Match $Name | Write-Output
+        }
+        "FromDllPath" {
+            Get-ComRuntimeClass $Database | ? DllPath -Match $DllPath | Write-Output
+        }
+        "FromActivationType" {
+            Get-ComRuntimeClass $Database | ? ActivationType -eq $ActivationType | Write-Output
+        }
     }
 }

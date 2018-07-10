@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
@@ -56,6 +57,18 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public Guid Clsid { get; private set; }
         public string DllPath { get; private set; }
+        public string DllName
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(DllPath))
+                {
+                    return string.Empty;
+                }
+                return Path.GetFileName(DllPath);
+            }
+        }
+
         public string Server { get; private set; }
         public string DefaultServer { get { return Server; } }
         public bool HasServer

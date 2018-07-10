@@ -660,8 +660,8 @@ namespace OleViewDotNet
                 Report(progress, "TypeLibs", 8, total_count);
                 LoadTypelibs(classes_key);
                 Report(progress, "Runtime Classes", 9, total_count);
-                m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>();
-                m_runtime_servers = new SortedDictionary<string, COMRuntimeServerEntry>();
+                m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>(StringComparer.OrdinalIgnoreCase);
+                m_runtime_servers = new SortedDictionary<string, COMRuntimeServerEntry>(StringComparer.OrdinalIgnoreCase);
                 if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
                 {
                     using (RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime"))
@@ -733,8 +733,8 @@ namespace OleViewDotNet
                     m_preapproved = reader.ReadGuids("clsids").ToList();
                     reader.Read();
                 }
-                m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name);
-                m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry()).ToSortedDictionary(p => p.Name);
+                m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+                m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry()).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
                 reader.ReadEndElement();
             }
             FilePath = path;
@@ -1103,7 +1103,7 @@ namespace OleViewDotNet
                             }
                         }
                     }
-                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name.ToLower());
+                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name.ToLower(), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -1125,7 +1125,7 @@ namespace OleViewDotNet
                             }
                         }
                     }
-                    m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower());
+                    m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower(), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
