@@ -543,8 +543,6 @@ Get COM Runtime classes from a database.
 This cmdlet gets COM Runtime classes from the database based on a set of criteria. The default is to return all registered runtime classes.
 .PARAMETER Database
 The database to use.
-.PARAMETER Clsid
-Specify a CLSID to lookup.
 .PARAMETER Name
 Specify a name to match against the class name.
 .PARAMETER DllPath
@@ -592,6 +590,54 @@ function Get-ComRuntimeClass {
         }
         "FromActivationType" {
             Get-ComRuntimeClass $Database | ? ActivationType -eq $ActivationType | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM interfaces from a database.
+.DESCRIPTION
+This cmdlet gets COM interfaces from the database based on a set of criteria. The default is to return all registered interfaces.
+.PARAMETER Database
+The database to use.
+.PARAMETER Iid
+Specify a IID to lookup.
+.PARAMETER Name
+Specify a name to match against the interface name.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMInterfaceEntry
+.EXAMPLE
+Get-ComInterface -Database $comdb
+Get all COM interfaces from a database.
+.EXAMPLE
+Get-ComInterface -Database $comdb -Iid "00000001-0000-0000-C000-000000000046"
+Get COM interface from an IID from a database.
+.EXAMPLE
+Get-ComInterface -Database $comdb -Name "IBlah"
+Get COM interfaces which contain IBlah in their name.
+#>
+function Get-ComInterface {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromIid")]
+        [Guid]$Iid,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name
+    )
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.Interfaces.Values
+        }
+        "FromName" {
+            Get-ComInterface $Database | ? Name -Match $Name | Write-Output
+        }
+        "FromIid" {
+            $Database.Interfaces[$Iid] | Write-Output
         }
     }
 }
