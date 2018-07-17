@@ -1290,7 +1290,7 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMProcessEntry
+    public class COMProcessEntry : ICOMAccessSecurity
     {
         public int Pid { get; private set; }
         public string ExecutablePath { get; private set; }
@@ -1352,6 +1352,10 @@ namespace OleViewDotNet
                 return CustomMarshalAllowedInternal(true);
             }
         }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => string.Empty;
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => string.Empty;
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,

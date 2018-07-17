@@ -734,7 +734,7 @@ namespace OleViewDotNet
                     reader.Read();
                 }
                 m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-                m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry()).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+                m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
                 reader.ReadEndElement();
             }
             FilePath = path;
@@ -1121,7 +1121,7 @@ namespace OleViewDotNet
                         {
                             if (subkey != null)
                             {
-                                entries.Add(new COMRuntimeServerEntry(name, subkey));
+                                entries.Add(new COMRuntimeServerEntry(name, subkey, this));
                             }
                         }
                     }

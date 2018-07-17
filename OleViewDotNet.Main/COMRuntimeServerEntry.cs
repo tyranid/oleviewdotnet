@@ -44,8 +44,10 @@ namespace OleViewDotNet
         MultipleInstances = 1
     }
 
-    public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable
+    public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
     {
+        private readonly COMRegistry m_registry;
+
         public string Identity { get; private set; }
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
@@ -58,6 +60,10 @@ namespace OleViewDotNet
         public IdentityType IdentityType { get; private set; }
         public ServerType ServerType { get; private set; }
         public InstancingType InstancingType { get; private set; }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
 
         private void LoadFromKey(RegistryKey key)
         {
@@ -72,11 +78,12 @@ namespace OleViewDotNet
             Permissions = COMSecurity.GetStringSDForSD(permissions);
         }
 
-        internal COMRuntimeServerEntry()
+        internal COMRuntimeServerEntry(COMRegistry registry)
         {
+            m_registry = registry;
         }
 
-        public COMRuntimeServerEntry(string name, RegistryKey rootKey)
+        public COMRuntimeServerEntry(string name, RegistryKey rootKey, COMRegistry registry) : this(registry)
         {
             Name = name;
             LoadFromKey(rootKey);

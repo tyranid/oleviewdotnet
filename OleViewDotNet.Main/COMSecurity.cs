@@ -84,7 +84,7 @@ namespace OleViewDotNet
             return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
         }
 
-        internal static bool IsAccessGranted(string sddl, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
+        public static bool IsAccessGranted(string sddl, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
         {
             try
             {

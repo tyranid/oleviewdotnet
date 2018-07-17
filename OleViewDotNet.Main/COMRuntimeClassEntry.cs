@@ -48,7 +48,7 @@ namespace OleViewDotNet
         Mta = 2
     }
 
-    public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry
+    public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
@@ -346,5 +346,9 @@ namespace OleViewDotNet
                 }
             }
         }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
     }
 }

@@ -497,7 +497,7 @@ namespace OleViewDotNet
         bool SupportsRemoteActivation { get; }
     }
 
-    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry
+    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
     {
         private readonly COMRegistry m_registry;
         private List<COMInterfaceInstance> m_interfaces;
@@ -1169,6 +1169,12 @@ namespace OleViewDotNet
         }
 
         public bool SupportsRemoteActivation { get { return true; } }
+
+        public COMRegistry Database { get { return m_registry; } }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => m_registry.DefaultLaunchPermission;
 
         public override string ToString()
         {

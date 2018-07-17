@@ -22,10 +22,7 @@ namespace OleViewDotNet.PowerShell
     {
         static NtToken GetProcessAccessToken(NtProcess process)
         {
-            using (NtToken token = process.OpenToken())
-            {
-                return token.DuplicateToken(SecurityImpersonationLevel.Identification);
-            }
+            return process.OpenToken();
         }
 
         public static NtToken GetAccessToken(NtToken token, NtProcess process, int process_id)
@@ -44,6 +41,46 @@ namespace OleViewDotNet.PowerShell
                 {
                     return GetProcessAccessToken(p);
                 }
+            }
+        }
+
+        public static COMAccessCheck GetAccessCheck(NtToken token,
+            string principal,
+            COMAccessRights access_rights,
+            COMAccessRights launch_rights,
+            bool ignore_default)
+        {
+            return new COMAccessCheck(
+                token,
+                principal,
+                access_rights,
+                launch_rights,
+                ignore_default);
+        }
+
+        public static COMAccessCheck GetAccessCheck(NtProcess process,
+            string principal,
+            COMAccessRights access_rights,
+            COMAccessRights launch_rights,
+            bool ignore_default)
+        {
+            return new COMAccessCheck(
+                process.OpenToken(),
+                principal,
+                access_rights,
+                launch_rights,
+                ignore_default);
+        }
+
+        public static COMAccessCheck GetAccessCheck(int process_id,
+            string principal,
+            COMAccessRights access_rights,
+            COMAccessRights launch_rights,
+            bool ignore_default)
+        {
+            using (var process = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation))
+            {
+                return GetAccessCheck(process, principal, access_rights, launch_rights, ignore_default);
             }
         }
     }

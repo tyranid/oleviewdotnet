@@ -647,10 +647,8 @@ function Get-ComInterface {
 Filter launch accessible COM database information.
 .DESCRIPTION
 This cmdlet filters various types of COM database information such as classes and AppIds to only those launchable accessible by certain processes or tokens.
-.PARAMETER ClassEntry
-The COM class entry to select on.
-.PARAMETER AppIdEntry
-The COM AppID entry to select on.
+.PARAMETER InputObject
+The COM object entry to select on.
 .PARAMETER Token
 An access token to perform the access check on.
 .PARAMETER Process
@@ -658,7 +656,9 @@ A process to get the access token from for the access check.
 .PARAMETER ProcessId
 A process ID to get the access token from for the access check.
 .PARAMETER Access
-The access mask to check. Defaults to local execute and activation.
+The access mask to check, for access permissions. Defaults to local execute.
+.PARAMETER Access
+The access mask to check, for launch permissions. Defaults to local execute and activation.
 .PARAMETER Principal
 The principal for the access check, defaults to the current user.
 .PARAMETER NotAccessible
@@ -670,68 +670,69 @@ OleViewDotNet.COMCLSIDEntry or OleViewDotNet.COMAppIDEntry
 .OUTPUTS
 OleViewDotNet.COMCLSIDEntry or OleViewDotNet.COMAppIDEntry
 .EXAMPLE
-Get-ComClass $comdb | Select-ComLaunchAccess
+Get-ComClass $comdb | Select-ComAccess
 Get all COM classes which are accessible by the current process.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComLaunchAccess -IgnoreDefault
+Get-ComClass $comdb | Select-ComAccess -IgnoreDefault
 Get all COM classes which are accessible by the current process ignoring default security permissions.
+.EXAMPLE
+Get-ComClass $comdb | Select-ComAccess -Token $token
+Get all COM classes which are accessible by a specified token.
+.EXAMPLE
+Get-ComClass $comdb | Select-ComAccess -Process $process
+Get all COM classes which are accessible by a specified process.
+.EXAMPLE
+Get-ComClass $comdb | Select-ComAccess -ProcessId 1234
+Get all COM classes which are accessible by a specified process from its ID.
+.EXAMPLE
+Get-ComClass $comdb | Select-ComAccess -Access 0
+Only check for launch permissions and ignore access permissions.
 #>
-function Select-ComLaunchAccess {
-    [CmdletBinding(DefaultParameterSetName = "All")]
+function Select-ComAccess {
+    [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
     Param(
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass", ValueFromPipeline)]
-        [OleViewDotNet.COMCLSIDEntry]$ClassEntry,
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromAppId", ValueFromPipeline)]
-        [OleViewDotNet.COMAppIDEntry]$AppIdEntry,
-        [OleViewDotNet.COMAccessRights]$Access = "ActivateLocal, ExecuteLocal",
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [OleViewDotNet.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.COMAccessRights]$Access = "ExecuteLocal",
+        [OleViewDotNet.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
+        [Parameter(Mandatory, ParameterSetName = "FromToken")]
         [NtApiDotNet.NtToken]$Token,
+        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
         [NtApiDotNet.NtProcess]$Process,
-        [NtApiDotNet.Sid]$Principal = [NtApiDotNet.NtProcess]::Current.User,
+        [Parameter(ParameterSetName = "FromProcessId")]
         [int]$ProcessId = $pid,
+        [NtApiDotNet.Sid]$Principal = [NtApiDotNet.NtProcess]::Current.User,
         [switch]$NotAccessible,
         [switch]$IgnoreDefault
     )
 
     BEGIN {
-        $cache = @{""=$false;}
-        $access_token = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessToken($Token, $Process, $ProcessId)
+        switch($PSCmdlet.ParameterSetName) {
+            "FromProcessId" {
+                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($ProcessId, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+            "FromProcess" {
+                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($Process, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+            "FromToken" {
+                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($Token, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+        }
     }
 
     PROCESS {
-        $input_object = $null
-        $sddl = ""
-        switch($PSCmdlet.ParameterSetName) {
-            "FromClass" {
-                $input_object = $ClassEntry
-            }
-            "FromAppId" {
-                $input_object = $AppIdEntry
-            }
-        }
-
-        
-        if ($input_object.HasLaunchPermission) {
-            $sddl = $input_object.LaunchPermission
-        } elseif (!$IgnoreDefault) {
-            $sddl = $input_object.Database.DefaultLaunchPermission
-        }
-
-        if (!$cache.ContainsKey($sddl)) {
-            if ($Access -eq 0) {
-                $cache[$sddl] = $true
-            } else {
-                $cache[$sddl] = [OleViewDotNet.COMSecurity]::IsAccessGranted($sddl, $Principal, $access_token, $true, $true, $Access)
-            }
-        }
-
-        if ($cache[$sddl] -or $NotAccessible) {
-            Write-Output $input_object
+        $result = $access_check.AccessCheck($InputObject)
+        if ($result -or (!$result -and $NotAccessible)) {
+            Write-Output $InputObject
         }
     }
 
     END {
-        if ($null -ne $access_token) {
-            $access_token.Close()
+        if ($null -ne $access_check) {
+            $access_check.Dispose()
         }
     }
 }

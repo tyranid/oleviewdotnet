@@ -149,7 +149,7 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable
+    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity
     {
         private readonly COMRegistry m_registry;
 
@@ -354,6 +354,12 @@ namespace OleViewDotNet
                 return new COMCLSIDEntry[0];
             }
         }
+
+        public COMRegistry Database { get { return m_registry; } }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => m_registry.DefaultLaunchPermission;
 
         public override string ToString()
         {
