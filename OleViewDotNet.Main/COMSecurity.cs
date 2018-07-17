@@ -135,16 +135,22 @@ namespace OleViewDotNet
                 return true;
             }
 
+            AccessMask mask;
+
             if (!String.IsNullOrWhiteSpace(principal))
             {
-                maximum_rights = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, new Sid(principal), mapping).ToSpecificAccess<COMAccessRights>();
+                mask = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, new Sid(principal), mapping);
             }
             else
             {
-                maximum_rights = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, mapping).ToSpecificAccess<COMAccessRights>();
+                mask = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, mapping);
             }
 
-            return maximum_rights != 0;
+            mask &= 0xFFFF;
+
+            maximum_rights = mask.ToSpecificAccess<COMAccessRights>();
+
+            return mask != 0;
         }
 
         private static string GetSecurityPermissions(COMSD sdtype)
