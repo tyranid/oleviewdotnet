@@ -56,6 +56,11 @@ namespace OleViewDotNet
         public bool AccessCheck(
             ICOMAccessSecurity obj)
         {
+            if (obj == null)
+            {
+                return false;
+            }
+
             string launch_sddl = m_ignore_default ? string.Empty : obj.DefaultLaunchPermission;
             string access_sddl = m_ignore_default ? string.Empty : obj.DefaultAccessPermission;
             bool check_launch = true;
