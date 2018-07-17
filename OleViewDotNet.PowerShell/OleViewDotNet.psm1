@@ -646,7 +646,8 @@ function Get-ComInterface {
 .SYNOPSIS
 Filter launch accessible COM database information.
 .DESCRIPTION
-This cmdlet filters various types of COM database information such as classes and AppIds to only those launchable accessible by certain processes or tokens.
+This cmdlet filters various types of COM database information such as Classes, AppIDs and processes 
+to only those launchable accessible by certain processes or tokens.
 .PARAMETER InputObject
 The COM object entry to select on.
 .PARAMETER Token
@@ -666,9 +667,9 @@ Filter out accessible objects.
 .PARAMETER IgnoreDefault
 If the object doesn't have a specific set of launch permissions uses the system default. If this flag is specified objects without a specific launch permission are ignored.
 .INPUTS
-OleViewDotNet.COMCLSIDEntry or OleViewDotNet.COMAppIDEntry
+OleViewDotNet.ICOMAccessSecurity
 .OUTPUTS
-OleViewDotNet.COMCLSIDEntry or OleViewDotNet.COMAppIDEntry
+OleViewDotNet.ICOMAccessSecurity
 .EXAMPLE
 Get-ComClass $comdb | Select-ComAccess
 Get all COM classes which are accessible by the current process.
@@ -687,6 +688,9 @@ Get all COM classes which are accessible by a specified process from its ID.
 .EXAMPLE
 Get-ComClass $comdb | Select-ComAccess -Access 0
 Only check for launch permissions and ignore access permissions.
+.EXAMPLE
+Get-ComClass $comdb | Select-ComAccess -LaunchAccess 0
+Only check for access permissions and ignore launch permissions.
 #>
 function Select-ComAccess {
     [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
@@ -725,7 +729,10 @@ function Select-ComAccess {
 
     PROCESS {
         $result = $access_check.AccessCheck($InputObject)
-        if ($result -or (!$result -and $NotAccessible)) {
+        if ($NotAccessible) {
+            $result = !$result
+        }
+        if ($result) {
             Write-Output $InputObject
         }
     }
