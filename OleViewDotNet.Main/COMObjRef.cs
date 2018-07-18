@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace OleViewDotNet
@@ -148,7 +149,7 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMDualStringArray
+    internal class COMDualStringArray
     {
         public List<COMStringBinding> StringBindings { get; private set; }
         public List<COMSecurityBinding> SecurityBindings { get; private set; }
@@ -359,16 +360,32 @@ namespace OleViewDotNet
     public class COMObjRefStandard : COMObjRef
     {
         internal COMStdObjRef _stdobjref;
+        internal COMDualStringArray _stringarray;
 
-        public COMDualStringArray StringArray { get; protected set; }
+        public COMStdObjRefFlags StdFlags { get => _stdobjref.StdFlags; set => _stdobjref.StdFlags = value; }
+        public int PublicRefs { get => _stdobjref.PublicRefs; set => _stdobjref.PublicRefs = value; }
+        public ulong Oxid { get => _stdobjref.Oxid; set => _stdobjref.Oxid = value; }
+        public ulong Oid { get => _stdobjref.Oid; set => _stdobjref.Oid = value; }
+        public Guid Ipid { get => _stdobjref.Ipid; set => _stdobjref.Ipid = value; }
 
-        public COMStdObjRefFlags StdFlags => _stdobjref.StdFlags;
-        public int PublicRefs => _stdobjref.PublicRefs;
-        public ulong Oxid => _stdobjref.Oxid;
-        public ulong Oid => _stdobjref.Oid;
-        public Guid Ipid => _stdobjref.Ipid;
+        public List<COMStringBinding> StringBindings => _stringarray.StringBindings;
+        public List<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings;
 
         public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
+        public string ProcessName
+        {
+            get
+            {
+                try
+                {
+                    return Process.GetProcessById(ProcessId).ProcessName;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
         public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
         public string ApartmentName => COMUtilities.GetApartmentIdStringFromIPid(Ipid);
 
@@ -376,7 +393,7 @@ namespace OleViewDotNet
             : base(iid)
         {
             _stdobjref = new COMStdObjRef(reader);
-            StringArray = new COMDualStringArray(reader);
+            _stringarray = new COMDualStringArray(reader);
         }
 
         protected COMObjRefStandard(Guid iid) : base(iid)
@@ -386,13 +403,13 @@ namespace OleViewDotNet
         public COMObjRefStandard() : base(Guid.Empty)
         {
             _stdobjref = new COMStdObjRef();
-            StringArray = new COMDualStringArray();
+            _stringarray = new COMDualStringArray();
         }
 
         protected override void Serialize(BinaryWriter writer)
         {
             _stdobjref.ToWriter(writer);
-            StringArray.ToWriter(writer);
+            _stringarray.ToWriter(writer);
         }
     }
 
@@ -405,7 +422,7 @@ namespace OleViewDotNet
         {
             _stdobjref = new COMStdObjRef(reader);
             Clsid = reader.ReadGuid();
-            StringArray = new COMDualStringArray(reader);
+            _stringarray = new COMDualStringArray(reader);
         }
 
         public COMObjRefHandler() : base()
@@ -416,7 +433,7 @@ namespace OleViewDotNet
         {
             _stdobjref.ToWriter(writer);
             writer.Write(Clsid);
-            StringArray.ToWriter(writer);
+            _stringarray.ToWriter(writer);
         }
     }
 }

@@ -744,19 +744,24 @@ function Select-ComAccess {
     }
 }
 
+Enum ComObjRefOutput
+{
+    Object
+    Bytes
+    Moniker
+}
+
 <#
 .SYNOPSIS
 Get an OBJREF for a COM object.
 .DESCRIPTION
-This cmdlet marshals a COM object to an OBJREF, writing it to a file, returning a COMObjRef object or a moniker.
+This cmdlet marshals a COM object to an OBJREF, returning a byte array, a COMObjRef object or a moniker.
 .PARAMETER InputObject
 The object to marshal.
 .PARAMETER Path
 Specify a path for the output OBJREF.
-.PARAMETER AsObject
-Specify to return the OBJREF as a COMObjRef object.
-.PARAMETER AsMoniker
-Specify to return the OBJREF as a moniker.
+.PARAMETER Output
+Specify the output mode for the OBJREF.
 .PARAMETER IID
 Specify the IID to marshal.
 .PARAMETER MarshalContext
@@ -771,38 +776,51 @@ OleViewDotNet.COMObjRef or string.
 Get-ComObjRef $obj 
 Marshal an object to the file marshal.bin as a COMObjRef object.
 .EXAMPLE
-Get-ComObjRef $obj -AsBytes | Set-Content output.bin -Encoding Bytes
+Get-ComObjRef $obj -Output Bytes | Set-Content objref.bin -Encoding Bytes
 Marshal an object to a byte array and write to a file.
 .EXAMPLE
-Get-ComObjRef $obj -AsMoniker
+Get-ComObjRef $obj -Output Moniker
 Marshal an object to a moniker.
+.EXAMPLE
+Get-ComObjRef objref.bin
+Gets an OBJREF from a file.
 #>
 function Get-ComObjRef {
-    [CmdletBinding(DefaultParameterSetName = "ToObject")]
+    [CmdletBinding(DefaultParameterSetName = "FromPath")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromObject")]
         [object]$InputObject,
-        [Parameter(Mandatory, ParameterSetName = "ToMoniker")]
-        [switch]$AsMoniker,
-        [Parameter(Mandatory, ParameterSetName = "ToBytes")]
-        [switch]$AsBytes,
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromPath")]
+        [string]$Path,
+        [ComObjRefOutput]$Output = "Object",
+        [Parameter(ParameterSetName = "FromObject")]
         [Guid]$Iid = "00000000-0000-0000-C000-000000000046",
+        [Parameter(ParameterSetName = "FromObject")]
         [OleViewDotNet.MSHCTX]$MarshalContext = "DIFFERENTMACHINE",
+        [Parameter(ParameterSetName = "FromObject")]
         [OleViewdotNet.MSHLFLAGS]$MarshalFlags = "NORMAL"
     )
 
-    $objref = [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($InputObject, $Iid, $MarshalContext, $MarshalFlags)
-
     switch($PSCmdlet.ParameterSetName) {
-        "ToBytes" {
+        "FromObject" {
+            $objref = [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($InputObject, $Iid, $MarshalContext, $MarshalFlags)
+        }
+        "FromPath" {
+            $ba = Get-Content -Path $Path -Encoding Byte
+            $objref = [OleViewDotNet.COMObjRef]::FromArray($ba)
+        }
+    }
+
+    switch($Output) {
+        "Bytes" {
             Write-Output $objref.ToArray()
         }
-        "ToObject" {
-            Write-Output $objref
-        }
-        "ToMoniker" {
+        "Moniker" {
             $moniker = $objref.ToMoniker()
             Write-Output $moniker
+        }
+        "Object" {
+            Write-Output $objref
         }
     }
 }

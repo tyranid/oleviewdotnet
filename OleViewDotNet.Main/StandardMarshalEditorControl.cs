@@ -66,7 +66,7 @@ namespace OleViewDotNet
                 tableLayoutPanel.Controls.Remove(textBoxHandlerName);
             }
 
-            foreach (COMStringBinding str in objref.StringArray.StringBindings)
+            foreach (COMStringBinding str in objref.StringBindings)
             {
                 ListViewItem item = listViewStringBindings.Items.Add(str.TowerId.ToString());
                 item.SubItems.Add(str.NetworkAddr);
@@ -75,7 +75,7 @@ namespace OleViewDotNet
             listViewStringBindings.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewStringBindings.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
 
-            foreach (COMSecurityBinding sec in objref.StringArray.SecurityBindings)
+            foreach (COMSecurityBinding sec in objref.SecurityBindings)
             {
                 ListViewItem item = listViewSecurityBindings.Items.Add(sec.AuthnSvc.ToString());
                 item.SubItems.Add(sec.PrincName);
