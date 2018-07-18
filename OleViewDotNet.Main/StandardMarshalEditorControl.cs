@@ -30,14 +30,14 @@ namespace OleViewDotNet
             m_objref = objref;
             m_registry = registry;
             InitializeComponent();
-            textBoxStandardFlags.Text = String.Format("0x{0:X}", objref.StdObjRef.Flags);
-            textBoxPublicRefs.Text = objref.StdObjRef.PublicRefs.ToString();
-            textBoxOxid.Text = String.Format("0x{0:X016}", objref.StdObjRef.Oxid);
-            textBoxOid.Text = String.Format("0x{0:X016}", objref.StdObjRef.Oid);
-            textBoxIpid.Text = objref.StdObjRef.Ipid.FormatGuid();
-            textBoxApartmentId.Text = COMUtilities.GetApartmentIdStringFromIPid(objref.StdObjRef.Ipid);
-            int pid = COMUtilities.GetProcessIdFromIPid(objref.StdObjRef.Ipid);
-            textBoxProcessId.Text = COMUtilities.GetProcessIdFromIPid(objref.StdObjRef.Ipid).ToString();
+            textBoxStandardFlags.Text = String.Format("0x{0:X}", objref.StdFlags);
+            textBoxPublicRefs.Text = objref.PublicRefs.ToString();
+            textBoxOxid.Text = String.Format("0x{0:X016}", objref.Oxid);
+            textBoxOid.Text = String.Format("0x{0:X016}", objref.Oid);
+            textBoxIpid.Text = objref.Ipid.FormatGuid();
+            textBoxApartmentId.Text = COMUtilities.GetApartmentIdStringFromIPid(objref.Ipid);
+            int pid = COMUtilities.GetProcessIdFromIPid(objref.Ipid);
+            textBoxProcessId.Text = COMUtilities.GetProcessIdFromIPid(objref.Ipid).ToString();
             try
             {
                 Process p = Process.GetProcessById(pid);
@@ -96,7 +96,7 @@ namespace OleViewDotNet
 
         private void btnViewProcess_Click(object sender, EventArgs e)
         {
-            EntryPoint.GetMainForm(m_registry).LoadIPid(m_objref.StdObjRef.Ipid);
+            EntryPoint.GetMainForm(m_registry).LoadIPid(m_objref.Ipid);
         }
     }
 }

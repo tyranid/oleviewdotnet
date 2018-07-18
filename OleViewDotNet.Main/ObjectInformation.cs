@@ -316,7 +316,7 @@ namespace OleViewDotNet
                     throw new Exception("Object must be standard marshaled to view the interface");
                 }
 
-                EntryPoint.GetMainForm(m_registry).LoadIPid(objref.StdObjRef.Ipid);
+                EntryPoint.GetMainForm(m_registry).LoadIPid(objref.Ipid);
             }
             catch (Exception ex)
             {

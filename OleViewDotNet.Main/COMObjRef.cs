@@ -247,6 +247,11 @@ namespace OleViewDotNet
             return stm.ToArray();
         }
 
+        public string ToMoniker()
+        {
+            return $"objref:{Convert.ToBase64String(ToArray())}:";
+        }
+
         protected abstract void Serialize(BinaryWriter writer);
 
         protected COMObjRef(Guid iid)
@@ -262,7 +267,7 @@ namespace OleViewDotNet
             if (magic != OBJREF_MAGIC)
             {
                 throw new ArgumentException("Invalid OBJREF Magic");
-            }            
+            }
 
             COMObjrefFlags flags = (COMObjrefFlags)reader.ReadInt32();
             Guid iid = reader.ReadGuid();
@@ -313,9 +318,16 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMStdObjRef
+    [Flags]
+    public enum COMStdObjRefFlags
     {
-        public int Flags { get; set; }
+        None = 0,
+        NoPing = 0x1000
+    }
+
+    internal class COMStdObjRef
+    {
+        public COMStdObjRefFlags StdFlags { get; set; }
         public int PublicRefs { get; set; }
         public ulong Oxid { get; set; }
         public ulong Oid { get; set; }
@@ -327,7 +339,7 @@ namespace OleViewDotNet
 
         internal COMStdObjRef(BinaryReader reader)
         {
-            Flags = reader.ReadInt32();
+            StdFlags = (COMStdObjRefFlags)reader.ReadInt32();
             PublicRefs = reader.ReadInt32();
             Oxid = reader.ReadUInt64();
             Oid = reader.ReadUInt64();
@@ -336,7 +348,7 @@ namespace OleViewDotNet
 
         public void ToWriter(BinaryWriter writer)
         {
-            writer.Write(Flags);
+            writer.Write((int)StdFlags);
             writer.Write(PublicRefs);
             writer.Write(Oxid);
             writer.Write(Oid);
@@ -346,13 +358,24 @@ namespace OleViewDotNet
 
     public class COMObjRefStandard : COMObjRef
     {
-        public COMStdObjRef StdObjRef { get; protected set; }
+        internal COMStdObjRef _stdobjref;
+
         public COMDualStringArray StringArray { get; protected set; }
+
+        public COMStdObjRefFlags StdFlags => _stdobjref.StdFlags;
+        public int PublicRefs => _stdobjref.PublicRefs;
+        public ulong Oxid => _stdobjref.Oxid;
+        public ulong Oid => _stdobjref.Oid;
+        public Guid Ipid => _stdobjref.Ipid;
+
+        public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
+        public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
+        public string ApartmentName => COMUtilities.GetApartmentIdStringFromIPid(Ipid);
 
         internal COMObjRefStandard(BinaryReader reader, Guid iid) 
             : base(iid)
         {
-            StdObjRef = new COMStdObjRef(reader);
+            _stdobjref = new COMStdObjRef(reader);
             StringArray = new COMDualStringArray(reader);
         }
 
@@ -362,13 +385,13 @@ namespace OleViewDotNet
 
         public COMObjRefStandard() : base(Guid.Empty)
         {
-            StdObjRef = new COMStdObjRef();
+            _stdobjref = new COMStdObjRef();
             StringArray = new COMDualStringArray();
         }
 
         protected override void Serialize(BinaryWriter writer)
         {
-            StdObjRef.ToWriter(writer);
+            _stdobjref.ToWriter(writer);
             StringArray.ToWriter(writer);
         }
     }
@@ -380,18 +403,18 @@ namespace OleViewDotNet
         internal COMObjRefHandler(BinaryReader reader, Guid iid) 
             : base(iid)
         {
-            StdObjRef = new COMStdObjRef(reader);
+            _stdobjref = new COMStdObjRef(reader);
             Clsid = reader.ReadGuid();
             StringArray = new COMDualStringArray(reader);
         }
 
         public COMObjRefHandler() : base()
-        {        
+        {
         }
 
         protected override void Serialize(BinaryWriter writer)
         {
-            StdObjRef.ToWriter(writer);
+            _stdobjref.ToWriter(writer);
             writer.Write(Clsid);
             StringArray.ToWriter(writer);
         }
