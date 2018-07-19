@@ -32,6 +32,15 @@ function New-CallbackProgress {
     [OleViewDotNet.PowerShell.CallbackProgress]::new($Activity, [Action[string, string, int]]$callback)
 }
 
+function Resolve-LocalPath {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Path
+    )
+    $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+}
+
 <#
 .SYNOPSIS
 Get a COM database from the registry or a file.
@@ -112,7 +121,7 @@ function Set-ComDatabase {
         [switch]$NoProgress
     )
     $callback = New-CallbackProgress -Activity "Saving COM Registry" -NoProgress:$NoProgress
-    $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+    $Path = Resolve-LocalPath $Path
     $Database.Save($Path, $callback)
 }
 
@@ -377,7 +386,7 @@ function Start-ComActivationLog {
         [OleViewDotNet.COMRegistry]$Database
     )
 
-    $Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+    $Path = Resolve-LocalPath $Path
     [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
 }
 
