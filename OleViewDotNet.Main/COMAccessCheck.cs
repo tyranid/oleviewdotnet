@@ -36,6 +36,73 @@ namespace OleViewDotNet
         private readonly COMAccessRights m_launch_rights;
         private readonly bool m_ignore_default;
 
+        public static string GetAccessPermission(ICOMAccessSecurity obj)
+        {
+            if (obj is COMProcessEntry process)
+            {
+                return process.AccessPermissions;
+            }
+            else if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
+            {
+                COMAppIDEntry appid = obj as COMAppIDEntry;
+                if (appid == null && obj is COMCLSIDEntry clsid)
+                {
+                    appid = clsid.AppIDEntry;
+                    if (appid == null)
+                    {
+                        throw new ArgumentException("No AppID available for class");
+                    }
+                }
+
+                if (appid.HasAccessPermission)
+                {
+                    return appid.AccessPermission;
+                }
+                throw new ArgumentException("AppID doesn't have an access permission");
+            }
+
+            throw new ArgumentException("Can't get access permission for object");
+        }
+
+        public static string GetLaunchPermission(ICOMAccessSecurity obj)
+        {
+            if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
+            {
+                COMAppIDEntry appid = obj as COMAppIDEntry;
+                if (appid == null && obj is COMCLSIDEntry clsid)
+                {
+                    appid = clsid.AppIDEntry;
+                    if (appid == null)
+                    {
+                        throw new ArgumentException("No AppID available for class");
+                    }
+                }
+
+                if (appid.HasLaunchPermission)
+                {
+                    return appid.LaunchPermission;
+                }
+                throw new ArgumentException("AppID doesn't have an launch permission");
+            }
+            else if (obj is COMRuntimeClassEntry runtime_class)
+            {
+                if (runtime_class.HasPermission)
+                {
+                    return runtime_class.Permissions;
+                }
+                throw new ArgumentException("RuntimeClass doesn't have an launch permission");
+            }
+            else if (obj is COMRuntimeServerEntry runtime_server)
+            {
+                if (runtime_server.HasPermission)
+                {
+                    return runtime_server.Permissions;
+                }
+                throw new ArgumentException("RuntimeServer doesn't have an launch permission");
+            }
+            throw new ArgumentException("Can't get launc permission for object");
+        }
+
         public COMAccessCheck(NtToken token,
             string principal,
             COMAccessRights access_rights,

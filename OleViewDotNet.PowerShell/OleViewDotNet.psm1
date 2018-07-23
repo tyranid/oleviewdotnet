@@ -833,3 +833,74 @@ function Get-ComObjRef {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Views a COM security descriptor.
+.DESCRIPTION
+This cmdlet opens a viewer for a COM security descriptor.
+.PARAMETER SecurityDescriptor
+The security descriptor to view in SDDL format.
+.PARAMETER ShowAccess
+Show access rights rather than launch rights.
+.PARAMETER InputObject
+Shows the security descriptor for a database object.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Show-ComSecurityDescriptor $obj
+Shows a launch security descriptor from an object.
+.EXAMPLE
+Show-ComSecurityDescriptor $obj -ShowAccess
+Shows an access security descriptor from an object.
+.EXAMPLE
+Show-ComSecurityDescriptor "D:(A;;GA;;;WD)" 
+Shows a SDDL launch security descriptor.
+.EXAMPLE
+Show-ComSecurityDescriptor "D:(A;;GA;;;WD)" -ShowAccess
+Shows a SDDL access security descriptor.
+#>
+function Show-ComSecurityDescriptor {
+    [CmdletBinding(DefaultParameterSetName="FromObject")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromSddl")]
+        [string]$SecurityDescriptor,
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
+        [OleViewDotNet.ICOMAccessSecurity]$InputObject,
+        [switch]$ShowAccess
+    )
+
+    PROCESS {
+        $name = ""
+        switch($PSCmdlet.ParameterSetName) {
+            "FromSddl" {
+                # Do nothing.
+            }
+            "FromObject" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = [OleViewDotNet.COMAccessCheck]::GetAccessPermission($InputObject)
+                } else {
+                    $SecurityDescriptor = [OleViewDotNet.COMAccessCheck]::GetLaunchPermission($InputObject)
+                }
+                $name = $InputObject.Name.Replace("`"", " ")
+            }
+        }
+
+        if ("" -ne $SecurityDescriptor) {
+            $exe = [OleViewDotNet.COMUtilities]::GetExePathForCurrentBitness()
+            if ($ShowAccess) {
+                $cmd = "-v"
+            } else {
+                $cmd = "-l"
+            }
+            $args = @("`"$cmd=$SecurityDescriptor`"")
+            if ("" -ne $name) {
+                $args += @("`"$name`"")
+            }
+            Start-Process $exe $args
+        }
+    }
+}
+

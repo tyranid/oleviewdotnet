@@ -16,6 +16,7 @@
 
 using NDesk.Options;
 using NtApiDotNet;
+using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -205,6 +207,9 @@ namespace OleViewDotNet
             bool enable_activation_filter = false;
             string symbol_dir = null;
             bool delete_database = false;
+            string view_access_sd = null;
+            string view_launch_sd = null;
+            string view_name = null;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
             
@@ -222,6 +227,9 @@ namespace OleViewDotNet
                 { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
                 { "g=", "Generate a symbol file in the specified directory.", v => symbol_dir = v },
                 { "d", "Delete the input database once loaded", v => delete_database = v != null },
+                { "v=", "View a COM access security descriptor (specify the SDDL)", v => view_access_sd = v },
+                { "l=", "View a COM launch security descriptor (specify the SDDL)", v => view_launch_sd = v },
+                { "n=", "Name any simple form display such as security descriptor", v => view_name = v },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -272,6 +280,31 @@ namespace OleViewDotNet
 
                 try
                 {
+                    if (view_access_sd != null || view_launch_sd != null)
+                    {
+                        bool access = view_access_sd != null;
+                        SecurityDescriptor sd = new SecurityDescriptor(view_access_sd ?? view_launch_sd);
+                        AccessMask valid_access = access ? 0x7 : 0x1F;
+
+                        SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
+                        DocumentForm frm = new DocumentForm(control);
+                        string title = $"{(access ? "Access Security" : "Launch Security")}";
+                        if (!string.IsNullOrWhiteSpace(view_name))
+                        {
+                            title = $"{view_name} {title}";
+                        }
+                        frm.Text = title;
+                        control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
+                        {
+                            GenericExecute = valid_access,
+                            GenericRead = valid_access,
+                            GenericWrite = valid_access,
+                            GenericAll = valid_access
+                        }, valid_access);
+                        Application.Run(frm);
+                        return;
+                    }
+
                     COMRegistry registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
                         : COMUtilities.LoadRegistry(null, mode);
                     if (delete_database && database_file != null)
