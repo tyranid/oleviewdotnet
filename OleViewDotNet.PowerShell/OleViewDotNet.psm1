@@ -206,6 +206,12 @@ Specify a name to match against the class name.
 Specify a server name to match against.
 .PARAMETER ServerType
 Specify a type of server to match against. If specified as UnknownServer will search all servers.
+.PARAMETER InteractiveUser
+Specify that the COM classes should be configured to run as the Interactive User.
+.PARAMETER ProgId
+Specify looking up the COM class from a ProgID.
+.PARAMETER Iid
+Specify looking up a COM class based on it's proxy IID.
 .INPUTS
 None
 .OUTPUTS
@@ -231,6 +237,9 @@ Get COM class registered as an interface proxy.
 .EXAMPLE
 Get-ComClass -Database $comdb -ProgId htafile
 Get COM class from a Prog ID.
+.EXAMPLE
+Get-ComClass -Database $comdb -InteractiveUser
+Get COM classes registered to run as the interactive user.
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -248,7 +257,9 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromProgId")]
-        [string]$ProgId
+        [string]$ProgId,
+        [Parameter(Mandatory, ParameterSetName = "FromIU")]
+        [switch]$InteractiveUser
     )
     switch($PSCmdlet.ParameterSetName) {
         "All" {
@@ -268,6 +279,9 @@ function Get-ComClass {
         }
         "FromProgId" {
             Write-Output $Database.MapProgIdToClsid($ProgId)
+        }
+        "FromIU" {
+            Get-ComClass $Database | ? { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
         }
     }
 }
@@ -904,3 +918,90 @@ function Show-ComSecurityDescriptor {
     }
 }
 
+<#
+.SYNOPSIS
+Creates a new COM object instance.
+.DESCRIPTION
+This cmdlet creates a new COM object instance from a class or factory.
+.PARAMETER Class
+Specify the class to use for the new COM object.
+.PARAMETER Factory
+Specify an existing class factory for the new COM object.
+.PARAMETER Clsid
+Specify a CLSID to use for the new COM object.
+.PARAMETER ClassContext
+Specify the context the new object will be created from.
+.PARAMETER RemoteServer
+Specify the remote server the COM object will be created on.
+#>
+function New-ComObject {
+    [CmdletBinding(DefaultParameterSetName="FromClass")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [OleViewDotNet.ICOMClassEntry]$Class,
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
+        [OleViewDotNet.PowerShell.ClassFactoryWrapper]$Factory,
+        [Parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Guid]$Clsid,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
+        [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
+        [string]$RemoteServer
+    )
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromClass" {
+                $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
+            }
+            "FromClsid" {
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+            }
+            "FromFactory" {
+                $obj = $Factory.CreateInstance("00000000-0000-0000-C000-000000000046")
+            }
+        }
+        Write-Output $obj
+    }
+}
+
+<#
+.SYNOPSIS
+Creates a new COM object factory.
+.DESCRIPTION
+This cmdlet creates a new COM object factory from a class.
+.PARAMETER Class
+Specify the class to use for the new COM object factory.
+.PARAMETER Clsid
+Specify a CLSID to use for the new COM object factory.
+.PARAMETER ClassContext
+Specify the context the new factory will be created from.
+.PARAMETER RemoteServer
+Specify the remote server the COM object factory will be created on.
+#>
+function New-ComObjectFactory {
+    [CmdletBinding(DefaultParameterSetName="FromClass")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [OleViewDotNet.ICOMClassEntry]$Class,
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
+        [Guid]$Clsid,
+        [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
+        [string]$RemoteServer
+    )
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromClass" {
+                $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer)
+            }
+            "FromClsid" {
+                $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+            }
+        }
+        $obj = [OleViewDotNet.PowerShell.ClassFactoryWrapper]::new($obj)
+        Write-Output $obj
+    }
+}

@@ -487,9 +487,10 @@ namespace OleViewDotNet
         /// <summary>
         /// Create an instance of this object's class factory.
         /// </summary>
+        /// <param name="dwContext">The class context.</param>
         /// <param name="server">The remote server address.</param>
         /// <returns>The instance of the object.</returns>
-        object CreateClassFactory(string server);
+        object CreateClassFactory(CLSCTX dwContext, string server);
 
         /// <summary>
         /// True if this class supports remote activation.
@@ -727,6 +728,14 @@ namespace OleViewDotNet
             get
             {
                 return m_registry.AppIDs.GetGuidEntry(AppID);
+            }
+        }
+
+        public bool HasAppID
+        {
+            get
+            {
+                return AppIDEntry != null;
             }
         }
 
@@ -1091,42 +1100,7 @@ namespace OleViewDotNet
             }
             
             Guid iid = COMInterfaceEntry.CreateKnownInterface(m_registry, COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
-            Guid clsid = Clsid;
-
-            int hr = 0;
-            if (server != null)
-            {
-                MULTI_QI[] qis = new MULTI_QI[1];
-                qis[0] = new MULTI_QI(iid);
-                COSERVERINFO server_info = new COSERVERINFO(server);
-                try
-                {
-                    hr = COMUtilities.CoCreateInstanceEx(ref clsid, IntPtr.Zero, dwContext, server_info, 1, qis);
-                    if (hr == 0)
-                    {
-                        hr = qis[0].HResult();
-                        if (hr == 0)
-                        {
-                            pInterface = qis[0].GetObjectPointer();
-                        }
-                    }
-                }
-                finally
-                {
-                    ((IDisposable)qis[0]).Dispose();
-                }
-            }
-            else
-            {
-                hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, dwContext, ref iid, out pInterface);
-            }
-
-            if (hr != 0)
-            {
-                Marshal.ThrowExceptionForHR(hr);
-            }
-
-            return pInterface;
+            return COMUtilities.CreateInstance(Clsid, iid, dwContext, server);
         }
 
         public object CreateInstanceAsObject(CLSCTX dwContext, string server)
@@ -1145,27 +1119,12 @@ namespace OleViewDotNet
 
         public object CreateClassFactory()
         {
-            return CreateClassFactory(null);
+            return CreateClassFactory(CreateContext, null);
         }
 
-        public object CreateClassFactory(string server)
+        public object CreateClassFactory(CLSCTX dwContext, string server)
         {
-            IntPtr obj;
-            Guid iid = COMInterfaceEntry.IID_IUnknown;
-            Guid clsid = Clsid;
-
-            COSERVERINFO server_info = server != null ? new COSERVERINFO(server) : null;
-
-            int hr = COMUtilities.CoGetClassObject(ref clsid, server_info != null ? CLSCTX.REMOTE_SERVER 
-                : CreateContext, server_info, ref iid, out obj);
-            if (hr != 0)
-            {
-                Marshal.ThrowExceptionForHR(hr);
-            }
-
-            object ret = Marshal.GetObjectForIUnknown(obj);
-            Marshal.Release(obj);
-            return ret;
+            return COMUtilities.CreateClassFactory(Clsid, COMInterfaceEntry.IID_IUnknown, dwContext, server);
         }
 
         public bool SupportsRemoteActivation { get { return true; } }

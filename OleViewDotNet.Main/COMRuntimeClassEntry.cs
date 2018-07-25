@@ -297,7 +297,7 @@ namespace OleViewDotNet
             return CreateInstance(server, false);
         }
 
-        public object CreateClassFactory(string server)
+        public object CreateClassFactory(CLSCTX dwContext, string server)
         {
             return CreateInstance(server, true);
         }

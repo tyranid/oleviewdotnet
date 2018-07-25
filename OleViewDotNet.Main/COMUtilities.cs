@@ -2228,5 +2228,83 @@ namespace OleViewDotNet
             }
             return default(T);
         }
+
+        public static IntPtr CreateInstance(Guid clsid, Guid iid, CLSCTX context, string server)
+        {
+            IntPtr pInterface = IntPtr.Zero;
+            int hr = 0;
+            if (!string.IsNullOrWhiteSpace(server))
+            {
+                MULTI_QI[] qis = new MULTI_QI[1];
+                qis[0] = new MULTI_QI(iid);
+                COSERVERINFO server_info = new COSERVERINFO(server);
+                try
+                {
+                    hr = COMUtilities.CoCreateInstanceEx(ref clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
+                    if (hr == 0)
+                    {
+                        hr = qis[0].HResult();
+                        if (hr == 0)
+                        {
+                            pInterface = qis[0].GetObjectPointer();
+                        }
+                    }
+                }
+                finally
+                {
+                    ((IDisposable)qis[0]).Dispose();
+                }
+            }
+            else
+            {
+                hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, context, ref iid, out pInterface);
+            }
+
+            if (hr != 0)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            return pInterface;
+        }
+
+        public static object CreateInstanceAsObject(Guid clsid, Guid iid, CLSCTX context, string server)
+        {
+            IntPtr pObject = CreateInstance(clsid, iid, context, server);
+            object ret = null;
+
+            if (pObject != IntPtr.Zero)
+            {
+                ret = Marshal.GetObjectForIUnknown(pObject);
+                Marshal.Release(pObject);
+            }
+
+            return ret;
+        }
+
+        public static object CreateInstanceFromFactory(object obj, Guid iid)
+        {
+            IClassFactory factory = (IClassFactory)obj;
+            factory.CreateInstance(null, ref iid, out object ret);
+            return ret;
+        }
+
+        public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server)
+        {
+            IntPtr obj;
+
+            COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
+
+            int hr = CoGetClassObject(ref clsid, server_info != null ? CLSCTX.REMOTE_SERVER
+                : context, server_info, ref iid, out obj);
+            if (hr != 0)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            object ret = Marshal.GetObjectForIUnknown(obj);
+            Marshal.Release(obj);
+            return ret;
+        }
     }
 }

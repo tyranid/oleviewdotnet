@@ -58,7 +58,7 @@ namespace OleViewDotNet
             if (!Marshal.IsComObject(entry))
             {
                 throw new ArgumentException("Target must be a COM object");
-            }                       
+            }
 
             _methods = instanceType.GetMethods().Where(m => !m.IsSpecialName).ToDictionary(m => m.Name);
             _properties = instanceType.GetProperties().ToDictionary(m => m.Name);
@@ -181,14 +181,14 @@ namespace OleViewDotNet
         }
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
-        {            
+        {
             object res = null;
 
             return Invoke(binder.Name, false, out res, new object[] { value });
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
-        {            
+        {
             return Invoke(binder.Name, true, out result, new object[0]);
         }
 

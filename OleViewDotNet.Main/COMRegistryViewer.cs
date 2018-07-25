@@ -1324,7 +1324,7 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    object comObj = ent.CreateClassFactory(server);
+                    object comObj = ent.CreateClassFactory(CLSCTX.ALL, server);
                     if (comObj != null)
                     {
                         await SetupObjectView(ent, comObj, true);

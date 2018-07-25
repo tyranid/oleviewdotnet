@@ -124,6 +124,11 @@ namespace OleViewDotNet
             writer.WriteGuid("libid", TypelibId);
             writer.WriteSerializableObjects("libvers", Versions);
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class COMTypeLibVersionEntry : IXmlSerializable
