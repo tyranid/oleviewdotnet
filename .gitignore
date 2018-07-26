@@ -1,14 +1,40 @@
-.vs/
-Win32/
-x64/
-packages/
-*/obj/
-*/bin/
-*.suo
-*.user
-*.sdf
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 *.opensdf
+*.user
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+#*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+#*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+Debug/
+Release/
+*.suo
+*.sdf
+
+ipch/
+packages/
+bin/
+obj/
+
 *.opendb
 *.db
-packages
-/.vs/OleViewDotNet/v15/Server/sqlite3
+*.nupkg
+*.ide
+
+.vs/
