@@ -49,8 +49,13 @@ function Wrap-ComObject {
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
-        [Type]$Type
+        [Type]$Type,
+        [switch]$NoWrapper
     )
+
+    if ($NoWrapper) {
+        return $Object
+    }
 
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
@@ -975,6 +980,8 @@ Specify a CLSID to use for the new COM object.
 Specify the context the new object will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object will be created on.
+.PARAMETER NoWrapper
+Don't wrap object in a callable wrapper.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -983,6 +990,8 @@ function New-ComObject {
         [OleViewDotNet.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
         [OleViewDotNet.IClassFactory]$Factory,
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
+        [System.Runtime.InteropServices.WindowsRuntime.IActivationFactory]$ActivationFactory,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
@@ -992,7 +1001,8 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
         [Parameter(ParameterSetName = "FromMoniker")]
-        [string]$Moniker
+        [string]$Moniker,
+        [switch]$NoWrapper
     )
 
     PROCESS {
@@ -1009,9 +1019,15 @@ function New-ComObject {
             "FromMoniker" {
                 $obj = [System.Runtime.InteropServices.Marshal]::BindToMoniker($Moniker)
             }
+            "FromActivationFactory" {
+                $obj = $ActivationFactory.ActivateInstance()
+            }
         }
-        $type = [OleViewDotNet.IUnknown]
-        Wrap-ComObject $obj -Type $type | Write-Output
+
+        if ($null -ne $obj) {
+            $type = [OleViewDotNet.IUnknown]
+            Wrap-ComObject $obj -Type $type -NoWrapper:$NoWrapper | Write-Output
+        }
     }
 }
 
@@ -1028,6 +1044,8 @@ Specify a CLSID to use for the new COM object factory.
 Specify the context the new factory will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object factory will be created on.
+.PARAMETER NoWrapper
+Don't wrap factory object in a callable wrapper.
 #>
 function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1037,7 +1055,8 @@ function New-ComObjectFactory {
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
-        [string]$RemoteServer
+        [string]$RemoteServer,
+        [switch]$NoWrapper
     )
 
     PROCESS {
@@ -1049,7 +1068,10 @@ function New-ComObjectFactory {
                 $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
         }
-        $type = [OleViewDotNet.IClassFactory]
-        Wrap-ComObject $obj $type | Write-Output
+
+        if ($null -ne $obj) {
+            $type = [OleViewDotNet.PowerShell.PowerShellUtils]::GetFactoryType($Class)
+            Wrap-ComObject $obj $type -NoWrapper:$NoWrapper | Write-Output
+        }
     }
 }

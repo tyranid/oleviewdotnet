@@ -15,6 +15,8 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace OleViewDotNet.PowerShell
 {
@@ -82,6 +84,15 @@ namespace OleViewDotNet.PowerShell
             {
                 return GetAccessCheck(process, principal, access_rights, launch_rights, ignore_default);
             }
+        }
+
+        public static Type GetFactoryType(ICOMClassEntry cls)
+        {
+            if (cls is COMRuntimeClassEntry)
+            {
+                return typeof(IActivationFactory);
+            }
+            return typeof(IClassFactory);
         }
     }
 }
