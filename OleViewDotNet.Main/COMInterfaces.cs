@@ -58,6 +58,7 @@ namespace OleViewDotNet
     public interface IPersistStream
     {
         void GetClassID(out Guid clsid);
+        [PreserveSig]
         int IsDirty();
         void Load(IStream pStm);
         void Save(IStream pStm, bool fClearDirty);
@@ -68,10 +69,12 @@ namespace OleViewDotNet
     public interface IPersistStreamInit
     {
         void GetClassID(out Guid clsid);
+        [PreserveSig]
         int IsDirty();
         void Load(IStream pStm);
         void Save(IStream pStm, bool fClearDirty);
         void GetSizeMax(out ulong pcbSize);
+        [PreserveSig]
         int InitNew();
     }
 
