@@ -784,13 +784,13 @@ namespace OleViewDotNet
                         }
                         catch (Exception e)
                         {
-                            System.Diagnostics.Debug.WriteLine(e.ToString());
+                            Debug.WriteLine(e.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
+                    Debug.WriteLine(e.ToString());
                 }
 
                 LoadBuiltinTypes(Assembly.GetExecutingAssembly());

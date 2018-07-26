@@ -918,6 +918,27 @@ function Show-ComSecurityDescriptor {
     }
 }
 
+function Wrap-Object {
+    [CmdletBinding(DefaultParameterSetName = "FromType")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [object]$Object,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
+        [Guid]$Iid,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
+        [Type]$Type
+    )
+
+    switch($PSCmdlet.ParameterSetName) {
+        "FromIid" {
+            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Iid)
+        }
+        "FromType" {
+            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Type)
+        }
+    }
+}
+
 <#
 .SYNOPSIS
 Creates a new COM object instance.
@@ -940,7 +961,7 @@ function New-ComObject {
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
         [OleViewDotNet.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
-        [OleViewDotNet.PowerShell.ClassFactoryWrapper]$Factory,
+        [OleViewDotNet.IClassFactory]$Factory,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
@@ -960,10 +981,11 @@ function New-ComObject {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = $Factory.CreateInstance("00000000-0000-0000-C000-000000000046")
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
             }
         }
-        Write-Output $obj
+        $type = [OleViewDotNet.IUnknown]
+        Wrap-Object $obj -Type $type | Write-Output
     }
 }
 
@@ -1001,7 +1023,7 @@ function New-ComObjectFactory {
                 $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
         }
-        $obj = [OleViewDotNet.PowerShell.ClassFactoryWrapper]::new($obj)
-        Write-Output $obj
+        $type = [OleViewDotNet.IClassFactory]
+        Wrap-Object $obj $type | Write-Output
     }
 }

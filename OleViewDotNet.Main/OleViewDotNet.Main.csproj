@@ -145,6 +145,7 @@
     <Compile Include="COMProxyInstance.cs" />
     <Compile Include="COMRuntimeServerEntry.cs" />
     <Compile Include="COMAccessCheck.cs" />
+    <Compile Include="ComWrapperFactory.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

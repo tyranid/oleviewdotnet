@@ -60,7 +60,7 @@ namespace OleViewDotNet
         }
 
         public override bool TryInvoke(InvokeBinder binder, object[] args, out object result)
-        {            
+        {
             List<Type> outReturnTypes = new List<Type>();
             List<object> returns = new List<object>();
             int startIndex = 0;
@@ -85,7 +85,7 @@ namespace OleViewDotNet
 
             // Possible varargs
             if ((outReturnTypes.Count == 0) && (pis.Length > 0) && (uargs.Length >= pis.Length) && (pis[pis.Length - 1].ParameterType == typeof(object[])))
-            {                
+            {
                 // Copy up to last argument (pis.Length - 1)
                 object[] xargs = new object[pis.Length];
                 Array.Copy(uargs, xargs, pis.Length - 1);
