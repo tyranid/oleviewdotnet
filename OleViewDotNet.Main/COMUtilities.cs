@@ -937,7 +937,8 @@ namespace OleViewDotNet
 
         public static bool IsComImport(Type t)
         {
-            return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0;
+            return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0 ||
+                t.GetCustomAttributes(typeof(InterfaceTypeAttribute), false).Length > 0;
         }
 
         private static Dictionary<Type, Type> _wrappers = new Dictionary<Type, Type>();

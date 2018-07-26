@@ -41,6 +41,37 @@ function Resolve-LocalPath {
     $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
 }
 
+function Wrap-ComObject {
+    [CmdletBinding(DefaultParameterSetName = "FromType")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [object]$Object,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
+        [Guid]$Iid,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
+        [Type]$Type
+    )
+
+    switch($PSCmdlet.ParameterSetName) {
+        "FromIid" {
+            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Iid)
+        }
+        "FromType" {
+            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Type)
+        }
+    }
+}
+
+function Unwrap-ComObject {
+    [CmdletBinding(DefaultParameterSetName = "FromType")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [object]$Object
+    )
+
+    [OleViewDotNet.ComWrapperFactory]::Unwrap($obj)
+}
+
 <#
 .SYNOPSIS
 Get a COM database from the registry or a file.
@@ -535,6 +566,8 @@ This cmdlet enumerates the supported interfaces for a COM class or Runtime class
 The COM or Runtime class to enumerate.
 .PARAMETER Refresh
 Specify to force the interfaces to be refreshed.
+.PARAMETER Factory
+Specify to return the implemented factory interfaces.
 .INPUTS
 None
 .OUTPUTS
@@ -542,6 +575,9 @@ OleViewDotNet.COMInterfaceInstance[]
 .EXAMPLE
 Get-ComClassInterface -ClassEntry $cls
 Get instance interfaces for a COM class.
+.EXAMPLE
+Get-ComClassInterface -ClassEntry $cls -Factory
+Get factory interfaces for a COM class.
 .EXAMPLE
 Get-ComClassInterface -ClassEntry $cls -Refresh
 Get instance interfaces for a COM class forcing them to be refreshed if necessary.
@@ -551,11 +587,16 @@ function Get-ComClassInterface {
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
         [OleViewDotNet.ICOMClassEntry]$ClassEntry,
-        [switch]$Refresh
+        [switch]$Refresh,
+        [switch]$Factory
         )
     PROCESS {
         $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
-        $ClassEntry.Interfaces | Write-Output
+        if ($Factory) {
+            $ClassEntry.FactoryInterfaces | Write-Output
+        } else {
+            $ClassEntry.Interfaces | Write-Output
+        }
     }
 }
 
@@ -826,6 +867,7 @@ function Get-ComObjRef {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromObject" {
+            $InputObject = Unwrap-ComObject $InputObject
             $objref = [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($InputObject, $Iid, $MarshalContext, $MarshalFlags)
         }
         "FromPath" {
@@ -918,27 +960,6 @@ function Show-ComSecurityDescriptor {
     }
 }
 
-function Wrap-Object {
-    [CmdletBinding(DefaultParameterSetName = "FromType")]
-    Param(
-        [Parameter(Mandatory, Position = 0)]
-        [object]$Object,
-        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
-        [Guid]$Iid,
-        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
-        [Type]$Type
-    )
-
-    switch($PSCmdlet.ParameterSetName) {
-        "FromIid" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Iid)
-        }
-        "FromType" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Type)
-        }
-    }
-}
-
 <#
 .SYNOPSIS
 Creates a new COM object instance.
@@ -969,7 +990,9 @@ function New-ComObject {
         [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
-        [string]$RemoteServer
+        [string]$RemoteServer,
+        [Parameter(ParameterSetName = "FromMoniker")]
+        [string]$Moniker
     )
 
     PROCESS {
@@ -983,9 +1006,12 @@ function New-ComObject {
             "FromFactory" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
             }
+            "FromMoniker" {
+                $obj = [System.Runtime.InteropServices.Marshal]::BindToMoniker($Moniker)
+            }
         }
         $type = [OleViewDotNet.IUnknown]
-        Wrap-Object $obj -Type $type | Write-Output
+        Wrap-ComObject $obj -Type $type | Write-Output
     }
 }
 
@@ -1024,6 +1050,6 @@ function New-ComObjectFactory {
             }
         }
         $type = [OleViewDotNet.IClassFactory]
-        Wrap-Object $obj $type | Write-Output
+        Wrap-ComObject $obj $type | Write-Output
     }
 }

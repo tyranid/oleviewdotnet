@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet
 {
@@ -64,12 +65,51 @@ namespace OleViewDotNet
         }
     }
 
+    public class IClassFactoryWrapper : BaseComWrapper<IClassFactory>, IClassFactory
+    {
+        public IClassFactoryWrapper(object obj) : base(obj)
+        {
+        }
+
+        public void CreateInstance(object pUnkOuter, ref Guid riid, out object ppvObject)
+        {
+            _object.CreateInstance(pUnkOuter, ref riid, out ppvObject);
+        }
+
+        public void LockServer(bool fLock)
+        {
+            _object.LockServer(fLock);
+        }
+    }
+
     public static class ComWrapperFactory
     {
         private static AssemblyName _name = new AssemblyName("ComWrapperTypes");
         private static AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.Run);
         private static ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name);
-        private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() { { typeof(IUnknown).GUID, typeof(IUnknownWrapper) } };
+        private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() {
+            { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
+            { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) } };
+
+        public static Type GenerateNonReflectionInterface(Type intf_type)
+        {
+            TypeBuilder tb = _module.DefineType(
+                 intf_type.Name,
+                 TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Interface);
+            var com_import_attr = new CustomAttributeBuilder(typeof(ComImportAttribute).GetConstructor(Type.EmptyTypes), new object[0]);
+            tb.SetCustomAttribute(com_import_attr);
+            var guid_attr = new CustomAttributeBuilder(typeof(GuidAttribute).GetConstructor(new Type[] { typeof(string) }), new object[] { intf_type.GUID.ToString() });
+            tb.SetCustomAttribute(guid_attr);
+
+            foreach (var mi in intf_type.GetMethods())
+            {
+                string name = mi.Name;
+                var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.NewSlot | MethodAttributes.HideBySig | MethodAttributes.Virtual, 
+                    mi.ReturnType, mi.GetParameters().Select(p => p.ParameterType).ToArray());
+            }
+            // TODO: Emit properties.
+            return tb.CreateType();
+        }
 
         public static BaseComWrapper<T> Wrap<T>(object obj)
         {
@@ -93,6 +133,17 @@ namespace OleViewDotNet
                 throw new ArgumentException("Wrapper type must be a public COM interface");
             }
 
+            if (intf_type.Assembly.ReflectionOnly)
+            {
+                //throw new ArgumentException("Interface type cant be reflection only", nameof(intf_type));
+                intf_type = GenerateNonReflectionInterface(intf_type);
+            }
+
+            if (!Marshal.IsComObject(obj))
+            {
+                throw new ArgumentException("Object must be a COM object", nameof(obj));
+            }
+
             if (!_types.ContainsKey(intf_type.GUID))
             {
                 Type base_type = typeof(BaseComWrapper<>).MakeGenericType(intf_type);
@@ -107,7 +158,7 @@ namespace OleViewDotNet
                 conil.Emit(OpCodes.Call,
                     base_type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(object) }, null));
                 conil.Emit(OpCodes.Ret);
-                foreach (var mi in typeof(IClassFactory).GetMethods())
+                foreach (var mi in intf_type.GetMethods())
                 {
                     string name = mi.Name;
                     switch (name)
@@ -128,9 +179,20 @@ namespace OleViewDotNet
                     ilgen.Emit(OpCodes.Callvirt, mi);
                     ilgen.Emit(OpCodes.Ret);
                 }
+                // TODO: Emit properties.
                 _types[intf_type.GUID] = tb.CreateType();
             }
             return (BaseComWrapper)Activator.CreateInstance(_types[intf_type.GUID], obj);
         }
+
+        public static object Unwrap(object obj)
+        {
+            if (obj is BaseComWrapper wrapper)
+            {
+                return wrapper.Unwrap();
+            }
+            return obj;
+        }
+
     }
 }
