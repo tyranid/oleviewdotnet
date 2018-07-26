@@ -87,15 +87,28 @@ namespace OleViewDotNet
         private static AssemblyName _name = new AssemblyName("ComWrapperTypes");
         private static AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.Run);
         private static ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name);
+        private static Dictionary<Type, Type> _generated_intfs = new Dictionary<Type, Type>();
         private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() {
             { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
             { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) } };
 
         public static Type GenerateNonReflectionInterface(Type intf_type)
         {
+            if (!intf_type.Assembly.ReflectionOnly)
+            {
+                return intf_type;
+            }
+
+            if (_generated_intfs.ContainsKey(intf_type))
+            {
+                return _generated_intfs[intf_type];
+            }
+
             TypeBuilder tb = _module.DefineType(
                  intf_type.Name,
-                 TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Interface);
+                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
+            _generated_intfs[intf_type] = tb;
+
             var com_import_attr = new CustomAttributeBuilder(typeof(ComImportAttribute).GetConstructor(Type.EmptyTypes), new object[0]);
             tb.SetCustomAttribute(com_import_attr);
             var guid_attr = new CustomAttributeBuilder(typeof(GuidAttribute).GetConstructor(new Type[] { typeof(string) }), new object[] { intf_type.GUID.ToString() });
@@ -105,10 +118,11 @@ namespace OleViewDotNet
             {
                 string name = mi.Name;
                 var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.NewSlot | MethodAttributes.HideBySig | MethodAttributes.Virtual, 
-                    mi.ReturnType, mi.GetParameters().Select(p => p.ParameterType).ToArray());
+                    GenerateNonReflectionInterface(mi.ReturnType), mi.GetParameters().Select(p => GenerateNonReflectionInterface(p.ParameterType)).ToArray());
             }
             // TODO: Emit properties.
-            return tb.CreateType();
+            _generated_intfs[intf_type] = tb.CreateType();
+            return _generated_intfs[intf_type];
         }
 
         public static BaseComWrapper<T> Wrap<T>(object obj)
@@ -119,6 +133,30 @@ namespace OleViewDotNet
         public static BaseComWrapper Wrap(object obj, Guid iid)
         {
             return Wrap(obj, COMUtilities.GetInterfaceType(iid));
+        }
+
+        private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes, Type base_type)
+        {
+            string name = mi.Name;
+            switch (name)
+            {
+                case "QueryInterface":
+                case "Unwrap":
+                    name = name + "_real";
+                    break;
+            }
+            var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Virtual | attributes, 
+                mi.ReturnType, mi.GetParameters().Select(p => p.ParameterType).ToArray());
+            var ilgen = methbuilder.GetILGenerator();
+            ilgen.Emit(OpCodes.Ldarg_0);
+            ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
+            for (int i = 0; i < mi.GetParameters().Length; ++i)
+            {
+                ilgen.Emit(OpCodes.Ldarg, i + 1);
+            }
+            ilgen.Emit(OpCodes.Callvirt, mi);
+            ilgen.Emit(OpCodes.Ret);
+            return methbuilder;
         }
 
         public static BaseComWrapper Wrap(object obj, Type intf_type)
@@ -135,8 +173,7 @@ namespace OleViewDotNet
 
             if (intf_type.Assembly.ReflectionOnly)
             {
-                //throw new ArgumentException("Interface type cant be reflection only", nameof(intf_type));
-                intf_type = GenerateNonReflectionInterface(intf_type);
+                throw new ArgumentException("Interface type cant be reflection only", nameof(intf_type));
             }
 
             if (!Marshal.IsComObject(obj))
@@ -158,28 +195,26 @@ namespace OleViewDotNet
                 conil.Emit(OpCodes.Call,
                     base_type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(object) }, null));
                 conil.Emit(OpCodes.Ret);
-                foreach (var mi in intf_type.GetMethods())
+                foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
                 {
-                    string name = mi.Name;
-                    switch (name)
-                    {
-                        case "QueryInterface":
-                        case "Unwrap":
-                            name = name + "_real";
-                            break;
-                    }
-                    var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, mi.GetParameters().Select(p => p.ParameterType).ToArray());
-                    var ilgen = methbuilder.GetILGenerator();
-                    ilgen.Emit(OpCodes.Ldarg_0);
-                    ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
-                    for (int i = 0; i < mi.GetParameters().Length; ++i)
-                    {
-                        ilgen.Emit(OpCodes.Ldarg, i + 1);
-                    }
-                    ilgen.Emit(OpCodes.Callvirt, mi);
-                    ilgen.Emit(OpCodes.Ret);
+                    GenerateForwardingMethod(tb, mi, 0, base_type);
                 }
-                // TODO: Emit properties.
+
+                foreach (var pi in intf_type.GetProperties())
+                {
+                    var pb = tb.DefineProperty(pi.Name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
+                    if (pi.CanRead)
+                    {
+                        var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type);
+                        pb.SetGetMethod(get_method);
+                    }
+                    if (pi.CanWrite)
+                    {
+                        var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type);
+                        pb.SetSetMethod(set_method);
+                    }
+                }
+
                 _types[intf_type.GUID] = tb.CreateType();
             }
             return (BaseComWrapper)Activator.CreateInstance(_types[intf_type.GUID], obj);
