@@ -1267,6 +1267,11 @@ namespace OleViewDotNet
             return UnmarshalObject(new MemoryStream(objref), COMInterfaceEntry.IID_IUnknown);
         }
 
+        public static object UnmarshalObject(COMObjRef objref)
+        {
+            return UnmarshalObject(objref.ToArray());
+        }
+
         public static Guid GetObjectClass(object p)
         {
             Guid ret = Guid.Empty;
@@ -2306,6 +2311,87 @@ namespace OleViewDotNet
             object ret = Marshal.GetObjectForIUnknown(obj);
             Marshal.Release(obj);
             return ret;
+        }
+
+        private static Guid CLSID_NewMoniker = new Guid("ecabafc6-7f19-11d2-978e-0000f8757e2a");
+
+        private static IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string)
+        {
+            if (moniker_string == "new")
+            {
+                Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
+                IntPtr unk;
+                int hr = CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero, 
+                    CLSCTX.INPROC_SERVER, ref IID_IUnknown, out unk);
+                if (hr != 0)
+                {
+                    Marshal.ThrowExceptionForHR(hr);
+                }
+
+                try
+                {
+                    return (IMoniker)Marshal.GetObjectForIUnknown(unk);
+                }
+                finally
+                {
+                    Marshal.Release(unk);
+                }
+            }
+            else
+            {
+                if (moniker_string.StartsWith("file:", StringComparison.OrdinalIgnoreCase) ||
+                    moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                    moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
+                {
+                    IMoniker moniker;
+                    int hr = CreateURLMonikerEx(null, moniker_string, out moniker, CreateUrlMonikerFlags.Uniform);
+                    if (hr != 0)
+                    {
+                        Marshal.ThrowExceptionForHR(hr);
+                    }
+                    return moniker;
+                }
+
+                int eaten = 0;
+                return MkParseDisplayName(bind_context, moniker_string, out eaten);
+            }
+        }
+
+        private static IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string, bool composite)
+        {
+            if (composite)
+            {
+                IMoniker ret_moniker = null;
+                foreach (string m in moniker_string.Split('!'))
+                {
+                    IMoniker moniker = ParseMoniker(bind_context, m);
+                    if (ret_moniker != null)
+                    {
+                        ret_moniker.ComposeWith(moniker, false, out moniker);
+                    }
+                    ret_moniker = moniker;
+                }
+                return ret_moniker;
+            }
+            else
+            {
+                return ParseMoniker(bind_context, moniker_string);
+            }
+        }
+
+        public static IMoniker ParseMoniker(string moniker_string, bool composite)
+        {
+            IBindCtx bind_context = CreateBindCtx(0);
+            return ParseMoniker(bind_context, moniker_string, composite);
+        }
+
+        public static object ParseAndBindMoniker(string moniker_string, bool composite)
+        {
+            IBindCtx bind_context = CreateBindCtx(0);
+            IMoniker moniker = ParseMoniker(bind_context, moniker_string, composite);
+            Guid iid = COMInterfaceEntry.IID_IUnknown;
+            moniker.BindToObject(bind_context, null, ref iid, out object comObj);
+            return comObj;
         }
     }
 }

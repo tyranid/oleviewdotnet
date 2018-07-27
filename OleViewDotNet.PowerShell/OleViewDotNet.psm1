@@ -982,6 +982,8 @@ Specify the context the new object will be created from.
 Specify the remote server the COM object will be created on.
 .PARAMETER NoWrapper
 Don't wrap object in a callable wrapper.
+.PARAMETER Moniker
+Specify a moniker to bind to.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1000,8 +1002,10 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
-        [Parameter(ParameterSetName = "FromMoniker")]
-        [string]$Moniker,
+        [Parameter(ParameterSetName = "FromObjRef")]
+        [OleViewDotNet.COMObjRef]$ObjRef,
+        [Parameter(ParameterSetName = "FromIpid")]
+        [OleViewDotNet.COMIPIDEntry]$Ipid,
         [switch]$NoWrapper
     )
 
@@ -1016,11 +1020,14 @@ function New-ComObject {
             "FromFactory" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
             }
-            "FromMoniker" {
-                $obj = [System.Runtime.InteropServices.Marshal]::BindToMoniker($Moniker)
-            }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
+            }
+            "FromObjRef" {
+                $obj = [OleViewDotNet.COMUtilities]::UnmarshalObject($ObjRef)
+            }
+            "FromIpid" {
+                $obj = [OleViewDotNet.COMUtilities]::UnmarshalObject($Ipid.ToObjRef())
             }
         }
 
@@ -1074,4 +1081,57 @@ function New-ComObjectFactory {
             Wrap-ComObject $obj $type -NoWrapper:$NoWrapper | Write-Output
         }
     }
+}
+
+<#
+.SYNOPSIS
+Creates a new COM moniker instance and optionally binds to it.
+.DESCRIPTION
+This cmdlet creates a new COM moniker instance and optionally binds to the object.
+.PARAMETER NoWrapper
+Don't wrap object in a callable wrapper.
+.PARAMETER Moniker
+Specify a moniker to parse.
+.PARAMETER Bind
+Bind to parsed moniker.
+.PARAMETER Composite
+Parse the moniker as a composite, each component separated by a '!'
+#>
+function Get-ComMoniker {
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Moniker,
+        [switch]$Bind,
+        [switch]$Composite,
+        [switch]$NoWrapper
+    )
+
+    if ($Bind) {
+        $type = [OleViewDotNet.IUnknown]
+        $obj = [OleViewDotNet.COMUtilities]::ParseAndBindMoniker($Moniker, $Composite)
+    } else {
+        $type = [System.Runtime.InteropServices.ComTypes.IMoniker]
+        $obj = [OleViewDotNet.COMUtilities]::ParseMoniker($Moniker, $Composite)
+    }
+
+    if ($null -ne $obj) {
+        Wrap-ComObject $obj $type -NoWrapper:$NoWrapper | Write-Output
+    }
+}
+
+<#
+.SYNOPSIS
+Gets the display name from a COM moniker.
+.DESCRIPTION
+This cmdlet gets the display name from a COM moniker
+.PARAMETER Moniker
+Specify a moniker to get the display name from.
+#>
+function Get-ComMonikerDisplayName {
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [System.Runtime.InteropServices.ComTypes.IMoniker]$Moniker
+    )
+
+    [OleViewDotNet.COMUtilities]::GetMonikerDisplayName($Moniker) | Write-Output
 }
