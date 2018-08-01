@@ -482,7 +482,7 @@ namespace OleViewDotNet
         {
             if (obj._interfaces == null)
             {
-                obj._interfaces = GetInterfacesForObject(ComWrapperFactory.Unwrap(obj));
+                obj._interfaces = GetInterfacesForObject(ComWrapperFactory.Unwrap(obj)).ToList();
             }
             return obj._interfaces;
         }
