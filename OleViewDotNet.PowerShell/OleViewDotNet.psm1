@@ -374,8 +374,8 @@ function Get-ComProcess {
     )
 
     BEGIN {
-        if ($comdbgHelpPath -eq "") {
-            $comdbgHelpPath = "dbghelp.dll"
+        if ($DgHelpPath -eq "") {
+            $DbgHelpPath = "dbghelp.dll"
         }
         if ($SymbolPath -eq "") {
             $SymbolPath = $env:_NT_SYMBOL_PATH
@@ -403,7 +403,7 @@ function Get-ComProcess {
 
     END {
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
-        $config = [OleViewDotNet.COMProcessParserConfig]::new($comdbgHelpPath, $SymbolPath, `
+        $config = [OleViewDotNet.COMProcessParserConfig]::new($DbgHelpPath, $SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
 
         if ($PSCmdlet.ParameterSetName -eq "FromObjRef") {
