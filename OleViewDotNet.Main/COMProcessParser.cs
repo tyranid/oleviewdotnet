@@ -875,7 +875,8 @@ namespace OleViewDotNet
             }
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) 
+        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, 
+            COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set) 
             where T : struct, IPIDEntryNativeInterface
         {
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
@@ -901,7 +902,10 @@ namespace OleViewDotNet
                         IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
                         if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                         {
-                            entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, config, registry));
+                            if (ipid_set.Count == 0 || ipid_set.Contains(ipid_entry.Ipid))
+                            {
+                                entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, config, registry));
+                            }
                         }
                     }
                 }
@@ -922,8 +926,10 @@ namespace OleViewDotNet
             return String.Format("0x{0:X}", address.ToInt64());
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, 
+            COMRegistry registry, IEnumerable<Guid> ipids)
         {
+            HashSet<Guid> ipid_set = new HashSet<Guid>(ipids);
             IntPtr ipid_table = resolver.GetAddressOfSymbol(GetSymbolName("CIPIDTable::_palloc"));
             if (ipid_table == IntPtr.Zero)
             {
@@ -932,11 +938,11 @@ namespace OleViewDotNet
 
             if (process.Is64Bit)
             {
-                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver, config, registry);
+                return ParseIPIDEntries<IPIDEntryNative>(process, ipid_table, resolver, config, registry, ipid_set);
             }
             else
             {
-                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver, config, registry);
+                return ParseIPIDEntries<IPIDEntryNative32>(process, ipid_table, resolver, config, registry, ipid_set);
             }
         }
 
@@ -1179,8 +1185,8 @@ namespace OleViewDotNet
         {
             return process.GetImageFilePath(false);
         }
-        
-        public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry)
+
+        public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry, IEnumerable<Guid> ipids)
         {
             using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
             {
@@ -1196,14 +1202,14 @@ namespace OleViewDotNet
                     return null;
                 }
 
-                using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit, 
+                using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
                     SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
                 {
                     Sid user = process.User;
                     return new COMProcessEntry(
                         pid,
                         GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver, config, registry),
+                        ParseIPIDEntries(process, resolver, config, registry, ipids),
                         process.Is64Bit,
                         GetProcessAppId(process, resolver),
                         GetProcessAccessSecurityDescriptor(process, resolver),
@@ -1222,7 +1228,27 @@ namespace OleViewDotNet
             }
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config, IProgress<Tuple<string, int>> progress, COMRegistry registry)
+        public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry)
+        {
+            return ParseProcess(pid, config, registry, new Guid[0]);
+        }
+
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<COMObjRef> objrefs, COMProcessParserConfig config, 
+            IProgress<Tuple<string, int>> progress, COMRegistry registry)
+        {
+            var stdobjrefs = objrefs.OfType<COMObjRefStandard>();
+            return GetProcesses(stdobjrefs.Select(o => Process.GetProcessById(o.ProcessId)), config, progress, registry, stdobjrefs.Select(i => i.Ipid));
+        }
+
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config, 
+            IProgress<Tuple<string, int>> progress, COMRegistry registry)
+        {
+            return GetProcesses(procs, config, progress, registry, new Guid[0]);
+        }
+
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, 
+            COMProcessParserConfig config, IProgress<Tuple<string, int>> progress, 
+            COMRegistry registry, IEnumerable<Guid> ipids)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
             NtToken.EnableDebugPrivilege();
@@ -1238,7 +1264,7 @@ namespace OleViewDotNet
                             100 * current_count++ / total_count));
                     }
                     COMProcessEntry proc = ParseProcess(p.Id,
-                        config, registry);
+                        config, registry, ipids);
                     if (proc != null)
                     {
                         ret.Add(proc);
