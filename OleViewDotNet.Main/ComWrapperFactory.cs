@@ -25,6 +25,8 @@ namespace OleViewDotNet
 {
     public abstract class BaseComWrapper
     {
+        internal IEnumerable<COMInterfaceEntry> _interfaces;
+
         public string InterfaceName { get; }
         public Guid Iid { get; }
         public abstract BaseComWrapper QueryInterface(Guid iid);

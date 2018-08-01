@@ -473,6 +473,20 @@ namespace OleViewDotNet
             }
         }
 
+        /// <summary>
+        /// Get list of supported interfaces for a COM wrapper
+        /// </summary>
+        /// <param name="obj">COM Wrapper Object</param>
+        /// <returns>List of interfaces supported</returns>
+        public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(BaseComWrapper obj)
+        {
+            if (obj._interfaces == null)
+            {
+                obj._interfaces = GetInterfacesForObject(ComWrapperFactory.Unwrap(obj));
+            }
+            return obj._interfaces;
+        }
+
         public COMInterfaceEntry[] GetProxiesForClsid(COMCLSIDEntry clsid)
         {
             if (ProxiesByClsid.ContainsKey(clsid.Clsid))
