@@ -1237,7 +1237,8 @@ namespace OleViewDotNet
             IProgress<Tuple<string, int>> progress, COMRegistry registry)
         {
             var stdobjrefs = objrefs.OfType<COMObjRefStandard>();
-            return GetProcesses(stdobjrefs.Select(o => Process.GetProcessById(o.ProcessId)), config, progress, registry, stdobjrefs.Select(i => i.Ipid));
+            return GetProcesses(stdobjrefs.Select(o => o.ProcessId).Distinct().Select(pid => Process.GetProcessById(pid)), 
+                config, progress, registry, stdobjrefs.Select(i => i.Ipid));
         }
 
         public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config, 
