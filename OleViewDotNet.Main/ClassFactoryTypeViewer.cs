@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -48,7 +49,7 @@ namespace OleViewDotNet
                 props.Add("Name", _name);
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
                 ObjectInformation view = new ObjectInformation(_registry, _entry, _name, new_object,
-                    props, _registry.GetInterfacesForObject(new_object));
+                    props, _registry.GetInterfacesForObject(new_object).ToArray());
                 EntryPoint.GetMainForm(_registry).HostControl(view);
             }
             catch (Exception ex)

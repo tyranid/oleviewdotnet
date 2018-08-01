@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
@@ -120,7 +121,7 @@ namespace OleViewDotNet
                     info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
                     dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
                     ObjectInformation view = new ObjectInformation(m_registry, null, info.strDisplayName, 
-                        comObj, props, m_registry.GetInterfacesForObject(comObj));
+                        comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
                     EntryPoint.GetMainForm(m_registry).HostControl(view);
                 }
                 catch (Exception ex)

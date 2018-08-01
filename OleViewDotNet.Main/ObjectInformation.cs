@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -57,7 +58,7 @@ namespace OleViewDotNet
             m_pEntry = ObjectCache.Add(registry, objName, pObject, interfaces);
             m_pObject = pObject;
             m_properties = properties;
-            m_interfaces = interfaces; 
+            m_interfaces = interfaces.OrderBy(i => i.Name).ToArray();
             m_objName = objName;
             
             InitializeComponent();
@@ -282,7 +283,7 @@ namespace OleViewDotNet
                 factory.CreateInstance(null, ref IID_IUnknown, out new_object);
                 ObjectInformation view = new ObjectInformation(m_registry,
                     m_entry, m_objName, new_object,
-                    props, m_registry.GetInterfacesForObject(new_object));
+                    props, m_registry.GetInterfacesForObject(new_object).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);
             }
             catch (Exception ex)

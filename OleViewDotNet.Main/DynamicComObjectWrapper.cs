@@ -99,10 +99,10 @@ namespace OleViewDotNet
         {            
             if (_interfaces == null)
             {
-                _interfaces = _registry.GetInterfacesForObject(_target);
+                _interfaces = _registry.GetInterfacesForObject(_target).OrderBy(i => i.Name).ToArray();
             }
 
-            return _interfaces;    
+            return _interfaces;
         }
 
         private object QueryInterface(string name)

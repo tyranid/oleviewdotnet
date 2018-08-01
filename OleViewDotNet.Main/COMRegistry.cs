@@ -435,19 +435,24 @@ namespace OleViewDotNet
         /// <returns>List of interfaces supported</returns>
         public IEnumerable<COMInterfaceEntry> GetInterfacesForIUnknown(IntPtr pObject)
         {
-            List<COMInterfaceEntry> ents = new List<COMInterfaceEntry>();
-            foreach (COMInterfaceEntry intEnt in Interfaces.Values)
+            Marshal.AddRef(pObject);
+            try
             {
-                Guid currIID = intEnt.Iid;
-                IntPtr pRequested;
-
-                if (Marshal.QueryInterface(pObject, ref currIID, out pRequested) == 0)
+                foreach (var intEnt in Interfaces.Values)
                 {
-                    Marshal.Release(pRequested);
-                    ents.Add(intEnt);
+                    Guid currIID = intEnt.Iid;
+
+                    if (Marshal.QueryInterface(pObject, ref currIID, out IntPtr pRequested) == 0)
+                    {
+                        Marshal.Release(pRequested);
+                        yield return intEnt;
+                    }
                 }
             }
-            return ents.OrderBy(i => i.Name);
+            finally
+            {
+                Marshal.Release(pObject);
+            }
         }
 
         /// <summary>
@@ -455,15 +460,17 @@ namespace OleViewDotNet
         /// </summary>
         /// <param name="obj">COM Wrapper Object</param>
         /// <returns>List of interfaces supported</returns>
-        public COMInterfaceEntry[] GetInterfacesForObject(object obj)
+        public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(object obj)
         {
-            COMInterfaceEntry[] ret;
-
             IntPtr pObject = Marshal.GetIUnknownForObject(obj);
-            ret = GetInterfacesForIUnknown(pObject).ToArray();
-            Marshal.Release(pObject);
-
-            return ret;
+            try
+            {
+                return GetInterfacesForIUnknown(pObject);
+            }
+            finally
+            {
+                Marshal.Release(pObject);
+            }
         }
 
         public COMInterfaceEntry[] GetProxiesForClsid(COMCLSIDEntry clsid)

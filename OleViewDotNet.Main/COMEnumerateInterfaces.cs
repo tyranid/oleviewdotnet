@@ -38,6 +38,7 @@ namespace OleViewDotNet
         public Guid Iid { get; private set; }
         public string Module { get; private set; }
         public long VTableOffset { get; private set; }
+        internal COMRegistry Database { get { return m_registry; } }
         public string Name
         {
             get
@@ -47,6 +48,13 @@ namespace OleViewDotNet
                     return string.Empty;
                 }
                 return m_registry.InterfacesToNames[Iid];
+            }
+        }
+        public COMInterfaceEntry InterfaceEntry
+        {
+            get
+            {
+                return m_registry?.Interfaces.GetGuidEntry(Iid);
             }
         }
 

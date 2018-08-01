@@ -20,7 +20,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet
 {
@@ -38,7 +37,7 @@ namespace OleViewDotNet
         }
     }
 
-    public abstract class BaseComWrapper<T> : BaseComWrapper
+    public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable
     {
         protected readonly T _object;
 
@@ -56,6 +55,11 @@ namespace OleViewDotNet
         public override object Unwrap()
         {
             return _object;
+        }
+
+        void IDisposable.Dispose()
+        {
+            Marshal.ReleaseComObject(_object);
         }
     }
 

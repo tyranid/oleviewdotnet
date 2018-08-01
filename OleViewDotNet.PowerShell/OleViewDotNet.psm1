@@ -59,10 +59,10 @@ function Wrap-ComObject {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Iid)
+            [OleViewDotNet.ComWrapperFactory]::Wrap($Object, $Iid)
         }
         "FromType" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($obj, $Type)
+            [OleViewDotNet.ComWrapperFactory]::Wrap($Object, $Type)
         }
     }
 }
@@ -74,7 +74,7 @@ function Unwrap-ComObject {
         [object]$Object
     )
 
-    [OleViewDotNet.ComWrapperFactory]::Unwrap($obj)
+    [OleViewDotNet.ComWrapperFactory]::Unwrap($Object)
 }
 
 <#
@@ -674,6 +674,8 @@ The database to use.
 Specify a IID to lookup.
 .PARAMETER Name
 Specify a name to match against the interface name.
+.PARAMETER Object
+A running COM object to query for interfaces (can take a long time/hang).
 .INPUTS
 None
 .OUTPUTS
@@ -687,6 +689,9 @@ Get COM interface from an IID from a database.
 .EXAMPLE
 Get-ComInterface -Database $comdb -Name "IBlah"
 Get COM interfaces which contain IBlah in their name.
+.EXAMPLE
+Get-ComInterface -Database $comdb -Object $obj
+Get COM interfaces supported by an object.
 #>
 function Get-ComInterface {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -696,7 +701,9 @@ function Get-ComInterface {
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
-        [string]$Name
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromObject")]
+        [object]$Object
     )
     switch($PSCmdlet.ParameterSetName) {
         "All" {
@@ -707,6 +714,10 @@ function Get-ComInterface {
         }
         "FromIid" {
             $Database.Interfaces[$Iid] | Write-Output
+        }
+        "FromObject" {
+            $Object = Unwrap-ComObject $Object
+            $Database.GetInterfacesForObject($Object) | Write-Output
         }
     }
 }
@@ -1134,4 +1145,52 @@ function Get-ComMonikerDisplayName {
     )
 
     [OleViewDotNet.COMUtilities]::GetMonikerDisplayName($Moniker) | Write-Output
+}
+
+<#
+.SYNOPSIS
+Parses COM proxy information for an interface or a proxy class.
+.DESCRIPTION
+This cmdlet parses the COM proxy information for an interface or specified COM proxy class. If a class is specified all interfaces
+from that class are returned.
+.PARAMETER Class
+A COM proxy class.
+.PARAMETER Interface
+A COM interface with a registered proxy.
+.PARAMETER InterfaceInstance
+A COM interface instance.
+.OUTPUTS
+The parsed proxy information and complex types.
+.EXAMPLE
+Get-ComProxy $intf
+Parse the proxy information for an interface.
+.EXAMPLE
+Get-ComProxy $class
+Parse the proxy information for a class.
+#>
+function Get-ComProxy {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position=0, ParameterSetName = "FromInterface", ValueFromPipeline)]
+        [OleViewDotNet.COMInterfaceEntry]$Interface,
+        [parameter(Mandatory, Position=0, ParameterSetName = "FromInterfaceInstance", ValueFromPipeline)]
+        [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
+        [parameter(Mandatory, Position=0, ParameterSetName = "FromClass")]
+        [OleViewDotNet.COMClsidEntry]$Class
+    )
+
+    PROCESS {
+        $proxy = switch($PSCmdlet.ParameterSetName) {
+            "FromClass" {
+                [OleViewDotNet.COMProxyInstance]::GetFromCLSID($Class, $null)
+            }
+            "FromInterface" {
+                [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($Interface, $null)
+            }
+            "FromInterfaceInstance" {
+                [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
+            }
+        }
+        Write-Output $proxy
+    }
 }

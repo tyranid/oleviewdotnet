@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OleViewDotNet
 {
@@ -34,7 +35,7 @@ namespace OleViewDotNet
         }
 
         public ObjectEntry(COMRegistry registry, string name, object instance)
-            : this(registry, name, instance, registry.GetInterfacesForObject(instance))
+            : this(registry, name, instance, registry.GetInterfacesForObject(instance).OrderBy(i => i.Name).ToArray())
         {
         }
 

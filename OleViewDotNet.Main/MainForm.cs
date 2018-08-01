@@ -261,7 +261,7 @@ namespace OleViewDotNet
 
                     try
                     {
-                        ints = m_registry.GetInterfacesForIUnknown(pObj);
+                        ints = m_registry.GetInterfacesForIUnknown(pObj).ToArray();
                         comObj = Marshal.GetObjectForIUnknown(pObj);
                         strObjName = clsid.FormatGuid();
                         props.Add("CLSID", clsid.FormatGuid());
@@ -366,7 +366,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    ints = m_registry.GetInterfacesForObject(comObj);
+                    ints = m_registry.GetInterfacesForObject(comObj).ToArray();
                     strObjName = defaultName != null ? defaultName : clsid.FormatGuid();
                     props.Add("CLSID", clsid.FormatGuid());
                 }

@@ -47,7 +47,7 @@ namespace OleViewDotNet
                     factory.ServerCreateElevatedObject(vso.Clsid, COMInterfaceEntry.IID_IUnknown, out new_object);
                     ObjectInformation view = new ObjectInformation(_registry, vso,
                         vso.Name, new_object,
-                        props, _registry.GetInterfacesForObject(new_object));
+                        props, _registry.GetInterfacesForObject(new_object).ToArray());
                     EntryPoint.GetMainForm(_registry).HostControl(view);
                 }
             }

@@ -1129,7 +1129,7 @@ namespace OleViewDotNet
 
         public bool SupportsRemoteActivation { get { return true; } }
 
-        public COMRegistry Database { get { return m_registry; } }
+        internal COMRegistry Database { get { return m_registry; } }
 
         string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
 
