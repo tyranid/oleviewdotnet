@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+Set-StrictMode -Version Latest
+
 [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
 
 function New-CallbackProgress {
@@ -359,13 +361,15 @@ function Get-ComProcess {
     Param(
         [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
-        [string]$comdbgHelpPath = "dbghelp.dll",
+        [string]$DbgHelpPath = "dbghelp.dll",
         [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols",
         [switch]$ParseStubMethods,
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
         [System.Diagnostics.Process[]]$Process,
+        [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromObjRef")]
+        [OleViewDotNet.COMObjRef[]]$ObjRef,
         [switch]$NoProgress
     )
 
@@ -380,6 +384,7 @@ function Get-ComProcess {
             }
         }
         $procs = @()
+        $objrefs = @()
     }
 
     PROCESS {
@@ -390,6 +395,9 @@ function Get-ComProcess {
             "FromProcess" {
                 $procs += $Process
             }
+            "FromObjRef" {
+                $objrefs += $ObjRef
+            }
         }
     }
 
@@ -397,7 +405,12 @@ function Get-ComProcess {
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
         $config = [OleViewDotNet.COMProcessParserConfig]::new($comdbgHelpPath, $SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
-        [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
+
+        if ($PSCmdlet.ParameterSetName -eq "FromObjRef") {
+            [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
+        } else {
+            [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
+        }
     }
 }
 
@@ -830,12 +843,34 @@ Enum ComObjRefOutput
     Moniker
 }
 
+function Out-ObjRef {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, ValueFromPipeline)]
+        [OleViewDotNet.ComObjRef]$ObjRef,
+        [ComObjRefOutput]$Output = "Object"
+    )
+
+    switch($Output) {
+        "Bytes" {
+            Write-Output $objref.ToArray()
+        }
+        "Moniker" {
+            $moniker = $objref.ToMoniker()
+            Write-Output $moniker
+        }
+        "Object" {
+            Write-Output $objref
+        }
+    }
+}
+
 <#
 .SYNOPSIS
 Get an OBJREF for a COM object.
 .DESCRIPTION
 This cmdlet marshals a COM object to an OBJREF, returning a byte array, a COMObjRef object or a moniker.
-.PARAMETER InputObject
+.PARAMETER Object
 The object to marshal.
 .PARAMETER Path
 Specify a path for the output OBJREF.
@@ -868,11 +903,11 @@ function Get-ComObjRef {
     [CmdletBinding(DefaultParameterSetName = "FromPath")]
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromObject")]
-        [object]$InputObject,
+        [object]$Object,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromPath")]
         [string]$Path,
         [ComObjRefOutput]$Output = "Object",
-        [Parameter(ParameterSetName = "FromObject")]
+        [Parameter(ParameterSetName = "FromObject", ValueFromPipelineByPropertyName)]
         [Guid]$Iid = "00000000-0000-0000-C000-000000000046",
         [Parameter(ParameterSetName = "FromObject")]
         [OleViewDotNet.MSHCTX]$MarshalContext = "DIFFERENTMACHINE",
@@ -880,27 +915,25 @@ function Get-ComObjRef {
         [OleViewdotNet.MSHLFLAGS]$MarshalFlags = "NORMAL"
     )
 
-    switch($PSCmdlet.ParameterSetName) {
-        "FromObject" {
-            $InputObject = Unwrap-ComObject $InputObject
-            $objref = [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($InputObject, $Iid, $MarshalContext, $MarshalFlags)
-        }
-        "FromPath" {
-            $ba = Get-Content -Path $Path -Encoding Byte
-            $objref = [OleViewDotNet.COMObjRef]::FromArray($ba)
+
+    BEGIN {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromObject" {
+                $Object = Unwrap-ComObject $Object
+            }
         }
     }
 
-    switch($Output) {
-        "Bytes" {
-            Write-Output $objref.ToArray()
-        }
-        "Moniker" {
-            $moniker = $objref.ToMoniker()
-            Write-Output $moniker
-        }
-        "Object" {
-            Write-Output $objref
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromObject" {
+                [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($Object, `
+                        $Iid, $MarshalContext, $MarshalFlags) | Out-ObjRef -Output $Output
+            }
+            "FromPath" {
+                $ba = Get-Content -Path $Path -Encoding Byte
+                [OleViewDotNet.COMObjRef]::FromArray($ba) | Out-ObjRef -Output $Output
+            }
         }
     }
 }
