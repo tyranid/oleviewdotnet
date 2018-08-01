@@ -716,7 +716,6 @@ function Get-ComInterface {
             $Database.Interfaces[$Iid] | Write-Output
         }
         "FromObject" {
-            $Object = Unwrap-ComObject $Object
             $Database.GetInterfacesForObject($Object) | Write-Output
         }
     }
