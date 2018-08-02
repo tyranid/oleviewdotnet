@@ -1392,6 +1392,10 @@ namespace OleViewDotNet
         {
             Pid = pid;
             ExecutablePath = path;
+            foreach (var ipid in ipids)
+            {
+                ipid.Process = this;
+            }
             Ipids = ipids.AsReadOnly();
             Is64Bit = is64bit;
             AppId = appid;
@@ -1414,6 +1418,11 @@ namespace OleViewDotNet
             STAMainHWnd = sta_main_hwnd;
             Classes = classes.AsReadOnly();
             UnmarshalPolicy = unmarshal_policy;
+        }
+
+        public override string ToString()
+        {
+            return $"{Pid} {Name}";
         }
     }
 
@@ -1456,6 +1465,7 @@ namespace OleViewDotNet
     {
         public Guid Ipid { get; private set; }
         public Guid Iid { get; private set; }
+        public string Name { get; private set; }
         public IPIDFlags Flags { get; private set; }
         public IntPtr Interface { get; private set; }
         public string InterfaceVTable { get; private set; }
@@ -1483,6 +1493,8 @@ namespace OleViewDotNet
                 return (Flags & (IPIDFlags.IPIDF_DISCONNECTED | IPIDFlags.IPIDF_DEACTIVATED)) == 0;
             }
         }
+
+        public COMProcessEntry Process { get; internal set; }
 
         public byte[] ToObjref()
         {
@@ -1569,6 +1581,7 @@ namespace OleViewDotNet
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
+            Name = registry.InterfacesToNames.GetGuidEntry(Iid) ?? string.Empty;
             Flags = (IPIDFlags)ipid.Flags;
             Interface = ipid.Interface;
             Stub = ipid.Stub;
@@ -1643,6 +1656,11 @@ namespace OleViewDotNet
             NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(name, Iid, COMInterfaceEntry.IID_IUnknown,
                 Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
             return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes);
+        }
+
+        public override string ToString()
+        {
+            return $"IPID: {Ipid} {Name}";
         }
     }
 }
