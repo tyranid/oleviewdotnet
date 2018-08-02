@@ -1011,7 +1011,7 @@ namespace OleViewDotNet
 
         private static void ReadRegisteredClasses(NtProcess process, ISymbolResolver resolver, 
             IntPtr base_address, COMProcessClassApartment apartment, 
-            int thread_id, List<COMProcessClassRegistration> classes)
+            int thread_id, List<COMProcessClassRegistration> classes, COMRegistry registry)
         {
             if (base_address == IntPtr.Zero)
             {
@@ -1032,7 +1032,7 @@ namespace OleViewDotNet
                     classes.Add(new COMProcessClassRegistration(class_entry.GetGuids()[0], 
                         entry.GetIUnknown(), vtable,
                         entry.GetRegFlags(), entry.GetCookie(), thread_id, 
-                        entry.GetContext(), apartment));
+                        entry.GetContext(), apartment, registry));
                 }
 
                 next = entry.GetNext();
@@ -1040,15 +1040,15 @@ namespace OleViewDotNet
             while (next != base_address);
         }
 
-        private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config)
+        private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             var classes = new List<COMProcessClassRegistration>();
             if (!config.ParseRegisteredClasses)
             {
                 return classes;
             }
-            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_MTALSvrsFront"), COMProcessClassApartment.MTA, -1, classes);
-            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_NTALSvrsFront"), COMProcessClassApartment.NTA, 0, classes);
+            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_MTALSvrsFront"), COMProcessClassApartment.MTA, -1, classes, registry);
+            ReadRegisteredClasses(process, resolver, ReadPointer(process, resolver, "CClassCache::_NTALSvrsFront"), COMProcessClassApartment.NTA, 0, classes, registry);
             using (var list = process.GetThreads(ThreadAccessRights.QueryLimitedInformation).ToDisposableList())
             {
                 foreach (var th in list)
@@ -1059,7 +1059,7 @@ namespace OleViewDotNet
                         continue;
                     }
 
-                    ReadRegisteredClasses(process, resolver, sta, COMProcessClassApartment.STA, th.ThreadId, classes);
+                    ReadRegisteredClasses(process, resolver, sta, COMProcessClassApartment.STA, th.ThreadId, classes, registry);
                 }
             }
             return classes;
@@ -1223,7 +1223,7 @@ namespace OleViewDotNet
                         ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
                         ReadPointer(process, resolver, "gAccessControl"),
                         ReadPointer(process, resolver, "ghwndOleMainThread"),
-                        GetRegisteredClasses(process, resolver, config));
+                        GetRegisteredClasses(process, resolver, config, registry));
                 }
             }
         }
@@ -1293,7 +1293,9 @@ namespace OleViewDotNet
 
     public class COMProcessClassRegistration
     {
+        public string Name => ClassEntry?.Name ?? string.Empty;
         public Guid Clsid { get; private set; }
+        public COMCLSIDEntry ClassEntry { get; private set; }
         public IntPtr ClassFactory { get; private set; }
         public string VTable { get; private set; }
         public COMProcessClassApartment Apartment { get; private set; }
@@ -1303,13 +1305,15 @@ namespace OleViewDotNet
         public CLSCTX Context { get; private set; }
         public int ProcessID => Process.ProcessId;
         public string ProcessName => Process.Name;
+        public bool Registered => ClassEntry != null;
 
         public COMProcessEntry Process { get; internal set; }
 
         internal COMProcessClassRegistration(
             Guid clsid, IntPtr class_factory, string vtable,
             REGCLS regflags, uint cookie, int thread_id, 
-            CLSCTX context, COMProcessClassApartment apartment)
+            CLSCTX context, COMProcessClassApartment apartment,
+            COMRegistry registry)
         {
             Clsid = clsid;
             ClassFactory = class_factory;
@@ -1319,6 +1323,7 @@ namespace OleViewDotNet
             Cookie = cookie;
             ThreadId = thread_id;
             Context = context;
+            ClassEntry = registry?.Clsids.GetGuidEntry(Clsid);
         }
 
         public override string ToString()

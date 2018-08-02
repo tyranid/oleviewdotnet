@@ -1479,5 +1479,5 @@ function Get-ComRegisteredClass {
 
     $Database = Get-CurrentComDatabase $Database
     Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
-        | select -ExpandProperty Classes | Write-Output
+        | select -ExpandProperty Classes | ? {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
 }
