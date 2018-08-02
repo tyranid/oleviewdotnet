@@ -18,6 +18,7 @@ Set-StrictMode -Version Latest
 
 $Script:GlobalDbgHelpPath = "dbghelp.dll"
 $Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
+$Script:GlobalComDatabase = $null
 
 [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
 
@@ -103,6 +104,44 @@ function Get-ComSymbolResolver {
 
 <#
 .SYNOPSIS
+Gets the global COM database.
+.DESCRIPTION
+This cmdlet gets the global COM database.
+.PARAMETER Database
+A database parameter to test. This function returns $Database if it's not $null, otherwise returns the global database.
+#>
+function Get-GlobalComDatabase {
+    Param(
+        [parameter(Position=0)]
+        [OleViewDotNet.COMRegistry]$Database
+    )
+
+    if ($null -ne $Database) {
+        $Database
+    } else {
+        $Script:GlobalComDatabase
+    }
+}
+
+<#
+.SYNOPSIS
+Sets the global COM database.
+.DESCRIPTION
+This cmdlet sets the global COM database. It allows you to load a COM database and not need to pass it as a parameter.
+.PARAMETER Database
+The database to set as the global database. You can specify $null to remove the current global.
+#>
+function Set-GlobalComDatabase {
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [AllowNull()]
+        [OleViewDotNet.COMRegistry]$Database
+    )
+    $Script:GlobalComDatabase = $Database
+}
+
+<#
+.SYNOPSIS
 Get a COM database from the registry or a file.
 .DESCRIPTION
 This cmdlet loads a COM registration information database from the current registry or a file and returns an object which can be inspected or passed to other methods.
@@ -114,6 +153,9 @@ Specify a user to load when loading user-specific COM registration information.
 Specify a path to load a saved COM database.
 .PARAMETER NoProgress
 Don't show progress for load.
+.PARAMETER SetGlobal
+Specify after loading that the database is set as the global database. When setting the global the database isn't returned. To access it directly
+call Get-GlobalComDatabase.
 .INPUTS
 None
 .OUTPUTS
@@ -127,6 +169,9 @@ Load a user-only database for the current user.
 .EXAMPLE
 Get-ComDatabase -User S-1-5-X-Y-Z
 Load a merged COM database including user-only information from the user SID.
+.EXAMPLE
+Get-ComDatabase -SetGlobal
+Load a default, merged COM database then sets it as a global.
 #>
 function Get-ComDatabase {
     [CmdletBinding(DefaultParameterSetName = "FromRegistry")]
@@ -137,11 +182,11 @@ function Get-ComDatabase {
         [NtApiDotNet.Sid]$User,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
-        [switch]$NoProgress
+        [switch]$NoProgress,
+        [switch]$SetGlobal
     )
     $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
-
-    switch($PSCmdlet.ParameterSetName) {
+    $comdb = switch($PSCmdlet.ParameterSetName) {
         "FromRegistry" {
             [OleViewDotNet.COMRegistry]::Load($LoadMode, $User, $callback)
         }
@@ -149,6 +194,11 @@ function Get-ComDatabase {
             $Path = Resolve-Path $Path
             [OleViewDotNet.COMRegistry]::Load($Path, $callback)
         }
+    }
+    if ($SetGlobal) {
+        Set-GlobalComDatabase $comdb
+    } else {
+        Write-Output $comdb
     }
 }
 
@@ -168,18 +218,27 @@ None
 .OUTPUTS
 None
 .EXAMPLE
-Set-ComRegistry -Database $comdb -Path output.db
-Save a database to the file output.db
+Set-ComRegistry -Path output.db
+Save the current global database to the file output.db
+.EXAMPLE
+Set-ComRegistry -Path output.db -Database $comdb 
+Save a specific database to the file output.db
 #>
 function Set-ComDatabase {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory, Position = 0)]
-        [OleViewDotNet.COMRegistry]$Database,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(Mandatory,Position=0)]
         [string]$Path,
+        [OleViewDotNet.COMRegistry]$Database,
         [switch]$NoProgress
     )
+
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
+
     $callback = New-CallbackProgress -Activity "Saving COM Registry" -NoProgress:$NoProgress
     $Path = Resolve-LocalPath $Path
     $Database.Save($Path, $callback)
@@ -304,7 +363,6 @@ Get COM classes registered to run as the interactive user.
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
@@ -321,6 +379,13 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromIU")]
         [switch]$InteractiveUser
     )
+
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
+
     switch($PSCmdlet.ParameterSetName) {
         "All" {
             Write-Output $Database.Clsids.Values
@@ -381,7 +446,6 @@ Get COM process from a list of processes.
 function Get-ComProcess {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
@@ -421,6 +485,11 @@ function Get-ComProcess {
     }
 
     END {
+        $Database = Get-GlobalComDatabase $Database
+        if ($null -eq $Database) {
+            Write-Error "No database specified and global database isn't set"
+            return
+        }
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
         $config = [OleViewDotNet.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
@@ -515,7 +584,6 @@ Get all COM AppIDs from a database.
 function Get-ComAppId {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromAppId")]
         [Guid]$AppId,
@@ -526,6 +594,11 @@ function Get-ComAppId {
         [Parameter(ParameterSetName = "FromIsService")]
         [switch]$IsService
     )
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
     switch($PSCmdlet.ParameterSetName) {
         "All" {
             Write-Output $Database.AppIDs.Values
@@ -566,9 +639,9 @@ Show-ComDatabase -Path com.db
 Show a COM database in the viewer from a file.
 #>
 function Show-ComDatabase {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="FromDb")]
     Param(
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromDb")]
+        [Parameter(Position = 0, ParameterSetName = "FromDb")]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFile")]
         [string]$Path
@@ -578,6 +651,11 @@ function Show-ComDatabase {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromDb" {
+            $Database = Get-GlobalComDatabase $Database
+            if ($null -eq $Database) {
+                Write-Error "No database specified and global database isn't set"
+                return
+            }
             $Path = (New-TemporaryFile).FullName
             Set-ComDatabase $Database $Path -NoProgress
             $DeleteFile = $true
@@ -670,7 +748,6 @@ Get COM Runtime classes which are implemented out-of-process.
 function Get-ComRuntimeClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
@@ -679,6 +756,11 @@ function Get-ComRuntimeClass {
         [Parameter(Mandatory, ParameterSetName = "FromActivationType")]
         [OleViewDotNet.ActivationType]$ActivationType 
     )
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
     switch($PSCmdlet.ParameterSetName) {
         "All" {
             Write-Output $Database.RuntimeClasses.Values
@@ -728,7 +810,6 @@ Get COM interfaces supported by an object.
 function Get-ComInterface {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid]$Iid,
@@ -737,6 +818,11 @@ function Get-ComInterface {
         [Parameter(Mandatory, ParameterSetName = "FromObject")]
         [object]$Object
     )
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
     switch($PSCmdlet.ParameterSetName) {
         "All" {
             Write-Output $Database.Interfaces.Values
@@ -1314,17 +1400,22 @@ Specify the global dbghelp path using c:\symbols to source the symbol files.
 function Get-ComObjectIpid {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory, Position=0)]
         [OleViewDotNet.ComRegistry]$Database,
-        [parameter(Mandatory, Position=1)]
+        [parameter(Mandatory, Position=0)]
         [object]$Object,
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
         [switch]$ResolveMethodNames
     )
 
+    $Database = Get-GlobalComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and global database isn't set"
+        return
+    }
+
     $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
-    $ps = Get-ComInterface $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess $Database `
+    $ps = Get-ComInterface -Database $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess $Database `
         -DbgHelpPath $resolver.DbgHelpPath -ParseStubMethods -SymbolPath $resolver.SymbolPath -ResolveMethodNames:$ResolveMethodNames
     $ps.Ipids | Write-Output
 }

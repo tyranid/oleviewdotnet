@@ -19,9 +19,9 @@
 Import-Module "$PSScriptRoot\OleViewDotNet.psd1"
 
 if ($args.Count -gt 0) {
-    $comdb = Get-ComDatabase $args[0] -NoProgress
+    Get-ComDatabase $args[0] -NoProgress -SetGlobal
     if ($args.Count -gt 1) {
         Remove-Item $args[0]
     }
-    Write-Host -ForegroundColor Yellow "Loaded Database, access using `$comdb variable."
+    Write-Host -ForegroundColor Yellow "Loaded Global Database."
 }
