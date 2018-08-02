@@ -456,6 +456,9 @@ None
 .OUTPUTS
 OleViewDotNet.COMProcessEntry
 .EXAMPLE
+Get-ComProcess
+Get all COM processes using the current database.
+.EXAMPLE
 Get-ComProcess -Database $comdb
 Get all COM processes.
 .EXAMPLE
@@ -472,6 +475,7 @@ function Get-ComProcess {
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcessId")]
+        [alias("pid")]
         [int[]]$ProcessId,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
         [System.Diagnostics.Process[]]$Process,
@@ -1441,4 +1445,39 @@ function Get-ComObjectIpid {
     $ps = Get-ComInterface -Database $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess -Database $Database `
         -DbgHelpPath $resolver.DbgHelpPath -ParseStubMethods -SymbolPath $resolver.SymbolPath -ResolveMethodNames:$ResolveMethodNames
     $ps.Ipids | Write-Output
+}
+
+<#
+.SYNOPSIS
+Get register class information from COM processes.
+.DESCRIPTION
+This cmdlet parses all accessible processes for registered COM clsses.
+.PARAMETER Database
+The database to use to lookup information.
+.PARAMETER DbgHelpPath
+Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
+.PARAMETER SymbolPath
+Specify the location of symbols for the resolver.
+.PARAMETER NoProgress
+Don't show progress for process parsing.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMProcessClassRegistration
+.EXAMPLE
+Get-ComRegisteredClass
+Get all COM registered classes accessible.
+#>
+function Get-ComRegisteredClass {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [OleViewDotNet.COMRegistry]$Database,
+        [string]$DbgHelpPath = "",
+        [string]$SymbolPath = "",
+        [switch]$NoProgress
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
+        | select -ExpandProperty Classes | Write-Output
 }
