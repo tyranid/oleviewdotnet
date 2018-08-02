@@ -324,7 +324,7 @@ namespace OleViewDotNet
         {
             m_process = obj;
             textBoxProcessExecutablePath.Text = obj.ExecutablePath;
-            textBoxProcessProcessId.Text = obj.Pid.ToString();
+            textBoxProcessProcessId.Text = obj.ProcessId.ToString();
             textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
             textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions);
             btnProcessViewAccessPermissions.Enabled = !String.IsNullOrWhiteSpace(obj.AccessPermissions);

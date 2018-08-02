@@ -829,7 +829,7 @@ namespace OleViewDotNet
 
         private void menuProcessesAllProcessesByPid_Click(object sender, EventArgs e)
         {
-            LoadProcesses(p => p.Pid);
+            LoadProcesses(p => p.ProcessId);
         }
 
         private void menuProcessesAllProcessesByName_Click(object sender, EventArgs e)

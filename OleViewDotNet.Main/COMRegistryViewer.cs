@@ -578,7 +578,7 @@ namespace OleViewDotNet
 
         private static string BuildCOMProcessName(COMProcessEntry proc)
         {
-            return String.Format("{0,-8} - {1} - {2}", proc.Pid, proc.Name, proc.User);
+            return String.Format("{0,-8} - {1} - {2}", proc.ProcessId, proc.Name, proc.User);
         }
 
         private static void PopulatorIpids(COMRegistry registry, TreeNode node, COMProcessEntry proc)
@@ -599,10 +599,10 @@ namespace OleViewDotNet
             node.ToolTipText = BuildCOMProcessTooltip(proc);
             node.Tag = proc;
 
-            if (appIdsByPid.ContainsKey(proc.Pid) && appIdsByPid[proc.Pid].Count() > 0)
+            if (appIdsByPid.ContainsKey(proc.ProcessId) && appIdsByPid[proc.ProcessId].Count() > 0)
             {
                 TreeNode services_node = CreateNode("Services", FolderKey);
-                foreach (COMAppIDEntry appid in appIdsByPid[proc.Pid])
+                foreach (COMAppIDEntry appid in appIdsByPid[proc.ProcessId])
                 {
                     if (clsidsByAppId.ContainsKey(appid.AppId))
                     {
@@ -2298,7 +2298,7 @@ namespace OleViewDotNet
             if (node != null && node.Tag is COMProcessEntry)
             {
                 COMProcessEntry process = (COMProcessEntry)node.Tag;
-                process = COMProcessParser.ParseProcess(process.Pid, COMUtilities.GetProcessParserConfig(), m_registry);
+                process = COMProcessParser.ParseProcess(process.ProcessId, COMUtilities.GetProcessParserConfig(), m_registry);
                 if (process == null)
                 {
                     treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);
