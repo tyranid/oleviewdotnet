@@ -1,0 +1,14 @@
+# Microsoft Windows NT 10.0.16299.0 C:\WINDOWS\System32\combase.dll 10.0.16299.15 (WinBuild.160101.0800)
+2870720 combase!CIPIDTable::_palloc
+2875008 combase!g_AppId
+2873544 combase!gSecDesc
+2873856 combase!gLrpcSecurityDescriptor
+2868704 combase!gwszLRPCEndPoint
+2873600 combase!gCapabilities
+2864940 combase!gAuthnLevel
+2864944 combase!gImpLevel
+2864972 combase!g_GLBOPT_UnmarshalingPolicy
+2867808 combase!gAccessControl
+2874376 combase!ghwndOleMainThread
+2874304 combase!CClassCache::_MTALSvrsFront
+2874280 combase!CClassCache::_NTALSvrsFront

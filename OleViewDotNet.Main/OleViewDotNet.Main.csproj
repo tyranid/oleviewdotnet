@@ -507,6 +507,12 @@
     <None Include="symbol_cache\215BDA791F9BC240EFD4BE5310F86B78.sym">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\789A3A3D760237153A6E7B782432926C.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\B52200505767CD0819034CF220977439.sym">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
