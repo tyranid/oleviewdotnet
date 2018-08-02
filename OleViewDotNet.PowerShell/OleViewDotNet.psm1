@@ -16,6 +16,9 @@
 
 Set-StrictMode -Version Latest
 
+$Script:GlobalDbgHelpPath = "dbghelp.dll"
+$Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
+
 [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
 
 function New-CallbackProgress {
@@ -77,6 +80,25 @@ function Unwrap-ComObject {
     )
 
     [OleViewDotNet.ComWrapperFactory]::Unwrap($Object)
+}
+
+function Get-ComSymbolResolver {
+    Param (
+        [parameter( Position=0)]
+        [string]$DbgHelpPath = "",
+        [parameter(Position=1)]
+        [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
+    )
+    if ($DbgHelpPath -eq "") {
+        $DbgHelpPath = $Script:GlobalDbgHelpPath
+    }
+    if ($SymbolPath -eq "") {
+        $SymbolPath = $env:_NT_SYMBOL_PATH
+        if ($SymbolPath -eq "") {
+            $SymbolPath = $Script:GlobalSymbolPath
+        }
+    }
+    @{DbgHelpPath=$DbgHelpPath; SymbolPath=$SymbolPath}
 }
 
 <#
@@ -361,11 +383,13 @@ function Get-ComProcess {
     Param(
         [Parameter(Mandatory, Position = 0)]
         [OleViewDotNet.COMRegistry]$Database,
-        [string]$DbgHelpPath = "dbghelp.dll",
-        [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols",
+        [string]$DbgHelpPath = "",
+        [string]$SymbolPath = "",
         [switch]$ParseStubMethods,
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
+        [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcessId")]
+        [int[]]$ProcessId,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
         [System.Diagnostics.Process[]]$Process,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromObjRef")]
@@ -374,15 +398,7 @@ function Get-ComProcess {
     )
 
     BEGIN {
-        if ($DgHelpPath -eq "") {
-            $DbgHelpPath = "dbghelp.dll"
-        }
-        if ($SymbolPath -eq "") {
-            $SymbolPath = $env:_NT_SYMBOL_PATH
-            if ($SymbolPath -eq "") {
-                $SymbolPath = 'srv*https://msdl.microsoft.com/download/symbols'
-            }
-        }
+        $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
         $procs = @()
         $objrefs = @()
     }
@@ -391,6 +407,9 @@ function Get-ComProcess {
         switch($PSCmdlet.ParameterSetName) {
             "All" {
                 $procs = Get-Process
+            }
+            "FromProcessId" {
+                $procs = Get-Process -Id $ProcessId
             }
             "FromProcess" {
                 $procs += $Process
@@ -403,7 +422,7 @@ function Get-ComProcess {
 
     END {
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
-        $config = [OleViewDotNet.COMProcessParserConfig]::new($DbgHelpPath, $SymbolPath, `
+        $config = [OleViewDotNet.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses)
 
         if ($PSCmdlet.ParameterSetName -eq "FromObjRef") {
@@ -915,7 +934,6 @@ function Get-ComObjRef {
         [OleViewdotNet.MSHLFLAGS]$MarshalFlags = "NORMAL"
     )
 
-
     BEGIN {
         switch($PSCmdlet.ParameterSetName) {
             "FromObject" {
@@ -1058,10 +1076,12 @@ function New-ComObject {
                 $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
             }
             "FromClsid" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, `
+                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, `
+                    "00000000-0000-0000-C000-000000000046")
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
@@ -1115,7 +1135,8 @@ function New-ComObjectFactory {
                 $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer)
             }
             "FromClsid" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+                $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, `
+                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
         }
 
@@ -1224,5 +1245,40 @@ function Get-ComProxy {
             }
         }
         Write-Output $proxy
+    }
+}
+
+<#
+.SYNOPSIS
+Sets the COM symbol resolver paths.
+.DESCRIPTION
+This cmdlet sets the COM symbol resolver paths. This allows you to specify symbol resolver paths for cmdlets which support it.
+.PARAMETER DbgHelpPath
+Specify path to a dbghelp DLL to use for symbol resolving. This should be ideally the dbghelp from debugging tool for Windows
+which will allow symbol servers however you can use the system version if you just want to pull symbols locally.
+.PARAMETER SymbolPath
+Specify path for the symbols.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Set-ComSymbolResolver -DbgHelpPath c:\windbg\x64\dbghelp.dll
+Specify the global dbghelp path.
+.EXAMPLE
+Set-ComSymbolResolver -DbgHelpPath dbghelp.dll -SymbolPath "c:\symbols"
+Specify the global dbghelp path using c:\symbols to source the symbol files.
+#>
+function Set-ComSymbolResolver {
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [string]$DbgHelpPath,
+        [parameter(Position=1)]
+        [string]$SymbolPath
+    )
+
+    $Script:GlobalDbgHelpPath = $DbgHelpPath
+    if ("" -ne $SymbolPath) {
+        $Script:GlobalSymbolPath = $SymbolPath
     }
 }
