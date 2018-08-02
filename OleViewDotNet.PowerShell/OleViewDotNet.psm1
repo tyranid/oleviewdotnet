@@ -18,7 +18,7 @@ Set-StrictMode -Version Latest
 
 $Script:GlobalDbgHelpPath = "dbghelp.dll"
 $Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
-$Script:GlobalComDatabase = $null
+$Script:CurrentComDatabase = $null
 
 [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
 
@@ -104,13 +104,13 @@ function Get-ComSymbolResolver {
 
 <#
 .SYNOPSIS
-Gets the global COM database.
+Gets the current COM database.
 .DESCRIPTION
-This cmdlet gets the global COM database.
+This cmdlet gets the current COM database.
 .PARAMETER Database
-A database parameter to test. This function returns $Database if it's not $null, otherwise returns the global database.
+A database parameter to test. This function returns $Database if it's not $null, otherwise returns the current database.
 #>
-function Get-GlobalComDatabase {
+function Get-CurrentComDatabase {
     Param(
         [parameter(Position=0)]
         [OleViewDotNet.COMRegistry]$Database
@@ -119,25 +119,25 @@ function Get-GlobalComDatabase {
     if ($null -ne $Database) {
         $Database
     } else {
-        $Script:GlobalComDatabase
+        $Script:CurrentComDatabase
     }
 }
 
 <#
 .SYNOPSIS
-Sets the global COM database.
+Sets the current COM database.
 .DESCRIPTION
-This cmdlet sets the global COM database. It allows you to load a COM database and not need to pass it as a parameter.
+This cmdlet sets the current COM database. It allows you to load a COM database and not need to pass it as a parameter.
 .PARAMETER Database
-The database to set as the global database. You can specify $null to remove the current global.
+The database to set as the current database. You can specify $null to remove the current.
 #>
-function Set-GlobalComDatabase {
+function Set-CurrentComDatabase {
     Param(
         [parameter(Mandatory, Position=0)]
         [AllowNull()]
         [OleViewDotNet.COMRegistry]$Database
     )
-    $Script:GlobalComDatabase = $Database
+    $Script:CurrentComDatabase = $Database
 }
 
 <#
@@ -153,9 +153,9 @@ Specify a user to load when loading user-specific COM registration information.
 Specify a path to load a saved COM database.
 .PARAMETER NoProgress
 Don't show progress for load.
-.PARAMETER SetGlobal
-Specify after loading that the database is set as the global database. When setting the global the database isn't returned. To access it directly
-call Get-GlobalComDatabase.
+.PARAMETER SetCurrent
+Specify after loading that the database is set as the current database. When setting the current database the object isn't returned. To access it directly
+call Get-CurrentComDatabase.
 .INPUTS
 None
 .OUTPUTS
@@ -170,8 +170,8 @@ Load a user-only database for the current user.
 Get-ComDatabase -User S-1-5-X-Y-Z
 Load a merged COM database including user-only information from the user SID.
 .EXAMPLE
-Get-ComDatabase -SetGlobal
-Load a default, merged COM database then sets it as a global.
+Get-ComDatabase -SetCurrent
+Load a default, merged COM database then sets it as the current database.
 #>
 function Get-ComDatabase {
     [CmdletBinding(DefaultParameterSetName = "FromRegistry")]
@@ -183,7 +183,7 @@ function Get-ComDatabase {
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
         [switch]$NoProgress,
-        [switch]$SetGlobal
+        [switch]$SetCurrent
     )
     $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
     $comdb = switch($PSCmdlet.ParameterSetName) {
@@ -195,8 +195,8 @@ function Get-ComDatabase {
             [OleViewDotNet.COMRegistry]::Load($Path, $callback)
         }
     }
-    if ($SetGlobal) {
-        Set-GlobalComDatabase $comdb
+    if ($SetCurrent) {
+        Set-CurrentComDatabase $comdb
     } else {
         Write-Output $comdb
     }
@@ -218,10 +218,10 @@ None
 .OUTPUTS
 None
 .EXAMPLE
-Set-ComRegistry -Path output.db
-Save the current global database to the file output.db
+Set-ComDatabase -Path output.db
+Save the current database to the file output.db
 .EXAMPLE
-Set-ComRegistry -Path output.db -Database $comdb 
+Set-ComDatabase -Path output.db -Database $comdb 
 Save a specific database to the file output.db
 #>
 function Set-ComDatabase {
@@ -233,9 +233,9 @@ function Set-ComDatabase {
         [switch]$NoProgress
     )
 
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
 
@@ -336,6 +336,9 @@ None
 .OUTPUTS
 OleViewDotNet.COMCLSIDEntry
 .EXAMPLE
+Get-ComClass 
+Get all COM classes from the current databae.
+.EXAMPLE
 Get-ComClass -Database $comdb
 Get all COM classes from a database.
 .EXAMPLE
@@ -380,9 +383,9 @@ function Get-ComClass {
         [switch]$InteractiveUser
     )
 
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
 
@@ -394,10 +397,10 @@ function Get-ComClass {
             Write-Output $Database.Clsids[$Clsid]
         }
         "FromName" {
-            Get-ComClass $Database | ? Name -Match $Name | Write-Output
+            Get-ComClass -Database $Database | ? Name -Match $Name | Write-Output
         }
         "FromServer" {
-            Get-ComClass $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
+            Get-ComClass -Database $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
         }
         "FromIid" {
             Write-Output $Database.MapIidToInterface($Iid).ProxyClassEntry
@@ -406,7 +409,7 @@ function Get-ComClass {
             Write-Output $Database.MapProgIdToClsid($ProgId)
         }
         "FromIU" {
-            Get-ComClass $Database | ? { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
+            Get-ComClass -Database $Database | ? { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
         }
     }
 }
@@ -485,9 +488,9 @@ function Get-ComProcess {
     }
 
     END {
-        $Database = Get-GlobalComDatabase $Database
+        $Database = Get-CurrentComDatabase $Database
         if ($null -eq $Database) {
-            Write-Error "No database specified and global database isn't set"
+            Write-Error "No database specified and current database isn't set"
             return
         }
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
@@ -537,7 +540,7 @@ function Start-ComActivationLog {
         [OleViewDotNet.COMRegistry]$Database
     )
 
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     $Path = Resolve-LocalPath $Path
     [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
 }
@@ -595,9 +598,9 @@ function Get-ComAppId {
         [Parameter(ParameterSetName = "FromIsService")]
         [switch]$IsService
     )
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
     switch($PSCmdlet.ParameterSetName) {
@@ -608,13 +611,13 @@ function Get-ComAppId {
             Write-Output $Database.AppIDs[$AppId]
         }
         "FromName" {
-            Get-ComAppId $Database | ? Name -Match $Name | Write-Output
+            Get-ComAppId -Database $Database | ? Name -Match $Name | Write-Output
         }
         "FromServiceName" {
-            Get-ComAppId $Database | ? ServiceName -Match $ServiceName | Write-Output
+            Get-ComAppId -Database $Database | ? ServiceName -Match $ServiceName | Write-Output
         }
         "FromIsService" {
-            Get-ComAppId $Database | ? IsService | Write-Output
+            Get-ComAppId -Database $Database | ? IsService | Write-Output
         }
     }
 }
@@ -632,6 +635,9 @@ The path to the database to view.
 None
 .OUTPUTS
 None
+.EXAMPLE
+Show-ComDatabase
+Show the current COM database in the viewer.
 .EXAMPLE
 Show-ComDatabase -Database $comdb
 Show a COM database in the viewer.
@@ -652,13 +658,13 @@ function Show-ComDatabase {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromDb" {
-            $Database = Get-GlobalComDatabase $Database
+            $Database = Get-CurrentComDatabase $Database
             if ($null -eq $Database) {
-                Write-Error "No database specified and global database isn't set"
+                Write-Error "No database specified and current database isn't set"
                 return
             }
             $Path = (New-TemporaryFile).FullName
-            Set-ComDatabase $Database $Path -NoProgress
+            Set-ComDatabase $Path -NoProgress -Database $Database
             $DeleteFile = $true
         }
         "FromFile" {
@@ -757,9 +763,9 @@ function Get-ComRuntimeClass {
         [Parameter(Mandatory, ParameterSetName = "FromActivationType")]
         [OleViewDotNet.ActivationType]$ActivationType 
     )
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
     switch($PSCmdlet.ParameterSetName) {
@@ -767,13 +773,13 @@ function Get-ComRuntimeClass {
             Write-Output $Database.RuntimeClasses.Values
         }
         "FromName" {
-            Get-ComRuntimeClass $Database | ? Name -Match $Name | Write-Output
+            Get-ComRuntimeClass -Database $Database | ? Name -Match $Name | Write-Output
         }
         "FromDllPath" {
-            Get-ComRuntimeClass $Database | ? DllPath -Match $DllPath | Write-Output
+            Get-ComRuntimeClass -Database $Database | ? DllPath -Match $DllPath | Write-Output
         }
         "FromActivationType" {
-            Get-ComRuntimeClass $Database | ? ActivationType -eq $ActivationType | Write-Output
+            Get-ComRuntimeClass -Database $Database | ? ActivationType -eq $ActivationType | Write-Output
         }
     }
 }
@@ -819,9 +825,9 @@ function Get-ComInterface {
         [object]$Object,
         [OleViewDotNet.COMRegistry]$Database
     )
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
     switch($PSCmdlet.ParameterSetName) {
@@ -829,7 +835,7 @@ function Get-ComInterface {
             Write-Output $Database.Interfaces.Values
         }
         "FromName" {
-            Get-ComInterface $Database | ? Name -Match $Name | Write-Output
+            Get-ComInterface -Database $Database | ? Name -Match $Name | Write-Output
         }
         "FromIid" {
             $Database.Interfaces[$Iid] | Write-Output
@@ -869,25 +875,25 @@ OleViewDotNet.ICOMAccessSecurity
 .OUTPUTS
 OleViewDotNet.ICOMAccessSecurity
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess
+Get-ComClass | Select-ComAccess
 Get all COM classes which are accessible by the current process.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -IgnoreDefault
+Get-ComClass | Select-ComAccess -IgnoreDefault
 Get all COM classes which are accessible by the current process ignoring default security permissions.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -Token $token
+Get-ComClass | Select-ComAccess -Token $token
 Get all COM classes which are accessible by a specified token.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -Process $process
+Get-ComClass | Select-ComAccess -Process $process
 Get all COM classes which are accessible by a specified process.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -ProcessId 1234
+Get-ComClass | Select-ComAccess -ProcessId 1234
 Get all COM classes which are accessible by a specified process from its ID.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -Access 0
+Get-ComClass | Select-ComAccess -Access 0
 Only check for launch permissions and ignore access permissions.
 .EXAMPLE
-Get-ComClass $comdb | Select-ComAccess -LaunchAccess 0
+Get-ComClass | Select-ComAccess -LaunchAccess 0
 Only check for access permissions and ignore launch permissions.
 #>
 function Select-ComAccess {
@@ -1409,9 +1415,9 @@ function Get-ComObjectIpid {
         [switch]$ResolveMethodNames
     )
 
-    $Database = Get-GlobalComDatabase $Database
+    $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and global database isn't set"
+        Write-Error "No database specified and current database isn't set"
         return
     }
 
