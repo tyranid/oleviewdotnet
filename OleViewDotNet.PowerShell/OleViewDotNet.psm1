@@ -811,13 +811,13 @@ Get COM interfaces supported by an object.
 function Get-ComInterface {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromObject")]
-        [object]$Object
+        [object]$Object,
+        [OleViewDotNet.COMRegistry]$Database
     )
     $Database = Get-GlobalComDatabase $Database
     if ($null -eq $Database) {
@@ -1401,9 +1401,9 @@ Specify the global dbghelp path using c:\symbols to source the symbol files.
 function Get-ComObjectIpid {
     [CmdletBinding()]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
         [parameter(Mandatory, Position=0)]
         [object]$Object,
+        [OleViewDotNet.COMRegistry]$Database,
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
         [switch]$ResolveMethodNames
@@ -1416,7 +1416,7 @@ function Get-ComObjectIpid {
     }
 
     $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
-    $ps = Get-ComInterface -Database $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess $Database `
+    $ps = Get-ComInterface -Database $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess -Database $Database `
         -DbgHelpPath $resolver.DbgHelpPath -ParseStubMethods -SymbolPath $resolver.SymbolPath -ResolveMethodNames:$ResolveMethodNames
     $ps.Ipids | Write-Output
 }
