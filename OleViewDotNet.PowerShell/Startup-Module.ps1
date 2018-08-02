@@ -19,9 +19,9 @@
 Import-Module "$PSScriptRoot\OleViewDotNet.psd1"
 
 if ($args.Count -gt 0) {
-    Get-ComDatabase $args[0] -NoProgress -SetGlobal
+    Get-ComDatabase $args[0] -NoProgress -SetCurrent
     if ($args.Count -gt 1) {
         Remove-Item $args[0]
     }
-    Write-Host -ForegroundColor Yellow "Loaded Global Database."
+    Write-Host -ForegroundColor Yellow "Loaded Database and set as current."
 }
