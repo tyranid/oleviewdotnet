@@ -537,6 +537,7 @@ function Start-ComActivationLog {
         [OleViewDotNet.COMRegistry]$Database
     )
 
+    $Database = Get-GlobalComDatabase $Database
     $Path = Resolve-LocalPath $Path
     [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
 }
@@ -1400,7 +1401,7 @@ Specify the global dbghelp path using c:\symbols to source the symbol files.
 function Get-ComObjectIpid {
     [CmdletBinding()]
     Param(
-        [OleViewDotNet.ComRegistry]$Database,
+        [OleViewDotNet.COMRegistry]$Database,
         [parameter(Mandatory, Position=0)]
         [object]$Object,
         [string]$DbgHelpPath = "",
