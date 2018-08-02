@@ -342,26 +342,32 @@ Get all COM classes from the current databae.
 Get-ComClass -Database $comdb
 Get all COM classes from a database.
 .EXAMPLE
-Get-ComClass -Database $comdb -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
+Get-ComClass -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
 Get a COM class with a specified CLSID.
 .EXAMPLE
-Get-ComClass -Database $comdb -Name "TestClass"
+Get-ComClass -Name "TestClass"
 Get COM classes which contain TestClass in their name.
 .EXAMPLE
-Get-ComClass -Database $comdb -ServerName "obj.ocx"
+Get-ComClass -ServerName "obj.ocx"
 Get COM classes which are implemented in a server containing the string "obj.ocx"
 .EXAMPLE
-Get-ComClass -Database $comdb -ServerType InProcServer32
+Get-ComClass -ServerType InProcServer32
 Get COM classes which are registered with an in-process server.
 .EXAMPLE
-Get-ComClass -Database $comdb -Iid "00000001-0000-0000-C000-000000000046"
+Get-ComClass -Iid "00000001-0000-0000-C000-000000000046"
 Get COM class registered as an interface proxy.
 .EXAMPLE
-Get-ComClass -Database $comdb -ProgId htafile
+Get-ComClass -ProgId htafile
 Get COM class from a Prog ID.
 .EXAMPLE
-Get-ComClass -Database $comdb -InteractiveUser
+Get-ComClass -InteractiveUser
 Get COM classes registered to run as the interactive user.
+.EXAMPLE
+Get-ComClass -Service
+Get COM classes registered to run inside a service.
+.EXAMPLE
+Get-ComClass -ServiceName
+Get COM classes registered to run inside a service with a specific name.
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -380,7 +386,11 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromProgId")]
         [string]$ProgId,
         [Parameter(Mandatory, ParameterSetName = "FromIU")]
-        [switch]$InteractiveUser
+        [switch]$InteractiveUser,
+        [Parameter(Mandatory, ParameterSetName = "FromService")]
+        [switch]$Service,
+        [Parameter(Mandatory, ParameterSetName = "FromServiceName")]
+        [string]$ServiceName
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -410,6 +420,12 @@ function Get-ComClass {
         }
         "FromIU" {
             Get-ComClass -Database $Database | ? { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
+        }
+        "FromService" {
+            Get-ComClass -Database $Database | ? { $_.HasAppID -and $_.AppIDEntry.IsService } | Write-Output
+        }
+        "FromServiceName" {
+            Get-ComClass -Database $Database -Service | ? { $_.AppIDEntry.ServiceName -eq $ServiceName } | Write-Output
         }
     }
 }
