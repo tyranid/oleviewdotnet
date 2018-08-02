@@ -1301,6 +1301,11 @@ namespace OleViewDotNet
         public uint Cookie { get; private set; }
         public int ThreadId { get; private set; }
         public CLSCTX Context { get; private set; }
+        public int ProcessID => Process.ProcessId;
+        public string ProcessName => Process.Name;
+
+        public COMProcessEntry Process { get; internal set; }
+
         internal COMProcessClassRegistration(
             Guid clsid, IntPtr class_factory, string vtable,
             REGCLS regflags, uint cookie, int thread_id, 
@@ -1315,11 +1320,16 @@ namespace OleViewDotNet
             ThreadId = thread_id;
             Context = context;
         }
+
+        public override string ToString()
+        {
+            return $"Class: {Clsid}";
+        }
     }
 
     public class COMProcessEntry : ICOMAccessSecurity
     {
-        public int Pid { get; private set; }
+        public int ProcessId { get; private set; }
         public string ExecutablePath { get; private set; }
         public string Name
         {
@@ -1390,7 +1400,7 @@ namespace OleViewDotNet
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes)
         {
-            Pid = pid;
+            ProcessId = pid;
             ExecutablePath = path;
             foreach (var ipid in ipids)
             {
@@ -1418,11 +1428,15 @@ namespace OleViewDotNet
             STAMainHWnd = sta_main_hwnd;
             Classes = classes.AsReadOnly();
             UnmarshalPolicy = unmarshal_policy;
+            foreach (var c in Classes)
+            {
+                c.Process = this;
+            }
         }
 
         public override string ToString()
         {
-            return $"{Pid} {Name}";
+            return $"{ProcessId} {Name}";
         }
     }
 
