@@ -817,6 +817,8 @@ Specify a IID to lookup.
 Specify a name to match against the interface name.
 .PARAMETER Object
 A running COM object to query for interfaces (can take a long time/hang).
+.PARAMETER Proxy
+Return interfaces which have a registered proxy class.
 .INPUTS
 None
 .OUTPUTS
@@ -843,6 +845,8 @@ function Get-ComInterface {
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromObject")]
         [object]$Object,
+        [Parameter(Mandatory, ParameterSetName = "FromProxy")]
+        [switch]$Proxy,
         [OleViewDotNet.COMRegistry]$Database
     )
     $Database = Get-CurrentComDatabase $Database
@@ -862,6 +866,9 @@ function Get-ComInterface {
         }
         "FromObject" {
             $Database.GetInterfacesForObject($Object) | Write-Output
+        }
+        "FromProxy" {
+            Get-ComInterface -Database $Database | ? ProxyClassEntry -ne $null | Write-Output
         }
     }
 }
@@ -1325,6 +1332,8 @@ A COM proxy class.
 A COM interface with a registered proxy.
 .PARAMETER InterfaceInstance
 A COM interface instance.
+.PARAMETER AsText
+Return the results as text rather than objects.
 .OUTPUTS
 The parsed proxy information and complex types.
 .EXAMPLE
