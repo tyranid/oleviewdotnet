@@ -17,6 +17,7 @@
 using Microsoft.CSharp;
 using Microsoft.Win32;
 using NtApiDotNet;
+using NtApiDotNet.Win32;
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
@@ -2392,6 +2393,42 @@ namespace OleViewDotNet
             Guid iid = COMInterfaceEntry.IID_IUnknown;
             moniker.BindToObject(bind_context, null, ref iid, out object comObj);
             return comObj;
+        }
+
+        public static bool GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
+        {
+            try
+            {
+                COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true);
+                var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
+                Dictionary<string, int> entries;
+                if (Environment.Is64BitProcess)
+                {
+                    entries = SymbolResolverWrapper.GetResolvedNative();
+                }
+                else
+                {
+                    entries = SymbolResolverWrapper.GetResolved32Bit();
+                }
+
+                if (!entries.Any())
+                {
+                    throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
+                }
+
+                string dll_name = GetCOMDllName();
+                var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
+                string output_file = Path.Combine(symbol_dir, $"{COMUtilities.GetFileMD5(module.FullPath)}.sym");
+                List<string> lines = new List<string>();
+                lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
+                lines.AddRange(entries.Where(p => p.Key.StartsWith(dll_name)).Select(p => $"{p.Value} {p.Key}"));
+                File.WriteAllLines(output_file, lines);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

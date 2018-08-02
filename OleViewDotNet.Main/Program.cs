@@ -20,11 +20,9 @@ using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OleViewDotNet
@@ -153,43 +151,6 @@ namespace OleViewDotNet
             return ss.Select(s => (COMServerType)Enum.Parse(typeof(COMServerType), s, true)).ToArray();
         }
 
-        static bool GenerateSymbolFile(string symbol_dir)
-        {
-            try
-            {
-                Process proc = Process.GetCurrentProcess();
-                var procs = COMUtilities.LoadProcesses(new Process[] { proc }, null, COMRegistry.Load(COMRegistryMode.UserOnly));
-                if (!procs.Any())
-                {
-                    throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
-                }
-
-                Dictionary<string, int> entries;
-                if (Environment.Is64BitProcess)
-                {
-                    entries = SymbolResolverWrapper.GetResolvedNative();
-                }
-                else
-                {
-                    entries = SymbolResolverWrapper.GetResolved32Bit();
-                }
-
-                string dll_name = COMUtilities.GetCOMDllName();
-                var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
-                string output_file = Path.Combine(symbol_dir, $"{COMUtilities.GetFileMD5(module.FullPath)}.sym");
-                List<string> lines = new List<string>();
-                lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
-                lines.AddRange(entries.Where(p => p.Key.StartsWith(dll_name)).Select(p => $"{p.Value} {p.Key}"));
-                File.WriteAllLines(output_file, lines);
-            }
-            catch (Exception ex)
-            {
-                ShowError(null, ex);
-                return false;
-            }
-            return true;
-        }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -270,7 +231,9 @@ namespace OleViewDotNet
             }
             else if (symbol_dir != null)
             {
-                Environment.Exit(GenerateSymbolFile(symbol_dir) ? 0 : 1);
+                bool result = COMUtilities.GenerateSymbolFile(symbol_dir,
+                    Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32, Properties.Settings.Default.SymbolPath);
+                Environment.Exit(result ? 0 : 1);
             }
             else
             {
