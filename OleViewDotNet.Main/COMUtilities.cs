@@ -17,6 +17,7 @@
 using Microsoft.CSharp;
 using Microsoft.Win32;
 using NtApiDotNet;
+using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using System;
 using System.CodeDom;
@@ -2429,6 +2430,32 @@ namespace OleViewDotNet
                 return false;
             }
             return true;
+        }
+
+        public static string FormatProxy(COMRegistry registry, IEnumerable<NdrComplexTypeReference> complex_types, 
+            IEnumerable<NdrComProxyDefinition> proxies, ProxyFormatterFlags flags)
+        {
+            bool remove_comments = (flags & ProxyFormatterFlags.RemoveComments) != 0;
+            INdrFormatter formatter = DefaultNdrFormatter.Create(registry.InterfacesToNames,
+                    DemangleWinRTName,
+                    remove_comments ? DefaultNdrFormatterFlags.RemoveComments : DefaultNdrFormatterFlags.None);
+            StringBuilder builder = new StringBuilder();
+
+            if ((flags & ProxyFormatterFlags.RemoveComplexTypes) == 0)
+            {
+                foreach (var type in complex_types)
+                {
+                    builder.AppendLine(formatter.FormatComplexType(type));
+                }
+                builder.AppendLine();
+            }
+
+            foreach (var proxy in proxies)
+            {
+                builder.AppendLine(formatter.FormatComProxy(proxy));
+            }
+
+            return builder.ToString();
         }
     }
 }

@@ -22,12 +22,15 @@ using System.Linq;
 
 namespace OleViewDotNet
 {
-    public class COMProxyInterfaceInstance
+    public class COMProxyInterfaceInstance : IProxyFormatter
     {
         /// <summary>
         /// The name of the proxy interface.
         /// </summary>
         public string Name => Entry.Name;
+        /// <summary>
+        /// Original name of the interface.
+        /// </summary>
         public string OriginalName { get; }
         /// <summary>
         /// The IID of the proxy interface.
@@ -56,13 +59,16 @@ namespace OleViewDotNet
 
         public COMCLSIDEntry ClassEntry { get; }
 
-        private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf)
+        private readonly COMRegistry m_registry;
+
+        private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
         {
             NdrParser parser = new NdrParser(resolver);
             Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
             ComplexTypes = parser.ComplexTypes;
             OriginalName = intf.Name;
             ClassEntry = clsid;
+            m_registry = registry;
         }
 
         private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new Dictionary<Guid, COMProxyInterfaceInstance>();
@@ -81,7 +87,7 @@ namespace OleViewDotNet
             }
             else
             {
-                var instance = new COMProxyInterfaceInstance(clsid, resolver, intf);
+                var instance = new COMProxyInterfaceInstance(clsid, resolver, intf, clsid.Database);
                 m_proxies[intf.Iid] = instance;
                 return instance;
             }
@@ -90,6 +96,16 @@ namespace OleViewDotNet
         public static COMProxyInterfaceInstance GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
         {
             return GetFromIID(intf.InterfaceEntry, resolver);
+        }
+
+        public string FormatText(ProxyFormatterFlags flags)
+        {
+            return COMUtilities.FormatProxy(m_registry, ComplexTypes, new NdrComProxyDefinition[] { Entry }, flags);
+        }
+
+        public string FormatText()
+        {
+            return FormatText(ProxyFormatterFlags.None);
         }
     }
 }

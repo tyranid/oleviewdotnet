@@ -1366,7 +1366,9 @@ function Get-ComProxy {
                 [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
             }
         }
-        Write-Output $proxy
+        if ($null -ne $proxy) {
+            Write-Output $proxy
+        }
     }
 }
 
@@ -1478,7 +1480,7 @@ Get-ComRegisteredClass
 Get all COM registered classes accessible.
 #>
 function Get-ComRegisteredClass {
-    [CmdletBinding(DefaultParameterSetName = "All")]
+    [CmdletBinding()]
     Param(
         [OleViewDotNet.COMRegistry]$Database,
         [string]$DbgHelpPath = "",
@@ -1489,4 +1491,43 @@ function Get-ComRegisteredClass {
     $Database = Get-CurrentComDatabase $Database
     Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
         | select -ExpandProperty Classes | ? {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
+}
+
+<#
+.SYNOPSIS
+Formats a COM proxy or IPID as text.
+.DESCRIPTION
+This cmdlet formats a COM proxy object or IPID entry as text.
+.PARAMETER Proxy
+The proxy or IPID entry to format.
+.PARAMETER Flags
+Specify flags for the formatter.
+.INPUTS
+OleViewDotNet.IProxyFormatter
+.OUTPUTS
+string
+.EXAMPLE
+Format-ComProxy $proxy
+Format a COM proxy as text.
+.EXAMPLE
+Format-ComProxy $proxy -Flags RemoveComments
+Format a COM proxy as text removing comments.
+.EXAMPLE
+Format-ComProxy $proxy -Flags RemoveComplexTypes
+Format a COM proxy as text removing complex types.
+.EXAMPLE
+$ipids | Format-ComProxy
+Format a list of IPIDs as text.
+#>
+function Format-ComProxy {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position=0, ValueFromPipeline)]
+        [OleViewDotNet.IProxyFormatter]$Proxy,
+        [OleViewDotNet.ProxyFormatterFlags]$Flags = 0
+    )
+
+    PROCESS {
+        $Proxy.FormatText($Flags) | Write-Output
+    }
 }

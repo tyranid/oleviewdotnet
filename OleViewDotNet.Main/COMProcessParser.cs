@@ -1480,8 +1480,10 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMIPIDEntry
+    public class COMIPIDEntry : IProxyFormatter
     {
+        private readonly COMRegistry m_registry;
+
         public Guid Ipid { get; private set; }
         public Guid Iid { get; private set; }
         public string Name { get; private set; }
@@ -1596,7 +1598,7 @@ namespace OleViewDotNet
         }
 
         internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, 
-            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) 
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
@@ -1668,18 +1670,33 @@ namespace OleViewDotNet
             }
             Methods = methods.AsReadOnly();
             ComplexTypes = complex_types.AsReadOnly();
+            m_registry = registry;
         }
 
-        internal COMProxyInstance ToProxyInstance(string name)
+        internal COMProxyInstance ToProxyInstance()
         {
-            NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(name, Iid, COMInterfaceEntry.IID_IUnknown,
+            NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMInterfaceEntry.IID_IUnknown,
                 Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
-            return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes);
+            return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes, m_registry);
         }
 
         public override string ToString()
         {
             return $"IPID: {Ipid} {Name}";
+        }
+
+        public string FormatText(ProxyFormatterFlags flags)
+        {
+            if (!Methods.Any())
+            {
+                return string.Empty;
+            }
+            return ToProxyInstance().FormatText(flags);
+        }
+
+        public string FormatText()
+        {
+            return FormatText(ProxyFormatterFlags.None);
         }
     }
 }

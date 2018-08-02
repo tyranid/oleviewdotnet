@@ -18,31 +18,35 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OleViewDotNet
 {
-    public class COMProxyInstance
+    public class COMProxyInstance : IProxyFormatter
     {
+        private readonly COMRegistry m_registry;
+
         public IEnumerable<NdrComProxyDefinition> Entries { get; private set; }
 
         public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
 
         internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries, 
-                                  IEnumerable<NdrComplexTypeReference> complex_types)
+                                  IEnumerable<NdrComplexTypeReference> complex_types,
+                                  COMRegistry registry)
         {
             Entries = new List<NdrComProxyDefinition>(entries).AsReadOnly();
             ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
+            m_registry = registry;
         }
 
-        private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver)
+        private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver, COMRegistry registry)
         {
             NdrParser parser = new NdrParser(resolver);
             Entries = parser.ReadFromComProxyFile(path, clsid);
             ComplexTypes = parser.ComplexTypes;
+            m_registry = registry;
         }
 
-        private COMProxyInstance(string path, ISymbolResolver resolver) : this(path, Guid.Empty, resolver)
+        private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) : this(path, Guid.Empty, resolver, registry)
         {
         }
 
@@ -57,13 +61,13 @@ namespace OleViewDotNet
             }
             else
             {
-                COMProxyInstance proxy = new COMProxyInstance(clsid.DefaultServer, clsid.Clsid, resolver);
+                COMProxyInstance proxy = new COMProxyInstance(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
                 m_proxies[clsid.Clsid] = proxy;
                 return proxy;
             }
         }
 
-        public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver)
+        public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
         {
             if (m_proxies_by_file.ContainsKey(path))
             {
@@ -71,10 +75,20 @@ namespace OleViewDotNet
             }
             else
             {
-                COMProxyInstance proxy = new COMProxyInstance(path, resolver);
+                COMProxyInstance proxy = new COMProxyInstance(path, resolver, registry);
                 m_proxies_by_file[path] = proxy;
                 return proxy;
             }
+        }
+
+        public string FormatText(ProxyFormatterFlags flags)
+        {
+            return COMUtilities.FormatProxy(m_registry, ComplexTypes, Entries, flags);
+        }
+
+        public string FormatText()
+        {
+            return FormatText(ProxyFormatterFlags.None);
         }
     }
 }

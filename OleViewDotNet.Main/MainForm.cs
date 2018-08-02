@@ -709,7 +709,7 @@ namespace OleViewDotNet
                     {
                         using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
                         {
-                            COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver);
+                            COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
                             HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
                         }
                     }

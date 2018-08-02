@@ -127,6 +127,7 @@
     <Compile Include="COMRuntimeServerEntry.cs" />
     <Compile Include="COMAccessCheck.cs" />
     <Compile Include="ComWrapperFactory.cs" />
+    <Compile Include="IProxyFormatter.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

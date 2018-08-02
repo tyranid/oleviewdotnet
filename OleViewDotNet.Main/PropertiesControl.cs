@@ -821,7 +821,7 @@ namespace OleViewDotNet
             if (has_ndr)
             {
                 string name = m_registry.MapIidToInterface(m_ipid.Iid).Name;
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, name, m_ipid.ToProxyInstance(name), m_ipid.Iid));
+                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, name, m_ipid.ToProxyInstance(), m_ipid.Iid));
             }
         }
 
