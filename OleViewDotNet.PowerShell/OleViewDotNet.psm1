@@ -1282,3 +1282,49 @@ function Set-ComSymbolResolver {
         $Script:GlobalSymbolPath = $SymbolPath
     }
 }
+
+<#
+.SYNOPSIS
+Gets IPID entries for a COM object.
+.DESCRIPTION
+This cmdlet gets the IPID entries for a COM object. It queries for all known remote interfaces on the object, marshal the interfaces
+then parse the containing process. If the containing process cannot be opend then this will fail.
+.PARAMETER Database
+The COM database to extract information from.
+.PARAMETER object
+The object to query.
+.PARAMETER DbgHelpPath
+Specify path to a dbghelp DLL to use for symbol resolving. This should be ideally the dbghelp from debugging tool for Windows
+which will allow symbol servers however you can use the system version if you just want to pull symbols locally.
+.PARAMETER SymbolPath
+Specify path for the symbols.
+.PARAMETER ResolveMethodNames
+Specify to try and resolve method names for interfaces.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMIPIDEntry[]
+.EXAMPLE
+Get-ComObjectIpid $comdb $obj
+Get all
+.EXAMPLE
+Set-ComSymbolResolver -DbgHelpPath dbghelp.dll -SymbolPath "c:\symbols"
+Specify the global dbghelp path using c:\symbols to source the symbol files.
+#>
+function Get-ComObjectIpid {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [OleViewDotNet.ComRegistry]$Database,
+        [parameter(Mandatory, Position=1)]
+        [object]$Object,
+        [string]$DbgHelpPath = "",
+        [string]$SymbolPath = "",
+        [switch]$ResolveMethodNames
+    )
+
+    $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
+    $ps = Get-ComInterface $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess $Database `
+        -DbgHelpPath $resolver.DbgHelpPath -ParseStubMethods -SymbolPath $resolver.SymbolPath -ResolveMethodNames:$ResolveMethodNames
+    $ps.Ipids | Write-Output
+}
