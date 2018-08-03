@@ -819,6 +819,8 @@ Specify a name to match against the interface name.
 A running COM object to query for interfaces (can take a long time/hang).
 .PARAMETER Proxy
 Return interfaces which have a registered proxy class.
+.PARAMETER TypeLib
+Return interfaces which have a registered type library.
 .INPUTS
 None
 .OUTPUTS
@@ -847,6 +849,8 @@ function Get-ComInterface {
         [object]$Object,
         [Parameter(Mandatory, ParameterSetName = "FromProxy")]
         [switch]$Proxy,
+        [Parameter(Mandatory, ParameterSetName = "FromTypeLib")]
+        [switch]$TypeLib,
         [OleViewDotNet.COMRegistry]$Database
     )
     $Database = Get-CurrentComDatabase $Database
@@ -869,6 +873,9 @@ function Get-ComInterface {
         }
         "FromProxy" {
             Get-ComInterface -Database $Database | ? ProxyClassEntry -ne $null | Write-Output
+        }
+        "FromTypeLib" {
+            Get-ComInterface -Database $Database | ? TypeLibEntry -ne $null | Write-Output
         }
     }
 }
@@ -1529,5 +1536,84 @@ function Format-ComProxy {
 
     PROCESS {
         $Proxy.FormatText($Flags) | Write-Output
+    }
+}
+
+<#
+.SYNOPSIS
+Gets registered COM type libraries.
+.DESCRIPTION
+This cmdlet gets all COM type libraries from a database.`
+.PARAMETER Database
+The database to use to lookup information.
+.PARAMETER Iid
+Get type library from an IID if that interface has a type library.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMTypeLibVersionEntry[]
+.EXAMPLE
+Get-ComTypeLib
+Get all COM registered type libraries.
+#>
+function Get-ComTypeLib {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [OleViewDotNet.COMRegistry]$Database,
+        [parameter(Mandatory, ParameterSetName = "FromIid")]
+        [Guid]$Iid
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            $Database.Typelibs.Values.Versions | Write-Output
+        }
+        "FromIid" {
+            $intf = Get-ComInterface -Database $Database -Iid $Iid
+            if ($null -ne $intf) {
+                $intf.TypeLibVersionEntry | Write-Output
+            }
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Gets a .NET assembly which represents the type library.
+.DESCRIPTION
+This cmdlet converts a type library to a .NET assembly. This process can take a while depending on the size of the library.
+.INPUTS
+None
+.OUTPUTS
+System.Reflection.Assembly[]
+.EXAMPLE
+Get-ComTypeLibAssembly $typelib
+Get a .NET assembly from a type library entry.
+#>
+function Get-ComTypeLibAssembly {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromTypeLib", Position=0)]
+        [OleViewDotNet.COMTypeLibVersionEntry]$TypeLib,
+        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [string]$Path,
+        [switch]$NoProgress
+    )
+
+    PROCESS {
+        $callback = New-CallbackProgress -Activity "Converting TypeLib" -NoProgress:$NoProgress
+        if ($PSCmdlet.ParameterSetName -eq "FromTypeLib") {
+            $Path = ""
+            if ([Environment]::Is64BitProcess) {
+                $Path = $TypeLib.Win64Path
+            }
+            if ($Path -eq "") {
+                $Path = $TypeLib.Win32Path
+            }
+        }
+        if ($Path -ne "") {
+            [OleViewDotNet.COMUtilities]::LoadTypeLib($Path, $callback) | Write-Output
+        }
     }
 }

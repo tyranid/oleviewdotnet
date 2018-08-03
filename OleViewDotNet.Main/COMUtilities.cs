@@ -1789,7 +1789,7 @@ namespace OleViewDotNet
 
         internal static Assembly LoadTypeLib(IWin32Window window, ITypeLib typelib)
         {
-            using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMUtilities.LoadTypeLib(typelib, progress), s => s))
+            using (WaitingDialog dlg = new WaitingDialog((progress, token) => LoadTypeLib(typelib, progress), s => s))
             {
                 dlg.Text = "Loading TypeLib";
                 dlg.CancelEnabled = false;
