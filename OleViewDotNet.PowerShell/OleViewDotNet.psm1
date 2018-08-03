@@ -1617,3 +1617,42 @@ function Get-ComTypeLibAssembly {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Formats a .NET assembly or Type which represents COM type.
+.DESCRIPTION
+This cmdlet formats a .NET assembly or a .NET type which represents a COM type.
+.INPUTS
+System.Reflection.Assembly
+.OUTPUTS
+string
+.EXAMPLE
+Format-ComTypeLib $typelib
+Format a .NET assembly.
+.EXAMPLE
+Format-ComTypeLib $type
+Format a .NET assembly.
+#>
+function Format-ComTypeLib {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
+        [System.Reflection.Assembly]$TypeLib,
+        [parameter(ParameterSetName = "FromTypeLib")]
+        [switch]$OnlyInterfaces,
+        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromType")]
+        [System.Type]$Type
+    )
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromTypeLib" {
+                [OleViewDotNet.COMUtilities]::FormatComAssembly($TypeLib, $OnlyInterfaces) | Write-Output
+            }
+            "FromType" {
+                [OleViewDotNet.COMUtilities]::FormatComType($Type) | Write-Output
+            }
+        }
+    }
+}

@@ -2457,5 +2457,221 @@ namespace OleViewDotNet
 
             return builder.ToString();
         }
+
+        static void EmitMember(StringBuilder builder, MemberInfo mi)
+        {
+            String name = MemberInfoToString(mi);
+            if (!String.IsNullOrWhiteSpace(name))
+            {
+                builder.Append("   ");
+                if (mi is FieldInfo)
+                {
+                    builder.AppendFormat("{0};", name).AppendLine();
+                }
+                else
+                {
+                    builder.AppendLine(name);
+                }
+            }
+        }
+
+        static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
+        {
+            HashSet<string> matched_names = new HashSet<string>();
+            Dictionary<MethodInfo, string> ret = new Dictionary<MethodInfo, string>();
+            foreach (MethodInfo mi in mis.Reverse())
+            {
+                int count = 2;
+                string name = mi.Name;
+                while (!matched_names.Add(name))
+                {
+                    name = String.Format("{0}_{1}", mi.Name, count++);
+                }
+                ret.Add(mi, name);
+            }
+            return ret;
+        }
+
+        static Dictionary<string, object> GetEnumValues(Type enum_type)
+        {
+            return enum_type.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(e => e.Name, e => e.GetRawConstantValue());
+        }
+
+        public static void FormatComType(StringBuilder builder, Type t)
+        {
+            try
+            {
+                if (t.IsInterface)
+                {
+                    builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                    builder.AppendFormat("interface {0}", t.Name).AppendLine();
+                }
+                else if (t.IsEnum)
+                {
+                    builder.AppendFormat("enum {0}", t.Name).AppendLine();
+                }
+                else if (t.IsClass)
+                {
+                    builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
+                    ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
+                    if (class_attr != null)
+                    {
+                        builder.AppendFormat("[ClassInterface(ClassInterfaceType.{0})]", class_attr.Value).AppendLine();
+                    }
+                    builder.AppendFormat("class {0}", t.Name).AppendLine();
+                }
+                else
+                {
+                    builder.AppendFormat("struct {0}", t.Name).AppendLine();
+                }
+                builder.AppendLine("{");
+
+                if (t.IsInterface || t.IsClass)
+                {
+                    MethodInfo[] methods = t.GetMethods().Where(m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
+                    if (methods.Length > 0)
+                    {
+                        builder.AppendLine("   /* Methods */");
+
+                        Dictionary<MethodInfo, string> name_mapping = new Dictionary<MethodInfo, string>();
+                        if (t.IsClass)
+                        {
+                            name_mapping = MapMethodNamesToCOM(methods);
+                        }
+
+                        foreach (MethodInfo mi in methods)
+                        {
+                            if (name_mapping.ContainsKey(mi) && name_mapping[mi] != mi.Name)
+                            {
+                                builder.AppendFormat("    /* Exposed as {0} */", name_mapping[mi]).AppendLine();
+                            }
+
+                            EmitMember(builder, mi);
+                        }
+                    }
+
+                    var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
+                    if (props.Any())
+                    {
+                        builder.AppendLine("   /* Properties */");
+                        foreach (PropertyInfo pi in props)
+                        {
+                            EmitMember(builder, pi);
+                        }
+                    }
+
+                    var evs = t.GetEvents();
+                    if (evs.Length > 0)
+                    {
+                        builder.AppendLine("   /* Events */");
+                        foreach (EventInfo ei in evs)
+                        {
+                            EmitMember(builder, ei);
+                        }
+                    }
+                }
+                else if (t.IsEnum)
+                {
+                    foreach (var pair in GetEnumValues(t))
+                    {
+                        builder.Append("   ");
+                        try
+                        {
+                            builder.AppendFormat("{0} = {1},", pair.Key, pair.Value);
+                        }
+                        catch
+                        {
+                            builder.AppendFormat("{0},");
+                        }
+                        builder.AppendLine();
+                    }
+                }
+                else
+                {
+                    FieldInfo[] fields = t.GetFields();
+                    if (fields.Length > 0)
+                    {
+                        builder.AppendLine("   /* Fields */");
+                        foreach (FieldInfo fi in fields)
+                        {
+                            EmitMember(builder, fi);
+                        }
+                    }
+                }
+
+                builder.AppendLine("}");
+            }
+            catch (InvalidOperationException)
+            {
+            }
+        }
+
+        public static string FormatComType(Type t)
+        {
+            StringBuilder builder = new StringBuilder();
+            FormatComType(builder, t);
+            return builder.ToString();
+        }
+        
+        public static IEnumerable<Type> GetComClasses(Assembly typelib, bool com_visible)
+        {
+            return GetComTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
+        }
+
+        public static IEnumerable<Type> GetComInterfaces(Assembly typelib, bool com_visible)
+        {
+            return GetComTypes(typelib.GetTypes().Where(t => t.IsInterface), com_visible);
+        }
+
+        private static IEnumerable<Type> GetComTypes(IEnumerable<Type> types, bool com_visible)
+        {
+            if (com_visible)
+            {
+                return types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+            else
+            {
+                return types.Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)));
+            }
+        }
+
+        public static IEnumerable<Type> GetComStructs(Assembly typelib, bool com_visible)
+        {
+            var types = typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum);
+            if (com_visible)
+            {
+                types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+            return types;
+        }
+
+        public static IEnumerable<Type> GetComEnums(Assembly typelib, bool com_visible)
+        {
+            var types = typelib.GetTypes().Where(t => t.IsEnum);
+            if (com_visible)
+            {
+                types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
+            }
+            return types;
+        }
+
+        private static void FormatComTypes(StringBuilder builder, IEnumerable<Type> types)
+        {
+            foreach (var type in types)
+            {
+                FormatComType(builder, type);
+            }
+            builder.AppendLine();
+        }
+
+        public static string FormatComAssembly(Assembly assembly, bool interfaces_only)
+        {
+            StringBuilder builder = new StringBuilder();
+            FormatComTypes(builder, GetComStructs(assembly, false));
+            FormatComTypes(builder, GetComEnums(assembly, false));
+            FormatComTypes(builder, GetComClasses(assembly, false));
+            FormatComTypes(builder, GetComInterfaces(assembly, false));
+            return builder.ToString();
+        }
     }
 }
