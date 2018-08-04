@@ -1339,6 +1339,8 @@ A COM proxy class.
 A COM interface with a registered proxy.
 .PARAMETER InterfaceInstance
 A COM interface instance.
+.PARAMETER Iid
+A COM IID which is being proxied.
 .PARAMETER AsText
 Return the results as text rather than objects.
 .OUTPUTS
@@ -1349,16 +1351,23 @@ Parse the proxy information for an interface.
 .EXAMPLE
 Get-ComProxy $class
 Parse the proxy information for a class.
+.EXAMPLE
+Get-ComProxy "00000001-0000-0000-C000-000000000046"
+Parse the proxy based on a IID.
 #>
 function Get-ComProxy {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = "FromIid")]
     Param(
         [parameter(Mandatory, Position=0, ParameterSetName = "FromInterface", ValueFromPipeline)]
         [OleViewDotNet.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromInterfaceInstance", ValueFromPipeline)]
         [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromClass")]
-        [OleViewDotNet.COMClsidEntry]$Class
+        [OleViewDotNet.COMClsidEntry]$Class,
+        [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]
+        [Guid]$Iid,
+        [parameter(ParameterSetName = "FromIid")]
+        [OleViewDotNet.COMRegistry]$Database
     )
 
     PROCESS {
@@ -1371,6 +1380,17 @@ function Get-ComProxy {
             }
             "FromInterfaceInstance" {
                 [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
+            }
+            "FromIid" {
+                $Database = Get-CurrentComDatabase $Database
+                if ($null -eq $Database) {
+                    Write-Error "No database specified and current database isn't set"
+                    return
+                }
+                $intf = Get-ComInterface -Database $Database -Iid $Iid
+                if ($null -ne $intf) {
+                    [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($intf, $null)
+                }
             }
         }
         if ($null -ne $proxy) {
@@ -1496,6 +1516,10 @@ function Get-ComRegisteredClass {
     )
 
     $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
     Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
         | select -ExpandProperty Classes | ? {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
 }
@@ -1565,6 +1589,10 @@ function Get-ComTypeLib {
     )
 
     $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
     switch($PSCmdlet.ParameterSetName) {
         "All" {
             $Database.Typelibs.Values.Versions | Write-Output
