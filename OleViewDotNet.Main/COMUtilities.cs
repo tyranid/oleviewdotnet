@@ -194,6 +194,14 @@ namespace OleViewDotNet
         NOPING = 4
     }
 
+    public enum GuidFormat
+    {
+        String,
+        Structure,
+        Object,
+        HexString,
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct OptionalGuid : IDisposable
     {
@@ -2673,6 +2681,50 @@ namespace OleViewDotNet
             FormatComTypes(builder, GetComClasses(assembly, false));
             FormatComTypes(builder, GetComInterfaces(assembly, false));
             return builder.ToString();
+        }
+
+        public static void CopyTextToClipboard(string text)
+        {
+            int tries = 10;
+            while (tries > 0)
+            {
+                try
+                {
+                    Clipboard.SetText(text);
+                    break;
+                }
+                catch (ExternalException)
+                {
+                }
+                System.Threading.Thread.Sleep(100);
+                tries--;
+            }
+        }
+
+        public static string GuidToString(Guid guid, GuidFormat format_type)
+        {
+            switch (format_type)
+            {
+                case GuidFormat.Object:
+                    return String.Format("<object id=\"obj\" classid=\"clsid:{0}\">NO OBJECT</object>",
+                        guid);
+                case GuidFormat.String:
+                    return guid.FormatGuid();
+                case GuidFormat.Structure:
+                    return String.Format("GUID guidObject = {0:X};", guid);
+                case GuidFormat.HexString:
+                    {
+                        byte[] data = guid.ToByteArray();
+                        return String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));
+                    }
+                default:
+                    throw new ArgumentException("Invalid guid string type", nameof(format_type));
+            }
+        }
+
+        public static void CopyGuidToClipboard(Guid guid, GuidFormat guid_format)
+        {
+            CopyTextToClipboard(GuidToString(guid, guid_format));
         }
     }
 }

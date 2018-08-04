@@ -172,7 +172,7 @@ namespace OleViewDotNet
             if (hexBox.CanCopy() && hexBox.SelectionLength == 16)
             {
                 byte[] bytes = GetSelectedBytes();
-                COMRegistryViewer.CopyTextToClipboard(new Guid(bytes).FormatGuid());
+                COMUtilities.CopyTextToClipboard(new Guid(bytes).FormatGuid());
             }
         }
 

@@ -221,11 +221,11 @@ namespace OleViewDotNet
             if (list != null && list.SelectedItems.Count > 0)
             {
                 ListViewItem item = listViewInterfaces.SelectedItems[0];
-                COMRegistryViewer.CopyTextToClipboard(item.Text);
+                COMUtilities.CopyTextToClipboard(item.Text);
             }
         }
 
-        private void CopyGuid(object sender, COMRegistryViewer.CopyGuidType copy_type)
+        private void CopyGuid(object sender, GuidFormat copy_type)
         {
             ListView list = sender as ListView;
             if (list != null && list.SelectedItems.Count > 0)
@@ -233,24 +233,24 @@ namespace OleViewDotNet
                 ListViewItemWithGuid item = list.SelectedItems[0] as ListViewItemWithGuid;
                 if (item != null)
                 {
-                    COMRegistryViewer.CopyGuidToClipboard(item.Guid, copy_type);
+                    COMUtilities.CopyGuidToClipboard(item.Guid, copy_type);
                 }
             }
         }
 
         private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsString);
+            CopyGuid(sender, GuidFormat.String);
         }
 
         private void copyGUIDCStructureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsStructure);
+            CopyGuid(sender, GuidFormat.Structure);
         }
 
         private void copyGIUDHexStringToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyGuid(sender, COMRegistryViewer.CopyGuidType.CopyAsHexString);
+            CopyGuid(sender, GuidFormat.HexString);
         }
         
         public void SelectInterface(Guid iid)

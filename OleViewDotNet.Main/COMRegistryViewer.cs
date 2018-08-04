@@ -1093,63 +1093,6 @@ namespace OleViewDotNet
             Cursor.Current = currCursor;
         }
 
-        public enum CopyGuidType
-        {
-            CopyAsString,
-            CopyAsStructure,
-            CopyAsObject,
-            CopyAsHexString,
-        }
-
-        public static void CopyTextToClipboard(string text)
-        {
-            int tries = 10;
-            while (tries > 0)
-            {
-                try
-                {
-                    Clipboard.SetText(text);
-                    break;
-                }
-                catch (ExternalException)
-                {
-                }
-                System.Threading.Thread.Sleep(100);
-                tries--;
-            }
-        }
-
-        public static void CopyGuidToClipboard(Guid guid, CopyGuidType copyType)
-        {
-            string strCopy = null;
-
-            switch (copyType)
-            {
-                case CopyGuidType.CopyAsObject:
-                    strCopy = String.Format("<object id=\"obj\" classid=\"clsid:{0}\">NO OBJECT</object>",
-                        guid.ToString());
-                    break;
-                case CopyGuidType.CopyAsString:
-                    strCopy = guid.FormatGuid();
-                    break;
-                case CopyGuidType.CopyAsStructure:
-                    {
-                        strCopy = String.Format("GUID guidObject = {0:X};", guid);
-                    }
-                    break;
-                case CopyGuidType.CopyAsHexString:
-                    {
-                        byte[] data = guid.ToByteArray();
-                        strCopy = String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));
-                    }
-                    break;
-            }
-
-            if (strCopy != null)
-            {
-                CopyTextToClipboard(strCopy);
-            }
-        }
 
         private static bool CanGetGuid(TreeNode node)
         {
@@ -1226,7 +1169,7 @@ namespace OleViewDotNet
 
             if (guid != Guid.Empty)
             {
-                CopyGuidToClipboard(guid, CopyGuidType.CopyAsString);
+                COMUtilities.CopyGuidToClipboard(guid, GuidFormat.String);
             }
         }
 
@@ -1236,7 +1179,7 @@ namespace OleViewDotNet
 
             if (guid != Guid.Empty)
             {
-                CopyGuidToClipboard(guid, CopyGuidType.CopyAsStructure);
+                COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Structure);
             }
         }
 
@@ -1246,7 +1189,7 @@ namespace OleViewDotNet
 
             if (guid != Guid.Empty)
             {
-                CopyGuidToClipboard(guid, CopyGuidType.CopyAsHexString);
+                COMUtilities.CopyGuidToClipboard(guid, GuidFormat.HexString);
             }
         }
 
@@ -1269,7 +1212,7 @@ namespace OleViewDotNet
 
                 if (guid != Guid.Empty)
                 {
-                    CopyGuidToClipboard(guid, CopyGuidType.CopyAsObject);
+                    COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Object);
                 }
             }
         }
@@ -2135,7 +2078,7 @@ namespace OleViewDotNet
             TreeNode node = treeComRegistry.SelectedNode;
             if (node != null)
             {
-                CopyTextToClipboard(node.Text);
+                COMUtilities.CopyTextToClipboard(node.Text);
             }
         }
 

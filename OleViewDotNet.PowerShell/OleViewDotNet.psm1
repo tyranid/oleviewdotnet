@@ -1656,3 +1656,32 @@ function Format-ComTypeLib {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Formats a GUID in various formats.
+.DESCRIPTION
+This cmdlet formats a GUID in various formats.
+.INPUTS
+System.Guid
+.OUTPUTS
+string
+.EXAMPLE
+Format-ComGuid $Guid
+Format a GUID to a string.
+.EXAMPLE
+Format-ComGuid $Guid Object
+Format a GUID to a HTML object.
+#>
+function Format-ComGuid {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, ValueFromPipeline, Position=0)]
+        [Guid]$Guid,
+        [OleViewDotNet.GuidFormat]$Format = "String"
+    )
+
+    PROCESS {
+        [OleViewDotNet.COMUtilities]::GuidToString($Guid, $Format)
+    }
+}

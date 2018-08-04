@@ -469,7 +469,7 @@ namespace OleViewDotNet
             if (listViewProgIDs.SelectedItems.Count > 0)
             {
                 ListViewItem item = listViewProgIDs.SelectedItems[0];
-                COMRegistryViewer.CopyTextToClipboard(item.Text);
+                COMUtilities.CopyTextToClipboard(item.Text);
             }
         }
 
@@ -527,33 +527,33 @@ namespace OleViewDotNet
             if (view != null && view.SelectedIndices.Count > 0)
             {
                 ListViewItem item = view.SelectedItems[0];
-                COMRegistryViewer.CopyTextToClipboard(item.Text);
+                COMUtilities.CopyTextToClipboard(item.Text);
             }
         }
 
-        private void CopyIID(ListView view, COMRegistryViewer.CopyGuidType type)
+        private void CopyIID(ListView view, GuidFormat type)
         {
             if (view != null && view.SelectedIndices.Count > 0)
             {
                 ListViewItem item = view.SelectedItems[0];
                 Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
-                COMRegistryViewer.CopyGuidToClipboard(intf.Item1.Iid, type);
+                COMUtilities.CopyGuidToClipboard(intf.Item1.Iid, type);
             }
         }
 
         private void asStringToolStripMenuItem_Click(object sender, EventArgs e)
         {            
-            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsString);
+            CopyIID(GetListViewForMenu(sender), GuidFormat.String);
         }
 
         private void asCStructureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsStructure);
+            CopyIID(GetListViewForMenu(sender), GuidFormat.Structure);
         }
 
         private void asHexStringToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CopyIID(GetListViewForMenu(sender), COMRegistryViewer.CopyGuidType.CopyAsHexString);
+            CopyIID(GetListViewForMenu(sender), GuidFormat.HexString);
         }
 
         private ListView GetListViewForMenu(object sender)
@@ -637,7 +637,7 @@ namespace OleViewDotNet
             COMIPIDEntry ipid = GetSelectedIpid();
             if (ipid != null)
             {
-                COMRegistryViewer.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Interface.ToInt64()));
+                COMUtilities.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Interface.ToInt64()));
             }
         }
 
@@ -646,7 +646,7 @@ namespace OleViewDotNet
             COMIPIDEntry ipid = GetSelectedIpid();
             if (ipid != null)
             {
-                COMRegistryViewer.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Stub.ToInt64()));
+                COMUtilities.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Stub.ToInt64()));
             }
         }
 
@@ -773,7 +773,7 @@ namespace OleViewDotNet
             COMIPIDEntry ipid = GetSelectedIpid();
             if (ipid != null)
             {
-                COMRegistryViewer.CopyGuidToClipboard(ipid.Ipid, COMRegistryViewer.CopyGuidType.CopyAsString);
+                COMUtilities.CopyGuidToClipboard(ipid.Ipid, GuidFormat.String);
             }
         }
 
@@ -782,7 +782,7 @@ namespace OleViewDotNet
             COMIPIDEntry ipid = GetSelectedIpid();
             if (ipid != null)
             {
-                COMRegistryViewer.CopyGuidToClipboard(ipid.Iid, COMRegistryViewer.CopyGuidType.CopyAsString);
+                COMUtilities.CopyGuidToClipboard(ipid.Iid, GuidFormat.String);
             }
         }
 
@@ -840,7 +840,7 @@ namespace OleViewDotNet
             COMProcessClassRegistration c = GetRegisteredClass();
             if (c != null)
             {
-                COMRegistryViewer.CopyGuidToClipboard(c.Clsid, COMRegistryViewer.CopyGuidType.CopyAsString);
+                COMUtilities.CopyGuidToClipboard(c.Clsid, GuidFormat.String);
             }
         }
 
@@ -866,7 +866,7 @@ namespace OleViewDotNet
             if (ipid != null)
             {
                 var objref = $"objref:{Convert.ToBase64String(ipid.ToObjref())}:";
-                COMRegistryViewer.CopyTextToClipboard(objref);
+                COMUtilities.CopyTextToClipboard(objref);
             }
         }
 
