@@ -66,7 +66,7 @@ namespace OleViewDotNet
     }
 
     [Flags]
-    public enum CLSCTX
+    public enum CLSCTX : uint
     {
         INPROC_SERVER = 0x1,
         INPROC_HANDLER = 0x2,
@@ -88,9 +88,10 @@ namespace OleViewDotNet
         FROM_DEFAULT_CONTEXT = 0x20000,
         ACTIVATE_32_BIT_SERVER = 0x40000,
         ACTIVATE_64_BIT_SERVER = 0x80000,
+        ENABLE_CLOAKING = 0x100000,
         APPCONTAINER = 0x400000,
         ACTIVATE_AAA_AS_IU = 0x800000,
-        PS_DLL = unchecked((int)0x80000000),
+        PS_DLL = 0x80000000,
         SERVER = INPROC_SERVER | LOCAL_SERVER | REMOTE_SERVER,
         ALL = INPROC_SERVER | INPROC_HANDLER | LOCAL_SERVER | REMOTE_SERVER
     }
