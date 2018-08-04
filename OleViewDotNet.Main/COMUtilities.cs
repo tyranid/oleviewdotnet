@@ -2676,9 +2676,12 @@ namespace OleViewDotNet
         public static string FormatComAssembly(Assembly assembly, bool interfaces_only)
         {
             StringBuilder builder = new StringBuilder();
-            FormatComTypes(builder, GetComStructs(assembly, false));
-            FormatComTypes(builder, GetComEnums(assembly, false));
-            FormatComTypes(builder, GetComClasses(assembly, false));
+            if (!interfaces_only)
+            {
+                FormatComTypes(builder, GetComStructs(assembly, false));
+                FormatComTypes(builder, GetComEnums(assembly, false));
+                FormatComTypes(builder, GetComClasses(assembly, false));
+            }
             FormatComTypes(builder, GetComInterfaces(assembly, false));
             return builder.ToString();
         }

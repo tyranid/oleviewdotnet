@@ -469,6 +469,7 @@ function Get-ComProcess {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.COMRegistry]$Database,
+        [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
         [switch]$ParseStubMethods,
@@ -1422,6 +1423,7 @@ Specify the global dbghelp path using c:\symbols to source the symbol files.
 #>
 function Set-ComSymbolResolver {
     Param(
+        [alias("dbghelp")]
         [parameter(Mandatory, Position=0)]
         [string]$DbgHelpPath,
         [parameter(Position=1)]
@@ -1468,6 +1470,7 @@ function Get-ComObjectIpid {
         [parameter(Mandatory, Position=0)]
         [object]$Object,
         [OleViewDotNet.COMRegistry]$Database,
+        [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
         [switch]$ResolveMethodNames
@@ -1510,6 +1513,7 @@ function Get-ComRegisteredClass {
     [CmdletBinding()]
     Param(
         [OleViewDotNet.COMRegistry]$Database,
+        [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
         [switch]$NoProgress
@@ -1611,10 +1615,16 @@ function Get-ComTypeLib {
 Gets a .NET assembly which represents the type library.
 .DESCRIPTION
 This cmdlet converts a type library to a .NET assembly. This process can take a while depending on the size of the library.
+.PARAMETER TypeLib
+The type library version entry to convert.
+.PARAMETER Path
+The path to a type library to convert.
+.PARAMETER NoProgress
+Don't show progress during conversion.
 .INPUTS
-None
+OleViewDotNet.COMTypeLibVersionEntry or string.
 .OUTPUTS
-System.Reflection.Assembly[]
+System.Reflection.Assembly
 .EXAMPLE
 Get-ComTypeLibAssembly $typelib
 Get a .NET assembly from a type library entry.
@@ -1651,6 +1661,18 @@ function Get-ComTypeLibAssembly {
 Formats a .NET assembly or Type which represents COM type.
 .DESCRIPTION
 This cmdlet formats a .NET assembly or a .NET type which represents a COM type.
+.PARAMETER Assembly
+Specify a converted COM type library assembly.
+.PARAMETER InterfacesOnly
+Only convert interfaces to text.
+.PARAMETER Type
+Specify COM type object.
+.PARAMETER TypeLib
+Specify a registered COM typelib entry to format.
+.PARAMETER NoProgress
+Don't show progress for conversion.
+.PARAMETER Path
+The path to a type library to format.
 .INPUTS
 System.Reflection.Assembly
 .OUTPUTS
@@ -1665,21 +1687,36 @@ Format a .NET assembly.
 function Format-ComTypeLib {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
-        [System.Reflection.Assembly]$TypeLib,
-        [parameter(ParameterSetName = "FromTypeLib")]
-        [switch]$OnlyInterfaces,
+        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromAssembly")]
+        [System.Reflection.Assembly]$Assembly,
         [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromType")]
-        [System.Type]$Type
+        [System.Type]$Type,
+        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
+        [OleViewDotNet.COMTypeLibVersionEntry]$TypeLib,
+        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [string]$Path,
+        [parameter(ParameterSetName = "FromAssembly")]
+        [parameter(ParameterSetName = "FromTypeLib")]
+        [parameter(ParameterSetName = "FromPath")]
+        [switch]$InterfacesOnly,
+        [parameter(ParameterSetName = "FromTypeLib")]
+        [parameter(ParameterSetName = "FromPath")]
+        [switch]$NoProgress
     )
 
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
-            "FromTypeLib" {
-                [OleViewDotNet.COMUtilities]::FormatComAssembly($TypeLib, $OnlyInterfaces) | Write-Output
+            "FromAssembly" {
+                [OleViewDotNet.COMUtilities]::FormatComAssembly($Assembly, $InterfacesOnly) | Write-Output
             }
             "FromType" {
                 [OleViewDotNet.COMUtilities]::FormatComType($Type) | Write-Output
+            }
+            "FromTypeLib" {
+                Get-ComTypeLibAssembly -TypeLib $TypeLib -NoProgress:$NoProgress | Format-ComTypeLib -InterfacesOnly:$InterfacesOnly
+            }
+            "FromPath" {
+                Get-ComTypeLibAssembly -Path $Path -NoProgress:$NoProgress | Format-ComTypeLib -InterfacesOnly:$InterfacesOnly
             }
         }
     }
