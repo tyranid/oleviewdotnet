@@ -331,6 +331,8 @@ Specify that the COM classes should be configured to run as the Interactive User
 Specify looking up the COM class from a ProgID.
 .PARAMETER Iid
 Specify looking up a COM class based on it's proxy IID.
+.PARAMETER Object
+Specify looking up the COM class based on an object instance. Needs to support an IPersist inteface to extract the CLSID.
 .INPUTS
 None
 .OUTPUTS
@@ -366,8 +368,11 @@ Get COM classes registered to run as the interactive user.
 Get-ComClass -Service
 Get COM classes registered to run inside a service.
 .EXAMPLE
-Get-ComClass -ServiceName
+Get-ComClass -ServiceName "ExampleService"
 Get COM classes registered to run inside a service with a specific name.
+.EXAMPLE
+Get-ComClass -Object $obj
+Get COM class based on an object instance. Needs 
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -390,7 +395,9 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromService")]
         [switch]$Service,
         [Parameter(Mandatory, ParameterSetName = "FromServiceName")]
-        [string]$ServiceName
+        [string]$ServiceName,
+        [Parameter(Mandatory, ParameterSetName = "FromObject")]
+        [object]$Object
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -426,6 +433,13 @@ function Get-ComClass {
         }
         "FromServiceName" {
             Get-ComClass -Database $Database -Service | ? { $_.AppIDEntry.ServiceName -eq $ServiceName } | Write-Output
+        }
+        "FromObject" {
+            $Object = Unwrap-ComObject $Object
+            $Clsid = [OleViewDotNet.COMUtilities]::GetObjectClass($Object)
+            if ($Clsid -ne [Guid]::Empty) {
+                Get-ComClass -Database $Database -Clsid $Clsid | Write-Output
+            }
         }
     }
 }
