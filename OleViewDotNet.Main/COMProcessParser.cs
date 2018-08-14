@@ -1344,6 +1344,7 @@ namespace OleViewDotNet
             }
         }
         public IEnumerable<COMIPIDEntry> Ipids { get; private set; }
+        public IEnumerable<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning);
         public bool Is64Bit { get; private set; }
         public Guid AppId { get; private set; }
         public string AccessPermissions { get; private set; }
