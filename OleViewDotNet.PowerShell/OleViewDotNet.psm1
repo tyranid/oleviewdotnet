@@ -1764,3 +1764,43 @@ function Format-ComGuid {
         [OleViewDotNet.COMUtilities]::GuidToString($Guid, $Format)
     }
 }
+
+<#
+.SYNOPSIS
+Generate a symbol cache file for the current base DLL.
+.DESCRIPTION
+This cmdlet generates a symbol cache file in a specified directory. This should be copied to cached_symbols directory 
+in the installation to allow you to parse processes without symbols. You need to do this in both a 32 and 64 bit 
+process to get support for both symbols.
+.PARAMETER Path
+The directory where the cached symbol file will be created.
+.PARAMETER DbgHelpPath
+Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
+.PARAMETER SymbolPath
+Specify the location of symbols for the resolver.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Set-ComSymbolCache .\symbol_cache
+Generates a symbol cache in the "symbol_cache" directory.
+#>
+function Set-ComSymbolCache {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position = 0)]
+        [string]$Path,
+        [alias("dbghelp")]
+        [string]$DbgHelpPath = "",
+        [string]$SymbolPath = ""
+    )
+
+    $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
+    $Path = Resolve-Path $Path
+    if ($null -ne $Path) {
+        [OleViewDotNet.COMUtilities]::ClearCachedSymbols()
+        [OleViewDotNet.COMUtilities]::GenerateSymbolFile($Path, $resolver.DbgHelpPath, $resolver.SymbolPath)
+        [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
+    }
+}

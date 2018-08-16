@@ -231,9 +231,16 @@ namespace OleViewDotNet
             }
             else if (symbol_dir != null)
             {
-                bool result = COMUtilities.GenerateSymbolFile(symbol_dir,
-                    Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32, Properties.Settings.Default.SymbolPath);
-                Environment.Exit(result ? 0 : 1);
+                try
+                {
+                    COMUtilities.GenerateSymbolFile(symbol_dir,
+                        Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32, Properties.Settings.Default.SymbolPath);
+                    Environment.Exit(0);
+                }
+                catch (Exception)
+                {
+                    Environment.Exit(1);
+                }
             }
             else
             {

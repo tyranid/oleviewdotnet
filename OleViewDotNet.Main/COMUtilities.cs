@@ -720,6 +720,13 @@ namespace OleViewDotNet
             }
         }
 
+        public static void ClearCachedSymbols()
+        {
+            _cached_symbols_configured = false;
+            SymbolResolverWrapper.GetResolvedNative().Clear();
+            SymbolResolverWrapper.GetResolved32Bit().Clear();
+        }
+
         private static void RegisterTypeInterfaces(Assembly a)
         {
             Type[] types = a.GetTypes();
@@ -2405,42 +2412,34 @@ namespace OleViewDotNet
             return comObj;
         }
 
-        public static bool GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
+        public static void GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
         {
-            try
+            COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true);
+            var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
+            Dictionary<string, int> entries;
+            if (Environment.Is64BitProcess)
             {
-                COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true);
-                var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
-                Dictionary<string, int> entries;
-                if (Environment.Is64BitProcess)
-                {
-                    entries = SymbolResolverWrapper.GetResolvedNative();
-                }
-                else
-                {
-                    entries = SymbolResolverWrapper.GetResolved32Bit();
-                }
-
-                string dll_name = GetCOMDllName();
-                var symbols = entries.Where(p => p.Key.StartsWith(dll_name));
-
-                if (!symbols.Any())
-                {
-                    throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
-                }
-
-                var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
-                string output_file = Path.Combine(symbol_dir, $"{GetFileMD5(module.FullPath)}.sym");
-                List<string> lines = new List<string>();
-                lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
-                lines.AddRange(symbols.Select(p => $"{p.Value} {p.Key}"));
-                File.WriteAllLines(output_file, lines);
+                entries = SymbolResolverWrapper.GetResolvedNative();
             }
-            catch (Exception)
+            else
             {
-                return false;
+                entries = SymbolResolverWrapper.GetResolved32Bit();
             }
-            return true;
+
+            string dll_name = GetCOMDllName();
+            var symbols = entries.Where(p => p.Key.StartsWith(dll_name));
+
+            if (!symbols.Any())
+            {
+                throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
+            }
+
+            var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
+            string output_file = Path.Combine(symbol_dir, $"{GetFileMD5(module.FullPath)}.sym");
+            List<string> lines = new List<string>();
+            lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
+            lines.AddRange(symbols.Select(p => $"{p.Value} {p.Key}"));
+            File.WriteAllLines(output_file, lines);
         }
 
         public static string FormatProxy(COMRegistry registry, IEnumerable<NdrComplexTypeReference> complex_types, 
