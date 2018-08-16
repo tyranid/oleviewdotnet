@@ -1186,6 +1186,16 @@ namespace OleViewDotNet
             return process.GetImageFilePath(false);
         }
 
+        private static string ReadActivationFilterVTable(NtProcess process, ISymbolResolver resolver)
+        {
+            IntPtr vtable = ReadPointer(process, ReadPointer(process, resolver, "g_ActivationFilter"));
+            if (vtable != IntPtr.Zero)
+            {
+                return resolver.GetModuleRelativeAddress(vtable);
+            }
+            return string.Empty;
+        }
+
         public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry, IEnumerable<Guid> ipids)
         {
             using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
@@ -1223,7 +1233,8 @@ namespace OleViewDotNet
                         ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
                         ReadPointer(process, resolver, "gAccessControl"),
                         ReadPointer(process, resolver, "ghwndOleMainThread"),
-                        GetRegisteredClasses(process, resolver, config, registry));
+                        GetRegisteredClasses(process, resolver, config, registry),
+                        ReadActivationFilterVTable(process, resolver));
                 }
             }
         }
@@ -1396,6 +1407,11 @@ namespace OleViewDotNet
             }
         }
 
+        public string ActivationFilterVTable
+        {
+            get;
+        }
+
         string ICOMAccessSecurity.DefaultAccessPermission => string.Empty;
 
         string ICOMAccessSecurity.DefaultLaunchPermission => string.Empty;
@@ -1404,7 +1420,8 @@ namespace OleViewDotNet
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
-            IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes)
+            IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
+            string activation_filter_vtable)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -1419,13 +1436,13 @@ namespace OleViewDotNet
             LRpcPermissions = lrpc_perm;
             User = user;
             UserSid = user_sid;
-            if (!String.IsNullOrWhiteSpace(rpc_endpoint))
+            if (!string.IsNullOrWhiteSpace(rpc_endpoint))
             {
                 RpcEndpoint = "OLE" + rpc_endpoint;
             }
             else
             {
-                RpcEndpoint = String.Empty;
+                RpcEndpoint = string.Empty;
             }
             Capabilities = capabilities;
             AuthnLevel = authn_level;
@@ -1438,6 +1455,7 @@ namespace OleViewDotNet
             {
                 c.Process = this;
             }
+            ActivationFilterVTable = activation_filter_vtable;
         }
 
         public override string ToString()
