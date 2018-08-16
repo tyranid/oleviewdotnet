@@ -2421,17 +2421,19 @@ namespace OleViewDotNet
                     entries = SymbolResolverWrapper.GetResolved32Bit();
                 }
 
-                if (!entries.Any())
+                string dll_name = GetCOMDllName();
+                var symbols = entries.Where(p => p.Key.StartsWith(dll_name));
+
+                if (!symbols.Any())
                 {
                     throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
                 }
 
-                string dll_name = GetCOMDllName();
                 var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
-                string output_file = Path.Combine(symbol_dir, $"{COMUtilities.GetFileMD5(module.FullPath)}.sym");
+                string output_file = Path.Combine(symbol_dir, $"{GetFileMD5(module.FullPath)}.sym");
                 List<string> lines = new List<string>();
                 lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
-                lines.AddRange(entries.Where(p => p.Key.StartsWith(dll_name)).Select(p => $"{p.Value} {p.Key}"));
+                lines.AddRange(symbols.Select(p => $"{p.Value} {p.Key}"));
                 File.WriteAllLines(output_file, lines);
             }
             catch (Exception)
