@@ -1,4 +1,4 @@
-# Microsoft Windows NT 6.2.9200.0 C:\WINDOWS\System32\combase.dll 10.0.17134.1 (WinBuild.160101.0800)
+# Microsoft Windows NT 10.0.17134.0 C:\WINDOWS\System32\combase.dll 10.0.17134.1 (WinBuild.160101.0800)
 2213456 combase!CIPIDTable::_palloc
 2213312 combase!g_AppId
 2215492 combase!gSecDesc
@@ -12,3 +12,4 @@
 2215964 combase!ghwndOleMainThread
 2215916 combase!CClassCache::_MTALSvrsFront
 2215912 combase!CClassCache::_NTALSvrsFront
+2218140 combase!g_ActivationFilter
