@@ -2730,5 +2730,20 @@ namespace OleViewDotNet
         {
             CopyTextToClipboard(GuidToString(guid, guid_format));
         }
+
+        public static bool IsProxy(object obj)
+        {
+            return obj is IRpcOptions;
+        }
+
+        public static RPCOPT_SERVER_LOCALITY_VALUES GetServerLocality(object obj)
+        {
+            if (obj is IRpcOptions opts)
+            {
+                opts.Query(obj, RPCOPT_PROPERTIES.SERVER_LOCALITY, out IntPtr value);
+                return (RPCOPT_SERVER_LOCALITY_VALUES)value.ToInt32();
+            }
+            return RPCOPT_SERVER_LOCALITY_VALUES.PROCESS_LOCAL;
+        }
     }
 }

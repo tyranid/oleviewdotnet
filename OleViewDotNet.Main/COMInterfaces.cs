@@ -296,4 +296,35 @@ namespace OleViewDotNet
         void DebuggerRelease();
         [return: MarshalAs(UnmanagedType.IUnknown)] object GetClipboardBroker();
     }
+
+    public enum RPCOPT_PROPERTIES
+    {
+        RPCTIMEOUT = 0x1,
+        SERVER_LOCALITY = 0x2,
+        RESERVED1 = 0x4,
+        RESERVED2 = 0x5,
+        RESERVED3 = 0x8,
+        RESERVED4 = 0x10
+    }
+
+    public enum RPCOPT_SERVER_LOCALITY_VALUES
+    {
+        PROCESS_LOCAL = 0,
+        MACHINE_LOCAL = 1,
+        REMOTE = 2
+    }
+
+    [Guid("00000144-0000-0000-C000-000000000046")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IRpcOptions
+    {
+        void Set([MarshalAs(UnmanagedType.IUnknown)] object pPrx,
+                    RPCOPT_PROPERTIES dwProperty,
+                    IntPtr dwValue);
+
+        void Query(
+            [MarshalAs(UnmanagedType.IUnknown)] object pPrx,
+            RPCOPT_PROPERTIES dwProperty,
+            out IntPtr pdwValue);
+    };
 }
