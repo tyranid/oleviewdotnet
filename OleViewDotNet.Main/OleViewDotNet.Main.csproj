@@ -201,6 +201,7 @@
     <Compile Include="StandardMarshalEditorControl.Designer.cs">
       <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="StorageWrapper.cs" />
     <Compile Include="StorageViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>

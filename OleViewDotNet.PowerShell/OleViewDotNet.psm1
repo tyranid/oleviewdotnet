@@ -1804,3 +1804,73 @@ function Set-ComSymbolCache {
         [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
     }
 }
+
+<#
+.SYNOPSIS
+Creates a new OLE storage object.
+.DESCRIPTION
+This cmdlet creates a new OLE storage object based on a file.
+.PARAMETER Path
+The path to the storage object to create.
+.PARAMETER Mode
+The mode to use when creating the storage object.
+.PARAMETER Format
+The format of the storage object to create.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.StorageWrapper
+.EXAMPLE
+New-ComStorageObject storage.stg
+Creates a new storage object.
+#>
+function New-ComStorageObject {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position = 0)]
+        [string]$Path,
+        [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
+        [OleViewDotNet.STGFMT]$Format = "Storage",
+        [switch]$NoWrapper
+    )
+
+    $type = [OleViewDotNet.IStorage]
+    $iid = $type.GUID
+    $Path = Resolve-LocalPath $Path
+    [OleViewDotNet.COMUtilities]::CreateStorage($Path, $Mode, $Format) | Write-Output
+}
+
+<#
+.SYNOPSIS
+Opens an existing OLE storage object.
+.DESCRIPTION
+This cmdlet opens a existing OLE storage object based on a file.
+.PARAMETER Path
+The path to the storage object to open.
+.PARAMETER Mode
+The mode to use when opening the storage object.
+.PARAMETER Format
+The format of the storage object to open.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.StorageWrapper
+.EXAMPLE
+Get-ComStorageObject storage.stg
+Creates a new storage object.
+#>
+function Get-ComStorageObject {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position = 0)]
+        [string]$Path,
+        [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
+        [OleViewDotNet.STGFMT]$Format = "Storage",
+        [switch]$NoWrapper
+    )
+
+    $type = [OleViewDotNet.IStorage]
+    $iid = $type.GUID
+    $Path = Resolve-LocalPath $Path
+    [OleViewDotNet.COMUtilities]::OpenStorage($Path, $Mode, $Format) | Write-Output
+}

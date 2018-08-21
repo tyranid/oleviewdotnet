@@ -15,53 +15,15 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel;
-using IS = System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Windows.Forms;
+using IS = System.Runtime.InteropServices;
 
 namespace OleViewDotNet
 {
     public partial class StorageViewer : UserControl
     {
-        class STATSTGWrapper
-        {
-            private static DateTime FromFileTime(FILETIME filetime)
-            {
-                long result = (uint)filetime.dwLowDateTime | (((long)filetime.dwHighDateTime) << 32);
-                return DateTime.FromFileTime(result);
-            }
-
-            public STATSTGWrapper(STATSTG stat, byte[] bytes)
-            {
-                Name = EscapeStorageName(stat.pwcsName);
-                Type = (STGTY)stat.type;
-                Size = stat.cbSize;
-                ModifiedTime = FromFileTime(stat.mtime);
-                CreationTime = FromFileTime(stat.ctime);
-                AccessTime = FromFileTime(stat.atime);
-                Mode = (STGM)stat.grfMode;
-                LocksSupported = stat.grfLocksSupported;
-                Clsid = stat.clsid;
-                StateBits = stat.grfStateBits;
-                Bytes = bytes;
-            }
-
-            public string Name { get; private set; }
-            public STGTY Type { get; private set; }
-            public long Size { get; private set; }
-            public DateTime ModifiedTime { get; private set; }
-            public DateTime CreationTime { get; private set; }
-            public DateTime AccessTime { get; private set; }
-            public STGM Mode { get; private set; }
-            public int LocksSupported { get; private set; }
-            public Guid Clsid { get; private set; }
-            public int StateBits { get; private set; }
-            [Browsable(false)]
-            public byte[] Bytes { get; private set; }
-        }
-
         private static string EscapeStorageName(string name)
         {
             if (name == null)
@@ -203,7 +165,7 @@ namespace OleViewDotNet
         {
             STATSTG stg_stat = new STATSTG();
             stg.Stat(stg_stat, 0);
-            root.Tag = new STATSTGWrapper(stg_stat, new byte[0]);
+            root.Tag = new STATSTGWrapper(EscapeStorageName(stg_stat.pwcsName), stg_stat, new byte[0]);
             IEnumSTATSTG enum_stg;
             stg.EnumElements(0, IntPtr.Zero, 0, out enum_stg);
             STATSTG[] stat = new STATSTG[1];
@@ -236,7 +198,7 @@ namespace OleViewDotNet
                     default:
                         break;
                 }
-                node.Tag = new STATSTGWrapper(stat[0], bytes);
+                node.Tag = new STATSTGWrapper(EscapeStorageName(stat[0].pwcsName), stat[0], bytes);
 
                 root.Nodes.Add(node);
             }

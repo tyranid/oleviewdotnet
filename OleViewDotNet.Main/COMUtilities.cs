@@ -392,16 +392,15 @@ namespace OleViewDotNet
             [MarshalAs(UnmanagedType.HString)] string activatableClassId,
             out IntPtr instance);
 
-        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
-        public static extern int StgOpenStorageEx(
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern IStorage StgOpenStorageEx(
               string pwcsName,
               STGM grfMode,
               STGFMT stgfmt,
               int grfAttrs,
               [In, Out] STGOPTIONS pStgOptions,
               IntPtr reserved2,
-              ref Guid riid,
-              [MarshalAs(UnmanagedType.IUnknown)] out object ppObjectOpen
+              ref Guid riid
             );
 
         [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
@@ -412,16 +411,6 @@ namespace OleViewDotNet
               IntPtr snbExclude,
               int reserved
             );
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class STGOPTIONS
-        {
-            public ushort usVersion;
-            public ushort reserved;
-            public ulong ulSectorSize;
-            [MarshalAs(UnmanagedType.LPWStr)]
-            public string pwcsTemplateFile;
-        }
 
         [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
         public static extern IStorage StgCreateStorageEx(
@@ -2744,6 +2733,28 @@ namespace OleViewDotNet
                 return (RPCOPT_SERVER_LOCALITY_VALUES)value.ToInt32();
             }
             return RPCOPT_SERVER_LOCALITY_VALUES.PROCESS_LOCAL;
+        }
+
+        public static StorageWrapper CreateStorage(string name, STGM mode, STGFMT format)
+        {
+            Guid iid = typeof(IStorage).GUID;
+            return new StorageWrapper(StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, ref iid));
+        }
+
+        public static StorageWrapper CreateReadOnlyStorage(string name)
+        {
+            return CreateStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
+        }
+
+        public static StorageWrapper OpenStorage(string name, STGM mode, STGFMT format)
+        {
+            Guid iid = typeof(IStorage).GUID;
+            return new StorageWrapper(StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, ref iid));
+        }
+
+        public static StorageWrapper OpenReadOnlyStorage(string name)
+        {
+            return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
         }
     }
 }
