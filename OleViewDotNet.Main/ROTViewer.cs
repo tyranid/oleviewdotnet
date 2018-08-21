@@ -63,10 +63,9 @@ namespace OleViewDotNet
                 while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
                 {
                     string strDisplayName;
-                    Guid clsid;
 
                     moniker[0].GetDisplayName(bindCtx, null, out strDisplayName);
-                    moniker[0].GetClassID(out clsid);
+                    Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
                     ListViewItem item = listViewROT.Items.Add(strDisplayName);
                     item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
                     
