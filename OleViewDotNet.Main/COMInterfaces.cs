@@ -140,6 +140,24 @@ namespace OleViewDotNet
         IEnumSTATSTG Clone();
     }
 
+    [StructLayout(LayoutKind.Explicit)]
+    public class FILETIMEOptional
+    {
+        [FieldOffset(0)]
+        public System.Runtime.InteropServices.ComTypes.FILETIME FileTime;
+        [FieldOffset(0)]
+        public long QuadPart;
+
+        public FILETIMEOptional(DateTime datetime)
+        {
+            QuadPart = datetime.ToFileTime();
+        }
+
+        public FILETIMEOptional()
+        {
+        }
+    }
+
     [ComImport, Guid("0000000B-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IStorage
     {
@@ -158,7 +176,7 @@ namespace OleViewDotNet
         void EnumElements([In, MarshalAs(UnmanagedType.U4)] int reserved1, IntPtr reserved2, [In, MarshalAs(UnmanagedType.U4)] int reserved3, [MarshalAs(UnmanagedType.Interface)] out IEnumSTATSTG ppVal);
         void DestroyElement([In, MarshalAs(UnmanagedType.BStr)] string pwcsName);
         void RenameElement([In, MarshalAs(UnmanagedType.BStr)] string pwcsOldName, [In, MarshalAs(UnmanagedType.BStr)] string pwcsNewName);
-        void SetElementTimes([In, MarshalAs(UnmanagedType.BStr)] string pwcsName, [In] System.Runtime.InteropServices.ComTypes.FILETIME pctime, [In] System.Runtime.InteropServices.ComTypes.FILETIME patime, [In] System.Runtime.InteropServices.ComTypes.FILETIME pmtime);
+        void SetElementTimes([In, MarshalAs(UnmanagedType.BStr)] string pwcsName, [In] FILETIMEOptional pctime, [In] FILETIMEOptional patime, [In] FILETIMEOptional pmtime);
         void SetClass([In] ref Guid clsid);
         void SetStateBits(int grfStateBits, int grfMask);
         void Stat([Out] System.Runtime.InteropServices.ComTypes.STATSTG pStatStg, int grfStatFlag);

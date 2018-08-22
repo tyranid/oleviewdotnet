@@ -184,6 +184,16 @@ namespace OleViewDotNet
                 mode, IntPtr.Zero, 0));
         }
 
+        public StorageWrapper CreateStorage(string name, STGM mode)
+        {
+            return new StorageWrapper(_stg.CreateStorage(name, mode, 0, 0));
+        }
+
+        public StorageWrapper CreateStore(string name)
+        {
+            return CreateStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
+        }
+
         public StreamWrapper OpenStream(string name, STGM mode)
         {
             return new StreamWrapper(_stg.OpenStream(name, IntPtr.Zero, mode, 0));
@@ -192,6 +202,21 @@ namespace OleViewDotNet
         public StreamWrapper OpenReadOnlyStream(string name)
         {
             return OpenStream(name, STGM.SHARE_EXCLUSIVE | STGM.READ);
+        }
+
+        public StreamWrapper OpenReadWriteStream(string name)
+        {
+            return OpenStream(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
+        }
+
+        public StreamWrapper CreateStream(string name, STGM mode)
+        {
+            return new StreamWrapper(_stg.CreateStream(name, mode, 0, 0));
+        }
+
+        public StreamWrapper CreateStream(string name)
+        {
+            return CreateStream(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
         }
 
         public IEnumerable<STATSTGWrapper> EnumElements()
@@ -254,6 +279,53 @@ namespace OleViewDotNet
                 _stg.Stat(stg_stat, 0);
                 return new STATSTGWrapper(stg_stat.pwcsName, stg_stat, new byte[0]);
             }
+        }
+
+        public Guid Clsid
+        {
+            get
+            {
+                return Stat.Clsid;
+            }
+            set
+            {
+                _stg.SetClass(ref value);
+            }
+        }
+
+        public void RenameElement(string old_name, string new_name)
+        {
+            _stg.RenameElement(old_name, new_name);
+        }
+
+        public void DestroyElement(string name)
+        {
+            _stg.DestroyElement(name);
+        }
+
+        public void Commit(STGC stgc)
+        {
+            _stg.Commit((int)stgc);
+        }
+
+        public void Revert()
+        {
+            _stg.Revert();
+        }
+
+        private static FILETIMEOptional DateTimeToFileTime(DateTime? dt)
+        {
+            return dt.HasValue ? new FILETIMEOptional(dt.Value) : null;
+        }
+
+        public void SetElementTimes(
+            string name,
+            DateTime? ctime,
+            DateTime? atime,
+            DateTime? mtime)
+        {
+            _stg.SetElementTimes(string.IsNullOrEmpty(name) ? null : name, 
+                DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
         }
 
         public IStorage Object { get { return (IStorage)ComWrapperFactory.Wrap<IStorage>(_stg); } }

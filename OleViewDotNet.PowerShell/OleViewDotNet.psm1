@@ -1830,14 +1830,13 @@ function New-ComStorageObject {
         [parameter(Mandatory, Position = 0)]
         [string]$Path,
         [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
-        [OleViewDotNet.STGFMT]$Format = "Storage",
-        [switch]$NoWrapper
+        [OleViewDotNet.STGFMT]$Format = "Storage"
     )
 
     $type = [OleViewDotNet.IStorage]
     $iid = $type.GUID
     $Path = Resolve-LocalPath $Path
-    [OleViewDotNet.COMUtilities]::CreateStorage($Path, $Mode, $Format) | Write-Output
+    [OleViewDotNet.COMUtilities]::CreateStorage($Path, $Mode, $Format)
 }
 
 <#
@@ -1851,6 +1850,8 @@ The path to the storage object to open.
 The mode to use when opening the storage object.
 .PARAMETER Format
 The format of the storage object to open.
+.PARAMETER ReadOnly
+Opens storage read only. Overrides $Mode parameter.
 .INPUTS
 None
 .OUTPUTS
@@ -1864,13 +1865,17 @@ function Get-ComStorageObject {
     Param(
         [parameter(Mandatory, Position = 0)]
         [string]$Path,
+        [switch]$ReadOnly,
         [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
-        [OleViewDotNet.STGFMT]$Format = "Storage",
-        [switch]$NoWrapper
+        [OleViewDotNet.STGFMT]$Format = "Storage"
     )
 
     $type = [OleViewDotNet.IStorage]
     $iid = $type.GUID
     $Path = Resolve-LocalPath $Path
-    [OleViewDotNet.COMUtilities]::OpenStorage($Path, $Mode, $Format) | Write-Output
+    if ($ReadOnly) {
+        $Mode = "SHARE_EXCLUSIVE, READ"
+    }
+
+    [OleViewDotNet.COMUtilities]::OpenStorage($Path, $Mode, $Format)
 }

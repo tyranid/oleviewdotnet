@@ -130,6 +130,15 @@ namespace OleViewDotNet
         DELETEONRELEASE = 0x04000000
     }
 
+    public enum STGC
+    {
+        DEFAULT,
+        OVERWRITE,
+        ONLYIFCURRENT,
+        DANGEROUSLYCOMMITMERELYTODISKCACHE,
+        CONSOLIDATE
+    }
+
     [Flags]
     public enum EOLE_AUTHENTICATION_CAPABILITIES
     {
