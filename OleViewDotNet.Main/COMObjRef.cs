@@ -290,6 +290,8 @@ namespace OleViewDotNet
     public class COMObjRefCustom : COMObjRef
     {
         public Guid Clsid { get; set; }
+        public int Reserved { get; set; }
+        public byte[] ExtensionData { get; set; }
         public byte[] ObjectData { get; set; }
 
         public COMObjRefCustom() 
@@ -302,10 +304,14 @@ namespace OleViewDotNet
             : base(iid)
         {
             Clsid = reader.ReadGuid();
-            // Reserved.
-            reader.ReadInt32();
-            // Technically size but can be 0.
-            reader.ReadInt32();
+            // Size of extension data but can be 0.
+            int extension = reader.ReadInt32();
+            ExtensionData = new byte[extension];
+            Reserved = reader.ReadInt32();
+            if (extension > 0)
+            {
+                ExtensionData = reader.ReadAll(extension);
+            }
             // Read to end of stream.
             ObjectData = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
         }
@@ -313,8 +319,9 @@ namespace OleViewDotNet
         protected override void Serialize(BinaryWriter writer)
         {
             writer.Write(Clsid);
-            writer.Write(ObjectData.Length);
-            writer.Write(0);
+            writer.Write(ExtensionData.Length);
+            writer.Write(Reserved);
+            writer.Write(ExtensionData);
             writer.Write(ObjectData);
         }
     }
