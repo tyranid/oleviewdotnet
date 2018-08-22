@@ -98,8 +98,7 @@ namespace OleViewDotNet
                     break;
                 case 2: origin = SeekOrigin.End;
                     break;
-                default: throw new ArgumentException();                    
-
+                default: throw new ArgumentException();
             }
             m_stream.Seek(dlibMove, origin);
             if (plibNewPosition != IntPtr.Zero)
