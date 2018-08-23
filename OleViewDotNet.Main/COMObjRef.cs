@@ -298,6 +298,7 @@ namespace OleViewDotNet
             : base(COMInterfaceEntry.IID_IUnknown)
         {
             ObjectData = new byte[0];
+            ExtensionData = new byte[0];
         }
 
         internal COMObjRefCustom(BinaryReader reader, Guid iid) 
