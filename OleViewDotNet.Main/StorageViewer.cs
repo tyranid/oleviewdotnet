@@ -163,8 +163,8 @@ namespace OleViewDotNet
 
         private void PopulateTree(IStorage stg, TreeNode root)
         {
-            STATSTG stg_stat = new STATSTG();
-            stg.Stat(stg_stat, 0);
+            STATSTG stg_stat;
+            stg.Stat(out stg_stat, 0);
             root.Tag = new STATSTGWrapper(EscapeStorageName(stg_stat.pwcsName), stg_stat, new byte[0]);
             IEnumSTATSTG enum_stg;
             stg.EnumElements(0, IntPtr.Zero, 0, out enum_stg);

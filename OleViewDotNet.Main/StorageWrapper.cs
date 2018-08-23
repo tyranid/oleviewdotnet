@@ -276,7 +276,7 @@ namespace OleViewDotNet
             get
             {
                 ComTypes.STATSTG stg_stat = new ComTypes.STATSTG();
-                _stg.Stat(stg_stat, 0);
+                _stg.Stat(out stg_stat, 0);
                 return new STATSTGWrapper(stg_stat.pwcsName, stg_stat, new byte[0]);
             }
         }
