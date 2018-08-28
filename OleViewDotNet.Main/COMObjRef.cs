@@ -14,9 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace OleViewDotNet
@@ -58,12 +58,13 @@ namespace OleViewDotNet
     {
         None = 0,
         Udp = 0x08,
-	    Tcp = 0x07,
-	    Ipx = 0x0E,
-	    Spx = 0x0C,
-	    NetBIOS = 0x12,
-	    DNetNSP = 0x04,
-	    LRPC = 0x10,
+        Tcp = 0x07,
+        Ipx = 0x0E,
+        Spx = 0x0C,
+        NetBIOS = 0x12,
+        DNetNSP = 0x04,
+        LRPC = 0x10,
+        StringBinding = -1,
     }
 
     public class COMStringBinding
@@ -77,16 +78,31 @@ namespace OleViewDotNet
             NetworkAddr = String.Empty;
         }
 
-        internal COMStringBinding(BinaryReader reader)
+        internal COMStringBinding(BinaryReader reader, bool direct_string)
         {
-            TowerId = (RpcTowerId)reader.ReadInt16();
-            if (TowerId != RpcTowerId.None)
+            if (direct_string)
             {
-                NetworkAddr = reader.ReadZString();
+                try
+                {
+                    TowerId = RpcTowerId.StringBinding;
+                    NetworkAddr = reader.ReadZString();
+                }
+                catch (EndOfStreamException)
+                {
+                    NetworkAddr = string.Empty;
+                }
             }
             else
             {
-                NetworkAddr = String.Empty;
+                TowerId = (RpcTowerId)reader.ReadInt16();
+                if (TowerId != RpcTowerId.None)
+                {
+                    NetworkAddr = reader.ReadZString();
+                }
+                else
+                {
+                    NetworkAddr = string.Empty;
+                }
             }
         }
 
@@ -128,7 +144,7 @@ namespace OleViewDotNet
             }
             else
             {
-                PrincName = String.Empty;
+                PrincName = string.Empty;
             }
         }
 
@@ -160,8 +176,44 @@ namespace OleViewDotNet
             SecurityBindings = new List<COMSecurityBinding>();
         }
 
+        private void ReadEntries(BinaryReader new_reader, int sec_offset, bool direct_string)
+        {
+            COMStringBinding str = new COMStringBinding(new_reader, direct_string);
+            if (direct_string)
+            {
+                StringBindings.Add(str);
+            }
+            else
+            {
+                while (str.TowerId != 0)
+                {
+                    StringBindings.Add(str);
+                    str = new COMStringBinding(new_reader, direct_string);
+                }
+            }
+
+            new_reader.BaseStream.Position = sec_offset * 2;
+            COMSecurityBinding sec = new COMSecurityBinding(new_reader);
+            while (sec.AuthnSvc != 0)
+            {
+                SecurityBindings.Add(sec);
+                sec = new COMSecurityBinding(new_reader);
+            }
+        }
+
+        public COMDualStringArray(IntPtr ptr, NtProcess process, bool direct_string) : this()
+        {
+            int num_entries = process.ReadMemory<ushort>(ptr.ToInt64());
+            int sec_offset = process.ReadMemory<ushort>(ptr.ToInt64() + 2);
+            if (num_entries > 0)
+            {
+                MemoryStream stm = new MemoryStream(process.ReadMemory(ptr.ToInt64() + 4, num_entries * 2));
+                ReadEntries(new BinaryReader(stm), sec_offset, direct_string);
+            }
+        }
+
         internal COMDualStringArray(BinaryReader reader) : this()
-        {            
+        {
             int num_entries = reader.ReadUInt16();
             int sec_offset = reader.ReadUInt16();
 
@@ -169,21 +221,7 @@ namespace OleViewDotNet
             {
                 MemoryStream stm = new MemoryStream(reader.ReadAll(num_entries * 2));
                 BinaryReader new_reader = new BinaryReader(stm);
-
-                COMStringBinding str = new COMStringBinding(new_reader);
-                while (str.TowerId != 0)
-                {
-                    StringBindings.Add(str);
-                    str = new COMStringBinding(new_reader);
-                }
-
-                new_reader.BaseStream.Position = sec_offset * 2;
-                COMSecurityBinding sec = new COMSecurityBinding(new_reader);
-                while (sec.AuthnSvc != 0)
-                {
-                    SecurityBindings.Add(sec);
-                    sec = new COMSecurityBinding(new_reader);
-                }
+                ReadEntries(new_reader, sec_offset, false);
             }
         }
 
@@ -384,14 +422,7 @@ namespace OleViewDotNet
         {
             get
             {
-                try
-                {
-                    return Process.GetProcessById(ProcessId).ProcessName;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
+                return COMUtilities.GetProcessNameById(ProcessId);
             }
         }
         public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
