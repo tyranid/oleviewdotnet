@@ -600,7 +600,14 @@ namespace OleViewDotNet
             {
                 if (_pBinding == IntPtr.Zero)
                     return new COMDualStringArray();
-                return new COMDualStringArray(_pBinding, process, true);
+                try
+                {
+                    return new COMDualStringArray(_pBinding, process, true);
+                }
+                catch (NtException)
+                {
+                    return new COMDualStringArray();
+                }
             }
         }
 
@@ -680,7 +687,14 @@ namespace OleViewDotNet
             {
                 if (_pBinding == 0)
                     return new COMDualStringArray();
-                return new COMDualStringArray(new IntPtr(_pBinding), process, true);
+                try
+                {
+                    return new COMDualStringArray(new IntPtr(_pBinding), process, true);
+                }
+                catch (NtException)
+                {
+                    return new COMDualStringArray();
+                }
             }
         }
 
@@ -789,6 +803,8 @@ namespace OleViewDotNet
         struct CStdIdentity32 : IStdIdentity
         {
             public int VTablePtr;
+            public int DummyValue; // Not quite sure this seems to be here.
+            public int VTablePtr2;
             public SMFLAGS _dwFlags;
             public int _cIPIDs;
             public int _pFirstIPID; // tagIPIDEntry* 
@@ -1722,14 +1738,21 @@ namespace OleViewDotNet
             {
                 return null;
             }
-            if (process.Is64Bit)
+            try
             {
-                return process.ReadMemoryArray<IntPtr>(p.ToInt64(), count);
+                if (process.Is64Bit)
+                {
+                    return process.ReadMemoryArray<IntPtr>(p.ToInt64(), count);
+                }
+                else
+                {
+                    var ptrs = process.ReadMemoryArray<int>(p.ToInt64(), count);
+                    return ptrs.Select(i => new IntPtr(i)).ToArray();
+                }
             }
-            else
+            catch (NtException)
             {
-                var ptrs = process.ReadMemoryArray<int>(p.ToInt64(), count);
-                return ptrs.Select(i => new IntPtr(i)).ToArray();
+                return null;
             }
         }
 
