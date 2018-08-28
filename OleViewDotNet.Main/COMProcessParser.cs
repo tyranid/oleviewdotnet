@@ -1394,7 +1394,7 @@ namespace OleViewDotNet
                         {
                             if (ipid_set.Count == 0 || ipid_set.Contains(ipid_entry.Ipid))
                             {
-                                entries.Add(new COMIPIDEntry(ipid_entry, process, resolver, config, registry));
+                                entries.Add(new COMIPIDEntry(ipid_entry, Guid.Empty, process, resolver, config, registry));
                             }
                         }
                     }
@@ -1515,10 +1515,10 @@ namespace OleViewDotNet
             return chain.Select((s, i) => new SHashChainEntry(buckets + (i * size), s)).ToArray();
         }
 
-        private static List<COMIPIDClientEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        private static List<COMIPIDEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             int pid = process.ProcessId;
-            List<COMIPIDClientEntry> entries = new List<COMIPIDClientEntry>();
+            List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
             var buckets = GetBuckets(process, resolver, "COIDTable::s_OIDBuckets", 23);
             foreach (var bucket in buckets)
             {
@@ -1541,7 +1541,7 @@ namespace OleViewDotNet
                         {
                             if (pid != COMUtilities.GetProcessIdFromIPid(ipid.Ipid))
                             {
-                                entries.Add(new COMIPIDClientEntry(ipid, process, resolver, config, registry, next_obj.GetOid()));
+                                entries.Add(new COMIPIDEntry(ipid, next_obj.GetOid(), process, resolver, config, registry));
                             }
                             ipid = ipid.GetNext(process);
                         }
@@ -1924,7 +1924,7 @@ namespace OleViewDotNet
         public IntPtr STAMainHWnd { get; private set; }
         public IEnumerable<COMProcessClassRegistration> Classes { get; private set; }
         public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
-        public IEnumerable<COMIPIDClientEntry> Clients { get; private set; }
+        public IEnumerable<COMIPIDEntry> Clients { get; private set; }
 
         private bool CustomMarshalAllowedInternal(bool ac)
         {
@@ -1976,7 +1976,7 @@ namespace OleViewDotNet
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
-            string activation_filter_vtable, List<COMIPIDClientEntry> clients)
+            string activation_filter_vtable, List<COMIPIDEntry> clients)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -2096,6 +2096,14 @@ namespace OleViewDotNet
 
         public COMProcessEntry Process { get; internal set; }
 
+        private COMDualStringArray _stringarray;
+
+        public Guid Oid { get; }
+        public IEnumerable<COMStringBinding> StringBindings => _stringarray.StringBindings.AsReadOnly();
+        public IEnumerable<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings.AsReadOnly();
+        public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
+        public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
+
         public byte[] ToObjref()
         {
             MemoryStream stm = new MemoryStream();
@@ -2106,9 +2114,16 @@ namespace OleViewDotNet
             writer.Write(0);
             writer.Write(1);
             writer.Write(Oxid.ToByteArray(), 0, 8);
-            RandomNumberGenerator rng = RandomNumberGenerator.Create();
             byte[] oid = new byte[8];
-            rng.GetBytes(oid);
+            if (Oid == Guid.Empty)
+            {
+                RandomNumberGenerator rng = RandomNumberGenerator.Create();
+                rng.GetBytes(oid);
+            }
+            else
+            {
+                Array.Copy(Oid.ToByteArray(), oid, 8);
+            }
             writer.Write(oid);
             writer.Write(Ipid.ToByteArray());
             writer.Write(0);
@@ -2176,7 +2191,7 @@ namespace OleViewDotNet
             return _method_cache[method_ptr];
         }
 
-        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process,
+        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, Guid oid, NtProcess process,
             ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             Ipid = ipid.Ipid;
@@ -2187,6 +2202,8 @@ namespace OleViewDotNet
             Stub = ipid.Stub;
             var oxid = ipid.GetOxidEntry(process);
             Oxid = oxid.MOxid;
+            Oid = oid;
+            _stringarray = oxid.GetBinding(process);
             ServerSTAHwnd = oxid.ServerSTAHwnd;
             StrongRefs = ipid.StrongRefs;
             WeakRefs = ipid.WeakRefs;
@@ -2276,26 +2293,6 @@ namespace OleViewDotNet
         public string FormatText()
         {
             return FormatText(ProxyFormatterFlags.None);
-        }
-    }
-
-    public class COMIPIDClientEntry : COMIPIDEntry
-    {
-        private COMDualStringArray _stringarray;
-
-        public Guid Oid { get; }
-        public IEnumerable<COMStringBinding> StringBindings => _stringarray.StringBindings.AsReadOnly();
-        public IEnumerable<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings.AsReadOnly();
-        public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
-        public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
-
-        internal COMIPIDClientEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process,
-            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry, Guid oid) 
-            : base(ipid, process, resolver, config, registry)
-        {
-            Oid = oid;
-            var oxid = ipid.GetOxidEntry(process);
-            _stringarray = oxid.GetBinding(process);
         }
     }
 }
