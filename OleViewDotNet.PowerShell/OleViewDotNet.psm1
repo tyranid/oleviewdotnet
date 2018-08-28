@@ -499,6 +499,8 @@ function Get-ComProcess {
         [System.Diagnostics.Process[]]$Process,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromObjRef")]
         [OleViewDotNet.COMObjRef[]]$ObjRef,
+        [parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
         [switch]$NoProgress
     )
 
@@ -521,6 +523,9 @@ function Get-ComProcess {
             }
             "FromObjRef" {
                 $objrefs += $ObjRef
+            }
+            "FromName" {
+                $procs = Get-Process -Name $Name
             }
         }
     }
