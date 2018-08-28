@@ -314,6 +314,7 @@ namespace OleViewDotNet
             int WeakRefs { get; }
             int PrivateRefs { get; }
             IOXIDEntry GetOxidEntry(NtProcess process);
+            IPIDEntryNativeInterface GetNext(NtProcess process);
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -396,6 +397,13 @@ namespace OleViewDotNet
                 {
                     return cPrivateRefs;
                 }
+            }
+
+            IPIDEntryNativeInterface IPIDEntryNativeInterface.GetNext(NtProcess process)
+            {
+                if (pNextIPID == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<IPIDEntryNative>(pNextIPID.ToInt64());
             }
 
             IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(NtProcess process)
@@ -486,6 +494,13 @@ namespace OleViewDotNet
                 }
             }
 
+            IPIDEntryNativeInterface IPIDEntryNativeInterface.GetNext(NtProcess process)
+            {
+                if (pNextIPID == 0)
+                    return null;
+                return process.ReadStruct<IPIDEntryNative32>(pNextIPID);
+            }
+
             IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(NtProcess process)
             {
                 return process.ReadStruct<OXIDEntryNative32>(pOXIDEntry);
@@ -506,6 +521,7 @@ namespace OleViewDotNet
             Guid MOxid { get; }
             long Mid { get; }
             IntPtr ServerSTAHwnd { get; }
+            COMDualStringArray GetBinding(NtProcess process);
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -579,6 +595,13 @@ namespace OleViewDotNet
                     return _hServerSTA;
                 }
             }
+
+            COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
+            {
+                if (_pBinding == IntPtr.Zero)
+                    return new COMDualStringArray();
+                return new COMDualStringArray(_pBinding, process, true);
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -651,6 +674,473 @@ namespace OleViewDotNet
                 {
                     return new IntPtr(_hServerSTA);
                 }
+            }
+
+            COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
+            {
+                if (_pBinding == 0)
+                    return new COMDualStringArray();
+                return new COMDualStringArray(new IntPtr(_pBinding), process, true);
+            }
+        }
+
+        interface IStdIdentity
+        {
+            int GetIPIDCount();
+            IPIDEntryNativeInterface GetFirstIpid(NtProcess process);
+            SMFLAGS GetFlags();
+        }
+
+        [Flags]
+        enum STDID_FLAGS
+        {
+            STDID_SERVER = 0x0,
+            STDID_CLIENT = 0x1,
+            STDID_FREETHREADED = 0x2,
+            STDID_HAVEID = 0x4,
+            STDID_IGNOREID = 0x8,
+            STDID_AGGREGATED = 0x10,
+            STDID_INDESTRUCTOR = 0x100,
+            STDID_LOCKEDINMEM = 0x200,
+            STDID_DEFHANDLER = 0x400,
+            STDID_AGGID = 0x800,
+            STDID_STCMRSHL = 0x1000,
+            STDID_REMOVEDFROMIDOBJ = 0x2000,
+            STDID_SYSTEM = 0x4000,
+            STDID_FTM = 0x8000,
+            STDID_NOIEC = 0x10000,
+            STDID_FASTRUNDOWN = 0x20000,
+            STDID_AGILE_OOP_PROXY = 0x40000,
+            STDID_SUPPRESS_WAKE_SET = 0x80000,
+            STDID_IMPLEMENTS_IAGILEOBJECT = 0x100000,
+            STDID_ALLOW_ASTA_TO_ASTA_DEADLOCK_RISK = 0x200000,
+            STDID_DO_NOT_DISTURB_SET = 0x400000,
+            STDID_DISABLE_ASYNC_REMOTING_FOR_WINRT_ASYNC = 0x800000,
+            STDID_FAKE_OID_FOR_INTERNAL_PROXY = 0x1000000,
+            STDID_RUNDOWN_OBJECT_OF_INTEREST = 0x2000000,
+            STDID_ALL = 0x3FFFF1F,
+        };
+
+        [Flags]
+        enum SMFLAGS
+        {
+            SMFLAGS_CLIENT_SIDE = 0x1,
+            SMFLAGS_PENDINGDISCONNECT = 0x2,
+            SMFLAGS_REGISTEREDOID = 0x4,
+            SMFLAGS_DISCONNECTED = 0x8,
+            SMFLAGS_FIRSTMARSHAL = 0x10,
+            SMFLAGS_HANDLER = 0x20,
+            SMFLAGS_WEAKCLIENT = 0x40,
+            SMFLAGS_IGNORERUNDOWN = 0x80,
+            SMFLAGS_CLIENTMARSHALED = 0x100,
+            SMFLAGS_NOPING = 0x200,
+            SMFLAGS_TRIEDTOCONNECT = 0x400,
+            SMFLAGS_CSTATICMARSHAL = 0x800,
+            SMFLAGS_USEAGGSTDMARSHAL = 0x1000,
+            SMFLAGS_SYSTEM = 0x2000,
+            SMFLAGS_DEACTIVATED = 0x4000,
+            SMFLAGS_FTM = 0x8000,
+            SMFLAGS_CLIENTPOLICYSET = 0x10000,
+            SMFLAGS_APPDISCONNECT = 0x20000,
+            SMFLAGS_SYSDISCONNECT = 0x40000,
+            SMFLAGS_RUNDOWNDISCONNECT = 0x80000,
+            SMFLAGS_CLEANEDUP = 0x100000,
+            SMFLAGS_LIGHTNA = 0x200000,
+            SMFLAGS_FASTRUNDOWN = 0x400000,
+            SMFLAGS_IMPLEMENTS_IAGILEOBJECT = 0x800000,
+            SMFLAGS_ALLOW_ASTA_TO_ASTA_DEADLOCK_RISK = 0x1000000,
+            SMFLAGS_SAFE_TO_QI_DURING_DISCONNECT = 0x2000000,
+            SMFLAGS_CHECKSUSPEND = 0x4000000,
+            SMFLAGS_DISABLE_ASYNC_REMOTING_FOR_WINRT_ASYNC = 0x8000000,
+            SMFLAGS_PROXY_TO_INPROC_OBJECT = 0x10000000,
+            SMFLAGS_MADE_WINRT_ASYNC_CALL = 0x20000000,
+            SMFLAGS_RUNDOWN_OBJECT_OF_INTEREST = 0x40000000,
+            SMFLAGS_ALL = 0x7FFFFFFF,
+        };
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CStdIdentity : IStdIdentity
+        {
+            public IntPtr VTablePtr;
+            public IntPtr VTablePtr2;
+            public SMFLAGS _dwFlags;
+            public int _cIPIDs;
+            public IntPtr _pFirstIPID; // tagIPIDEntry* 
+
+            IPIDEntryNativeInterface IStdIdentity.GetFirstIpid(NtProcess process)
+            {
+                if (_pFirstIPID == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<IPIDEntryNative>(_pFirstIPID.ToInt64());
+            }
+
+            int IStdIdentity.GetIPIDCount()
+            {
+                return _cIPIDs;
+            }
+
+            SMFLAGS IStdIdentity.GetFlags()
+            {
+                return _dwFlags;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CStdIdentity32 : IStdIdentity
+        {
+            public int VTablePtr;
+            public SMFLAGS _dwFlags;
+            public int _cIPIDs;
+            public int _pFirstIPID; // tagIPIDEntry* 
+
+            IPIDEntryNativeInterface IStdIdentity.GetFirstIpid(NtProcess process)
+            {
+                if (_pFirstIPID == 0)
+                    return null;
+                return process.ReadStruct<IPIDEntryNative32>(_pFirstIPID);
+            }
+
+            int IStdIdentity.GetIPIDCount()
+            {
+                return _cIPIDs;
+            }
+
+            SMFLAGS IStdIdentity.GetFlags()
+            {
+                return _dwFlags;
+            }
+        }
+
+        interface IIFaceEntry
+        {
+            IntPtr GetProxy();
+            IIFaceEntry GetNext(NtProcess process);
+            Guid GetIid();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct IFaceEntry : IIFaceEntry
+        {
+            public IntPtr _pNext; // IFaceEntry*
+            public IntPtr _pProxy; // void* 
+            public IntPtr _pRpcProxy; // IRpcProxyBuffer* 
+            public IntPtr _pRpcStub; // IRpcStubBuffer* 
+            public IntPtr _pServer; // void* 
+            public Guid _iid;
+            public IntPtr _pCtxChnl; // CCtxChnl* 
+            public IntPtr _pHead; // CtxEntry* 
+            public IntPtr _pFreeList; // CtxEntry* 
+            public IntPtr _pInterceptor; // ICallInterceptor*
+            public IntPtr _pUnkInner; // IUnknown* 
+
+            Guid IIFaceEntry.GetIid()
+            {
+                return _iid;
+            }
+
+            IIFaceEntry IIFaceEntry.GetNext(NtProcess process)
+            {
+                if (_pNext == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<IFaceEntry>(_pNext.ToInt64());
+            }
+
+            IntPtr IIFaceEntry.GetProxy()
+            {
+                return _pProxy;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct IFaceEntry32 : IIFaceEntry
+        {
+            public int _pNext; // IFaceEntry*
+            public int _pProxy; // void* 
+            public int _pRpcProxy; // IRpcProxyBuffer* 
+            public int _pRpcStub; // IRpcStubBuffer* 
+            public int _pServer; // void* 
+            public Guid _iid;
+            public int _pCtxChnl; // CCtxChnl* 
+            public int _pHead; // CtxEntry* 
+            public int _pFreeList; // CtxEntry* 
+            public int _pInterceptor; // ICallInterceptor*
+            public int _pUnkInner; // IUnknown* 
+
+            Guid IIFaceEntry.GetIid()
+            {
+                return _iid;
+            }
+
+            IIFaceEntry IIFaceEntry.GetNext(NtProcess process)
+            {
+                if (_pNext == 0)
+                    return null;
+                return process.ReadStruct<IFaceEntry32>(_pNext);
+            }
+
+            IntPtr IIFaceEntry.GetProxy()
+            {
+                return new IntPtr(_pProxy);
+            }
+        }
+
+        interface IStdWrapper
+        {
+            int GetIFaceCount();
+            IntPtr GetVtableAddress();
+            IIFaceEntry GetIFaceHead(NtProcess process);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CStdWrapper : IStdWrapper
+        {
+            public IntPtr VTablePtr;
+            public uint _dwState;
+            public int _cRefs;
+            public int _cCalls;
+            public int _cIFaces;
+            public IntPtr _pIFaceHead; // IFaceEntry* 
+            public IntPtr _pCtxEntryHead; // CtxEntry* 
+            public IntPtr _pCtxFreeList; // CtxEntry* 
+            public IntPtr _pServer; // IUnknown* 
+            public IntPtr _pID; // CIDObject* 
+            public IntPtr _pVtableAddress; // void* 
+
+            int IStdWrapper.GetIFaceCount()
+            {
+                return _cIFaces;
+            }
+
+            IIFaceEntry IStdWrapper.GetIFaceHead(NtProcess process)
+            {
+                if (_pIFaceHead == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<IFaceEntry>(_pIFaceHead.ToInt64());
+            }
+
+            IntPtr IStdWrapper.GetVtableAddress()
+            {
+                return _pVtableAddress;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CStdWrapper32 : IStdWrapper
+        {
+            public int VTablePtr;
+            public uint _dwState;
+            public int _cRefs;
+            public int _cCalls;
+            public int _cIFaces;
+            public int _pIFaceHead; // IFaceEntry* 
+            public int _pCtxEntryHead; // CtxEntry* 
+            public int _pCtxFreeList; // CtxEntry* 
+            public int _pServer; // IUnknown* 
+            public int _pID; // CIDObject* 
+            public int _pVtableAddress; // void* 
+
+            int IStdWrapper.GetIFaceCount()
+            {
+                return _cIFaces;
+            }
+
+            IIFaceEntry IStdWrapper.GetIFaceHead(NtProcess process)
+            {
+                if (_pIFaceHead == 0)
+                    return null;
+                return process.ReadStruct<IFaceEntry32>(_pIFaceHead);
+            }
+
+            IntPtr IStdWrapper.GetVtableAddress()
+            {
+                return new IntPtr(_pVtableAddress);
+            }
+        }
+
+        interface IIDObject
+        {
+            Guid GetOid();
+            IStdWrapper GetStdWrapper(NtProcess process);
+            IIDObject GetNextOid(NtProcess process, IntPtr head_ptr);
+            IStdIdentity GetStdIdentity(NtProcess process);
+        }
+
+        interface ISHashChain
+        {
+            IntPtr GetNext();
+            IntPtr GetPrev();
+            ISHashChain GetNextChain(NtProcess process);
+            IIDObject GetNextIDObject(NtProcess process);
+        }
+
+        class SHashChainEntry
+        {
+            public IntPtr BaseAddress { get; }
+            public ISHashChain StartEntry { get; }
+            public SHashChainEntry(IntPtr base_address, ISHashChain start_entry)
+            {
+                BaseAddress = base_address;
+                StartEntry = start_entry;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SHashChain : ISHashChain
+        {
+            public IntPtr pNext;
+            public IntPtr pPrev;
+
+            IntPtr ISHashChain.GetNext()
+            {
+                return pNext;
+            }
+
+            ISHashChain ISHashChain.GetNextChain(NtProcess process)
+            {
+                if (pNext == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<SHashChain>(pNext.ToInt64());
+            }
+
+            IIDObject ISHashChain.GetNextIDObject(NtProcess process)
+            {
+                if (pNext == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<CIDObject>(pNext.ToInt64() - 24);
+            }
+
+            IntPtr ISHashChain.GetPrev()
+            {
+                return pPrev;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CIDObject : IIDObject
+        {
+            public IntPtr VTablePtr;
+            public SHashChain _pidChain;
+            public SHashChain _oidChain;
+            public int _dwState;
+            public int _cRefs;
+            public IntPtr _pServer;
+            public IntPtr _pServerCtx; // CObjectContext* 
+            public Guid _oid;
+            public int _aptID;
+            public IntPtr _pStdWrapper; // CStdWrapper* 
+            public IntPtr _pStdID; // CStdIdentity* 
+            public int _cCalls;
+            public int _cLocks;
+            public SHashChain _oidUnpinReqChain;
+            public int _dwOidUnpinReqState;
+            public IntPtr _pvObjectTrackCookie; // void* 
+
+            IIDObject IIDObject.GetNextOid(NtProcess process, IntPtr head_ptr)
+            {
+                if (_oidChain.pNext == head_ptr)
+                    return null;
+                return process.ReadStruct<CIDObject>(_oidChain.pNext.ToInt64());
+            }
+
+            Guid IIDObject.GetOid()
+            {
+                return _oid;
+            }
+
+            IStdIdentity IIDObject.GetStdIdentity(NtProcess process)
+            {
+                if (_pStdID == IntPtr.Zero)
+                {
+                    return null;
+                }
+                return process.ReadStruct<CStdIdentity>(_pStdID.ToInt64());
+            }
+
+            IStdWrapper IIDObject.GetStdWrapper(NtProcess process)
+            {
+                if (_pStdWrapper == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<CStdWrapper>(_pStdWrapper.ToInt64());
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SHashChain32 : ISHashChain
+        {
+            public int pNext;
+            public int pPrev;
+
+            IntPtr ISHashChain.GetNext()
+            {
+                return new IntPtr(pNext);
+            }
+
+            IntPtr ISHashChain.GetPrev()
+            {
+                return new IntPtr(pPrev);
+            }
+
+            ISHashChain ISHashChain.GetNextChain(NtProcess process)
+            {
+                if (pNext == 0)
+                    return null;
+                return process.ReadStruct<SHashChain32>(pNext);
+            }
+
+            IIDObject ISHashChain.GetNextIDObject(NtProcess process)
+            {
+                if (pNext == 0)
+                    return null;
+                return process.ReadStruct<CIDObject32>(pNext - 12);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CIDObject32 : IIDObject
+        {
+            public int VTablePtr;
+            public SHashChain32 _pidChain;
+            public SHashChain32 _oidChain;
+            public int _dwState;
+            public int _cRefs;
+            public int _pServer;
+            public int _pServerCtx; // CObjectContext* 
+            public Guid _oid;
+            public int _aptID;
+            public int _pStdWrapper; // CStdWrapper* 
+            public int _pStdID; // CStdIdentity* 
+            public int _cCalls;
+            public int _cLocks;
+            public SHashChain32 _oidUnpinReqChain;
+            public int _dwOidUnpinReqState;
+            public int _pvObjectTrackCookie; // void* 
+
+            IIDObject IIDObject.GetNextOid(NtProcess process, IntPtr head_ptr)
+            {
+                if (_oidChain.pNext == head_ptr.ToInt32())
+                    return null;
+                return process.ReadStruct<CIDObject>(_oidChain.pNext);
+            }
+
+            Guid IIDObject.GetOid()
+            {
+                return _oid;
+            }
+
+            IStdWrapper IIDObject.GetStdWrapper(NtProcess process)
+            {
+                if (_pStdWrapper == 0)
+                    return null;
+                return process.ReadStruct<CStdWrapper32>(_pStdWrapper);
+            }
+
+            IStdIdentity IIDObject.GetStdIdentity(NtProcess process)
+            {
+                if (_pStdID == 0)
+                {
+                    return null;
+                }
+                return process.ReadStruct<CStdIdentity32>(_pStdID);
             }
         }
 
@@ -875,8 +1365,8 @@ namespace OleViewDotNet
             }
         }
 
-        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver, 
-            COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set) 
+        static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver,
+            COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set)
             where T : struct, IPIDEntryNativeInterface
         {
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
@@ -910,7 +1400,7 @@ namespace OleViewDotNet
                     }
                 }
             }
-            
+
             return entries;
         }
 
@@ -926,7 +1416,7 @@ namespace OleViewDotNet
             return String.Format("0x{0:X}", address.ToInt64());
         }
 
-        private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, 
+        private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config,
             COMRegistry registry, IEnumerable<Guid> ipids)
         {
             HashSet<Guid> ipid_set = new HashSet<Guid>(ipids);
@@ -1003,14 +1493,76 @@ namespace OleViewDotNet
             return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
         }
 
+        private static SHashChainEntry[] GetBuckets(NtProcess process, ISymbolResolver resolver, string name, int count)
+        {
+            IntPtr buckets = resolver.GetAddressOfSymbol(GetSymbolName(name));
+            if (buckets == IntPtr.Zero)
+                return new SHashChainEntry[0];
+            int size = 0;
+            IEnumerable<ISHashChain> chain = null;
+
+            if (process.Is64Bit)
+            {
+                size = Marshal.SizeOf<SHashChain>();
+                chain = process.ReadMemoryArray<SHashChain>(buckets.ToInt64(), count).Cast<ISHashChain>();
+            }
+            else
+            {
+                size = Marshal.SizeOf<SHashChain32>();
+                chain = process.ReadMemoryArray<SHashChain32>(buckets.ToInt64(), count).Cast<ISHashChain>();
+            }
+
+            return chain.Select((s, i) => new SHashChainEntry(buckets + (i * size), s)).ToArray();
+        }
+
+        private static List<COMIPIDClientEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            int pid = process.ProcessId;
+            List<COMIPIDClientEntry> entries = new List<COMIPIDClientEntry>();
+            var buckets = GetBuckets(process, resolver, "COIDTable::s_OIDBuckets", 23);
+            foreach (var bucket in buckets)
+            {
+                // Nothing in this bucket.
+                if (bucket.StartEntry.GetNext() == bucket.BaseAddress)
+                {
+                    continue;
+                }
+
+                var start_address = bucket.StartEntry.GetNext();
+                var next_bucket = bucket.StartEntry.GetNextChain(process);
+                var next_obj = bucket.StartEntry.GetNextIDObject(process);
+                do
+                {
+                    var stdid = next_obj.GetStdIdentity(process);
+                    if (stdid != null && (stdid.GetFlags() & SMFLAGS.SMFLAGS_CLIENT_SIDE) != 0)
+                    {
+                        var ipid = stdid.GetFirstIpid(process);
+                        while (ipid != null)
+                        {
+                            if (pid != COMUtilities.GetProcessIdFromIPid(ipid.Ipid))
+                            {
+                                entries.Add(new COMIPIDClientEntry(ipid, process, resolver, config, registry, next_obj.GetOid()));
+                            }
+                            ipid = ipid.GetNext(process);
+                        }
+                    }
+
+                    next_obj = next_bucket.GetNextIDObject(process);
+                    next_bucket = next_bucket.GetNextChain(process);
+                }
+                while (next_bucket.GetNext() != start_address);
+            }
+            return entries;
+        }
+
         private static ICLSvrClassEntry ReadCLSvrClassEntry(NtProcess process, IntPtr address)
         {
             return process.Is64Bit ? (ICLSvrClassEntry)process.ReadStruct<CLSvrClassEntry>(address.ToInt64())
                 : process.ReadStruct<CLSvrClassEntry32>(address.ToInt64());
         }
 
-        private static void ReadRegisteredClasses(NtProcess process, ISymbolResolver resolver, 
-            IntPtr base_address, COMProcessClassApartment apartment, 
+        private static void ReadRegisteredClasses(NtProcess process, ISymbolResolver resolver,
+            IntPtr base_address, COMProcessClassApartment apartment,
             int thread_id, List<COMProcessClassRegistration> classes, COMRegistry registry)
         {
             if (base_address == IntPtr.Zero)
@@ -1029,9 +1581,9 @@ namespace OleViewDotNet
                     IntPtr vtable_ptr = ReadPointer(process, entry.GetIUnknown());
                     string vtable = resolver.GetModuleRelativeAddress(vtable_ptr);
 
-                    classes.Add(new COMProcessClassRegistration(class_entry.GetGuids()[0], 
+                    classes.Add(new COMProcessClassRegistration(class_entry.GetGuids()[0],
                         entry.GetIUnknown(), vtable,
-                        entry.GetRegFlags(), entry.GetCookie(), thread_id, 
+                        entry.GetRegFlags(), entry.GetCookie(), thread_id,
                         entry.GetContext(), apartment, registry));
                 }
 
@@ -1216,6 +1768,7 @@ namespace OleViewDotNet
                     SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
                 {
                     Sid user = process.User;
+
                     return new COMProcessEntry(
                         pid,
                         GetProcessFileName(process),
@@ -1234,7 +1787,8 @@ namespace OleViewDotNet
                         ReadPointer(process, resolver, "gAccessControl"),
                         ReadPointer(process, resolver, "ghwndOleMainThread"),
                         GetRegisteredClasses(process, resolver, config, registry),
-                        ReadActivationFilterVTable(process, resolver));
+                        ReadActivationFilterVTable(process, resolver),
+                        ReadClients(process, resolver, config, registry));
                 }
             }
         }
@@ -1244,22 +1798,22 @@ namespace OleViewDotNet
             return ParseProcess(pid, config, registry, new Guid[0]);
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<COMObjRef> objrefs, COMProcessParserConfig config, 
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<COMObjRef> objrefs, COMProcessParserConfig config,
             IProgress<Tuple<string, int>> progress, COMRegistry registry)
         {
             var stdobjrefs = objrefs.OfType<COMObjRefStandard>();
-            return GetProcesses(stdobjrefs.Select(o => o.ProcessId).Distinct().Select(pid => Process.GetProcessById(pid)), 
+            return GetProcesses(stdobjrefs.Select(o => o.ProcessId).Distinct().Select(pid => Process.GetProcessById(pid)),
                 config, progress, registry, stdobjrefs.Select(i => i.Ipid));
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config, 
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, COMProcessParserConfig config,
             IProgress<Tuple<string, int>> progress, COMRegistry registry)
         {
             return GetProcesses(procs, config, progress, registry, new Guid[0]);
         }
 
-        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs, 
-            COMProcessParserConfig config, IProgress<Tuple<string, int>> progress, 
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs,
+            COMProcessParserConfig config, IProgress<Tuple<string, int>> progress,
             COMRegistry registry, IEnumerable<Guid> ipids)
         {
             List<COMProcessEntry> ret = new List<COMProcessEntry>();
@@ -1322,7 +1876,7 @@ namespace OleViewDotNet
 
         internal COMProcessClassRegistration(
             Guid clsid, IntPtr class_factory, string vtable,
-            REGCLS regflags, uint cookie, int thread_id, 
+            REGCLS regflags, uint cookie, int thread_id,
             CLSCTX context, COMProcessClassApartment apartment,
             COMRegistry registry)
         {
@@ -1370,6 +1924,7 @@ namespace OleViewDotNet
         public IntPtr STAMainHWnd { get; private set; }
         public IEnumerable<COMProcessClassRegistration> Classes { get; private set; }
         public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
+        public IEnumerable<COMIPIDClientEntry> Clients { get; private set; }
 
         private bool CustomMarshalAllowedInternal(bool ac)
         {
@@ -1416,12 +1971,12 @@ namespace OleViewDotNet
 
         string ICOMAccessSecurity.DefaultLaunchPermission => string.Empty;
 
-        internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids, 
+        internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids,
             bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
-            string activation_filter_vtable)
+            string activation_filter_vtable, List<COMIPIDClientEntry> clients)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -1456,6 +2011,11 @@ namespace OleViewDotNet
                 c.Process = this;
             }
             ActivationFilterVTable = activation_filter_vtable;
+            foreach (var client in clients)
+            {
+                client.Process = this;
+            }
+            Clients = clients.AsReadOnly();
         }
 
         public override string ToString()
@@ -1525,7 +2085,7 @@ namespace OleViewDotNet
                 return COMUtilities.GetApartmentIdFromIPid(Ipid);
             }
         }
-        
+
         public bool IsRunning
         {
             get
@@ -1585,7 +2145,7 @@ namespace OleViewDotNet
             return symbol;
         }
 
-        private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver, 
+        private COMMethodEntry ResolveMethod(int index, IntPtr method_ptr, ISymbolResolver resolver,
             COMProcessParserConfig config)
         {
             if (!_method_cache.ContainsKey(method_ptr))
@@ -1616,8 +2176,8 @@ namespace OleViewDotNet
             return _method_cache[method_ptr];
         }
 
-        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process, 
-            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) 
+        internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process,
+            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             Ipid = ipid.Ipid;
             Iid = ipid.Iid;
@@ -1716,6 +2276,26 @@ namespace OleViewDotNet
         public string FormatText()
         {
             return FormatText(ProxyFormatterFlags.None);
+        }
+    }
+
+    public class COMIPIDClientEntry : COMIPIDEntry
+    {
+        private COMDualStringArray _stringarray;
+
+        public Guid Oid { get; }
+        public IEnumerable<COMStringBinding> StringBindings => _stringarray.StringBindings.AsReadOnly();
+        public IEnumerable<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings.AsReadOnly();
+        public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
+        public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
+
+        internal COMIPIDClientEntry(COMProcessParser.IPIDEntryNativeInterface ipid, NtProcess process,
+            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry, Guid oid) 
+            : base(ipid, process, resolver, config, registry)
+        {
+            Oid = oid;
+            var oxid = ipid.GetOxidEntry(process);
+            _stringarray = oxid.GetBinding(process);
         }
     }
 }
