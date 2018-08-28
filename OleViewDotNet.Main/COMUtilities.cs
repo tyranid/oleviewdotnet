@@ -2765,5 +2765,17 @@ namespace OleViewDotNet
         {
             return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
         }
+
+        public static string GetProcessNameById(int pid)
+        {
+            try
+            {
+                return Process.GetProcessById(pid).ProcessName;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
     }
 }
