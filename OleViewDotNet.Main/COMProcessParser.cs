@@ -31,19 +31,23 @@ namespace OleViewDotNet
 {
     public class COMProcessParserConfig
     {
-        public string DbgHelpPath { get; private set; }
-        public string SymbolPath { get; private set; }
-        public bool ParseStubMethods { get; private set; }
-        public bool ResolveMethodNames { get; private set; }
-        public bool ParseRegisteredClasses { get; private set; }
+        public string DbgHelpPath { get; }
+        public string SymbolPath { get; }
+        public bool ParseStubMethods { get; }
+        public bool ResolveMethodNames { get; }
+        public bool ParseRegisteredClasses { get; }
+        public bool ParseClients { get; }
 
-        public COMProcessParserConfig(string dbghelp_path, string symbol_path, bool parse_stubs_methods, bool resolve_method_names, bool parse_registered_classes)
+        public COMProcessParserConfig(string dbghelp_path, string symbol_path, 
+            bool parse_stubs_methods, bool resolve_method_names, 
+            bool parse_registered_classes, bool parse_clients)
         {
             DbgHelpPath = dbghelp_path;
             SymbolPath = symbol_path;
             ParseStubMethods = parse_stubs_methods;
             ResolveMethodNames = resolve_method_names;
             ParseRegisteredClasses = parse_registered_classes;
+            ParseClients = parse_clients;
         }
     }
 
@@ -803,7 +807,7 @@ namespace OleViewDotNet
         struct CStdIdentity32 : IStdIdentity
         {
             public int VTablePtr;
-            public int DummyValue; // Not quite sure this seems to be here.
+            public int DummyValue; // This seems to be here to ensure the rest of the struct is 8 byte aligned.
             public int VTablePtr2;
             public SMFLAGS _dwFlags;
             public int _cIPIDs;
@@ -1535,6 +1539,10 @@ namespace OleViewDotNet
         {
             int pid = process.ProcessId;
             List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
+            if (!config.ParseClients)
+            {
+                return entries;
+            }
             var buckets = GetBuckets(process, resolver, "COIDTable::s_OIDBuckets", 23);
             foreach (var bucket in buckets)
             {
