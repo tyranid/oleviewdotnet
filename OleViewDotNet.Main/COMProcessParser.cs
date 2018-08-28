@@ -1781,46 +1781,53 @@ namespace OleViewDotNet
 
         public static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, COMRegistry registry, IEnumerable<Guid> ipids)
         {
-            using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
+            try
             {
-                if (!result.IsSuccess)
+                using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
                 {
-                    return null;
+                    if (!result.IsSuccess)
+                    {
+                        return null;
+                    }
+
+                    NtProcess process = result.Result;
+
+                    if (process.Is64Bit && !Environment.Is64BitProcess)
+                    {
+                        return null;
+                    }
+
+                    using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
+                        SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
+                    {
+                        Sid user = process.User;
+
+                        return new COMProcessEntry(
+                            pid,
+                            GetProcessFileName(process),
+                            ParseIPIDEntries(process, resolver, config, registry, ipids),
+                            process.Is64Bit,
+                            GetProcessAppId(process, resolver),
+                            GetProcessAccessSecurityDescriptor(process, resolver),
+                            GetLrpcSecurityDescriptor(process, resolver),
+                            user.Name,
+                            user.ToString(),
+                            ReadString(process, resolver, "gwszLRPCEndPoint"),
+                            ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
+                            ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
+                            ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
+                            ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
+                            ReadPointer(process, resolver, "gAccessControl"),
+                            ReadPointer(process, resolver, "ghwndOleMainThread"),
+                            GetRegisteredClasses(process, resolver, config, registry),
+                            ReadActivationFilterVTable(process, resolver),
+                            ReadClients(process, resolver, config, registry));
+                    }
                 }
-
-                NtProcess process = result.Result;
-
-                if (process.Is64Bit && !Environment.Is64BitProcess)
-                {
-                    return null;
-                }
-
-                using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
-                    SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
-                {
-                    Sid user = process.User;
-
-                    return new COMProcessEntry(
-                        pid,
-                        GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver, config, registry, ipids),
-                        process.Is64Bit,
-                        GetProcessAppId(process, resolver),
-                        GetProcessAccessSecurityDescriptor(process, resolver),
-                        GetLrpcSecurityDescriptor(process, resolver),
-                        user.Name,
-                        user.ToString(),
-                        ReadString(process, resolver, "gwszLRPCEndPoint"),
-                        ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
-                        ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
-                        ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
-                        ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
-                        ReadPointer(process, resolver, "gAccessControl"),
-                        ReadPointer(process, resolver, "ghwndOleMainThread"),
-                        GetRegisteredClasses(process, resolver, config, registry),
-                        ReadActivationFilterVTable(process, resolver),
-                        ReadClients(process, resolver, config, registry));
-                }
+            }
+            catch (NtException)
+            {
+                return null;
             }
         }
 
