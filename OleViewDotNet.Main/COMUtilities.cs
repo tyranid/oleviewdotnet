@@ -209,6 +209,9 @@ namespace OleViewDotNet
         Structure,
         Object,
         HexString,
+        CSGuid,
+        CSGuidAttribute,
+        RpcUuid
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -2710,17 +2713,22 @@ namespace OleViewDotNet
             switch (format_type)
             {
                 case GuidFormat.Object:
-                    return String.Format("<object id=\"obj\" classid=\"clsid:{0}\">NO OBJECT</object>",
-                        guid);
+                    return $"<object id=\"obj\" classid=\"clsid:{guid}\">NO OBJECT</object>";
                 case GuidFormat.String:
                     return guid.FormatGuid();
                 case GuidFormat.Structure:
-                    return String.Format("GUID guidObject = {0:X};", guid);
+                    return $"GUID guidObject = {guid:X};";
                 case GuidFormat.HexString:
                     {
                         byte[] data = guid.ToByteArray();
-                        return String.Join(" ", data.Select(b => String.Format("{0:X02}", b)));
+                        return string.Join(" ", data.Select(b => $"{b:X02}"));
                     }
+                case GuidFormat.CSGuid:
+                    return $"Guid guidObject = new Guid(\"{guid}\");";
+                case GuidFormat.CSGuidAttribute:
+                    return $"[Guid(\"{guid}\")]";
+                case GuidFormat.RpcUuid:
+                    return $"[uuid(\"{guid}\")]";
                 default:
                     throw new ArgumentException("Invalid guid string type", nameof(format_type));
             }
