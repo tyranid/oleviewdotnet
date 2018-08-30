@@ -37,9 +37,10 @@ namespace OleViewDotNet
         public bool ResolveMethodNames { get; }
         public bool ParseRegisteredClasses { get; }
         public bool ParseClients { get; }
+        public bool ParseActivatableClasses { get; }
 
-        public COMProcessParserConfig(string dbghelp_path, string symbol_path, 
-            bool parse_stubs_methods, bool resolve_method_names, 
+        public COMProcessParserConfig(string dbghelp_path, string symbol_path,
+            bool parse_stubs_methods, bool resolve_method_names,
             bool parse_registered_classes, bool parse_clients)
         {
             DbgHelpPath = dbghelp_path;
@@ -990,7 +991,6 @@ namespace OleViewDotNet
             IntPtr GetNext();
             IntPtr GetPrev();
             ISHashChain GetNextChain(NtProcess process);
-            IIDObject GetNextIDObject(NtProcess process);
             I GetNextObject<T, I>(NtProcess process, int offset) where I : class where T : I, new();
         }
 
@@ -1021,13 +1021,6 @@ namespace OleViewDotNet
                 if (pNext == IntPtr.Zero)
                     return null;
                 return process.ReadStruct<SHashChain>(pNext.ToInt64());
-            }
-
-            IIDObject ISHashChain.GetNextIDObject(NtProcess process)
-            {
-                if (pNext == IntPtr.Zero)
-                    return null;
-                return process.ReadStruct<CIDObject>(pNext.ToInt64() - 24);
             }
 
             I ISHashChain.GetNextObject<T, I>(NtProcess process, int offset)
@@ -1130,13 +1123,6 @@ namespace OleViewDotNet
                 if (pNext == 0)
                     return null;
                 return process.ReadStruct<SHashChain32>(pNext);
-            }
-
-            IIDObject ISHashChain.GetNextIDObject(NtProcess process)
-            {
-                if (pNext == 0)
-                    return null;
-                return process.ReadStruct<CIDObject32>(pNext - 12);
             }
 
             I ISHashChain.GetNextObject<T, I>(NtProcess process, int offset)
@@ -1418,6 +1404,118 @@ namespace OleViewDotNet
             }
         }
 
+        internal interface IWinRTLocalSvrClassEntry
+        {
+            Guid GetClsid();
+            string GetActivatableClassId(NtProcess process);
+            string GetPackageFullName(NtProcess process);
+            IntPtr GetActivationFactoryCallback();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SActivatableClassIdHashNode
+        {
+            public SHashChain chain;
+            public IntPtr activatableClassId;
+        };
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntry : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode _hashNode;
+            public IntPtr _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public IntPtr _pActivationFactoryCallback;
+            public int _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public Guid _clsid;
+            public int _dwSig;
+            public int _cLocks;
+            public IntPtr _pObjServer; // CObjServer* 
+            public IntPtr _cookie;
+            public bool _suspended;
+            public int _ulServiceId;
+            public IntPtr _activatableClassId;
+            public IntPtr _packageFullName; // Microsoft::WRL::Wrappers::HString 
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == IntPtr.Zero)
+                    return string.Empty;
+                return process.ReadHString(_activatableClassId.ToInt64());
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return _pActivationFactoryCallback;
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return _clsid;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                if (_packageFullName == IntPtr.Zero)
+                    return string.Empty;
+                return process.ReadHString(_packageFullName.ToInt64());
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SActivatableClassIdHashNode32
+        {
+            public SHashChain32 chain;
+            public int activatableClassId;
+        };
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntry32 : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode32 _hashNode;
+            public int _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public int _pActivationFactoryCallback;
+            public int _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public Guid _clsid;
+            public int _dwSig;
+            public int _cLocks;
+            public int _pObjServer; // CObjServer* 
+            public int _cookie;
+            public bool _suspended;
+            public int _ulServiceId;
+            public int _activatableClassId;
+            public int _packageFullName; // Microsoft::WRL::Wrappers::HString 
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == 0)
+                    return string.Empty;
+                return process.ReadHString(_activatableClassId);
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return new IntPtr(_pActivationFactoryCallback);
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return _clsid;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                if (_packageFullName == 0)
+                    return string.Empty;
+                return process.ReadHString(_packageFullName);
+            }
+        }
+
         static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver,
             COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set)
             where T : struct, IPIDEntryNativeInterface
@@ -1568,16 +1666,12 @@ namespace OleViewDotNet
             return chain.Select((s, i) => new SHashChainEntry(buckets + (i * size), s)).ToArray();
         }
 
-        private static List<U> ReadHashTable<T, U, I>(NtProcess process, string bucket_symbol, 
-            Func<I, NtProcess, ISymbolResolver, COMProcessParserConfig, COMRegistry, IEnumerable<U>> map, 
+        private static List<U> ReadHashTable<T, U, I>(NtProcess process, string bucket_symbol,
+            Func<I, NtProcess, ISymbolResolver, COMProcessParserConfig, COMRegistry, IEnumerable<U>> map,
             ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) where T : I, new() where I : class
         {
             int chain_offset = ChainOffsetAttribute.GetOffset(typeof(T));
             List<U> entries = new List<U>();
-            if (!config.ParseClients)
-            {
-                return entries;
-            }
             var buckets = GetBuckets(process, resolver, bucket_symbol, 23);
             foreach (var bucket in buckets)
             {
@@ -1626,13 +1720,42 @@ namespace OleViewDotNet
 
         private static List<COMIPIDEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
+            const string bucket_symbol = "COIDTable::s_OIDBuckets";
+            if (!config.ParseClients)
+            {
+                return new List<COMIPIDEntry>();
+            }
+
             if (process.Is64Bit)
             {
-                return ReadHashTable<CIDObject, COMIPIDEntry, IIDObject>(process, "COIDTable::s_OIDBuckets", GetClientIpids, resolver, config, registry);
+                return ReadHashTable<CIDObject, COMIPIDEntry, IIDObject>(process, bucket_symbol, GetClientIpids, resolver, config, registry);
             }
             else
             {
-                return ReadHashTable<CIDObject32, COMIPIDEntry, IIDObject>(process, "COIDTable::s_OIDBuckets", GetClientIpids, resolver, config, registry);
+                return ReadHashTable<CIDObject32, COMIPIDEntry, IIDObject>(process, bucket_symbol, GetClientIpids, resolver, config, registry);
+            }
+        }
+
+        private static IEnumerable<COMRuntimeActivableClassEntry> GetRuntimeServer(IWinRTLocalSvrClassEntry obj, NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            return new COMRuntimeActivableClassEntry[] { new COMRuntimeActivableClassEntry(obj, process, resolver, registry) };
+        }
+
+        private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            const string bucket_symbol = "CClassCache::_LSvrActivatableClassEBuckets";
+            if (!config.ParseRegisteredClasses)
+            {
+                return new List<COMRuntimeActivableClassEntry>();
+            }
+
+            if (process.Is64Bit)
+            {
+                return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+            }
+            else
+            {
+                return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
         }
 
@@ -1878,7 +2001,8 @@ namespace OleViewDotNet
                             ReadPointer(process, resolver, "ghwndOleMainThread"),
                             GetRegisteredClasses(process, resolver, config, registry),
                             ReadActivationFilterVTable(process, resolver),
-                            ReadClients(process, resolver, config, registry));
+                            ReadClients(process, resolver, config, registry),
+                            ReadRuntimeActivatableClasses(process, resolver, config, registry));
                     }
                 }
             }
@@ -2020,6 +2144,7 @@ namespace OleViewDotNet
         public IEnumerable<COMProcessClassRegistration> Classes { get; private set; }
         public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
         public IEnumerable<COMIPIDEntry> Clients { get; private set; }
+        public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
 
         private bool CustomMarshalAllowedInternal(bool ac)
         {
@@ -2071,7 +2196,7 @@ namespace OleViewDotNet
             string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
-            string activation_filter_vtable, List<COMIPIDEntry> clients)
+            string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -2111,6 +2236,7 @@ namespace OleViewDotNet
                 client.Process = this;
             }
             Clients = clients.AsReadOnly();
+            ActivatableClasses = activatable_classes.AsReadOnly();
         }
 
         public override string ToString()
@@ -2388,6 +2514,44 @@ namespace OleViewDotNet
         public string FormatText()
         {
             return FormatText(ProxyFormatterFlags.None);
+        }
+    }
+
+    public class COMRuntimeActivableClassEntry
+    {
+        private readonly COMRegistry m_registry;
+
+        public Guid Clsid { get; }
+        public string ActivatableClassId { get; }
+        public string FullPackageName { get; }
+        public string ActivationFactoryCallback { get; }
+        public string ActivationFactoryCallbackPointer { get; }
+        public COMRuntimeClassEntry ClassEntry
+        {
+            get
+            {
+                if (m_registry.RuntimeClasses.ContainsKey(ActivatableClassId))
+                {
+                    return m_registry.RuntimeClasses[ActivatableClassId];
+                }
+                return null;
+            }
+        }
+
+        internal COMRuntimeActivableClassEntry(COMProcessParser.IWinRTLocalSvrClassEntry entry, NtProcess process, ISymbolResolver resolver, COMRegistry registry)
+        {
+            Clsid = entry.GetClsid();
+            ActivatableClassId = entry.GetActivatableClassId(process);
+            FullPackageName = entry.GetPackageFullName(process);
+            IntPtr callback = entry.GetActivationFactoryCallback();
+            ActivationFactoryCallback = resolver.GetSymbolForAddress(callback, true);
+            ActivationFactoryCallbackPointer = resolver.GetModuleRelativeAddress(callback);
+            m_registry = registry;
+        }
+
+        public override string ToString()
+        {
+            return $"ActivatableClass: {ActivatableClassId}";
         }
     }
 }
