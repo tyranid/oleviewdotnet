@@ -1390,7 +1390,8 @@ function Get-ComProxy {
         [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [parameter(ParameterSetName = "FromIid")]
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.COMRegistry]$Database,
+        [switch]$AsText
     )
 
     PROCESS {
@@ -1417,7 +1418,11 @@ function Get-ComProxy {
             }
         }
         if ($null -ne $proxy) {
-            Write-Output $proxy
+            if ($AsText) {
+                Write-Output $proxy.FormatText()
+            } else {
+                Write-Output $proxy
+            }
         }
     }
 }
