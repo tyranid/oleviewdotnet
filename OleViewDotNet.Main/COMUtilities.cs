@@ -2779,5 +2779,39 @@ namespace OleViewDotNet
                 return string.Empty;
             }
         }
+
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
+
+        [DllImport("combase.dll")]
+        static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback, 
+            IntPtr context, out int length, out long targetStringAddress);
+
+        public static string ReadHString(this NtProcess process, long address)
+        {
+            InspectHStringCallback2 callback = (c, r, l, ba) =>
+            {
+                try
+                {
+                    byte[] data = process.ReadMemory(r, l, true);
+                    Marshal.Copy(data, 0, ba, l);
+                    return 0;
+                }
+                catch (NtException)
+                {
+                    return 0x8000FFFF;
+                }
+            };
+
+            int machine = process.Is64Bit ? 0x8664 : 0x14C;
+
+            if (WindowsInspectString2(address, machine, callback, IntPtr.Zero, out int length, out long target_addr) == 0)
+            {
+                return Encoding.Unicode.GetString(process.ReadMemory(target_addr, length * 2));
+            }
+
+            return string.Empty;
+        }
     }
 }
