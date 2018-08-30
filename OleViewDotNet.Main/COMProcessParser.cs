@@ -991,6 +991,7 @@ namespace OleViewDotNet
             IntPtr GetPrev();
             ISHashChain GetNextChain(NtProcess process);
             IIDObject GetNextIDObject(NtProcess process);
+            I GetNextObject<T, I>(NtProcess process, int offset) where I : class where T : I, new();
         }
 
         class SHashChainEntry
@@ -1029,9 +1030,32 @@ namespace OleViewDotNet
                 return process.ReadStruct<CIDObject>(pNext.ToInt64() - 24);
             }
 
+            I ISHashChain.GetNextObject<T, I>(NtProcess process, int offset)
+            {
+                if (pNext == IntPtr.Zero)
+                    return null;
+                return process.ReadStruct<T>(pNext.ToInt64() - offset);
+            }
+
             IntPtr ISHashChain.GetPrev()
             {
                 return pPrev;
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+        sealed class ChainOffsetAttribute : Attribute
+        {
+            public static int GetOffset(Type t)
+            {
+                foreach (var field in t.GetFields())
+                {
+                    if (field.GetCustomAttributes(typeof(ChainOffsetAttribute), false).Length > 0)
+                    {
+                        return Marshal.OffsetOf(t, field.Name).ToInt32();
+                    }
+                }
+                throw new ArgumentException("Invalid type, missing ChainOffset attribute");
             }
         }
 
@@ -1040,6 +1064,7 @@ namespace OleViewDotNet
         {
             public IntPtr VTablePtr;
             public SHashChain _pidChain;
+            [ChainOffset]
             public SHashChain _oidChain;
             public int _dwState;
             public int _cRefs;
@@ -1113,6 +1138,13 @@ namespace OleViewDotNet
                     return null;
                 return process.ReadStruct<CIDObject32>(pNext - 12);
             }
+
+            I ISHashChain.GetNextObject<T, I>(NtProcess process, int offset)
+            {
+                if (pNext == 0)
+                    return null;
+                return process.ReadStruct<T>(pNext - offset);
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1120,6 +1152,7 @@ namespace OleViewDotNet
         {
             public int VTablePtr;
             public SHashChain32 _pidChain;
+            [ChainOffset]
             public SHashChain32 _oidChain;
             public int _dwState;
             public int _cRefs;
@@ -1535,15 +1568,17 @@ namespace OleViewDotNet
             return chain.Select((s, i) => new SHashChainEntry(buckets + (i * size), s)).ToArray();
         }
 
-        private static List<COMIPIDEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        private static List<U> ReadHashTable<T, U, I>(NtProcess process, string bucket_symbol, 
+            Func<I, NtProcess, ISymbolResolver, COMProcessParserConfig, COMRegistry, IEnumerable<U>> map, 
+            ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) where T : I, new() where I : class
         {
-            int pid = process.ProcessId;
-            List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
+            int chain_offset = ChainOffsetAttribute.GetOffset(typeof(T));
+            List<U> entries = new List<U>();
             if (!config.ParseClients)
             {
                 return entries;
             }
-            var buckets = GetBuckets(process, resolver, "COIDTable::s_OIDBuckets", 23);
+            var buckets = GetBuckets(process, resolver, bucket_symbol, 23);
             foreach (var bucket in buckets)
             {
                 // Nothing in this bucket.
@@ -1554,29 +1589,51 @@ namespace OleViewDotNet
 
                 var start_address = bucket.StartEntry.GetNext();
                 var next_bucket = bucket.StartEntry.GetNextChain(process);
-                var next_obj = bucket.StartEntry.GetNextIDObject(process);
+                var next_obj = bucket.StartEntry.GetNextObject<T, I>(process, chain_offset);
                 do
                 {
-                    var stdid = next_obj.GetStdIdentity(process);
-                    if (stdid != null && (stdid.GetFlags() & SMFLAGS.SMFLAGS_CLIENT_SIDE) != 0)
+                    var objs = map(next_obj, process, resolver, config, registry);
+                    if (objs != null)
                     {
-                        var ipid = stdid.GetFirstIpid(process);
-                        while (ipid != null)
-                        {
-                            if (pid != COMUtilities.GetProcessIdFromIPid(ipid.Ipid))
-                            {
-                                entries.Add(new COMIPIDEntry(ipid, next_obj.GetOid(), process, resolver, config, registry));
-                            }
-                            ipid = ipid.GetNext(process);
-                        }
+                        entries.AddRange(objs);
                     }
 
-                    next_obj = next_bucket.GetNextIDObject(process);
+                    next_obj = next_bucket.GetNextObject<T, I>(process, chain_offset);
                     next_bucket = next_bucket.GetNextChain(process);
                 }
                 while (next_bucket.GetNext() != start_address);
             }
             return entries;
+        }
+
+        private static IEnumerable<COMIPIDEntry> GetClientIpids(IIDObject obj, NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            int pid = process.ProcessId;
+            var stdid = obj.GetStdIdentity(process);
+            if (stdid != null && (stdid.GetFlags() & SMFLAGS.SMFLAGS_CLIENT_SIDE) != 0)
+            {
+                var ipid = stdid.GetFirstIpid(process);
+                while (ipid != null)
+                {
+                    if (pid != COMUtilities.GetProcessIdFromIPid(ipid.Ipid))
+                    {
+                        yield return new COMIPIDEntry(ipid, obj.GetOid(), process, resolver, config, registry);
+                    }
+                    ipid = ipid.GetNext(process);
+                }
+            }
+        }
+
+        private static List<COMIPIDEntry> ReadClients(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            if (process.Is64Bit)
+            {
+                return ReadHashTable<CIDObject, COMIPIDEntry, IIDObject>(process, "COIDTable::s_OIDBuckets", GetClientIpids, resolver, config, registry);
+            }
+            else
+            {
+                return ReadHashTable<CIDObject32, COMIPIDEntry, IIDObject>(process, "COIDTable::s_OIDBuckets", GetClientIpids, resolver, config, registry);
+            }
         }
 
         private static ICLSvrClassEntry ReadCLSvrClassEntry(NtProcess process, IntPtr address)
