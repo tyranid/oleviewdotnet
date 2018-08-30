@@ -320,7 +320,7 @@ The database to use.
 .PARAMETER Clsid
 Specify a CLSID to lookup.
 .PARAMETER Name
-Specify a name to match against the class name.
+Specify a name which equals the class name.
 .PARAMETER ServerName
 Specify a server name to match against.
 .PARAMETER ServerType
@@ -348,7 +348,7 @@ Get-ComClass -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
 Get a COM class with a specified CLSID.
 .EXAMPLE
 Get-ComClass -Name "TestClass"
-Get COM classes which contain TestClass in their name.
+Get COM classes which where the name is TestClass.
 .EXAMPLE
 Get-ComClass -ServerName "obj.ocx"
 Get COM classes which are implemented in a server containing the string "obj.ocx"
@@ -414,7 +414,7 @@ function Get-ComClass {
             Write-Output $Database.Clsids[$Clsid]
         }
         "FromName" {
-            Get-ComClass -Database $Database | ? Name -Match $Name | Write-Output
+            Get-ComClass -Database $Database | ? Name -eq $Name | Write-Output
         }
         "FromServer" {
             Get-ComClass -Database $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
@@ -654,10 +654,10 @@ function Get-ComAppId {
             Write-Output $Database.AppIDs[$AppId]
         }
         "FromName" {
-            Get-ComAppId -Database $Database | ? Name -Match $Name | Write-Output
+            Get-ComAppId -Database $Database | ? Name -eq $Name | Write-Output
         }
         "FromServiceName" {
-            Get-ComAppId -Database $Database | ? ServiceName -Match $ServiceName | Write-Output
+            Get-ComAppId -Database $Database | ? ServiceName -eq $ServiceName | Write-Output
         }
         "FromIsService" {
             Get-ComAppId -Database $Database | ? IsService | Write-Output
@@ -773,7 +773,7 @@ This cmdlet gets COM Runtime classes from the database based on a set of criteri
 .PARAMETER Database
 The database to use.
 .PARAMETER Name
-Specify a name to match against the class name.
+Specify a name to equal the class name.
 .PARAMETER DllPath
 Specify the DLL path to match against.
 .PARAMETER ActivationType
@@ -786,8 +786,8 @@ OleViewDotNet.COMRuntimeClassEntry
 Get-ComRuntimeClass -Database $comdb
 Get all COM Runtime classes from a database.
 .EXAMPLE
-Get-ComRuntimeClass -Database $comdb -Name "TestClass"
-Get COM Runtime classes which contain TestClass in their name.
+Get-ComRuntimeClass -Database $comdb -Name "Windows.ABC.XYZ"
+Get COM Runtime classes with the name Windows.ABC.XYZ.
 .EXAMPLE
 Get-ComRuntimeClass -Database $comdb -DllPath "runtime.dll"
 Get COM Runtime classes which are implemented in a DLL containing the string "runtime.dll"
@@ -816,10 +816,10 @@ function Get-ComRuntimeClass {
             Write-Output $Database.RuntimeClasses.Values
         }
         "FromName" {
-            Get-ComRuntimeClass -Database $Database | ? Name -Match $Name | Write-Output
+            Get-ComRuntimeClass -Database $Database | ? Name -eq $Name | Write-Output
         }
         "FromDllPath" {
-            Get-ComRuntimeClass -Database $Database | ? DllPath -Match $DllPath | Write-Output
+            Get-ComRuntimeClass -Database $Database | ? DllPath -eq $DllPath | Write-Output
         }
         "FromActivationType" {
             Get-ComRuntimeClass -Database $Database | ? ActivationType -eq $ActivationType | Write-Output
@@ -886,7 +886,7 @@ function Get-ComInterface {
             Write-Output $Database.Interfaces.Values
         }
         "FromName" {
-            Get-ComInterface -Database $Database | ? Name -Match $Name | Write-Output
+            Get-ComInterface -Database $Database | ? Name -eq $Name | Write-Output
         }
         "FromIid" {
             $Database.Interfaces[$Iid] | Write-Output
