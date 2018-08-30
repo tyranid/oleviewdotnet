@@ -833,7 +833,7 @@ Get COM interfaces from a database.
 .DESCRIPTION
 This cmdlet gets COM interfaces from the database based on a set of criteria. The default is to return all registered interfaces.
 .PARAMETER Database
-The database to use.
+The database to use. If not specified then the current database is used.
 .PARAMETER Iid
 Specify a IID to lookup.
 .PARAMETER Name
@@ -849,16 +849,19 @@ None
 .OUTPUTS
 OleViewDotNet.COMInterfaceEntry
 .EXAMPLE
-Get-ComInterface -Database $comdb
-Get all COM interfaces from a database.
+Get-ComInterface
+Get all COM interfaces from the current database.
 .EXAMPLE
-Get-ComInterface -Database $comdb -Iid "00000001-0000-0000-C000-000000000046"
+Get-ComInterface -Database $comdb
+Get all COM interfaces from a specific database.
+.EXAMPLE
+Get-ComInterface -Iid "00000001-0000-0000-C000-000000000046"
 Get COM interface from an IID from a database.
 .EXAMPLE
-Get-ComInterface -Database $comdb -Name "IBlah"
-Get COM interfaces which contain IBlah in their name.
+Get-ComInterface -Name "IBlah"
+Get COM interface which is called IBlah.
 .EXAMPLE
-Get-ComInterface -Database $comdb -Object $obj
+Get-ComInterface -Object $obj
 Get COM interfaces supported by an object.
 #>
 function Get-ComInterface {
@@ -1891,4 +1894,58 @@ function Get-ComStorageObject {
     }
 
     [OleViewDotNet.COMUtilities]::OpenStorage($Path, $Mode, $Format)
+}
+
+<#
+.SYNOPSIS
+Get COM runtime interfaces from local metadata.
+.DESCRIPTION
+This cmdlet gets types representing COM runtime interfaces based on a set of criteria. The default is to return all interfaces.
+.PARAMETER Iid
+Specify a IID to lookup.
+.PARAMETER Name
+Specify a name to match against the interface name.
+.PARAMETER FullName
+Specify a full name to match against the interface name.
+.INPUTS
+None
+.OUTPUTS
+System.Type
+.EXAMPLE
+Get-ComRuntimeInterface
+Get all COM runtime interfaces.
+.EXAMPLE
+Get-ComRuntimeInterface -Iid "00000001-0000-0000-C000-000000000046"
+Get COM runtime interface from an IID.
+.EXAMPLE
+Get-ComRuntimeInterface -Name "IBlah"
+Get COM runtime interface called IBlah.
+.EXAMPLE
+Get-ComRuntimeInterface -FullName "App.ABC.IBlah"
+Get COM runtime interface whose full name is App.ABC.IBlah.
+#>
+function Get-ComRuntimeInterface {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromIid", ValueFromPipelineByPropertyName)]
+        [Guid]$Iid,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromFullName")]
+        [string]$FullName
+    )
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
+        }
+        "FromName" {
+            Get-ComRuntimeInterface | ? Name -eq $Name | Write-Output
+        }
+        "FromFullName" {
+            Get-ComRuntimeInterface | ? FullName -eq $FullName | Write-Output
+        }
+        "FromIid" {
+            [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
+        }
+    }
 }

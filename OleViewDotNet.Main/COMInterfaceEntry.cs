@@ -97,6 +97,7 @@ namespace OleViewDotNet
         internal COMInterfaceEntry(COMRegistry registry, Type type) : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
         {
             CacheIidToName(Iid, Name);
+            RuntimeInterface = true;
         }
 
         public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
@@ -296,6 +297,11 @@ namespace OleViewDotNet
             get { return ProxyClsid != Guid.Empty; }
         }
 
+        public bool RuntimeInterface
+        {
+            get; internal set;
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))
@@ -309,14 +315,15 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Name == right.Name && Iid == right.Iid && ProxyClsid == right.ProxyClsid 
-                && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib && TypeLibVersion == right.TypeLibVersion;
+            return Name == right.Name && Iid == right.Iid && ProxyClsid == right.ProxyClsid
+                && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
+                && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface;
         }
 
         public override int GetHashCode()
         {
             return Name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
-                ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode();
+                ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode();
         }
 
         public override string ToString()
@@ -338,6 +345,7 @@ namespace OleViewDotNet
             Base = reader.ReadString("base");
             TypeLibVersion = reader.ReadString("ver");
             TypeLib = reader.ReadGuid("tlib");
+            RuntimeInterface = reader.ReadBool("rt");
 
             m_iidtoname.TryAdd(Iid, Name);
         }
@@ -351,6 +359,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("base", Base);
             writer.WriteOptionalAttributeString("ver", TypeLibVersion);
             writer.WriteGuid("tlib", TypeLib);
+            writer.WriteBool("rt", RuntimeInterface);
         }
     }
 }

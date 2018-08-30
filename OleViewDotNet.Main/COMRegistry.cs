@@ -926,6 +926,10 @@ namespace OleViewDotNet
                 {
                     interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value));
                 }
+                else
+                {
+                    interfaces[pair.Key].RuntimeInterface = true;
+                }
             }
 
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
