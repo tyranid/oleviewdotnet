@@ -62,7 +62,14 @@ namespace OleViewDotNet
         public bool Restricted { get; }
         public bool Elevated { get; }
 
-        internal COMProcessToken(NtProcess process)
+        public COMProcessToken()
+        {
+            User = "UNKNOWN";
+            UserSid = string.Empty;
+            IntegrityLevel = TokenIntegrityLevel.Medium;
+        }
+
+        public COMProcessToken(NtProcess process) : this()
         {
             using (var result = NtToken.OpenProcessToken(process, TokenAccessRights.Query, false))
             {
@@ -70,16 +77,12 @@ namespace OleViewDotNet
                 {
                     NtToken token = result.Result;
                     User = token.User.Sid.Name;
+                    UserSid = token.User.Sid.ToString();
                     IntegrityLevel = token.IntegrityLevel;
                     Sandboxed = token.IsSandbox;
                     AppContainer = token.AppContainer;
                     Restricted = token.Restricted;
                     Elevated = token.Elevated;
-                }
-                else
-                {
-                    User = "UNKNOWN";
-                    IntegrityLevel = TokenIntegrityLevel.Medium;
                 }
             }
         }
