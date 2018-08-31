@@ -52,6 +52,44 @@ namespace OleViewDotNet
         }
     }
 
+    public class COMProcessToken
+    {
+        public string User { get; }
+        public string UserSid { get; }
+        public TokenIntegrityLevel IntegrityLevel { get; }
+        public bool Sandboxed { get; }
+        public bool AppContainer { get; }
+        public bool Restricted { get; }
+        public bool Elevated { get; }
+
+        internal COMProcessToken(NtProcess process)
+        {
+            using (var result = NtToken.OpenProcessToken(process, TokenAccessRights.Query, false))
+            {
+                if (result.IsSuccess)
+                {
+                    NtToken token = result.Result;
+                    User = token.User.Sid.Name;
+                    IntegrityLevel = token.IntegrityLevel;
+                    Sandboxed = token.IsSandbox;
+                    AppContainer = token.AppContainer;
+                    Restricted = token.Restricted;
+                    Elevated = token.Elevated;
+                }
+                else
+                {
+                    User = "UNKNOWN";
+                    IntegrityLevel = TokenIntegrityLevel.Medium;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{User}";
+        }
+    }
+
     internal class SymbolResolverWrapper : ISymbolResolver
     {
         private readonly ISymbolResolver _resolver;
@@ -1990,8 +2028,6 @@ namespace OleViewDotNet
                             GetProcessAppId(process, resolver),
                             GetProcessAccessSecurityDescriptor(process, resolver),
                             GetLrpcSecurityDescriptor(process, resolver),
-                            user.Name,
-                            user.ToString(),
                             ReadString(process, resolver, "gwszLRPCEndPoint"),
                             ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
                             ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
@@ -2002,7 +2038,8 @@ namespace OleViewDotNet
                             GetRegisteredClasses(process, resolver, config, registry),
                             ReadActivationFilterVTable(process, resolver),
                             ReadClients(process, resolver, config, registry),
-                            ReadRuntimeActivatableClasses(process, resolver, config, registry));
+                            ReadRuntimeActivatableClasses(process, resolver, config, registry),
+                            new COMProcessToken(process));
                     }
                 }
             }
@@ -2133,8 +2170,8 @@ namespace OleViewDotNet
         public Guid AppId { get; private set; }
         public string AccessPermissions { get; private set; }
         public string LRpcPermissions { get; private set; }
-        public string User { get; private set; }
-        public string UserSid { get; private set; }
+        public string User => Token.User;
+        public string UserSid => Token.UserSid;
         public string RpcEndpoint { get; private set; }
         public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; private set; }
         public RPC_AUTHN_LEVEL AuthnLevel { get; private set; }
@@ -2145,6 +2182,7 @@ namespace OleViewDotNet
         public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
         public IEnumerable<COMIPIDEntry> Clients { get; private set; }
         public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
+        public COMProcessToken Token { get; private set; }
 
         private bool CustomMarshalAllowedInternal(bool ac)
         {
@@ -2192,11 +2230,11 @@ namespace OleViewDotNet
         string ICOMAccessSecurity.DefaultLaunchPermission => string.Empty;
 
         internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids,
-            bool is64bit, Guid appid, string access_perm, string lrpc_perm, string user,
-            string user_sid, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
+            bool is64bit, Guid appid, string access_perm, string lrpc_perm, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
-            string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes)
+            string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes,
+            COMProcessToken token)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -2209,8 +2247,6 @@ namespace OleViewDotNet
             AppId = appid;
             AccessPermissions = access_perm;
             LRpcPermissions = lrpc_perm;
-            User = user;
-            UserSid = user_sid;
             if (!string.IsNullOrWhiteSpace(rpc_endpoint))
             {
                 RpcEndpoint = "OLE" + rpc_endpoint;
@@ -2237,6 +2273,7 @@ namespace OleViewDotNet
             }
             Clients = clients.AsReadOnly();
             ActivatableClasses = activatable_classes.AsReadOnly();
+            Token = token;
         }
 
         public override string ToString()
