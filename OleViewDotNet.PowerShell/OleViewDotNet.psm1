@@ -478,7 +478,7 @@ Get all COM processes using the current database.
 Get-ComProcess -Database $comdb
 Get all COM processes.
 .EXAMPLE
-Get-Process notepad | Get-ComProcess -Database $comdb
+Get-Process notepad | Get-ComProcess
 Get COM process from a list of processes.
 #>
 function Get-ComProcess {
@@ -783,16 +783,16 @@ None
 .OUTPUTS
 OleViewDotNet.COMRuntimeClassEntry
 .EXAMPLE
-Get-ComRuntimeClass -Database $comdb
-Get all COM Runtime classes from a database.
+Get-ComRuntimeClass $comdb
+Get all COM Runtime classes from the current database.
 .EXAMPLE
-Get-ComRuntimeClass -Database $comdb -Name "Windows.ABC.XYZ"
+Get-ComRuntimeClass -Name "Windows.ABC.XYZ"
 Get COM Runtime classes with the name Windows.ABC.XYZ.
 .EXAMPLE
-Get-ComRuntimeClass -Database $comdb -DllPath "runtime.dll"
-Get COM Runtime classes which are implemented in a DLL containing the string "runtime.dll"
+Get-ComRuntimeClass -DllPath "c:\path\to\runtime.dll"
+Get COM Runtime classes which are implemented in a DLL with the path "c:\path\to\runtime.dll"
 .EXAMPLE
-Get-ComRuntimeClass -Database $comdb -ActivationType OutOfProcess
+Get-ComRuntimeClass -ActivationType OutOfProcess
 Get COM Runtime classes which are implemented out-of-process.
 #>
 function Get-ComRuntimeClass {
@@ -816,13 +816,76 @@ function Get-ComRuntimeClass {
             Write-Output $Database.RuntimeClasses.Values
         }
         "FromName" {
-            Get-ComRuntimeClass -Database $Database | ? Name -eq $Name | Write-Output
+            $Database.RuntimeClasses[$Name] | Write-Output
         }
         "FromDllPath" {
             Get-ComRuntimeClass -Database $Database | ? DllPath -eq $DllPath | Write-Output
         }
         "FromActivationType" {
             Get-ComRuntimeClass -Database $Database | ? ActivationType -eq $ActivationType | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM Runtime servers from a database.
+.DESCRIPTION
+This cmdlet gets COM Runtime server from the database based on a set of criteria. The default is to return all registered runtime servers.
+.PARAMETER Database
+The database to use. Optional if the current database has been set.
+.PARAMETER Name
+Specify a name to equal the server name.
+.PARAMETER ExePath
+Specify the executable path to match against.
+.PARAMETER ServerType
+Specify a type of server to match against.
+.PARAMETER IdentityType
+Specify the identity type of the server to match against.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMRuntimeClassEntry
+.EXAMPLE
+Get-ComRuntimeServer
+Get all COM Runtime classes from the current data database.
+.EXAMPLE
+Get-ComRuntimeServer -Name "ABC"
+Get COM Runtime server with the name ABC.
+#>
+function Get-ComRuntimeServer {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromExePath")]
+        [string]$ExePath,
+        [Parameter(Mandatory, ParameterSetName = "FromServerType")]
+        [OleViewDotNet.ServerType]$ServerType,
+        [Parameter(Mandatory, ParameterSetName = "FromIdentityType")]
+        [OleViewDotNet.IdentityType]$IdentityType
+    )
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.RuntimeServers.Values
+        }
+        "FromName" {
+            $Database.RuntimeServers[$Name] | Write-Output
+        }
+        "FromExePath" {
+            Get-ComRuntimeServer -Database $Database | ? ExePath -eq $ExePath | Write-Output
+        }
+        "FromServerType" {
+            Get-ComRuntimeServer -Database $Database | ? ServerType -eq $ServerType | Write-Output
+        }
+        "FromIdentityType" {
+            Get-ComRuntimeServer -Database $Database | ? IdentityType -eq $IdentityType | Write-Output
         }
     }
 }
