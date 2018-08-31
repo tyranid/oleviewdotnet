@@ -2821,5 +2821,19 @@ namespace OleViewDotNet
 
             return string.Empty;
         }
+
+        public static string GetFileName(string path)
+        {
+            int index = path.LastIndexOf('\\');
+            if (index < 0)
+            {
+                index = path.LastIndexOf('/');
+            }
+            if (index < 0)
+            {
+                return path;
+            }
+            return path.Substring(index + 1);
+        }
     }
 }

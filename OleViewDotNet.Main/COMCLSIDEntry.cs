@@ -688,18 +688,7 @@ namespace OleViewDotNet
         {
             get
             {
-                string server = DefaultServer;
-                int index = server.LastIndexOf('\\');
-                if (index < 0)
-                {
-                    index = server.LastIndexOf('/');
-                }
-                if (index < 0)
-                {
-                    return server;
-                }
-
-                return server.Substring(index + 1);
+                return COMUtilities.GetFileName(DefaultServer);
             }
         }
 

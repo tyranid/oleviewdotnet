@@ -16,6 +16,8 @@
 
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -29,6 +31,7 @@ namespace OleViewDotNet
         ActivateAsPackage,
         SessionVirtual,
         SessionUser,
+        ActivateAsActivatingUser
     }
 
     public enum ServerType
@@ -52,6 +55,13 @@ namespace OleViewDotNet
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
         public string ExePath { get; private set; }
+        public string ExeName
+        {
+            get
+            {
+                return COMUtilities.GetFileName(ExePath);
+            }
+        }
         public string Permissions { get; private set; }
         public bool HasPermission
         {
@@ -60,6 +70,7 @@ namespace OleViewDotNet
         public IdentityType IdentityType { get; private set; }
         public ServerType ServerType { get; private set; }
         public InstancingType InstancingType { get; private set; }
+        public IEnumerable<COMRuntimeClassEntry> Classes => m_registry.RuntimeClasses.Values.Where(c => c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase));
 
         string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
 
