@@ -13,3 +13,5 @@
 2977496 combase!CClassCache::_MTALSvrsFront
 2977504 combase!CClassCache::_NTALSvrsFront
 2978640 combase!g_ActivationFilter
+2960928 combase!COIDTable::s_OIDBuckets
+2962784 combase!CClassCache::_LSvrActivatableClassEBuckets
