@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComClientGraphBuilder.cs" />
     <Compile Include="CallbackProgress.cs" />
     <Compile Include="ClassFactoryWrapper.cs" />
     <Compile Include="LoggingActivationFilter.cs" />

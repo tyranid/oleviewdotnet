@@ -2012,3 +2012,57 @@ function Get-ComRuntimeInterface {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Format COM clients as a DOT graph.
+.DESCRIPTION
+This cmdlet converts a set of processes with parsed clients into a DOT graph format.
+.PARAMETER Process
+One or more processes to format.
+.PARAMETER RemoveUnknownProcess
+Remove unknown processes from the graph.
+.PARAMETER IncludePid
+Include one or more PIDs as roots of the graph.
+.PARAMETER IncludeName
+Include one or more process names as roots of the graph.
+.PARAMETER Path
+Output the graph to a path.
+.INPUTS
+None
+.OUTPUTS
+string
+.EXAMPLE
+Format-ComProcessClient $ps
+Format a list of processes.
+.EXAMPLE
+Get-ComProcess -ParseClients | Format-ComProcessClient
+Format a list of processes.
+#>
+function Format-ComProcessClient {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [OleViewDotNet.COMProcessEntry[]]$Process,
+        [int[]]$IncludePid,
+        [string[]]$IncludeName,
+        [switch]$RemoveUnknownProcess,
+        [string]$Path
+    )
+
+    BEGIN {
+        $builder = [OleViewDotNet.PowerShell.ComClientGraphBuilder]::new($IncludePid, $IncludeName, $RemoveUnknownProcess)
+    }
+
+    PROCESS {
+        $builder.AddRange($Process)
+    }
+
+    END {
+        if ("" -ne $Path) {
+            $builder.ToString() | Set-Content -Path $Path
+        } else {
+            $builder.ToString() | Write-Output
+        }
+    }
+}
