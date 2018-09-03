@@ -2796,7 +2796,7 @@ namespace OleViewDotNet
         static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback, 
             IntPtr context, out int length, out long targetStringAddress);
 
-        public static string ReadHString(this NtProcess process, long address)
+        public static string ReadHStringFull(this NtProcess process, long address)
         {
             InspectHStringCallback2 callback = (c, r, l, ba) =>
             {
@@ -2820,6 +2820,55 @@ namespace OleViewDotNet
             }
 
             return string.Empty;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
+
+        [DllImport("combase.dll")]
+        static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
+            IntPtr context, out int length, out IntPtr targetStringAddress);
+
+        public static string ReadHString(this NtProcess process, IntPtr address)
+        {
+            InspectHStringCallback callback = (c, r, l, ba) =>
+            {
+                try
+                {
+                    byte[] data = process.ReadMemory(r.ToInt64(), l, true);
+                    Marshal.Copy(data, 0, ba, l);
+                    return 0;
+                }
+                catch (NtException)
+                {
+                    return 0x8000FFFF;
+                }
+            };
+
+            int machine = process.Is64Bit ? 0x8664 : 0x14C;
+
+            if (WindowsInspectString(address, machine, callback, IntPtr.Zero, out int length, out IntPtr target_addr) == 0)
+            {
+                return Encoding.Unicode.GetString(process.ReadMemory(target_addr.ToInt64(), length * 2));
+            }
+
+            return string.Empty;
+        }
+
+        public static string ReadZString(this NtProcess process, long address)
+        {
+            if (address == 0)
+                return string.Empty;
+
+            StringBuilder builder = new StringBuilder();
+            char c = process.ReadMemory<char>(address);
+            while (c != 0)
+            {
+                builder.Append(c);
+                address += 2;
+                c = process.ReadMemory<char>(address);
+            }
+            return builder.ToString();
         }
 
         public static string GetFileName(string path)
