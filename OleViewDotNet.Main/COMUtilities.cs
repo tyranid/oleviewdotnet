@@ -2835,5 +2835,26 @@ namespace OleViewDotNet
             }
             return path.Substring(index + 1);
         }
+
+        private static string GetNativeLibraryDirectory()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return Path.Combine(GetAppDirectory(), "x64");
+            }
+
+            return Path.Combine(GetAppDirectory(), "x86");
+        }
+
+        public static string GetDefaultDbgHelp()
+        {
+            string path = Path.Combine(GetNativeLibraryDirectory(), "dbghelp.dll");
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dbghelp.dll");
+        }
     }
 }

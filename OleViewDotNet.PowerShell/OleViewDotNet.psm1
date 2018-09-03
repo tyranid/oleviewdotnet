@@ -16,7 +16,7 @@
 
 Set-StrictMode -Version Latest
 
-$Script:GlobalDbgHelpPath = "dbghelp.dll"
+$Script:GlobalDbgHelpPath = [OleViewDotNet.COMUtilities]::GetDefaultDbgHelp()
 $Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
 $Script:CurrentComDatabase = $null
 
