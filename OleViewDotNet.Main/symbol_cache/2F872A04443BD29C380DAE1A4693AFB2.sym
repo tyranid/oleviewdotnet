@@ -1,0 +1,14 @@
+# Microsoft Windows NT 6.1.7601 Service Pack 1 C:\Windows\syswow64\ole32.dll 6.1.7601.24168 (win7sp1_ldr.180608-0600)
+1345264 ole32!CIPIDTable::_palloc
+1340280 ole32!g_AppId
+1340272 ole32!gSecDesc
+1343256 ole32!gwszLRPCEndPoint
+1339800 ole32!gCapabilities
+1339884 ole32!gAuthnLevel
+1339784 ole32!gImpLevel
+1349984 ole32!gAccessControl
+1340788 ole32!ghwndOleMainThread
+1350088 ole32!CClassCache::_MTALSvrsFront
+1350092 ole32!CClassCache::_NTALSvrsFront
+1354516 ole32!g_ActivationFilter
+1349248 ole32!COIDTable::s_OIDBuckets

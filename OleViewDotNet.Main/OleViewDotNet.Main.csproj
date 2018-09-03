@@ -504,10 +504,13 @@
       <DependentUpon>ROTViewer.cs</DependentUpon>
     </Compile>
     <None Include="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\215BDA791F9BC240EFD4BE5310F86B78.sym">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -516,10 +519,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\B52200505767CD0819034CF220977439.sym">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\D376A4B1765B8DF3E7E9CDE98DB3200E.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
