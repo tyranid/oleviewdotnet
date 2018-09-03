@@ -12,3 +12,6 @@
 2137312 combase!ghwndOleMainThread
 2137264 combase!CClassCache::_MTALSvrsFront
 2133356 combase!CClassCache::_NTALSvrsFront
+2139360 combase!g_ActivationFilter
+2127800 combase!COIDTable::s_OIDBuckets
+2128720 combase!CClassCache::_LSvrActivatableClassEBuckets
