@@ -1,0 +1,17 @@
+# Microsoft Windows NT 6.3.9600.0 C:\Windows\SYSTEM32\combase.dll 6.3.9600.18666 (winblue_ltsb.170415-2040)
+1367216 combase!CIPIDTable::_palloc
+1368240 combase!g_AppId
+1364424 combase!gSecDesc
+1368192 combase!gLrpcSecurityDescriptor
+1373152 combase!gwszLRPCEndPoint
+1364456 combase!gCapabilities
+1364060 combase!gAuthnLevel
+1364064 combase!gImpLevel
+1364084 combase!g_GLBOPT_UnmarshalingPolicy
+1364428 combase!gAccessControl
+1364704 combase!ghwndOleMainThread
+1364660 combase!CClassCache::_MTALSvrsFront
+1364656 combase!CClassCache::_NTALSvrsFront
+1368204 combase!g_ActivationFilter
+1374960 combase!COIDTable::s_OIDBuckets
+1375888 combase!CClassCache::_LSvrActivatableClassEBuckets

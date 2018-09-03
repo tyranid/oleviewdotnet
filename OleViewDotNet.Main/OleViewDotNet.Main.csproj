@@ -512,6 +512,9 @@
     <None Include="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\4AB47E9370AC36241341FFA48B618BBA.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -525,6 +528,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
