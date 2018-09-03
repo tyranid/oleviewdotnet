@@ -1484,7 +1484,7 @@ namespace OleViewDotNet
             {
                 if (_activatableClassId == IntPtr.Zero)
                     return string.Empty;
-                return process.ReadHString(_activatableClassId.ToInt64());
+                return process.ReadHString(_activatableClassId);
             }
 
             IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
@@ -1501,7 +1501,7 @@ namespace OleViewDotNet
             {
                 if (_packageFullName == IntPtr.Zero)
                     return string.Empty;
-                return process.ReadHString(_packageFullName.ToInt64());
+                return process.ReadHString(_packageFullName);
             }
         }
 
@@ -1536,7 +1536,7 @@ namespace OleViewDotNet
             {
                 if (_activatableClassId == 0)
                     return string.Empty;
-                return process.ReadHString(_activatableClassId);
+                return process.ReadHString(new IntPtr(_activatableClassId));
             }
 
             IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
@@ -1553,7 +1553,95 @@ namespace OleViewDotNet
             {
                 if (_packageFullName == 0)
                     return string.Empty;
-                return process.ReadHString(_packageFullName);
+                return process.ReadHString(new IntPtr(_packageFullName));
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntryWin8 : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode _hashNode;
+            public IntPtr _pNextLSvr; // CClassCache::CWinRTLocalSvrClassEntry*
+            public IntPtr _pPrevLSvr; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public IntPtr _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public IntPtr _pActivationFactoryCallback;
+            public uint _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public Guid _clsid;
+            public uint _dwSig;
+            public int _cLocks;
+            public IntPtr _pObjServer; // CObjServer* 
+            public IntPtr _cookie; // $F1BCC8D2ED72627AE3E1D14940DBB08E* 
+            public bool _suspended;
+            public int _ulServiceId;
+            public IntPtr _activatableClassId; // const wchar_t*
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == IntPtr.Zero)
+                    return string.Empty;
+                return process.ReadZString(_activatableClassId.ToInt64());
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return _pActivationFactoryCallback;
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return _clsid;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                return string.Empty;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntry32Win8 : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode32 _hashNode;
+            public int _pNextLSvr; // CClassCache::CWinRTLocalSvrClassEntry*
+            public int _pPrevLSvr; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public int _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public int _pActivationFactoryCallback;
+            public uint _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public Guid _clsid;
+            public uint _dwSig;
+            public int _cLocks;
+            public int _pObjServer; // CObjServer* 
+            public int _cookie; // $F1BCC8D2ED72627AE3E1D14940DBB08E* 
+            public bool _suspended;
+            public int _ulServiceId;
+            public int _activatableClassId; // const wchar_t*
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == 0)
+                    return string.Empty;
+                return process.ReadZString(_activatableClassId);
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return new IntPtr(_pActivationFactoryCallback);
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return _clsid;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                return string.Empty;
             }
         }
 
@@ -1782,6 +1870,8 @@ namespace OleViewDotNet
             return new COMRuntimeActivableClassEntry[] { new COMRuntimeActivableClassEntry(obj, process, resolver, registry) };
         }
 
+        private static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
+
         private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             const string bucket_symbol = "CClassCache::_LSvrActivatableClassEBuckets";
@@ -1792,11 +1882,25 @@ namespace OleViewDotNet
 
             if (process.Is64Bit)
             {
-                return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                if (IsWindows81OrLess)
+                {
+                    return ReadHashTable<CWinRTLocalSvrClassEntryWin8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                }
+                else
+                {
+                    return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                }
             }
             else
             {
-                return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                if (IsWindows81OrLess)
+                {
+                    return ReadHashTable<CWinRTLocalSvrClassEntry32Win8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                }
+                else
+                {
+                    return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
+                }
             }
         }
 
