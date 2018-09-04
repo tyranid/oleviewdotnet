@@ -1997,18 +1997,21 @@ function Get-ComRuntimeInterface {
         [Parameter(Mandatory, ParameterSetName = "FromFullName")]
         [string]$FullName
     )
-    switch($PSCmdlet.ParameterSetName) {
-        "All" {
-            [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
-        }
-        "FromName" {
-            Get-ComRuntimeInterface | ? Name -eq $Name | Write-Output
-        }
-        "FromFullName" {
-            Get-ComRuntimeInterface | ? FullName -eq $FullName | Write-Output
-        }
-        "FromIid" {
-            [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "All" {
+                [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
+            }
+            "FromName" {
+                Get-ComRuntimeInterface | ? Name -eq $Name | Write-Output
+            }
+            "FromFullName" {
+                Get-ComRuntimeInterface | ? FullName -eq $FullName | Write-Output
+            }
+            "FromIid" {
+                [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
+            }
         }
     }
 }
@@ -2063,6 +2066,60 @@ function Format-ComProcessClient {
             $builder.ToString() | Set-Content -Path $Path
         } else {
             $builder.ToString() | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Get COM categories from a database.
+.DESCRIPTION
+This cmdlet gets the COM categories from a database.
+.PARAMETER CatId
+Specify a CATID to lookup.
+.PARAMETER Name
+Specify a name to match against the category name.
+.PARAMETER Database
+The COM database to use.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMCategory
+.EXAMPLE
+Get-ComCategory
+Get all COM categories.
+.EXAMPLE
+Get-ComCategory -CatId "00000001-0000-0000-C000-000000000046"
+Get COM category from a CATID.
+.EXAMPLE
+Get-ComCategory -Name "Blah"
+Get the COM category with the name blah.
+#>
+function Get-ComCategory {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromCatId")]
+        [Guid]$CatId,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name,
+        [OleViewDotNet.COMRegistry]$Database
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            $Database.ImplementedCategories.Values | Write-Output 
+        }
+        "FromName" {
+            Get-ComCategory | ? Name -eq $Name | Write-Output
+        }
+        "FromCatId" {
+            $Database.ImplementedCategories[$CatId] | Write-Output
         }
     }
 }
