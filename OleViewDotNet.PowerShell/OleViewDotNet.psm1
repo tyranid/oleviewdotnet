@@ -361,7 +361,7 @@ Get-ComClass -ServerType InProcServer32
 Get COM classes which are registered with an in-process server.
 .EXAMPLE
 Get-ComClass -Iid "00000001-0000-0000-C000-000000000046"
-Get COM class registered as an interface proxy.
+Get COM class registered as an interface proxy for a specific IID.
 .EXAMPLE
 Get-ComClass -ProgId htafile
 Get COM class from a Prog ID.
@@ -753,6 +753,8 @@ The COM or Runtime class to enumerate.
 Specify to force the interfaces to be refreshed.
 .PARAMETER Factory
 Specify to return the implemented factory interfaces.
+.PARAMETER NoQuery
+Specify to not query for the interfaces at all and only return what's already available.
 .INPUTS
 None
 .OUTPUTS
@@ -773,10 +775,13 @@ function Get-ComClassInterface {
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
         [OleViewDotNet.ICOMClassEntry]$ClassEntry,
         [switch]$Refresh,
-        [switch]$Factory
+        [switch]$Factory,
+        [switch]$NoQuery
         )
     PROCESS {
-        $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
+        if (!$NoQuery) {
+            $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
+        }
         if ($Factory) {
             $ClassEntry.FactoryInterfaces | Write-Output
         } else {
@@ -2140,6 +2145,92 @@ function Get-ComCategory {
         }
         "FromCatId" {
             $Database.ImplementedCategories[$CatId] | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Filter COM classes based on whether they support one or more interfaces.
+.DESCRIPTION
+This cmdlet filters COM classes for one or more supported interfaces. This can take a very long time if the interface list needs to be queried first.
+.PARAMETER InputObject
+The COM class entry to filter on.
+.PARAMETER Iid
+Filter on an IID or list of IIDs.
+.PARAMETER Name
+Filter on a name or list of names.
+.PARAMETER NameMatch
+Filter on a partial matching name.
+.PARAMETER Factory
+Filter based on the factory interfaces rather than the main class interfaces.
+.PARAMETER Refresh
+Specify to force the interfaces to be refreshed.
+.PARAMETER NoQuery
+Specify to not query for the interfaces at all and only return what's already available.
+.PARAMETER Exclude
+Specify to return classes which do not implement one of the interfaces.
+.INPUTS
+OleViewDotNet.ICOMClassEntry
+.OUTPUTS
+OleViewDotNet.ICOMClassEntry
+.EXAMPLE
+Get-ComClass | Select-ComClassInterface -Name "IDispatch"
+Get all COM classes which implement IDispatch.
+.EXAMPLE
+Get-ComClass | Select-ComClassInterface -NameMatch "Blah"
+Get all COM classes which implement an interface containing the name Blah.
+.EXAMPLE
+Get-ComClass | Select-ComClassInterface -Iid "00020400-0000-0000-c000-000000000046"
+Get all COM classes which implement an interface with a specific IID.
+.EXAMPLE
+Get-ComClass | Select-ComClassInterface -Factory -Iid "00000001-0000-0000-C000-000000000046"
+Get all COM classes which implement a factory interface with a specific IID.
+#>
+function Select-ComClassInterface {
+    [CmdletBinding(DefaultParameterSetName = "FromName")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [OleViewDotNet.ICOMClassEntry]$InputObject,
+        [Parameter(Mandatory, ParameterSetName = "FromIid")]
+        [Guid[]]$Iid,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string[]]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromNameMatch")]
+        [string]$NameMatch,
+        [switch]$Factory,
+        [switch]$Refresh,
+        [switch]$NoQuery,
+        [switch]$Exclude
+    )
+
+    PROCESS {
+        $result = $false
+        $intfs = Get-ComClassInterface $InputObject -Factory:$Factory -Refresh:$Refresh -NoQuery:$NoQuery
+        $result = $false
+        foreach($intf in $intfs) {
+            switch($PSCmdlet.ParameterSetName) {
+                "FromIid" {
+                    $result = $intf.Iid -in $Iid
+                }
+                "FromName" {
+                    $result = $intf.Name -in $Name
+                }
+                "FromNameMatch" {
+                    $result = $intf.Name -match $NameMatch
+                }
+            }
+            if ($result) {
+                break
+            }
+        }
+
+        if ($Exclude) {
+            $result = !$result
+        }
+
+        if ($result) {
+            Write-Output $InputObject
         }
     }
 }
