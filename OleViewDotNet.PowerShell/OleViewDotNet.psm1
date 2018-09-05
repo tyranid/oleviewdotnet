@@ -333,6 +333,10 @@ Specify looking up the COM class from a ProgID.
 Specify looking up a COM class based on it's proxy IID.
 .PARAMETER Object
 Specify looking up the COM class based on an object instance. Needs to support an IPersist inteface to extract the CLSID.
+.PARAMETER CatId
+Specify looking up the COM classes based on a category ID.
+.PARAMETER CatName
+Specify looking up the COM classes based on a category name.
 .INPUTS
 None
 .OUTPUTS
@@ -372,7 +376,13 @@ Get-ComClass -ServiceName "ExampleService"
 Get COM classes registered to run inside a service with a specific name.
 .EXAMPLE
 Get-ComClass -Object $obj
-Get COM class based on an object instance. Needs 
+Get COM class based on an object instance.
+.EXAMPLE
+Get-ComClass -CatId "62c8fe65-4ebb-45e7-b440-6e39b2cdbf29"
+Get COM classes in a category with ID 62c8fe65-4ebb-45e7-b440-6e39b2cdbf29.
+.EXAMPLE
+Get-ComClass -CatName ".NET Category"
+Get COM classes in the .NET category.
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -397,7 +407,11 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromServiceName")]
         [string]$ServiceName,
         [Parameter(Mandatory, ParameterSetName = "FromObject")]
-        [object]$Object
+        [object]$Object,
+        [Parameter(Mandatory, ParameterSetName = "FromCatId")]
+        [Guid]$CatId,
+        [Parameter(Mandatory, ParameterSetName = "FromCatName")]
+        [string]$CatName
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -440,6 +454,12 @@ function Get-ComClass {
             if ($Clsid -ne [Guid]::Empty) {
                 Get-ComClass -Database $Database -Clsid $Clsid | Write-Output
             }
+        }
+        "FromCatId" {
+            Get-ComCategory -CatId $CatId | Select-Object -ExpandProperty ClassEntries | Write-Output
+        }
+        "FromCatName" {
+            Get-ComCategory -Name $CatName | Select-Object -ExpandProperty ClassEntries | Write-Output
         }
     }
 }
