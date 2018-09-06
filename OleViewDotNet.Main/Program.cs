@@ -138,10 +138,10 @@ namespace OleViewDotNet
 
         class ActivationFilter : IActivationFilter
         {
-            public void HandleActivation(uint dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+            public void HandleActivation(ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
             {
                 pReplacementClsId = rclsid;
-                System.Diagnostics.Trace.WriteLine(String.Format("{0:X} {1}", dwActivationType, rclsid));
+                System.Diagnostics.Trace.WriteLine(string.Format("{0} {1}", dwActivationType, rclsid));
             }
         }
 

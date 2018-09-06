@@ -292,12 +292,23 @@ namespace OleViewDotNet
                     out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);
     }
 
+    [Flags]
+    public enum ACTIVATIONTYPE
+    {
+        UNCATEGORIZED = 0x0,
+        FROM_MONIKER = 0x1,
+        FROM_DATA = 0x2,
+        FROM_STORAGE = 0x4,
+        FROM_STREAM = 0x8,
+        FROM_FILE = 0x10
+    }
+    
     [Guid("00000017-0000-0000-C000-000000000046"), 
         InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IActivationFilter
     {
         void HandleActivation(
-            uint dwActivationType,
+            ACTIVATIONTYPE dwActivationType,
             ref Guid rclsid,
             out Guid pReplacementClsId);
     };

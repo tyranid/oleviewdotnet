@@ -66,7 +66,7 @@ namespace OleViewDotNet.PowerShell
             }
         }
 
-        void IActivationFilter.HandleActivation(uint dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+        void IActivationFilter.HandleActivation(ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
         {
             pReplacementClsId = rclsid;
             lock (this)
@@ -79,12 +79,12 @@ namespace OleViewDotNet.PowerShell
                 COMCLSIDEntry entry = _registry?.MapClsidToEntry(rclsid);
                 if (entry == null)
                 {
-                    _writer.WriteLine("dwActivationType: 0x{0:X} rclsid: {1}", 
+                    _writer.WriteLine("dwActivationType: {0} rclsid: {1}", 
                         dwActivationType, rclsid);
                 }
                 else
                 {
-                    _writer.WriteLine("dwActivationType: 0x{0:X} rclsid: {1} name '{2}'", 
+                    _writer.WriteLine("dwActivationType: {0} rclsid: {1} name '{2}'", 
                         dwActivationType, rclsid, entry.Name);
                 }
             }
