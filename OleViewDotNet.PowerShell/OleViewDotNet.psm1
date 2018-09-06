@@ -1312,6 +1312,7 @@ function New-ComObject {
     )
 
     PROCESS {
+        $obj = $null
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
                 $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
@@ -1371,6 +1372,7 @@ function New-ComObjectFactory {
     )
 
     PROCESS {
+        $obj = $null
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
                 $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer)
@@ -1411,6 +1413,7 @@ function Get-ComMoniker {
         [switch]$NoWrapper
     )
 
+    $obj = $null
     if ($Bind) {
         $type = [OleViewDotNet.IUnknown]
         $obj = [OleViewDotNet.COMUtilities]::ParseAndBindMoniker($Moniker, $Composite)
