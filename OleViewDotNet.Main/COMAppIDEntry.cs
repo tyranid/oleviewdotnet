@@ -59,6 +59,17 @@ namespace OleViewDotNet
         AntimalwareLight = 3
     }
 
+    public enum PreferredServerBitness
+    {
+        DEFAULT = 0x0,
+        FOLLOW_CLIENT = 0x1,
+        X86 = 0x2,
+        X64 = 0x3,
+        ARM32 = 0x4,
+        ARM64 = 0x5,
+        NATIVE = unchecked((int)0x80000000)
+    };
+
     public class COMAppIDServiceEntry : IXmlSerializable
     {
         public string DisplayName { get; private set; }
@@ -231,6 +242,12 @@ namespace OleViewDotNet
             {
                 RotFlags = (COMAppIDRotFlags)rotflags;
             }
+
+            object bitness = key.GetValue("PreferredServerBitness");
+            if (bitness != null && bitness is int)
+            {
+                PreferredServerBitness = (PreferredServerBitness)bitness;
+            }
         }
 
         public int CompareTo(COMAppIDEntry other)
@@ -285,16 +302,16 @@ namespace OleViewDotNet
 
         public string LaunchPermission
         {
-            get; private set; 
+            get; private set;
         }
 
         public string AccessPermission
         {
-            get; private set; 
+            get; private set;
         }
 
         public bool HasLaunchPermission
-        {        
+        {
             get { return !String.IsNullOrWhiteSpace(LaunchPermission); }
         }
 
@@ -355,6 +372,11 @@ namespace OleViewDotNet
             }
         }
 
+        public PreferredServerBitness PreferredServerBitness
+        {
+            get; private set;
+        }
+
         internal COMRegistry Database { get { return m_registry; } }
 
         string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
@@ -390,9 +412,10 @@ namespace OleViewDotNet
             {
                 return false;
             }
-            
+
             return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
-                && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission && RotFlags == right.RotFlags;
+                && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission && RotFlags == right.RotFlags 
+                && PreferredServerBitness == right.PreferredServerBitness;
         }
 
         public override int GetHashCode()
@@ -400,7 +423,7 @@ namespace OleViewDotNet
             return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() 
                 ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
                 LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode() ^
-                LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode();
+                LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode();
         }
 
         internal COMAppIDEntry(COMRegistry registry)
@@ -423,6 +446,7 @@ namespace OleViewDotNet
             LaunchPermission = reader.ReadString("launchperm");
             AccessPermission = reader.ReadString("accessperm");
             RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
+            PreferredServerBitness = reader.ReadEnum<PreferredServerBitness>("bit");
             bool has_service = reader.ReadBool("service");
             if (has_service)
             {
@@ -441,6 +465,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
             writer.WriteOptionalAttributeString("accessperm", AccessPermission);
             writer.WriteEnum("rot", RotFlags);
+            writer.WriteEnum("bit", PreferredServerBitness);
             if (LocalService != null)
             {
                 writer.WriteBool("service", true);
