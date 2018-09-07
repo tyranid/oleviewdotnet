@@ -1733,9 +1733,9 @@ namespace OleViewDotNet
 
             result = name;
 
-            if (name.StartsWith("__x_"))
+            if (name.StartsWith("__x_") || name.StartsWith("___x_"))
             {
-                result = name.Substring(4).Replace("_", "::");
+                result = name.Substring(4).Replace("_C", "::");
             }
             else if (name.StartsWith("__F"))
             {
