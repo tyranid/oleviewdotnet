@@ -27,7 +27,7 @@ namespace OleViewDotNet
         /// <summary>
         /// The name of the proxy interface.
         /// </summary>
-        public string Name => Entry.Name;
+        public string Name => COMUtilities.DemangleWinRTName(Entry.Name);
         /// <summary>
         /// Original name of the interface.
         /// </summary>
@@ -40,6 +40,10 @@ namespace OleViewDotNet
         /// The base IID of the proxy interface.
         /// </summary>
         public Guid BaseIid => Entry.BaseIid;
+        /// <summary>
+        /// Get name of the base IID if known.
+        /// </summary>
+        public string BaseIidName => m_registry.MapIidToInterface(BaseIid).Name;
         /// <summary>
         /// The number of dispatch methods on the interface.
         /// </summary>
