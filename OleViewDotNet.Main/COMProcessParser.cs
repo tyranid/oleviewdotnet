@@ -2596,11 +2596,14 @@ namespace OleViewDotNet
                 {
                     IntPtr base_ptr = new IntPtr(stub_vptr.ToInt64() - (GetPointerSize(process) * 3));
                     IntPtr[] stub_info = COMProcessParser.ReadPointerArray(process, base_ptr, 3);
-                    if (stub_info[2] == IntPtr.Zero)
+                    if (stub_info != null)
                     {
-                        server_info = stub_info[0];
+                        if (stub_info[2] == IntPtr.Zero)
+                        {
+                            server_info = stub_info[0];
+                        }
+                        count = stub_info[1].ToInt64();
                     }
-                    count = stub_info[1].ToInt64();
                 }
                 else if (registry.Interfaces.ContainsKey(Iid))
                 {
