@@ -882,6 +882,24 @@ namespace OleViewDotNet
             }
         }
 
+        public bool HasRunAs
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.HasRunAs : false;
+            }
+        }
+
+        public string RunAs
+        {
+            get
+            {
+                var appid = AppIDEntry;
+                return appid != null ? appid.RunAs : string.Empty;
+            }
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))
