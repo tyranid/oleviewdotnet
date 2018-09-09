@@ -1222,6 +1222,12 @@ The security descriptor to view in SDDL format.
 Show access rights rather than launch rights.
 .PARAMETER InputObject
 Shows the security descriptor for a database object.
+.PARAMETER Default
+Shows the default security descriptor for the specified database.
+.PARAMETER Restriction
+Shows the security descriptor restriction for the specified database.
+.PARAMETER Database
+Specify the database for showing the default or restriction security descriptors.
 .INPUTS
 None
 .OUTPUTS
@@ -1238,6 +1244,18 @@ Shows a SDDL launch security descriptor.
 .EXAMPLE
 Show-ComSecurityDescriptor "D:(A;;GA;;;WD)" -ShowAccess
 Shows a SDDL access security descriptor.
+.EXAMPLE
+Show-ComSecurityDescriptor -Default
+Show the default launch security descriptor for the current database.
+.EXAMPLE
+Show-ComSecurityDescriptor -Default -ShowAccess
+Show the default access security descriptor for the current database.
+.EXAMPLE
+Show-ComSecurityDescriptor -Restriction
+Show the launch security descriptor restriction for the current database.
+.EXAMPLE
+Show-ComSecurityDescriptor -Restriction -ShowAccess
+Show the access security descriptor restriction for the current database.
 #>
 function Show-ComSecurityDescriptor {
     [CmdletBinding(DefaultParameterSetName="FromObject")]
@@ -1246,10 +1264,24 @@ function Show-ComSecurityDescriptor {
         [string]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
         [OleViewDotNet.ICOMAccessSecurity]$InputObject,
+        [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
+        [switch]$Restriction,
+        [Parameter(Mandatory, ParameterSetName = "FromDefault")]
+        [switch]$Default,
+        [Parameter(ParameterSetName = "FromRestriction")]
+        [Parameter(ParameterSetName = "FromDefault")]
+        [OleViewDotNet.COMRegistry]$Database,
         [switch]$ShowAccess
     )
 
     PROCESS {
+        if ($PSCmdlet.ParameterSetName -eq "FromRestriction" -or $PSCmdlet.ParameterSetName -eq "FromDefault") {
+            $Database = Get-CurrentComDatabase $Database
+            if ($null -eq $Database) {
+                Write-Error "No database specified and current database isn't set"
+                return
+            }
+        }
         $name = ""
         switch($PSCmdlet.ParameterSetName) {
             "FromSddl" {
@@ -1263,6 +1295,22 @@ function Show-ComSecurityDescriptor {
                 }
                 $name = $InputObject.Name.Replace("`"", " ")
             }
+            "FromDefault" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = $Database.DefaultAccessPermission
+                } else {
+                    $SecurityDescriptor = $Database.DefaultLaunchPermission
+                }
+                $name = "Default"
+            }
+            "FromRestriction" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = $Database.DefaultAccessRestriction
+                } else {
+                    $SecurityDescriptor = $Database.DefaultLaunchRestriction
+                }
+                $name = "Restriction"
+            }
         }
 
         if ("" -ne $SecurityDescriptor) {
@@ -1274,7 +1322,7 @@ function Show-ComSecurityDescriptor {
             }
             $args = @("`"$cmd=$SecurityDescriptor`"")
             if ("" -ne $name) {
-                $args += @("`"$name`"")
+                $args += @("`"-n=$name`"")
             }
             Start-Process $exe $args
         }
