@@ -1282,21 +1282,23 @@ Specify a CLSID to use for the new COM object.
 Specify the context the new object will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object will be created on.
+.PARAMETER SessionId
+Specify the console session to create the object in.
 .PARAMETER NoWrapper
 Don't wrap object in a callable wrapper.
-.PARAMETER Moniker
-Specify a moniker to bind to.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
         [OleViewDotNet.IClassFactory]$Factory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
         [System.Runtime.InteropServices.WindowsRuntime.IActivationFactory]$ActivationFactory,
-        [Parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
@@ -1308,6 +1310,9 @@ function New-ComObject {
         [OleViewDotNet.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
         [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
+        [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
+        [int]$SessionId,
         [switch]$NoWrapper
     )
 
@@ -1334,6 +1339,12 @@ function New-ComObject {
             "FromIpid" {
                 $obj = [OleViewDotNet.COMUtilities]::UnmarshalObject($Ipid.ToObjRef())
             }
+            "FromSessionIdClass" {
+                $obj = Get-ComMoniker "session:$SessionId!new:$($Class.Clsid)" -Bind -NoWrapper
+            }
+            "FromSessionIdClsid" {
+                $obj = Get-ComMoniker "session:$SessionId!new:$Clsid" -Bind -NoWrapper
+            }
         }
 
         if ($null -ne $obj) {
@@ -1356,6 +1367,8 @@ Specify a CLSID to use for the new COM object factory.
 Specify the context the new factory will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object factory will be created on.
+.PARAMETER SessionId
+Specify the console session to create the factory in.
 .PARAMETER NoWrapper
 Don't wrap factory object in a callable wrapper.
 #>
@@ -1363,11 +1376,20 @@ function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
         [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
+        [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
+        [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
+        [int]$SessionId,
         [switch]$NoWrapper
     )
 
@@ -1380,6 +1402,12 @@ function New-ComObjectFactory {
             "FromClsid" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, `
                     "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+            }
+            "FromSessionIdClass" {
+                $obj = Get-ComMoniker "session:$SessionId!clsid:$($Class.Clsid)" -Bind -NoWrapper
+            }
+            "FromSessionIdClsid" {
+                $obj = Get-ComMoniker "session:$SessionId!clsid:$Clsid" -Bind -NoWrapper
             }
         }
 
