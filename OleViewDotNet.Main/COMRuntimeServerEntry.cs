@@ -50,6 +50,7 @@ namespace OleViewDotNet
     public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
     {
         private readonly COMRegistry m_registry;
+        private readonly Lazy<List<COMRuntimeClassEntry>> m_get_classes;
 
         public string Identity { get; private set; }
         public string Name { get; private set; }
@@ -65,12 +66,13 @@ namespace OleViewDotNet
         public string Permissions { get; private set; }
         public bool HasPermission
         {
-            get { return !String.IsNullOrWhiteSpace(Permissions); }
+            get { return !string.IsNullOrWhiteSpace(Permissions); }
         }
         public IdentityType IdentityType { get; private set; }
         public ServerType ServerType { get; private set; }
         public InstancingType InstancingType { get; private set; }
-        public IEnumerable<COMRuntimeClassEntry> Classes => m_registry.RuntimeClasses.Values.Where(c => c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase));
+        public IEnumerable<COMRuntimeClassEntry> Classes => m_get_classes.Value.AsReadOnly();
+        public int ClassCount => m_get_classes.Value.Count;
 
         string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
 
@@ -92,6 +94,8 @@ namespace OleViewDotNet
         internal COMRuntimeServerEntry(COMRegistry registry)
         {
             m_registry = registry;
+            m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => m_registry.RuntimeClasses.Values.Where(c => 
+                c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
         public COMRuntimeServerEntry(string name, RegistryKey rootKey, COMRegistry registry) : this(registry)
