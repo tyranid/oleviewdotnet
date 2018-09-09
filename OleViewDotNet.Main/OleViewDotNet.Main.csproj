@@ -353,7 +353,7 @@
     <Compile Include="ObjectInformation.Designer.cs">
       <DependentUpon>ObjectInformation.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLibControl.cs">
       <SubType>UserControl</SubType>
