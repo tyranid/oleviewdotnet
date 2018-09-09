@@ -948,6 +948,10 @@ namespace OleViewDotNet
             {
                 throw;
             }
+            catch (AggregateException agg)
+            {
+                throw agg.InnerException;
+            }
         }
 
         private COMCLSIDServerEntry GetDefaultServer()
@@ -1005,12 +1009,23 @@ namespace OleViewDotNet
         public bool LoadSupportedInterfaces(bool refresh)
         {
             Task<bool> result = LoadSupportedInterfacesAsync(refresh);
-            result.Wait();
-            if (result.IsFaulted)
+            try
             {
-                throw result.Exception.InnerException;
+                result.Wait();
+                if (result.IsFaulted)
+                {
+                    throw result.Exception.InnerException;
+                }
+                return result.Result;
             }
-            return result.Result;
+            catch (Exception ex)
+            {
+                if (ex is AggregateException agg)
+                {
+                    throw agg.InnerException;
+                }
+                throw;
+            }
         }
 
         /// <summary>
