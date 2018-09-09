@@ -2435,6 +2435,7 @@ namespace OleViewDotNet
         public IntPtr Interface { get; private set; }
         public string InterfaceVTable { get; private set; }
         public IEnumerable<COMMethodEntry> Methods { get; private set; }
+        public int MethodCount { get; private set; }
         public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
         public IntPtr Stub { get; private set; }
         public string StubVTable { get; private set; }
@@ -2633,6 +2634,7 @@ namespace OleViewDotNet
                 }
             }
             Methods = methods.AsReadOnly();
+            MethodCount = methods.Count;
             ComplexTypes = complex_types.AsReadOnly();
             m_registry = registry;
         }
