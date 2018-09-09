@@ -748,13 +748,15 @@ Get a COM class or Runtime class instance interfaces.
 .DESCRIPTION
 This cmdlet enumerates the supported interfaces for a COM class or Runtime class and returns them.
 .PARAMETER ClassEntry
-The COM or Runtime class to enumerate.
+The COM or Runtime classes to enumerate.
 .PARAMETER Refresh
 Specify to force the interfaces to be refreshed.
 .PARAMETER Factory
 Specify to return the implemented factory interfaces.
 .PARAMETER NoQuery
 Specify to not query for the interfaces at all and only return what's already available.
+.PARAMETER NoProgress
+Don't show progress for query.
 .INPUTS
 None
 .OUTPUTS
@@ -773,19 +775,31 @@ function Get-ComClassInterface {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.ICOMClassEntry]$ClassEntry,
+        [OleViewDotNet.ICOMClassEntry[]]$ClassEntry,
         [switch]$Refresh,
         [switch]$Factory,
-        [switch]$NoQuery
+        [switch]$NoQuery,
+        [switch]$NoProgress
         )
     PROCESS {
-        if (!$NoQuery) {
-            $ClassEntry.LoadSupportedInterfaces($Refresh) | Out-Null
-        }
-        if ($Factory) {
-            $ClassEntry.FactoryInterfaces | Write-Output
-        } else {
-            $ClassEntry.Interfaces | Write-Output
+        $i = 0
+        foreach($class in $ClassEntry) {
+            if (!$NoQuery) {
+                if (!$NoProgress) {
+                    if ($PSCmdlet.MyInvocation.ExpectingInput) {
+                        Write-Progress "Querying for Class Interfaces" -Status $class.Name
+                    } else {
+                        Write-Progress "Querying for Class Interfaces" -Status $class.Name -PercentComplete (($i / $ClassEntry.Count) * 100)
+                        $i++
+                    }
+                }
+                $class.LoadSupportedInterfaces($Refresh) | Out-Null
+            }
+            if ($Factory) {
+                $class.FactoryInterfaces | Write-Output
+            } else {
+                $class.Interfaces | Write-Output
+            }
         }
     }
 }
@@ -2201,6 +2215,8 @@ Specify to force the interfaces to be refreshed.
 Specify to not query for the interfaces at all and only return what's already available.
 .PARAMETER Exclude
 Specify to return classes which do not implement one of the interfaces.
+.PARAMETER NoProgress
+Don't show progress for query.
 .INPUTS
 OleViewDotNet.ICOMClassEntry
 .OUTPUTS
@@ -2232,12 +2248,13 @@ function Select-ComClassInterface {
         [switch]$Factory,
         [switch]$Refresh,
         [switch]$NoQuery,
-        [switch]$Exclude
+        [switch]$Exclude,
+        [switch]$NoProgress
     )
 
     PROCESS {
         $result = $false
-        $intfs = Get-ComClassInterface $InputObject -Factory:$Factory -Refresh:$Refresh -NoQuery:$NoQuery
+        $intfs = Get-ComClassInterface $InputObject -Factory:$Factory -Refresh:$Refresh -NoQuery:$NoQuery -NoProgress:$NoProgress
         $result = $false
         foreach($intf in $intfs) {
             switch($PSCmdlet.ParameterSetName) {
