@@ -229,17 +229,23 @@ namespace OleViewDotNet
         {
             MemoryStream stm = new MemoryStream();
             BinaryWriter new_writer = new BinaryWriter(stm);
-            foreach (COMStringBinding str in StringBindings)
+            if (StringBindings.Count > 0)
             {
-                str.ToWriter(new_writer);
+                foreach (COMStringBinding str in StringBindings)
+                {
+                    str.ToWriter(new_writer);
+                }
+                new COMStringBinding().ToWriter(new_writer);
             }
-            new COMStringBinding().ToWriter(new_writer);
             ushort ofs = (ushort)(stm.Position / 2);
-            foreach (COMSecurityBinding sec in SecurityBindings)
+            if (SecurityBindings.Count > 0)
             {
-                sec.ToWriter(new_writer);
+                foreach (COMSecurityBinding sec in SecurityBindings)
+                {
+                    sec.ToWriter(new_writer);
+                }
+                new COMSecurityBinding().ToWriter(new_writer);
             }
-            new COMSecurityBinding().ToWriter(new_writer);
             writer.Write((ushort)(stm.Length / 2));
             writer.Write(ofs);
             writer.Write(stm.ToArray());
