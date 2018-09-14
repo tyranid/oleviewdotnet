@@ -969,7 +969,7 @@ Get COM interfaces supported by an object.
 function Get-ComInterface {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, ParameterSetName = "FromIid")]
+        [Parameter(Mandatory, ParameterSetName = "FromIid", ValueFromPipelineByPropertyName)]
         [Guid]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
