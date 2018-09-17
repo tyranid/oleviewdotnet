@@ -487,6 +487,8 @@ Specify to parse classes registered by the process.
 Specify to parse client proxy information from the process.
 .PARAMETER NoProgress
 Don't show progress for process parsing.
+.PARAMETER ServiceName
+Specify names of services to parse.
 .INPUTS
 None
 .OUTPUTS
@@ -521,6 +523,8 @@ function Get-ComProcess {
         [OleViewDotNet.COMObjRef[]]$ObjRef,
         [parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
+        [parameter(Mandatory, ParameterSetName = "FromServiceName")]
+        [string[]]$ServiceName,
         [switch]$NoProgress
     )
 
@@ -560,10 +564,16 @@ function Get-ComProcess {
         $config = [OleViewDotNet.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses, $ParseClients)
 
-        if ($PSCmdlet.ParameterSetName -eq "FromObjRef") {
-            [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
-        } else {
-            [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
+        switch($PSCmdlet.ParameterSetName) {
+            "FromObjRef" {
+                [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
+            }
+            "FromServiceName" {
+                [OleViewDotNet.COMProcessParser]::GetProcesses($ServiceName, $config, $callback, $Database) | Write-Output
+            }
+            default {
+                [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
+            }
         }
     }
 }

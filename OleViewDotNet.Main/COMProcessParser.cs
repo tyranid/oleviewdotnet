@@ -2175,6 +2175,13 @@ namespace OleViewDotNet
             return GetProcesses(procs, config, progress, registry, new Guid[0]);
         }
 
+        public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<string> services, COMProcessParserConfig config,
+            IProgress<Tuple<string, int>> progress, COMRegistry registry)
+        {
+            return GetProcesses(services.Select(n => ServiceUtils.GetServiceProcessId(n)).Distinct().Where(i => i != 0).Select(pid => Process.GetProcessById(pid)),
+                    config, progress, registry);
+        }
+
         public static IEnumerable<COMProcessEntry> GetProcesses(IEnumerable<Process> procs,
             COMProcessParserConfig config, IProgress<Tuple<string, int>> progress,
             COMRegistry registry, IEnumerable<Guid> ipids)
