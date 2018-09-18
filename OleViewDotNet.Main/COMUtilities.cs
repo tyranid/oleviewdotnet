@@ -1456,18 +1456,13 @@ namespace OleViewDotNet
 
         public static string MemberInfoToString(MemberInfo member)
         {
-            MethodInfo mi = member as MethodInfo;
-            PropertyInfo prop = member as PropertyInfo;
-            FieldInfo fi = member as FieldInfo;
-            EventInfo ei = member as EventInfo;
-
-            if (mi != null)
+            if (member is MethodInfo mi)
             {
                 return String.Format("{0} {1}({2});",
                     ConvertTypeToName(mi.ReturnType),
                     mi.Name, FormatParameters(mi.GetParameters()));
             }
-            else if (prop != null)
+            else if (member is PropertyInfo prop)
             {
                 List<string> propdirs = new List<string>();
                 if (prop.CanRead)
@@ -1489,11 +1484,11 @@ namespace OleViewDotNet
 
                 return String.Format("{0} {1}{2} {{ {3} }}", ConvertTypeToName(prop.PropertyType), prop.Name, ps, string.Join(" ", propdirs));
             }
-            else if (fi != null)
+            else if (member is FieldInfo fi)
             {
                 return String.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
             }
-            else if (ei != null)
+            else if (member is EventInfo ei)
             {
                 return string.Format("event {0} {1}", ei.EventHandlerType, ei.Name);
             }
@@ -2473,8 +2468,8 @@ namespace OleViewDotNet
 
         static void EmitMember(StringBuilder builder, MemberInfo mi)
         {
-            String name = MemberInfoToString(mi);
-            if (!String.IsNullOrWhiteSpace(name))
+            string name = MemberInfoToString(mi);
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 builder.Append("   ");
                 if (mi is FieldInfo)
@@ -2563,7 +2558,7 @@ namespace OleViewDotNet
                         }
                     }
 
-                    var props = t.GetProperties().Where(p => !p.GetMethod.IsStatic);
+                    var props = t.GetProperties().Where(p => !(p.GetMethod?.IsStatic ?? false));
                     if (props.Any())
                     {
                         builder.AppendLine("   /* Properties */");
@@ -2673,6 +2668,7 @@ namespace OleViewDotNet
             foreach (var type in types)
             {
                 FormatComType(builder, type);
+                builder.AppendLine();
             }
             builder.AppendLine();
         }
