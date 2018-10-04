@@ -319,6 +319,8 @@ This cmdlet gets COM classes from the database based on a set of criteria. The d
 The database to use.
 .PARAMETER Clsid
 Specify a CLSID to lookup.
+.PARAMETER AllowNoReg
+Allows the class entry to be returned even if not registered.
 .PARAMETER Name
 Specify a name which equals the class name.
 .PARAMETER ServerName
@@ -390,6 +392,8 @@ function Get-ComClass {
         [OleViewDotNet.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [switch]$AllowNoReg,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(ParameterSetName = "FromServer")]
@@ -425,7 +429,11 @@ function Get-ComClass {
             Write-Output $Database.Clsids.Values
         }
         "FromClsid" {
-            Write-Output $Database.Clsids[$Clsid]
+            if ($AllowNoReg) {
+                $Database.MapClsidToEntry($Clsid) | Write-Output
+            } else {
+                Write-Output $Database.Clsids[$Clsid]
+            }
         }
         "FromName" {
             Get-ComClass -Database $Database | ? Name -eq $Name | Write-Output
