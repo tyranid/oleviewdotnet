@@ -1506,6 +1506,50 @@ namespace OleViewDotNet
         }
 
         [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntryRS5 : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode _hashNode;
+            public IntPtr _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public IntPtr _pActivationFactoryCallback;
+            public int _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public int _dwSig;
+            public int _cLocks;
+            public IntPtr _pObjServer; // CObjServer* 
+            public IntPtr _cookie;
+            public bool _suspended;
+            public int _ulServiceId;
+            public IntPtr _activatableClassId;
+            public IntPtr _packageFullName; // Microsoft::WRL::Wrappers::HString 
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == IntPtr.Zero)
+                    return string.Empty;
+                return process.ReadHString(_activatableClassId);
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return _pActivationFactoryCallback;
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return Guid.Empty;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                if (_packageFullName == IntPtr.Zero)
+                    return string.Empty;
+                return process.ReadHString(_packageFullName);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
         struct SActivatableClassIdHashNode32
         {
             public SHashChain32 chain;
@@ -1547,6 +1591,50 @@ namespace OleViewDotNet
             Guid IWinRTLocalSvrClassEntry.GetClsid()
             {
                 return _clsid;
+            }
+
+            string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
+            {
+                if (_packageFullName == 0)
+                    return string.Empty;
+                return process.ReadHString(new IntPtr(_packageFullName));
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWinRTLocalSvrClassEntryRS532 : IWinRTLocalSvrClassEntry
+        {
+            [ChainOffset]
+            public SActivatableClassIdHashNode32 _hashNode;
+            public int _pRegChain; // CClassCache::CWinRTLocalSvrClassEntry* 
+            public int _pActivationFactoryCallback;
+            public int _dwFlags;
+            public int _dwScmReg;
+            public int _hApt;
+            public int _dwSig;
+            public int _cLocks;
+            public int _pObjServer; // CObjServer* 
+            public int _cookie;
+            public bool _suspended;
+            public int _ulServiceId;
+            public int _activatableClassId;
+            public int _packageFullName; // Microsoft::WRL::Wrappers::HString 
+
+            string IWinRTLocalSvrClassEntry.GetActivatableClassId(NtProcess process)
+            {
+                if (_activatableClassId == 0)
+                    return string.Empty;
+                return process.ReadHString(new IntPtr(_activatableClassId));
+            }
+
+            IntPtr IWinRTLocalSvrClassEntry.GetActivationFactoryCallback()
+            {
+                return new IntPtr(_pActivationFactoryCallback);
+            }
+
+            Guid IWinRTLocalSvrClassEntry.GetClsid()
+            {
+                return Guid.Empty;
             }
 
             string IWinRTLocalSvrClassEntry.GetPackageFullName(NtProcess process)
@@ -1871,6 +1959,7 @@ namespace OleViewDotNet
         }
 
         private static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
+        private static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
 
         private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
@@ -1886,10 +1975,11 @@ namespace OleViewDotNet
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntryWin8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
-                else
+                else if (IsWindows10RS4OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
+                return ReadHashTable<CWinRTLocalSvrClassEntryRS5, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
             else
             {
@@ -1897,10 +1987,11 @@ namespace OleViewDotNet
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry32Win8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
-                else
+                else if (IsWindows10RS4OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
+                return ReadHashTable<CWinRTLocalSvrClassEntryRS532, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
         }
 
