@@ -73,6 +73,8 @@ namespace OleViewDotNet
         public InstancingType InstancingType { get; private set; }
         public IEnumerable<COMRuntimeClassEntry> Classes => m_get_classes.Value.AsReadOnly();
         public int ClassCount => m_get_classes.Value.Count;
+        public string PackageId { get; private set; }
+        public bool RuntimeServer => string.IsNullOrEmpty(PackageId);
 
         string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
 
@@ -98,9 +100,11 @@ namespace OleViewDotNet
                 c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
         }
 
-        public COMRuntimeServerEntry(string name, RegistryKey rootKey, COMRegistry registry) : this(registry)
+        public COMRuntimeServerEntry(COMRegistry registry, string package_id, 
+            string name, RegistryKey rootKey) : this(registry)
         {
             Name = name;
+            PackageId = package_id ?? string.Empty;
             LoadFromKey(rootKey);
         }
 
@@ -124,6 +128,7 @@ namespace OleViewDotNet
             ExePath = reader.ReadString("exepath");
             Identity = reader.ReadString("identity");
             Permissions = reader.ReadString("perms");
+            PackageId = reader.ReadString("pkg");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -136,6 +141,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("exepath", ExePath);
             writer.WriteOptionalAttributeString("perms", Permissions);
             writer.WriteOptionalAttributeString("identity", Identity);
+            writer.WriteOptionalAttributeString("pkg", PackageId);
         }
 
         public override bool Equals(object obj)
@@ -154,14 +160,14 @@ namespace OleViewDotNet
             return IdentityType == right.IdentityType && ServerType == right.ServerType &&
                 InstancingType == right.InstancingType && ServiceName == right.ServiceName &&
                 ExePath == right.ExePath && Permissions == right.Permissions &&
-                Identity == right.Identity;
+                Identity == right.Identity && PackageId == right.PackageId;
         }
 
         public override int GetHashCode()
         {
             return IdentityType.GetHashCode() ^ ServerType.GetHashCode() ^ InstancingType.GetHashCode() ^
                 ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSafeHashCode() ^
-                Identity.GetSafeHashCode();
+                Identity.GetSafeHashCode() ^ PackageId.GetSafeHashCode();
         }
 
         public override string ToString()

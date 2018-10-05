@@ -558,7 +558,7 @@ namespace OleViewDotNet
             {
                 return m_runtime_classes[name];
             }
-            return new COMRuntimeClassEntry(this, activable_class);
+            return new COMRuntimeClassEntry(this, string.Empty, activable_class);
         }
 
         public COMTypeLibVersionEntry GetTypeLibVersionEntry(Guid typelib, string version)
@@ -681,19 +681,7 @@ namespace OleViewDotNet
                 Report(progress, "TypeLibs", 8, total_count);
                 LoadTypelibs(classes_key);
                 Report(progress, "Runtime Classes", 9, total_count);
-                m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>(StringComparer.OrdinalIgnoreCase);
-                m_runtime_servers = new SortedDictionary<string, COMRuntimeServerEntry>(StringComparer.OrdinalIgnoreCase);
-                if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
-                {
-                    using (RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime"))
-                    {
-                        if (runtime_key != null)
-                        {
-                            LoadRuntimeClasses(runtime_key);
-                            LoadRuntimeServers(runtime_key);
-                        }
-                    }
-                }
+                LoadWindowsRuntime(classes_key, mode);
             }
 
             try
@@ -1111,7 +1099,48 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadRuntimeClasses(RegistryKey runtime_key)
+        private void LoadWindowsRuntime(RegistryKey classes_key, COMRegistryMode mode)
+        {
+            Dictionary<string, COMRuntimeClassEntry> classes = new Dictionary<string, COMRuntimeClassEntry>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, COMRuntimeServerEntry> servers = new Dictionary<string, COMRuntimeServerEntry>(StringComparer.OrdinalIgnoreCase);
+
+            // Load the system Windows Runtime classes.
+            if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
+            {
+                using (RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime"))
+                {
+                    if (runtime_key != null)
+                    {
+                        LoadRuntimeClasses(runtime_key, string.Empty, this, classes);
+                        LoadRuntimeServers(runtime_key, string.Empty, this, servers);
+                    }
+                }
+            }
+
+            using (RegistryKey package_key = classes_key.OpenSubKey(@"ActivatableClasses\Package"))
+            {
+                if (package_key != null)
+                {
+                    foreach (var package_id in package_key.GetSubKeyNames())
+                    {
+                        using (RegistryKey runtime_key = package_key.OpenSubKey(package_id))
+                        {
+                            if (runtime_key != null)
+                            {
+                                LoadRuntimeClasses(runtime_key, package_id, this, classes);
+                                LoadRuntimeServers(runtime_key, package_id, this, servers);
+                            }
+                        }
+                    }
+                }
+            }
+
+            m_runtime_classes = new SortedDictionary<string, COMRuntimeClassEntry>(classes, StringComparer.OrdinalIgnoreCase);
+            m_runtime_servers = new SortedDictionary<string, COMRuntimeServerEntry>(servers, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void LoadRuntimeClasses(RegistryKey runtime_key, string package_id, 
+            COMRegistry registry, Dictionary<string, COMRuntimeClassEntry> classes)
         {
             using (RegistryKey classes_key = runtime_key.OpenSubKey("ActivatableClassId"))
             {
@@ -1124,16 +1153,16 @@ namespace OleViewDotNet
                         {
                             if (subkey != null)
                             {
-                                entries.Add(new COMRuntimeClassEntry(this, name, subkey));
+                                classes[name] = new COMRuntimeClassEntry(registry, package_id, name, subkey);
                             }
                         }
                     }
-                    m_runtime_classes = entries.ToSortedDictionary(c => c.Name.ToLower(), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
 
-        private void LoadRuntimeServers(RegistryKey runtime_key)
+        private static void LoadRuntimeServers(RegistryKey runtime_key, string package_id, 
+            COMRegistry registry, Dictionary<string, COMRuntimeServerEntry> servers)
         {
             using (RegistryKey server_key = runtime_key.OpenSubKey("Server"))
             {
@@ -1146,11 +1175,10 @@ namespace OleViewDotNet
                         {
                             if (subkey != null)
                             {
-                                entries.Add(new COMRuntimeServerEntry(name, subkey, this));
+                                servers[name] = new COMRuntimeServerEntry(registry, package_id, name, subkey);
                             }
                         }
                     }
-                    m_runtime_servers = entries.ToSortedDictionary(c => c.Name.ToLower(), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }

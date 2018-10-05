@@ -68,7 +68,8 @@ namespace OleViewDotNet
                 return Path.GetFileName(DllPath);
             }
         }
-
+        public string PackageId { get; private set; }
+        public bool RuntimeClass => string.IsNullOrEmpty(PackageId);
         public string Server { get; private set; }
         public string DefaultServer { get { return Server; } }
         public bool HasServer
@@ -93,10 +94,19 @@ namespace OleViewDotNet
         {
             get; private set;
         }
+
         public bool HasPermission
         {
             get { return !string.IsNullOrWhiteSpace(Permissions); }
         }
+
+        public string ServerPermissions => ServerEntry?.Permissions ?? string.Empty;
+
+        public bool HasServerPermission
+        {
+            get { return !string.IsNullOrWhiteSpace(ServerPermissions); }
+        }
+
         public TrustLevel TrustLevel
         {
             get; private set;
@@ -123,16 +133,19 @@ namespace OleViewDotNet
             ActivateInSharedBroker = COMUtilities.ReadIntFromKey(key, null, "ActivateInSharedBroker") != 0;
         }
 
-        internal COMRuntimeClassEntry(COMRegistry registry, string name) : this(registry)
+        internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 
+            : this(registry)
         {
             Name = name;
             DllPath = string.Empty;
             Server = string.Empty;
             Permissions = string.Empty;
+            PackageId = package_id ?? string.Empty;
         }
 
-        public COMRuntimeClassEntry(COMRegistry registry, string name, RegistryKey rootKey) 
-            : this(registry, name)
+        public COMRuntimeClassEntry(COMRegistry registry, 
+            string package_id, string name, RegistryKey rootKey) 
+            : this(registry, package_id, name)
         {
             LoadFromKey(rootKey);
         }
@@ -158,6 +171,7 @@ namespace OleViewDotNet
             TrustLevel = reader.ReadEnum<TrustLevel>("trust");
             Threading = reader.ReadEnum<ThreadingType>("thread");
             ActivateInSharedBroker = reader.ReadBool("shared");
+            PackageId = reader.ReadString("pkg");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -171,6 +185,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("perms", Permissions);
             writer.WriteEnum("thread", Threading);
             writer.WriteBool("shared", ActivateInSharedBroker);
+            writer.WriteOptionalAttributeString("pkg", PackageId);
         }
 
         public override bool Equals(object obj)
@@ -188,14 +203,16 @@ namespace OleViewDotNet
 
             return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
                 && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
-                Permissions == right.Permissions && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker;
+                Permissions == right.Permissions && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
+                && PackageId == right.PackageId;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
                 ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
-                ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode();
+                ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
+                ^ PackageId.GetSafeHashCode();
         }
 
         public override string ToString()
