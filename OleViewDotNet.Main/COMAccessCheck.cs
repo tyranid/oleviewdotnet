@@ -167,6 +167,10 @@ namespace OleViewDotNet
                 {
                     launch_sddl = runtime_class.Permissions;
                 }
+                else if (runtime_class.TrustLevel == TrustLevel.PartialTrust)
+                {
+                    launch_sddl = COMRuntimeClassEntry.DefaultActivationPermission;
+                }
                 else
                 {
                     // Set to denied access.

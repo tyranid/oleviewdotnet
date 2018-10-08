@@ -54,6 +54,8 @@ namespace OleViewDotNet
         private List<COMInterfaceInstance> m_factory_interfaces;
         private readonly COMRegistry m_registry;
 
+        public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
+
         public string Name { get; private set; }
         public Guid Clsid { get; private set; }
         public string DllPath { get; private set; }
