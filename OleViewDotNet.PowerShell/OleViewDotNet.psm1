@@ -861,7 +861,9 @@ function Get-ComRuntimeClass {
         [Parameter(Mandatory, ParameterSetName = "FromDllPath")]
         [string]$DllPath,
         [Parameter(Mandatory, ParameterSetName = "FromActivationType")]
-        [OleViewDotNet.ActivationType]$ActivationType 
+        [OleViewDotNet.ActivationType]$ActivationType,
+        [Parameter(Mandatory, ParameterSetName = "FromTrustLevel")]
+        [OleViewDotNet.TrustLevel]$TrustLevel
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -880,6 +882,9 @@ function Get-ComRuntimeClass {
         }
         "FromActivationType" {
             Get-ComRuntimeClass -Database $Database | ? ActivationType -eq $ActivationType | Write-Output
+        }
+        "FromTrustLevel" {
+            Get-ComRuntimeClass -Database $Database | ? TrustLevel -eq $TrustLevel | Write-Output
         }
     }
 }
