@@ -1386,7 +1386,7 @@ namespace OleViewDotNet
                         createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
                     }
 
-                    if (runtime_class != null && runtime_class.HasPermission)
+                    if (runtime_class != null && runtime_class.TrustLevel == TrustLevel.PartialTrust)
                     {
                         createSpecialToolStripMenuItem.DropDownItems.Add(createInRuntimeBrokerToolStripMenuItem);
                         createSpecialToolStripMenuItem.DropDownItems.Add(createInPerUserRuntimeBrokerToolStripMenuItem);
