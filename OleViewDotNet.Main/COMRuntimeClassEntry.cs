@@ -241,11 +241,6 @@ namespace OleViewDotNet
 
         public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
         {
-            if (Clsid == Guid.Empty)
-            {
-                return false;
-            }
-
             if (refresh || !InterfacesLoaded)
             {
                 COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
