@@ -1247,6 +1247,8 @@ Show access rights rather than launch rights.
 Shows the security descriptor for a database object.
 .PARAMETER Default
 Shows the default security descriptor for the specified database.
+.PARAMETER RuntimeDefault
+Shows the default security descriptor for the Windows Runtime Broker.
 .PARAMETER Restriction
 Shows the security descriptor restriction for the specified database.
 .PARAMETER Database
@@ -1291,6 +1293,8 @@ function Show-ComSecurityDescriptor {
         [switch]$Restriction,
         [Parameter(Mandatory, ParameterSetName = "FromDefault")]
         [switch]$Default,
+        [Parameter(Mandatory, ParameterSetName = "FromRuntimeDefault")]
+        [switch]$RuntimeDefault,
         [Parameter(ParameterSetName = "FromRestriction")]
         [Parameter(ParameterSetName = "FromDefault")]
         [OleViewDotNet.COMRegistry]$Database,
@@ -1333,6 +1337,9 @@ function Show-ComSecurityDescriptor {
                     $SecurityDescriptor = $Database.DefaultLaunchRestriction
                 }
                 $name = "Restriction"
+            }
+            "FromRuntimeDefault" {
+                $SecurityDescriptor = [OleViewDotNet.COMRuntimeClassEntry]::DefaultActivationPermission
             }
         }
 

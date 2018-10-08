@@ -100,7 +100,7 @@ namespace OleViewDotNet
                 }
                 throw new ArgumentException("RuntimeServer doesn't have an launch permission");
             }
-            throw new ArgumentException("Can't get launc permission for object");
+            throw new ArgumentException("Can't get launch permission for object");
         }
 
         public COMAccessCheck(NtToken token,
