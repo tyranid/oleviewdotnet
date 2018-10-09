@@ -863,6 +863,33 @@ namespace OleViewDotNet
         struct CStdIdentity32 : IStdIdentity
         {
             public int VTablePtr;
+            public int VTablePtr2;
+            public SMFLAGS _dwFlags;
+            public int _cIPIDs;
+            public int _pFirstIPID; // tagIPIDEntry* 
+
+            IPIDEntryNativeInterface IStdIdentity.GetFirstIpid(NtProcess process)
+            {
+                if (_pFirstIPID == 0)
+                    return null;
+                return process.ReadStruct<IPIDEntryNative32>(_pFirstIPID);
+            }
+
+            int IStdIdentity.GetIPIDCount()
+            {
+                return _cIPIDs;
+            }
+
+            SMFLAGS IStdIdentity.GetFlags()
+            {
+                return _dwFlags;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CStdIdentity32RS4 : IStdIdentity
+        {
+            public int VTablePtr;
             public int DummyValue; // This seems to be here to ensure the rest of the struct is 8 byte aligned.
             public int VTablePtr2;
             public SMFLAGS _dwFlags;
@@ -1234,7 +1261,15 @@ namespace OleViewDotNet
                 {
                     return null;
                 }
-                return process.ReadStruct<CStdIdentity32>(_pStdID);
+
+                if (IsWindows10RS3OrLess)
+                {
+                    return process.ReadStruct<CStdIdentity32>(_pStdID);
+                }
+                else
+                {
+                    return process.ReadStruct<CStdIdentity32RS4>(_pStdID);
+                }
             }
         }
 
@@ -1973,6 +2008,7 @@ namespace OleViewDotNet
         }
 
         private static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
+        private static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
         private static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
 
         private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
