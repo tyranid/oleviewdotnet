@@ -68,6 +68,7 @@ namespace OleViewDotNet
         private Dictionary<Guid, IEnumerable<COMInterfaceEntry>> m_proxiesbyclsid;
         private Dictionary<Guid, string> m_iids_to_names;
         private Dictionary<Guid, IEnumerable<COMCLSIDEntry>> m_clsids_by_appid;
+        private SortedDictionary<string, IEnumerable<COMRuntimeExtensionEntry>> m_runtime_extensions_by_category_id;
 
         #endregion
 
@@ -199,6 +200,19 @@ namespace OleViewDotNet
         public IEnumerable<COMRuntimeExtensionEntry> RuntimeExtensions
         {
             get { return m_runtime_extensions; }
+        }
+
+        public IDictionary<string, IEnumerable<COMRuntimeExtensionEntry>> RuntimeExtensionsByCategory
+        {
+            get
+            {
+                if (m_runtime_extensions_by_category_id == null)
+                {
+                    m_runtime_extensions_by_category_id = 
+                        m_runtime_extensions.GroupBy(m => m.ContractId, StringComparer.OrdinalIgnoreCase).ToSortedDictionary(p => p.Key, p => p.AsEnumerable());
+                }
+                return m_runtime_extensions_by_category_id;
+            }
         }
 
         public string CreatedDate

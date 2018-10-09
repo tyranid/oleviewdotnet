@@ -2360,3 +2360,47 @@ function Select-ComClassInterface {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Get Windows Runtime extensions.
+.DESCRIPTION
+This cmdlet gets the Windows Runtime extensions from a database.
+.PARAMETER ContractId
+Specify a contract ID to lookup.
+.PARAMETER Database
+The COM database to use.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMRuntimeExtensionEntry
+.EXAMPLE
+Get-ComRuntimeExtension
+Get all Windows Runtime extensions.
+.EXAMPLE
+Get-ComRuntimeExtension -ContractId "Windows.Protocol"
+Get Windows Runtime extensions with contract ID of Windows.Protocol.
+#>
+function Get-ComRuntimeExtension {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromCategoryId")]
+        [string]$CategoryId,
+        [OleViewDotNet.COMRegistry]$Database
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            $Database.RuntimeExtensions | Write-Output 
+        }
+        "FromCategoryId" {
+            $Database.RuntimeExtensionsByCategory[$CategoryId] | Write-Output
+        }
+    }
+}
