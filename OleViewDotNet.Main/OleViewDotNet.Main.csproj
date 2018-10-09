@@ -112,6 +112,7 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="AppxPackageName.cs" />
     <Compile Include="BuildMonikerForm.cs">
       <SubType>Form</SubType>
     </Compile>

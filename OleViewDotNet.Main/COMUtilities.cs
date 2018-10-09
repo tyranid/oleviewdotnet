@@ -371,7 +371,7 @@ namespace OleViewDotNet
         public int dwServerTid;
         public long ui64ServerAddress;
     }
-    
+
     public static class COMUtilities
     {
         private enum RegKind

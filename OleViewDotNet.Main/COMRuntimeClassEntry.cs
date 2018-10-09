@@ -71,6 +71,9 @@ namespace OleViewDotNet
             }
         }
         public string PackageId { get; private set; }
+        public string PackageName => Package?.Name ?? string.Empty;
+        public AppxPackageName Package => AppxPackageName.FromFullName(PackageId);
+
         public bool RuntimeClass => string.IsNullOrEmpty(PackageId);
         public string Server { get; private set; }
         public string DefaultServer { get { return Server; } }

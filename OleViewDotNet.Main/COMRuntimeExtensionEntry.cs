@@ -128,6 +128,8 @@ namespace OleViewDotNet
 
         #region Public Properties
         public string PackageId { get; private set; }
+        public string PackageName => Package?.Name ?? string.Empty;
+        public AppxPackageName Package => AppxPackageName.FromFullName(PackageId);
         public string ContractId { get; private set; }
         public string AppId { get; private set; }
         public string Description { get; private set; }
