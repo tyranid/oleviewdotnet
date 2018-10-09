@@ -19,6 +19,7 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -61,6 +62,10 @@ namespace OleViewDotNet
         public bool AppContainer { get; }
         public bool Restricted { get; }
         public bool Elevated { get; }
+        public bool LowPrivilegeAppContainer { get; }
+        public AppxPackageName PackageName { get; }
+        public ulong PackageHostId { get; }
+        public IEnumerable<AppModelPolicy_PolicyValue> AppModelPolicies { get; }
 
         public COMProcessToken()
         {
@@ -71,6 +76,8 @@ namespace OleViewDotNet
 
         public COMProcessToken(NtProcess process) : this()
         {
+            PackageName = AppxPackageName.FromProcess(process);
+
             using (var result = NtToken.OpenProcessToken(process, TokenAccessRights.Query, false))
             {
                 if (result.IsSuccess)
@@ -83,6 +90,13 @@ namespace OleViewDotNet
                     AppContainer = token.AppContainer;
                     Restricted = token.Restricted;
                     Elevated = token.Elevated;
+                    LowPrivilegeAppContainer = token.LowPrivilegeAppContainer;
+                    var pkghostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
+                    if (pkghostid != null && pkghostid.ValueType == ClaimSecurityValueType.UInt64 && pkghostid.Values.Any())
+                    {
+                        PackageHostId = (ulong)pkghostid.Values.First();
+                    }
+                    AppModelPolicies = token.AppModelPolicies.ToList().AsReadOnly();
                 }
             }
         }
@@ -2388,6 +2402,10 @@ namespace OleViewDotNet
         public IEnumerable<COMIPIDEntry> Clients { get; private set; }
         public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
         public COMProcessToken Token { get; private set; }
+        public string PackageId => Token.PackageName?.FullName ?? string.Empty;
+        public string PackageName => Token.PackageName?.Name ?? string.Empty;
+        public ulong PackageHostId => Token.PackageHostId;
+        public bool Sandboxed => Token.Sandboxed;
 
         private bool CustomMarshalAllowedInternal(bool ac)
         {
