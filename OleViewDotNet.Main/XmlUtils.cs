@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace OleViewDotNet
@@ -47,7 +48,7 @@ namespace OleViewDotNet
                     return new T[0];
                 }
             }
-                     
+
             if (reader.IsStartElement(name))
             {
                 if (!reader.IsEmptyElement)
@@ -68,6 +69,49 @@ namespace OleViewDotNet
                 }
             }
             return ret;
+        }
+
+        private class XmlNameValuePair : IXmlSerializable
+        {
+            public string Name;
+            public string Value;
+
+            XmlSchema IXmlSerializable.GetSchema()
+            {
+                return null;
+            }
+
+            public XmlNameValuePair()
+            {
+            }
+
+            public XmlNameValuePair(KeyValuePair<string, string> pair)
+            {
+                Name = pair.Key;
+                Value = pair.Value;
+            }
+
+            void IXmlSerializable.ReadXml(XmlReader reader)
+            {
+                Name = reader.ReadString("n");
+                Value = reader.ReadString("v");
+            }
+
+            void IXmlSerializable.WriteXml(XmlWriter writer)
+            {
+                writer.WriteOptionalAttributeString("n", Name);
+                writer.WriteOptionalAttributeString("v", Value);
+            }
+        }
+
+        internal static Dictionary<string, string> ReadDictionary(this XmlReader reader, string name)
+        {
+            return reader.ReadSerializableObjects(name, () => new XmlNameValuePair()).ToDictionary(p => p.Name, p => p.Value);
+        }
+
+        internal static void WriteDictionary(this XmlWriter writer, IReadOnlyDictionary<string, string> dict, string name)
+        {
+            writer.WriteSerializableObjects(name, dict.Select(p => new XmlNameValuePair(p)));
         }
 
         internal static void WriteGuids(this XmlWriter writer, string name, IEnumerable<Guid> guids)
@@ -110,7 +154,7 @@ namespace OleViewDotNet
 
         internal static void WriteOptionalAttributeString(this XmlWriter writer, string name, string value)
         {
-            if (!String.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(value))
             {
                 writer.WriteAttributeString(name, CleanupXmlString(value));
             }

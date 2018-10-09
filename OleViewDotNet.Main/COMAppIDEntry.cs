@@ -162,8 +162,6 @@ namespace OleViewDotNet
 
     public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity
     {
-        private readonly COMRegistry m_registry;
-
         public COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
         {
             AppId = appId;
@@ -364,9 +362,9 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_registry.ClsidsByAppId.ContainsKey(AppId))
+                if (Database.ClsidsByAppId.ContainsKey(AppId))
                 {
-                    return m_registry.ClsidsByAppId[AppId];
+                    return Database.ClsidsByAppId[AppId];
                 }
                 return new COMCLSIDEntry[0];
             }
@@ -377,11 +375,11 @@ namespace OleViewDotNet
             get; private set;
         }
 
-        internal COMRegistry Database { get { return m_registry; } }
+        internal COMRegistry Database { get; }
 
-        string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
+        string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-        string ICOMAccessSecurity.DefaultLaunchPermission => m_registry.DefaultLaunchPermission;
+        string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
         public override string ToString()
         {
@@ -428,7 +426,7 @@ namespace OleViewDotNet
 
         internal COMAppIDEntry(COMRegistry registry)
         {
-            m_registry = registry;
+            Database = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

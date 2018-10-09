@@ -32,6 +32,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -537,7 +538,7 @@ namespace OleViewDotNet
                     key = rootKey.OpenSubKey(keyName);
                 }
 
-                string valueString = String.Empty;
+                string valueString = string.Empty;
                 if (key != null)
                 {
                     object valueObject = key.GetValue(valueName);
@@ -582,6 +583,18 @@ namespace OleViewDotNet
             }
             
             return Guid.Empty;
+        }
+
+        public static RegistryKey OpenSubKeySafe(this RegistryKey rootKey, string keyName)
+        {
+            try
+            {
+                return rootKey.OpenSubKey(keyName);
+            }
+            catch(SecurityException)
+            {
+                return null;
+            }
         }
 
         public static string GetCategoryName(Guid catid)
@@ -2900,6 +2913,39 @@ namespace OleViewDotNet
             }
 
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dbghelp.dll");
+        }
+
+        internal static bool EqualsDictionary<K, V>(IReadOnlyDictionary<K, V> left, IReadOnlyDictionary<K, V> right)
+        {
+            if (left.Count != right.Count)
+            {
+                return false;
+            }
+
+            foreach (var pair in left)
+            {
+                if (!right.ContainsKey(pair.Key))
+                {
+                    return false;
+                }
+
+                if (!right[pair.Key].Equals(pair.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static int GetHashCodeDictionary<K, V>(IReadOnlyDictionary<K, V> dict)
+        {
+            int hash_code = 0;
+            foreach (var pair in dict)
+            {
+                hash_code ^= pair.Key.GetHashCode() ^ pair.Value.GetHashCode();
+            }
+            return hash_code;
         }
     }
 }
