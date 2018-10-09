@@ -422,13 +422,13 @@
                         <Alignment>left</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>PackageId</Label>
-                        <Width>50</Width>
+                        <Label>PackageName</Label>
+                        <Width>30</Width>
                         <Alignment>left</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>AppId</Label>
-                        <Width>20</Width>
+                        <Width>30</Width>
                         <Alignment>left</Alignment>
                     </TableColumnHeader>
                 </TableHeaders>
@@ -439,7 +439,7 @@
                                 <PropertyName>ContractId</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>PackageId</PropertyName>
+                                <PropertyName>PackageName</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>AppId</PropertyName>
