@@ -37,11 +37,13 @@ namespace OleViewDotNet
         IUServerSelfSidInLaunchPermission = 0x10,
         IUServerActivateInClientSessionOnly = 0x20,
         Reserved1 = 0x40,
-        Reserved2 = 0x80,
+        RequireSideLoadedPackage = 0x80,
         SessionVirtualAccountServer = 0x100,
         IUServerUnmodifiedClientLogonTokenUser = 0x200,
         IUServerUnmodifiedSessionLogonTokenUser = 0x400,
         AAANoImplicitActivateAsIU = 0x800,
+        PerAppBrokerSuspension = 0x1000,
+        SuspensionManaged = 0x2000
     }
 
     [Flags]
@@ -440,7 +442,8 @@ namespace OleViewDotNet
             DllSurrogate = reader.ReadString("dllsurrogate");
             RunAs = reader.ReadString("runas");
             Name = reader.ReadString("name");
-            Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), reader.ReadString("flags"), true);
+            string flags = reader.ReadString("flags").Replace("Reserved2", "RequireSideLoadedPackage");
+            Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), flags, true);
             LaunchPermission = reader.ReadString("launchperm");
             AccessPermission = reader.ReadString("accessperm");
             RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
