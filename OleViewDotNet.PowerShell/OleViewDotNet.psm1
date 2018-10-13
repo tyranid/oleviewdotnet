@@ -1828,9 +1828,13 @@ Get all COM registered type libraries.
 function Get-ComTypeLib {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
-        [parameter(Mandatory, ParameterSetName = "FromIid")]
-        [Guid]$Iid
+        [parameter(Mandatory, ParameterSetName = "FromIid", Position=0)]
+        [Guid]$Iid,
+        [parameter(Mandatory, ParameterSetName = "FromInterface")]
+        [OleViewDotNet.COMInterfaceEntry]$Interface,
+        [parameter(Mandatory, ParameterSetName = "FromInterfaceInstance")]
+        [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
+        [OleViewDotNet.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -1847,6 +1851,12 @@ function Get-ComTypeLib {
             if ($null -ne $intf) {
                 $intf.TypeLibVersionEntry | Write-Output
             }
+        }
+        "FromInterface" {
+            Get-ComTypeLib $Interface.Iid -Database $Database | Write-Output
+        }
+        "FromInterfaceInstance" {
+            Get-ComTypeLib $InterfaceInstance.Iid -Database $Database | Write-Output
         }
     }
 }
