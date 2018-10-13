@@ -125,6 +125,18 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public Type RuntimeType
+        {
+            get
+            {
+                if (COMUtilities.RuntimeClassMetadata.ContainsKey(Name))
+                {
+                    return COMUtilities.RuntimeClassMetadata[Name];
+                }
+                return null;
+            }
+        }
+
         private void LoadFromKey(RegistryKey key)
         {
             Clsid = COMUtilities.ReadGuidFromKey(key, null, "CLSID");
