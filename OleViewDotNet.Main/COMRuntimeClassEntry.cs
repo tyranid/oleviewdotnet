@@ -129,11 +129,7 @@ namespace OleViewDotNet
         {
             get
             {
-                if (COMUtilities.RuntimeClassMetadata.ContainsKey(Name))
-                {
-                    return COMUtilities.RuntimeClassMetadata[Name];
-                }
-                return null;
+                return Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
             }
         }
 
