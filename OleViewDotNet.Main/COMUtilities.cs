@@ -583,7 +583,7 @@ namespace OleViewDotNet
             {
                 return ret;
             }
-            
+
             return Guid.Empty;
         }
 
@@ -593,7 +593,7 @@ namespace OleViewDotNet
             {
                 return rootKey.OpenSubKey(keyName);
             }
-            catch(SecurityException)
+            catch (SecurityException)
             {
                 return null;
             }
@@ -1684,7 +1684,7 @@ namespace OleViewDotNet
 
             token = int.Parse(name.Substring(0, length));
 
-            return name.Substring(length).TrimStart('_'); 
+            return name.Substring(length).TrimStart('_');
         }
 
         private static string ReadType(ref string name)
@@ -1843,7 +1843,7 @@ namespace OleViewDotNet
             bool parse_registered_classes = Properties.Settings.Default.ParseRegisteredClasses;
             bool parse_clients = Properties.Settings.Default.ParseClients;
 
-            return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods, 
+            return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods,
                 resolve_method_names, parse_registered_classes, parse_clients);
         }
 
@@ -2183,7 +2183,7 @@ namespace OleViewDotNet
             return ResolveAssembly(base_path, args.Name);
         }
 
-        private static IReadOnlyDictionary<Guid, Type> m_runtime_interface_metadata;
+        private static Dictionary<Guid, Type> m_runtime_interface_metadata;
 
         public static IReadOnlyDictionary<Guid, Type> RuntimeInterfaceMetadata
         {
@@ -2191,19 +2191,34 @@ namespace OleViewDotNet
             {
                 if (m_runtime_interface_metadata == null)
                 {
-                    m_runtime_interface_metadata = LoadRuntimeIntefaceMetadata();
+                    LoadRuntimeMetadata();
                 }
                 return m_runtime_interface_metadata;
             }
         }
 
-        private static IReadOnlyDictionary<Guid, Type> LoadRuntimeIntefaceMetadata()
+        private static Dictionary<string, Type> m_runtime_class_metadata;
+
+        public static IReadOnlyDictionary<string, Type> RuntimeClassMetadata
+        {
+            get
+            {
+                if (m_runtime_class_metadata == null)
+                {
+                    LoadRuntimeMetadata();
+                }
+                return m_runtime_class_metadata;
+            }
+        }
+
+        private static void LoadRuntimeMetadata()
         {
             string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
-            Dictionary<Guid, Type> ret = new Dictionary<Guid, Type>();
+            m_runtime_interface_metadata = new Dictionary<Guid, Type>();
+            m_runtime_class_metadata = new Dictionary<string, Type>();
             if (!Directory.Exists(base_path))
             {
-                return ret;
+                return;
             }
 
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (s, a) => CurrentDomain_ReflectionOnlyAssemblyResolve(base_path, a);
@@ -2214,23 +2229,37 @@ namespace OleViewDotNet
                 try
                 {
                     Assembly asm = Assembly.ReflectionOnlyLoadFrom(file.FullName);
-                    Type[] types = asm.GetTypes();
-                    foreach (Type t in types.Where(x => x.IsInterface))
+                    Type type = asm.GetTypes().FirstOrDefault();
+                    if (type == null)
                     {
-                        foreach (var attr in t.GetCustomAttributesData())
+                        continue;
+                    }
+                    // Convert to a non-reflection only assembly.
+                    Assembly new_asm = Type.GetType(type.AssemblyQualifiedName)?.Assembly;
+                    Type[] types = (new_asm ?? asm).GetTypes();
+                    foreach (Type t in types)
+                    {
+                        if (t.IsInterface)
                         {
-                            if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
+                            foreach (var attr in t.GetCustomAttributesData())
                             {
-                                ret[t.GUID] = t;
+                                if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
+                                {
+                                    m_runtime_interface_metadata[t.GUID] = t;
+                                }
                             }
+                        }
+                        else if (t.IsClass && t.IsPublic)
+                        {
+                            m_runtime_class_metadata[t.FullName] = t;
                         }
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine(ex.ToString());
                 }
             }
-            return ret;
         }
 
         private static Lazy<string> _assembly_version = new Lazy<string>(() =>
