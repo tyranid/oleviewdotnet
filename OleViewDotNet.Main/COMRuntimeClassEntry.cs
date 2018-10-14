@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
@@ -185,6 +186,12 @@ namespace OleViewDotNet
             Threading = reader.ReadEnum<ThreadingType>("thread");
             ActivateInSharedBroker = reader.ReadBool("shared");
             PackageId = reader.ReadString("pkg");
+            InterfacesLoaded = reader.ReadBool("loaded");
+            if (InterfacesLoaded)
+            {
+                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(m_registry)).ToList();
+                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(m_registry)).ToList();
+            }
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -199,6 +206,12 @@ namespace OleViewDotNet
             writer.WriteEnum("thread", Threading);
             writer.WriteBool("shared", ActivateInSharedBroker);
             writer.WriteOptionalAttributeString("pkg", PackageId);
+            writer.WriteBool("loaded", InterfacesLoaded);
+            if (InterfacesLoaded)
+            {
+                writer.WriteSerializableObjects("ints", m_interfaces);
+                writer.WriteSerializableObjects("facts", m_factory_interfaces);
+            }
         }
 
         public override bool Equals(object obj)
