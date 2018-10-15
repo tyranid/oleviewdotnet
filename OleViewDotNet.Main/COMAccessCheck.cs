@@ -90,6 +90,10 @@ namespace OleViewDotNet
                 {
                     return runtime_class.Permissions;
                 }
+                else if (runtime_class.ActivationType == ActivationType.OutOfProcess && runtime_class.HasServerPermission)
+                {
+                    return runtime_class.ServerPermissions;
+                }
                 throw new ArgumentException("RuntimeClass doesn't have an launch permission");
             }
             else if (obj is COMRuntimeServerEntry runtime_server)
@@ -166,6 +170,10 @@ namespace OleViewDotNet
                 if (runtime_class.HasPermission)
                 {
                     launch_sddl = runtime_class.Permissions;
+                }
+                else if (runtime_class.ActivationType == ActivationType.OutOfProcess && runtime_class.HasServerPermission)
+                {
+                    launch_sddl = runtime_class.ServerPermissions;
                 }
                 else if (runtime_class.TrustLevel == TrustLevel.PartialTrust)
                 {
