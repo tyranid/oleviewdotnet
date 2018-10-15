@@ -293,7 +293,7 @@ namespace OleViewDotNet
     }
 
     [Flags]
-    public enum ACTIVATIONTYPE
+    public enum FILTER_ACTIVATIONTYPE
     {
         UNCATEGORIZED = 0x0,
         FROM_MONIKER = 0x1,
@@ -308,7 +308,7 @@ namespace OleViewDotNet
     public interface IActivationFilter
     {
         void HandleActivation(
-            ACTIVATIONTYPE dwActivationType,
+            FILTER_ACTIVATIONTYPE dwActivationType,
             ref Guid rclsid,
             out Guid pReplacementClsId);
     };

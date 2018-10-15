@@ -66,7 +66,7 @@ namespace OleViewDotNet.PowerShell
             }
         }
 
-        void IActivationFilter.HandleActivation(ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+        void IActivationFilter.HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
         {
             pReplacementClsId = rclsid;
             lock (this)
