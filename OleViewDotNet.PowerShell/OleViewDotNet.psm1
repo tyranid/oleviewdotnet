@@ -2395,7 +2395,7 @@ function Get-ComRuntimeExtension {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [Parameter(Mandatory, ParameterSetName = "FromCategoryId")]
-        [string]$CategoryId,
+        [string]$ContractId,
         [OleViewDotNet.COMRegistry]$Database
     )
 
@@ -2410,7 +2410,7 @@ function Get-ComRuntimeExtension {
             $Database.RuntimeExtensions | Write-Output 
         }
         "FromCategoryId" {
-            $Database.RuntimeExtensionsByCategory[$CategoryId] | Write-Output
+            $Database.RuntimeExtensionsByContractId[$ContractId] | Write-Output
         }
     }
 }
