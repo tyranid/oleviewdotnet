@@ -61,6 +61,18 @@ namespace OleViewDotNet
             public IntPtr publisherId;
         }
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private class PACKAGE_ID_ALLOC
+        {
+            public uint reserved;
+            public AppxPackageArchitecture processorArchitecture;
+            public PACKAGE_VERSION version;
+            public string name;
+            public string publisher;
+            public string resourceId;
+            public string publisherId;
+        }
+
         private const int PACKAGE_INFORMATION_BASIC = 0;
         private const int PACKAGE_INFORMATION_FULL = 0x00000100;
         private const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
@@ -77,6 +89,10 @@ namespace OleViewDotNet
             ref int packageFullNameLength,
             StringBuilder packageFullName
         );
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        static extern int PackageFullNameFromId(PACKAGE_ID_ALLOC packageId, 
+            ref int packageFullNameLength, StringBuilder packageFullName);
 
         private AppxPackageName(string package_id)
         {
@@ -153,6 +169,26 @@ namespace OleViewDotNet
             }
 
             return FromFullName(builder.ToString());
+        }
+
+        public static string GetPublisherIdFromPublisher(string publisher)
+        {
+            PACKAGE_ID_ALLOC pkgid = new PACKAGE_ID_ALLOC();
+            pkgid.publisher = publisher;
+            pkgid.name = "Temp";
+            int length = 0;
+            int err = PackageFullNameFromId(pkgid, ref length, null);
+            if (err != ERROR_INSUFFICIENT_BUFFER)
+            {
+                return null;
+            }
+            StringBuilder builder = new StringBuilder(length);
+            err = PackageFullNameFromId(pkgid, ref length, builder);
+            if (err != 0)
+            {
+                return null;
+            }
+            return FromFullName(builder.ToString())?.PublisherId;
         }
 
         public AppxPackageArchitecture Architecture { get; }
