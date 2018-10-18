@@ -76,6 +76,7 @@ namespace OleViewDotNet
         private const int PACKAGE_INFORMATION_BASIC = 0;
         private const int PACKAGE_INFORMATION_FULL = 0x00000100;
         private const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
+        private const int ERROR_NOT_FOUND = 0x490;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern int PackageIdFromFullName(string packageFullName, int flags,
@@ -94,29 +95,20 @@ namespace OleViewDotNet
         static extern int PackageFullNameFromId(PACKAGE_ID_ALLOC packageId, 
             ref int packageFullNameLength, StringBuilder packageFullName);
 
-        private AppxPackageName(string package_id)
+        private AppxPackageName(string package_id, PACKAGE_ID package)
         {
             FullName = package_id;
-            Architecture = AppxPackageArchitecture.Unknown;
-            Version = new Version();
-            Name = string.Empty;
-            ResourceId = string.Empty;
-            PublisherId = string.Empty;
-        }
-
-        private AppxPackageName(string package_id, PACKAGE_ID package) 
-            : this(package_id)
-        {
             Architecture = package.processorArchitecture;
             Version = package.version.ToVersion();
             Name = package.name != IntPtr.Zero ? Marshal.PtrToStringUni(package.name) : string.Empty;
             ResourceId = package.resourceId != IntPtr.Zero ? Marshal.PtrToStringUni(package.resourceId) : string.Empty;
             PublisherId = package.publisherId != IntPtr.Zero ? Marshal.PtrToStringUni(package.publisherId) : string.Empty;
+            Publisher = package.publisher != IntPtr.Zero ? Marshal.PtrToStringUni(package.publisher) : string.Empty;
         }
 
         private static Dictionary<string, AppxPackageName> _name_cache = new Dictionary<string, AppxPackageName>();
 
-        private static AppxPackageName FromFullNameInternal(string package_id)
+        private static AppxPackageName FromFullNameInternal(string package_id, int flags)
         {
             if (string.IsNullOrWhiteSpace(package_id))
             {
@@ -124,18 +116,27 @@ namespace OleViewDotNet
             }
 
             int length = 0;
-            int err = PackageIdFromFullName(package_id, PACKAGE_INFORMATION_BASIC, ref length, SafeHGlobalBuffer.Null);
+            int err = PackageIdFromFullName(package_id, flags, ref length, SafeHGlobalBuffer.Null);
             if (err != ERROR_INSUFFICIENT_BUFFER)
             {
+                if (err == ERROR_NOT_FOUND && flags == PACKAGE_INFORMATION_FULL)
+                {
+                    return FromFullNameInternal(package_id, PACKAGE_INFORMATION_BASIC);
+                }
                 return null;
             }
 
             using (var buffer = new SafeStructureInOutBuffer<PACKAGE_ID>(length, false))
             {
                 length = buffer.Length;
-                err = PackageIdFromFullName(package_id, PACKAGE_INFORMATION_BASIC, ref length, buffer);
+                err = PackageIdFromFullName(package_id, flags, ref length, buffer);
                 if (err != 0)
                 {
+                    if (err == ERROR_NOT_FOUND && flags == PACKAGE_INFORMATION_FULL)
+                    {
+                        return FromFullNameInternal(package_id, PACKAGE_INFORMATION_BASIC);
+                    }
+
                     return null;
                 }
                 return new AppxPackageName(package_id, buffer.Result);
@@ -146,7 +147,7 @@ namespace OleViewDotNet
         {
             if (!_name_cache.ContainsKey(package_id))
             {
-                _name_cache[package_id] = FromFullNameInternal(package_id);
+                _name_cache[package_id] = FromFullNameInternal(package_id, PACKAGE_INFORMATION_FULL);
             }
 
             return _name_cache[package_id];
@@ -195,7 +196,13 @@ namespace OleViewDotNet
         public Version Version { get; }
         public string Name { get; }
         public string ResourceId { get; }
+        public string Publisher { get; }
         public string PublisherId { get; }
         public string FullName { get; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
