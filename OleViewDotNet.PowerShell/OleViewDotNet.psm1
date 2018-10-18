@@ -1093,6 +1093,7 @@ function Select-ComAccess {
         [Parameter(Mandatory, ParameterSetName = "FromProcess")]
         [NtApiDotNet.NtProcess]$Process,
         [Parameter(ParameterSetName = "FromProcessId")]
+        [alias("pid")]
         [int]$ProcessId = $pid,
         [NtApiDotNet.Sid]$Principal = [NtApiDotNet.NtProcess]::Current.User,
         [switch]$NotAccessible,
