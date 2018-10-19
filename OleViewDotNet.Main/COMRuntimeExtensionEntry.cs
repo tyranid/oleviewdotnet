@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
@@ -137,6 +138,18 @@ namespace OleViewDotNet
         public string Icon { get; private set; }
         public string Vendor { get; private set; }
         public IReadOnlyDictionary<string, string> CustomProperties { get; private set; }
+        public string Protocol
+        {
+            get
+            {
+                if (ContractId.Equals("windows.protocol", StringComparison.OrdinalIgnoreCase) 
+                    && CustomProperties.ContainsKey("Name"))
+                {
+                    return CustomProperties["Name"];
+                }
+                return string.Empty;
+            }
+        }
 
         #endregion
     }
