@@ -2379,6 +2379,12 @@ Get Windows Runtime extensions.
 This cmdlet gets the Windows Runtime extensions from a database.
 .PARAMETER ContractId
 Specify a contract ID to lookup.
+.PARAMETER Launch
+Only show Windows.Launch extensions.
+.PARAMETER Protocol
+Only show Windows.Protocol extensions. Select out the Protocol property to see the name.
+.PARAMETER BackgroundTasks
+Only show Windows.BackgroundTasks extensions.
 .PARAMETER Database
 The COM database to use.
 .INPUTS
@@ -2397,6 +2403,12 @@ function Get-ComRuntimeExtension {
     Param(
         [Parameter(Mandatory, ParameterSetName = "FromCategoryId")]
         [string]$ContractId,
+        [Parameter(Mandatory, ParameterSetName = "FromLaunch")]
+        [switch]$Launch,
+        [Parameter(Mandatory, ParameterSetName = "FromProtocol")]
+        [switch]$Protocol,
+        [Parameter(Mandatory, ParameterSetName = "FromBackgroundTasks")]
+        [switch]$BackgroundTasks,
         [OleViewDotNet.COMRegistry]$Database
     )
 
@@ -2412,6 +2424,15 @@ function Get-ComRuntimeExtension {
         }
         "FromCategoryId" {
             $Database.RuntimeExtensionsByContractId[$ContractId] | Write-Output
+        }
+        "FromLaunch" {
+            $Database.RuntimeExtensionsByContractId["Windows.Launch"] | Write-Output
+        }
+        "FromProtocol" {
+            $Database.RuntimeExtensionsByContractId["Windows.Protocol"] | Write-Output
+        }
+        "FromBackgroundTasks" {
+            $Database.RuntimeExtensionsByContractId["Windows.BackgroundTasks"] | Write-Output
         }
     }
 }
