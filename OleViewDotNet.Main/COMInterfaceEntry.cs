@@ -62,17 +62,17 @@ namespace OleViewDotNet
                 Name = Iid.FormatGuidDefault();
             }
 
-            ProxyClsid = COMUtilities.ReadGuidFromKey(key, "ProxyStubCLSID32", null);
-            NumMethods = COMUtilities.ReadIntFromKey(key, "NumMethods", null);
+            ProxyClsid = COMUtilities.ReadGuid(key, "ProxyStubCLSID32", null);
+            NumMethods = COMUtilities.ReadInt(key, "NumMethods", null);
 
             if (NumMethods < 3)
             {
                 NumMethods = 3;
             }
 
-            TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
-            TypeLibVersion = COMUtilities.ReadStringFromKey(key, "TypeLib", "Version");
-            Base = COMUtilities.ReadStringFromKey(key, "BaseInterface", null);
+            TypeLib = COMUtilities.ReadGuid(key, "TypeLib", null);
+            TypeLibVersion = COMUtilities.ReadString(key, "TypeLib", "Version");
+            Base = COMUtilities.ReadString(key, "BaseInterface", null);
             if (Base.Length == 0)
             {
                 Base = "IUnknown";

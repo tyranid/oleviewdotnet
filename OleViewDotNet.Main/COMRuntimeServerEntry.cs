@@ -82,12 +82,12 @@ namespace OleViewDotNet
 
         private void LoadFromKey(RegistryKey key)
         {
-            IdentityType = (IdentityType)COMUtilities.ReadIntFromKey(key, null, "IdentityType");
-            ServerType = (ServerType)COMUtilities.ReadIntFromKey(key, null, "ServerType");
-            InstancingType = (InstancingType)COMUtilities.ReadIntFromKey(key, null, "InstancingType");
-            Identity = COMUtilities.ReadStringFromKey(key, null, "Identity");
-            ServiceName = COMUtilities.ReadStringFromKey(key, null, "ServiceName");
-            ExePath = COMUtilities.ReadStringFromKey(key, null, "ExePath");
+            IdentityType = (IdentityType)COMUtilities.ReadInt(key, null, "IdentityType");
+            ServerType = (ServerType)COMUtilities.ReadInt(key, null, "ServerType");
+            InstancingType = (InstancingType)COMUtilities.ReadInt(key, null, "InstancingType");
+            Identity = COMUtilities.ReadString(key, null, "Identity");
+            ServiceName = COMUtilities.ReadString(key, null, "ServiceName");
+            ExePath = COMUtilities.ReadString(key, null, "ExePath");
             Permissions = string.Empty;
             byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
             Permissions = COMSecurity.GetStringSDForSD(permissions);

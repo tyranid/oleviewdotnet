@@ -875,7 +875,7 @@ namespace OleViewDotNet
                 {
                     using (RegistryKey regKey = rootKey.OpenSubKey(key))
                     {
-                        Guid clsid = COMUtilities.ReadGuidFromKey(regKey, "CLSID", null);
+                        Guid clsid = COMUtilities.ReadGuid(regKey, "CLSID", null);
                         if (clsid != Guid.Empty)
                         {
                             COMProgIDEntry entry = new COMProgIDEntry(this, key, clsid, regKey);

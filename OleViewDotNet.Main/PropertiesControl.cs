@@ -606,7 +606,8 @@ namespace OleViewDotNet
                         using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
                         {
                             EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                            Path.GetFileName(clsid.DefaultServer), COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
+                            COMUtilities.GetFileName(clsid.DefaultServerName), 
+                            COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
                         }
                     }
                 }

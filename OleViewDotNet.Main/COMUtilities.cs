@@ -529,7 +529,7 @@ namespace OleViewDotNet
             return null;
         }
 
-        public static string ReadStringFromKey(RegistryKey rootKey, string keyName, string valueName)
+        public static string ReadString(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
         {
             RegistryKey key = rootKey;
 
@@ -543,14 +543,20 @@ namespace OleViewDotNet
                 string valueString = string.Empty;
                 if (key != null)
                 {
-                    object valueObject = key.GetValue(valueName);
+                    object valueObject = key.GetValue(valueName, null, options);
                     if (valueObject != null)
                     {
                         valueString = valueObject.ToString();
                     }
                 }
 
-                return valueString.TrimEnd('\0');
+                int first_nul = valueString.IndexOf('\0');
+                if (first_nul >= 0)
+                {
+                    valueString = valueString.Substring(0, first_nul);
+                }
+
+                return valueString;
             }
             finally
             {
@@ -561,9 +567,9 @@ namespace OleViewDotNet
             }
         }
 
-        public static int ReadIntFromKey(RegistryKey rootKey, string keyName, string valueName)
+        public static int ReadInt(this RegistryKey rootKey, string keyName, string valueName)
         {
-            string value = ReadStringFromKey(rootKey, keyName, valueName);
+            string value = rootKey.ReadString(keyName, valueName);
             if (value != null)
             {
                 int ret;
@@ -575,9 +581,9 @@ namespace OleViewDotNet
             return 0;
         }
 
-        public static Guid ReadGuidFromKey(RegistryKey rootKey, string keyName, string valueName)
+        public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
         {
-            string guid = ReadStringFromKey(rootKey, keyName, valueName);
+            string guid = rootKey.ReadString(keyName, valueName);
             Guid ret = Guid.Empty;
             if (guid != null && Guid.TryParse(guid, out ret))
             {

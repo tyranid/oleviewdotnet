@@ -56,8 +56,8 @@ namespace OleViewDotNet
 
         internal COMCLSIDElevationEntry(RegistryKey key, RegistryKey vso_key, bool auto_approval)
         {
-            Enabled = COMUtilities.ReadIntFromKey(key, null, "Enabled") != 0;
-            IconReference = COMUtilities.ReadStringFromKey(key, null, "IconReference");
+            Enabled = COMUtilities.ReadInt(key, null, "Enabled") != 0;
+            IconReference = COMUtilities.ReadString(key, null, "IconReference");
             HashSet<Guid> vsos = new HashSet<Guid>();
             if (vso_key != null)
             {
@@ -136,10 +136,10 @@ namespace OleViewDotNet
 
         internal COMCLSIDServerDotNetEntry(RegistryKey key)
         {
-            AssemblyName = COMUtilities.ReadStringFromKey(key, null, "Assembly");
-            ClassName = COMUtilities.ReadStringFromKey(key, null, "Class");
-            CodeBase = COMUtilities.ReadStringFromKey(key, null, "CodeBase");
-            RuntimeVersion = COMUtilities.ReadStringFromKey(key, null, "RuntimeVersion");
+            AssemblyName = COMUtilities.ReadString(key, null, "Assembly");
+            ClassName = COMUtilities.ReadString(key, null, "Class");
+            CodeBase = COMUtilities.ReadString(key, null, "CodeBase");
+            RuntimeVersion = COMUtilities.ReadString(key, null, "RuntimeVersion");
         }
 
         XmlSchema IXmlSerializable.GetSchema()
@@ -305,34 +305,32 @@ namespace OleViewDotNet
 
         private static COMThreadingModel ReadThreadingModel(RegistryKey key)
         {
-            string threading_model = key.GetValue("ThreadingModel") as string;
-            if (threading_model != null)
+            string threading_model = key.ReadString(valueName: "ThreadingModel");
+            switch (threading_model.ToLower())
             {
-                switch (threading_model.ToLower())
-                {
-                    case "both":
-                        return COMThreadingModel.Both;
-                    case "free":
-                        return COMThreadingModel.Free;
-                    case "neutral":
-                        return COMThreadingModel.Neutral;
-                    case "apartment":
-                        return COMThreadingModel.Apartment;
-                }
+                case "both":
+                    return COMThreadingModel.Both;
+                case "free":
+                    return COMThreadingModel.Free;
+                case "neutral":
+                    return COMThreadingModel.Neutral;
+                case "apartment":
+                    return COMThreadingModel.Apartment;
+                default:
+                    return COMThreadingModel.None;
             }
-            return COMThreadingModel.None;
         }
 
         internal COMCLSIDServerEntry(COMServerType server_type, string server)
         {
             Server = server;
-            CommandLine = String.Empty;
+            CommandLine = string.Empty;
             ServerType = server_type;
             ThreadingModel = COMThreadingModel.Apartment;
         }
 
         internal COMCLSIDServerEntry(COMServerType server_type) 
-            : this(server_type, String.Empty)
+            : this(server_type, string.Empty)
         {
         }
 
@@ -343,22 +341,22 @@ namespace OleViewDotNet
         internal COMCLSIDServerEntry(RegistryKey key, COMServerType server_type)
             : this(server_type)
         {
-            string server_string = key.GetValue(null) as string;
-            RawServer = key.GetValue(null, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
+            string server_string = key.ReadString();
+            RawServer = key.ReadString(options: RegistryValueOptions.DoNotExpandEnvironmentNames);
 
-            if (String.IsNullOrWhiteSpace(server_string))
+            if (string.IsNullOrWhiteSpace(server_string))
             {
                 // TODO: Support weird .NET registration which registers a .NET version string.
                 return;
             }
 
             bool process_command_line = false;
-            CommandLine = String.Empty;
+            CommandLine = string.Empty;
 
             if (server_type == COMServerType.LocalServer32)
             {
-                string executable = key.GetValue("ServerExecutable") as string;
-                if (executable != null)
+                string executable = key.ReadString(valueName: "ServerExecutable");
+                if (!string.IsNullOrWhiteSpace(executable))
                 {
                     server_string = executable;
                 }
@@ -581,14 +579,14 @@ namespace OleViewDotNet
 
             if (fake_name && inproc_server != null && inproc_server.HasDotNet)
             {
-                Name = String.Format("{0}, {1}", inproc_server.DotNet.ClassName, inproc_server.DotNet.AssemblyName);
+                Name = string.Format("{0}, {1}", inproc_server.DotNet.ClassName, inproc_server.DotNet.AssemblyName);
             }
 
-            AppID = COMUtilities.ReadGuidFromKey(key, null, "AppID");
+            AppID = COMUtilities.ReadGuid(key, null, "AppID");
             if (AppID == Guid.Empty)
             {
-                AppID = COMUtilities.ReadGuidFromKey(Registry.ClassesRoot,
-                        String.Format(@"AppID\{0}", Path.GetFileName(DefaultServer)), "AppID");
+                AppID = COMUtilities.ReadGuid(Registry.ClassesRoot,
+                        string.Format(@"AppID\{0}", COMUtilities.GetFileName(DefaultServer)), "AppID");
             }
 
             if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
@@ -596,7 +594,7 @@ namespace OleViewDotNet
                 servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, "<APPID HOSTED>"));
             }
 
-            TypeLib = COMUtilities.ReadGuidFromKey(key, "TypeLib", null);
+            TypeLib = COMUtilities.ReadGuid(key, "TypeLib", null);
             if (key.HasSubkey("Control"))
             {
                 categories.Add(COMCategory.CATID_Control);
@@ -630,7 +628,7 @@ namespace OleViewDotNet
             }
 
             Categories = categories.ToList().AsReadOnly();
-            TreatAs = COMUtilities.ReadGuidFromKey(key, "TreatAs", null);
+            TreatAs = COMUtilities.ReadGuid(key, "TreatAs", null);
 
             using (RegistryKey elev_key = key.OpenSubKey("Elevation"),
                 vso_key = key.OpenSubKey("VirtualServerObjects"))
@@ -640,7 +638,7 @@ namespace OleViewDotNet
                     using (var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, 
                         Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default))
                     {
-                        int auto_approval = COMUtilities.ReadIntFromKey(base_key, 
+                        int auto_approval = COMUtilities.ReadInt(base_key, 
                             @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
                         Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
                     }

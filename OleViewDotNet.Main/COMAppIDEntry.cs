@@ -88,19 +88,19 @@ namespace OleViewDotNet
             DisplayName = service.DisplayName;
             Name = service.ServiceName;
             ServiceType = service.ServiceType;
-            ServiceDll = String.Empty;
-            ImagePath = String.Empty;
-            UserName = String.Empty;
+            ServiceDll = string.Empty;
+            ImagePath = string.Empty;
+            UserName = string.Empty;
             if (key != null)
             {
-                UserName = COMUtilities.ReadStringFromKey(key, null, "ObjectName");
-                ImagePath = COMUtilities.ReadStringFromKey(key, null, "ImagePath");
-                ServiceDll = COMUtilities.ReadStringFromKey(key, "Parameters", "ServiceDll");
-                if (String.IsNullOrEmpty(ServiceDll))
+                UserName = key.ReadString(null, "ObjectName");
+                ImagePath = key.ReadString(null, "ImagePath");
+                ServiceDll = key.ReadString("Parameters", "ServiceDll");
+                if (string.IsNullOrEmpty(ServiceDll))
                 {
-                    ServiceDll = COMUtilities.ReadStringFromKey(key, null, "ServiceDll");
+                    ServiceDll = key.ReadString(null, "ServiceDll");
                 }
-                ProtectionLevel = (ServiceProtectionLevel) COMUtilities.ReadIntFromKey(key, null, "LaunchProtected");
+                ProtectionLevel = (ServiceProtectionLevel) COMUtilities.ReadInt(key, null, "LaunchProtected");
             }
         }
 

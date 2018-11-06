@@ -68,7 +68,7 @@ namespace OleViewDotNet
                 {
                     return string.Empty;
                 }
-                return Path.GetFileName(DllPath);
+                return COMUtilities.GetFileName(DllPath);
             }
         }
         public string PackageId { get; private set; }
@@ -136,15 +136,15 @@ namespace OleViewDotNet
 
         private void LoadFromKey(RegistryKey key)
         {
-            Clsid = COMUtilities.ReadGuidFromKey(key, null, "CLSID");
-            ActivationType = (ActivationType)COMUtilities.ReadIntFromKey(key, null, "ActivationType");
-            TrustLevel = (TrustLevel)COMUtilities.ReadIntFromKey(key, null, "TrustLevel");
-            Threading = (ThreadingType)COMUtilities.ReadIntFromKey(key, null, "Threading");
-            DllPath = COMUtilities.ReadStringFromKey(key, null, "DllPath");
-            Server = COMUtilities.ReadStringFromKey(key, null, "Server");
+            Clsid = COMUtilities.ReadGuid(key, null, "CLSID");
+            ActivationType = (ActivationType)COMUtilities.ReadInt(key, null, "ActivationType");
+            TrustLevel = (TrustLevel)COMUtilities.ReadInt(key, null, "TrustLevel");
+            Threading = (ThreadingType)COMUtilities.ReadInt(key, null, "Threading");
+            DllPath = COMUtilities.ReadString(key, null, "DllPath");
+            Server = COMUtilities.ReadString(key, null, "Server");
             byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
             Permissions = COMSecurity.GetStringSDForSD(permissions);
-            ActivateInSharedBroker = COMUtilities.ReadIntFromKey(key, null, "ActivateInSharedBroker") != 0;
+            ActivateInSharedBroker = COMUtilities.ReadInt(key, null, "ActivateInSharedBroker") != 0;
         }
 
         internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 

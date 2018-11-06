@@ -42,10 +42,10 @@ namespace OleViewDotNet
                 }
             }
             CustomProperties = custom_properties;
-            Description = COMUtilities.ReadStringFromKey(key, null, "Description");
-            DisplayName = COMUtilities.ReadStringFromKey(key, null, "DisplayName");
-            Icon = COMUtilities.ReadStringFromKey(key, null, "Icon");
-            Vendor = COMUtilities.ReadStringFromKey(key, null, "Vendor");
+            Description = COMUtilities.ReadString(key, null, "Description");
+            DisplayName = COMUtilities.ReadString(key, null, "DisplayName");
+            Icon = COMUtilities.ReadString(key, null, "Icon");
+            Vendor = COMUtilities.ReadString(key, null, "Vendor");
         }
 
         #endregion
