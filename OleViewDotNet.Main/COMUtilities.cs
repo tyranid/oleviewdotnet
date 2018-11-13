@@ -2984,5 +2984,9 @@ namespace OleViewDotNet
             }
             return hash_code;
         }
+
+        internal static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
+        internal static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
+        internal static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
     }
 }

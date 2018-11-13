@@ -1262,7 +1262,7 @@ namespace OleViewDotNet
                     return null;
                 }
 
-                if (IsWindows10RS3OrLess)
+                if (COMUtilities.IsWindows10RS3OrLess)
                 {
                     return process.ReadStruct<CStdIdentity32>(_pStdID);
                 }
@@ -2007,10 +2007,6 @@ namespace OleViewDotNet
             return new COMRuntimeActivableClassEntry[] { new COMRuntimeActivableClassEntry(obj, process, resolver, registry) };
         }
 
-        private static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
-        private static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
-        private static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
-
         private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             const string bucket_symbol = "CClassCache::_LSvrActivatableClassEBuckets";
@@ -2021,11 +2017,11 @@ namespace OleViewDotNet
 
             if (process.Is64Bit)
             {
-                if (IsWindows81OrLess)
+                if (COMUtilities.IsWindows81OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntryWin8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
-                else if (IsWindows10RS4OrLess)
+                else if (COMUtilities.IsWindows10RS4OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
@@ -2033,11 +2029,11 @@ namespace OleViewDotNet
             }
             else
             {
-                if (IsWindows81OrLess)
+                if (COMUtilities.IsWindows81OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry32Win8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
-                else if (IsWindows10RS4OrLess)
+                else if (COMUtilities.IsWindows10RS4OrLess)
                 {
                     return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
                 }
