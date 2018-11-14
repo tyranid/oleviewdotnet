@@ -239,7 +239,10 @@ namespace OleViewDotNet
 
             foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
             {
-                comboBoxMode.Items.Add(filter);
+                if (filter != FilterMode.Python || COMUtilities.HasIronPython)
+                {
+                    comboBoxMode.Items.Add(filter);
+                }
             }
             comboBoxMode.SelectedIndex = 0;
 

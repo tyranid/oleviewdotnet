@@ -54,9 +54,17 @@ namespace OleViewDotNet
             m_registry = registry;
             InitializeComponent();
 
-            HighlightingManager.Manager.AddSyntaxModeFileProvider(new SimpleSyntaxModeProvider("Python.xshd", "Python", ".py", Properties.Resources.PythonHighlightingRules));
-
-            textEditorControl.SetHighlighting("Python");
+            if (COMUtilities.HasIronPython)
+            {
+                HighlightingManager.Manager.AddSyntaxModeFileProvider(
+                    new SimpleSyntaxModeProvider("Python.xshd", "Python", ".py",
+                    Properties.Resources.PythonHighlightingRules));
+                textEditorControl.SetHighlighting("Python");
+            }
+            else
+            {
+                tabControl.TabPages.Remove(tabPageScript);
+            }
 
             LoadDispatch();
             Text = String.Format("{0} {1}", m_objName, m_dispType.Name);
@@ -65,7 +73,6 @@ namespace OleViewDotNet
         public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType) 
             : this(registry, strObjName, new ObjectEntry(registry, strObjName, pObject), dispType)
         {
-
         }
 
         private void LoadDispatch()
