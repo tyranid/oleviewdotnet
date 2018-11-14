@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,19 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="tableLayoutPanelTop.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
-  </metadata>
-  <metadata name="contextMenuMethods.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>196, 17</value>
-  </metadata>
-  <metadata name="tableLayoutPanelBottom.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>False</value>
-  </metadata>
-  <metadata name="contextMenuProperties.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="toolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="contextMenuStripOutput.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>466, 17</value>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="toolStripButtonImport.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAADVSURBVDhPzZG9EYMwDIW1CT1LMIXrjGJvAkUqL8ES7rNC
+        +hSKnvyDMHBJl/juO4Gt9/QM9B9rWe7cU44+LzTzI2a4VOFrEzsVxNntaiWEsNvHuxpgo03uqyLnta4b
+        3rtsALdrcWUTJjAT+1sxQBR+PXPjQSyibnKSxMkTu2qgCa6ERYypdjpoBpoAojOTVaoRs4odRySYegMr
+        PJnMiK6QGowTGYM2HeJSD+IcHfdXg6FLoPcDrVmiGkEmx49y/3EwCfBPAT4M7jYCaahI2+EZFfpfL6I3
+        Kp7NJeDtszwAAAAASUVORK5CYII=
+</value>
+  </data>
+  <data name="toolStripButtonExport.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAAIHSURBVDhPjZLNTxNRFMXnnzOauGMhRhNjlESBGFMMDVhL
+        w5AWp6S1tCC2MqQgHahpJmKkoY3IpAq6UCPVLkh0bfyogYraujnOuc2UzrDxJiczyXvnd9697ykfra+w
+        Ft+Jdnc+/Ze4dyO4B4Vl3itj8LQfuq+EZusvGo2G6Nv+gUtfvu+Lfhw2Ydx+Jp7stAGFtGr1PXT/I7B+
+        NVsCYhF08Lt5TAXNQq1WswGrNmBuD+vJlwKgkTr805KNrG7jT3vNAaxcfY3M5IM2YC22g4WQ2TF7jRSP
+        7gDYwtKlF7gbzkIpx2sCcGbgpHtFczdAv7x1BCiEn0sLXGR5e2e6IwewcMFCIpSBUtI+dACsbqPX3A2Y
+        PVM+AuSC9pFsAO/YSfcaPzfa4h4CUj3FNqAYqSI/vC2Qhzfbs1gafiq6P1BGur+IuSvrLqXOrYkE8Fh9
+        C3PkDZavW7I5r20geW1ZxH8qpz6RW4oNLmL0VArhHt0NWPW9EgDfA4sgprOder0uD82yKjCMPEZPJt0A
+        prOFbH8bQJNzxEplG5ubW2JMZ3SoagS+E9HjAKZnLpbkhTHtztkCps+bHWN8KoHJiSiGbvhdAG0kBYWD
+        M4d25WkSwEQndX4+i0RiBlo0JroVGJMWYr05CRQAa9ZvyIDigbSkRSNTkjgeUsVEjQXH5RvoC2NiIA61
+        b8Y2K8o/HTQiX3FlGVcAAAAASUVORK5CYII=
+</value>
+  </data>
+  <data name="toolStripButtonRun.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAADmSURBVDhPY6A7KNmd9T9sm8d/KJc00Lqn7n/oXpf/0ac8
+        /tfOqiLdkJgj3v9TLgb8T5oVSbrmxGP+/5Ou+/wP3ehGuubiY6n/0575/o+54Uqe3/PehP4v+R71v3Je
+        MekGFL2I/l/3L+l/2s4w3JonXGr/X3k6B0NB47VisOb0BwH4bQYpACksfBOFohDk9PzPof8L5qcTdnru
+        nYj/lb/i/mc+DQIrLr4EtPmFPzjewQqIAaA4BoV21G3n/2GX7MEYKkU8CDxl89/rpMl/5+O6//3mOpJu
+        AAiY7VP8r79FijzNdAYMDADjt3wWIXBCsgAAAABJRU5ErkJggg==
+</value>
+  </data>
+  <metadata name="contextMenuStripScript.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>133, 19</value>
   </metadata>
 </root>

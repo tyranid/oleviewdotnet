@@ -130,6 +130,12 @@
     <Compile Include="COMAccessCheck.cs" />
     <Compile Include="ComWrapperFactory.cs" />
     <Compile Include="IProxyFormatter.cs" />
+    <Compile Include="PythonScriptEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PythonScriptEditor.Designer.cs">
+      <DependentUpon>PythonScriptEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="RuntimeExtensionActivator.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
@@ -375,6 +381,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PythonScriptEditor.resx">
+      <DependentUpon>PythonScriptEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>

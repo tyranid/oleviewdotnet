@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using ICSharpCode.TextEditor.Document;
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
@@ -56,10 +55,10 @@ namespace OleViewDotNet
 
             if (COMUtilities.HasIronPython)
             {
-                HighlightingManager.Manager.AddSyntaxModeFileProvider(
-                    new SimpleSyntaxModeProvider("Python.xshd", "Python", ".py",
-                    Properties.Resources.PythonHighlightingRules));
-                textEditorControl.SetHighlighting("Python");
+                var script_editor = new PythonScriptEditor();
+                script_editor.Dock = DockStyle.Fill;
+                script_editor.RunScript += DoRunScript;
+                splitContainerScript.Panel1.Controls.Add(script_editor);
             }
             else
             {
@@ -68,6 +67,58 @@ namespace OleViewDotNet
 
             LoadDispatch();
             Text = String.Format("{0} {1}", m_objName, m_dispType.Name);
+        }
+
+        private void DoRunScript(object sender, PythonScriptEditor.RunScriptEventArgs e)
+        {
+            try
+            {
+                ScriptEngine engine = Python.CreateEngine();
+
+                engine.Runtime.LoadAssembly(Assembly.GetExecutingAssembly());
+                engine.Runtime.IO.SetOutput(new MemoryStream(), new ConsoleTextWriter(this, false));
+                engine.Runtime.IO.SetErrorOutput(new MemoryStream(), new ConsoleTextWriter(this, true));
+
+                ICollection<string> paths = engine.GetSearchPaths();
+
+                paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonLib"));
+
+                engine.SetSearchPaths(paths);
+
+                ScriptErrorListener listener = new ScriptErrorListener();
+                ScriptSource source = engine.CreateScriptSourceFromString(e.ScriptText);
+
+                CompiledCode code = source.Compile(listener);
+
+                if (listener.Errors.Count == 0)
+                {
+                    // Just create the global scope, don't execute it yet
+                    ScriptScope scope = engine.CreateScope();
+
+                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) 
+                        ? new DynamicComObjectWrapper(m_registry, m_dispType, m_pObject) : m_pObject);
+                    scope.SetVariable("disp", m_pObject);
+
+                    dynamic host = new ExpandoObject();
+
+                    host.openobj = new Action<DynamicComObjectWrapper>(o => { OpenObjectViewer(o); });
+
+                    scope.SetVariable("host", host);
+
+                    code.Execute(scope);
+                }
+            }
+            catch (Exception ex)
+            {
+                TargetInvocationException tex = ex as TargetInvocationException;
+
+                if (tex != null)
+                {
+                    ex = tex.InnerException;
+                }
+
+                AddText(ex.Message + Environment.NewLine);
+            }
         }
 
         public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType) 
@@ -344,57 +395,6 @@ namespace OleViewDotNet
             }
         }
 
-        private void toolStripButtonRun_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                ScriptEngine engine = Python.CreateEngine();
-                
-                engine.Runtime.LoadAssembly(Assembly.GetExecutingAssembly());
-                engine.Runtime.IO.SetOutput(new MemoryStream(), new ConsoleTextWriter(this, false));
-                engine.Runtime.IO.SetErrorOutput(new MemoryStream(), new ConsoleTextWriter(this, true));
-
-                ICollection<string> paths = engine.GetSearchPaths();
-
-                paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonLib"));
-                
-                engine.SetSearchPaths(paths);
-
-                ScriptErrorListener listener = new ScriptErrorListener();
-                ScriptSource source = engine.CreateScriptSourceFromString(textEditorControl.Text);
-
-                CompiledCode code = source.Compile(listener);
-
-                if (listener.Errors.Count == 0)
-                {
-                    // Just create the global scope, don't execute it yet
-                    ScriptScope scope = engine.CreateScope();
-                   
-                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) ? new DynamicComObjectWrapper(m_registry, m_dispType, m_pObject) : m_pObject);
-                    scope.SetVariable("disp", m_pObject);
-
-                    dynamic host = new ExpandoObject();
-
-                    host.openobj = new Action<DynamicComObjectWrapper>(o => { OpenObjectViewer(o); });
-
-                    scope.SetVariable("host", host);
-
-                    code.Execute(scope);
-                }
-            }
-            catch (Exception ex)
-            {
-                TargetInvocationException tex = ex as TargetInvocationException;
-
-                if (tex != null)
-                {
-                    ex = tex.InnerException;
-                }
-
-                AddText(ex.Message + Environment.NewLine);
-            }
-        }
-
         private void listViewMethods_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (listViewMethods.SelectedItems.Count > 0)
@@ -458,46 +458,6 @@ namespace OleViewDotNet
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
-        }
-
-        private void toolStripButtonExport_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                using (SaveFileDialog dlg = new SaveFileDialog())
-                {
-                    dlg.Filter = "Python Scripts (*.py)|*.py|All Files (*.*)|*.*";
-
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
-                    {
-                        File.WriteAllText(dlg.FileName, textEditorControl.Text);
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void toolStripButtonImport_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                using (OpenFileDialog dlg = new OpenFileDialog())
-                {
-                    dlg.Filter = "Python Scripts (*.py)|*.py|All Files (*.*)|*.*";
-
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
-                    {
-                        textEditorControl.Text = File.ReadAllText(dlg.FileName);
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
     }
 }
