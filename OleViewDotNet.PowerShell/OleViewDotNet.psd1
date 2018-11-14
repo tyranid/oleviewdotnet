@@ -88,9 +88,11 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.5
+        ReleaseNotes = 'v1.6
 ----
-* Initial release.'
+* Added support for enumerating COM runtime extensions
+* Various bug fixes
+'
 
     } # End of PSData hashtable
 
