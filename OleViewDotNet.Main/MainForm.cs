@@ -75,6 +75,7 @@ namespace OleViewDotNet
             Controls.Add(m_dockPanel);
             m_dockPanel.BringToFront();
             CreatePropertyGrid(true);
+            menuFilePythonConsole.Visible = COMUtilities.HasIronPython;
 
             if (!Environment.Is64BitOperatingSystem)
             {
