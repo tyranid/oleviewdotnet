@@ -115,6 +115,7 @@ namespace OleViewDotNet
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
             TypelibId = reader.ReadGuid("libid");
+            Name = reader.ReadString("name");
             reader.Read();
             Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(TypelibId));
         }
@@ -122,6 +123,7 @@ namespace OleViewDotNet
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             writer.WriteGuid("libid", TypelibId);
+            writer.WriteOptionalAttributeString("name", Name);
             writer.WriteSerializableObjects("libvers", Versions);
         }
 
