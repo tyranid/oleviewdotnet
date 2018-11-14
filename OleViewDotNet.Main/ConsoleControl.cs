@@ -15,6 +15,12 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 
+using IronPython.Hosting;
+using IronPython.Runtime;
+using Microsoft.Scripting;
+using Microsoft.Scripting.Hosting;
+using Microsoft.Scripting.Hosting.Providers;
+using Microsoft.Scripting.Hosting.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,13 +28,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using IronPython.Hosting;
-using IronPython.Runtime;
-using Microsoft.Scripting;
-using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Hosting.Providers;
-using Microsoft.Scripting.Hosting.Shell;
-using System.ComponentModel;
 
 namespace OleViewDotNet
 {
@@ -55,7 +54,7 @@ namespace OleViewDotNet
 
             protected override IConsole CreateConsole(ScriptEngine engine, CommandLine commandLine, ConsoleOptions options)
             {
-                return _control.Console;                
+                return _control.Console;
             }
 
             protected override CommandLine CreateCommandLine()
@@ -77,10 +76,10 @@ namespace OleViewDotNet
                     {
                         setup2.Options["SearchPaths"] = new string[0];
                     }
-                }                
+                }
 
                 return setup;
-            }            
+            }
 
             protected override void ExecuteInternal()
             {
@@ -95,7 +94,7 @@ namespace OleViewDotNet
                 string item = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonLib");
                 searchPaths.Add(item);
                 Engine.SetSearchPaths(searchPaths);
-                
+
                 base.ExecuteInternal();
             }
 
@@ -135,7 +134,7 @@ namespace OleViewDotNet
 
                 if (value == '\n')
                 {
-                    if(_error)
+                    if (_error)
                     {
                         _control.WriteErrorString(_builder.ToString());
                     }
@@ -144,7 +143,7 @@ namespace OleViewDotNet
                         _control.WriteOutputString(_builder.ToString());
                     }
                     _builder.Clear();
-                }                
+                }
             }
 
             public override Encoding Encoding
@@ -154,7 +153,7 @@ namespace OleViewDotNet
         }
 
         private sealed class ConsoleImpl : IConsole
-        {            
+        {
             private LockedQueue<string> _input;
             private ConsoleControl _control;
 
@@ -181,7 +180,7 @@ namespace OleViewDotNet
                 try
                 {
                     string line = _input.Dequeue();
-                    
+
                     return String.Empty.PadLeft(autoIndentSize) + line;
                 }
                 catch (OperationCanceledException)
@@ -229,12 +228,12 @@ namespace OleViewDotNet
             else
             {
                 if (!richTextBoxOutput.IsDisposed)
-                {                    
+                {
                     richTextBoxOutput.Text += text;
                     richTextBoxOutput.SelectionStart = richTextBoxOutput.Text.Length;
                     richTextBoxOutput.ScrollToCaret();
                 }
-            }           
+            }
         }
 
         private void SetPrompt(string prompt)
@@ -256,7 +255,7 @@ namespace OleViewDotNet
 
         private void WriteOutputString(string output)
         {
-            AddText(output);  
+            AddText(output);
         }
 
         public IConsole Console
@@ -287,7 +286,7 @@ namespace OleViewDotNet
             _console = new ConsoleImpl(this, _input);
             _history = new List<string>();
             this.Disposed += ConsoleControl_Disposed;
-            _consoleThread = new Thread(consoleThread_DoWork);            
+            _consoleThread = new Thread(consoleThread_DoWork);
         }
 
         void ConsoleControl_Disposed(object sender, EventArgs e)
@@ -310,21 +309,21 @@ namespace OleViewDotNet
 
         private void AddToHistory(string line)
         {
-            if ((_history.Count == 0) || (_history[_history.Count-1] != line))
+            if ((_history.Count == 0) || (_history[_history.Count - 1] != line))
             {
                 _history.Add(line);
-                _currHistory = _history.Count;                
-            }            
+                _currHistory = _history.Count;
+            }
         }
 
         private void textBoxCommand_KeyDown(object sender, KeyEventArgs e)
         {
-            if((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
+            if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
             {
                 WriteOutputString(lblPrompt.Text + " " + textBoxCommand.Text + Environment.NewLine);
                 _input.Enqueue(textBoxCommand.Text);
                 AddToHistory(textBoxCommand.Text);
-                textBoxCommand.Text = String.Empty;               
+                textBoxCommand.Text = String.Empty;
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Up)
@@ -332,7 +331,7 @@ namespace OleViewDotNet
                 if (_currHistory > 0)
                 {
                     _currHistory--;
-                    UpdateCommandFromHistory();                    
+                    UpdateCommandFromHistory();
                 }
                 e.Handled = true;
             }
@@ -341,7 +340,7 @@ namespace OleViewDotNet
                 if (_currHistory < _history.Count - 1)
                 {
                     _currHistory++;
-                    UpdateCommandFromHistory();                    
+                    UpdateCommandFromHistory();
                 }
                 e.Handled = true;
             }
@@ -352,13 +351,13 @@ namespace OleViewDotNet
         private void consoleThread_DoWork()
         {
             try
-            {                
+            {
                 if (Environment.GetEnvironmentVariable("TERM") == null)
                 {
                     Environment.SetEnvironmentVariable("TERM", "dumb");
                 }
                 new PythonConsoleHost(this).Run(new string[0]);
-            }           
+            }
             catch (Exception)
             {
             }
@@ -380,7 +379,7 @@ namespace OleViewDotNet
                 {
                     if (line.EndsWith("\n"))
                     {
-                        WriteOutputString(lblPrompt.Text + " " + line.TrimEnd('\r', '\n') + Environment.NewLine);                        
+                        WriteOutputString(lblPrompt.Text + " " + line.TrimEnd('\r', '\n') + Environment.NewLine);
                         _input.Enqueue(line.TrimEnd('\r', '\n'));
                     }
                     else
@@ -419,6 +418,5 @@ namespace OleViewDotNet
                 _consoleThread.Start();
             }
         }
-
     }
 }
