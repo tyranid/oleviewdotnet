@@ -402,6 +402,17 @@ namespace OleViewDotNet
             out IntPtr factory
         );
 
+        [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern ulong CoRegisterConsoleHandles(SafeHandle stdInputHandle, SafeHandle stdOutputHandle, SafeHandle stdErrorHandle);
+
+        [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern ulong CoRegisterRacActivationToken(SafeKernelObjectHandle racActivationToken);
+
+        [DllImport("combase.dll", EntryPoint = "#65", CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern IExtensionRegistration RoGetExtensionRegistration([MarshalAs(UnmanagedType.HString)]string contractId,
+                [MarshalAs(UnmanagedType.HString)]string packageId,
+                [MarshalAs(UnmanagedType.HString)]string activatableClassId);
+
         [DllImport("combase.dll", CharSet = CharSet.Unicode)]
         public static extern int RoActivateInstance(
             [MarshalAs(UnmanagedType.HString)] string activatableClassId,
@@ -2986,6 +2997,7 @@ namespace OleViewDotNet
         }
 
         internal static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
+        internal static readonly bool IsWindows10RS2OrLess = Environment.OSVersion.Version < new Version(10, 0, 16299);
         internal static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
         internal static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
     }

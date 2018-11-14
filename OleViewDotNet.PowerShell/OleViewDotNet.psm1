@@ -2397,6 +2397,15 @@ Get all Windows Runtime extensions.
 .EXAMPLE
 Get-ComRuntimeExtension -ContractId "Windows.Protocol"
 Get Windows Runtime extensions with contract ID of Windows.Protocol.
+.EXAMPLE
+Get-ComRuntimeExtension -Launch
+Get Windows Runtime extensions with contract ID of Windows.Launch.
+.EXAMPLE
+Get-ComRuntimeExtension -Protocol
+Get Windows Runtime extensions with contract ID of Windows.Protocol.
+.EXAMPLE
+Get-ComRuntimeExtension -BackgroundTasks
+Get Windows Runtime extensions with contract ID of Windows.BackgroundTasks.
 #>
 function Get-ComRuntimeExtension {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -2433,6 +2442,89 @@ function Get-ComRuntimeExtension {
         }
         "FromBackgroundTasks" {
             $Database.RuntimeExtensionsByContractId["Windows.BackgroundTasks"] | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Start a Windows Runtime extension.
+.DESCRIPTION
+This cmdlet starts a Windows Runtime extension and returns a reference to the COM interface.
+.PARAMETER ContractId
+Specify a contract ID to start.
+.PARAMETER PackageId
+Specify a package ID to start.
+.PARAMETER AppId
+Specify an AppId to start.
+.PARAMETER Extension
+Specify an extension to start.
+.PARAMETER UseExistingHostId
+Use an existing host ID for the activation. A hosted application in the same package must be running.
+.PARAMETER HostId
+Specify the host ID to use for the activation.
+.PARAMETER NoWrapper
+Don't wrap object in a callable wrapper.
+.INPUTS
+OleViewDotNet.COMRuntimeExtensionEntry
+.OUTPUTS
+COM object instance.
+.EXAMPLE
+Start-ComRuntimeExtension $Extension
+Start a runtime extension from an extension object.
+.EXAMPLE
+Get-ComRuntimeExtension -ContractId "Windows.Protocol" -PackageId "Pkg_1.0.0.0_xxxx" -AppId App
+Start a runtime extension from parts.
+.EXAMPLE
+Start-ComRuntimeExtension $Extension -UseExistingHostId
+Start a runtime extension from an extension object using an existing host ID.
+.EXAMPLE
+Start-ComRuntimeExtension $Extension -HostId 1234
+Start a runtime extension from an extension object using an specific host ID.
+#>
+function Start-ComRuntimeExtension {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position = 0, ParameterSetName = "FromParts")]
+        [string]$ContractId,
+        [parameter(Mandatory, Position = 1, ParameterSetName = "FromParts")]
+        [string]$PackageId,
+        [parameter(Mandatory, Position = 2, ParameterSetName = "FromParts")]
+        [string]$AppId,
+        [parameter(Mandatory, Position = 0, ParameterSetName = "FromExtension", ValueFromPipeline)]
+        [OleViewDotNet.COMRuntimeExtensionEntry]$Extension,
+        [switch]$UseExistingHostId,
+        [int64]$HostId,
+        [switch]$NoWrapper
+    )
+
+    PROCESS {
+        try
+        {
+            switch($PSCmdlet.ParameterSetName) {
+                "FromParts" {
+                    $act = [OleViewDotNet.RuntimeExtensionActivator]::new($ContractId, 
+                            $PackageId, $AppId)
+                }
+                "FromExtension" {
+                    $act = [OleViewDotNet.RuntimeExtensionActivator]::new($Extension)
+                }
+            }
+            
+            if ($UseExistingHostId) {
+                $act.UseExistingHostId()
+            } else {
+                $act.HostId = $HostId
+            }
+            $obj = $act.Activate()
+            if ($null -ne $obj) {
+                $type = [OleViewDotNet.IUnknown]
+                Wrap-ComObject $obj -Type $type -NoWrapper:$NoWrapper | Write-Output
+            }
+        }
+        catch
+        {
+            Write-Error $_
         }
     }
 }

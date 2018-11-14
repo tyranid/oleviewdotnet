@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -355,5 +356,102 @@ namespace OleViewDotNet
             [MarshalAs(UnmanagedType.IUnknown)] object pPrx,
             RPCOPT_PROPERTIES dwProperty,
             out IntPtr pdwValue);
-    };
+    }
+
+    public enum RegistrationScope
+    {
+        PerMachine = 0x0,
+        PerUser = 0x1,
+        InboxApp = 0x2,
+    }
+
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable), Guid("905754d7-1cc5-404e-a9d4-c517bc35e88d")]
+    public interface IExtensionRegistration
+    {
+        string ActivatableClassId
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string ContractId
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string PackageId
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string ExtensionId
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+
+        object ActivatableClassRegistration // Windows::Foundation::IActivatableClassRegistration
+        {
+            [return: MarshalAs(UnmanagedType.Interface)]
+            get;
+        }
+
+        string Vendor
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string Icon
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string DisplayName
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        string Description
+        {
+            [return: MarshalAs(UnmanagedType.HString)]
+            get;
+        }
+
+        RegistrationScope RegistrationScope
+        {
+            get;
+        }
+
+        IReadOnlyDictionary<string, object> Attributes
+        {
+            get;
+        }
+
+        int OutOfProcActivationFlags
+        {
+            get; set;
+        }
+
+        [return: MarshalAs(UnmanagedType.IInspectable)]
+        object Activate();
+    }
+
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("533148e2-ee0a-4b06-8500-7fda28f92ae2")]
+    interface IExtensionActivationContext
+    {
+        ulong HostId { get; set; }
+        ulong UserContext { get; set; }
+        ulong ComponentProcessId { get; set; }
+        ulong RacActivationTokenId { get; set; }
+        IntPtr LpacAttributes { get; set; }
+        ulong ConsoleHandlesId { get; set; }
+        uint AAMActivationId { get; set; }
+    }
 }
