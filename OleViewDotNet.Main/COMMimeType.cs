@@ -37,6 +37,7 @@ namespace OleViewDotNet
         }
 
         public string Extension { get; private set; }
+        public string Name => ClassEntry?.Name ?? string.Empty;
 
         public override string ToString()
         {
