@@ -2528,3 +2528,60 @@ function Start-ComRuntimeExtension {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Get COM MIME types.
+.DESCRIPTION
+This cmdlet gets the COM mime types from a database.
+.PARAMETER MimeType
+Specify the name of a MIME type to lookup.
+.PARAMETER Extension
+Specify the file extension of a MIME type to lookup, can have a period or not.
+.PARAMETER Database
+The COM database to use.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMMimeType
+.EXAMPLE
+Get-ComMimeType
+Get all COM MIME types from the current database.
+.EXAMPLE
+Get-ComMimeType -MimeType "application/xml"
+Get the COM MIME type with the name application/xml.
+.EXAMPLE
+Get-ComMimeType -Extension xml
+Get the COM MIME type with the extension xml.
+#>
+function Get-ComMimeType {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromMimeType")]
+        [string]$MimeType,
+        [Parameter(Mandatory, ParameterSetName = "FromExtension")]
+        [string]$Extension,
+        [OleViewDotNet.COMRegistry]$Database
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            $Database.MimeTypes | Write-Output 
+        }
+        "FromMimeType" {
+            $Database.MimeTypes | ? MimeType -eq $MimeType | Write-Output
+        }
+        "FromExtension" {
+            if (!$Extension.StartsWith(".")) {
+                $Extension = "." + $Extension
+            }
+            $Database.MimeTypes | ? Extension -eq $Extension | Write-Output
+        }
+    }
+}
