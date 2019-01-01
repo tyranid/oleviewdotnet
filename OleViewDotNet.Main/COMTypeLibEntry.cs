@@ -69,6 +69,7 @@ namespace OleViewDotNet
         public Guid TypelibId { get; private set; }
         public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
         public string Name { get; private set; }
+        public COMRegistryEntrySource Source { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -83,17 +84,18 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return TypelibId == right.TypelibId && Versions.SequenceEqual(right.Versions);
+            return TypelibId == right.TypelibId && Versions.SequenceEqual(right.Versions) && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
-            return TypelibId.GetHashCode() ^ Versions.GetEnumHashCode();
+            return TypelibId.GetHashCode() ^ Versions.GetEnumHashCode() ^ Source.GetHashCode();
         }
 
         public COMTypeLibEntry(Guid typelibid, RegistryKey rootKey)
         {
             TypelibId = typelibid;
+            Source = rootKey.GetSource();
             Versions = LoadFromKey(rootKey).AsReadOnly();
             Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
         }
@@ -116,6 +118,7 @@ namespace OleViewDotNet
         {
             TypelibId = reader.ReadGuid("libid");
             Name = reader.ReadString("name");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
             reader.Read();
             Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(TypelibId));
         }
@@ -124,6 +127,7 @@ namespace OleViewDotNet
         {
             writer.WriteGuid("libid", TypelibId);
             writer.WriteOptionalAttributeString("name", Name);
+            writer.WriteEnum("src", Source);
             writer.WriteSerializableObjects("libvers", Versions);
         }
 
@@ -141,6 +145,7 @@ namespace OleViewDotNet
         public string Win32Path { get; private set; }
         public string Win64Path { get; private set; }
         public int Locale { get; private set; }
+        public COMRegistryEntrySource Source { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -155,20 +160,21 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Version == right.Version && Name == right.Name 
-                && Win32Path == right.Win32Path && Win64Path == right.Win64Path && Locale == right.Locale;
+            return Version == right.Version && Name == right.Name
+                && Win32Path == right.Win32Path && Win64Path == right.Win64Path && Locale == right.Locale
+                && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
-            return Version.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Win32Path.GetSafeHashCode() ^ Win64Path.GetSafeHashCode();
+            return Version.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Win32Path.GetSafeHashCode() ^ Win64Path.GetSafeHashCode() ^ Source.GetHashCode();
         }
 
         public string NativePath
         {
             get
             {
-                if (((Environment.Is64BitProcess) && !String.IsNullOrWhiteSpace(Win64Path)) || String.IsNullOrWhiteSpace(Win32Path))
+                if (((Environment.Is64BitProcess) && !string.IsNullOrWhiteSpace(Win64Path)) || string.IsNullOrWhiteSpace(Win32Path))
                 {
                     return Win64Path;
                 }
@@ -203,6 +209,7 @@ namespace OleViewDotNet
                     Win64Path = subKey.GetValue(null) as string;
                 }
             }
+            Source = key.GetSource();
         }
 
         public COMTypeLibVersionEntry(Guid typelibid)
@@ -222,6 +229,7 @@ namespace OleViewDotNet
             Win32Path = reader.GetAttribute("win32");
             Win64Path = reader.GetAttribute("win64");
             Locale = reader.ReadInt("locale");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -231,6 +239,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("win32", Win32Path);
             writer.WriteOptionalAttributeString("win64", Win64Path);
             writer.WriteInt("locale", Locale);
+            writer.WriteEnum("src", Source);
         }
 
         public override string ToString()
