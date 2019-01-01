@@ -45,7 +45,9 @@ namespace OleViewDotNet
         LocalMachine,
         User,
         Packaged,
-        ActCtx
+        ActCtx,
+        Metadata,
+        Builtin
     }
 
     /// <summary>
