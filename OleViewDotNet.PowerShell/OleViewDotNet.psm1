@@ -2585,3 +2585,49 @@ function Get-ComMimeType {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Get COM ProgIDs from a database.
+.DESCRIPTION
+This cmdlet gets COM ProgIDs from the database based on a set of criteria. The default is to return all registered ProgIds.
+.PARAMETER Database
+The database to use.
+.PARAMETER ProgId
+Specify a ProgID to lookup.
+.PARAMETER Name
+Specify a name to match against the ProgId name.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.COMProgIDEntry
+.EXAMPLE
+Get-ComProgIdId
+Get all COM ProgIds from the current database.
+#>
+function Get-ComProgId {
+    [CmdletBinding(DefaultParameterSetName = "All")]
+    Param(
+        [OleViewDotNet.COMRegistry]$Database,
+        [Parameter(Mandatory, ParameterSetName = "FromProgId")]
+        [Guid]$ProgId,
+        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [string]$Name
+    )
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+    switch($PSCmdlet.ParameterSetName) {
+        "All" {
+            Write-Output $Database.Progids.Values
+        }
+        "FromAppId" {
+            Write-Output $Database.Progids[$ProgId]
+        }
+        "FromName" {
+            Get-ComProgId -Database $Database | ? Name -eq $Name | Write-Output
+        }
+    }
+}
