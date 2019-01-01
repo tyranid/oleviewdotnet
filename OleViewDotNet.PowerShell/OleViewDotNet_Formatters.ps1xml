@@ -489,5 +489,45 @@
                 </TableRowEntries>
             </TableControl>
         </View>
+        <View>
+            <Name>COMTypeLibVersionEntryTable</Name>
+            <ViewSelectedBy>
+                <TypeName>OleViewDotNet.COMTypeLibVersionEntry</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>TypelibId</Label>
+                        <Width>36</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Version</Label>
+                        <Width>8</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Name</Label>
+                        <Width>40</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>TypelibId</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Version</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Name</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
     </ViewDefinitions>
 </Configuration>
