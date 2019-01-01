@@ -19,7 +19,6 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -38,11 +37,12 @@ namespace OleViewDotNet
         public bool ResolveMethodNames { get; }
         public bool ParseRegisteredClasses { get; }
         public bool ParseClients { get; }
-        public bool ParseActivatableClasses { get; }
+        public bool ParseActivationContext { get; }
 
         public COMProcessParserConfig(string dbghelp_path, string symbol_path,
             bool parse_stubs_methods, bool resolve_method_names,
-            bool parse_registered_classes, bool parse_clients)
+            bool parse_registered_classes, bool parse_clients,
+            bool parse_activation_context)
         {
             DbgHelpPath = dbghelp_path;
             SymbolPath = symbol_path;
@@ -50,6 +50,7 @@ namespace OleViewDotNet
             ResolveMethodNames = resolve_method_names;
             ParseRegisteredClasses = parse_registered_classes;
             ParseClients = parse_clients;
+            ParseActivationContext = parse_activation_context;
         }
     }
 
@@ -2002,6 +2003,15 @@ namespace OleViewDotNet
             }
         }
 
+        private static ActivationContext ReadActivationContext(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
+        {
+            if (!config.ParseActivationContext)
+            {
+                return null;
+            }
+            return ActivationContext.FromProcess(process, false);
+        }
+
         private static IEnumerable<COMRuntimeActivableClassEntry> GetRuntimeServer(IWinRTLocalSvrClassEntry obj, NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
         {
             return new COMRuntimeActivableClassEntry[] { new COMRuntimeActivableClassEntry(obj, process, resolver, registry) };
@@ -2283,7 +2293,8 @@ namespace OleViewDotNet
                             ReadActivationFilterVTable(process, resolver),
                             ReadClients(process, resolver, config, registry),
                             ReadRuntimeActivatableClasses(process, resolver, config, registry),
-                            new COMProcessToken(process));
+                            new COMProcessToken(process),
+                            ReadActivationContext(process, resolver, config, registry));
                     }
                 }
             }
@@ -2434,6 +2445,8 @@ namespace OleViewDotNet
         public IEnumerable<COMIPIDEntry> Clients { get; private set; }
         public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
         public COMProcessToken Token { get; private set; }
+        public ActivationContext ActivationContext { get; }
+
         public string PackageId => Token.PackageName?.FullName ?? string.Empty;
         public string PackageName => Token.PackageName?.Name ?? string.Empty;
         public ulong PackageHostId => Token.PackageHostId;
@@ -2489,7 +2502,7 @@ namespace OleViewDotNet
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
             string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes,
-            COMProcessToken token)
+            COMProcessToken token, ActivationContext activation_context)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -2529,6 +2542,7 @@ namespace OleViewDotNet
             Clients = clients.AsReadOnly();
             ActivatableClasses = activatable_classes.AsReadOnly();
             Token = token;
+            ActivationContext = activation_context;
         }
 
         public override string ToString()

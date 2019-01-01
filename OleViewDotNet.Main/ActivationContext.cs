@@ -798,7 +798,7 @@ namespace OleViewDotNet
                 }
                 else
                 {
-                    actctx_base = process.ReadMemory<int>(peb_base + offset);
+                    actctx_base = process.ReadMemory<uint>(peb_base + offset);
                 }
 
                 if (actctx_base == 0)

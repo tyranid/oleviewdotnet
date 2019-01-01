@@ -493,6 +493,8 @@ Specify to try and resolve method names for interfaces.
 Specify to parse classes registered by the process.
 .PARAMETER ParseClients
 Specify to parse client proxy information from the process.
+.PARAMETER ParseActivationContext
+Specify to parse process activation context.
 .PARAMETER NoProgress
 Don't show progress for process parsing.
 .PARAMETER ServiceName
@@ -522,6 +524,7 @@ function Get-ComProcess {
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
         [switch]$ParseClients,
+        [switch]$ParseActivationContext,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcessId")]
         [alias("pid")]
         [int[]]$ProcessId,
@@ -570,7 +573,7 @@ function Get-ComProcess {
         }
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
         $config = [OleViewDotNet.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
-                    $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses, $ParseClients)
+                    $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses, $ParseClients, $ParseActivationContext)
 
         switch($PSCmdlet.ParameterSetName) {
             "FromObjRef" {

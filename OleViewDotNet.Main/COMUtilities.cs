@@ -1860,9 +1860,10 @@ namespace OleViewDotNet
             bool resolve_method_names = Properties.Settings.Default.ResolveMethodNames;
             bool parse_registered_classes = Properties.Settings.Default.ParseRegisteredClasses;
             bool parse_clients = Properties.Settings.Default.ParseClients;
+            bool parse_activation_context = Properties.Settings.Default.ParseActivationContext;
 
             return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods,
-                resolve_method_names, parse_registered_classes, parse_clients);
+                resolve_method_names, parse_registered_classes, parse_clients, parse_activation_context);
         }
 
         internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
@@ -2474,7 +2475,7 @@ namespace OleViewDotNet
 
         public static void GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
         {
-            COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true, true);
+            COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true, true, false);
             var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
             Dictionary<string, int> entries;
             if (Environment.Is64BitProcess)
