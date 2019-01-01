@@ -650,6 +650,8 @@ namespace OleViewDotNet
             {
                 TrustedMarshaller = trustkey != null ? true : categories.Contains(COMCategory.CATID_TrustedMarshaler);
             }
+
+            Source = key.GetSource();
         }
 
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
@@ -898,6 +900,11 @@ namespace OleViewDotNet
             }
         }
 
+        public COMRegistryEntrySource Source
+        {
+            get; private set;
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))
@@ -926,14 +933,16 @@ namespace OleViewDotNet
             // We don't consider the loaded interfaces.
             return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID
                 && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values) 
-                && ActivatableFromApp == right.ActivatableFromApp && TrustedMarshaller == right.TrustedMarshaller;
+                && ActivatableFromApp == right.ActivatableFromApp && TrustedMarshaller == right.TrustedMarshaller
+                && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
                 ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() 
-                ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode() ^ TrustedMarshaller.GetHashCode();
+                ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode() ^ TrustedMarshaller.GetHashCode()
+                ^ Source.GetHashCode();
         }
 
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
@@ -1181,6 +1190,7 @@ namespace OleViewDotNet
             ActivatableFromApp = reader.ReadBool("activatable");
             TrustedMarshaller = reader.ReadBool("trusted");
             bool elevate = reader.ReadBool("elevate");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
             Name = reader.ReadString("name");
             if (m_loaded_interfaces)
@@ -1210,7 +1220,8 @@ namespace OleViewDotNet
             writer.WriteBool("activatable", ActivatableFromApp);
             writer.WriteBool("trusted", TrustedMarshaller);
             writer.WriteBool("elevate", Elevation != null);
-            
+            writer.WriteEnum("src", Source);
+
             writer.WriteOptionalAttributeString("name", Name);
             if (m_loaded_interfaces)
             {
