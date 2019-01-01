@@ -95,6 +95,14 @@ namespace OleViewDotNet
             TypeLibVersion = String.Empty;
         }
 
+        internal COMInterfaceEntry(COMRegistry registry, ActCtxComInterfaceRedirection intf_redirection) 
+            : this(registry, intf_redirection.Iid, intf_redirection.ProxyStubClsid32, intf_redirection.NumMethods, 
+                  string.Empty, intf_redirection.Name)
+        {
+            TypeLib = intf_redirection.TypeLibraryId;
+            Source = COMRegistryEntrySource.ActCtx;
+        }
+
         internal COMInterfaceEntry(COMRegistry registry, Type type) : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
         {
             CacheIidToName(Iid, Name);

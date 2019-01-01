@@ -696,14 +696,20 @@ namespace OleViewDotNet
             {
                 const int total_count = 9;
                 LoadDefaultSecurity();
+                ActivationContext actctx = null;
+                if (mode == COMRegistryMode.Merged)
+                {
+                    actctx = ActivationContext.FromProcess();
+                }
                 Report(progress, "CLSIDs", 1, total_count);
-                LoadCLSIDs(classes_key);
+                LoadCLSIDs(classes_key, actctx);
                 Report(progress, "AppIDs", 2, total_count);
                 LoadAppIDs(classes_key);
                 Report(progress, "ProgIDs", 3, total_count);
-                LoadProgIDs(classes_key);
+                LoadProgIDs(classes_key, actctx);
                 Report(progress, "Interfaces", 4, total_count);
-                LoadInterfaces(classes_key);
+                LoadInterfaces(classes_key, actctx, 
+                    mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly);
                 Report(progress, "MIME Types", 5, total_count);
                 LoadMimeTypes(classes_key);
                 Report(progress, "PreApproved", 6, total_count);
@@ -711,7 +717,7 @@ namespace OleViewDotNet
                 Report(progress, "LowRights", 7, total_count);
                 LoadLowRights(mode, user);
                 Report(progress, "TypeLibs", 8, total_count);
-                LoadTypelibs(classes_key);
+                LoadTypelibs(classes_key, actctx);
                 Report(progress, "Runtime Classes", 9, total_count);
                 LoadWindowsRuntime(classes_key, mode);
             }
@@ -767,7 +773,7 @@ namespace OleViewDotNet
                 Report(progress, "LowRights", 7, total_count);
                 m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy(this)).ToList();
                 Report(progress, "TypeLibs", 8, total_count);
-                m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry()).ToSortedDictionary(p => p.TypelibId);
+                m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry(this)).ToSortedDictionary(p => p.TypelibId);
                 Report(progress, "PreApproved", 9, total_count);
                 if (reader.IsStartElement("preapp"))
                 {
@@ -831,10 +837,19 @@ namespace OleViewDotNet
         /// Load CLSID information from the registry key
         /// </summary>
         /// <param name="rootKey">The root registry key, e.g. HKEY_CLASSES_ROOT</param>
-        private void LoadCLSIDs(RegistryKey rootKey)
+        /// <param name="actctx">The system default activation context.</param>
+        private void LoadCLSIDs(RegistryKey rootKey, ActivationContext actctx)
         {
             Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
             Dictionary<Guid, List<Guid>> categories = new Dictionary<Guid, List<Guid>>();
+
+            if (actctx != null)
+            {
+                foreach (var com_server in actctx.ComServers)
+                {
+                    clsids[com_server.Clsid] = new COMCLSIDEntry(this, com_server);
+                }
+            }
 
             using (RegistryKey clsidKey = rootKey.OpenSubKey("CLSID"))
             {
@@ -876,12 +891,25 @@ namespace OleViewDotNet
             m_categories = categories.ToSortedDictionary(p => p.Key, p => new COMCategory(this, p.Key, p.Value));
         }
 
-        private void LoadProgIDs(RegistryKey rootKey)
+        private void LoadProgIDs(RegistryKey rootKey, ActivationContext actctx)
         {
             Dictionary<string, COMProgIDEntry> progids = new Dictionary<string, COMProgIDEntry>(StringComparer.OrdinalIgnoreCase);
+
+            if (actctx != null)
+            {
+                foreach (var progid in actctx.ComProgIds)
+                {
+                    progids[progid.ProgId] = new COMProgIDEntry(this, progid);
+                }
+            }
+
             string[] subkeys = rootKey.GetSubKeyNames();
             foreach (string key in subkeys)
             {
+                if (progids.ContainsKey(key))
+                {
+                    continue;
+                }
                 try
                 {
                     using (RegistryKey regKey = rootKey.OpenSubKey(key))
@@ -901,11 +929,7 @@ namespace OleViewDotNet
             m_progids = new SortedDictionary<string, COMProgIDEntry>(progids, StringComparer.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Load interface list from registry
-        /// </summary>
-        /// <param name="rootKey">Root key of registry</param>
-        private void LoadInterfaces(RegistryKey rootKey)
+        private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, bool load_runtime_intfs)
         {
             Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
             foreach (COMInterfaceEntry.KnownInterfaces known_infs in Enum.GetValues(typeof(COMInterfaceEntry.KnownInterfaces)))
@@ -913,6 +937,15 @@ namespace OleViewDotNet
                 COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(this, known_infs);
                 interfaces.Add(unk.Iid, unk);
             }
+
+            if (actctx != null)
+            {
+                foreach (var intf in actctx.ComInterfaces)
+                {
+                    interfaces[intf.Iid] = new COMInterfaceEntry(this, intf);
+                }
+            }
+
             using (RegistryKey iidKey = rootKey.OpenSubKey("Interface"))
             {
                 if (iidKey != null)
@@ -920,9 +953,7 @@ namespace OleViewDotNet
                     string[] subkeys = iidKey.GetSubKeyNames();
                     foreach (string key in subkeys)
                     {
-                        Guid iid;
-
-                        if (Guid.TryParse(key, out iid))
+                        if (Guid.TryParse(key, out Guid iid))
                         {
                             if (!interfaces.ContainsKey(iid))
                             {
@@ -941,15 +972,18 @@ namespace OleViewDotNet
                 }
             }
 
-            foreach (var pair in COMUtilities.RuntimeInterfaceMetadata)
+            if (load_runtime_intfs)
             {
-                if (!interfaces.ContainsKey(pair.Key))
+                foreach (var pair in COMUtilities.RuntimeInterfaceMetadata)
                 {
-                    interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value));
-                }
-                else
-                {
-                    interfaces[pair.Key].RuntimeInterface = true;
+                    if (!interfaces.ContainsKey(pair.Key))
+                    {
+                        interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value));
+                    }
+                    else
+                    {
+                        interfaces[pair.Key].RuntimeInterface = true;
+                    }
                 }
             }
 
@@ -997,9 +1031,16 @@ namespace OleViewDotNet
             }
         }
 
-        void LoadTypelibs(RegistryKey rootKey)
+        void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx)
         {
             Dictionary<Guid, COMTypeLibEntry> typelibs = new Dictionary<Guid, COMTypeLibEntry>();
+            if (actctx != null)
+            {
+                foreach (var typelib in actctx.ComTypeLibs)
+                {
+                    typelibs[typelib.TypeLibraryId] = new COMTypeLibEntry(this, typelib);
+                }
+            }
 
             using (RegistryKey key = rootKey.OpenSubKey("TypeLib"))
             {
@@ -1016,7 +1057,7 @@ namespace OleViewDotNet
                             {
                                 if (subKey != null)
                                 {
-                                    COMTypeLibEntry typelib = new COMTypeLibEntry(g, subKey);
+                                    COMTypeLibEntry typelib = new COMTypeLibEntry(this, g, subKey);
 
                                     typelibs[g] = typelib;
                                 }

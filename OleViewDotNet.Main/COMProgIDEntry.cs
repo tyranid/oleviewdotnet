@@ -26,12 +26,22 @@ namespace OleViewDotNet
     {
         private readonly COMRegistry m_registry;
 
-        public COMProgIDEntry(COMRegistry registry, string progid, Guid clsid, RegistryKey rootKey) : this(registry)
+        public COMProgIDEntry(COMRegistry registry, 
+            string progid, Guid clsid, RegistryKey rootKey) : this(registry)
         {
             Clsid = clsid;
             ProgID = progid;
             Name = rootKey.GetValue(null, string.Empty).ToString();
             Source = rootKey.GetSource();
+        }
+
+        internal COMProgIDEntry(COMRegistry registry,
+            ActCtxComProgIdRedirection progid_redirection)
+        {
+            Clsid = progid_redirection.Clsid;
+            ProgID = progid_redirection.ProgId;
+            Name = ProgID;
+            Source = COMRegistryEntrySource.ActCtx;
         }
 
         internal COMProgIDEntry(COMRegistry registry)

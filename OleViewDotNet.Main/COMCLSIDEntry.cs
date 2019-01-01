@@ -321,12 +321,17 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMCLSIDServerEntry(COMServerType server_type, string server)
+        internal COMCLSIDServerEntry(COMServerType server_type, string server, COMThreadingModel threading_model)
         {
             Server = server;
             CommandLine = string.Empty;
             ServerType = server_type;
-            ThreadingModel = COMThreadingModel.Apartment;
+            ThreadingModel = threading_model;
+        }
+
+        internal COMCLSIDServerEntry(COMServerType server_type, string server) 
+            : this(server_type, server, COMThreadingModel.Apartment)
+        {
         }
 
         internal COMCLSIDServerEntry(COMServerType server_type) 
@@ -670,6 +675,23 @@ namespace OleViewDotNet
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, COMServerType type)
             : this(registry, clsid)
         {
+        }
+
+
+        internal COMCLSIDEntry(COMRegistry registry)
+        {
+            m_registry = registry;
+        }
+
+        internal COMCLSIDEntry(COMRegistry registry, ActCtxComServerRedirection com_server)
+            : this(registry, com_server.Clsid)
+        {
+            Clsid = com_server.Clsid;
+            TypeLib = com_server.TypeLibraryId;
+            Servers[COMServerType.InProcServer32] = 
+                new COMCLSIDServerEntry(COMServerType.InProcServer32, com_server.FullPath, com_server.ThreadingModel);
+            Name = string.IsNullOrWhiteSpace(com_server.ProgId) ? Clsid.ToString() : com_server.ProgId;
+            Source = COMRegistryEntrySource.ActCtx;
         }
 
         public Guid Clsid { get; private set; }
@@ -1167,11 +1189,6 @@ namespace OleViewDotNet
         public override string ToString()
         {
             return Name;
-        }
-
-        internal COMCLSIDEntry(COMRegistry registry)
-        {
-            m_registry = registry;
         }
 
         XmlSchema IXmlSerializable.GetSchema()

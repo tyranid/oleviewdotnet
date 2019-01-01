@@ -26,6 +26,8 @@ namespace OleViewDotNet
 {
     public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable
     {
+        private readonly COMRegistry m_registry;
+
         private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string name, string version, RegistryKey key)
         {
             List<COMTypeLibVersionEntry> entries = new List<COMTypeLibVersionEntry>();
@@ -38,8 +40,9 @@ namespace OleViewDotNet
                     {
                         if (subkey != null)
                         {
-                            COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(name, version, TypelibId, locale_int, subkey);
-                            if (!String.IsNullOrWhiteSpace(entry.NativePath))
+                            COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(m_registry, 
+                                name, version, TypelibId, locale_int, subkey);
+                            if (!string.IsNullOrWhiteSpace(entry.NativePath))
                             {
                                 entries.Add(entry);
                             }
@@ -92,7 +95,7 @@ namespace OleViewDotNet
             return TypelibId.GetHashCode() ^ Versions.GetEnumHashCode() ^ Source.GetHashCode();
         }
 
-        public COMTypeLibEntry(Guid typelibid, RegistryKey rootKey)
+        public COMTypeLibEntry(COMRegistry registry, Guid typelibid, RegistryKey rootKey) : this(registry)
         {
             TypelibId = typelibid;
             Source = rootKey.GetSource();
@@ -100,8 +103,20 @@ namespace OleViewDotNet
             Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
         }
 
-        internal COMTypeLibEntry()
+        internal COMTypeLibEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection) 
+            : this(registry)
         {
+            TypelibId = typelib_redirection.TypeLibraryId;
+            Name = TypelibId.FormatGuid();
+            List<COMTypeLibVersionEntry> versions = new List<COMTypeLibVersionEntry>();
+            versions.Add(new COMTypeLibVersionEntry(registry, typelib_redirection));
+            Versions = versions.AsReadOnly();
+            Source = COMRegistryEntrySource.ActCtx;
+        }
+
+        internal COMTypeLibEntry(COMRegistry registry)
+        {
+            m_registry = registry;
         }
 
         public int CompareTo(COMTypeLibEntry other)
@@ -120,7 +135,7 @@ namespace OleViewDotNet
             Name = reader.ReadString("name");
             Source = reader.ReadEnum<COMRegistryEntrySource>("src");
             reader.Read();
-            Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(TypelibId));
+            Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(m_registry, TypelibId));
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -139,6 +154,8 @@ namespace OleViewDotNet
 
     public class COMTypeLibVersionEntry : IXmlSerializable
     {
+        private readonly COMRegistry m_registry;
+
         public Guid TypelibId { get; private set; }
         public string Version { get; private set; }
         public string Name { get; private set; }
@@ -186,8 +203,8 @@ namespace OleViewDotNet
             }
         }
 
-        internal COMTypeLibVersionEntry(string name, string version, Guid typelibid, int locale, RegistryKey key) 
-            : this(typelibid)
+        internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key) 
+            : this(registry, typelibid)
         {
             Version = version;
             Locale = locale;
@@ -212,9 +229,19 @@ namespace OleViewDotNet
             Source = key.GetSource();
         }
 
-        public COMTypeLibVersionEntry(Guid typelibid)
+        public COMTypeLibVersionEntry(COMRegistry registry, Guid typelibid)
         {
+            m_registry = registry;
             TypelibId = typelibid;
+        }
+
+        public COMTypeLibVersionEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection) 
+            : this(registry, typelib_redirection.TypeLibraryId)
+        {
+            Name = TypelibId.FormatGuid();
+            Win32Path = typelib_redirection.FullPath;
+            Win64Path = typelib_redirection.FullPath;
+            Source = COMRegistryEntrySource.ActCtx;
         }
 
         XmlSchema IXmlSerializable.GetSchema()
