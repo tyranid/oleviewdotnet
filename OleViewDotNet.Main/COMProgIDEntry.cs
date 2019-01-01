@@ -30,7 +30,8 @@ namespace OleViewDotNet
         {
             Clsid = clsid;
             ProgID = progid;
-            Name = rootKey.GetValue(null, String.Empty).ToString();
+            Name = rootKey.GetValue(null, string.Empty).ToString();
+            Source = rootKey.GetSource();
         }
 
         internal COMProgIDEntry(COMRegistry registry)
@@ -57,6 +58,8 @@ namespace OleViewDotNet
 
         public string Name { get; private set; }
 
+        public COMRegistryEntrySource Source { get; private set; }
+
         public override string ToString()
         {
             return Name;
@@ -75,12 +78,14 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return ProgID == right.ProgID && Name == right.Name && Clsid == right.Clsid;
+            return ProgID == right.ProgID && Name == right.Name && Clsid == right.Clsid
+                    && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
-            return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode();
+            return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode()
+                ^ Source.GetHashCode();
         }
 
         XmlSchema IXmlSerializable.GetSchema()
@@ -93,6 +98,7 @@ namespace OleViewDotNet
             ProgID = reader.ReadString("progid");
             Clsid = reader.ReadGuid("clsid");
             Name = reader.ReadString("name");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -100,6 +106,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("progid", ProgID);
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("name", Name);
+            writer.WriteEnum("src", Source);
         }
     }
 }
