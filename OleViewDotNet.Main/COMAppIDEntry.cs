@@ -189,14 +189,14 @@ namespace OleViewDotNet
             DllSurrogate = key.GetValue("DllSurrogate") as string;
             if (DllSurrogate != null)
             {
-                if (String.IsNullOrWhiteSpace(DllSurrogate))
+                if (string.IsNullOrWhiteSpace(DllSurrogate))
                 {
                     DllSurrogate = "dllhost.exe";
                 }
                 else
                 {
                     string dllexe = key.GetValue("DllSurrogateExecutable") as string;
-                    if (!String.IsNullOrWhiteSpace(dllexe))
+                    if (!string.IsNullOrWhiteSpace(dllexe))
                     {
                         DllSurrogate = dllexe;
                     }
@@ -204,7 +204,7 @@ namespace OleViewDotNet
             }
             else
             {
-                DllSurrogate = String.Empty;
+                DllSurrogate = string.Empty;
             }
 
             object flags = key.GetValue("AppIDFlags");
@@ -215,7 +215,7 @@ namespace OleViewDotNet
 
             string local_service = key.GetValue("LocalService") as string;
 
-            if (!String.IsNullOrWhiteSpace(local_service))
+            if (!string.IsNullOrWhiteSpace(local_service))
             {
                 try
                 {
@@ -232,9 +232,9 @@ namespace OleViewDotNet
                 }
             }
 
-            if (String.IsNullOrWhiteSpace(RunAs))
+            if (string.IsNullOrWhiteSpace(RunAs))
             {
-                RunAs = String.Empty;
+                RunAs = string.Empty;
             }
 
             object rotflags = key.GetValue("ROTFlags");
@@ -248,6 +248,8 @@ namespace OleViewDotNet
             {
                 PreferredServerBitness = (PreferredServerBitness)bitness;
             }
+
+            Source = key.GetSource();
         }
 
         public int CompareTo(COMAppIDEntry other)
@@ -259,7 +261,7 @@ namespace OleViewDotNet
 
         public string DllSurrogate { get; private set; }
 
-        public bool HasDllSurrogate { get { return !String.IsNullOrWhiteSpace(DllSurrogate); } }
+        public bool HasDllSurrogate { get { return !string.IsNullOrWhiteSpace(DllSurrogate); } }
 
         public COMAppIDServiceEntry LocalService { get; private set; }
 
@@ -377,6 +379,8 @@ namespace OleViewDotNet
             get; private set;
         }
 
+        public COMRegistryEntrySource Source { get; private set; }
+
         internal COMRegistry Database { get; }
 
         string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
@@ -415,15 +419,16 @@ namespace OleViewDotNet
 
             return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
                 && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission && RotFlags == right.RotFlags 
-                && PreferredServerBitness == right.PreferredServerBitness;
+                && PreferredServerBitness == right.PreferredServerBitness && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
-            return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode() 
+            return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode()
                 ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
                 LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode() ^
-                LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode();
+                LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode()
+                ^ Source.GetHashCode();
         }
 
         internal COMAppIDEntry(COMRegistry registry)
@@ -448,6 +453,7 @@ namespace OleViewDotNet
             AccessPermission = reader.ReadString("accessperm");
             RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
             PreferredServerBitness = reader.ReadEnum<PreferredServerBitness>("bit");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
             bool has_service = reader.ReadBool("service");
             if (has_service)
             {
@@ -467,6 +473,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("accessperm", AccessPermission);
             writer.WriteEnum("rot", RotFlags);
             writer.WriteEnum("bit", PreferredServerBitness);
+            writer.WriteEnum("src", Source);
             if (LocalService != null)
             {
                 writer.WriteBool("service", true);
