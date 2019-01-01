@@ -50,6 +50,7 @@ namespace OleViewDotNet
         }
         public string AppPath { get; private set; }
         public IEElevationPolicy Policy { get; private set; }
+        public COMRegistryEntrySource Source { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -64,14 +65,15 @@ namespace OleViewDotNet
                 return false;
             }
 
-            return Name == right.Name && Uuid == right.Uuid && Clsid == right.Clsid 
-                && AppPath == right.AppPath && Policy == right.Policy;
+            return Name == right.Name && Uuid == right.Uuid && Clsid == right.Clsid
+                && AppPath == right.AppPath && Policy == right.Policy && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
             return Name.GetSafeHashCode() ^ Uuid.GetHashCode() 
-                ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode();
+                ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode()
+                ^ Source.GetHashCode();
         }
 
         private static string HandleNulTerminate(string s)
@@ -116,7 +118,7 @@ namespace OleViewDotNet
                 try
                 {
                     Name = HandleNulTerminate(appName);
-                    AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();   
+                    AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();
                 }
                 catch (ArgumentException)
                 {
@@ -124,11 +126,12 @@ namespace OleViewDotNet
             }
         }
 
-        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, RegistryKey key) 
+        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key) 
             : this(registry)
         {
             Uuid = guid;
             Name = Uuid.FormatGuidDefault();
+            Source = source;
             LoadFromRegistry(key);
         }
 
@@ -154,6 +157,7 @@ namespace OleViewDotNet
             Clsid = reader.ReadGuid("clsid");
             AppPath = reader.GetAttribute("path");
             Policy = reader.ReadEnum<IEElevationPolicy>("policy");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
         }
 
         void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -163,6 +167,7 @@ namespace OleViewDotNet
             writer.WriteGuid("clsid", Clsid);
             writer.WriteOptionalAttributeString("path", AppPath);
             writer.WriteEnum("policy", Policy);
+            writer.WriteEnum("src", Source);
         }
     }
 }

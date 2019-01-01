@@ -1029,7 +1029,7 @@ namespace OleViewDotNet
             m_typelibs = new SortedDictionary<Guid, COMTypeLibEntry>(typelibs);
         }
 
-        private void LoadLowRightsKey(RegistryKey rootKey)
+        private void LoadLowRightsKey(RegistryKey rootKey, COMRegistryEntrySource source)
         {
             using (RegistryKey key = rootKey.OpenSubKey(@"SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy"))
             {
@@ -1042,8 +1042,8 @@ namespace OleViewDotNet
                         {
                             using (RegistryKey rightsKey = key.OpenSubKey(s))
                             {
-                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, rightsKey);
-                                if (entry.Clsid != Guid.Empty || !String.IsNullOrWhiteSpace(entry.AppPath))
+                                COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, source, rightsKey);
+                                if (entry.Clsid != Guid.Empty || !string.IsNullOrWhiteSpace(entry.AppPath))
                                 {
                                     m_lowrights.Add(entry);
                                 }
@@ -1060,7 +1060,7 @@ namespace OleViewDotNet
 
             if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
             {
-                LoadLowRightsKey(Registry.LocalMachine);
+                LoadLowRightsKey(Registry.LocalMachine, COMRegistryEntrySource.LocalMachine);
             }
 
             if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
@@ -1069,7 +1069,7 @@ namespace OleViewDotNet
                 {
                     if (key != null)
                     {
-                        LoadLowRightsKey(key);
+                        LoadLowRightsKey(key, COMRegistryEntrySource.User);
                     }
                 }
             }
