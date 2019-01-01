@@ -77,6 +77,7 @@ namespace OleViewDotNet
             {
                 Base = "IUnknown";
             }
+            Source = key.GetSource();
         }
 
         internal COMInterfaceEntry(COMRegistry registry)
@@ -98,6 +99,7 @@ namespace OleViewDotNet
         {
             CacheIidToName(Iid, Name);
             RuntimeInterface = true;
+            Source = COMRegistryEntrySource.Metadata;
         }
 
         public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
@@ -180,39 +182,44 @@ namespace OleViewDotNet
 
         public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, KnownInterfaces known)
         {
-            COMInterfaceEntry ent = null;
             switch (known)
             {
                 case KnownInterfaces.IUnknown:
-                    ent = new COMInterfaceEntry(registry);
-                    ent.Base = "";
-                    ent.Iid = IID_IUnknown;
-                    ent.ProxyClsid = Guid.Empty;
-                    ent.NumMethods = 3;
-                    ent.Name = "IUnknown";
-                    ent.TypeLibVersion = String.Empty;
-                    break;
+                    return new COMInterfaceEntry(registry)
+                    {
+                        Base = "",
+                        Iid = IID_IUnknown,
+                        ProxyClsid = Guid.Empty,
+                        NumMethods = 3,
+                        Name = "IUnknown",
+                        TypeLibVersion = String.Empty,
+                        Source = COMRegistryEntrySource.Builtin
+                    };
                 case KnownInterfaces.IMarshal:
-                    ent = new COMInterfaceEntry(registry);
-                    ent.Base = "";
-                    ent.Iid = IID_IMarshal;
-                    ent.ProxyClsid = Guid.Empty;
-                    ent.NumMethods = 9;
-                    ent.Name = "IMarshal";
-                    ent.TypeLibVersion = String.Empty;
-                    break;
+                    return new COMInterfaceEntry(registry)
+                    {
+                        Base = "",
+                        Iid = IID_IMarshal,
+                        ProxyClsid = Guid.Empty,
+                        NumMethods = 9,
+                        Name = "IMarshal",
+                        TypeLibVersion = String.Empty,
+                        Source = COMRegistryEntrySource.Builtin
+                    };
                 case KnownInterfaces.IPSFactoryBuffer:
-                    ent = new COMInterfaceEntry(registry);
-                    ent.Base = "";
-                    ent.Iid = IID_IPSFactoryBuffer;
-                    ent.ProxyClsid = Guid.Empty;
-                    ent.NumMethods = 4;
-                    ent.Name = "IPSFactoryBuffer";
-                    ent.TypeLibVersion = String.Empty;
-                    break;
+                    return new COMInterfaceEntry(registry)
+                    {
+                        Base = "",
+                        Iid = IID_IPSFactoryBuffer,
+                        ProxyClsid = Guid.Empty,
+                        NumMethods = 4,
+                        Name = "IPSFactoryBuffer",
+                        TypeLibVersion = String.Empty,
+                        Source = COMRegistryEntrySource.Builtin
+                    };
             }
 
-            return ent;
+            return null;
         }
 
         public string Name
@@ -302,6 +309,11 @@ namespace OleViewDotNet
             get; internal set;
         }
 
+        public COMRegistryEntrySource Source
+        {
+            get; private set;
+        }
+
         public override bool Equals(object obj)
         {
             if (base.Equals(obj))
@@ -317,13 +329,15 @@ namespace OleViewDotNet
 
             return Name == right.Name && Iid == right.Iid && ProxyClsid == right.ProxyClsid
                 && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
-                && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface;
+                && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
+                && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
             return Name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
-                ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode();
+                ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
+                ^ Source.GetHashCode();
         }
 
         public override string ToString()
@@ -346,6 +360,7 @@ namespace OleViewDotNet
             TypeLibVersion = reader.ReadString("ver");
             TypeLib = reader.ReadGuid("tlib");
             RuntimeInterface = reader.ReadBool("rt");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
             m_iidtoname.TryAdd(Iid, Name);
         }
@@ -360,6 +375,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("ver", TypeLibVersion);
             writer.WriteGuid("tlib", TypeLib);
             writer.WriteBool("rt", RuntimeInterface);
+            writer.WriteEnum("src", Source);
         }
     }
 }
