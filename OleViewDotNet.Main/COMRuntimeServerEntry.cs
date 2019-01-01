@@ -49,9 +49,122 @@ namespace OleViewDotNet
 
     public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
     {
+        #region Private Members
         private readonly COMRegistry m_registry;
         private readonly Lazy<List<COMRuntimeClassEntry>> m_get_classes;
 
+        private void LoadFromKey(RegistryKey key)
+        {
+            IdentityType = (IdentityType)COMUtilities.ReadInt(key, null, "IdentityType");
+            ServerType = (ServerType)COMUtilities.ReadInt(key, null, "ServerType");
+            InstancingType = (InstancingType)COMUtilities.ReadInt(key, null, "InstancingType");
+            Identity = COMUtilities.ReadString(key, null, "Identity");
+            ServiceName = COMUtilities.ReadString(key, null, "ServiceName");
+            ExePath = COMUtilities.ReadString(key, null, "ExePath");
+            Permissions = string.Empty;
+            byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
+            Permissions = COMSecurity.GetStringSDForSD(permissions);
+        }
+        #endregion
+
+        #region Constructors
+        internal COMRuntimeServerEntry(COMRegistry registry)
+        {
+            m_registry = registry;
+            m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => m_registry.RuntimeClasses.Values.Where(c => 
+                c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
+        }
+
+        public COMRuntimeServerEntry(COMRegistry registry, string package_id, 
+            string name, RegistryKey rootKey) : this(registry)
+        {
+            Name = name;
+            PackageId = package_id ?? string.Empty;
+            LoadFromKey(rootKey);
+            Source = rootKey.GetSource();
+        }
+        #endregion
+
+        #region Interface Implementation
+        int IComparable<COMRuntimeServerEntry>.CompareTo(COMRuntimeServerEntry other)
+        {
+            return Name.CompareTo(other.Name);
+        }
+
+        string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
+
+        string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
+        #endregion
+
+        #region XML Serialization
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            Name = reader.ReadString("name");
+            IdentityType = reader.ReadEnum<IdentityType>("idtype");
+            ServerType = reader.ReadEnum<ServerType>("servertype");
+            InstancingType = reader.ReadEnum<InstancingType>("instancetype");
+            ServiceName = reader.ReadString("servicename");
+            ExePath = reader.ReadString("exepath");
+            Identity = reader.ReadString("identity");
+            Permissions = reader.ReadString("perms");
+            PackageId = reader.ReadString("pkg");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteOptionalAttributeString("name", Name);
+            writer.WriteEnum("idtype", IdentityType);
+            writer.WriteEnum("servertype", ServerType);
+            writer.WriteEnum("instancetype", InstancingType);
+            writer.WriteOptionalAttributeString("servicename", ServiceName);
+            writer.WriteOptionalAttributeString("exepath", ExePath);
+            writer.WriteOptionalAttributeString("perms", Permissions);
+            writer.WriteOptionalAttributeString("identity", Identity);
+            writer.WriteOptionalAttributeString("pkg", PackageId);
+            writer.WriteEnum("src", Source);
+        }
+        #endregion
+
+        #region Public Methods
+        public override bool Equals(object obj)
+        {
+            if (base.Equals(obj))
+            {
+                return true;
+            }
+
+            COMRuntimeServerEntry right = obj as COMRuntimeServerEntry;
+            if (right == null)
+            {
+                return false;
+            }
+
+            return IdentityType == right.IdentityType && ServerType == right.ServerType &&
+                InstancingType == right.InstancingType && ServiceName == right.ServiceName &&
+                ExePath == right.ExePath && Permissions == right.Permissions &&
+                Identity == right.Identity && PackageId == right.PackageId && Source == right.Source;
+        }
+
+        public override int GetHashCode()
+        {
+            return IdentityType.GetHashCode() ^ ServerType.GetHashCode() ^ InstancingType.GetHashCode() ^
+                ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSafeHashCode() ^
+                Identity.GetSafeHashCode() ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+        #endregion
+
+        #region Public Properties
         public string Identity { get; private set; }
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
@@ -75,104 +188,7 @@ namespace OleViewDotNet
         public int ClassCount => m_get_classes.Value.Count;
         public string PackageId { get; private set; }
         public bool RuntimeServer => string.IsNullOrEmpty(PackageId);
-
-        string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
-
-        string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
-
-        private void LoadFromKey(RegistryKey key)
-        {
-            IdentityType = (IdentityType)COMUtilities.ReadInt(key, null, "IdentityType");
-            ServerType = (ServerType)COMUtilities.ReadInt(key, null, "ServerType");
-            InstancingType = (InstancingType)COMUtilities.ReadInt(key, null, "InstancingType");
-            Identity = COMUtilities.ReadString(key, null, "Identity");
-            ServiceName = COMUtilities.ReadString(key, null, "ServiceName");
-            ExePath = COMUtilities.ReadString(key, null, "ExePath");
-            Permissions = string.Empty;
-            byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
-            Permissions = COMSecurity.GetStringSDForSD(permissions);
-        }
-
-        internal COMRuntimeServerEntry(COMRegistry registry)
-        {
-            m_registry = registry;
-            m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => m_registry.RuntimeClasses.Values.Where(c => 
-                c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
-        }
-
-        public COMRuntimeServerEntry(COMRegistry registry, string package_id, 
-            string name, RegistryKey rootKey) : this(registry)
-        {
-            Name = name;
-            PackageId = package_id ?? string.Empty;
-            LoadFromKey(rootKey);
-        }
-
-        int IComparable<COMRuntimeServerEntry>.CompareTo(COMRuntimeServerEntry other)
-        {
-            return Name.CompareTo(other.Name);
-        }
-
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            Name = reader.ReadString("name");
-            IdentityType = reader.ReadEnum<IdentityType>("idtype");
-            ServerType = reader.ReadEnum<ServerType>("servertype");
-            InstancingType = reader.ReadEnum<InstancingType>("instancetype");
-            ServiceName = reader.ReadString("servicename");
-            ExePath = reader.ReadString("exepath");
-            Identity = reader.ReadString("identity");
-            Permissions = reader.ReadString("perms");
-            PackageId = reader.ReadString("pkg");
-        }
-
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteEnum("idtype", IdentityType);
-            writer.WriteEnum("servertype", ServerType);
-            writer.WriteEnum("instancetype", InstancingType);
-            writer.WriteOptionalAttributeString("servicename", ServiceName);
-            writer.WriteOptionalAttributeString("exepath", ExePath);
-            writer.WriteOptionalAttributeString("perms", Permissions);
-            writer.WriteOptionalAttributeString("identity", Identity);
-            writer.WriteOptionalAttributeString("pkg", PackageId);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-
-            COMRuntimeServerEntry right = obj as COMRuntimeServerEntry;
-            if (right == null)
-            {
-                return false;
-            }
-
-            return IdentityType == right.IdentityType && ServerType == right.ServerType &&
-                InstancingType == right.InstancingType && ServiceName == right.ServiceName &&
-                ExePath == right.ExePath && Permissions == right.Permissions &&
-                Identity == right.Identity && PackageId == right.PackageId;
-        }
-
-        public override int GetHashCode()
-        {
-            return IdentityType.GetHashCode() ^ ServerType.GetHashCode() ^ InstancingType.GetHashCode() ^
-                ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSafeHashCode() ^
-                Identity.GetSafeHashCode() ^ PackageId.GetSafeHashCode();
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
+        public COMRegistryEntrySource Source { get; private set; }
+        #endregion
     }
 }

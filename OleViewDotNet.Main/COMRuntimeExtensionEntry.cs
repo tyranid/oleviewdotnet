@@ -63,6 +63,7 @@ namespace OleViewDotNet
             ContractId = contract_id;
             AppId = id;
             LoadFromKey(key);
+            Source = key.GetSource();
         }
 
         #endregion
@@ -82,6 +83,7 @@ namespace OleViewDotNet
             DisplayName = reader.ReadString("name");
             Icon = reader.ReadString("icon");
             Vendor = reader.ReadString("vend");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
             CustomProperties = reader.ReadDictionary("props");
         }
 
@@ -94,6 +96,7 @@ namespace OleViewDotNet
             writer.WriteOptionalAttributeString("name", DisplayName);
             writer.WriteOptionalAttributeString("icon", Icon);
             writer.WriteOptionalAttributeString("vend", Vendor);
+            writer.WriteEnum("src", Source);
             writer.WriteDictionary(CustomProperties, "props");
         }
         #endregion
@@ -112,13 +115,15 @@ namespace OleViewDotNet
             }
 
             return AppId == right.AppId && PackageId == right.PackageId && ContractId == right.ContractId && Description == right.Description
-                && DisplayName == right.DisplayName && Icon == right.Icon && Vendor == right.Vendor && COMUtilities.EqualsDictionary(CustomProperties, right.CustomProperties);
+                && DisplayName == right.DisplayName && Icon == right.Icon && Vendor == right.Vendor && COMUtilities.EqualsDictionary(CustomProperties, right.CustomProperties)
+                && Source == right.Source;
         }
 
         public override int GetHashCode()
         {
             return AppId.GetHashCode() ^ PackageId.GetHashCode() ^ ContractId.GetHashCode() ^ Description.GetHashCode()
-                ^ DisplayName.GetHashCode() ^ Icon.GetHashCode() ^ Vendor.GetHashCode() ^ COMUtilities.GetHashCodeDictionary(CustomProperties);
+                ^ DisplayName.GetHashCode() ^ Icon.GetHashCode() ^ Vendor.GetHashCode() ^ COMUtilities.GetHashCodeDictionary(CustomProperties)
+                ^ Source.GetHashCode();
         }
 
         public override string ToString()
@@ -150,6 +155,7 @@ namespace OleViewDotNet
                 return string.Empty;
             }
         }
+        public COMRegistryEntrySource Source { get; private set; }
 
         #endregion
     }

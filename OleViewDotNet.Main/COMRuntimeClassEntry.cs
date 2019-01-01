@@ -18,7 +18,6 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -134,6 +133,11 @@ namespace OleViewDotNet
             }
         }
 
+        public COMRegistryEntrySource Source
+        {
+            get; private set;
+        }
+
         private void LoadFromKey(RegistryKey key)
         {
             Clsid = COMUtilities.ReadGuid(key, null, "CLSID");
@@ -162,6 +166,7 @@ namespace OleViewDotNet
             : this(registry, package_id, name)
         {
             LoadFromKey(rootKey);
+            Source = rootKey.GetSource();
         }
 
         internal COMRuntimeClassEntry(COMRegistry registry)
@@ -186,6 +191,7 @@ namespace OleViewDotNet
             Threading = reader.ReadEnum<ThreadingType>("thread");
             ActivateInSharedBroker = reader.ReadBool("shared");
             PackageId = reader.ReadString("pkg");
+            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
             InterfacesLoaded = reader.ReadBool("loaded");
             if (InterfacesLoaded)
             {
@@ -206,6 +212,7 @@ namespace OleViewDotNet
             writer.WriteEnum("thread", Threading);
             writer.WriteBool("shared", ActivateInSharedBroker);
             writer.WriteOptionalAttributeString("pkg", PackageId);
+            writer.WriteEnum("src", Source);
             writer.WriteBool("loaded", InterfacesLoaded);
             if (InterfacesLoaded)
             {
@@ -230,7 +237,7 @@ namespace OleViewDotNet
             return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
                 && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
                 Permissions == right.Permissions && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
-                && PackageId == right.PackageId;
+                && PackageId == right.PackageId && Source == right.Source;
         }
 
         public override int GetHashCode()
@@ -238,7 +245,7 @@ namespace OleViewDotNet
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
                 ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
                 ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
-                ^ PackageId.GetSafeHashCode();
+                ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
         }
 
         public override string ToString()
