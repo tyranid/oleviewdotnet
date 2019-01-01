@@ -604,6 +604,21 @@ namespace OleViewDotNet
             return Guid.Empty;
         }
 
+        public static COMRegistryEntrySource GetSource(this RegistryKey key)
+        {
+            NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle());
+            string full_path = native_key.FullPath;
+            if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
+            {
+                return COMRegistryEntrySource.LocalMachine;
+            }
+            else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
+            {
+                return COMRegistryEntrySource.User;
+            }
+            return COMRegistryEntrySource.Unknown;
+        }
+
         public static RegistryKey OpenSubKeySafe(this RegistryKey rootKey, string keyName)
         {
             try

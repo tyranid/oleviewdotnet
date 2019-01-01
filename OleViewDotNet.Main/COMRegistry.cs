@@ -39,6 +39,15 @@ namespace OleViewDotNet
         RightOnly,
     }
 
+    public enum COMRegistryEntrySource
+    {
+        Unknown,
+        LocalMachine,
+        User,
+        Packaged,
+        ActCtx
+    }
+
     /// <summary>
     /// Class to hold information about the current COM registration information
     /// </summary>
