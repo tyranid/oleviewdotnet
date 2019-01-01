@@ -972,20 +972,6 @@ namespace OleViewDotNet
             return ret;
         }
 
-        public static RawSecurityDescriptor ReadSecurityDescriptorFromKey(RegistryKey key, string value)
-        {
-            byte[] data = (byte[])key.GetValue(value);
-
-            if (data != null)
-            {
-                return new RawSecurityDescriptor(data, 0);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static bool IsComImport(Type t)
         {
             return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0 ||
