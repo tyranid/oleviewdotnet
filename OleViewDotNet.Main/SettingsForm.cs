@@ -26,17 +26,29 @@ namespace OleViewDotNet
         public SettingsForm()
         {
             InitializeComponent();
-            textBoxDbgHelp.Text = Environment.Is64BitProcess ?
-                Properties.Settings.Default.DbgHelpPath64 :
-                Properties.Settings.Default.DbgHelpPath32;
+            if (Environment.Is64BitProcess)
+            {
+                textBoxDbgHelp.Text = Properties.Settings.Default.DbgHelpPath64;
+                textBoxDatabasePath.Text = Properties.Settings.Default.DatabasePath64;
+                checkBoxEnableSaveOnExit.Checked = Properties.Settings.Default.EnableSaveOnExit64;
+                checkBoxEnableLoadOnStart.Checked = Properties.Settings.Default.EnableLoadOnStart64;
+            }
+            else
+            {
+                textBoxDbgHelp.Text = Properties.Settings.Default.DbgHelpPath32;
+                textBoxDatabasePath.Text = Properties.Settings.Default.DatabasePath32;
+                checkBoxEnableSaveOnExit.Checked = Properties.Settings.Default.EnableSaveOnExit32;
+                checkBoxEnableLoadOnStart.Checked = Properties.Settings.Default.EnableLoadOnStart32;
+            }
             textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
             checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
             checkBoxResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
             checkBoxProxyParserResolveSymbols.Checked = Properties.Settings.Default.ProxyParserResolveSymbols;
             checkBoxParseRegisteredClasses.Checked = Properties.Settings.Default.ParseRegisteredClasses;
+            checkBoxParseActCtx.Checked = Properties.Settings.Default.ParseActivationContext;
         }
 
-        private void btnBrowse_Click(object sender, EventArgs e)
+        private void btnBrowseDbgHelpPath_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
@@ -75,10 +87,16 @@ namespace OleViewDotNet
             if (Environment.Is64BitProcess)
             {
                 Properties.Settings.Default.DbgHelpPath64 = textBoxDbgHelp.Text;
+                Properties.Settings.Default.DatabasePath64 = textBoxDatabasePath.Text;
+                Properties.Settings.Default.EnableLoadOnStart64 = checkBoxEnableLoadOnStart.Checked;
+                Properties.Settings.Default.EnableSaveOnExit64 = checkBoxEnableSaveOnExit.Checked;
             }
             else
             {
                 Properties.Settings.Default.DbgHelpPath32 = textBoxDbgHelp.Text;
+                Properties.Settings.Default.DatabasePath32 = textBoxDatabasePath.Text;
+                Properties.Settings.Default.EnableLoadOnStart32 = checkBoxEnableLoadOnStart.Checked;
+                Properties.Settings.Default.EnableSaveOnExit32 = checkBoxEnableSaveOnExit.Checked;
             }
             Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
             Properties.Settings.Default.SymbolsConfigured = true;
@@ -86,6 +104,7 @@ namespace OleViewDotNet
             Properties.Settings.Default.ResolveMethodNames = checkBoxResolveMethodNames.Checked;
             Properties.Settings.Default.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
             Properties.Settings.Default.ParseRegisteredClasses = checkBoxParseRegisteredClasses.Checked;
+            Properties.Settings.Default.ParseActivationContext = checkBoxParseActCtx.Checked;
             try
             {
                 Properties.Settings.Default.Save();

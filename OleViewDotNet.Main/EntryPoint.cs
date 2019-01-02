@@ -145,6 +145,33 @@ namespace OleViewDotNet
             }
         }
 
+        class AutoSaveLoadConfiguration
+        {
+            public bool AutoLoad { get; }
+            public bool AutoSave { get; }
+            public string DatabasePath { get; }
+
+            public AutoSaveLoadConfiguration()
+            {
+                if (Environment.Is64BitProcess)
+                {
+                    AutoLoad = Properties.Settings.Default.EnableLoadOnStart64;
+                    AutoSave = Properties.Settings.Default.EnableSaveOnExit64;
+                    DatabasePath = Properties.Settings.Default.DatabasePath64;
+                }
+                else
+                {
+                    AutoLoad = Properties.Settings.Default.EnableLoadOnStart32;
+                    AutoSave = Properties.Settings.Default.EnableSaveOnExit32;
+                    DatabasePath = Properties.Settings.Default.DatabasePath32;
+                }
+                if (string.IsNullOrWhiteSpace(DatabasePath))
+                {
+                    DatabasePath = COMUtilities.GetAutoSaveLoadPath();
+                }
+            }
+        }
+
         static IEnumerable<COMServerType> ParseServerTypes(string servers)
         {
             string[] ss = servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -173,7 +200,7 @@ namespace OleViewDotNet
             string view_name = null;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
-            
+
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
                 { "o|out=", "Save database and exit.", v => save_file = v },
@@ -244,6 +271,7 @@ namespace OleViewDotNet
             }
             else
             {
+                AutoSaveLoadConfiguration autoload_config = new AutoSaveLoadConfiguration();
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -275,8 +303,26 @@ namespace OleViewDotNet
                         return;
                     }
 
-                    COMRegistry registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
-                        : COMUtilities.LoadRegistry(null, mode);
+                    COMRegistry registry = null;
+
+                    if (database_file == null && autoload_config.AutoLoad && File.Exists(autoload_config.DatabasePath))
+                    {
+                        try
+                        {
+                            registry = COMUtilities.LoadRegistry(null, autoload_config.DatabasePath);
+                        }
+                        catch
+                        {
+                            MessageBox.Show($"Error loading database {autoload_config.DatabasePath}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+
+                    if (registry == null)
+                    {
+                        registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
+                            : COMUtilities.LoadRegistry(null, mode);
+                    }
+
                     if (delete_database && database_file != null)
                     {
                         File.Delete(database_file);
@@ -302,6 +348,12 @@ namespace OleViewDotNet
                         COMUtilities.CoRegisterActivationFilter(new ActivationFilter());
                     }
                     Application.Run(_appContext);
+
+                    autoload_config = new AutoSaveLoadConfiguration();
+                    if (autoload_config.AutoSave)
+                    {
+                        registry.Save(autoload_config.DatabasePath);
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -154,5 +154,77 @@ namespace OleViewDotNet.Properties {
                 this["ParseActivationContext"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DatabasePath32 {
+            get {
+                return ((string)(this["DatabasePath32"]));
+            }
+            set {
+                this["DatabasePath32"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DatabasePath64 {
+            get {
+                return ((string)(this["DatabasePath64"]));
+            }
+            set {
+                this["DatabasePath64"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableSaveOnExit32 {
+            get {
+                return ((bool)(this["EnableSaveOnExit32"]));
+            }
+            set {
+                this["EnableSaveOnExit32"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableSaveOnExit64 {
+            get {
+                return ((bool)(this["EnableSaveOnExit64"]));
+            }
+            set {
+                this["EnableSaveOnExit64"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableLoadOnStart32 {
+            get {
+                return ((bool)(this["EnableLoadOnStart32"]));
+            }
+            set {
+                this["EnableLoadOnStart32"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableLoadOnStart64 {
+            get {
+                return ((bool)(this["EnableLoadOnStart64"]));
+            }
+            set {
+                this["EnableLoadOnStart64"] = value;
+            }
+        }
     }
 }

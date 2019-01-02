@@ -33,7 +33,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security;
-using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
@@ -714,6 +713,13 @@ namespace OleViewDotNet
         public static string GetPluginDirectory()
         {
             return Path.Combine(GetAppDirectory(), "plugin");
+        }
+
+        public static string GetAutoSaveLoadPath()
+        {
+            string autosave = Path.Combine(GetAppDataDirectory(), "autosave");
+            Directory.CreateDirectory(autosave);
+            return Path.Combine(autosave, Environment.Is64BitProcess ? "com64.db" : "com32.db");
         }
 
         public static Dictionary<string, int> GetSymbolFile(bool native)
