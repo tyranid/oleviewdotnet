@@ -795,8 +795,8 @@ namespace OleViewDotNet
         {
             try
             {
-                bool is_64bit = process.Is64Bit;
-                long peb_base = process.PebAddress.ToInt64();
+                bool is_64bit = process.Is64Bit || Environment.Is64BitOperatingSystem;
+
                 int offset;
                 if (default_actctx)
                 {
@@ -807,6 +807,7 @@ namespace OleViewDotNet
                     offset = is_64bit ? ACTCTX_PEB_OFFSET_64 : ACTCTX_PEB_OFFSET_32;
                 }
 
+                long peb_base = process.PebAddress.ToInt64();
                 long actctx_base;
                 if (is_64bit)
                 {
