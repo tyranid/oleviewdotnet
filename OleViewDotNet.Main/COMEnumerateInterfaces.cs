@@ -228,6 +228,16 @@ namespace OleViewDotNet
                 QueryInterface(punk, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _interfaces);
                 QueryInterface(pfactory, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _factory_interfaces);
 
+                var actctx = ActivationContext.FromProcess();
+                if (actctx != null)
+                {
+                    foreach (var intf in actctx.ComInterfaces)
+                    {
+                        QueryInterface(punk, intf.Iid, module_names, _interfaces);
+                        QueryInterface(pfactory, intf.Iid, module_names, _factory_interfaces);
+                    }
+                }
+
                 using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
                 {
                     foreach (string iid_string in interface_key.GetSubKeyNames())
