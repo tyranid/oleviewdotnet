@@ -57,13 +57,15 @@ namespace OleViewDotNet
     public enum RpcTowerId : short
     {
         None = 0,
+        DNetNSP = 0x04,
         Udp = 0x08,
         Tcp = 0x07,
-        Ipx = 0x0E,
         Spx = 0x0C,
-        NetBIOS = 0x12,
-        DNetNSP = 0x04,
+        Ipx = 0x0E,
+        NamedPipe = 0xF,
         LRPC = 0x10,
+        NetBIOS = 0x12,
+        Container = 0x21,
         StringBinding = -1,
     }
 
@@ -72,10 +74,14 @@ namespace OleViewDotNet
         public RpcTowerId TowerId { get; set; }
         public string NetworkAddr { get; set; }
 
-        public COMStringBinding()
+        public COMStringBinding() : this(0, string.Empty)
         {
-            TowerId = 0;
-            NetworkAddr = String.Empty;
+        }
+
+        public COMStringBinding(RpcTowerId tower_id, string network_addr)
+        {
+            TowerId = tower_id;
+            NetworkAddr = network_addr;
         }
 
         internal COMStringBinding(BinaryReader reader, bool direct_string)
@@ -127,10 +133,14 @@ namespace OleViewDotNet
         public RpcAuthnService AuthnSvc { get; set; }
         public string PrincName { get; set; }
 
-        public COMSecurityBinding()
+        public COMSecurityBinding() : this(0, string.Empty)
         {
-            AuthnSvc = 0;
-            PrincName = String.Empty;
+        }
+
+        public COMSecurityBinding(RpcAuthnService authn_svc, string princ_name)
+        {
+            AuthnSvc = authn_svc;
+            PrincName = princ_name;
         }
 
         internal COMSecurityBinding(BinaryReader reader)
