@@ -54,18 +54,26 @@ namespace OleViewDotNet
         Default     = -1,
     }
 
+    // Note that most of these won't actually work.
     public enum RpcTowerId : short
     {
         None = 0,
-        DNetNSP = 0x04,
-        Udp = 0x08,
-        Tcp = 0x07,
-        Spx = 0x0C,
-        Ipx = 0x0E,
-        NamedPipe = 0xF,
-        LRPC = 0x10,
-        NetBIOS = 0x12,
-        Container = 0x21,
+        DNetNSP = 0x04, // ncacn_dnet_dsp
+        Tcp = 0x07,     // ncacg_ip_tcp
+        Udp = 0x08,     // ncacn_ip_udp
+        NetbiosTcp = 0x09, // ncacn_nb_tcp
+        Spx = 0x0C,         // ncacn_spx
+        NetbiosIpx = 0xD,   // ncacn_np_ipx
+        Ipx = 0x0E,         // ncacg_ipx
+        NamedPipe = 0xF,    // ncacn_np
+        LRPC = 0x10,        // ncalrpc
+        NetBIOS = 0x13,     // ncacn_nb_nb
+        AppleTalkDSP = 0x16,// ncacn_at_dsp
+        AppleTalkDDP = 0x17,// ncacg_at_ddp
+        BanyanVinesSPP = 0x1A, // ncacn_vns_spp
+        MessageQueue = 0x1D,   // ncadg_mq
+        Http = 0x1F,           // ncacn_http
+        Container = 0x21,      // ncacn_hvsocket
         StringBinding = -1,
     }
 
