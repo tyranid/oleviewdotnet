@@ -232,7 +232,7 @@ namespace OleViewDotNet
     {
         private static T ReadStruct<T>(this NtProcess process, long address) where T : new()
         {
-            if (address < 0)
+            if (address <= 0)
             {
                 return new T();
             }
@@ -2085,7 +2085,7 @@ namespace OleViewDotNet
 
                 next = entry.GetNext();
             }
-            while (next != base_address);
+            while (next != IntPtr.Zero && next != base_address );
         }
 
         private static List<COMProcessClassRegistration> GetRegisteredClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
@@ -2113,6 +2113,16 @@ namespace OleViewDotNet
             return classes;
         }
 
+        // combase!tagSOleTlsData::pSTALSvrsFront
+        private static int GetSTALSvrsOffset(NtProcess process)
+        {
+            if (COMUtilities.IsWindows10RS4OrLess)
+            {
+                return process.Is64Bit ? 0x118 : 0xa8;
+            }
+            return process.Is64Bit ? 0x110 : 0xa4;
+        }
+
         private static IntPtr GetSTALSvrsFront(NtProcess process, NtThread thread)
         {
             IntPtr p = GetReservedForOle(process, thread);
@@ -2121,11 +2131,7 @@ namespace OleViewDotNet
                 return IntPtr.Zero;
             }
 
-            if (process.Is64Bit)
-            {
-                return ReadPointer(process, p + 0x118);
-            }
-            return ReadPointer(process, p + 0xa8);
+            return ReadPointer(process, p + GetSTALSvrsOffset(process));
         }
 
         private static IntPtr GetReservedForOle(NtProcess process, NtThread thread)
