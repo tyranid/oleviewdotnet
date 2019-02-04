@@ -546,10 +546,16 @@
     <None Include="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\6C28951826CB3339A320224696688F27.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\789A3A3D760237153A6E7B782432926C.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\8AF5F0A4B784EAE7901C8B937AB7411E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">
