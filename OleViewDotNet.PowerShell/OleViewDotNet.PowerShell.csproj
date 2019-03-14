@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NtApiDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NtApiDotNet.1.1.17\lib\net45\NtApiDotNet.dll</HintPath>
+      <HintPath>..\packages\NtApiDotNet.1.1.20\lib\net45\NtApiDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -66,7 +66,9 @@
     <None Include="OleViewDotNet.psm1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Startup-Module.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
