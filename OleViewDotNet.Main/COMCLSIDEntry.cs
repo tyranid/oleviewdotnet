@@ -63,8 +63,7 @@ namespace OleViewDotNet
             {
                 foreach (string value in vso_key.GetValueNames())
                 {
-                    Guid guid;
-                    if (Guid.TryParse(value, out guid))
+                    if (Guid.TryParse(value, out Guid guid))
                     {
                         vsos.Add(guid);
                     }
@@ -262,7 +261,7 @@ namespace OleViewDotNet
                     {
                         string name = temp.Substring(0, index);
 
-                        if (File.Exists(name) || (Path.GetExtension(name) == String.Empty && File.Exists(name + ".exe")))
+                        if (File.Exists(name) || (Path.GetExtension(name) == string.Empty && File.Exists(name + ".exe")))
                         {
                             filename = name;
                             break;
@@ -327,6 +326,12 @@ namespace OleViewDotNet
             CommandLine = string.Empty;
             ServerType = server_type;
             ThreadingModel = threading_model;
+        }
+
+        internal COMCLSIDServerEntry(COMServerType server_type, string server, string commandLine)
+            : this(server_type, server, COMThreadingModel.Apartment)
+        {
+            CommandLine = commandLine;
         }
 
         internal COMCLSIDServerEntry(COMServerType server_type, string server) 
@@ -503,10 +508,8 @@ namespace OleViewDotNet
 
     public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
     {
-        private readonly COMRegistry m_registry;
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
-        private bool m_loaded_interfaces;
 
         private static HashSet<Guid> LoadAppActivatableClsids()
         {
@@ -518,8 +521,7 @@ namespace OleViewDotNet
                 {
                     foreach (string clsid in activatable_key.GetSubKeyNames())
                     {
-                        Guid guid;
-                        if (Guid.TryParse(clsid, out guid))
+                        if (Guid.TryParse(clsid, out Guid guid))
                         {
                             app_activatable.Add(guid);
                         }
@@ -533,7 +535,7 @@ namespace OleViewDotNet
 
         public int CompareTo(COMCLSIDEntry right)
         {
-            return String.Compare(Name, right.Name);
+            return string.Compare(Name, right.Name);
         }
         
         private COMCLSIDServerEntry ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
@@ -546,7 +548,7 @@ namespace OleViewDotNet
                 }
 
                 COMCLSIDServerEntry entry = new COMCLSIDServerEntry(server_key, server_type);
-                if (!String.IsNullOrWhiteSpace(entry.Server))
+                if (!string.IsNullOrWhiteSpace(entry.Server))
                 {
                     servers.Add(server_type, new COMCLSIDServerEntry(server_key, server_type));
                 }
@@ -622,9 +624,7 @@ namespace OleViewDotNet
                     string[] subKeys = catkey.GetSubKeyNames();
                     foreach (string s in subKeys)
                     {
-                        Guid g;
-
-                        if (Guid.TryParse(s, out g))
+                        if (Guid.TryParse(s, out Guid g))
                         {
                             categories.Add(g);
                         }
@@ -659,6 +659,37 @@ namespace OleViewDotNet
             Source = key.GetSource();
         }
 
+        internal COMCLSIDEntry(COMRegistry registry, Guid clsid, COMPackagedEntry packageEntry,
+            COMPackagedClassEntry classEntry) : this(registry, clsid)
+        {
+            Source = COMRegistryEntrySource.Packaged;
+            Name = classEntry.DisplayName;
+            PackageId = packageEntry.PackageId;
+
+            Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+            if (!string.IsNullOrWhiteSpace(classEntry.DllPath))
+            {
+                servers.Add(COMServerType.InProcServer32, new COMCLSIDServerEntry(COMServerType.InProcServer32, classEntry.DllPath, classEntry.Threading));
+            }
+
+            if (packageEntry.Servers.ContainsKey(classEntry.ServerId))
+            {
+                COMPackagedServerEntry server = packageEntry.Servers[classEntry.ServerId];
+                AppID = server.SurrogateAppId;
+                string serverPath = "<APPID HOSTED>";
+                string commandLine = string.Empty;
+                if (AppID == Guid.Empty)
+                {
+                    serverPath = server.Executable;
+                    commandLine = server.CommandLine;
+                }
+                servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, serverPath, commandLine));
+            }
+
+            Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(servers);
+            Categories = classEntry.ImplementedCategories.AsReadOnly();
+        }
+
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
         {
             LoadFromKey(rootKey);
@@ -670,6 +701,7 @@ namespace OleViewDotNet
             Servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
             Name = string.Empty;
             Categories = new Guid[0];
+            PackageId = string.Empty;
         }
 
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, COMServerType type)
@@ -680,7 +712,7 @@ namespace OleViewDotNet
 
         internal COMCLSIDEntry(COMRegistry registry)
         {
-            m_registry = registry;
+            Database = registry;
         }
 
         internal COMCLSIDEntry(COMRegistry registry, ActCtxComServerRedirection com_server)
@@ -738,7 +770,7 @@ namespace OleViewDotNet
         {
             get
             {
-                return m_registry.AppIDs.GetGuidEntry(AppID);
+                return Database.AppIDs.GetGuidEntry(AppID);
             }
         }
 
@@ -756,7 +788,7 @@ namespace OleViewDotNet
         {
             get
             {
-                return m_registry.Typelibs.GetGuidEntry(TypeLib);
+                return Database.Typelibs.GetGuidEntry(TypeLib);
             }
         }
 
@@ -797,7 +829,7 @@ namespace OleViewDotNet
         {
             get
             {
-                return Categories.Select(c => m_registry.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
+                return Categories.Select(c => Database.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
             }
         }
 
@@ -813,7 +845,7 @@ namespace OleViewDotNet
         {
             get
             {
-                return m_registry.GetProgIdsForClsid(Clsid);
+                return Database.GetProgIdsForClsid(Clsid);
             }
         }
 
@@ -922,6 +954,8 @@ namespace OleViewDotNet
             }
         }
 
+        public string PackageId { get; private set; }
+
         public COMRegistryEntrySource Source
         {
             get; private set;
@@ -954,24 +988,24 @@ namespace OleViewDotNet
 
             // We don't consider the loaded interfaces.
             return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID
-                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values) 
+                && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values)
                 && ActivatableFromApp == right.ActivatableFromApp && TrustedMarshaller == right.TrustedMarshaller
-                && Source == right.Source;
+                && Source == right.Source && PackageId == right.PackageId;
         }
 
         public override int GetHashCode()
         {
             return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
-                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode() 
+                ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode()
                 ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode() ^ TrustedMarshaller.GetHashCode()
-                ^ Source.GetHashCode();
+                ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
         }
 
         private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database);
             }
             catch (Win32Exception)
             {
@@ -1018,12 +1052,12 @@ namespace OleViewDotNet
                 return false;
             }
 
-            if (refresh || !m_loaded_interfaces)
+            if (refresh || !InterfacesLoaded)
             {
                 COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
-                m_loaded_interfaces = true;
+                InterfacesLoaded = true;
                 return true;
             }
             return false;
@@ -1060,10 +1094,7 @@ namespace OleViewDotNet
         /// <summary>
         /// Indicates that the class' interface list has been loaded.
         /// </summary>
-        public bool InterfacesLoaded
-        {
-            get { return m_loaded_interfaces; }
-        }
+        public bool InterfacesLoaded { get; private set; }
 
         /// <summary>
         /// Get list of interfaces.
@@ -1073,7 +1104,7 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_loaded_interfaces)
+                if (InterfacesLoaded)
                 {
                     return m_interfaces.AsReadOnly();
                 }
@@ -1092,7 +1123,7 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_loaded_interfaces)
+                if (InterfacesLoaded)
                 {
                     return m_factory_interfaces.AsReadOnly();
                 }
@@ -1150,7 +1181,7 @@ namespace OleViewDotNet
                 }
             }
             
-            Guid iid = COMInterfaceEntry.CreateKnownInterface(m_registry, COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
+            Guid iid = COMInterfaceEntry.CreateKnownInterface(Database, COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
             return COMUtilities.CreateInstance(Clsid, iid, dwContext, server);
         }
 
@@ -1180,11 +1211,11 @@ namespace OleViewDotNet
 
         public bool SupportsRemoteActivation { get { return true; } }
 
-        internal COMRegistry Database { get { return m_registry; } }
+        internal COMRegistry Database { get; }
 
-        string ICOMAccessSecurity.DefaultAccessPermission => m_registry.DefaultAccessPermission;
+        string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-        string ICOMAccessSecurity.DefaultLaunchPermission => m_registry.DefaultLaunchPermission;
+        string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
         public override string ToString()
         {
@@ -1203,17 +1234,17 @@ namespace OleViewDotNet
             TypeLib = reader.ReadGuid("tlib");
             Categories = reader.ReadGuids("catids");
             TreatAs = reader.ReadGuid("treatas");
-            m_loaded_interfaces = reader.ReadBool("loaded");
+            InterfacesLoaded = reader.ReadBool("loaded");
             ActivatableFromApp = reader.ReadBool("activatable");
             TrustedMarshaller = reader.ReadBool("trusted");
             bool elevate = reader.ReadBool("elevate");
             Source = reader.ReadEnum<COMRegistryEntrySource>("src");
-
+            PackageId = reader.ReadString("pkg");
             Name = reader.ReadString("name");
-            if (m_loaded_interfaces)
+            if (InterfacesLoaded)
             {
-                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(m_registry)).ToList();
-                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(m_registry)).ToList();
+                m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(Database)).ToList();
+                m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(Database)).ToList();
             }
             Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(
                     reader.ReadSerializableObjects("servers", () => new COMCLSIDServerEntry()).ToDictionary(e => e.ServerType));
@@ -1221,7 +1252,7 @@ namespace OleViewDotNet
             if (elevate)
             {
                 IEnumerable<COMCLSIDElevationEntry> elevation = 
-                    reader.ReadSerializableObjects<COMCLSIDElevationEntry>("elevation", () => new COMCLSIDElevationEntry());
+                    reader.ReadSerializableObjects("elevation", () => new COMCLSIDElevationEntry());
                 Elevation = elevation.FirstOrDefault();
             }
         }
@@ -1233,14 +1264,14 @@ namespace OleViewDotNet
             writer.WriteGuid("tlib", TypeLib);
             writer.WriteGuids("catids", Categories);
             writer.WriteGuid("treatas", TreatAs);
-            writer.WriteBool("loaded", m_loaded_interfaces);
+            writer.WriteBool("loaded", InterfacesLoaded);
             writer.WriteBool("activatable", ActivatableFromApp);
             writer.WriteBool("trusted", TrustedMarshaller);
             writer.WriteBool("elevate", Elevation != null);
             writer.WriteEnum("src", Source);
-
+            writer.WriteOptionalAttributeString("pkg", PackageId);
             writer.WriteOptionalAttributeString("name", Name);
-            if (m_loaded_interfaces)
+            if (InterfacesLoaded)
             {
                 writer.WriteSerializableObjects("ints", m_interfaces);
                 writer.WriteSerializableObjects("facts", m_factory_interfaces);

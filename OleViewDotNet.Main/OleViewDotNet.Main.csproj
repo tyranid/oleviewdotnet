@@ -120,6 +120,7 @@
     <Compile Include="BuildMonikerForm.Designer.cs">
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="COMPackagedRegistry.cs" />
     <Compile Include="COMProxyInterfaceInstance.cs" />
     <Compile Include="COMRuntimeClassEntry.cs" />
     <Compile Include="COMInterfaces.cs" />

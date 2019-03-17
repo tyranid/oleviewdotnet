@@ -694,6 +694,7 @@ namespace OleViewDotNet
         {
             using (RegistryKey classes_key = OpenClassesKey(mode, user))
             {
+                bool include_machine_key = mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly;
                 const int total_count = 9;
                 LoadDefaultSecurity();
                 ActivationContext actctx = null;
@@ -701,15 +702,25 @@ namespace OleViewDotNet
                 {
                     actctx = ActivationContext.FromProcess();
                 }
+                COMPackagedRegistry packagedRegistry = new COMPackagedRegistry();
+                if (include_machine_key)
+                {
+                    using (var packagedComKey = classes_key.OpenSubKeySafe("PackagedCom"))
+                    {
+                        if (packagedComKey != null)
+                        {
+                            packagedRegistry = new COMPackagedRegistry(packagedComKey);
+                        }
+                    }
+                }
                 Report(progress, "CLSIDs", 1, total_count);
-                LoadCLSIDs(classes_key, actctx);
+                LoadCLSIDs(classes_key, actctx, packagedRegistry);
                 Report(progress, "AppIDs", 2, total_count);
-                LoadAppIDs(classes_key);
+                LoadAppIDs(classes_key, packagedRegistry);
                 Report(progress, "ProgIDs", 3, total_count);
-                LoadProgIDs(classes_key, actctx);
+                LoadProgIDs(classes_key, actctx, packagedRegistry);
                 Report(progress, "Interfaces", 4, total_count);
-                LoadInterfaces(classes_key, actctx, 
-                    mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly);
+                LoadInterfaces(classes_key, actctx, packagedRegistry, include_machine_key);
                 Report(progress, "MIME Types", 5, total_count);
                 LoadMimeTypes(classes_key);
                 Report(progress, "PreApproved", 6, total_count);
@@ -717,7 +728,7 @@ namespace OleViewDotNet
                 Report(progress, "LowRights", 7, total_count);
                 LoadLowRights(mode, user);
                 Report(progress, "TypeLibs", 8, total_count);
-                LoadTypelibs(classes_key, actctx);
+                LoadTypelibs(classes_key, actctx, packagedRegistry);
                 Report(progress, "Runtime Classes", 9, total_count);
                 LoadWindowsRuntime(classes_key, mode);
             }
@@ -833,12 +844,7 @@ namespace OleViewDotNet
             }
         }
 
-        /// <summary>
-        /// Load CLSID information from the registry key
-        /// </summary>
-        /// <param name="rootKey">The root registry key, e.g. HKEY_CLASSES_ROOT</param>
-        /// <param name="actctx">The system default activation context.</param>
-        private void LoadCLSIDs(RegistryKey rootKey, ActivationContext actctx)
+        private void LoadCLSIDs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
         {
             Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
             Dictionary<Guid, List<Guid>> categories = new Dictionary<Guid, List<Guid>>();
@@ -851,7 +857,7 @@ namespace OleViewDotNet
                 }
             }
 
-            using (RegistryKey clsidKey = rootKey.OpenSubKey("CLSID"))
+            using (RegistryKey clsidKey = rootKey.OpenSubKeySafe("CLSID"))
             {
                 if (clsidKey != null)
                 {
@@ -886,12 +892,20 @@ namespace OleViewDotNet
                     }
                 }
             }
-            
+
+            foreach (var pair in packagedRegistry.Packages)
+            {
+                foreach (var cls in pair.Value.Classes)
+                {
+                    clsids[cls.Key] = new COMCLSIDEntry(this, cls.Key, pair.Value, cls.Value);
+                }
+            }
+
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
             m_categories = categories.ToSortedDictionary(p => p.Key, p => new COMCategory(this, p.Key, p.Value));
         }
 
-        private void LoadProgIDs(RegistryKey rootKey, ActivationContext actctx)
+        private void LoadProgIDs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
         {
             Dictionary<string, COMProgIDEntry> progids = new Dictionary<string, COMProgIDEntry>(StringComparer.OrdinalIgnoreCase);
 
@@ -926,10 +940,26 @@ namespace OleViewDotNet
                 {
                 }
             }
+
+            foreach (var pair in packagedRegistry.Packages)
+            {
+                foreach (var cls in pair.Value.Classes.Values)
+                {
+                    if (!string.IsNullOrWhiteSpace(cls.ProgId))
+                    {
+                        progids[cls.ProgId] = new COMProgIDEntry(this, cls.ProgId, cls.Clsid, cls);
+                    }
+                    if (!string.IsNullOrWhiteSpace(cls.VersionIndependentProgId))
+                    {
+                        progids[cls.VersionIndependentProgId] = new COMProgIDEntry(this, cls.VersionIndependentProgId, cls.Clsid, cls);
+                    }
+                }
+            }
+
             m_progids = new SortedDictionary<string, COMProgIDEntry>(progids, StringComparer.OrdinalIgnoreCase);
         }
 
-        private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, bool load_runtime_intfs)
+        private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry, bool load_runtime_intfs)
         {
             Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
             foreach (COMInterfaceEntry.KnownInterfaces known_infs in Enum.GetValues(typeof(COMInterfaceEntry.KnownInterfaces)))
@@ -1000,8 +1030,7 @@ namespace OleViewDotNet
                     string[] subkeys = key.GetSubKeyNames();
                     foreach (string s in subkeys)
                     {
-                        Guid g;
-                        if(Guid.TryParse(s, out g))
+                        if (Guid.TryParse(s, out Guid g))
                         {
                             ret.Add(g);
                         }
@@ -1031,7 +1060,7 @@ namespace OleViewDotNet
             }
         }
 
-        void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx)
+        void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
         {
             Dictionary<Guid, COMTypeLibEntry> typelibs = new Dictionary<Guid, COMTypeLibEntry>();
             if (actctx != null)
@@ -1049,9 +1078,7 @@ namespace OleViewDotNet
                     string[] subkeys = key.GetSubKeyNames();
                     foreach (string s in subkeys)
                     {
-                        Guid g;
-
-                        if (Guid.TryParse(s, out g))
+                        if (Guid.TryParse(s, out Guid g))
                         {
                             using (RegistryKey subKey = key.OpenSubKey(s))
                             {
@@ -1141,7 +1168,7 @@ namespace OleViewDotNet
             }
         }
 
-        private void LoadAppIDs(RegistryKey rootKey)
+        private void LoadAppIDs(RegistryKey rootKey, COMPackagedRegistry packagedRegistry)
         {
             m_appid = new SortedDictionary<Guid, COMAppIDEntry>();
 
@@ -1152,23 +1179,37 @@ namespace OleViewDotNet
                     string[] subkeys = appIdKey.GetSubKeyNames();
                     foreach (string key in subkeys)
                     {
-                        Guid appid;
-
-                        if (Guid.TryParse(key, out appid))
+                        if (!Guid.TryParse(key, out Guid appid))
                         {
-                            if (!m_appid.ContainsKey(appid))
+                            continue;
+                        }
+                        if (m_appid.ContainsKey(appid))
+                        {
+                            continue;
+                        }
+
+                        using (RegistryKey regKey = appIdKey.OpenSubKey(key))
+                        {
+                            if (regKey != null)
                             {
-                                using (RegistryKey regKey = appIdKey.OpenSubKey(key))
-                                {
-                                    if (regKey != null)
-                                    {
-                                        COMAppIDEntry ent = new COMAppIDEntry(appid, regKey, this);
-                                        m_appid.Add(appid, ent);
-                                    }
-                                }
+                                COMAppIDEntry ent = new COMAppIDEntry(appid, regKey, this);
+                                m_appid.Add(appid, ent);
                             }
                         }
                     }
+                }
+            }
+
+            foreach (var package in packagedRegistry.Packages.Values)
+            {
+                foreach (var server in package.Servers.Values)
+                {
+                    if (server.SurrogateAppId == Guid.Empty)
+                    {
+                        continue;
+                    }
+
+                    m_appid[server.SurrogateAppId] = new COMAppIDEntry(server, this);
                 }
             }
         }

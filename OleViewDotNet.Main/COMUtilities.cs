@@ -65,6 +65,18 @@ namespace OleViewDotNet
         private IProgress<Tuple<string, int>> _progress;
     }
 
+    public class RegistryValue
+    {
+        public string Name { get; }
+        public object Value { get; }
+
+        internal RegistryValue(string name, object value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
+
     [Flags]
     public enum CLSCTX : uint
     {
@@ -514,6 +526,22 @@ namespace OleViewDotNet
         [DllImport("ole32.dll")]
         public static extern int CoDecodeProxy(int dwClientPid, long ui64ProxyAddress, out ServerInformation pServerInformation);
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern int PackageIdFromFullName(
+          string packageFullName,
+          int flags,
+          ref int bufferLength,
+          SafeBuffer buffer
+        );
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern int GetPackagePath(
+          SafeBuffer packageId,
+          int reserved,
+          ref int pathLength,
+          StringBuilder path
+        );
+
         private static Dictionary<Guid, Assembly> m_typelibs;
         private static Dictionary<string, Assembly> m_typelibsname;
         private static Dictionary<Guid, Type> m_iidtypes;
@@ -539,7 +567,7 @@ namespace OleViewDotNet
             return null;
         }
 
-        public static string ReadString(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
+        public static object ReadObject(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
         {
             RegistryKey key = rootKey;
 
@@ -550,23 +578,10 @@ namespace OleViewDotNet
                     key = rootKey.OpenSubKey(keyName);
                 }
 
-                string valueString = string.Empty;
                 if (key != null)
                 {
-                    object valueObject = key.GetValue(valueName, null, options);
-                    if (valueObject != null)
-                    {
-                        valueString = valueObject.ToString();
-                    }
+                    return key.GetValue(valueName, null, options);
                 }
-
-                int first_nul = valueString.IndexOf('\0');
-                if (first_nul >= 0)
-                {
-                    valueString = valueString.Substring(0, first_nul);
-                }
-
-                return valueString;
             }
             finally
             {
@@ -575,20 +590,66 @@ namespace OleViewDotNet
                     key.Close();
                 }
             }
+            return null;
+        }
+
+        public static string ReadString(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
+        {
+            object valueObject = ReadObject(rootKey, keyName, valueName, options);
+            string valueString = string.Empty;
+            if (valueObject != null)
+            {
+                valueString = valueObject.ToString();
+            }
+
+            int first_nul = valueString.IndexOf('\0');
+            if (first_nul >= 0)
+            {
+                valueString = valueString.Substring(0, first_nul);
+            }
+
+            return valueString;
+        }
+
+        public static string ReadStringPath(this RegistryKey rootKey, string basePath, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
+        {
+            string filePath = ReadString(rootKey, keyName, valueName, options);
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return string.Empty;
+            }
+            return Path.Combine(basePath, filePath);
         }
 
         public static int ReadInt(this RegistryKey rootKey, string keyName, string valueName)
         {
-            string value = rootKey.ReadString(keyName, valueName);
-            if (value != null)
+            object obj = rootKey.ReadObject(keyName, valueName, RegistryValueOptions.None);
+            if (obj == null)
             {
-                int ret;
-                if (int.TryParse(value, out ret))
-                {
-                    return ret;
-                }
+                return 0;
             }
+
+            if (obj is int i)
+            {
+                return i;
+            }
+
+            if (obj is uint u)
+            {
+                return (int)u;
+            }
+
+            if (int.TryParse(obj.ToString(), out int ret))
+            {
+                return ret;
+            }
+
             return 0;
+        }
+
+        public static bool ReadBool(this RegistryKey rootKey, string valueName = null, string keyName = null)
+        {
+            return ReadInt(rootKey, keyName, valueName) != 0;
         }
 
         public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
@@ -601,6 +662,76 @@ namespace OleViewDotNet
             }
 
             return Guid.Empty;
+        }
+
+        public static string ReadSddl(this RegistryKey rootKey, string valueName = null, string keyName = null)
+        {
+            return COMSecurity.GetStringSDForSD(rootKey.ReadObject(keyName, valueName) as byte[]);
+        }
+
+        public static IEnumerable<RegistryValue> ReadValues(this RegistryKey rootKey, string keyName = null)
+        {
+            RegistryKey key = rootKey;
+
+            try
+            {
+                if (keyName != null)
+                {
+                    key = rootKey.OpenSubKey(keyName);
+                }
+
+                if (key != null)
+                {
+                    yield return new RegistryValue("", key.GetValue(null));
+                    foreach (var valueName in key.GetValueNames())
+                    {
+                        yield return new RegistryValue(valueName, key.GetValue(valueName));
+                    }
+                }
+            }
+            finally
+            {
+                if (key != null && key != rootKey)
+                {
+                    key.Close();
+                }
+            }
+        }
+
+        public static IEnumerable<string> ReadValueNames(this RegistryKey rootKey, string keyName = null)
+        {
+            RegistryKey key = rootKey;
+
+            try
+            {
+                if (keyName != null)
+                {
+                    key = rootKey.OpenSubKey(keyName);
+                }
+
+                if (key != null)
+                {
+                    return key.GetValueNames();
+                }
+            }
+            finally
+            {
+                if (key != null && key != rootKey)
+                {
+                    key.Close();
+                }
+            }
+
+            return new string[0];
+        }
+
+        public static Guid? ReadOptionalGuid(string value)
+        {
+            if (Guid.TryParse(value, out Guid result))
+            {
+                return result;
+            }
+            return null;
         }
 
         public static COMRegistryEntrySource GetSource(this RegistryKey key)
@@ -1039,10 +1170,12 @@ namespace OleViewDotNet
 
         private static CodeMemberMethod CreateForwardingMethod(MethodInfo mi)
         {
-            CodeMemberMethod method = new CodeMemberMethod();
-            method.Attributes = MemberAttributes.Public | MemberAttributes.Final;
-            method.Name = mi.Name;
-            method.ReturnType = new CodeTypeReference(mi.ReturnType);
+            CodeMemberMethod method = new CodeMemberMethod
+            {
+                Attributes = MemberAttributes.Public | MemberAttributes.Final,
+                Name = mi.Name,
+                ReturnType = new CodeTypeReference(mi.ReturnType)
+            };
 
             List<CodeExpression> parameters = new List<CodeExpression>();
 
@@ -3015,6 +3148,36 @@ namespace OleViewDotNet
         internal static bool HasIronPython
         {
             get { return _has_iron_python.Value; }
+        }
+
+        public static string GetPackagePath(string packageId)
+        {
+            int length = 0;
+            int result = PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
+            if (result != 122)
+            {
+                return string.Empty;
+            }
+
+            using (var buffer = new SafeHGlobalBuffer(length))
+            {
+                result = PackageIdFromFullName(packageId,
+                0, ref length, buffer);
+                if (result != 0)
+                {
+                    return string.Empty;
+                }
+
+                StringBuilder builder = new StringBuilder(260);
+                length = builder.Capacity;
+                result = GetPackagePath(buffer, 0, ref length, builder);
+                if (result != 0)
+                {
+                    return string.Empty;
+                }
+
+                return builder.ToString();
+            }
         }
     }
 }

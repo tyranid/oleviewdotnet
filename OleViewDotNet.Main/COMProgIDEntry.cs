@@ -44,6 +44,15 @@ namespace OleViewDotNet
             Source = COMRegistryEntrySource.ActCtx;
         }
 
+        internal COMProgIDEntry(COMRegistry registry,
+            string progid, Guid clsid, COMPackagedClassEntry classEntry) : this(registry)
+        {
+            Clsid = clsid;
+            ProgID = progid;
+            Name = classEntry.DisplayName;
+            Source = COMRegistryEntrySource.Packaged;
+        }
+
         internal COMProgIDEntry(COMRegistry registry)
         {
             m_registry = registry;
@@ -51,7 +60,7 @@ namespace OleViewDotNet
 
         public int CompareTo(COMProgIDEntry right)
         {
-            return String.Compare(ProgID, right.ProgID);
+            return string.Compare(ProgID, right.ProgID);
         }
 
         public string ProgID { get; private set; }

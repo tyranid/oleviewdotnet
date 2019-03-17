@@ -158,23 +158,33 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("{0}", DisplayName);
+            return DisplayName;
         }
     }
 
     public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity
     {
-        public COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
+        internal COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
         {
             AppId = appId;
             LoadFromKey(key);
+        }
+
+        internal COMAppIDEntry(COMPackagedServerEntry server, COMRegistry registry) : this(registry)
+        {
+            AppId = server.SurrogateAppId;
+            RunAs = string.Empty;
+            Name = server.DisplayName;
+            LaunchPermission = server.LaunchAndActivationPermission;
+            AccessPermission = string.Empty;
+            Source = COMRegistryEntrySource.Packaged;
         }
 
         private void LoadFromKey(RegistryKey key)
         {
             RunAs = key.GetValue("RunAs") as string;
             string name = key.GetValue(null) as string;
-            if (!String.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 Name = name.ToString();
             }
@@ -183,8 +193,8 @@ namespace OleViewDotNet
                 Name = AppId.FormatGuidDefault();
             }
 
-            AccessPermission = COMSecurity.GetStringSDForSD(key.GetValue("AccessPermission") as byte[]);
-            LaunchPermission = COMSecurity.GetStringSDForSD(key.GetValue("LaunchPermission") as byte[]);
+            AccessPermission = key.ReadSddl("AccessPermission");
+            LaunchPermission = key.ReadSddl("LaunchPermission");
 
             DllSurrogate = key.GetValue("DllSurrogate") as string;
             if (DllSurrogate != null)
