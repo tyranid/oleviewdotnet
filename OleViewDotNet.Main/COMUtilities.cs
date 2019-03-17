@@ -73,7 +73,7 @@ namespace OleViewDotNet
         internal RegistryValue(string name, object value)
         {
             Name = name;
-            Value = value;
+            Value = value ?? string.Empty;
         }
     }
 

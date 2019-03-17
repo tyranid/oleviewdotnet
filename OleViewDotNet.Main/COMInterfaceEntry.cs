@@ -129,6 +129,7 @@ namespace OleViewDotNet
             }
             TypeLib = entry.TypeLibId;
             TypeLibVersion = entry.TypeLibVersionNumber;
+            Source = COMRegistryEntrySource.Packaged;
         }
 
         public enum KnownInterfaces

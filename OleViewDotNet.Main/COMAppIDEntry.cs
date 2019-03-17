@@ -178,6 +178,11 @@ namespace OleViewDotNet
             LaunchPermission = server.LaunchAndActivationPermission;
             AccessPermission = string.Empty;
             Source = COMRegistryEntrySource.Packaged;
+            DllSurrogate = server.Executable;
+            if (string.IsNullOrWhiteSpace(DllSurrogate))
+            {
+                DllSurrogate = "dllhost.exe";
+            }
         }
 
         private void LoadFromKey(RegistryKey key)
