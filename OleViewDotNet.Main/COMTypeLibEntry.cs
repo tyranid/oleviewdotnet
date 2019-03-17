@@ -103,6 +103,14 @@ namespace OleViewDotNet
             Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
         }
 
+        internal COMTypeLibEntry(COMRegistry registry, COMPackagedTypeLibEntry typelib) : this(registry)
+        {
+            TypelibId = typelib.TypeLibId;
+            Source = COMRegistryEntrySource.Packaged;
+            Versions = typelib.Versions.Select(v => new COMTypeLibVersionEntry(registry, typelib.TypeLibId, v)).ToList();
+            Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
+        }
+
         internal COMTypeLibEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection) 
             : this(registry)
         {
@@ -227,6 +235,17 @@ namespace OleViewDotNet
                 }
             }
             Source = key.GetSource();
+        }
+
+        internal COMTypeLibVersionEntry(COMRegistry registry, Guid typelibid, COMPackagedTypeLibVersionEntry entry)
+            : this(registry, typelibid)
+        {
+            Version = entry.Version;
+            Locale = entry.LocaleId;
+            Name = entry.DisplayName;
+            Win32Path = entry.Win32Path;
+            Win64Path = entry.Win64Path;
+            Source = COMRegistryEntrySource.Packaged;
         }
 
         public COMTypeLibVersionEntry(COMRegistry registry, Guid typelibid)

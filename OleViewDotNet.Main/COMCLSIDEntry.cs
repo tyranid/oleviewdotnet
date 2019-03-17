@@ -690,6 +690,27 @@ namespace OleViewDotNet
             Categories = classEntry.ImplementedCategories.AsReadOnly();
         }
 
+        internal COMCLSIDEntry(COMRegistry registry, Guid clsid, COMPackagedEntry packageEntry,
+            COMPackagedProxyStubEntry proxyEntry) : this(registry, clsid)
+        {
+            Source = COMRegistryEntrySource.Packaged;
+            Name = proxyEntry.DisplayName;
+            PackageId = packageEntry.PackageId;
+
+            Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+            string dllPath = Environment.Is64BitProcess ? proxyEntry.DllPath_x64 : proxyEntry.DllPath_x86;
+            if (string.IsNullOrWhiteSpace(dllPath))
+            {
+                dllPath = proxyEntry.DllPath;
+            }
+            if (!string.IsNullOrWhiteSpace(dllPath))
+            {
+                servers.Add(COMServerType.InProcServer32, new COMCLSIDServerEntry(COMServerType.InProcServer32, dllPath, COMThreadingModel.Both));
+            }
+
+            Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(servers);
+        }
+
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, RegistryKey rootKey) : this(registry, clsid)
         {
             LoadFromKey(rootKey);

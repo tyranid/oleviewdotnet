@@ -899,6 +899,11 @@ namespace OleViewDotNet
                 {
                     clsids[cls.Key] = new COMCLSIDEntry(this, cls.Key, pair.Value, cls.Value);
                 }
+
+                foreach (var proxy in pair.Value.ProxyStubs)
+                {
+                    clsids[proxy.Key] = new COMCLSIDEntry(this, proxy.Key, pair.Value, proxy.Value);
+                }
             }
 
             m_clsids = new SortedDictionary<Guid, COMCLSIDEntry>(clsids);
@@ -1017,6 +1022,14 @@ namespace OleViewDotNet
                 }
             }
 
+            foreach (var pair in packagedRegistry.Packages)
+            {
+                foreach (var entry in pair.Value.Interfaces.Values)
+                {
+                    interfaces[entry.Iid] = new COMInterfaceEntry(this, entry);
+                }
+            }
+
             m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
         }
 
@@ -1091,6 +1104,14 @@ namespace OleViewDotNet
                             }
                         }
                     }
+                }
+            }
+
+            foreach (var pair in packagedRegistry.Packages)
+            {
+                foreach (var entry in pair.Value.TypeLibs.Values)
+                {
+                    typelibs[entry.TypeLibId] = new COMTypeLibEntry(this, entry);
                 }
             }
 

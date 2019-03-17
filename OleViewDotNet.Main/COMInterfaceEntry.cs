@@ -31,8 +31,7 @@ namespace OleViewDotNet
 
         internal static string MapIidToName(Guid iid)
         {
-            string ret;
-            if (m_iidtoname.TryGetValue(iid, out ret))
+            if (m_iidtoname.TryGetValue(iid, out string ret))
             {
                 return ret;
             }
@@ -46,13 +45,13 @@ namespace OleViewDotNet
 
         public int CompareTo(COMInterfaceEntry right)
         {
-            return String.Compare(Name, right.Name);
+            return string.Compare(Name, right.Name);
         }
 
         private void LoadFromKey(RegistryKey key)
         {
             string name = key.GetValue(null) as string;
-            if (!String.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 Name = COMUtilities.DemangleWinRTName(name.ToString());
                 CacheIidToName(Iid, Name);
@@ -92,7 +91,7 @@ namespace OleViewDotNet
             NumMethods = nummethods;
             Base = baseName;
             Name = name;
-            TypeLibVersion = String.Empty;
+            TypeLibVersion = string.Empty;
         }
 
         internal COMInterfaceEntry(COMRegistry registry, ActCtxComInterfaceRedirection intf_redirection) 
@@ -119,6 +118,17 @@ namespace OleViewDotNet
         public COMInterfaceEntry(COMRegistry registry, Guid iid)
             : this(registry, iid, Guid.Empty, 3, "IUnknown", MapIidToName(iid))
         {
+        }
+
+        internal COMInterfaceEntry(COMRegistry registry, COMPackagedInterfaceEntry entry) 
+            : this(registry, entry.Iid, entry.ProxyStubCLSID, 3, "IUnknown", entry.Iid.FormatGuidDefault())
+        {
+            if (entry.UseUniversalMarshaler)
+            {
+                ProxyClsid = new Guid("00020424-0000-0000-C000-000000000046");
+            }
+            TypeLib = entry.TypeLibId;
+            TypeLibVersion = entry.TypeLibVersionNumber;
         }
 
         public enum KnownInterfaces

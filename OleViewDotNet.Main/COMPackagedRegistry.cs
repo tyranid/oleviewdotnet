@@ -174,7 +174,7 @@ namespace OleViewDotNet
 
     internal class COMPackagedTypeLibVersionEntry
     {
-        public Version Version { get; }
+        public string Version { get; }
         public string DisplayName { get; }
         public int Flags { get; }
         public string HelpDirectory { get; }
@@ -182,7 +182,7 @@ namespace OleViewDotNet
         public string Win32Path { get; }
         public string Win64Path { get; }
 
-        internal COMPackagedTypeLibVersionEntry(Version version, string packagePath, RegistryKey rootKey)
+        internal COMPackagedTypeLibVersionEntry(string version, string packagePath, RegistryKey rootKey)
         {
             Version = version;
             DisplayName = rootKey.ReadString(valueName: "DisplayName");
@@ -289,17 +289,13 @@ namespace OleViewDotNet
 
             foreach (var name in rootKey.GetSubKeyNames())
             {
-                if (!Version.TryParse(name, out Version ver))
-                {
-                    continue;
-                }
                 using (var subkey = rootKey.OpenSubKeySafe(name))
                 {
                     if (subkey == null)
                     {
                         continue;
                     }
-                    result.Add(new COMPackagedTypeLibVersionEntry(ver, packagePath, subkey));
+                    result.Add(new COMPackagedTypeLibVersionEntry(name, packagePath, subkey));
                 }
             }
 
