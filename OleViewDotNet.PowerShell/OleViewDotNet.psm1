@@ -339,6 +339,8 @@ Specify looking up the COM class based on an object instance. Needs to support a
 Specify looking up the COM classes based on a category ID.
 .PARAMETER CatName
 Specify looking up the COM classes based on a category name.
+.PARAMETER Source
+Specify looking up the COM classes based on a source type.
 .INPUTS
 None
 .OUTPUTS
@@ -385,6 +387,9 @@ Get COM classes in a category with ID 62c8fe65-4ebb-45e7-b440-6e39b2cdbf29.
 .EXAMPLE
 Get-ComClass -CatName ".NET Category"
 Get COM classes in the .NET category.
+.EXAMPLE
+Get-ComClass -Source Packaged
+Get COM classes which came from packaged COM source.
 #>
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
@@ -415,7 +420,9 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromCatId")]
         [Guid]$CatId,
         [Parameter(Mandatory, ParameterSetName = "FromCatName")]
-        [string]$CatName
+        [string]$CatName,
+        [Parameter(Mandatory, ParameterSetName = "FromSource")]
+        [OleViewDotNet.COMRegistryEntrySource]$Source
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -468,6 +475,9 @@ function Get-ComClass {
         }
         "FromCatName" {
             Get-ComCategory -Name $CatName | Select-Object -ExpandProperty ClassEntries | Write-Output
+        }
+        "FromSource" {
+            Get-ComClass -Database $Database | ? Source -eq $Source | Write-Output
         }
     }
 }
@@ -661,6 +671,8 @@ Specify a name to match against the AppId name.
 Specify a service name to match against.
 .PARAMETER IsService
 Specify a returns AppIDs implemented by services.
+.PARAMETER Source
+Specify looking up the COM AppIDs based on a source type.
 .INPUTS
 None
 .OUTPUTS
@@ -680,7 +692,9 @@ function Get-ComAppId {
         [Parameter(ParameterSetName = "FromServiceName")]
         [string]$ServiceName = "",
         [Parameter(ParameterSetName = "FromIsService")]
-        [switch]$IsService
+        [switch]$IsService,
+        [Parameter(Mandatory, ParameterSetName = "FromSource")]
+        [OleViewDotNet.COMRegistryEntrySource]$Source
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -702,6 +716,9 @@ function Get-ComAppId {
         }
         "FromIsService" {
             Get-ComAppId -Database $Database | ? IsService | Write-Output
+        }
+        "FromSource" {
+            Get-ComAppId -Database $Database | ? Source -eq $Source | Write-Output
         }
     }
 }
@@ -972,6 +989,8 @@ A running COM object to query for interfaces (can take a long time/hang).
 Return interfaces which have a registered proxy class.
 .PARAMETER TypeLib
 Return interfaces which have a registered type library.
+.PARAMETER Source
+Return interfaces which came from a specific source.
 .INPUTS
 None
 .OUTPUTS
@@ -1005,6 +1024,8 @@ function Get-ComInterface {
         [switch]$Proxy,
         [Parameter(Mandatory, ParameterSetName = "FromTypeLib")]
         [switch]$TypeLib,
+        [Parameter(Mandatory, ParameterSetName = "FromSource")]
+        [OleViewDotNet.COMRegistryEntrySource]$Source,
         [OleViewDotNet.COMRegistry]$Database
     )
     $Database = Get-CurrentComDatabase $Database
@@ -1030,6 +1051,9 @@ function Get-ComInterface {
         }
         "FromTypeLib" {
             Get-ComInterface -Database $Database | ? TypeLibEntry -ne $null | Write-Output
+        }
+        "FromSource" {
+            Get-ComInterface -Database $Database | ? Source -eq $Source | Write-Output
         }
     }
 }
@@ -1735,7 +1759,7 @@ function Get-ComObjectIpid {
 
 <#
 .SYNOPSIS
-Get register class information from COM processes.
+Get registered class information from COM processes.
 .DESCRIPTION
 This cmdlet parses all accessible processes for registered COM clsses.
 .PARAMETER Database
@@ -1821,6 +1845,8 @@ This cmdlet gets all COM type libraries from a database.`
 The database to use to lookup information.
 .PARAMETER Iid
 Get type library from an IID if that interface has a type library.
+.PARAMETER Source
+Specify a source where the typelib came from.
 .INPUTS
 None
 .OUTPUTS
@@ -1838,6 +1864,8 @@ function Get-ComTypeLib {
         [OleViewDotNet.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, ParameterSetName = "FromInterfaceInstance")]
         [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
+        [Parameter(Mandatory, ParameterSetName = "FromSource")]
+        [OleViewDotNet.COMRegistryEntrySource]$Source,
         [OleViewDotNet.COMRegistry]$Database
     )
 
@@ -1861,6 +1889,9 @@ function Get-ComTypeLib {
         }
         "FromInterfaceInstance" {
             Get-ComTypeLib $InterfaceInstance.Iid -Database $Database | Write-Output
+        }
+        "FromSource" {
+            Get-ComTypeLib -Database $Database | ? Source -eq $Source | Write-Output
         }
     }
 }
@@ -2600,6 +2631,8 @@ The database to use.
 Specify a ProgID to lookup.
 .PARAMETER Name
 Specify a name to match against the ProgId name.
+.PARAMETER Source
+Specify a source where the ProgID came from.
 .INPUTS
 None
 .OUTPUTS
@@ -2615,7 +2648,9 @@ function Get-ComProgId {
         [Parameter(Mandatory, ParameterSetName = "FromProgId")]
         [Guid]$ProgId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
-        [string]$Name
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromSource")]
+        [OleViewDotNet.COMRegistryEntrySource]$Source
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -2631,6 +2666,9 @@ function Get-ComProgId {
         }
         "FromName" {
             Get-ComProgId -Database $Database | ? Name -eq $Name | Write-Output
+        }
+        "FromSource" {
+            Get-ComProgId -Database $Database | ? Source -eq $Source | Write-Output
         }
     }
 }
