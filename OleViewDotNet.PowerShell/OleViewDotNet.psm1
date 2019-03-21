@@ -422,7 +422,9 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromCatName")]
         [string]$CatName,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source
+        [OleViewDotNet.COMRegistryEntrySource]$Source,
+        [Parameter(Mandatory, ParameterSetName = "FromTrustedMarshaller")]
+        [switch]$TrustedMarshaller
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -478,6 +480,9 @@ function Get-ComClass {
         }
         "FromSource" {
             Get-ComClass -Database $Database | ? Source -eq $Source | Write-Output
+        }
+        "FromTrustedMarshaller" {
+            Get-ComClass -Database $Database | ? TrustedMarshaller
         }
     }
 }
