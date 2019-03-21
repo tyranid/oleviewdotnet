@@ -16,12 +16,10 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Forms;
-using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 namespace OleViewDotNet
 {
@@ -43,7 +41,7 @@ namespace OleViewDotNet
     {
         public static void ViewSecurity(COMRegistry registry, string name, string sddl, bool access)
         {
-            if (!String.IsNullOrWhiteSpace(sddl))
+            if (!string.IsNullOrWhiteSpace(sddl))
             {
                 SecurityDescriptor sd = new SecurityDescriptor(sddl);
                 AccessMask valid_access = access ? 0x7 : 0x1F;
@@ -58,7 +56,7 @@ namespace OleViewDotNet
 
         public static void ViewSecurity(COMRegistry registry, COMAppIDEntry appid, bool access)
         {
-            ViewSecurity(registry, String.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
+            ViewSecurity(registry, string.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
                     access ? appid.AccessPermission : appid.LaunchPermission, access);
         }
 
@@ -93,7 +91,7 @@ namespace OleViewDotNet
                 if (check_il)
                 {
                     string sacl = GetSaclForSddl(sddl);
-                    if (String.IsNullOrEmpty(sacl))
+                    if (string.IsNullOrEmpty(sacl))
                     {
                         // Add medium NX SACL
                         sddl += "S:(ML;;NX;;;ME)";
@@ -137,7 +135,7 @@ namespace OleViewDotNet
 
             AccessMask mask;
 
-            if (!String.IsNullOrWhiteSpace(principal))
+            if (!string.IsNullOrWhiteSpace(principal))
             {
                 mask = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, new Sid(principal), mapping);
             }
@@ -234,7 +232,7 @@ namespace OleViewDotNet
 
         public static TokenIntegrityLevel GetILForSD(string sddl)
         {
-            if (String.IsNullOrWhiteSpace(sddl))
+            if (string.IsNullOrWhiteSpace(sddl))
             {
                 return TokenIntegrityLevel.Medium;
             }
@@ -252,7 +250,7 @@ namespace OleViewDotNet
 
         private static bool SDHasAllowedAce(string sddl, bool allow_null_dacl, Func<Ace, bool> check_func)
         {
-            if (String.IsNullOrWhiteSpace(sddl))
+            if (string.IsNullOrWhiteSpace(sddl))
             {
                 return allow_null_dacl;
             }
