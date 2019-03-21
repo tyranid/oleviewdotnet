@@ -141,7 +141,7 @@ namespace OleViewDotNet
 
             if (!ent.InterfacesLoaded)
             {
-                await ent.LoadSupportedInterfacesAsync(false);
+                await ent.LoadSupportedInterfacesAsync(false, null);
             }
 
             IEnumerable<COMInterfaceInstance> intfs = factory ? ent.FactoryInterfaces : ent.Interfaces;
@@ -226,7 +226,7 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.DefaultServer);
-                    await ent.LoadSupportedInterfacesAsync(false);
+                    await ent.LoadSupportedInterfacesAsync(false, null);
 
                     if (class_factory)
                     {
@@ -362,7 +362,7 @@ namespace OleViewDotNet
                     props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.DefaultServer);
-                    await ent.LoadSupportedInterfacesAsync(false);
+                    await ent.LoadSupportedInterfacesAsync(false, null);
                     ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                 }
                 else

@@ -800,6 +800,8 @@ Specify to return the implemented factory interfaces.
 Specify to not query for the interfaces at all and only return what's already available.
 .PARAMETER NoProgress
 Don't show progress for query.
+.PARAMETER Token
+The token to use when querying for the query.
 .INPUTS
 None
 .OUTPUTS
@@ -822,7 +824,8 @@ function Get-ComClassInterface {
         [switch]$Refresh,
         [switch]$Factory,
         [switch]$NoQuery,
-        [switch]$NoProgress
+        [switch]$NoProgress,
+        [NtApiDotNet.NtToken]$Token
         )
     PROCESS {
         $i = 0
@@ -836,7 +839,7 @@ function Get-ComClassInterface {
                         $i++
                     }
                 }
-                $class.LoadSupportedInterfaces($Refresh) | Out-Null
+                $class.LoadSupportedInterfaces($Refresh, $Token) | Out-Null
             }
             if ($Factory) {
                 $class.FactoryInterfaces | Write-Output

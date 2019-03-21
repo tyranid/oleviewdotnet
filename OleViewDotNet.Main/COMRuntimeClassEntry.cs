@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -258,11 +259,11 @@ namespace OleViewDotNet
             return Server.CompareTo(other.Server);
         }
 
-        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry, token);
             }
             catch (Win32Exception)
             {
@@ -270,11 +271,11 @@ namespace OleViewDotNet
             }
         }
 
-        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
         {
             if (refresh || !InterfacesLoaded)
             {
-                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
                 InterfacesLoaded = true;
@@ -289,9 +290,9 @@ namespace OleViewDotNet
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public bool LoadSupportedInterfaces(bool refresh)
+        public bool LoadSupportedInterfaces(bool refresh, NtToken token)
         {
-            Task<bool> result = LoadSupportedInterfacesAsync(refresh);
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
             result.Wait();
             if (result.IsFaulted)
             {

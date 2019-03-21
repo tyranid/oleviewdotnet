@@ -57,7 +57,7 @@ namespace OleViewDotNet
             return (MainForm)_appContext.MainForm;
         }
 
-        static int EnumInterfaces(Queue<string> args, bool runtime_class)
+        static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
         {
             using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args.Dequeue()))
             {
@@ -94,7 +94,7 @@ namespace OleViewDotNet
                         }
                     }
 
-                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, activatable_class, sta, timeout);
+                    COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, activatable_class, sta, timeout, token);
                     if (intf.Exception != null)
                     {
                         writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
@@ -200,6 +200,7 @@ namespace OleViewDotNet
             string view_name = null;
             COMRegistryMode mode = COMRegistryMode.Merged;
             IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
+            NtToken token = null;
 
             OptionSet opts = new OptionSet() {
                 { "i|in=",  "Open a database file.", v => database_file = v },
@@ -218,6 +219,7 @@ namespace OleViewDotNet
                 { "v=", "View a COM access security descriptor (specify the SDDL)", v => view_access_sd = v },
                 { "l=", "View a COM launch security descriptor (specify the SDDL)", v => view_launch_sd = v },
                 { "n=", "Name any simple form display such as security descriptor", v => view_name = v },
+                { "t=", "Specify a token to use when enumerating interfaces", v => token = NtToken.FromHandle(new IntPtr(int.Parse(v))) },
                 { "h|help",  "Show this message and exit.", v => show_help = v != null },
             };
 
@@ -249,7 +251,7 @@ namespace OleViewDotNet
             {
                 try
                 {
-                    Environment.Exit(EnumInterfaces(new Queue<string>(additional_args), enum_runtime));
+                    Environment.Exit(EnumInterfaces(new Queue<string>(additional_args), enum_runtime, token));
                 }
                 catch
                 {

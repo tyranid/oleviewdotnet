@@ -2073,7 +2073,7 @@ namespace OleViewDotNet
                 try
                 {
                     query_progress.Report();
-                    clsid.LoadSupportedInterfaces(false);
+                    clsid.LoadSupportedInterfaces(false, null);
                 }
                 catch
                 {

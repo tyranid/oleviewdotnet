@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet;
 using NtApiDotNet.Win32;
 using System;
 using System.Collections.Generic;
@@ -105,13 +106,13 @@ namespace OleViewDotNet
 
     public class COMEnumerateInterfaces
     {
-        private HashSet<COMInterfaceInstance> _interfaces;
-        private HashSet<COMInterfaceInstance> _factory_interfaces;
+        private readonly HashSet<COMInterfaceInstance> _interfaces;
+        private readonly HashSet<COMInterfaceInstance> _factory_interfaces;
         private Guid _clsid;
-        private CLSCTX _clsctx;
-        private string _activatable_classid;
+        private readonly CLSCTX _clsctx;
+        private readonly string _activatable_classid;
         private Win32Exception _ex;
-        private bool _winrt_component;
+        private readonly bool _winrt_component;
 
         const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 
@@ -119,8 +120,7 @@ namespace OleViewDotNet
         {
             if (punk != IntPtr.Zero)
             {
-                IntPtr ppout;
-                if (Marshal.QueryInterface(punk, ref iid, out ppout) == 0)
+                if (Marshal.QueryInterface(punk, ref iid, out IntPtr ppout) == 0)
                 {
                     IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
                     COMInterfaceInstance intf;
@@ -157,14 +157,12 @@ namespace OleViewDotNet
                 return;
             }
             object obj = Marshal.GetObjectForIUnknown(punk);
-            IInspectable inspectable = obj as IInspectable;
-            if (inspectable != null)
+            if (obj is IInspectable inspectable)
             {
                 IntPtr iids = IntPtr.Zero;
                 try
                 {
-                    int iid_count;
-                    inspectable.GetIids(out iid_count, out iids);
+                    inspectable.GetIids(out int iid_count, out iids);
                     for (int i = 0; i < iid_count; ++i)
                     {
                         byte[] buffer = new byte[16];
@@ -185,94 +183,101 @@ namespace OleViewDotNet
             }
         }
 
-        private void GetInterfacesInternal()
+        private void GetInterfacesInternal(NtToken token)
         {
             IntPtr punk = IntPtr.Zero;
             IntPtr pfactory = IntPtr.Zero;
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-
-            int hr = 0;
-            if (_winrt_component)
+            CLSCTX clsctx = _clsctx;
+            if (token != null)
             {
-                hr = COMUtilities.RoGetActivationFactory(_activatable_classid, ref IID_IUnknown, out pfactory);
-            }
-            else
-            {
-                hr = COMUtilities.CoGetClassObject(ref _clsid, _clsctx, null, ref IID_IUnknown, out pfactory);
-            }
-            // If we can't get class object, no chance we'll get object.
-            if (hr != 0)
-            {
-                throw new Win32Exception(hr);
+                clsctx |= CLSCTX.ENABLE_CLOAKING;
             }
 
-            if (_winrt_component)
+            using (var imp = token?.Impersonate())
             {
-                hr = COMUtilities.RoActivateInstance(_activatable_classid, out punk);
-            }
-            else
-            {
-                hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, _clsctx,
-                                               ref IID_IUnknown, out punk);
-            }
-            if (hr != 0)
-            {
-                punk = IntPtr.Zero;
-            }
-
-            try
-            {
-                Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
-                QueryInterface(punk, COMInterfaceEntry.IID_IMarshal, module_names, _interfaces);
-                QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal, module_names, _factory_interfaces);
-                QueryInterface(punk, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _interfaces);
-                QueryInterface(pfactory, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _factory_interfaces);
-
-                var actctx = ActivationContext.FromProcess();
-                if (actctx != null)
+                int hr = 0;
+                if (_winrt_component)
                 {
-                    foreach (var intf in actctx.ComInterfaces)
-                    {
-                        QueryInterface(punk, intf.Iid, module_names, _interfaces);
-                        QueryInterface(pfactory, intf.Iid, module_names, _factory_interfaces);
-                    }
+                    hr = COMUtilities.RoGetActivationFactory(_activatable_classid, ref IID_IUnknown, out pfactory);
+                }
+                else
+                {
+                    hr = COMUtilities.CoGetClassObject(ref _clsid, clsctx, null, ref IID_IUnknown, out pfactory);
+                }
+                // If we can't get class object, no chance we'll get object.
+                if (hr != 0)
+                {
+                    throw new Win32Exception(hr);
                 }
 
-                using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
+                if (_winrt_component)
                 {
-                    foreach (string iid_string in interface_key.GetSubKeyNames())
+                    hr = COMUtilities.RoActivateInstance(_activatable_classid, out punk);
+                }
+                else
+                {
+                    hr = COMUtilities.CoCreateInstance(ref _clsid, IntPtr.Zero, clsctx,
+                                                       ref IID_IUnknown, out punk);
+                }
+                if (hr != 0)
+                {
+                    punk = IntPtr.Zero;
+                }
+
+                try
+                {
+                    Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
+                    QueryInterface(punk, COMInterfaceEntry.IID_IMarshal, module_names, _interfaces);
+                    QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal, module_names, _factory_interfaces);
+                    QueryInterface(punk, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _interfaces);
+                    QueryInterface(pfactory, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _factory_interfaces);
+
+                    var actctx = ActivationContext.FromProcess();
+                    if (actctx != null)
                     {
-                        Guid iid;
-                        if (Guid.TryParse(iid_string, out iid))
+                        foreach (var intf in actctx.ComInterfaces)
                         {
-                            QueryInterface(punk, iid, module_names, _interfaces);
-                            QueryInterface(pfactory, iid, module_names, _factory_interfaces);
+                            QueryInterface(punk, intf.Iid, module_names, _interfaces);
+                            QueryInterface(pfactory, intf.Iid, module_names, _factory_interfaces);
                         }
                     }
-                }
 
-                QueryInspectableInterfaces(punk, module_names, _interfaces);
-                QueryInspectableInterfaces(pfactory, module_names, _factory_interfaces);
-            }
-            finally
-            {
-                if (pfactory != IntPtr.Zero)
-                {
-                    Marshal.Release(pfactory);
-                }
+                    using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
+                    {
+                        foreach (string iid_string in interface_key.GetSubKeyNames())
+                        {
+                            if (Guid.TryParse(iid_string, out Guid iid))
+                            {
+                                QueryInterface(punk, iid, module_names, _interfaces);
+                                QueryInterface(pfactory, iid, module_names, _factory_interfaces);
+                            }
+                        }
+                    }
 
-                if (punk != IntPtr.Zero)
+                    QueryInspectableInterfaces(punk, module_names, _interfaces);
+                    QueryInspectableInterfaces(pfactory, module_names, _factory_interfaces);
+                }
+                finally
                 {
-                    Marshal.Release(punk);
+                    if (pfactory != IntPtr.Zero)
+                    {
+                        Marshal.Release(pfactory);
+                    }
+
+                    if (punk != IntPtr.Zero)
+                    {
+                        Marshal.Release(punk);
+                    }
                 }
             }
         }
 
-        private void RunGetInterfaces()
+        private void RunGetInterfaces(object token)
         {
             try
             {
-                GetInterfacesInternal();
+                GetInterfacesInternal((NtToken)token);
             }
             catch (Win32Exception ex)
             {
@@ -286,20 +291,20 @@ namespace OleViewDotNet
             Environment.Exit(1);
         }
 
-        private void GetInterfaces(bool sta, int timeout)
+        private void GetInterfaces(bool sta, int timeout, NtToken token)
         {
             Thread timeout_thread = new Thread(ExitProcessThread);
             timeout_thread.Start(timeout);
             if (sta)
             {
-                RunGetInterfaces();
+                RunGetInterfaces(token);
             }
             else
             {
                 Thread th = null;
                 th = new Thread(RunGetInterfaces);
                 th.SetApartmentState(ApartmentState.MTA);
-                th.Start();
+                th.Start(token);
                 th.Join();
             }
         }
@@ -308,10 +313,10 @@ namespace OleViewDotNet
         public IEnumerable<COMInterfaceInstance> FactoryInterfaces { get { return _factory_interfaces; } }
         public Win32Exception Exception { get { return _ex; } }
 
-        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout)
+        public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout, NtToken token)
             : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
         {
-            GetInterfaces(sta, timeout);
+            GetInterfaces(sta, timeout, token);
         }
 
         private class InterfaceInstanceComparer : IEqualityComparer<COMInterfaceInstance>
@@ -337,7 +342,7 @@ namespace OleViewDotNet
             _winrt_component = !string.IsNullOrWhiteSpace(_activatable_classid);
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
         {
             string apartment = "s";
             if (ent.Threading == ThreadingType.Both
@@ -347,7 +352,7 @@ namespace OleViewDotNet
             }
             string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
                 ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
-            var interfaces = await GetInterfacesOOP(command_line, true, registry);
+            var interfaces = await GetInterfacesOOP(command_line, true, registry, token);
             return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
 
@@ -357,114 +362,135 @@ namespace OleViewDotNet
             public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
         }
 
-        private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry)
+        private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry, NtToken token)
         {
             using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(PipeDirection.In,
                 HandleInheritability.Inheritable, 16 * 1024, null))
             {
-                string process = null;
-                if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
+                using (var imp_token = token?.DuplicateToken(SecurityImpersonationLevel.Impersonation))
                 {
-                    process = COMUtilities.GetExePath();
-                }
-                else
-                {
-                    process = COMUtilities.Get32bitExePath();
-                }
-
-                Process proc = new Process();
-                ProcessStartInfo info = new ProcessStartInfo(process, string.Format("{0} {1} {2}",
-                    runtime_class ? "-r" : "-e", server.GetClientHandleAsString(), command_line));
-                info.UseShellExecute = false;
-                info.CreateNoWindow = true;
-                proc.StartInfo = info;
-                proc.Start();
-                try
-                {
-                    List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
-                    List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
-                    server.DisposeLocalCopyOfClientHandle();
-
-                    using (StreamReader reader = new StreamReader(server))
+                    if (imp_token != null)
                     {
-                        while (true)
-                        {
-                            string line = await reader.ReadLineAsync();
-                            if (line == null)
-                            {
-                                break;
-                            }
-
-                            if (line.StartsWith("ERROR:"))
-                            {
-                                uint errorCode;
-                                try
-                                {
-                                    errorCode = uint.Parse(line.Substring(6), System.Globalization.NumberStyles.AllowHexSpecifier);
-                                }
-                                catch (FormatException ex)
-                                {
-                                    Debug.WriteLine(ex.ToString());
-                                    errorCode = 0x80004005;
-                                }
-
-                                throw new Win32Exception((int)errorCode);
-                            }
-                            else
-                            {
-                                Guid g;
-                                bool factory = false;
-
-                                if (line.StartsWith("*"))
-                                {
-                                    factory = true;
-                                    line = line.Substring(1);
-                                }
-
-                                string[] parts = line.Split(new char[] { ',' }, 3);
-                                if (Guid.TryParse(parts[0], out g))
-                                {
-                                    string module_path = null;
-                                    long vtable_offset = 0;
-                                    if (parts.Length == 3)
-                                    {
-                                        module_path = parts[1];
-                                        long.TryParse(parts[2], out vtable_offset);
-                                    }
-
-                                    if (factory)
-                                    {
-                                        factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
-                                    }
-                                    else
-                                    {
-                                        interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!proc.WaitForExit(5000))
-                        {
-                            proc.Kill();
-                        }
-                        int exitCode = proc.ExitCode;
-                        if (exitCode != 0)
-                        {
-                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
-                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
-                        }
-                        return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
+                        imp_token.Inherit = true;
                     }
-                }
-                finally
-                {
-                    proc.Close();
+
+                    string process = null;
+                    if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
+                    {
+                        process = COMUtilities.GetExePath();
+                    }
+                    else
+                    {
+                        process = COMUtilities.Get32bitExePath();
+                    }
+
+                    Process proc = new Process();
+                    List<string> args = new List<string>
+                    {
+                        runtime_class ? "-r" : "-e",
+                        server.GetClientHandleAsString(),
+                        command_line
+                    };
+
+                    if (imp_token != null)
+                    {
+                        args.Insert(0, imp_token.Handle.DangerousGetHandle().ToInt32().ToString());
+                        args.Insert(0, "-t");
+                    }
+
+                    ProcessStartInfo info = new ProcessStartInfo(process, string.Join(" ", args))
+                    {
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    proc.StartInfo = info;
+                    proc.Start();
+                    try
+                    {
+                        List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
+                        List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
+                        server.DisposeLocalCopyOfClientHandle();
+
+                        using (StreamReader reader = new StreamReader(server))
+                        {
+                            while (true)
+                            {
+                                string line = await reader.ReadLineAsync();
+                                if (line == null)
+                                {
+                                    break;
+                                }
+
+                                if (line.StartsWith("ERROR:"))
+                                {
+                                    uint errorCode;
+                                    try
+                                    {
+                                        errorCode = uint.Parse(line.Substring(6), System.Globalization.NumberStyles.AllowHexSpecifier);
+                                    }
+                                    catch (FormatException ex)
+                                    {
+                                        Debug.WriteLine(ex.ToString());
+                                        errorCode = 0x80004005;
+                                    }
+
+                                    throw new Win32Exception((int)errorCode);
+                                }
+                                else
+                                {
+                                    bool factory = false;
+
+                                    if (line.StartsWith("*"))
+                                    {
+                                        factory = true;
+                                        line = line.Substring(1);
+                                    }
+
+                                    string[] parts = line.Split(new char[] { ',' }, 3);
+                                    if (Guid.TryParse(parts[0], out Guid g))
+                                    {
+                                        string module_path = null;
+                                        long vtable_offset = 0;
+                                        if (parts.Length == 3)
+                                        {
+                                            module_path = parts[1];
+                                            long.TryParse(parts[2], out vtable_offset);
+                                        }
+
+                                        if (factory)
+                                        {
+                                            factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
+                                        }
+                                        else
+                                        {
+                                            interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!proc.WaitForExit(5000))
+                            {
+                                proc.Kill();
+                            }
+                            int exitCode = proc.ExitCode;
+                            if (exitCode != 0)
+                            {
+                                interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
+                                factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
+                            }
+                            return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
+                        }
+                    }
+                    finally
+                    {
+                        proc.Close();
+                    }
                 }
             }
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token)
         {
             string apartment = "s";
             if (ent.DefaultThreadingModel == COMThreadingModel.Both 
@@ -474,7 +500,7 @@ namespace OleViewDotNet
             }
 
             string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, ent.CreateContext);
-            var interfaces = await GetInterfacesOOP(command_line, false, registry);
+            var interfaces = await GetInterfacesOOP(command_line, false, registry, token);
             return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
     }

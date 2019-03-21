@@ -27,6 +27,7 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Collections.ObjectModel;
+using NtApiDotNet;
 
 namespace OleViewDotNet
 {
@@ -455,17 +456,19 @@ namespace OleViewDotNet
         /// The returned array is cached so subsequent calls to this function return without calling into COM
         /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <param name="token">Token to use when querying for the interfaces.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        Task<bool> LoadSupportedInterfacesAsync(bool refresh);
+        Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token);
 
         /// <summary>
         /// Get list of supported Interface IIDs Synchronously
-        /// </summary>        
+        /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <param name="token">Token to use when querying for the interfaces.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        bool LoadSupportedInterfaces(bool refresh);
+        bool LoadSupportedInterfaces(bool refresh, NtToken token);
 
         /// <summary>
         /// Indicates that the class' interface list has been loaded.
@@ -1022,11 +1025,11 @@ namespace OleViewDotNet
                 ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
         }
 
-        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal()
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token);
             }
             catch (Win32Exception)
             {
@@ -1062,11 +1065,12 @@ namespace OleViewDotNet
         /// Get list of supported Interface IIDs (that we know about)
         /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
         /// The returned array is cached so subsequent calls to this function return without calling into COM
-        /// </summary>        
+        /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <param name="token">Token to use when checking for the interfaces.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh)
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
         {
             if (Clsid == Guid.Empty)
             {
@@ -1075,7 +1079,7 @@ namespace OleViewDotNet
 
             if (refresh || !InterfacesLoaded)
             {
-                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal();
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
                 InterfacesLoaded = true;
@@ -1086,13 +1090,14 @@ namespace OleViewDotNet
 
         /// <summary>
         /// Get list of supported Interface IIDs Synchronously
-        /// </summary>        
+        /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
+        /// <param name="token">Token to use when querying for the interfaces.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public bool LoadSupportedInterfaces(bool refresh)
+        public bool LoadSupportedInterfaces(bool refresh, NtToken token)
         {
-            Task<bool> result = LoadSupportedInterfacesAsync(refresh);
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
             try
             {
                 result.Wait();
