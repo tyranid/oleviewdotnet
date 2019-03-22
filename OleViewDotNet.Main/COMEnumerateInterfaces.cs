@@ -293,8 +293,12 @@ namespace OleViewDotNet
 
         private void GetInterfaces(bool sta, int timeout, NtToken token)
         {
-            Thread timeout_thread = new Thread(ExitProcessThread);
-            timeout_thread.Start(timeout);
+            if (timeout > 0)
+            {
+                Thread timeout_thread = new Thread(ExitProcessThread);
+                timeout_thread.Start(timeout);
+            }
+
             if (sta)
             {
                 RunGetInterfaces(token);
