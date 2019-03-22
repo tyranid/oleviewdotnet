@@ -77,11 +77,11 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            if (!String.IsNullOrWhiteSpace(Module))
+            if (!string.IsNullOrWhiteSpace(Module))
             {
-                return String.Format("{0},{1},{2}", Iid, Module, VTableOffset);
+                return string.Format("{0},{1},{2}", Iid, Module, VTableOffset);
             }
-            return String.Format("{0}", Iid);
+            return Iid.ToString();
         }
 
         XmlSchema IXmlSerializable.GetSchema()
