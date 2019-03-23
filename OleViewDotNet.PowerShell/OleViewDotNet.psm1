@@ -1814,6 +1814,8 @@ This cmdlet formats a COM proxy object or IPID entry as text.
 The proxy or IPID entry to format.
 .PARAMETER Flags
 Specify flags for the formatter.
+.PARAMETER Process
+Format the IPIDs of a COM process.
 .INPUTS
 OleViewDotNet.IProxyFormatter
 .OUTPUTS
@@ -1832,15 +1834,24 @@ $ipids | Format-ComProxy
 Format a list of IPIDs as text.
 #>
 function Format-ComProxy {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="FromProxy")]
     Param(
-        [parameter(Mandatory, Position=0, ValueFromPipeline)]
+        [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProxy")]
         [OleViewDotNet.IProxyFormatter]$Proxy,
+        [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProcess")]
+        [OleViewDotNet.COMProcessEntry]$Process,
         [OleViewDotNet.ProxyFormatterFlags]$Flags = 0
     )
 
     PROCESS {
-        $Proxy.FormatText($Flags) | Write-Output
+        switch($PSCmdlet.ParameterSetName) {
+            "FromProxy" {
+                $Proxy.FormatText($Flags) | Write-Output
+            }
+            "FromProcess" {
+                $Process.Ipids | Format-ComProxy -Flags $Flags
+            }
+        }
     }
 }
 
