@@ -65,10 +65,10 @@ function Wrap-ComObject {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($Object, $Iid)
+            [OleViewDotNet.COMWrapperFactory]::Wrap($Object, $Iid)
         }
         "FromType" {
-            [OleViewDotNet.ComWrapperFactory]::Wrap($Object, $Type)
+            [OleViewDotNet.COMWrapperFactory]::Wrap($Object, $Type)
         }
     }
 }
@@ -80,7 +80,7 @@ function Unwrap-ComObject {
         [object]$Object
     )
 
-    [OleViewDotNet.ComWrapperFactory]::Unwrap($Object)
+    [OleViewDotNet.COMWrapperFactory]::Unwrap($Object)
 }
 
 function Get-ComSymbolResolver {
@@ -1637,9 +1637,12 @@ function Get-ComProxy {
         [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromClass")]
         [OleViewDotNet.COMClsidEntry]$Class,
+        [parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Guid]$Clsid,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [parameter(ParameterSetName = "FromIid")]
+        [parameter(ParameterSetName = "FromClsid")]
         [OleViewDotNet.COMRegistry]$Database,
         [switch]$AsText
     )
@@ -1656,14 +1659,15 @@ function Get-ComProxy {
                 [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
             }
             "FromIid" {
-                $Database = Get-CurrentComDatabase $Database
-                if ($null -eq $Database) {
-                    Write-Error "No database specified and current database isn't set"
-                    return
-                }
                 $intf = Get-ComInterface -Database $Database -Iid $Iid
                 if ($null -ne $intf) {
                     [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($intf, $null)
+                }
+            }
+            "FromClsid" {
+                $class = Get-ComClass -Database $Database -Clsid $Clsid
+                if ($null -ne $class) {
+                    [OleViewDotNet.COMProxyInstance]::GetFromCLSID($class, $null)
                 }
             }
         }

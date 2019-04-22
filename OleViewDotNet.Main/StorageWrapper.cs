@@ -158,7 +158,7 @@ namespace OleViewDotNet
             _stm.Write(buffer, count, IntPtr.Zero);
         }
 
-        public ComTypes.IStream Object { get { return (ComTypes.IStream)ComWrapperFactory.Wrap<ComTypes.IStream>(_stm); } }
+        public ComTypes.IStream Object { get { return (ComTypes.IStream)COMWrapperFactory.Wrap<ComTypes.IStream>(_stm); } }
     }
 
     /// <summary>
@@ -328,6 +328,6 @@ namespace OleViewDotNet
                 DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
         }
 
-        public IStorage Object { get { return (IStorage)ComWrapperFactory.Wrap<IStorage>(_stg); } }
+        public IStorage Object { get { return (IStorage)COMWrapperFactory.Wrap<IStorage>(_stg); } }
     }
 }

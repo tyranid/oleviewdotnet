@@ -174,6 +174,11 @@ namespace OleViewDotNet
             get { return new Guid("D5F569D0-593B-101A-B569-08002B2DBF7A"); }
         }
 
+        public static Guid IID_IInspectable
+        {
+            get { return new Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90"); }
+        }
+
         public bool IsOleControl
         {
             get { return (Iid == IID_IOleControl); }

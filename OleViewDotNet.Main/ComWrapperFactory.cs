@@ -51,7 +51,7 @@ namespace OleViewDotNet
 
         public override BaseComWrapper QueryInterface(Guid iid)
         {
-            return ComWrapperFactory.Wrap(_object, COMUtilities.GetInterfaceType(iid));
+            return COMWrapperFactory.Wrap(_object, COMUtilities.GetInterfaceType(iid));
         }
 
         public override object Unwrap()
@@ -89,7 +89,7 @@ namespace OleViewDotNet
         }
     }
 
-    public static class ComWrapperFactory
+    public static class COMWrapperFactory
     {
         private static AssemblyName _name = new AssemblyName("ComWrapperTypes");
         private static AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.Run);
