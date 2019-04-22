@@ -31,6 +31,7 @@ namespace OleViewDotNet.Builder
         private readonly AssemblyBuilder m_builder;
         private readonly ModuleBuilder m_module;
         private readonly Dictionary<Guid, Type> m_types;
+        private readonly Queue<TypeBuilder> m_fixup;
         private readonly Dictionary<Guid, NdrComProxyDefinition> m_proxies;
         private readonly string m_output_path;
 
@@ -121,6 +122,7 @@ namespace OleViewDotNet.Builder
             m_module = m_builder.DefineDynamicModule(m_name.Name, m_name.Name + ".dll");
             m_types = new Dictionary<Guid, Type>();
             m_proxies = new Dictionary<Guid, NdrComProxyDefinition>();
+            m_fixup = new Queue<TypeBuilder>();
         }
 
         public void Save()
@@ -267,7 +269,7 @@ namespace OleViewDotNet.Builder
                 }
             }
 
-            m_types[intf.Iid] = tb.CreateType();
+            m_fixup.Enqueue(tb);
 
             return m_types[intf.Iid];
         }
@@ -282,6 +284,11 @@ namespace OleViewDotNet.Builder
             foreach (var entry in m_proxies.Values)
             {
                 CreateType(entry);
+            }
+
+            while(m_fixup.Count > 0)
+            {
+                m_fixup.Dequeue().CreateType();
             }
         }
 
