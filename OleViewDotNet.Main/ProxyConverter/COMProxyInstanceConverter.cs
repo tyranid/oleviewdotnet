@@ -54,14 +54,7 @@ namespace OleViewDotNet.Builder
 
             public TypeDescriptor(TypeDescriptor typeDescriptor)
             {
-                if (!typeDescriptor.BuiltinType.IsByRef)
-                {
-                    BuiltinType = typeDescriptor.BuiltinType.MakeByRefType();
-                }
-                else
-                {
-                    BuiltinType = typeDescriptor.BuiltinType;
-                }
+                BuiltinType = typeDescriptor.BuiltinType;
                 CustomAttributes = new List<CustomAttributeBuilder>(typeDescriptor.CustomAttributes);
                 Attributes = typeDescriptor.Attributes;
                 PointerCount = typeDescriptor.PointerCount + 1;
@@ -73,9 +66,9 @@ namespace OleViewDotNet.Builder
             {
                 ParameterAttributes attributes = ParameterAttributes.None;
                 BuiltinType = builtinType;
-                if (pm.Attributes.HasFlag(NdrParamAttributes.IsSimpleRef) && builtinType.IsValueType)
+                if (pm.Attributes.HasFlag(NdrParamAttributes.IsSimpleRef))
                 {
-                    BuiltinType = builtinType.MakeByRefType();
+                    PointerCount = 1;
                 }
 
                 CustomAttributes = new List<CustomAttributeBuilder>(customAttributes);
@@ -91,6 +84,32 @@ namespace OleViewDotNet.Builder
                     attributes |= ParameterAttributes.Out;
                 }
                 Attributes = attributes;
+            }
+
+            public Type GetParameterType()
+            {
+                if (PointerCount == 0)
+                {
+                    return BuiltinType;
+                }
+
+                if (PointerCount == 1)
+                {
+                    if (BuiltinType.IsValueType)
+                    {
+                        return BuiltinType.MakeByRefType();
+                    }
+                    return BuiltinType;
+                }
+
+                if (PointerCount == 2 && !BuiltinType.IsValueType)
+                {
+                    return BuiltinType.MakeByRefType();
+                }
+
+                // Could implement as constant sized array.
+                // Return a generic pointer for now.
+                return typeof(IntPtr).MakeByRefType();
             }
         }
 
@@ -237,7 +256,7 @@ namespace OleViewDotNet.Builder
                 var ret_type = GetTypeDescriptor(proc.ReturnValue);
                 var param_types = proc.Params.Select(p => GetTypeDescriptor(p)).ToList();
                 var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.NewSlot | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                    ret_type.BuiltinType, param_types.Select(p => p.BuiltinType).ToArray());
+                    ret_type.BuiltinType, param_types.Select(p => p.GetParameterType()).ToArray());
                 for (int i = 0; i < param_types.Count; ++i)
                 {
                     var param_builder = methbuilder.DefineParameter(i + 1, param_types[i].Attributes, $"p{i}");
