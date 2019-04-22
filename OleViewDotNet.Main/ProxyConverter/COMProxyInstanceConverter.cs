@@ -33,6 +33,7 @@ namespace OleViewDotNet.Builder
         private readonly Dictionary<Guid, Type> m_types;
         private readonly Queue<TypeBuilder> m_fixup;
         private readonly Dictionary<Guid, NdrComProxyDefinition> m_proxies;
+        private readonly Dictionary<NdrBaseStructureTypeReference, Type> m_structs;
         private readonly string m_output_path;
 
         private static CustomAttributeBuilder CreateAttribute<T>(params object[] args) where T : Attribute
@@ -123,6 +124,7 @@ namespace OleViewDotNet.Builder
             m_types = new Dictionary<Guid, Type>();
             m_proxies = new Dictionary<Guid, NdrComProxyDefinition>();
             m_fixup = new Queue<TypeBuilder>();
+            m_structs = new Dictionary<NdrBaseStructureTypeReference, Type>();
         }
 
         public void Save()
@@ -193,19 +195,21 @@ namespace OleViewDotNet.Builder
                         return new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.Struct));
                 }
             }
-
-            if (baseType is NdrPointerTypeReference pointer_type)
+            else if (baseType is NdrPointerTypeReference pointer_type)
             {
                 return new TypeDescriptor(GetTypeDescriptor(procParam, pointer_type.Type));
             }
-
-            if (baseType is NdrInterfacePointerTypeReference interface_pointer)
+            else if (baseType is NdrInterfacePointerTypeReference interface_pointer)
             {
                 if (interface_pointer.IsConstant && m_proxies.ContainsKey(interface_pointer.Iid))
                 {
-                    return new TypeDescriptor(CreateType(m_proxies[interface_pointer.Iid]), procParam, CreateMarshalAsAttribute(UnmanagedType.Interface));
+                    return new TypeDescriptor(CreateInterface(m_proxies[interface_pointer.Iid]), procParam, CreateMarshalAsAttribute(UnmanagedType.Interface));
                 }
                 return new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.IUnknown));
+            }
+            else if (baseType is NdrBaseStructureTypeReference struct_type)
+            {
+                return new TypeDescriptor(CreateStruct(struct_type), procParam);
             }
 
             return new TypeDescriptor(typeof(IntPtr), procParam);
@@ -236,7 +240,7 @@ namespace OleViewDotNet.Builder
             return CreateAttribute<InterfaceTypeAttribute>(GetInterfaceTypeAndProcs(proxy, procs));
         }
 
-        private Type CreateType(NdrComProxyDefinition intf)
+        private Type CreateInterface(NdrComProxyDefinition intf)
         {
             if (m_types.ContainsKey(intf.Iid))
             {
@@ -274,6 +278,23 @@ namespace OleViewDotNet.Builder
             return m_types[intf.Iid];
         }
 
+        private Type CreateStruct(NdrBaseStructureTypeReference struct_type)
+        {
+            if (m_structs.ContainsKey(struct_type))
+            {
+                return m_structs[struct_type];
+            }
+
+            TypeBuilder tb = m_module.DefineType(
+                        struct_type.Name,
+                TypeAttributes.Public | TypeAttributes.SequentialLayout | TypeAttributes.Sealed);
+            tb.SetParent(typeof(ValueType));
+            m_structs[struct_type] = tb;
+
+            m_fixup.Enqueue(tb);
+            return m_structs[struct_type];
+        }
+
         private void AddProxy(COMProxyInstance proxy)
         {
             foreach (var entry in proxy.Entries)
@@ -283,7 +304,7 @@ namespace OleViewDotNet.Builder
 
             foreach (var entry in m_proxies.Values)
             {
-                CreateType(entry);
+                CreateInterface(entry);
             }
 
             while(m_fixup.Count > 0)
