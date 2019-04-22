@@ -143,45 +143,47 @@ namespace OleViewDotNet.Builder
             {
                 baseType = procParam.Type;
             }
-            NdrFormatCharacter format = baseType.Format;
-            switch (format)
-            {
-                case NdrFormatCharacter.FC_BYTE:
-                case NdrFormatCharacter.FC_USMALL:
-                    return new TypeDescriptor(typeof(byte), procParam);
-                case NdrFormatCharacter.FC_SMALL:
-                case NdrFormatCharacter.FC_CHAR:
-                    return new TypeDescriptor(typeof(sbyte), procParam);
-                case NdrFormatCharacter.FC_WCHAR:
-                    return new TypeDescriptor(typeof(char), procParam);
-                case NdrFormatCharacter.FC_SHORT:
-                    return new TypeDescriptor(typeof(short), procParam);
-                case NdrFormatCharacter.FC_USHORT:
-                    return new TypeDescriptor(typeof(ushort), procParam);
-                case NdrFormatCharacter.FC_ENUM16:
-                case NdrFormatCharacter.FC_LONG:
-                case NdrFormatCharacter.FC_ENUM32:
-                    return new TypeDescriptor(typeof(int), procParam);
-                case NdrFormatCharacter.FC_ULONG:
-                case NdrFormatCharacter.FC_ERROR_STATUS_T:
-                    return new TypeDescriptor(typeof(uint), procParam);
-                case NdrFormatCharacter.FC_FLOAT:
-                    return new TypeDescriptor(typeof(float), procParam);
-                case NdrFormatCharacter.FC_HYPER:
-                    return new TypeDescriptor(typeof(long), procParam);
-                case NdrFormatCharacter.FC_DOUBLE:
-                    return new TypeDescriptor(typeof(double), procParam);
-                case NdrFormatCharacter.FC_INT3264:
-                    return new TypeDescriptor(typeof(IntPtr), procParam);
-                case NdrFormatCharacter.FC_UINT3264:
-                    return new TypeDescriptor(typeof(UIntPtr), procParam);
-                case NdrFormatCharacter.FC_C_WSTRING:
-                    return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPWStr));
-                case NdrFormatCharacter.FC_C_CSTRING:
-                    return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPStr));
-            }
 
-            if (baseType is NdrKnownTypeReference known_type)
+            if (baseType is NdrSimpleTypeReference || baseType is NdrBaseStringTypeReference)
+            {
+                switch (baseType.Format)
+                {
+                    case NdrFormatCharacter.FC_BYTE:
+                    case NdrFormatCharacter.FC_USMALL:
+                        return new TypeDescriptor(typeof(byte), procParam);
+                    case NdrFormatCharacter.FC_SMALL:
+                    case NdrFormatCharacter.FC_CHAR:
+                        return new TypeDescriptor(typeof(sbyte), procParam);
+                    case NdrFormatCharacter.FC_WCHAR:
+                        return new TypeDescriptor(typeof(char), procParam);
+                    case NdrFormatCharacter.FC_SHORT:
+                        return new TypeDescriptor(typeof(short), procParam);
+                    case NdrFormatCharacter.FC_USHORT:
+                        return new TypeDescriptor(typeof(ushort), procParam);
+                    case NdrFormatCharacter.FC_ENUM16:
+                    case NdrFormatCharacter.FC_LONG:
+                    case NdrFormatCharacter.FC_ENUM32:
+                        return new TypeDescriptor(typeof(int), procParam);
+                    case NdrFormatCharacter.FC_ULONG:
+                    case NdrFormatCharacter.FC_ERROR_STATUS_T:
+                        return new TypeDescriptor(typeof(uint), procParam);
+                    case NdrFormatCharacter.FC_FLOAT:
+                        return new TypeDescriptor(typeof(float), procParam);
+                    case NdrFormatCharacter.FC_HYPER:
+                        return new TypeDescriptor(typeof(long), procParam);
+                    case NdrFormatCharacter.FC_DOUBLE:
+                        return new TypeDescriptor(typeof(double), procParam);
+                    case NdrFormatCharacter.FC_INT3264:
+                        return new TypeDescriptor(typeof(IntPtr), procParam);
+                    case NdrFormatCharacter.FC_UINT3264:
+                        return new TypeDescriptor(typeof(UIntPtr), procParam);
+                    case NdrFormatCharacter.FC_C_WSTRING:
+                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPWStr));
+                    case NdrFormatCharacter.FC_C_CSTRING:
+                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPStr));
+                }
+            }
+            else if (baseType is NdrKnownTypeReference known_type)
             {
                 switch (known_type.KnownType)
                 {
@@ -201,11 +203,17 @@ namespace OleViewDotNet.Builder
             }
             else if (baseType is NdrInterfacePointerTypeReference interface_pointer)
             {
+                TypeDescriptor intf_p;
                 if (interface_pointer.IsConstant && m_proxies.ContainsKey(interface_pointer.Iid))
                 {
-                    return new TypeDescriptor(CreateInterface(m_proxies[interface_pointer.Iid]), procParam, CreateMarshalAsAttribute(UnmanagedType.Interface));
+                    intf_p = new TypeDescriptor(CreateInterface(m_proxies[interface_pointer.Iid]), procParam, CreateMarshalAsAttribute(UnmanagedType.Interface));
                 }
-                return new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.IUnknown));
+                else
+                {
+                    intf_p = new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.IUnknown));
+                }
+                // Interface pointer should have a pointer value of 1.
+                return new TypeDescriptor(intf_p);
             }
             else if (baseType is NdrBaseStructureTypeReference struct_type)
             {
