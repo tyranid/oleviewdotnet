@@ -382,11 +382,11 @@ namespace OleViewDotNet
         private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() {
             { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
             { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
-            { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) },
-            { typeof(IMoniker).GUID, typeof(IMonikerWrapper) },
-            { typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
-            { typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
-            { typeof(IStream).GUID, typeof(IStreamWrapper) } };
+            { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) } };
+            //{ typeof(IMoniker).GUID, typeof(IMonikerWrapper) },
+            //{ typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
+            //{ typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
+            //{ typeof(IStream).GUID, typeof(IStreamWrapper) } };
 
         private static bool FilterStructuredTypes(Type t)
         {
@@ -439,10 +439,44 @@ namespace OleViewDotNet
             return ret;
         }
 
-        private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes, Type base_type, HashSet<Type> structured_types, HashSet<string> names)
+        private static Type Deref(this Type t)
+        {
+            if (!t.IsByRef)
+            {
+                return t;
+            }
+            return t.GetElementType();
+        }
+
+        private static Type GetParameterType(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+        {
+            Type ret = pi.ParameterType;
+            if (!pi.IsOut && ret.IsByRef)
+            {
+                Type value_type = ret.GetElementType();
+                if (value_type.IsValueType)
+                {
+                    return value_type;
+                }
+            }
+            else if (IsComInterfaceType(pi.ParameterType))
+            {
+                Type type = pi.ParameterType.Deref();
+                ret = CreateType(type, fixup_queue);
+                if (pi.ParameterType.IsByRef)
+                {
+                    ret = ret.MakeByRefType();
+                }
+            }
+            return ret;
+        }
+
+        private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes, 
+            Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
         {
             string name = names.GenerateName(mi);
-            Type[] param_types = mi.GetParameters().Select(p => p.ParameterType).ToArray();
+            var param_info = mi.GetParameters();
+            var param_types = param_info.Select(p => p.GetParameterType(fixup_queue)).ToArray();
             foreach (var t in param_types)
             {
                 structured_types.AddType(t);
@@ -452,17 +486,23 @@ namespace OleViewDotNet
             var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Virtual | attributes, 
                 mi.ReturnType, param_types);
 
-            var ps = mi.GetParameters();
-            for (int i = 0; i < ps.Length; ++i)
+            for (int i = 0; i < param_info.Length; ++i)
             {
-                methbuilder.DefineParameter(i + 1, ps[i].Attributes, ps[i].Name);
+                methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
             }
             var ilgen = methbuilder.GetILGenerator();
             ilgen.Emit(OpCodes.Ldarg_0);
             ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
-            for (int i = 0; i < ps.Length; ++i)
+            for (int i = 0; i < param_info.Length; ++i)
             {
-                ilgen.Emit(OpCodes.Ldarg, i + 1);
+                if (param_info[i].ParameterType.IsByRef != param_types[i].IsByRef)
+                {
+                    ilgen.Emit(OpCodes.Ldarga, i + 1);
+                }
+                else
+                {
+                    ilgen.Emit(OpCodes.Ldarg, i + 1);
+                }
             }
             ilgen.Emit(OpCodes.Callvirt, mi);
             ilgen.Emit(OpCodes.Ret);
@@ -471,6 +511,10 @@ namespace OleViewDotNet
 
         private static bool IsComInterfaceType(Type intf_type)
         {
+            if (intf_type.IsByRef)
+            {
+                intf_type = intf_type.GetElementType();
+            }
             return COMUtilities.IsComImport(intf_type) && intf_type.IsInterface && intf_type.IsPublic && !intf_type.Assembly.ReflectionOnly;
         }
 
@@ -501,7 +545,7 @@ namespace OleViewDotNet
                     $"{intf_type.Name}Wrapper",
                      TypeAttributes.Public | TypeAttributes.Sealed, base_type);
                 _types[intf_type.GUID] = tb;
-                tb.AddInterfaceImplementation(intf_type);
+                //tb.AddInterfaceImplementation(intf_type);
                 HashSet<string> names = new HashSet<string>(base_type.GetMembers().Select(m => m.Name));
                 var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object) });
                 con.DefineParameter(1, ParameterAttributes.In, "obj");
@@ -513,7 +557,7 @@ namespace OleViewDotNet
                 conil.Emit(OpCodes.Ret);
                 foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
                 {
-                    GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names);
+                    GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
                 }
 
                 // TODO: Should change interface parameters to wrapper types.
@@ -523,12 +567,12 @@ namespace OleViewDotNet
                     var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                     if (pi.CanRead)
                     {
-                        var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names);
+                        var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                         pb.SetGetMethod(get_method);
                     }
                     if (pi.CanWrite)
                     {
-                        var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names);
+                        var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                         pb.SetSetMethod(set_method);
                     }
                 }
@@ -562,9 +606,9 @@ namespace OleViewDotNet
 
         public static BaseComWrapper Wrap(object obj, Type intf_type)
         {
-            if (!Marshal.IsComObject(obj))
+            if (!Marshal.IsComObject(obj) && !intf_type.IsAssignableFrom(obj.GetType()))
             {
-                throw new ArgumentException("Object must be a COM object", nameof(obj));
+                throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
             }
 
             return (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
