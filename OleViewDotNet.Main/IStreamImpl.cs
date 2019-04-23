@@ -52,8 +52,10 @@ namespace OleViewDotNet
 
         public void Stat(out System.Runtime.InteropServices.ComTypes.STATSTG statStg, int grfFlags)
         {
-            statStg = new System.Runtime.InteropServices.ComTypes.STATSTG();
-            statStg.cbSize = m_stream.Length;            
+            statStg = new System.Runtime.InteropServices.ComTypes.STATSTG
+            {
+                cbSize = m_stream.Length
+            };
         }
 
         public void UnlockRegion(long libOffset, long cb, int dwLockType)
