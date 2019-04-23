@@ -83,6 +83,43 @@ function Unwrap-ComObject {
     [OleViewDotNet.COMWrapperFactory]::Unwrap($Object)
 }
 
+<#
+.SYNOPSIS
+Wrap a COM object inside a callable wrapper.
+.DESCRIPTION
+This cmdlet generates a callable wrapper for a COM interface and wraps the object.
+.PARAMETER Object
+The object to wrap.
+.PARAMETER Iid
+The interface ID to base the wrapper on.
+.PARAMETER Type
+The existing interface type to wrap with.
+#>
+function Get-ComObjectWrapper {
+    [CmdletBinding(DefaultParameterSetName = "FromType")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [object[]]$Object,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
+        [Guid]$Iid,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
+        [Type]$Type
+    )
+
+    PROCESS {
+        foreach($o in $Object) {
+            switch($PSCmdlet.ParameterSetName) {
+                "FromIid" {
+                    Wrap-ComObject -Object $o -Iid $Iid | Write-Output
+                }
+                "FromType" {
+                    Wrap-ComObject -Object $o -Type $Type | Write-Output
+                }
+            }
+        }
+    }
+}
+
 function Get-ComSymbolResolver {
     Param (
         [parameter( Position=0)]

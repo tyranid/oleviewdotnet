@@ -918,7 +918,7 @@ namespace OleViewDotNet
 
             foreach (Type t in types)
             {
-                if (t.IsInterface)
+                if (t.IsInterface && t.IsPublic)
                 {
                     InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
                     if (!m_iidtypes.ContainsKey(t.GUID))
@@ -933,6 +933,10 @@ namespace OleViewDotNet
         {
             foreach (Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
             {
+                if (t.GetCustomAttribute<ObsoleteAttribute>() != null)
+                {
+                    continue;
+                }
                 if (!m_iidtypes.ContainsKey(t.GUID))
                 {
                     m_iidtypes.Add(t.GUID, t);
@@ -952,6 +956,16 @@ namespace OleViewDotNet
                 return m_iidtypes[iid];
             }
             return null;
+        }
+
+        public static void LoadTypesFromAssembly(Assembly assembly)
+        {
+            if (m_iidtypes == null)
+            {
+                LoadTypeLibAssemblies();
+            }
+
+            LoadBuiltinTypes(assembly);
         }
 
         public static void LoadTypeLibAssemblies()
