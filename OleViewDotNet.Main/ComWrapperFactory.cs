@@ -131,14 +131,17 @@ namespace OleViewDotNet
             _object.SetBindOptions(ref pbindopts);
         }
 
-        public void GetBindOptions(ref System.Runtime.InteropServices.ComTypes.BIND_OPTS pbindopts)
+        public System.Runtime.InteropServices.ComTypes.BIND_OPTS GetBindOptions()
         {
-            _object.GetBindOptions(ref pbindopts);
+            System.Runtime.InteropServices.ComTypes.BIND_OPTS ret = new System.Runtime.InteropServices.ComTypes.BIND_OPTS();
+            _object.GetBindOptions(ref ret);
+            return ret;
         }
 
-        public void GetRunningObjectTable(out IRunningObjectTable pprot)
+        public IRunningObjectTableWrapper GetRunningObjectTable()
         {
-            _object.GetRunningObjectTable(out pprot);
+            _object.GetRunningObjectTable(out IRunningObjectTable rot);
+            return new IRunningObjectTableWrapper(rot);
         }
 
         public void RegisterObjectParam(string pszKey, object punk)
@@ -219,6 +222,12 @@ namespace OleViewDotNet
             return new IMonikerWrapper(out_mk);
         }
 
+        public void ComposeWith(IMonikerWrapper pmkRight, bool fOnlyIfNotGeneric, out IMonikerWrapper wrapper)
+        {
+            _object.ComposeWith(pmkRight.UnwrapTyped(), fOnlyIfNotGeneric, out IMoniker out_mk);
+            wrapper = new IMonikerWrapper(out_mk);
+        }
+
         public IEnumMonikerWrapper Enum(bool fForward)
         {
             _object.Enum(fForward, out IEnumMoniker ppenumMoniker);
@@ -288,9 +297,9 @@ namespace OleViewDotNet
         {
         }
 
-        public int Next(int celt, IMonikerWrapper[] rgelt, IntPtr pceltFetched)
+        public int Next(int celt, IMoniker[] rgelt, IntPtr pceltFetched)
         {
-            return _object.Next(celt, rgelt.Select(m => m.UnwrapTyped()).ToArray(), pceltFetched);
+            return _object.Next(celt, rgelt, pceltFetched);
         }
 
         public int Skip(int celt)
@@ -373,6 +382,79 @@ namespace OleViewDotNet
         }
     }
 
+    public sealed class IEnumStringWrapper : BaseComWrapper<IEnumString>
+    {
+        public IEnumStringWrapper([In] object obj)
+            : base(obj)
+        {
+        }
+
+        public int Next(int celt, [Out] string[] rgelt, IntPtr pceltFetched)
+        {
+            return _object.Next(celt, rgelt, pceltFetched);
+        }
+
+        public int Skip(int celt)
+        {
+            return _object.Skip(celt);
+        }
+
+        public void Reset()
+        {
+            _object.Reset();
+        }
+
+        public IEnumStringWrapper Clone()
+        {
+            _object.Clone(out IEnumString ppenum2);
+            return new IEnumStringWrapper(ppenum2);
+        }
+    }
+
+    public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTable>
+    {
+        public IRunningObjectTableWrapper([In] object obj)
+            : base(obj)
+        {
+        }
+
+        public int Register(int grfFlags, object punkObject, IMonikerWrapper pmkObjectName)
+        {
+            return _object.Register(grfFlags, punkObject, pmkObjectName.UnwrapTyped());
+        }
+
+        public void Revoke(int dwRegister)
+        {
+            _object.Revoke(dwRegister);
+        }
+
+        public int IsRunning(IMonikerWrapper pmkObjectName)
+        {
+            return _object.IsRunning(pmkObjectName.UnwrapTyped());
+        }
+
+        public int GetObject(IMonikerWrapper pmkObjectName, out object ppunkObject)
+        {
+            return _object.GetObject(pmkObjectName.UnwrapTyped(), out ppunkObject);
+        }
+
+        public void NoteChangeTime(int dwRegister, System.Runtime.InteropServices.ComTypes.FILETIME pfiletime)
+        {
+            _object.NoteChangeTime(dwRegister, ref pfiletime);
+        }
+
+        public int GetTimeOfLastChange(IMonikerWrapper pmkObjectName, out System.Runtime.InteropServices.ComTypes.FILETIME pfiletime)
+        {
+            return _object.GetTimeOfLastChange(pmkObjectName.UnwrapTyped(), out pfiletime);
+        }
+
+        public IEnumMonikerWrapper EnumRunning()
+        {
+            _object.EnumRunning(out IEnumMoniker ppenumMoniker2);
+            return new IEnumMonikerWrapper(ppenumMoniker2);
+        }
+    }
+
     public static class COMWrapperFactory
     {
         private static AssemblyName _name = new AssemblyName("ComWrapperTypes");
@@ -382,11 +464,15 @@ namespace OleViewDotNet
         private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() {
             { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
             { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
-            { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) } };
-            //{ typeof(IMoniker).GUID, typeof(IMonikerWrapper) },
-            //{ typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
-            //{ typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
-            //{ typeof(IStream).GUID, typeof(IStreamWrapper) } };
+            { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) },
+            { typeof(IMoniker).GUID, typeof(IMonikerWrapper) },
+            { typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
+            { typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
+            { typeof(IEnumString).GUID, typeof(IEnumStringWrapper) },
+            { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
+            { typeof(IStream).GUID, typeof(IStreamWrapper) } };
+        private static MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
+        private static Dictionary<Type, ConstructorInfo> _constructors = new Dictionary<Type, ConstructorInfo>();
 
         private static bool FilterStructuredTypes(Type t)
         {
@@ -471,6 +557,16 @@ namespace OleViewDotNet
             return ret;
         }
 
+        private static ConstructorInfo GetConstructor(Type type)
+        {
+            type = type.Deref();
+            if (!_constructors.ContainsKey(type))
+            {
+                _constructors[type] = type.GetConstructor(new[] { typeof(object) });
+            }
+            return _constructors[type];
+        }
+
         private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes, 
             Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
         {
@@ -483,28 +579,56 @@ namespace OleViewDotNet
             }
             structured_types.AddType(mi.ReturnType);
 
-            var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Virtual | attributes, 
+            var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes, 
                 mi.ReturnType, param_types);
 
             for (int i = 0; i < param_info.Length; ++i)
             {
                 methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
             }
+
+            List<Tuple<int, int>> locals = new List<Tuple<int, int>>();
             var ilgen = methbuilder.GetILGenerator();
             ilgen.Emit(OpCodes.Ldarg_0);
             ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
             for (int i = 0; i < param_info.Length; ++i)
             {
-                if (param_info[i].ParameterType.IsByRef != param_types[i].IsByRef)
+                if (param_info[i].ParameterType.IsByRef && !param_types[i].IsByRef)
                 {
                     ilgen.Emit(OpCodes.Ldarga, i + 1);
                 }
                 else
                 {
-                    ilgen.Emit(OpCodes.Ldarg, i + 1);
+                    if (typeof(BaseComWrapper).IsAssignableFrom(param_types[i].Deref()))
+                    {
+                        if (!param_info[i].IsOut)
+                        {
+                            ilgen.Emit(OpCodes.Ldarg, i + 1);
+                            ilgen.Emit(OpCodes.Call, _unwrap_method.MakeGenericMethod(param_info[i].ParameterType));
+                            ilgen.Emit(OpCodes.Castclass, param_info[i].ParameterType);
+                        }
+                        else
+                        {
+                            LocalBuilder local = ilgen.DeclareLocal(param_info[i].ParameterType.Deref());
+                            ilgen.Emit(OpCodes.Ldloca, local.LocalIndex);
+                            locals.Add(Tuple.Create(i, local.LocalIndex));
+                        }
+                    }
+                    else
+                    {
+                        ilgen.Emit(OpCodes.Ldarg, i + 1);
+                    }
                 }
             }
             ilgen.Emit(OpCodes.Callvirt, mi);
+            foreach(var local in locals)
+            {
+                var con = GetConstructor(param_types[local.Item1]);
+                ilgen.Emit(OpCodes.Ldarg, local.Item1 + 1);
+                ilgen.Emit(OpCodes.Ldloc, local.Item2);
+                ilgen.Emit(OpCodes.Newobj, con);
+                ilgen.Emit(OpCodes.Stind_Ref);
+            }
             ilgen.Emit(OpCodes.Ret);
             return methbuilder;
         }
@@ -545,9 +669,9 @@ namespace OleViewDotNet
                     $"{intf_type.Name}Wrapper",
                      TypeAttributes.Public | TypeAttributes.Sealed, base_type);
                 _types[intf_type.GUID] = tb;
-                //tb.AddInterfaceImplementation(intf_type);
                 HashSet<string> names = new HashSet<string>(base_type.GetMembers().Select(m => m.Name));
                 var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object) });
+                _constructors[tb] = con;
                 con.DefineParameter(1, ParameterAttributes.In, "obj");
                 var conil = con.GetILGenerator();
                 conil.Emit(OpCodes.Ldarg_0);
@@ -560,19 +684,18 @@ namespace OleViewDotNet
                     GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
                 }
 
-                // TODO: Should change interface parameters to wrapper types.
                 foreach (var pi in intf_type.GetProperties())
                 {
                     string name = names.GenerateName(pi);
                     var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                     if (pi.CanRead)
                     {
-                        var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                        var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                         pb.SetGetMethod(get_method);
                     }
                     if (pi.CanWrite)
                     {
-                        var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.HideBySig | MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                        var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                         pb.SetSetMethod(set_method);
                     }
                 }
@@ -582,8 +705,8 @@ namespace OleViewDotNet
                     var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public | MethodAttributes.Static,
                             type, new Type[0]);
                     var ilgen = methbuilder.GetILGenerator();
-                    ilgen.DeclareLocal(type);
-                    ilgen.Emit(OpCodes.Ldloca_S, 0);
+                    var local = ilgen.DeclareLocal(type);
+                    ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
                     ilgen.Emit(OpCodes.Initobj, type);
                     ilgen.Emit(OpCodes.Ldloc_0);
                     ilgen.Emit(OpCodes.Ret);

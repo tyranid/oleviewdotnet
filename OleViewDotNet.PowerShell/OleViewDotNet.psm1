@@ -1459,9 +1459,9 @@ function New-ComObject {
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
-        [OleViewDotNet.IClassFactory]$Factory,
+        [OleViewDotNet.IClassFactoryWrapper]$Factory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
-        [System.Runtime.InteropServices.WindowsRuntime.IActivationFactory]$ActivationFactory,
+        [OleViewDotNet.IActivationFactoryWrapper]$ActivationFactory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
