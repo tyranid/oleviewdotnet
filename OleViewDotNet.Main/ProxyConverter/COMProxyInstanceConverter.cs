@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace OleViewDotNet.Builder
 {
@@ -35,6 +36,19 @@ namespace OleViewDotNet.Builder
         private readonly Dictionary<Guid, NdrComProxyDefinition> m_proxies;
         private readonly Dictionary<NdrBaseStructureTypeReference, Type> m_structs;
         private readonly string m_output_path;
+
+        private static Regex _identifier_regex = new Regex(@"[^a-zA-Z0-9_\.]");
+
+        public static string MakeIdentifier(string id)
+        {
+            id = _identifier_regex.Replace(id, "_");
+            if (!char.IsLetter(id[0]) && id[0] != '_')
+            {
+                id = "_" + id;
+            }
+
+            return id;
+        }
 
         private static CustomAttributeBuilder CreateAttribute<T>(params object[] args) where T : Attribute
         {
@@ -62,30 +76,30 @@ namespace OleViewDotNet.Builder
                 PointerCount = typeDescriptor.PointerCount + 1;
             }
 
-            public TypeDescriptor(Type builtinType, 
-                NdrProcedureParameter pm,
+            public TypeDescriptor(Type builtinType,
+                NdrParamAttributes attributes,
                 params CustomAttributeBuilder[] customAttributes)
             {
-                ParameterAttributes attributes = ParameterAttributes.None;
+                ParameterAttributes real_attributes = ParameterAttributes.None;
                 BuiltinType = builtinType;
-                if (pm.Attributes.HasFlag(NdrParamAttributes.IsSimpleRef))
+                if (attributes.HasFlag(NdrParamAttributes.IsSimpleRef))
                 {
                     PointerCount = 1;
                 }
 
                 CustomAttributes = new List<CustomAttributeBuilder>(customAttributes);
-                if (pm.Attributes.HasFlag(NdrParamAttributes.IsIn))
+                if (attributes.HasFlag(NdrParamAttributes.IsIn))
                 {
                     CustomAttributes.Add(CreateAttribute<InAttribute>());
-                    attributes |= ParameterAttributes.In;
+                    real_attributes |= ParameterAttributes.In;
                 }
 
-                if (pm.Attributes.HasFlag(NdrParamAttributes.IsOut))
+                if (attributes.HasFlag(NdrParamAttributes.IsOut))
                 {
                     CustomAttributes.Add(CreateAttribute<OutAttribute>());
-                    attributes |= ParameterAttributes.Out;
+                    real_attributes |= ParameterAttributes.Out;
                 }
-                Attributes = attributes;
+                Attributes = real_attributes;
             }
 
             public Type GetParameterType()
@@ -119,7 +133,7 @@ namespace OleViewDotNet.Builder
         {
             m_output_path = output_path;
             m_name = new AssemblyName(Path.GetFileNameWithoutExtension(output_path));
-            m_builder = AppDomain.CurrentDomain.DefineDynamicAssembly(m_name, AssemblyBuilderAccess.Save);
+            m_builder = AppDomain.CurrentDomain.DefineDynamicAssembly(m_name, AssemblyBuilderAccess.Save, Path.GetDirectoryName(output_path));
             m_module = m_builder.DefineDynamicModule(m_name.Name, m_name.Name + ".dll");
             m_types = new Dictionary<Guid, Type>();
             m_proxies = new Dictionary<Guid, NdrComProxyDefinition>();
@@ -129,7 +143,7 @@ namespace OleViewDotNet.Builder
 
         public void Save()
         {
-            m_builder.Save(m_output_path);
+            m_builder.Save(Path.GetFileName(m_output_path));
         }
 
         private CustomAttributeBuilder CreateMarshalAsAttribute(UnmanagedType unmanagedType)
@@ -137,50 +151,50 @@ namespace OleViewDotNet.Builder
             return new CustomAttributeBuilder(typeof(MarshalAsAttribute).GetConstructor(new Type[] { typeof(UnmanagedType) }), new object[] { unmanagedType });
         }
 
-        private TypeDescriptor GetTypeDescriptor(NdrProcedureParameter procParam, NdrBaseTypeReference baseType = null)
+        private TypeDescriptor GetTypeDescriptor(NdrProcedureParameter procParam)
         {
-            if (baseType == null)
-            {
-                baseType = procParam.Type;
-            }
+            return GetTypeDescriptor(procParam.Attributes, procParam.Type);
+        }
 
+        private TypeDescriptor GetTypeDescriptor(NdrParamAttributes paramAttributes, NdrBaseTypeReference baseType, bool field_type = false)
+        {
             if (baseType is NdrSimpleTypeReference || baseType is NdrBaseStringTypeReference)
             {
                 switch (baseType.Format)
                 {
                     case NdrFormatCharacter.FC_BYTE:
                     case NdrFormatCharacter.FC_USMALL:
-                        return new TypeDescriptor(typeof(byte), procParam);
+                        return new TypeDescriptor(typeof(byte), paramAttributes);
                     case NdrFormatCharacter.FC_SMALL:
                     case NdrFormatCharacter.FC_CHAR:
-                        return new TypeDescriptor(typeof(sbyte), procParam);
+                        return new TypeDescriptor(typeof(sbyte), paramAttributes);
                     case NdrFormatCharacter.FC_WCHAR:
-                        return new TypeDescriptor(typeof(char), procParam);
+                        return new TypeDescriptor(typeof(char), paramAttributes);
                     case NdrFormatCharacter.FC_SHORT:
-                        return new TypeDescriptor(typeof(short), procParam);
+                        return new TypeDescriptor(typeof(short), paramAttributes);
                     case NdrFormatCharacter.FC_USHORT:
-                        return new TypeDescriptor(typeof(ushort), procParam);
+                        return new TypeDescriptor(typeof(ushort), paramAttributes);
                     case NdrFormatCharacter.FC_ENUM16:
                     case NdrFormatCharacter.FC_LONG:
                     case NdrFormatCharacter.FC_ENUM32:
-                        return new TypeDescriptor(typeof(int), procParam);
+                        return new TypeDescriptor(typeof(int), paramAttributes);
                     case NdrFormatCharacter.FC_ULONG:
                     case NdrFormatCharacter.FC_ERROR_STATUS_T:
-                        return new TypeDescriptor(typeof(uint), procParam);
+                        return new TypeDescriptor(typeof(uint), paramAttributes);
                     case NdrFormatCharacter.FC_FLOAT:
-                        return new TypeDescriptor(typeof(float), procParam);
+                        return new TypeDescriptor(typeof(float), paramAttributes);
                     case NdrFormatCharacter.FC_HYPER:
-                        return new TypeDescriptor(typeof(long), procParam);
+                        return new TypeDescriptor(typeof(long), paramAttributes);
                     case NdrFormatCharacter.FC_DOUBLE:
-                        return new TypeDescriptor(typeof(double), procParam);
+                        return new TypeDescriptor(typeof(double), paramAttributes);
                     case NdrFormatCharacter.FC_INT3264:
-                        return new TypeDescriptor(typeof(IntPtr), procParam);
+                        return new TypeDescriptor(typeof(IntPtr), paramAttributes);
                     case NdrFormatCharacter.FC_UINT3264:
-                        return new TypeDescriptor(typeof(UIntPtr), procParam);
+                        return new TypeDescriptor(typeof(UIntPtr), paramAttributes);
                     case NdrFormatCharacter.FC_C_WSTRING:
-                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPWStr));
+                        return new TypeDescriptor(typeof(string), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.LPWStr));
                     case NdrFormatCharacter.FC_C_CSTRING:
-                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.LPStr));
+                        return new TypeDescriptor(typeof(string), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.LPStr));
                 }
             }
             else if (baseType is NdrKnownTypeReference known_type)
@@ -188,39 +202,43 @@ namespace OleViewDotNet.Builder
                 switch (known_type.KnownType)
                 {
                     case NdrKnownTypes.BSTR:
-                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.BStr));
+                        return new TypeDescriptor(typeof(string), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.BStr));
                     case NdrKnownTypes.GUID:
-                        return new TypeDescriptor(typeof(Guid), procParam);
+                        return new TypeDescriptor(typeof(Guid), paramAttributes);
                     case NdrKnownTypes.HSTRING:
-                        return new TypeDescriptor(typeof(string), procParam, CreateMarshalAsAttribute(UnmanagedType.HString));
+                        return new TypeDescriptor(typeof(string), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.HString));
                     case NdrKnownTypes.VARIANT:
-                        return new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.Struct));
+                        return new TypeDescriptor(typeof(object), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.Struct));
                 }
             }
             else if (baseType is NdrPointerTypeReference pointer_type)
             {
-                return new TypeDescriptor(GetTypeDescriptor(procParam, pointer_type.Type));
+                return new TypeDescriptor(GetTypeDescriptor(paramAttributes, pointer_type.Type));
             }
             else if (baseType is NdrInterfacePointerTypeReference interface_pointer)
             {
                 TypeDescriptor intf_p;
                 if (interface_pointer.IsConstant && m_proxies.ContainsKey(interface_pointer.Iid))
                 {
-                    intf_p = new TypeDescriptor(CreateInterface(m_proxies[interface_pointer.Iid]), procParam, CreateMarshalAsAttribute(UnmanagedType.Interface));
+                    intf_p = new TypeDescriptor(CreateInterface(m_proxies[interface_pointer.Iid]), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.Interface));
                 }
                 else
                 {
-                    intf_p = new TypeDescriptor(typeof(object), procParam, CreateMarshalAsAttribute(UnmanagedType.IUnknown));
+                    intf_p = new TypeDescriptor(typeof(object), paramAttributes, CreateMarshalAsAttribute(UnmanagedType.IUnknown));
                 }
                 // Interface pointer should have a pointer value of 1.
                 return new TypeDescriptor(intf_p);
             }
             else if (baseType is NdrBaseStructureTypeReference struct_type)
             {
-                return new TypeDescriptor(CreateStruct(struct_type), procParam);
+                return new TypeDescriptor(CreateStruct(struct_type), paramAttributes);
             }
 
-            return new TypeDescriptor(typeof(IntPtr), procParam);
+            if (field_type)
+            {
+                return null;
+            }
+            return new TypeDescriptor(typeof(IntPtr), paramAttributes);
         }
 
         private ComInterfaceType GetInterfaceTypeAndProcs(NdrComProxyDefinition proxy, List<NdrProcedureDefinition> procs)
@@ -256,7 +274,7 @@ namespace OleViewDotNet.Builder
             }
 
             TypeBuilder tb = m_module.DefineType(
-                        intf.Name,
+                        MakeIdentifier(intf.Name),
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
             m_types[intf.Iid] = tb;
             tb.SetCustomAttribute(CreateAttribute<ComImportAttribute>());
@@ -266,7 +284,7 @@ namespace OleViewDotNet.Builder
 
             foreach (var proc in procs)
             {
-                string name = proc.Name;
+                string name = MakeIdentifier(proc.Name);
                 var ret_type = GetTypeDescriptor(proc.ReturnValue);
                 var param_types = proc.Params.Select(p => GetTypeDescriptor(p)).ToList();
                 var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.NewSlot | MethodAttributes.HideBySig | MethodAttributes.Virtual,
@@ -294,23 +312,37 @@ namespace OleViewDotNet.Builder
             }
 
             TypeBuilder tb = m_module.DefineType(
-                        struct_type.Name,
+                        MakeIdentifier(struct_type.Name),
                 TypeAttributes.Public | TypeAttributes.SequentialLayout | TypeAttributes.Sealed);
             tb.SetParent(typeof(ValueType));
             m_structs[struct_type] = tb;
+
+            foreach (var member in struct_type.Members)
+            {
+                var type_desc = GetTypeDescriptor(0, member.MemberType, true);
+                if (type_desc == null)
+                {
+                    break;
+                }
+                var field = tb.DefineField(MakeIdentifier(member.Name), type_desc.BuiltinType, FieldAttributes.Public);
+                foreach (var attr in type_desc.CustomAttributes)
+                {
+                    field.SetCustomAttribute(attr);
+                }
+            }
 
             m_fixup.Enqueue(tb);
             return m_structs[struct_type];
         }
 
-        private void AddProxy(COMProxyInstance proxy)
+        private void AddProxy(IEnumerable<NdrComProxyDefinition> entries)
         {
-            foreach (var entry in proxy.Entries)
+            foreach (var entry in entries)
             {
                 m_proxies.Add(entry.Iid, entry);
             }
 
-            foreach (var entry in m_proxies.Values)
+            foreach (var entry in entries)
             {
                 CreateInterface(entry);
             }
@@ -321,12 +353,26 @@ namespace OleViewDotNet.Builder
             }
         }
 
-        public static Assembly Convert(COMProxyInstance proxy, string output_path)
+        public static void Convert(IEnumerable<NdrComProxyDefinition> entries, string output_path)
         {
-            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(output_path);
-            converter.AddProxy(proxy);
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(Path.GetFullPath(output_path));
+            converter.AddProxy(entries);
             converter.Save();
-            return converter.m_builder;
+        }
+
+        public static void Convert(COMProxyInstance proxy, string output_path)
+        {
+            Convert(proxy.Entries, output_path);
+        }
+
+        public static void Convert(COMProxyInterfaceInstance proxy, string output_path)
+        {
+            Convert(new[] { proxy.Entry }, output_path);
+        }
+
+        public static void Convert(COMIPIDEntry ipid, string output_path)
+        {
+            Convert(ipid.ToProxyInstance(), output_path);
         }
     }
 }
