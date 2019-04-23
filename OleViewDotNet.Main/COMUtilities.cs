@@ -2520,9 +2520,8 @@ namespace OleViewDotNet
             return ret;
         }
 
-        public static object CreateInstanceFromFactory(object obj, Guid iid)
+        public static object CreateInstanceFromFactory(IClassFactoryWrapper factory, Guid iid)
         {
-            IClassFactory factory = (IClassFactory)obj;
             factory.CreateInstance(null, ref iid, out object ret);
             return ret;
         }
