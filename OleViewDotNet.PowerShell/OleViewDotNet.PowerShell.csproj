@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NtApiDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NtApiDotNet.1.1.20\lib\net45\NtApiDotNet.dll</HintPath>
+      <HintPath>..\packages\NtApiDotNet.1.1.21\lib\net45\NtApiDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="ComClientGraphBuilder.cs" />
     <Compile Include="CallbackProgress.cs" />
-    <Compile Include="ClassFactoryWrapper.cs" />
     <Compile Include="LoggingActivationFilter.cs" />
     <Compile Include="PowerShellUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,9 +65,7 @@
     <None Include="OleViewDotNet.psm1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="Startup-Module.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
