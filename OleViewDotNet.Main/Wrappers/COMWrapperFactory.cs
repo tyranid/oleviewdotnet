@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Wrappers
 {
     public abstract class BaseComWrapper
     {

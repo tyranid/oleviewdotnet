@@ -53,9 +53,8 @@ namespace OleViewDotNet
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            Guid clsid;
 
-            if ((GetClsid(textBoxCLSID.Text.Trim(), out clsid) && (comboBoxClsCtx.SelectedItem != null)))
+            if ((GetClsid(textBoxCLSID.Text.Trim(), out Guid clsid) && (comboBoxClsCtx.SelectedItem != null)))
             {
                 Clsid = clsid;
                 ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;

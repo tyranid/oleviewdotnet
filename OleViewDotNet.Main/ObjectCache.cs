@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace OleViewDotNet
 {
     class ObjectEntry
     {
-        private COMRegistry m_registry;
+        private readonly COMRegistry m_registry;
 
         public string Name { get; private set; }
         public object Instance { get; private set; }
@@ -46,14 +47,14 @@ namespace OleViewDotNet
             Instance = instance;
             Id = Guid.NewGuid();
 
-            Interfaces = new KeyValuePair<Guid,string>[interfaces.Length];
+            Interfaces = new KeyValuePair<Guid, string>[interfaces.Length];
             int pos = 0;
             foreach (COMInterfaceEntry ent in interfaces)
             {
                 Interfaces[pos++] = new KeyValuePair<Guid, string>(ent.Iid, ent.Name);
             }
-        }        
-     
+        }
+
         public dynamic QueryInterface(string name)
         {
             Guid iid = Guid.Empty;
@@ -62,13 +63,13 @@ namespace OleViewDotNet
             {
                 foreach (KeyValuePair<Guid, string> pair in Interfaces)
                 {
-                    if (String.Compare(pair.Value, name, true) == 0)
+                    if (string.Compare(pair.Value, name, true) == 0)
                     {
                         iid = pair.Key;
                         break;
                     }
                 }
-            }            
+            }
 
             Type type = COMUtilities.GetInterfaceType(iid);
             if (type != null)
@@ -107,7 +108,7 @@ namespace OleViewDotNet
 
         public static ObjectEntry GetObjectByName(string name)
         {
-            return m_objects.Find(o => String.Equals(name, o.Name, StringComparison.CurrentCultureIgnoreCase));
+            return m_objects.Find(o => string.Equals(name, o.Name, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public static ObjectEntry GetObjectByGuid(Guid id)

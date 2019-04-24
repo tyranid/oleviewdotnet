@@ -65,10 +65,10 @@ function Wrap-ComObject {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
-            [OleViewDotNet.COMWrapperFactory]::Wrap($Object, $Iid)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid)
         }
         "FromType" {
-            [OleViewDotNet.COMWrapperFactory]::Wrap($Object, $Type)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
         }
     }
 }
@@ -80,7 +80,7 @@ function Unwrap-ComObject {
         [object]$Object
     )
 
-    [OleViewDotNet.COMWrapperFactory]::Unwrap($Object)
+    [OleViewDotNet.Wrappers.COMWrapperFactory]::Unwrap($Object)
 }
 
 <#

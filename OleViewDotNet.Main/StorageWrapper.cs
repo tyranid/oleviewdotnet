@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -158,7 +159,7 @@ namespace OleViewDotNet
             _stm.Write(buffer, count, IntPtr.Zero);
         }
 
-        public ComTypes.IStream Object { get { return (ComTypes.IStream)COMWrapperFactory.Wrap<ComTypes.IStream>(_stm); } }
+        public IStreamWrapper Object { get { return new IStreamWrapper(_stm); } }
     }
 
     /// <summary>
@@ -328,6 +329,6 @@ namespace OleViewDotNet
                 DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
         }
 
-        public IStorage Object { get { return (IStorage)COMWrapperFactory.Wrap<IStorage>(_stg); } }
+        public BaseComWrapper<IStorage> Object { get { return COMWrapperFactory.Wrap<IStorage>(_stg); } }
     }
 }

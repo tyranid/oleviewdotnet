@@ -21,14 +21,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Wrappers
 {
     class DynamicComObjectWrapper : DynamicObject
-    {        
+    {
         private object _target;
         private Dictionary<string, MethodInfo> _methods;
         private Dictionary<string, PropertyInfo> _properties;
-        private Type _instanceType;
+        private readonly Type _instanceType;
         private COMRegistry _registry;
 
         public override string ToString()
@@ -96,7 +96,7 @@ namespace OleViewDotNet
         private COMInterfaceEntry[] _interfaces;
 
         private COMInterfaceEntry[] GetInterfaces()
-        {            
+        {
             if (_interfaces == null)
             {
                 _interfaces = _registry.GetInterfacesForObject(_target).OrderBy(i => i.Name).ToArray();
@@ -131,9 +131,9 @@ namespace OleViewDotNet
         }
 
         private bool Invoke(string name, bool getprop, out object result, object[] args)
-        {            
+        {
             result = null;
-                     
+
             if (getprop && _methods.ContainsKey(name))
             {
                 result = new DynamicComFunctionWrapper(_registry, _methods[name], _target);
@@ -182,9 +182,8 @@ namespace OleViewDotNet
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            object res = null;
 
-            return Invoke(binder.Name, false, out res, new object[] { value });
+            return Invoke(binder.Name, false, out object res, new object[] { value });
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)

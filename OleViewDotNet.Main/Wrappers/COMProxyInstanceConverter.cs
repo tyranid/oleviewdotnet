@@ -24,7 +24,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace OleViewDotNet.Builder
+namespace OleViewDotNet.Wrappers
 {
     public class COMProxyInstanceConverter
     {

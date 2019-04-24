@@ -17,6 +17,7 @@
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -31,7 +32,7 @@ namespace OleViewDotNet
     /// Generic interface viewer from a type
     /// </summary>
     partial class TypedObjectViewer : UserControl
-    {        
+    {
         private string m_objName;
         private ObjectEntry m_pEntry;
         private object m_pObject;
@@ -95,7 +96,7 @@ namespace OleViewDotNet
                     // Just create the global scope, don't execute it yet
                     ScriptScope scope = engine.CreateScope();
 
-                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType) 
+                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType)
                         ? new DynamicComObjectWrapper(m_registry, m_dispType, m_pObject) : m_pObject);
                     scope.SetVariable("disp", m_pObject);
 
@@ -121,7 +122,7 @@ namespace OleViewDotNet
             }
         }
 
-        public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType) 
+        public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType)
             : this(registry, strObjName, new ObjectEntry(registry, strObjName, pObject), dispType)
         {
         }
@@ -193,7 +194,7 @@ namespace OleViewDotNet
                     ListViewItem item = listViewProperties.Items.Add(pi.Name);
                     item.Tag = pi;
                     item.SubItems.Add(pi.PropertyType.ToString());
-                    
+
                     object val = null;
 
                     try
@@ -204,7 +205,7 @@ namespace OleViewDotNet
                         }
                     }
                     catch (Exception)
-                    {                        
+                    {
                         val = null;
                     }
 
@@ -347,7 +348,7 @@ namespace OleViewDotNet
         {
             private StringBuilder _builder;
             private TypedObjectViewer _control;
-            private bool _error;
+            private readonly bool _error;
 
             public ConsoleTextWriter(TypedObjectViewer control, bool error)
             {

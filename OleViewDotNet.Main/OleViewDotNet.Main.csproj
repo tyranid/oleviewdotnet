@@ -114,7 +114,7 @@
     </Compile>
     <Compile Include="ActivationContext.cs" />
     <Compile Include="AppxPackageName.cs" />
-    <Compile Include="ProxyConverter\COMProxyInstanceConverter.cs" />
+    <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
     <Compile Include="BuildMonikerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -131,7 +131,7 @@
     <Compile Include="COMRuntimeExtensionEntry.cs" />
     <Compile Include="COMRuntimeServerEntry.cs" />
     <Compile Include="COMAccessCheck.cs" />
-    <Compile Include="COMWrapperFactory.cs" />
+    <Compile Include="Wrappers\COMWrapperFactory.cs" />
     <Compile Include="IProxyFormatter.cs" />
     <Compile Include="PythonScriptEditor.cs">
       <SubType>UserControl</SubType>
@@ -265,8 +265,8 @@
     <Compile Include="DocumentForm.Designer.cs">
       <DependentUpon>DocumentForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DynamicComFunctionWrapper.cs" />
-    <Compile Include="DynamicComObjectWrapper.cs" />
+    <Compile Include="Wrappers\DynamicComFunctionWrapper.cs" />
+    <Compile Include="Wrappers\DynamicComObjectWrapper.cs" />
     <Compile Include="HexEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>

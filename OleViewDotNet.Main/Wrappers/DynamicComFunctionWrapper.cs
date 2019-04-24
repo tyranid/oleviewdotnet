@@ -21,13 +21,13 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Wrappers
 {
     class DynamicComFunctionWrapper : DynamicObject
     {
-        private MethodInfo _mi;
-        private object _target;
-        private COMRegistry _registry;
+        private readonly MethodInfo _mi;
+        private readonly object _target;
+        private readonly COMRegistry _registry;
 
         public DynamicComFunctionWrapper(COMRegistry registry, MethodInfo mi, object target)
         {
