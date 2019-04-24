@@ -106,20 +106,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutForm.cs">
+    <Compile Include="Forms\AboutForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutForm.Designer.cs">
+    <Compile Include="Forms\AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ActivationContext.cs" />
     <Compile Include="AppxPackageName.cs" />
     <Compile Include="Wrappers\BuiltinWrappers.cs" />
     <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
-    <Compile Include="BuildMonikerForm.cs">
+    <Compile Include="Forms\BuildMonikerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BuildMonikerForm.Designer.cs">
+    <Compile Include="Forms\BuildMonikerForm.Designer.cs">
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="COMPackagedRegistry.cs" />
@@ -134,110 +134,110 @@
     <Compile Include="COMAccessCheck.cs" />
     <Compile Include="Wrappers\COMWrapperFactory.cs" />
     <Compile Include="IProxyFormatter.cs" />
-    <Compile Include="PythonScriptEditor.cs">
+    <Compile Include="Forms\PythonScriptEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PythonScriptEditor.Designer.cs">
+    <Compile Include="Forms\PythonScriptEditor.Designer.cs">
       <DependentUpon>PythonScriptEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="RuntimeExtensionActivator.cs" />
-    <Compile Include="SettingsForm.cs">
+    <Compile Include="Forms\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForm.Designer.cs">
+    <Compile Include="Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="CustomMarshalEditorControl.cs">
+    <Compile Include="Forms\CustomMarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CustomMarshalEditorControl.Designer.cs">
+    <Compile Include="Forms\CustomMarshalEditorControl.Designer.cs">
       <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="DiffRegistryForm.cs">
+    <Compile Include="Forms\DiffRegistryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DiffRegistryForm.Designer.cs">
+    <Compile Include="Forms\DiffRegistryForm.Designer.cs">
       <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ElevatedFactoryServerTypeViewer.cs">
+    <Compile Include="Forms\ElevatedFactoryServerTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ElevatedFactoryServerTypeViewer.Designer.cs">
+    <Compile Include="Forms\ElevatedFactoryServerTypeViewer.Designer.cs">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="SelectProcessControl.cs">
+    <Compile Include="Forms\SelectProcessControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SelectProcessControl.Designer.cs">
+    <Compile Include="Forms\SelectProcessControl.Designer.cs">
       <DependentUpon>SelectProcessControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="SelectProcessForm.cs">
+    <Compile Include="Forms\SelectProcessForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectProcessForm.Designer.cs">
+    <Compile Include="Forms\SelectProcessForm.Designer.cs">
       <DependentUpon>SelectProcessForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SelectSecurityCheckForm.cs">
+    <Compile Include="Forms\SelectSecurityCheckForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectSecurityCheckForm.Designer.cs">
+    <Compile Include="Forms\SelectSecurityCheckForm.Designer.cs">
       <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MarshalEditorControl.cs">
+    <Compile Include="Forms\MarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MarshalEditorControl.Designer.cs">
+    <Compile Include="Forms\MarshalEditorControl.Designer.cs">
       <DependentUpon>MarshalEditorControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObjectHexEditor.cs">
+    <Compile Include="Forms\ObjectHexEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ObjectHexEditor.Designer.cs">
+    <Compile Include="Forms\ObjectHexEditor.Designer.cs">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="QueryInterfacesOptionsForm.cs">
+    <Compile Include="Forms\QueryInterfacesOptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="QueryInterfacesOptionsForm.Designer.cs">
+    <Compile Include="Forms\QueryInterfacesOptionsForm.Designer.cs">
       <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="RegistryViewerFilter.cs" />
-    <Compile Include="RegistryPropertiesControl.cs">
+    <Compile Include="Forms\RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="RegistryPropertiesControl.Designer.cs">
+    <Compile Include="Forms\RegistryPropertiesControl.Designer.cs">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="StandardMarshalEditorControl.cs">
+    <Compile Include="Forms\StandardMarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="StandardMarshalEditorControl.Designer.cs">
+    <Compile Include="Forms\StandardMarshalEditorControl.Designer.cs">
       <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="StorageWrapper.cs" />
-    <Compile Include="StorageViewer.cs">
+    <Compile Include="Forms\StorageViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="StorageViewer.Designer.cs">
+    <Compile Include="Forms\StorageViewer.Designer.cs">
       <DependentUpon>StorageViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewFilterControl.cs">
+    <Compile Include="Forms\ViewFilterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ViewFilterControl.Designer.cs">
+    <Compile Include="Forms\ViewFilterControl.Designer.cs">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewFilterForm.cs">
+    <Compile Include="Forms\ViewFilterForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ViewFilterForm.Designer.cs">
+    <Compile Include="Forms\ViewFilterForm.Designer.cs">
       <DependentUpon>ViewFilterForm.cs</DependentUpon>
     </Compile>
     <Compile Include="XmlUtils.cs" />
-    <Compile Include="ClassFactoryTypeViewer.cs">
+    <Compile Include="Forms\ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ClassFactoryTypeViewer.Designer.cs">
+    <Compile Include="Forms\ClassFactoryTypeViewer.Designer.cs">
       <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="COMAppIDEntry.cs" />
@@ -248,22 +248,22 @@
     <Compile Include="COMInterfaceEntry.cs" />
     <Compile Include="COMMimeType.cs" />
     <Compile Include="COMTypeLibEntry.cs" />
-    <Compile Include="ConsoleControl.cs">
+    <Compile Include="Forms\ConsoleControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ConsoleControl.designer.cs">
+    <Compile Include="Forms\ConsoleControl.designer.cs">
       <DependentUpon>ConsoleControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="CreateCLSIDForm.cs">
+    <Compile Include="Forms\CreateCLSIDForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CreateCLSIDForm.Designer.cs">
+    <Compile Include="Forms\CreateCLSIDForm.Designer.cs">
       <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DocumentForm.cs">
+    <Compile Include="Forms\DocumentForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DocumentForm.Designer.cs">
+    <Compile Include="Forms\DocumentForm.Designer.cs">
       <DependentUpon>DocumentForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Wrappers\DynamicComFunctionWrapper.cs" />
@@ -281,205 +281,205 @@
     <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />
     <Compile Include="COMProgIDEntry.cs" />
-    <Compile Include="COMRegistryViewer.cs">
+    <Compile Include="Forms\COMRegistryViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="COMRegistryViewer.Designer.cs">
+    <Compile Include="Forms\COMRegistryViewer.Designer.cs">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="COMRegistry.cs" />
     <Compile Include="COMUtilities.cs" />
-    <Compile Include="CreateIStreamForm.cs">
+    <Compile Include="Forms\CreateIStreamForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CreateIStreamForm.Designer.cs">
+    <Compile Include="Forms\CreateIStreamForm.Designer.cs">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetTextForm.cs">
+    <Compile Include="Forms\GetTextForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GetTextForm.Designer.cs">
+    <Compile Include="Forms\GetTextForm.Designer.cs">
       <DependentUpon>GetTextForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetTypeForm.cs">
+    <Compile Include="Forms\GetTypeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GetTypeForm.Designer.cs">
+    <Compile Include="Forms\GetTypeForm.Designer.cs">
       <DependentUpon>GetTypeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="InterfaceViewers\BaseTypeFactory.cs" />
     <Compile Include="InterfaceViewers\BuiltinTypeViewers.cs" />
-    <Compile Include="InvokeForm.cs">
+    <Compile Include="Forms\InvokeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InvokeForm.Designer.cs">
+    <Compile Include="Forms\InvokeForm.Designer.cs">
       <DependentUpon>InvokeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IStreamImpl.cs" />
-    <Compile Include="WaitingDialog.cs">
+    <Compile Include="Forms\WaitingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WaitingDialog.Designer.cs">
+    <Compile Include="Forms\WaitingDialog.Designer.cs">
       <DependentUpon>WaitingDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObjectContainer.cs">
+    <Compile Include="Forms\ObjectContainer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ObjectContainer.Designer.cs">
+    <Compile Include="Forms\ObjectContainer.Designer.cs">
       <DependentUpon>ObjectContainer.cs</DependentUpon>
     </Compile>
-    <Compile Include="PersistStreamTypeViewer.cs">
+    <Compile Include="Forms\PersistStreamTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PersistStreamTypeViewer.Designer.cs">
+    <Compile Include="Forms\PersistStreamTypeViewer.Designer.cs">
       <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="PropertiesControl.cs">
+    <Compile Include="Forms\PropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropertiesControl.Designer.cs">
+    <Compile Include="Forms\PropertiesControl.Designer.cs">
       <DependentUpon>PropertiesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="PythonConsole.cs">
+    <Compile Include="Forms\PythonConsole.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PythonConsole.Designer.cs">
+    <Compile Include="Forms\PythonConsole.Designer.cs">
       <DependentUpon>PythonConsole.cs</DependentUpon>
     </Compile>
     <Compile Include="COMSecurity.cs" />
     <Compile Include="SimpleSyntaxModeProvider.cs" />
-    <Compile Include="TypedObjectViewer.cs">
+    <Compile Include="Forms\TypedObjectViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TypedObjectViewer.Designer.cs">
+    <Compile Include="Forms\TypedObjectViewer.Designer.cs">
       <DependentUpon>TypedObjectViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObjectInformation.cs">
+    <Compile Include="Forms\ObjectInformation.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ObjectInformation.Designer.cs">
+    <Compile Include="Forms\ObjectInformation.Designer.cs">
       <DependentUpon>ObjectInformation.cs</DependentUpon>
     </Compile>
     <Compile Include="EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TypeLibControl.cs">
+    <Compile Include="Forms\TypeLibControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TypeLibControl.Designer.cs">
+    <Compile Include="Forms\TypeLibControl.Designer.cs">
       <DependentUpon>TypeLibControl.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="AboutForm.resx">
+    <EmbeddedResource Include="Forms\AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BuildMonikerForm.resx">
+    <EmbeddedResource Include="Forms\BuildMonikerForm.resx">
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ClassFactoryTypeViewer.resx">
+    <EmbeddedResource Include="Forms\ClassFactoryTypeViewer.resx">
       <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="COMRegistryViewer.resx">
+    <EmbeddedResource Include="Forms\COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PythonScriptEditor.resx">
+    <EmbeddedResource Include="Forms\PythonScriptEditor.resx">
       <DependentUpon>PythonScriptEditor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsForm.resx">
+    <EmbeddedResource Include="Forms\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConsoleControl.resx">
+    <EmbeddedResource Include="Forms\ConsoleControl.resx">
       <DependentUpon>ConsoleControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CreateCLSIDForm.resx">
+    <EmbeddedResource Include="Forms\CreateCLSIDForm.resx">
       <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CreateIStreamForm.resx">
+    <EmbeddedResource Include="Forms\CreateIStreamForm.resx">
       <DependentUpon>CreateIStreamForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CustomMarshalEditorControl.resx">
+    <EmbeddedResource Include="Forms\CustomMarshalEditorControl.resx">
       <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DiffRegistryForm.resx">
+    <EmbeddedResource Include="Forms\DiffRegistryForm.resx">
       <DependentUpon>DiffRegistryForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DocumentForm.resx">
+    <EmbeddedResource Include="Forms\DocumentForm.resx">
       <DependentUpon>DocumentForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ElevatedFactoryServerTypeViewer.resx">
+    <EmbeddedResource Include="Forms\ElevatedFactoryServerTypeViewer.resx">
       <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SelectProcessControl.resx">
+    <EmbeddedResource Include="Forms\SelectProcessControl.resx">
       <DependentUpon>SelectProcessControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SelectProcessForm.resx">
+    <EmbeddedResource Include="Forms\SelectProcessForm.resx">
       <DependentUpon>SelectProcessForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SelectSecurityCheckForm.resx">
+    <EmbeddedResource Include="Forms\SelectSecurityCheckForm.resx">
       <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GetTextForm.resx">
+    <EmbeddedResource Include="Forms\GetTextForm.resx">
       <DependentUpon>GetTextForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GetTypeForm.resx">
+    <EmbeddedResource Include="Forms\GetTypeForm.resx">
       <DependentUpon>GetTypeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="HexEditor.resx">
       <DependentUpon>HexEditor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="InvokeForm.resx">
+    <EmbeddedResource Include="Forms\InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MarshalEditorControl.resx">
+    <EmbeddedResource Include="Forms\MarshalEditorControl.resx">
       <DependentUpon>MarshalEditorControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ObjectHexEditor.resx">
+    <EmbeddedResource Include="Forms\ObjectHexEditor.resx">
       <DependentUpon>ObjectHexEditor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="QueryInterfacesOptionsForm.resx">
+    <EmbeddedResource Include="Forms\QueryInterfacesOptionsForm.resx">
       <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="RegistryPropertiesControl.resx">
+    <EmbeddedResource Include="Forms\RegistryPropertiesControl.resx">
       <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="StandardMarshalEditorControl.resx">
+    <EmbeddedResource Include="Forms\StandardMarshalEditorControl.resx">
       <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="StorageViewer.resx">
+    <EmbeddedResource Include="Forms\StorageViewer.resx">
       <DependentUpon>StorageViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ViewFilterControl.resx">
+    <EmbeddedResource Include="Forms\ViewFilterControl.resx">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ViewFilterForm.resx">
+    <EmbeddedResource Include="Forms\ViewFilterForm.resx">
       <DependentUpon>ViewFilterForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WaitingDialog.resx">
+    <EmbeddedResource Include="Forms\WaitingDialog.resx">
       <DependentUpon>WaitingDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ObjectContainer.resx">
+    <EmbeddedResource Include="Forms\ObjectContainer.resx">
       <DependentUpon>ObjectContainer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PersistStreamTypeViewer.resx">
+    <EmbeddedResource Include="Forms\PersistStreamTypeViewer.resx">
       <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PropertiesControl.resx">
+    <EmbeddedResource Include="Forms\PropertiesControl.resx">
       <DependentUpon>PropertiesControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PythonConsole.resx">
+    <EmbeddedResource Include="Forms\PythonConsole.resx">
       <DependentUpon>PythonConsole.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TypedObjectViewer.resx">
+    <EmbeddedResource Include="Forms\TypedObjectViewer.resx">
       <DependentUpon>TypedObjectViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ObjectInformation.resx">
+    <EmbeddedResource Include="Forms\ObjectInformation.resx">
       <DependentUpon>ObjectInformation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -487,7 +487,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ROTViewer.resx">
+    <EmbeddedResource Include="Forms\ROTViewer.resx">
       <DependentUpon>ROTViewer.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
@@ -495,7 +495,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="TypeLibControl.resx">
+    <EmbeddedResource Include="Forms\TypeLibControl.resx">
       <DependentUpon>TypeLibControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
@@ -513,10 +513,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ROTViewer.cs">
+    <Compile Include="Forms\ROTViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ROTViewer.Designer.cs">
+    <Compile Include="Forms\ROTViewer.Designer.cs">
       <DependentUpon>ROTViewer.cs</DependentUpon>
     </Compile>
     <None Include="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
