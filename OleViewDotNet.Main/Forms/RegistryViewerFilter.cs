@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public enum FilterDecision
     {

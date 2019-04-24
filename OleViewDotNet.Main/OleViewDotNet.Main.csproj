@@ -113,7 +113,7 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ActivationContext.cs" />
-    <Compile Include="AppxPackageName.cs" />
+    <Compile Include="Database\AppxPackageName.cs" />
     <Compile Include="Wrappers\BuiltinWrappers.cs" />
     <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
     <Compile Include="Forms\BuildMonikerForm.cs">
@@ -122,15 +122,15 @@
     <Compile Include="Forms\BuildMonikerForm.Designer.cs">
       <DependentUpon>BuildMonikerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="COMPackagedRegistry.cs" />
+    <Compile Include="Database\COMPackagedRegistry.cs" />
     <Compile Include="COMProxyInterfaceInstance.cs" />
-    <Compile Include="COMRuntimeClassEntry.cs" />
+    <Compile Include="Database\COMRuntimeClassEntry.cs" />
     <Compile Include="COMInterfaces.cs" />
     <Compile Include="COMObjRef.cs" />
     <Compile Include="COMProcessParser.cs" />
     <Compile Include="COMProxyInstance.cs" />
-    <Compile Include="COMRuntimeExtensionEntry.cs" />
-    <Compile Include="COMRuntimeServerEntry.cs" />
+    <Compile Include="Database\COMRuntimeExtensionEntry.cs" />
+    <Compile Include="Database\COMRuntimeServerEntry.cs" />
     <Compile Include="COMAccessCheck.cs" />
     <Compile Include="Wrappers\COMWrapperFactory.cs" />
     <Compile Include="IProxyFormatter.cs" />
@@ -201,7 +201,7 @@
     <Compile Include="Forms\QueryInterfacesOptionsForm.Designer.cs">
       <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="RegistryViewerFilter.cs" />
+    <Compile Include="Forms\RegistryViewerFilter.cs" />
     <Compile Include="Forms\RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -240,14 +240,14 @@
     <Compile Include="Forms\ClassFactoryTypeViewer.Designer.cs">
       <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="COMAppIDEntry.cs" />
-    <Compile Include="COMCategory.cs" />
-    <Compile Include="COMCLSIDEntry.cs" />
-    <Compile Include="COMEnumerateInterfaces.cs" />
-    <Compile Include="COMIELowRightsElevationPolicy.cs" />
-    <Compile Include="COMInterfaceEntry.cs" />
-    <Compile Include="COMMimeType.cs" />
-    <Compile Include="COMTypeLibEntry.cs" />
+    <Compile Include="Database\COMAppIDEntry.cs" />
+    <Compile Include="Database\COMCategory.cs" />
+    <Compile Include="Database\COMCLSIDEntry.cs" />
+    <Compile Include="Database\COMEnumerateInterfaces.cs" />
+    <Compile Include="Database\COMIELowRightsElevationPolicy.cs" />
+    <Compile Include="Database\COMInterfaceEntry.cs" />
+    <Compile Include="Database\COMMimeType.cs" />
+    <Compile Include="Database\COMTypeLibEntry.cs" />
     <Compile Include="Forms\ConsoleControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -280,14 +280,14 @@
     <Compile Include="ListItemComparer.cs" />
     <Compile Include="LockedQueue.cs" />
     <Compile Include="ObjectCache.cs" />
-    <Compile Include="COMProgIDEntry.cs" />
+    <Compile Include="Database\COMProgIDEntry.cs" />
     <Compile Include="Forms\COMRegistryViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Forms\COMRegistryViewer.Designer.cs">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </Compile>
-    <Compile Include="COMRegistry.cs" />
+    <Compile Include="Database\COMRegistry.cs" />
     <Compile Include="COMUtilities.cs" />
     <Compile Include="Forms\CreateIStreamForm.cs">
       <SubType>Form</SubType>
