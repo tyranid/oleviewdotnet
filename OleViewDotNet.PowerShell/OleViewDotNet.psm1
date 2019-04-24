@@ -150,7 +150,7 @@ A database parameter to test. This function returns $Database if it's not $null,
 function Get-CurrentComDatabase {
     Param(
         [parameter(Position=0)]
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     if ($null -ne $Database) {
@@ -172,7 +172,7 @@ function Set-CurrentComDatabase {
     Param(
         [parameter(Mandatory, Position=0)]
         [AllowNull()]
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
     $Script:CurrentComDatabase = $Database
 }
@@ -214,7 +214,7 @@ function Get-ComDatabase {
     [CmdletBinding(DefaultParameterSetName = "FromRegistry")]
     Param(
         [Parameter(ParameterSetName = "FromRegistry")]
-        [OleViewDotNet.COMRegistryMode]$LoadMode = "Merged",
+        [OleViewDotNet.Database.COMRegistryMode]$LoadMode = "Merged",
         [Parameter(ParameterSetName = "FromRegistry")]
         [NtApiDotNet.Sid]$User,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
@@ -225,11 +225,11 @@ function Get-ComDatabase {
     $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
     $comdb = switch($PSCmdlet.ParameterSetName) {
         "FromRegistry" {
-            [OleViewDotNet.COMRegistry]::Load($LoadMode, $User, $callback)
+            [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $User, $callback)
         }
         "FromFile" {
             $Path = Resolve-Path $Path
-            [OleViewDotNet.COMRegistry]::Load($Path, $callback)
+            [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
         }
     }
     if ($SetCurrent) {
@@ -266,7 +266,7 @@ function Set-ComDatabase {
     Param(
         [Parameter(Mandatory,Position=0)]
         [string]$Path,
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [switch]$NoProgress
     )
 
@@ -309,23 +309,23 @@ function Compare-ComDatabase {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory, Position = 0)]
-        [OleViewDotNet.COMRegistry]$Left,
+        [OleViewDotNet.Database.COMRegistry]$Left,
         [Parameter(Mandatory, Position = 1)]
-        [OleViewDotNet.COMRegistry]$Right,
-        [OleViewDotNet.COMRegistryDiffMode]$DiffMode = "LeftOnly",
+        [OleViewDotNet.Database.COMRegistry]$Right,
+        [OleViewDotNet.Database.COMRegistryDiffMode]$DiffMode = "LeftOnly",
         [switch]$NoProgresss
     )
     $callback = New-CallbackProgress -Activity "Comparing COM Registries" -NoProgress:$NoProgress
-    [OleViewDotNet.COMRegistry]::Diff($Left, $Right, $DiffMode, $callback)
+    [OleViewDotNet.Database.COMRegistry]::Diff($Left, $Right, $DiffMode, $callback)
 }
 
 function Where-HasComServer {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory, ValueFromPipeline)]
-        [OleViewDotNet.COMCLSIDEntry]$ClassEntry,
+        [OleViewDotNet.Database.COMCLSIDEntry]$ClassEntry,
         [string]$ServerName,
-        [OleViewDotNet.COMServerType]$ServerType
+        [OleViewDotNet.Database.COMServerType]$ServerType
     )
 
     PROCESS {
@@ -431,7 +431,7 @@ Get COM classes which came from packaged COM source.
 function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
@@ -441,7 +441,7 @@ function Get-ComClass {
         [Parameter(ParameterSetName = "FromServer")]
         [string]$ServerName = "",
         [Parameter(ParameterSetName = "FromServer")]
-        [OleViewDotNet.COMServerType]$ServerType = "UnknownServer",
+        [OleViewDotNet.Database.COMServerType]$ServerType = "UnknownServer",
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromProgId")]
@@ -459,7 +459,7 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromCatName")]
         [string]$CatName,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source,
+        [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
         [Parameter(Mandatory, ParameterSetName = "FromTrustedMarshaller")]
         [switch]$TrustedMarshaller
     )
@@ -568,7 +568,7 @@ Get COM process from a list of processes.
 function Get-ComProcess {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
@@ -673,7 +673,7 @@ function Start-ComActivationLog {
         [Parameter(Mandatory, Position = 0)]
         [string]$Path,
         [switch]$Append,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -726,7 +726,7 @@ Get all COM AppIDs from a database.
 function Get-ComAppId {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromAppId")]
         [Guid]$AppId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
@@ -736,7 +736,7 @@ function Get-ComAppId {
         [Parameter(ParameterSetName = "FromIsService")]
         [switch]$IsService,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source
+        [OleViewDotNet.Database.COMRegistryEntrySource]$Source
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -792,7 +792,7 @@ function Show-ComDatabase {
     [CmdletBinding(DefaultParameterSetName="FromDb")]
     Param(
         [Parameter(Position = 0, ParameterSetName = "FromDb")]
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFile")]
         [string]$Path
     )
@@ -857,7 +857,7 @@ function Get-ComClassInterface {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.ICOMClassEntry[]]$ClassEntry,
+        [OleViewDotNet.Database.ICOMClassEntry[]]$ClassEntry,
         [switch]$Refresh,
         [switch]$Factory,
         [switch]$NoQuery,
@@ -920,15 +920,15 @@ Get COM Runtime classes which are implemented out-of-process.
 function Get-ComRuntimeClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromDllPath")]
         [string]$DllPath,
         [Parameter(Mandatory, ParameterSetName = "FromActivationType")]
-        [OleViewDotNet.ActivationType]$ActivationType,
+        [OleViewDotNet.Database.ActivationType]$ActivationType,
         [Parameter(Mandatory, ParameterSetName = "FromTrustLevel")]
-        [OleViewDotNet.TrustLevel]$TrustLevel
+        [OleViewDotNet.Database.TrustLevel]$TrustLevel
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -983,15 +983,15 @@ Get COM Runtime server with the name ABC.
 function Get-ComRuntimeServer {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromExePath")]
         [string]$ExePath,
         [Parameter(Mandatory, ParameterSetName = "FromServerType")]
-        [OleViewDotNet.ServerType]$ServerType,
+        [OleViewDotNet.Database.ServerType]$ServerType,
         [Parameter(Mandatory, ParameterSetName = "FromIdentityType")]
-        [OleViewDotNet.IdentityType]$IdentityType
+        [OleViewDotNet.Database.IdentityType]$IdentityType
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -1070,8 +1070,8 @@ function Get-ComInterface {
         [Parameter(Mandatory, ParameterSetName = "FromTypeLib")]
         [switch]$TypeLib,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
@@ -1370,7 +1370,7 @@ function Show-ComSecurityDescriptor {
         [switch]$RuntimeDefault,
         [Parameter(ParameterSetName = "FromRestriction")]
         [Parameter(ParameterSetName = "FromDefault")]
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [switch]$ShowAccess
     )
 
@@ -1412,7 +1412,7 @@ function Show-ComSecurityDescriptor {
                 $name = "Restriction"
             }
             "FromRuntimeDefault" {
-                $SecurityDescriptor = [OleViewDotNet.COMRuntimeClassEntry]::DefaultActivationPermission
+                $SecurityDescriptor = [OleViewDotNet.Database.COMRuntimeClassEntry]::DefaultActivationPermission
             }
         }
 
@@ -1457,11 +1457,11 @@ function New-ComObject {
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
-        [OleViewDotNet.ICOMClassEntry]$Class,
+        [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
-        [OleViewDotNet.IClassFactoryWrapper]$Factory,
+        [OleViewDotNet.Wrappers.IClassFactoryWrapper]$Factory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
-        [OleViewDotNet.IActivationFactoryWrapper]$ActivationFactory,
+        [OleViewDotNet.Wrappers.IActivationFactoryWrapper]$ActivationFactory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
@@ -1474,7 +1474,7 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromObjRef")]
         [OleViewDotNet.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
-        [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [OleViewDotNet.Database.COMIPIDEntry]$Ipid,
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
@@ -1542,7 +1542,7 @@ function New-ComObjectFactory {
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
-        [OleViewDotNet.ICOMClassEntry]$Class,
+        [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
@@ -1669,18 +1669,18 @@ function Get-ComProxy {
     [CmdletBinding(DefaultParameterSetName = "FromIid")]
     Param(
         [parameter(Mandatory, Position=0, ParameterSetName = "FromInterface", ValueFromPipeline)]
-        [OleViewDotNet.COMInterfaceEntry]$Interface,
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromInterfaceInstance", ValueFromPipeline)]
-        [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
+        [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromClass")]
-        [OleViewDotNet.COMClsidEntry]$Class,
+        [OleViewDotNet.Database.COMClsidEntry]$Class,
         [parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [parameter(ParameterSetName = "FromIid")]
         [parameter(ParameterSetName = "FromClsid")]
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [switch]$AsText
     )
 
@@ -1787,7 +1787,7 @@ function Get-ComObjectIpid {
     Param(
         [parameter(Mandatory, Position=0)]
         [object]$Object,
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
@@ -1830,7 +1830,7 @@ Get all COM registered classes accessible.
 function Get-ComRegisteredClass {
     [CmdletBinding()]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [alias("dbghelp")]
         [string]$DbgHelpPath = "",
         [string]$SymbolPath = "",
@@ -1921,12 +1921,12 @@ function Get-ComTypeLib {
         [parameter(Mandatory, ParameterSetName = "FromIid", Position=0)]
         [Guid]$Iid,
         [parameter(Mandatory, ParameterSetName = "FromInterface")]
-        [OleViewDotNet.COMInterfaceEntry]$Interface,
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, ParameterSetName = "FromInterfaceInstance")]
-        [OleViewDotNet.COMInterfaceInstance]$InterfaceInstance,
+        [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -1979,7 +1979,7 @@ function Get-ComTypeLibAssembly {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromTypeLib", Position=0)]
-        [OleViewDotNet.COMTypeLibVersionEntry]$TypeLib,
+        [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
         [parameter(Mandatory, ParameterSetName = "FromPath")]
         [string]$Path,
         [switch]$NoProgress
@@ -2038,7 +2038,7 @@ function Format-ComTypeLib {
         [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromType")]
         [System.Type]$Type,
         [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
-        [OleViewDotNet.COMTypeLibVersionEntry]$TypeLib,
+        [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
         [parameter(Mandatory, ParameterSetName = "FromPath")]
         [string]$Path,
         [parameter(ParameterSetName = "FromAssembly")]
@@ -2355,7 +2355,7 @@ function Get-ComCategory {
         [Guid]$CatId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -2421,7 +2421,7 @@ function Select-ComClassInterface {
     [CmdletBinding(DefaultParameterSetName = "FromName")]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.ICOMClassEntry]$InputObject,
+        [OleViewDotNet.Database.ICOMClassEntry]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromIid")]
         [Guid[]]$Iid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
@@ -2512,7 +2512,7 @@ function Get-ComRuntimeExtension {
         [switch]$Protocol,
         [Parameter(Mandatory, ParameterSetName = "FromBackgroundTasks")]
         [switch]$BackgroundTasks,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -2586,7 +2586,7 @@ function Start-ComRuntimeExtension {
         [parameter(Mandatory, Position = 2, ParameterSetName = "FromParts")]
         [string]$AppId,
         [parameter(Mandatory, Position = 0, ParameterSetName = "FromExtension", ValueFromPipeline)]
-        [OleViewDotNet.COMRuntimeExtensionEntry]$Extension,
+        [OleViewDotNet.Database.COMRuntimeExtensionEntry]$Extension,
         [switch]$UseExistingHostId,
         [int64]$HostId,
         [switch]$NoWrapper
@@ -2655,7 +2655,7 @@ function Get-ComMimeType {
         [string]$MimeType,
         [Parameter(Mandatory, ParameterSetName = "FromExtension")]
         [string]$Extension,
-        [OleViewDotNet.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -2704,13 +2704,13 @@ Get all COM ProgIds from the current database.
 function Get-ComProgId {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [OleViewDotNet.COMRegistry]$Database,
+        [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, ParameterSetName = "FromProgId")]
         [Guid]$ProgId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
-        [OleViewDotNet.COMRegistryEntrySource]$Source
+        [OleViewDotNet.Database.COMRegistryEntrySource]$Source
     )
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {

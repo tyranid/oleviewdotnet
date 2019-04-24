@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using OleViewDotNet.Database;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 

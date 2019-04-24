@@ -20,7 +20,7 @@ using Microsoft.Win32;
 using System.Xml.Serialization;
 using System.Xml.Schema;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Database
 {
     public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable
     {

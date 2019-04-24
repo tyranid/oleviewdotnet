@@ -18,6 +18,7 @@ using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using NtApiDotNet;
+using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

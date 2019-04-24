@@ -18,6 +18,7 @@ using NDesk.Options;
 using NtApiDotNet;
 using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
+using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using System;
 using System.Collections.Generic;

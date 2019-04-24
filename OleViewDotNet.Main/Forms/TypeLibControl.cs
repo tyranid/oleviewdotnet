@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr;
+using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;

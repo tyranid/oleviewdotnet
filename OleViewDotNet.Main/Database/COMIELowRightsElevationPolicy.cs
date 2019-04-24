@@ -22,7 +22,7 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Database
 {
     public enum IEElevationPolicy
     {

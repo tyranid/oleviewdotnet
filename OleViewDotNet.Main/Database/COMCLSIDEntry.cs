@@ -29,7 +29,7 @@ using System.Xml.Schema;
 using System.Collections.ObjectModel;
 using NtApiDotNet;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Database
 {
     public enum COMServerType
     {

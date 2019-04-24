@@ -4,7 +4,7 @@
         <View>
             <Name>COMCLSIDEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMCLSIDEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMCLSIDEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -44,7 +44,7 @@
         <View>
             <Name>COMAppIDEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMAppIDEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMAppIDEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -92,7 +92,7 @@
         <View>
             <Name>COMInterfaceEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMInterfaceEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMInterfaceEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -140,7 +140,7 @@
         <View>
             <Name>COMInterfaceInstanceTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMInterfaceInstance</TypeName>
+                <TypeName>OleViewDotNet.Database.COMInterfaceInstance</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -188,7 +188,7 @@
         <View>
             <Name>COMCategoryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMCategory</TypeName>
+                <TypeName>OleViewDotNet.Database.COMCategory</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -220,7 +220,7 @@
         <View>
             <Name>COMRuntimeClassEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMRuntimeClassEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMRuntimeClassEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -364,7 +364,7 @@
         <View>
             <Name>COMRuntimeServerEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMRuntimeServerEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMRuntimeServerEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -412,7 +412,7 @@
         <View>
             <Name>COMRuntimeExtensionEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMRuntimeExtensionEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMRuntimeExtensionEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -452,7 +452,7 @@
         <View>
             <Name>COMMimeTypeTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMMimeType</TypeName>
+                <TypeName>OleViewDotNet.Database.COMMimeType</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -492,7 +492,7 @@
         <View>
             <Name>COMTypeLibVersionEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMTypeLibVersionEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMTypeLibVersionEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -532,7 +532,7 @@
         <View>
             <Name>COMProgIDEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMProgIDEntry</TypeName>
+                <TypeName>OleViewDotNet.Database.COMProgIDEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
