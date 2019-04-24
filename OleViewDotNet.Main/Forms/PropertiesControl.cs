@@ -22,7 +22,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class PropertiesControl : UserControl
     {

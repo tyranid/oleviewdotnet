@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class BuildMonikerForm : Form
     {

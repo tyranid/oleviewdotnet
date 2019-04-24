@@ -21,7 +21,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     internal partial class SelectSecurityCheckForm : Form
     {

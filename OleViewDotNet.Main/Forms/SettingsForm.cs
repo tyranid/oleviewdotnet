@@ -19,7 +19,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class SettingsForm : Form
     {

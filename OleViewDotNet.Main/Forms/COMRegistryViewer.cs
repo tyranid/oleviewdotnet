@@ -31,7 +31,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     /// <summary>
     /// Form to view the COM registration information

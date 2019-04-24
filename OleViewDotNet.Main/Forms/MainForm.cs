@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class MainForm : Form
     {

@@ -1,4 +1,4 @@
-﻿namespace OleViewDotNet
+﻿namespace OleViewDotNet.Forms
 {
     partial class SelectSecurityCheckForm
     {
@@ -31,7 +31,7 @@
             System.Windows.Forms.GroupBox groupBoxAccessToken;
             System.Windows.Forms.GroupBox groupBoxOptions;
             System.Windows.Forms.Label label1;
-            this.selectProcessControl = new OleViewDotNet.SelectProcessControl();
+            this.selectProcessControl = new OleViewDotNet.Forms.SelectProcessControl();
             this.radioAnonymous = new System.Windows.Forms.RadioButton();
             this.radioSpecificProcess = new System.Windows.Forms.RadioButton();
             this.radioCurrentProcess = new System.Windows.Forms.RadioButton();

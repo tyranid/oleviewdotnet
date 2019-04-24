@@ -17,7 +17,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class GetTextForm : Form
     {

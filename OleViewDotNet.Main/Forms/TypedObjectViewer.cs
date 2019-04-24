@@ -26,7 +26,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     /// <summary>
     /// Generic interface viewer from a type

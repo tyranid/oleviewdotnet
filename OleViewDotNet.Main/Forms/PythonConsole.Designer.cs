@@ -1,4 +1,4 @@
-﻿namespace OleViewDotNet
+﻿namespace OleViewDotNet.Forms
 {
     partial class PythonConsole
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.consoleControl = new OleViewDotNet.ConsoleControl();
+            this.consoleControl = new OleViewDotNet.Forms.ConsoleControl();
             this.SuspendLayout();
             // 
             // consoleControl

@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class ViewFilterForm : Form
     {

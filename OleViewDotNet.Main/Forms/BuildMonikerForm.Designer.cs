@@ -1,4 +1,4 @@
-﻿namespace OleViewDotNet
+﻿namespace OleViewDotNet.Forms
 {
     partial class BuildMonikerForm
     {

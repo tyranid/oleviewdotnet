@@ -20,7 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     /// <summary>
     /// Form to display basic information about an object
@@ -28,7 +28,7 @@ namespace OleViewDotNet
     public partial class ObjectInformation : UserControl
     {
         private ObjectEntry m_pEntry;
-        private Object m_pObject;
+        private object m_pObject;
         private Dictionary<string, string> m_properties;
         private COMInterfaceEntry[] m_interfaces;
         private string m_objName;
@@ -42,7 +42,7 @@ namespace OleViewDotNet
         /// <param name="pObject">Managed wrapper to the object</param>
         /// <param name="properties">List of textual properties to display</param>
         /// <param name="interfaces">List of available interfaces</param>
-        public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, Object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
+        public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
         {
             m_entry = entry;
             if (m_entry == null)
@@ -60,7 +60,7 @@ namespace OleViewDotNet
             m_properties = properties;
             m_interfaces = interfaces.OrderBy(i => i.Name).ToArray();
             m_objName = objName;
-            
+
             InitializeComponent();
 
             LoadProperties();
@@ -89,11 +89,9 @@ namespace OleViewDotNet
                 IObjectSafety objSafety = m_pObject as IObjectSafety;
                 if (objSafety != null)
                 {
-                    uint supportedOptions;
-                    uint enabledOptions;
                     Guid iid = COMInterfaceEntry.IID_IDispatch;
 
-                    objSafety.GetInterfaceSafetyOptions(ref iid, out supportedOptions, out enabledOptions);
+                    objSafety.GetInterfaceSafetyOptions(ref iid, out uint supportedOptions, out uint enabledOptions);
                     for (int i = 0; i < 4; i++)
                     {
                         int val = 1 << i;
@@ -104,7 +102,7 @@ namespace OleViewDotNet
                     }
                 }
             }
-            catch 
+            catch
             {
             }
 
@@ -256,13 +254,13 @@ namespace OleViewDotNet
             try
             {
                 EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry,
-                    "Marshal Editor", COMUtilities.MarshalObject(m_pObject, GetSelectedIID(), 
+                    "Marshal Editor", COMUtilities.MarshalObject(m_pObject, GetSelectedIID(),
                     MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL)));
             }
             catch (Exception ex)
             {
                 EntryPoint.ShowError(this, ex);
-            }   
+            }
         }
 
         private void listViewInterfaces_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -276,11 +274,10 @@ namespace OleViewDotNet
             try
             {
                 IClassFactory factory = (IClassFactory)m_pObject;
-                object new_object;
                 Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
                 Dictionary<string, string> props = new Dictionary<string, string>();
                 props.Add("Name", m_objName);
-                factory.CreateInstance(null, ref IID_IUnknown, out new_object);
+                factory.CreateInstance(null, ref IID_IUnknown, out object new_object);
                 ObjectInformation view = new ObjectInformation(m_registry,
                     m_entry, m_objName, new_object,
                     props, m_registry.GetInterfacesForObject(new_object).ToArray());
@@ -296,8 +293,8 @@ namespace OleViewDotNet
         {
             try
             {
-                EntryPoint.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, 
-                    COMUtilities.MarshalObjectToObjRef(m_pObject, GetSelectedIID(), 
+                EntryPoint.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry,
+                    COMUtilities.MarshalObjectToObjRef(m_pObject, GetSelectedIID(),
                     MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL)));
             }
             catch (Exception ex)
@@ -310,7 +307,7 @@ namespace OleViewDotNet
         {
             try
             {
-                COMObjRefStandard objref = COMUtilities.MarshalObjectToObjRef(m_pObject, 
+                COMObjRefStandard objref = COMUtilities.MarshalObjectToObjRef(m_pObject,
                     GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) as COMObjRefStandard;
                 if (objref == null)
                 {

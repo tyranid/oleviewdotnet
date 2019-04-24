@@ -22,7 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class ViewFilterControl : UserControl
     {

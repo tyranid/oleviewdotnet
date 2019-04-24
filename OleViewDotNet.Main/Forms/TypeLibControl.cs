@@ -19,10 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class TypeLibControl : UserControl
     {
@@ -61,7 +60,7 @@ namespace OleViewDotNet
         {
             return COMUtilities.GetComClasses(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
         }
-        
+
         private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy)
         {
             foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name)))
@@ -94,8 +93,8 @@ namespace OleViewDotNet
             return COMUtilities.GetComEnums(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
         }
 
-        private void AddGuidItems(ListView list, 
-            IEnumerable<ListViewItemWithGuid> items, 
+        private void AddGuidItems(ListView list,
+            IEnumerable<ListViewItemWithGuid> items,
             TabPage tab_page, Guid guid_to_view)
         {
             if (items.Any())
@@ -119,8 +118,8 @@ namespace OleViewDotNet
         }
 
         private TypeLibControl(IDictionary<Guid, string> iids_to_names,
-            string name, 
-            Guid guid_to_view, 
+            string name,
+            Guid guid_to_view,
             IEnumerable<ListViewItemWithGuid> interfaces,
             IEnumerable<ListViewItemWithGuid> classes,
             IEnumerable<ListViewItem> structs,
@@ -157,17 +156,17 @@ namespace OleViewDotNet
             Text = name;
         }
 
-        public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly) 
+        public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
             : this(null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly),
-                  dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : new ListViewItemWithGuid[0], 
-                  FormatAssemblyStructs(typelib, dotnet_assembly), 
+                  dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : new ListViewItemWithGuid[0],
+                  FormatAssemblyStructs(typelib, dotnet_assembly),
                   FormatAssemblyEnums(typelib, dotnet_assembly))
         {
         }
 
-        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view) 
-            : this(registry.InterfacesToNames, name, guid_to_view, 
-                  FormatProxyInstance(proxy), 
+        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view)
+            : this(registry.InterfacesToNames, name, guid_to_view,
+                  FormatProxyInstance(proxy),
                   new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
         }
@@ -252,7 +251,7 @@ namespace OleViewDotNet
         {
             CopyGuid(sender, GuidFormat.HexString);
         }
-        
+
         public void SelectInterface(Guid iid)
         {
             foreach (ListViewItemWithGuid item in listViewInterfaces.Items)

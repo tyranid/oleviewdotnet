@@ -1,4 +1,4 @@
-﻿namespace OleViewDotNet
+﻿namespace OleViewDotNet.Forms
 {
     partial class SelectProcessForm
     {
@@ -31,7 +31,7 @@
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.selectProcessControl = new OleViewDotNet.SelectProcessControl();
+            this.selectProcessControl = new OleViewDotNet.Forms.SelectProcessControl();
             this.tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 

@@ -1,4 +1,21 @@
-﻿using System;
+﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2014
+//
+//    OleViewDotNet is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    OleViewDotNet is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
+
+using OleViewDotNet.Forms;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -17,7 +34,7 @@ namespace OleViewDotNet.InterfaceViewers
     /// Simple base implementation to reduce the amount of code to write
     /// </summary>
     abstract class BaseTypeViewerFactory : ITypeViewerFactory
-    {        
+    {
         public BaseTypeViewerFactory(string strName, Guid iid)
         {
             IidName = strName;
@@ -40,7 +57,7 @@ namespace OleViewDotNet.InterfaceViewers
     /// </summary>
     /// <typeparam name="T">The interface type to create the factory for</typeparam>
     class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
-    {        
+    {
         public GenericTypeViewerFactory() : base(typeof(T))
         {
         }
@@ -56,7 +73,7 @@ namespace OleViewDotNet.InterfaceViewers
     /// </summary>
     class InstanceTypeViewerFactory : BaseTypeViewerFactory
     {
-        Type m_type;
+        readonly Type m_type;
         public InstanceTypeViewerFactory(Type t)
             : base(t)
         {

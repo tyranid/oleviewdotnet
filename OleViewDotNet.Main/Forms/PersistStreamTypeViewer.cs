@@ -14,12 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.InterfaceViewers;
 using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class PersistStreamTypeViewer : UserControl
     {
@@ -41,7 +40,7 @@ namespace OleViewDotNet
                 {
                     COMUtilities.SaveObjectToStream(_obj, stm);
                     hexEditor.Bytes = stm.ToArray();
-                }                
+                }
             }
             catch (Exception ex)
             {
@@ -72,7 +71,7 @@ namespace OleViewDotNet
             {
                 using (MemoryStream stm = new MemoryStream(hexEditor.Bytes))
                 {
-                    COMUtilities.LoadObjectFromStream(_obj, stm);                    
+                    COMUtilities.LoadObjectFromStream(_obj, stm);
                 }
             }
             catch (Exception ex)

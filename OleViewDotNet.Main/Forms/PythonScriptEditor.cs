@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class PythonScriptEditor : UserControl
     {

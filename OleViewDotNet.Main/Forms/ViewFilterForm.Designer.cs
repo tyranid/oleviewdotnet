@@ -1,4 +1,4 @@
-﻿namespace OleViewDotNet
+﻿namespace OleViewDotNet.Forms
 {
     partial class ViewFilterForm
     {
@@ -30,7 +30,7 @@
         {
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.viewFilterControl = new OleViewDotNet.ViewFilterControl();
+            this.viewFilterControl = new OleViewDotNet.Forms.ViewFilterControl();
             this.SuspendLayout();
             // 
             // btnOK

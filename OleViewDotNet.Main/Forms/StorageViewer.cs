@@ -20,7 +20,7 @@ using System.Text;
 using System.Windows.Forms;
 using IS = System.Runtime.InteropServices;
 
-namespace OleViewDotNet
+namespace OleViewDotNet.Forms
 {
     public partial class StorageViewer : UserControl
     {
