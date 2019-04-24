@@ -37,7 +37,7 @@
             this.tabPageProperties = new System.Windows.Forms.TabPage();
             this.propertyGridStat = new System.Windows.Forms.PropertyGrid();
             this.tabPageStream = new System.Windows.Forms.TabPage();
-            this.hexEditorStream = new OleViewDotNet.HexEditor();
+            this.hexEditorStream = new OleViewDotNet.Forms.HexEditor();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
