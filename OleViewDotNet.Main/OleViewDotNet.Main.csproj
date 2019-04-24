@@ -268,11 +268,11 @@
     </Compile>
     <Compile Include="Wrappers\DynamicComFunctionWrapper.cs" />
     <Compile Include="Wrappers\DynamicComObjectWrapper.cs" />
-    <Compile Include="Forms\HexEditor.cs">
+    <Compile Include="Forms\HexEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\HexEditor.Designer.cs">
-      <DependentUpon>HexEditor.cs</DependentUpon>
+    <Compile Include="Forms\HexEditorControl.Designer.cs">
+      <DependentUpon>HexEditorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="InputTextBox.cs">
       <SubType>Component</SubType>
@@ -428,8 +428,8 @@
     <EmbeddedResource Include="Forms\GetTypeForm.resx">
       <DependentUpon>GetTypeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\HexEditor.resx">
-      <DependentUpon>HexEditor.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\HexEditorControl.resx">
+      <DependentUpon>HexEditorControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\InvokeForm.resx">
       <DependentUpon>InvokeForm.cs</DependentUpon>

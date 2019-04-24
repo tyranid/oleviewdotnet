@@ -33,7 +33,7 @@
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxClsid = new System.Windows.Forms.TextBox();
             this.textBoxName = new System.Windows.Forms.TextBox();
-            this.hexEditor = new OleViewDotNet.Forms.HexEditor();
+            this.hexEditor = new OleViewDotNet.Forms.HexEditorControl();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             this.tableLayoutPanel.SuspendLayout();
@@ -127,6 +127,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
         private System.Windows.Forms.TextBox textBoxClsid;
         private System.Windows.Forms.TextBox textBoxName;
-        private HexEditor hexEditor;
+        private HexEditorControl hexEditor;
     }
 }

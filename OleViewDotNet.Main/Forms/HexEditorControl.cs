@@ -21,11 +21,11 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms
 {
-    public partial class HexEditor : UserControl
+    public partial class HexEditorControl : UserControl
     {
         DynamicByteProvider _bytes;
 
-        public HexEditor()
+        public HexEditorControl()
         {
             InitializeComponent();
             Bytes = new byte[0];

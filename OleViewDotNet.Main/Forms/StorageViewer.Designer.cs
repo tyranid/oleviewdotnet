@@ -37,7 +37,7 @@
             this.tabPageProperties = new System.Windows.Forms.TabPage();
             this.propertyGridStat = new System.Windows.Forms.PropertyGrid();
             this.tabPageStream = new System.Windows.Forms.TabPage();
-            this.hexEditorStream = new OleViewDotNet.Forms.HexEditor();
+            this.hexEditorStream = new OleViewDotNet.Forms.HexEditorControl();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -168,7 +168,7 @@
         private System.Windows.Forms.TabPage tabPageProperties;
         private System.Windows.Forms.PropertyGrid propertyGridStat;
         private System.Windows.Forms.TabPage tabPageStream;
-        private HexEditor hexEditorStream;
+        private HexEditorControl hexEditorStream;
         private System.Windows.Forms.ImageList imageList;
     }
 }

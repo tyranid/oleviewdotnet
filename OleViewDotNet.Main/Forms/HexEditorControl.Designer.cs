@@ -1,6 +1,6 @@
 ﻿namespace OleViewDotNet.Forms
 {
-    partial class HexEditor
+    partial class HexEditorControl
     {
         /// <summary> 
         /// Required designer variable.

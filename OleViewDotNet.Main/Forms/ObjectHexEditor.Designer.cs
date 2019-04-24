@@ -30,7 +30,7 @@
         {
             System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
             this.btnLoadFromStream = new System.Windows.Forms.Button();
-            this.hexEditor = new OleViewDotNet.Forms.HexEditor();
+            this.hexEditor = new OleViewDotNet.Forms.HexEditorControl();
             this.btnUnmarshal = new System.Windows.Forms.Button();
             this.btnMarshalProps = new System.Windows.Forms.Button();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -114,7 +114,7 @@
 
         #endregion
 
-        private HexEditor hexEditor;
+        private HexEditorControl hexEditor;
         private System.Windows.Forms.Button btnLoadFromStream;
         private System.Windows.Forms.Button btnUnmarshal;
         private System.Windows.Forms.Button btnMarshalProps;

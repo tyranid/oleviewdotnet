@@ -32,7 +32,7 @@
             this.btnLoad = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnInit = new System.Windows.Forms.Button();
-            this.hexEditor = new OleViewDotNet.Forms.HexEditor();
+            this.hexEditor = new OleViewDotNet.Forms.HexEditorControl();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
@@ -116,6 +116,6 @@
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnInit;
-        private HexEditor hexEditor;
+        private HexEditorControl hexEditor;
     }
 }
