@@ -2203,6 +2203,11 @@ namespace OleViewDotNet
             return ReadPointer(process, resolver.GetAddressOfSymbol(GetSymbolName(symbol)));
         }
 
+        internal static Guid ReadGuid(NtProcess process, ISymbolResolver resolver, string symbol)
+        {
+            return ReadGuid(process, resolver.GetAddressOfSymbol(GetSymbolName(symbol)));
+        }
+
         internal static IntPtr ReadPointer(NtProcess process, IntPtr p)
         {
             if (p != IntPtr.Zero)
@@ -2217,6 +2222,15 @@ namespace OleViewDotNet
                 }
             }
             return IntPtr.Zero;
+        }
+
+        internal static Guid ReadGuid(NtProcess process, IntPtr p)
+        {
+            if (p != IntPtr.Zero)
+            {
+                return new Guid(process.ReadMemory(p.ToInt64(), 16));
+            }
+            return Guid.Empty;
         }
 
         internal static IntPtr[] ReadPointerArray(NtProcess process, IntPtr p, int count)
@@ -2301,7 +2315,9 @@ namespace OleViewDotNet
                             ReadClients(process, resolver, config, registry),
                             ReadRuntimeActivatableClasses(process, resolver, config, registry),
                             new COMProcessToken(process),
-                            ReadActivationContext(process, resolver, config, registry));
+                            ReadActivationContext(process, resolver, config, registry),
+                            ReadPointer(process, resolver, "g_pMTAEmptyCtx"),
+                            ReadGuid(process, resolver, "CProcessSecret::s_guidOle32Secret"));
                     }
                 }
             }
@@ -2453,6 +2469,8 @@ namespace OleViewDotNet
         public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
         public COMProcessToken Token { get; private set; }
         public ActivationContext ActivationContext { get; }
+        public IntPtr MTAContext { get; }
+        public Guid ProcessSecret { get; }
 
         public string PackageId => Token.PackageName?.FullName ?? string.Empty;
         public string PackageName => Token.PackageName?.Name ?? string.Empty;
@@ -2509,7 +2527,7 @@ namespace OleViewDotNet
             RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
             IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
             string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes,
-            COMProcessToken token, ActivationContext activation_context)
+            COMProcessToken token, ActivationContext activation_context, IntPtr mta_context, Guid process_secret)
         {
             ProcessId = pid;
             ExecutablePath = path;
@@ -2550,6 +2568,8 @@ namespace OleViewDotNet
             ActivatableClasses = activatable_classes.AsReadOnly();
             Token = token;
             ActivationContext = activation_context;
+            MTAContext = mta_context;
+            ProcessSecret = process_secret;
         }
 
         public override string ToString()

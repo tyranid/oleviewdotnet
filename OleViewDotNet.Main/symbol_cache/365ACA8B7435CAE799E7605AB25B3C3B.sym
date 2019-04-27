@@ -15,3 +15,5 @@
 2328652 combase!g_ActivationFilter
 2319720 combase!COIDTable::s_OIDBuckets
 2316448 combase!CClassCache::_LSvrActivatableClassEBuckets
+2322756 combase!g_pMTAEmptyCtx
+2322728 combase!CProcessSecret::s_guidOle32Secret
