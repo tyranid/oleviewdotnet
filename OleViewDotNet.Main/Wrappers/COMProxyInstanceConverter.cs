@@ -132,7 +132,7 @@ namespace OleViewDotNet.Wrappers
 
         private COMProxyInstanceConverter(string output_path)
         {
-            m_output_path = output_path;
+            m_output_path = Path.GetFullPath(output_path);
             m_name = new AssemblyName(Path.GetFileNameWithoutExtension(output_path));
             m_builder = AppDomain.CurrentDomain.DefineDynamicAssembly(m_name, AssemblyBuilderAccess.Save, Path.GetDirectoryName(output_path));
             m_module = m_builder.DefineDynamicModule(m_name.Name, m_name.Name + ".dll");
@@ -356,7 +356,7 @@ namespace OleViewDotNet.Wrappers
 
         public static void Convert(IEnumerable<NdrComProxyDefinition> entries, string output_path)
         {
-            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(Path.GetFullPath(output_path));
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(output_path);
             converter.AddProxy(entries);
             converter.Save();
         }
@@ -374,6 +374,28 @@ namespace OleViewDotNet.Wrappers
         public static void Convert(COMIPIDEntry ipid, string output_path)
         {
             Convert(ipid.ToProxyInstance(), output_path);
+        }
+
+        public static Assembly Convert(IEnumerable<NdrComProxyDefinition> entries)
+        {
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter("temp.dll");
+            converter.AddProxy(entries);
+            return converter.m_builder;
+        }
+
+        public static Assembly Convert(COMProxyInstance proxy)
+        {
+            return Convert(proxy.Entries);
+        }
+
+        public static Assembly Convert(COMProxyInterfaceInstance proxy)
+        {
+            return Convert(new[] { proxy.Entry });
+        }
+
+        public static Assembly Convert(COMIPIDEntry ipid)
+        {
+            return Convert(ipid.ToProxyInstance());
         }
     }
 }

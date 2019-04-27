@@ -95,7 +95,7 @@ The interface ID to base the wrapper on.
 .PARAMETER Type
 The existing interface type to wrap with.
 #>
-function Get-ComObjectWrapper {
+function Get-ComObjectInterface {
     [CmdletBinding(DefaultParameterSetName = "FromType")]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
@@ -108,6 +108,7 @@ function Get-ComObjectWrapper {
 
     PROCESS {
         foreach($o in $Object) {
+            $o = Unwrap-ComObject $o
             switch($PSCmdlet.ParameterSetName) {
                 "FromIid" {
                     Wrap-ComObject -Object $o -Iid $Iid | Write-Output
@@ -1474,7 +1475,7 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromObjRef")]
         [OleViewDotNet.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
-        [OleViewDotNet.Database.COMIPIDEntry]$Ipid,
+        [OleViewDotNet.COMIPIDEntry]$Ipid,
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
