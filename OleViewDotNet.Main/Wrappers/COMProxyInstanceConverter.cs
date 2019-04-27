@@ -37,6 +37,7 @@ namespace OleViewDotNet.Wrappers
         private readonly Dictionary<Guid, NdrComProxyDefinition> m_proxies;
         private readonly Dictionary<NdrBaseStructureTypeReference, Type> m_structs;
         private readonly string m_output_path;
+        private readonly IProgress<Tuple<string, int>> m_progress;
 
         private static Regex _identifier_regex = new Regex(@"[^a-zA-Z0-9_\.]");
 
@@ -130,7 +131,15 @@ namespace OleViewDotNet.Wrappers
             }
         }
 
-        private COMProxyInstanceConverter(string output_path)
+        private void ReportProgress(string progress)
+        {
+            if (m_progress != null)
+            {
+                m_progress.Report(Tuple.Create(progress, -1));
+            }
+        }
+
+        public COMProxyInstanceConverter(string output_path, IProgress<Tuple<string, int>> progress)
         {
             m_output_path = Path.GetFullPath(output_path);
             m_name = new AssemblyName(Path.GetFileNameWithoutExtension(output_path));
@@ -146,6 +155,8 @@ namespace OleViewDotNet.Wrappers
         {
             m_builder.Save(Path.GetFileName(m_output_path));
         }
+
+        public Assembly BuiltAssembly => m_builder;
 
         private CustomAttributeBuilder CreateMarshalAsAttribute(UnmanagedType unmanagedType)
         {
@@ -274,6 +285,15 @@ namespace OleViewDotNet.Wrappers
                 return m_types[intf.Iid];
             }
 
+            Type existing_type = COMUtilities.GetInterfaceType(intf.Iid);
+            if (existing_type != null)
+            {
+                m_types[intf.Iid] = existing_type;
+                return existing_type;
+            }
+
+            ReportProgress($"Creating Interface {intf.Name}");
+
             TypeBuilder tb = m_module.DefineType(
                         MakeIdentifier(intf.Name),
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
@@ -312,6 +332,8 @@ namespace OleViewDotNet.Wrappers
                 return m_structs[struct_type];
             }
 
+            ReportProgress($"Creating Type {struct_type.Name}");
+
             TypeBuilder tb = m_module.DefineType(
                         MakeIdentifier(struct_type.Name),
                 TypeAttributes.Public | TypeAttributes.SequentialLayout | TypeAttributes.Sealed);
@@ -336,7 +358,7 @@ namespace OleViewDotNet.Wrappers
             return m_structs[struct_type];
         }
 
-        private void AddProxy(IEnumerable<NdrComProxyDefinition> entries)
+        public void AddProxy(IEnumerable<NdrComProxyDefinition> entries)
         {
             foreach (var entry in entries)
             {
@@ -352,50 +374,6 @@ namespace OleViewDotNet.Wrappers
             {
                 m_fixup.Dequeue().CreateType();
             }
-        }
-
-        public static void Convert(IEnumerable<NdrComProxyDefinition> entries, string output_path)
-        {
-            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(output_path);
-            converter.AddProxy(entries);
-            converter.Save();
-        }
-
-        public static void Convert(COMProxyInstance proxy, string output_path)
-        {
-            Convert(proxy.Entries, output_path);
-        }
-
-        public static void Convert(COMProxyInterfaceInstance proxy, string output_path)
-        {
-            Convert(new[] { proxy.Entry }, output_path);
-        }
-
-        public static void Convert(COMIPIDEntry ipid, string output_path)
-        {
-            Convert(ipid.ToProxyInstance(), output_path);
-        }
-
-        public static Assembly Convert(IEnumerable<NdrComProxyDefinition> entries)
-        {
-            COMProxyInstanceConverter converter = new COMProxyInstanceConverter("temp.dll");
-            converter.AddProxy(entries);
-            return converter.m_builder;
-        }
-
-        public static Assembly Convert(COMProxyInstance proxy)
-        {
-            return Convert(proxy.Entries);
-        }
-
-        public static Assembly Convert(COMProxyInterfaceInstance proxy)
-        {
-            return Convert(new[] { proxy.Entry });
-        }
-
-        public static Assembly Convert(COMIPIDEntry ipid)
-        {
-            return Convert(ipid.ToProxyInstance());
         }
     }
 }

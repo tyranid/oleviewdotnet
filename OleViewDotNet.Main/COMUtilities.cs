@@ -1089,6 +1089,69 @@ namespace OleViewDotNet
             }
         }
 
+        public static void ConvertProxyToAssembly(IEnumerable<NdrComProxyDefinition> entries, string output_path, IProgress<Tuple<string, int>> progress)
+        {
+            if (m_typelibs == null)
+            {
+                if (progress != null)
+                {
+                    progress.Report(Tuple.Create("Initializing Global Libraries", -1));
+                }
+                LoadTypeLibAssemblies();
+            }
+
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter(output_path, progress);
+            converter.AddProxy(entries);
+            converter.Save();
+        }
+
+        public static void ConvertProxyToAssembly(COMProxyInstance proxy, string output_path, IProgress<Tuple<string, int>> progress)
+        {
+            ConvertProxyToAssembly(proxy.Entries, output_path, progress);
+        }
+
+        public static void ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, string output_path, IProgress<Tuple<string, int>> progress)
+        {
+            ConvertProxyToAssembly(new[] { proxy.Entry }, output_path, progress);
+        }
+
+        public static void ConvertProxyToAssembly(COMIPIDEntry ipid, string output_path, IProgress<Tuple<string, int>> progress)
+        {
+            ConvertProxyToAssembly(ipid.ToProxyInstance(), output_path, progress);
+        }
+
+        public static Assembly ConvertProxyToAssembly(IEnumerable<NdrComProxyDefinition> entries, IProgress<Tuple<string, int>> progress)
+        {
+            if (m_typelibs == null)
+            {
+                if (progress != null)
+                {
+                    progress.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
+                }
+                LoadTypeLibAssemblies();
+            }
+
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter("temp.dll", progress);
+            converter.AddProxy(entries);
+            RegisterTypeInterfaces(converter.BuiltAssembly);
+            return converter.BuiltAssembly;
+        }
+
+        public static Assembly ConvertProxyToAssembly(COMProxyInstance proxy, IProgress<Tuple<string, int>> progress)
+        {
+            return ConvertProxyToAssembly(proxy.Entries, progress);
+        }
+
+        public static Assembly ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, IProgress<Tuple<string, int>> progress)
+        {
+            return ConvertProxyToAssembly(new[] { proxy.Entry }, progress);
+        }
+
+        public static Assembly ConvertProxyToAssembly(COMIPIDEntry ipid, IProgress<Tuple<string, int>> progress)
+        {
+            return ConvertProxyToAssembly(ipid.ToProxyInstance(), progress);
+        }
+
         public static Type GetDispatchTypeInfo(IWin32Window parent, object comObj)
         {
             Type ret = null;

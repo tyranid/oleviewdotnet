@@ -1452,6 +1452,10 @@ Specify the remote server the COM object will be created on.
 Specify the console session to create the object in.
 .PARAMETER NoWrapper
 Don't wrap object in a callable wrapper.
+.PARAMETER Iid
+Specify the interface to query for initially.
+.PARAMETER Ipid
+Create the object from an existing IPID.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1479,7 +1483,8 @@ function New-ComObject {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
-        [switch]$NoWrapper
+        [switch]$NoWrapper,
+        [Guid]$Iid = "00000000-0000-0000-C000-000000000046"
     )
 
     PROCESS {
@@ -1490,11 +1495,10 @@ function New-ComObject {
             }
             "FromClsid" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, `
-                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+                    $Iid, $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, `
-                    "00000000-0000-0000-C000-000000000046")
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
@@ -1515,7 +1519,7 @@ function New-ComObject {
 
         if ($null -ne $obj) {
             $type = [OleViewDotNet.IUnknown]
-            Wrap-ComObject $obj -Type $type -NoWrapper:$NoWrapper | Write-Output
+            Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper | Write-Output
         }
     }
 }
@@ -2730,6 +2734,66 @@ function Get-ComProgId {
         }
         "FromSource" {
             Get-ComProgId -Database $Database | ? Source -eq $Source | Write-Output
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Converts a type library or proxy instance to a .NET assembly.
+.DESCRIPTION
+This cmdlet converts a type library or proxy instance object to a .NET assembly. This assembly can then be used to 
+access COM interfaces. The assembly will be automatically registered with the applications so that you can use it with
+Get-ComObjectInterface.
+.PARAMETER TypeLib
+The type library version entry to convert.
+.PARAMETER Path
+The path to a type library to convert.
+.PARAMETER NoProgress
+Don't show progress during conversion.
+.PARAMETER Proxy
+The proxy instance to convert.
+.PARAMETER Ipid
+The IPID entry to convert. Must have been created with ParseStubMethods parameter.
+.INPUTS
+None
+.OUTPUTS
+System.Reflection.Assembly
+#>
+function ConvertTo-ComAssembly {
+    [CmdletBinding(DefaultParameterSetName="FromTypeLib")]
+    Param(
+        [parameter(Mandatory, ParameterSetName = "FromTypeLib", Position=0)]
+        [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
+        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [string]$Path,
+        [parameter(Mandatory, ParameterSetName = "FromProxy")]
+        [OleViewDotNet.COMProxyInstance]$Proxy,
+        [parameter(Mandatory, ParameterSetName = "FromProxyInterface")]
+        [OleViewDotNet.COMProxyInterfaceInstance]$ProxyInterface,
+        [parameter(Mandatory, ParameterSetName = "FromIpid")]
+        [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [switch]$NoProgress
+    )
+
+    PROCESS {
+        $callback = New-CallbackProgress -Activity "Converting to Assembly" -NoProgress:$NoProgress
+        switch($PSCmdlet.ParameterSetName) {
+            "FromTypeLib" {
+                Get-ComTypeLibAssembly -TypeLib $TypeLib -NoProgress:$NoProgress | Write-Output
+            }
+            "FromPath" {
+                Get-ComTypeLibAssembly -Path $TypeLib -NoProgress:$NoProgress | Write-Output
+            }
+            "FromProxy" {
+                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($Proxy, $callback) | Write-Output
+            }
+            "FromProxyInterface" {
+                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($ProxyInterface, $callback) | Write-Output
+            }
+            "FromIpid" {
+                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($Ipid, $callback) | Write-Output
+            }
         }
     }
 }
