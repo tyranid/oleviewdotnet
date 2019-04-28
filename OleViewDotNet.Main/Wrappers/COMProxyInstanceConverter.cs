@@ -149,6 +149,7 @@ namespace OleViewDotNet.Wrappers
             m_proxies = new Dictionary<Guid, NdrComProxyDefinition>();
             m_fixup = new Queue<TypeBuilder>();
             m_structs = new Dictionary<NdrBaseStructureTypeReference, Type>();
+            m_progress = progress;
         }
 
         public void Save()

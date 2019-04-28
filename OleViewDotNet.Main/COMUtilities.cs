@@ -961,6 +961,28 @@ namespace OleViewDotNet
             return null;
         }
 
+        public static Type GetInterfaceType(COMInterfaceEntry intf)
+        {
+            if (intf == null)
+            {
+                return null;
+            }
+
+            Type type = GetInterfaceType(intf.Iid);
+            if (type != null)
+            {
+                return type;
+            }
+
+            if (intf.ProxyClassEntry == null)
+            {
+                return null;
+            }
+
+            ConvertProxyToAssembly(COMProxyInstance.GetFromCLSID(intf.ProxyClassEntry, null), null);
+            return GetInterfaceType(intf.Iid);
+        }
+
         public static void LoadTypesFromAssembly(Assembly assembly)
         {
             if (m_iidtypes == null)

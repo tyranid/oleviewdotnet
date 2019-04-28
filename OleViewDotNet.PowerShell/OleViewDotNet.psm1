@@ -56,6 +56,10 @@ function Wrap-ComObject {
         [Guid]$Iid,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
         [Type]$Type,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterface")]
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterfaceInstance")]
+        [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [switch]$NoWrapper
     )
 
@@ -69,6 +73,12 @@ function Wrap-ComObject {
         }
         "FromType" {
             [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
+        }
+        "FromInterface" {
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
+        }
+        "FromInterfaceInstance" {
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
         }
     }
 }
@@ -94,6 +104,8 @@ The object to wrap.
 The interface ID to base the wrapper on.
 .PARAMETER Type
 The existing interface type to wrap with.
+.PARAMETER Interface
+A COM interface from a database. If no existing interface exists for this class it'll try and build one from its proxy.
 #>
 function Get-ComObjectInterface {
     [CmdletBinding(DefaultParameterSetName = "FromType")]
@@ -103,7 +115,11 @@ function Get-ComObjectInterface {
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
         [Guid]$Iid,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
-        [Type]$Type
+        [Type]$Type,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterface")]
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
+        [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterfaceInstance")]
+        [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance
     )
 
     PROCESS {
@@ -115,6 +131,12 @@ function Get-ComObjectInterface {
                 }
                 "FromType" {
                     Wrap-ComObject -Object $o -Type $Type | Write-Output
+                }
+                "FromInterface" {
+                    Wrap-ComObject -Object $o -Interface $Interface | Write-Output
+                }
+                "FromInterfaceInstance" {
+                    Wrap-ComObject -Object $o -InterfaceInstance $InterfaceInstance | Write-Output
                 }
             }
         }

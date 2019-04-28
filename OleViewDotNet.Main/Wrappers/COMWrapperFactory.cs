@@ -108,6 +108,16 @@ namespace OleViewDotNet.Wrappers
             return Wrap(obj, COMUtilities.GetInterfaceType(iid));
         }
 
+        public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
+        {
+            return Wrap(obj, COMUtilities.GetInterfaceType(intf));
+        }
+
+        public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
+        {
+            return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry));
+        }
+
         private static bool AddType(this HashSet<Type> types, Type t)
         {
             if (t.IsByRef)
