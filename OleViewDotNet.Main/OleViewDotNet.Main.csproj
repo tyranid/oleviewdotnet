@@ -537,6 +537,9 @@
     <None Include="symbol_cache\240708796730EA1965F09011DE78658F.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\2471D4FEEFD93183284363E012C04C7C.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\2B4988FBE80A35E42AD7A6AB150395E1.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -550,6 +553,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\525A1F7BE5A73D4006619F1B0712E8B7.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\5342DBFC2B8129FF6AD81CDB3699ADBA.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
