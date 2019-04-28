@@ -537,13 +537,25 @@
     <None Include="symbol_cache\240708796730EA1965F09011DE78658F.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\2471D4FEEFD93183284363E012C04C7C.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\2B4988FBE80A35E42AD7A6AB150395E1.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\365ACA8B7435CAE799E7605AB25B3C3B.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\4AB47E9370AC36241341FFA48B618BBA.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\525A1F7BE5A73D4006619F1B0712E8B7.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\5342DBFC2B8129FF6AD81CDB3699ADBA.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
@@ -561,6 +573,9 @@
     <None Include="symbol_cache\8AF5F0A4B784EAE7901C8B937AB7411E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\90042A515118CB205BBEAD51F8EF5810.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -574,6 +589,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\F0E2032A2AF04E2C38D2F74EE8DFC42E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
