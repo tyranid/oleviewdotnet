@@ -103,9 +103,14 @@ namespace OleViewDotNet.Wrappers
             return (BaseComWrapper<T>)Wrap(obj, typeof(T));
         }
 
+        public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry)
+        {
+            return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry));
+        }
+
         public static BaseComWrapper Wrap(object obj, Guid iid)
         {
-            return Wrap(obj, COMUtilities.GetInterfaceType(iid));
+            return Wrap(obj, iid, null);
         }
 
         public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
@@ -116,6 +121,11 @@ namespace OleViewDotNet.Wrappers
         public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
         {
             return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry));
+        }
+
+        public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
+        {
+            return Wrap(obj, COMUtilities.GetInterfaceType(ipid));
         }
 
         private static bool AddType(this HashSet<Type> types, Type t)

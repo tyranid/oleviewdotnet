@@ -2830,6 +2830,10 @@ namespace OleViewDotNet
 
         internal COMProxyInstance ToProxyInstance()
         {
+            if (!Methods.Any())
+            {
+                return null;
+            }
             NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMInterfaceEntry.IID_IUnknown,
                 Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
             return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes, m_registry);

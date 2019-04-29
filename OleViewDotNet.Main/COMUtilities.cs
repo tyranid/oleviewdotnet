@@ -947,6 +947,16 @@ namespace OleViewDotNet
             }
         }
 
+        public static Type GetInterfaceType(Guid iid, COMRegistry registry)
+        {
+            if (registry != null && registry.Interfaces.ContainsKey(iid))
+            {
+                return GetInterfaceType(registry.Interfaces[iid]);
+            }
+
+            return GetInterfaceType(iid);
+        }
+
         public static Type GetInterfaceType(Guid iid)
         {
             if (m_iidtypes == null)
@@ -958,6 +968,7 @@ namespace OleViewDotNet
             {
                 return m_iidtypes[iid];
             }
+
             return null;
         }
 
@@ -979,8 +990,32 @@ namespace OleViewDotNet
                 return null;
             }
 
-            ConvertProxyToAssembly(COMProxyInstance.GetFromCLSID(intf.ProxyClassEntry, null), null);
+            ConvertProxyToAssembly(COMProxyInterfaceInstance.GetFromIID(intf, null), null);
             return GetInterfaceType(intf.Iid);
+        }
+
+        public static Type GetInterfaceType(COMIPIDEntry ipid)
+        {
+            if (ipid == null)
+            {
+                return null;
+            }
+
+            Type type = GetInterfaceType(ipid.Iid);
+            if (type != null)
+            {
+                return type;
+            }
+
+            COMProxyInstance proxy = ipid.ToProxyInstance();
+
+            if (proxy == null)
+            {
+                return null;
+            }
+
+            ConvertProxyToAssembly(proxy, null);
+            return GetInterfaceType(ipid.Iid);
         }
 
         public static void LoadTypesFromAssembly(Assembly assembly)
@@ -1153,7 +1188,7 @@ namespace OleViewDotNet
                 LoadTypeLibAssemblies();
             }
 
-            COMProxyInstanceConverter converter = new COMProxyInstanceConverter("temp.dll", progress);
+            COMProxyInstanceConverter converter = new COMProxyInstanceConverter($"{Guid.NewGuid()}.dll", progress);
             converter.AddProxy(entries);
             RegisterTypeInterfaces(converter.BuiltAssembly);
             return converter.BuiltAssembly;

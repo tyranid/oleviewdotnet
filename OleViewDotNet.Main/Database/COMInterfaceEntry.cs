@@ -84,7 +84,8 @@ namespace OleViewDotNet.Database
             m_registry = registry;
         }
 
-        private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, int nummethods, string baseName, string name) : this(registry)
+        private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, 
+            int nummethods, string baseName, string name) : this(registry)
         {
             Iid = iid;
             ProxyClsid = proxyclsid;
