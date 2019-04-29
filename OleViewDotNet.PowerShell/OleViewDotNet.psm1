@@ -2823,15 +2823,15 @@ System.Reflection.Assembly
 function ConvertTo-ComAssembly {
     [CmdletBinding(DefaultParameterSetName="FromTypeLib")]
     Param(
-        [parameter(Mandatory, ParameterSetName = "FromTypeLib", Position=0)]
+        [parameter(Mandatory, ParameterSetName = "FromTypeLib", Position = 0)]
         [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
-        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [parameter(Mandatory, ParameterSetName = "FromPath", Position = 0)]
         [string]$Path,
-        [parameter(Mandatory, ParameterSetName = "FromProxy")]
+        [parameter(Mandatory, ParameterSetName = "FromProxy", Position = 0)]
         [OleViewDotNet.COMProxyInstance]$Proxy,
-        [parameter(Mandatory, ParameterSetName = "FromProxyInterface")]
+        [parameter(Mandatory, ParameterSetName = "FromProxyInterface", Position = 0)]
         [OleViewDotNet.COMProxyInterfaceInstance]$ProxyInterface,
-        [parameter(Mandatory, ParameterSetName = "FromIpid")]
+        [parameter(Mandatory, ParameterSetName = "FromIpid", Position = 0)]
         [OleViewDotNet.COMIPIDEntry]$Ipid,
         [switch]$NoProgress
     )
