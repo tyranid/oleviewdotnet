@@ -80,7 +80,7 @@ namespace OleViewDotNet.Wrappers
             { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
             { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) },
             { typeof(IMoniker).GUID, typeof(IMonikerWrapper) },
-            //{ typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
+            { typeof(IBindCtx).GUID, typeof(IBindCtxWrapper) },
             { typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
             { typeof(IEnumString).GUID, typeof(IEnumStringWrapper) },
             { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
