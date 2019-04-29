@@ -3237,6 +3237,12 @@ namespace OleViewDotNet
                 return path;
             }
 
+            path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{(Environment.Is64BitProcess ? "X64" : "X86")}");
+            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            {
+                return path;
+            }
+
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dbghelp.dll");
         }
 
