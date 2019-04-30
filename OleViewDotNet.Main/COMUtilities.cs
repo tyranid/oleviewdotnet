@@ -739,17 +739,19 @@ namespace OleViewDotNet
 
         public static COMRegistryEntrySource GetSource(this RegistryKey key)
         {
-            NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle());
-            string full_path = native_key.FullPath;
-            if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
+            using (NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle()))
             {
-                return COMRegistryEntrySource.LocalMachine;
+                string full_path = native_key.FullPath;
+                if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
+                {
+                    return COMRegistryEntrySource.LocalMachine;
+                }
+                else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
+                {
+                    return COMRegistryEntrySource.User;
+                }
+                return COMRegistryEntrySource.Unknown;
             }
-            else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
-            {
-                return COMRegistryEntrySource.User;
-            }
-            return COMRegistryEntrySource.Unknown;
         }
 
         public static RegistryKey OpenSubKeySafe(this RegistryKey rootKey, string keyName)
