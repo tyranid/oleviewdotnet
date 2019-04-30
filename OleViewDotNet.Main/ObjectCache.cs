@@ -55,31 +55,6 @@ namespace OleViewDotNet
                 Interfaces[pos++] = new KeyValuePair<Guid, string>(ent.Iid, ent.Name);
             }
         }
-
-        public dynamic QueryInterface(string name)
-        {
-            Guid iid = Guid.Empty;
-            object o = null;
-            if (!Guid.TryParse(name, out iid))
-            {
-                foreach (KeyValuePair<Guid, string> pair in Interfaces)
-                {
-                    if (string.Compare(pair.Value, name, true) == 0)
-                    {
-                        iid = pair.Key;
-                        break;
-                    }
-                }
-            }
-
-            Type type = COMUtilities.GetInterfaceType(iid);
-            if (type != null)
-            {
-                o = new DynamicComObjectWrapper(m_registry, type, Instance);
-            }
-
-            return o;
-        }
     }
 
     static class ObjectCache

@@ -238,8 +238,6 @@
     <Compile Include="Forms\DocumentForm.Designer.cs">
       <DependentUpon>DocumentForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wrappers\DynamicComFunctionWrapper.cs" />
-    <Compile Include="Wrappers\DynamicComObjectWrapper.cs" />
     <Compile Include="Forms\HexEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

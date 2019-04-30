@@ -15,13 +15,9 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms
@@ -116,10 +112,10 @@ namespace OleViewDotNet.Forms
                                 strDir += " optional";
                             }
 
-                            pars.Add(String.Format("[{0}] {1} {2}", strDir, pi.ParameterType.Name, pi.Name));
+                            pars.Add(string.Format("[{0}] {1} {2}", strDir, pi.ParameterType.Name, pi.Name));
                         }
 
-                        item.SubItems.Add(String.Join(", ", pars));
+                        item.SubItems.Add(string.Join(", ", pars));
                     }
                 }
                 else if (info.MemberType == MemberTypes.Property)
@@ -203,11 +199,6 @@ namespace OleViewDotNet.Forms
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateProperties();
-        }
-
-        private void OpenObjectViewer(DynamicComObjectWrapper wrapper)
-        {
-            EntryPoint.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, wrapper.Instance, wrapper.InstanceType));
         }
 
         private void OpenObject(ListView lv)
