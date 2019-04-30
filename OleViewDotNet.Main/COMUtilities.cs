@@ -739,7 +739,7 @@ namespace OleViewDotNet
 
         public static COMRegistryEntrySource GetSource(this RegistryKey key)
         {
-            using (NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle()))
+            using (NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle(), false))
             {
                 string full_path = native_key.FullPath;
                 if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))

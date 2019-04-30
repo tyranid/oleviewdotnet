@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.7'
+ModuleVersion = '1.8'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -88,12 +88,9 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.7
+        ReleaseNotes = 'v1.8
 ----
-* Added parsing of activation contexts.
-* Added simple auto-save/auto-load functionality for the GUI.
-* Added Get-ComProgId function.
-* Added source information for inbuilt classes.
+* Added basic proxy to interface generation.
 '
 
     } # End of PSData hashtable

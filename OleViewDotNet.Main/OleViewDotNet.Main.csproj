@@ -75,7 +75,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NtApiDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NtApiDotNet.1.1.21\lib\net45\NtApiDotNet.dll</HintPath>
+      <HintPath>..\packages\NtApiDotNet.1.1.22\lib\net45\NtApiDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -437,19 +437,9 @@
     <EmbeddedResource Include="Forms\ObjectInformation.resx">
       <DependentUpon>ObjectInformation.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ROTViewer.resx">
       <DependentUpon>ROTViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="Forms\TypeLibControl.resx">
       <DependentUpon>TypeLibControl.cs</DependentUpon>
     </EmbeddedResource>
