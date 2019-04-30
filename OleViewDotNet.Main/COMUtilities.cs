@@ -3284,14 +3284,6 @@ namespace OleViewDotNet
         internal static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
         internal static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
 
-        private static readonly Lazy<bool> _has_iron_python = new Lazy<bool>(
-            () => File.Exists(Path.Combine(GetAppDirectory(), "IronPython.dll")));
-
-        internal static bool HasIronPython
-        {
-            get { return _has_iron_python.Value; }
-        }
-
         public static string GetPackagePath(string packageId)
         {
             int length = 0;

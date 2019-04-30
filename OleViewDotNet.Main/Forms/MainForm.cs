@@ -76,7 +76,6 @@ namespace OleViewDotNet.Forms
             Controls.Add(m_dockPanel);
             m_dockPanel.BringToFront();
             CreatePropertyGrid(true);
-            menuFilePythonConsole.Visible = COMUtilities.HasIronPython;
 
             if (!Environment.Is64BitOperatingSystem)
             {
@@ -317,11 +316,6 @@ namespace OleViewDotNet.Forms
         private void menuViewAppIDs_Click(object sender, EventArgs e)
         {
             OpenView(COMRegistryViewer.DisplayMode.AppIDs);
-        }
-
-        private void menuFilePythonConsole_Click(object sender, EventArgs e)
-        {
-            HostControl(new PythonConsole());
         }
 
         private async void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)

@@ -69,23 +69,7 @@
     <Reference Include="ICSharpCode.TextEditor">
       <HintPath>..\packages\ICSharpCode.TextEditor.3.2.1.6466\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
-    <Reference Include="IronPython, Version=2.7.7.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronPython.2.7.7\lib\Net45\IronPython.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="IronPython.Modules, Version=2.7.7.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronPython.2.7.7\lib\Net45\IronPython.Modules.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Dynamic, Version=1.1.2.22, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net45\Microsoft.Dynamic.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Scripting, Version=1.1.2.22, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamicLanguageRuntime.1.1.2\lib\Net45\Microsoft.Scripting.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
       <Private>True</Private>
@@ -134,12 +118,6 @@
     <Compile Include="COMAccessCheck.cs" />
     <Compile Include="Wrappers\COMWrapperFactory.cs" />
     <Compile Include="IProxyFormatter.cs" />
-    <Compile Include="Forms\PythonScriptEditor.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\PythonScriptEditor.Designer.cs">
-      <DependentUpon>PythonScriptEditor.cs</DependentUpon>
-    </Compile>
     <Compile Include="RuntimeExtensionActivator.cs" />
     <Compile Include="Forms\SettingsForm.cs">
       <SubType>Form</SubType>
@@ -248,12 +226,6 @@
     <Compile Include="Database\COMInterfaceEntry.cs" />
     <Compile Include="Database\COMMimeType.cs" />
     <Compile Include="Database\COMTypeLibEntry.cs" />
-    <Compile Include="Forms\ConsoleControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\ConsoleControl.designer.cs">
-      <DependentUpon>ConsoleControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\CreateCLSIDForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -346,12 +318,6 @@
     <Compile Include="Forms\PropertiesControl.Designer.cs">
       <DependentUpon>PropertiesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\PythonConsole.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\PythonConsole.Designer.cs">
-      <DependentUpon>PythonConsole.cs</DependentUpon>
-    </Compile>
     <Compile Include="COMSecurity.cs" />
     <Compile Include="SimpleSyntaxModeProvider.cs" />
     <Compile Include="Forms\TypedObjectViewer.cs">
@@ -386,14 +352,8 @@
     <EmbeddedResource Include="Forms\COMRegistryViewer.resx">
       <DependentUpon>COMRegistryViewer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\PythonScriptEditor.resx">
-      <DependentUpon>PythonScriptEditor.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ConsoleControl.resx">
-      <DependentUpon>ConsoleControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CreateCLSIDForm.resx">
       <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
@@ -472,9 +432,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PropertiesControl.resx">
       <DependentUpon>PropertiesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\PythonConsole.resx">
-      <DependentUpon>PythonConsole.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\TypedObjectViewer.resx">
       <DependentUpon>TypedObjectViewer.cs</DependentUpon>
@@ -607,12 +564,6 @@
     <None Include="FolderOpen.ico" />
     <Content Include="license.txt" />
     <Content Include="oleview.ico" />
-    <Content Include="PythonLib\oleviewdotnet\registry.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="PythonLib\oleviewdotnet\__init__.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\PythonHighlightingRules.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -657,6 +608,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy /I /Y /Q /E "$(SolutionDir)packages\IronPython.StdLib.2.7.7\content\Lib" "$(TargetDir)PythonLib"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

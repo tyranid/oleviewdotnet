@@ -14,9 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using IronPython.Hosting;
-using Microsoft.Scripting;
-using Microsoft.Scripting.Hosting;
 using OleViewDotNet.Database;
 using OleViewDotNet.Wrappers;
 using System;
@@ -55,72 +52,8 @@ namespace OleViewDotNet.Forms
             m_registry = registry;
             InitializeComponent();
 
-            if (COMUtilities.HasIronPython)
-            {
-                var script_editor = new PythonScriptEditor();
-                script_editor.Dock = DockStyle.Fill;
-                script_editor.RunScript += DoRunScript;
-                splitContainerScript.Panel1.Controls.Add(script_editor);
-            }
-            else
-            {
-                tabControl.TabPages.Remove(tabPageScript);
-            }
-
             LoadDispatch();
-            Text = String.Format("{0} {1}", m_objName, m_dispType.Name);
-        }
-
-        private void DoRunScript(object sender, PythonScriptEditor.RunScriptEventArgs e)
-        {
-            try
-            {
-                ScriptEngine engine = Python.CreateEngine();
-
-                engine.Runtime.LoadAssembly(Assembly.GetExecutingAssembly());
-                engine.Runtime.IO.SetOutput(new MemoryStream(), new ConsoleTextWriter(this, false));
-                engine.Runtime.IO.SetErrorOutput(new MemoryStream(), new ConsoleTextWriter(this, true));
-
-                ICollection<string> paths = engine.GetSearchPaths();
-
-                paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonLib"));
-
-                engine.SetSearchPaths(paths);
-
-                ScriptErrorListener listener = new ScriptErrorListener();
-                ScriptSource source = engine.CreateScriptSourceFromString(e.ScriptText);
-
-                CompiledCode code = source.Compile(listener);
-
-                if (listener.Errors.Count == 0)
-                {
-                    // Just create the global scope, don't execute it yet
-                    ScriptScope scope = engine.CreateScope();
-
-                    scope.SetVariable("obj", COMUtilities.IsComImport(m_dispType)
-                        ? new DynamicComObjectWrapper(m_registry, m_dispType, m_pObject) : m_pObject);
-                    scope.SetVariable("disp", m_pObject);
-
-                    dynamic host = new ExpandoObject();
-
-                    host.openobj = new Action<DynamicComObjectWrapper>(o => { OpenObjectViewer(o); });
-
-                    scope.SetVariable("host", host);
-
-                    code.Execute(scope);
-                }
-            }
-            catch (Exception ex)
-            {
-                TargetInvocationException tex = ex as TargetInvocationException;
-
-                if (tex != null)
-                {
-                    ex = tex.InnerException;
-                }
-
-                AddText(ex.Message + Environment.NewLine);
-            }
+            Text = string.Format("{0} {1}", m_objName, m_dispType.Name);
         }
 
         public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType)
@@ -318,85 +251,6 @@ namespace OleViewDotNet.Forms
             OpenObject(listViewMethods);
         }
 
-        private void AddText(string text)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<string>(AddText), text);
-            }
-            else
-            {
-                if (!richTextBoxOutput.IsDisposed)
-                {
-                    richTextBoxOutput.Text += text;
-                    richTextBoxOutput.SelectionStart = richTextBoxOutput.Text.Length;
-                    richTextBoxOutput.ScrollToCaret();
-                }
-            }
-        }
-
-        private void WriteOutputString(string s)
-        {
-            AddText(s);
-        }
-
-        private void WriteErrorString(string s)
-        {
-            AddText(s);
-        }
-
-        private class ConsoleTextWriter : TextWriter
-        {
-            private StringBuilder _builder;
-            private TypedObjectViewer _control;
-            private readonly bool _error;
-
-            public ConsoleTextWriter(TypedObjectViewer control, bool error)
-            {
-                _builder = new StringBuilder();
-                _control = control;
-                _error = error;
-            }
-
-            public override void Write(char value)
-            {
-                _builder.Append(value);
-
-                if (value == '\n')
-                {
-                    if (_error)
-                    {
-                        _control.WriteErrorString(_builder.ToString());
-                    }
-                    else
-                    {
-                        _control.WriteOutputString(_builder.ToString());
-                    }
-                    _builder.Clear();
-                }
-            }
-
-            public override Encoding Encoding
-            {
-                get { return Encoding.UTF8; }
-            }
-        }
-
-        internal class ScriptErrorListener : ErrorListener
-        {
-            public List<string> Errors { get; private set; }
-
-            public ScriptErrorListener()
-            {
-                Errors = new List<string>();
-            }
-
-            public override void ErrorReported(ScriptSource source, string message, SourceSpan span, int errorCode, Severity severity)
-            {
-                Errors.Add(String.Format("{0}: {1}/{2} - {3}", severity, span.Start.Line, span.Start.Column, message));
-            }
-        }
-
         private void listViewMethods_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (listViewMethods.SelectedItems.Count > 0)
@@ -450,11 +304,6 @@ namespace OleViewDotNet.Forms
                     }
                 }
             }
-        }
-
-        private void clearOutputToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBoxOutput.Clear();
         }
 
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)

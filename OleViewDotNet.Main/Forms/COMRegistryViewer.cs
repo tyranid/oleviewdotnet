@@ -14,9 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using IronPython.Hosting;
-using Microsoft.Scripting;
-using Microsoft.Scripting.Hosting;
 using NtApiDotNet;
 using OleViewDotNet.Database;
 using System;
@@ -240,10 +237,7 @@ namespace OleViewDotNet.Forms
 
             foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
             {
-                if (filter != FilterMode.Python || COMUtilities.HasIronPython)
-                {
-                    comboBoxMode.Items.Add(filter);
-                }
+                comboBoxMode.Items.Add(filter);
             }
             comboBoxMode.SelectedIndex = 0;
 
@@ -1559,34 +1553,6 @@ namespace OleViewDotNet.Forms
             return new Regex(builder.ToString(), ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
         }
 
-        private static Func<object, bool> CreatePythonFilter(string filter)
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.AppendLine("from OleViewDotNet import *");
-            builder.AppendLine("def run_filter(entry):");
-            builder.AppendFormat("  return {0}", filter);
-            builder.AppendLine();
-
-            ScriptEngine engine = Python.CreateEngine();
-            ScriptSource source = engine.CreateScriptSourceFromString(builder.ToString(), SourceCodeKind.File);
-            ScriptScope scope = engine.CreateScope();
-            scope.Engine.Runtime.LoadAssembly(typeof(COMCLSIDEntry).Assembly);
-            source.Execute(scope);
-            return scope.GetVariable<Func<object, bool>>("run_filter");            
-        }
-
-        private static bool RunPythonFilter(TreeNode node, Func<object, bool> python_filter)
-        {
-            try
-            {
-                return python_filter(node.Tag);
-            }
-            catch 
-            {
-                return false;
-            }
-        }
-
         private FilterResult RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
         {
             try
@@ -1726,7 +1692,6 @@ namespace OleViewDotNet.Forms
             Equals,
             Glob,
             Regex,
-            Python,
             Accessible,
             NotAccessible,
             Complex,
@@ -1780,12 +1745,6 @@ namespace OleViewDotNet.Forms
                         Regex r = new Regex(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
                         return n => r.IsMatch(n.Text);
-                    }
-                case FilterMode.Python:
-                    {
-                        Func<object, bool> python_filter = CreatePythonFilter(filter);
-
-                        return n => RunPythonFilter(n, python_filter);
                     }
                 default:
                     throw new ArgumentException("Invalid mode value");

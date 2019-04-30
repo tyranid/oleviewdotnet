@@ -19,7 +19,7 @@ namespace OleViewDotNet.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,38 +57,6 @@ namespace OleViewDotNet.Properties {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;SyntaxDefinition name=&quot;Python&quot; extensions=&quot;.py&quot;&gt;
-        ///	
-        ///	&lt;Properties&gt;
-        ///		&lt;Property name=&quot;LineComment&quot; value=&quot;#&quot;/&gt;
-        ///	&lt;/Properties&gt;
-        ///	
-        ///	&lt;Digits name=&quot;Digits&quot; color=&quot;DarkBlue&quot;/&gt;
-        ///
-        ///	&lt;RuleSets&gt;
-        ///		&lt;RuleSet ignorecase=&quot;false&quot;&gt;
-        ///			
-        ///			&lt;Delimiters&gt;()[]{}@,:.`=;+-*/% &amp;amp;|^&amp;gt;&amp;lt;&lt;/Delimiters&gt;
-        ///			
-        ///			&lt;Span name=&quot;DocComment&quot; color=&quot;Green&quot;&gt;
-        ///				&lt;Begin&gt;&quot;&quot;&quot;&lt;/Begin&gt;
-        ///				&lt;End&gt;&quot;&quot;&quot;&lt;/End&gt;
-        ///			&lt;/Span&gt;
-        ///			
-        ///			&lt;Span name=&quot;SingleQuoteDocComment&quot; color=&quot;Green&quot;&gt;
-        ///				&lt;Begin&gt;&apos;&apos;&apos;&lt;/Begin&gt;
-        ///				&lt;End&gt;&apos;&apos;&apos;&lt;/End&gt;
-        ///			&lt;/Span&gt;
-        ///
-        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string PythonHighlightingRules {
-            get {
-                return ResourceManager.GetString("PythonHighlightingRules", resourceCulture);
             }
         }
     }
