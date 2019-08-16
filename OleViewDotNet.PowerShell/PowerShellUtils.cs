@@ -95,5 +95,17 @@ namespace OleViewDotNet.PowerShell
             }
             return typeof(IClassFactory);
         }
+
+        public static Guid GuidFromInts(int[] ints)
+        {
+            if (ints.Length != 4)
+            {
+                throw new ArgumentException("Must provide 4 integers to convert to a GUID");
+            }
+
+            byte[] bytes = new byte[16];
+            Buffer.BlockCopy(ints, 0, bytes, 0, 16);
+            return new Guid(bytes);
+        }
     }
 }

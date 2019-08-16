@@ -2857,3 +2857,36 @@ function ConvertTo-ComAssembly {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Converts various input formats into a GUID.
+.DESCRIPTION
+This cmdlet converts various input formats into a GUID structure.
+.PARAMETER Bytes
+Convert from a 16 byte array.
+.PARAMETER Ints
+Convert from a 4 integer array.
+.INPUTS
+None
+.OUTPUTS
+System.Guid
+#>
+function Get-ComGuid {
+	[CmdletBinding(DefaultParameterSetName="FromBytes")]
+    Param(
+        [parameter(Mandatory, ParameterSetName = "FromBytes", Position = 0)]
+        [byte[]]$Bytes,
+        [parameter(Mandatory, ParameterSetName = "FromInts")]
+        [int[]]$Ints
+    )
+
+	switch($PSCmdlet.ParameterSetName) {
+		"FromBytes" {
+			[guid]::new($Bytes)
+		}
+		"FromInts" {
+			[OleViewDotNet.PowerShell.PowerShellUtils]::GuidFromInts($Ints)
+		}
+	}
+}
