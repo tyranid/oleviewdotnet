@@ -24,7 +24,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database
 {
-    public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable
+    public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
     {
         private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
         private readonly COMRegistry m_registry;
@@ -338,6 +338,8 @@ namespace OleViewDotNet.Database
         {
             get; private set;
         }
+
+        Guid IComGuid.ComGuid => Iid;
 
         public override bool Equals(object obj)
         {

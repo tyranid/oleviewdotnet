@@ -23,7 +23,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database
 {
-    public class COMCategory : IXmlSerializable
+    public class COMCategory : IXmlSerializable, IComGuid
     {
         private readonly COMRegistry m_registry;
         
@@ -37,6 +37,8 @@ namespace OleViewDotNet.Database
                 return Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
             }
         }
+
+        Guid IComGuid.ComGuid => CategoryID;
 
         internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
             : this(registry)

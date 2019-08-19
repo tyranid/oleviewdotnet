@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="ActivationContext.cs" />
     <Compile Include="Database\AppxPackageName.cs" />
+    <Compile Include="IComGuid.cs" />
     <Compile Include="Wrappers\BuiltinWrappers.cs" />
     <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
     <Compile Include="Forms\BuildMonikerForm.cs">
@@ -467,6 +468,9 @@
     <None Include="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\09F4C2218CDCBE274B6F6DB07C6D5D8C.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -519,6 +523,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\90042A515118CB205BBEAD51F8EF5810.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\9B19279533B9C1539FB262B8D0B0DB51.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">

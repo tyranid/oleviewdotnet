@@ -22,7 +22,7 @@ using System.Xml.Schema;
 
 namespace OleViewDotNet.Database
 {
-    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable
+    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid
     {
         private readonly COMRegistry m_registry;
 
@@ -78,6 +78,8 @@ namespace OleViewDotNet.Database
         public string Name { get; private set; }
 
         public COMRegistryEntrySource Source { get; private set; }
+
+        Guid IComGuid.ComGuid => Clsid;
 
         public override string ToString()
         {

@@ -1094,68 +1094,21 @@ namespace OleViewDotNet.Forms
 
         private static bool CanGetGuid(TreeNode node)
         {
-            Guid guid = Guid.Empty;
-            if (node != null)
-            {
-                object tag = node.Tag;
-                if (tag is COMCLSIDEntry ||
-                    tag is COMInterfaceEntry ||
-                    tag is COMProgIDEntry ||
-                    tag is COMTypeLibVersionEntry ||
-                    tag is COMTypeLibEntry ||
-                    tag is Guid ||
-                    tag is COMAppIDEntry ||
-                    tag is COMIPIDEntry ||
-                    tag is COMCategory)
-                {
-                    return true;
-                }
-            }
-            return false;
+            object tag = node?.Tag;
+            return tag is IComGuid || tag is Guid;
         }
 
         private static Guid GetGuidFromType(TreeNode node)
         {
-            if (node != null)
+            object tag = node?.Tag;
+            if (tag is IComGuid com_guid)
             {
-                object tag = node.Tag;
-                if (tag is COMCLSIDEntry)
-                {
-                    return ((COMCLSIDEntry)tag).Clsid;
-                }
-                else if (tag is COMInterfaceEntry)
-                {
-                    return ((COMInterfaceEntry)tag).Iid;
-                }
-                else if (tag is COMProgIDEntry)
-                {
-                    COMProgIDEntry ent = (COMProgIDEntry)tag;
-                    return ent.Clsid;
-                }
-                else if (tag is COMTypeLibVersionEntry)
-                {
-                    return ((COMTypeLibVersionEntry)tag).TypelibId;
-                }
-                else if (tag is COMTypeLibEntry)
-                {
-                    return ((COMTypeLibEntry)tag).TypelibId;
-                }
-                else if (tag is Guid)
-                {
-                    return (Guid)tag;
-                }
-                else if (tag is COMAppIDEntry)
-                {
-                    return ((COMAppIDEntry)tag).AppId;
-                }
-                else if (tag is COMIPIDEntry)
-                {
-                    return ((COMIPIDEntry)tag).Ipid;
-                }
-                else if (tag is COMCategory)
-                {
-                    return ((COMCategory)tag).CategoryID;
-                }
+                return com_guid.ComGuid;
+            }
+
+            if (tag is Guid guid)
+            {
+                return guid;
             }
 
             return Guid.Empty;
@@ -1164,7 +1117,6 @@ namespace OleViewDotNet.Forms
         private void copyGUIDToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Guid guid = GetGuidFromType(treeComRegistry.SelectedNode);
-
             if (guid != Guid.Empty)
             {
                 COMUtilities.CopyGuidToClipboard(guid, GuidFormat.String);

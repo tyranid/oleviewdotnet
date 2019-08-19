@@ -162,7 +162,7 @@ namespace OleViewDotNet.Database
         }
     }
 
-    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity
+    public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity, IComGuid
     {
         internal COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
         {
@@ -401,6 +401,8 @@ namespace OleViewDotNet.Database
         string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
         string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+
+        Guid IComGuid.ComGuid => AppId;
 
         public override string ToString()
         {

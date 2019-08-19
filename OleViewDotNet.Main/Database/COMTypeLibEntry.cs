@@ -24,7 +24,7 @@ using System.Xml.Schema;
 
 namespace OleViewDotNet.Database
 {
-    public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable
+    public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, IComGuid
     {
         private readonly COMRegistry m_registry;
 
@@ -73,6 +73,8 @@ namespace OleViewDotNet.Database
         public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
         public string Name { get; private set; }
         public COMRegistryEntrySource Source { get; private set; }
+
+        Guid IComGuid.ComGuid => TypelibId;
 
         public override bool Equals(object obj)
         {
@@ -160,7 +162,7 @@ namespace OleViewDotNet.Database
         }
     }
 
-    public class COMTypeLibVersionEntry : IXmlSerializable
+    public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
     {
         private readonly COMRegistry m_registry;
 
@@ -210,6 +212,8 @@ namespace OleViewDotNet.Database
 
             }
         }
+
+        Guid IComGuid.ComGuid => TypelibId;
 
         internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key) 
             : this(registry, typelibid)

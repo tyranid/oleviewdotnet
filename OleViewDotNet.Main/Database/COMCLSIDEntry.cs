@@ -509,7 +509,7 @@ namespace OleViewDotNet.Database
         bool SupportsRemoteActivation { get; }
     }
 
-    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
+    public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, IComGuid
     {
         private List<COMInterfaceInstance> m_interfaces;
         private List<COMInterfaceInstance> m_factory_interfaces;
@@ -1242,6 +1242,8 @@ namespace OleViewDotNet.Database
         string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
         string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+
+        Guid IComGuid.ComGuid => Clsid;
 
         public override string ToString()
         {

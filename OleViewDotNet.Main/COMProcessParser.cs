@@ -2613,7 +2613,7 @@ namespace OleViewDotNet
         }
     }
 
-    public class COMIPIDEntry : IProxyFormatter
+    public class COMIPIDEntry : IProxyFormatter, IComGuid
     {
         private readonly COMRegistry m_registry;
 
@@ -2658,6 +2658,8 @@ namespace OleViewDotNet
         public IEnumerable<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings.AsReadOnly();
         public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
         public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
+
+        Guid IComGuid.ComGuid => Ipid;
 
         public byte[] ToObjref()
         {
