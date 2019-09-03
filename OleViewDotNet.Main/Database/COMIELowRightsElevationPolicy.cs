@@ -95,9 +95,9 @@ namespace OleViewDotNet.Database
 
             object policyValue = key.GetValue("Policy", 0);
 
-            if (policyValue != null)
+            if (policyValue != null && !String.IsNullOrEmpty(policyValue.ToString()))
             {
-                Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), key.GetValue("Policy", 0));
+                Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
             }
             
             string clsid = (string)key.GetValue("CLSID");
