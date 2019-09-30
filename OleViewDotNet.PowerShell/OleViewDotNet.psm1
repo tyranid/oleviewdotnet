@@ -1325,6 +1325,8 @@ function Get-ComObjRef {
         [object]$Object,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromPath")]
         [string]$Path,
+		[Parameter(Mandatory, Position = 0, ParameterSetName = "FromBytes")]
+        [byte[]]$Bytes,
         [ComObjRefOutput]$Output = "Object",
         [Parameter(ParameterSetName = "FromObject", ValueFromPipelineByPropertyName)]
         [Guid]$Iid = "00000000-0000-0000-C000-000000000046",
@@ -1351,6 +1353,9 @@ function Get-ComObjRef {
             "FromPath" {
                 $ba = Get-Content -Path $Path -Encoding Byte
                 [OleViewDotNet.COMObjRef]::FromArray($ba) | Out-ObjRef -Output $Output
+            }
+			"FromBytes" {
+                [OleViewDotNet.COMObjRef]::FromArray($Bytes) | Out-ObjRef -Output $Output
             }
         }
     }
