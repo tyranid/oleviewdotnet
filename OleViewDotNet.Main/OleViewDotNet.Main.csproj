@@ -510,6 +510,7 @@
     <None Include="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\5D5DB9BA72AF3B80B1540C0BDA3B8A04.sym" />
     <None Include="symbol_cache\6C28951826CB3339A320224696688F27.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -549,6 +550,7 @@
     <None Include="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\FE65FC82CB2C8948F477636563B25803.sym" />
   </ItemGroup>
   <ItemGroup>
     <None Include="interface.ico" />
