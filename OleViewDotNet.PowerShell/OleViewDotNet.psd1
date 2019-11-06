@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.8'
+ModuleVersion = '1.9'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -88,9 +88,12 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.8
+        ReleaseNotes = 'v1.9
 ----
-* Added basic proxy to interface generation.
+* Updated NtApiDotNet to v1.1.23.
+* Create objref from bytes option.
+* Bug fix for issue #15
+* Added Get-ComGuid function.
 '
 
     } # End of PSData hashtable
