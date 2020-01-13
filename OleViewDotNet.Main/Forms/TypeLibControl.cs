@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms
@@ -308,6 +309,17 @@ namespace OleViewDotNet.Forms
             e.Handled = true;
             RefreshInterfaces();
         }
-        
+
+        private void btnExportInterfaces_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach(ListViewItem item in this.listViewInterfaces.Items)
+            {
+                sb.Append( GetTextFromTag(item.Tag) );
+                sb.AppendLine();
+            }
+
+            Clipboard.SetText(sb.ToString());
+        }
     }
 }

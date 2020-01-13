@@ -55,6 +55,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
             this.inputFilter = new OleViewDotNet.InputTextBox();
+            this.btnExportInterfaces = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -297,6 +298,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnExportInterfaces);
             this.panel1.Controls.Add(this.inputFilter);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -319,9 +321,20 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.inputFilter.Location = new System.Drawing.Point(7, 12);
             this.inputFilter.Name = "inputFilter";
-            this.inputFilter.Size = new System.Drawing.Size(279, 20);
+            this.inputFilter.Size = new System.Drawing.Size(197, 20);
             this.inputFilter.TabIndex = 6;
             this.inputFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.inputFilter_KeyUp);
+            // 
+            // btnExportInterfaces
+            // 
+            this.btnExportInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnExportInterfaces.Location = new System.Drawing.Point(210, 12);
+            this.btnExportInterfaces.Name = "btnExportInterfaces";
+            this.btnExportInterfaces.Size = new System.Drawing.Size(73, 23);
+            this.btnExportInterfaces.TabIndex = 7;
+            this.btnExportInterfaces.Text = "clpbrd!";
+            this.btnExportInterfaces.UseVisualStyleBackColor = true;
+            this.btnExportInterfaces.Click += new System.EventHandler(this.btnExportInterfaces_Click);
             // 
             // TypeLibControl
             // 
@@ -375,5 +388,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.Panel panel1;
         private InputTextBox inputFilter;
+        private System.Windows.Forms.Button btnExportInterfaces;
     }
 }
