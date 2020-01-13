@@ -174,9 +174,13 @@ namespace OleViewDotNet.Forms
             var filteredInterfaces = interfaces;
             if(!showAll)
             {
-                filteredInterfaces = interfaces.Where(x =>
+                filteredInterfaces = interfaces.Where(item =>
                 {
-                    return x.Text.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
+                    if (item.Text.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1)
+                        return true;
+
+                    string interfaceDescription = GetTextFromTag(item.Tag);
+                    return interfaceDescription.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
                 });
             }
             AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, guid_to_view, false);
