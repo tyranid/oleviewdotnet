@@ -27,6 +27,10 @@ namespace OleViewDotNet.Forms
     public partial class TypeLibControl : UserControl
     {
         private IDictionary<Guid, string> m_iids_to_names;
+        private IEnumerable<ListViewItemWithGuid> interfaces;
+        private Guid guid_to_view;
+
+        private const string filterDefaultString = "filter interfaces";
 
         private class ListViewItemWithGuid : ListViewItem
         {
@@ -96,10 +100,11 @@ namespace OleViewDotNet.Forms
 
         private void AddGuidItems(ListView list,
             IEnumerable<ListViewItemWithGuid> items,
-            TabPage tab_page, Guid guid_to_view)
+            TabPage tab_page, Guid guid_to_view, bool removeIfEmpty = true)
         {
             if (items.Any())
             {
+                list.Items.Clear();
                 list.Items.AddRange(items.ToArray());
                 list.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 foreach (ListViewItemWithGuid item in list.Items)
@@ -114,7 +119,8 @@ namespace OleViewDotNet.Forms
             }
             else
             {
-                tabControl.TabPages.Remove(tab_page);
+                if(removeIfEmpty)
+                   tabControl.TabPages.Remove(tab_page);
             }
         }
 
@@ -129,7 +135,14 @@ namespace OleViewDotNet.Forms
             m_iids_to_names = iids_to_names;
             InitializeComponent();
 
-            AddGuidItems(listViewInterfaces, interfaces, tabPageInterfaces, guid_to_view);
+            textEditor.SetHighlighting("C#");
+            textEditor.IsReadOnly = true;
+            Text = name;
+
+            this.inputFilter.Text = filterDefaultString;
+            this.guid_to_view = guid_to_view;
+            this.interfaces = interfaces;
+
             AddGuidItems(listViewClasses, classes, tabPageClasses, guid_to_view);
 
             if (structs.Any())
@@ -152,9 +165,21 @@ namespace OleViewDotNet.Forms
                 tabControl.TabPages.Remove(tabPageEnums);
             }
 
-            textEditor.SetHighlighting("C#");
-            textEditor.IsReadOnly = true;
-            Text = name;
+            RefreshInterfaces();
+        }
+
+        private void RefreshInterfaces()
+        {
+            bool showAll = inputFilter.Text.Length <= 0 || inputFilter.Text.Equals(filterDefaultString);
+            var filteredInterfaces = interfaces;
+            if(!showAll)
+            {
+                filteredInterfaces = interfaces.Where(x =>
+                {
+                    return x.Text.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
+                });
+            }
+            AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, guid_to_view, false);
         }
 
         public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
@@ -272,5 +297,13 @@ namespace OleViewDotNet.Forms
                 UpdateFromListView((ListView)e.TabPage.Controls[0]);
             }
         }
+        
+        private void inputFilter_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            e.Handled = true;
+            RefreshInterfaces();
+        }
+        
     }
 }
