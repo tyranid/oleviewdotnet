@@ -984,5 +984,13 @@ namespace OleViewDotNet.Forms
                 EntryPoint.ShowError(this, ex);
             }
         }
+
+        private void MainForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if((e.Control)&&(e.KeyCode == Keys.W))
+            {
+                m_dockPanel.ActivePane.CloseActiveContent();
+            }
+        }
     }
 }
