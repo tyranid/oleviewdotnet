@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms
@@ -320,6 +321,44 @@ namespace OleViewDotNet.Forms
             }
 
             Clipboard.SetText(sb.ToString());
+        }
+
+        private void btnDqs_Click(object sender, EventArgs e)
+        {
+            using (var formInput = new TextAreaInputForm())
+            {
+                formInput.Text = "Paste the DQS lines obtained from windbg";
+                if (DialogResult.OK != formInput.ShowDialog()) return;
+
+                CombineOVDNIdlAndDqs(textEditor.Text, formInput.textEditor.Text);
+            }
+        }
+
+        private static void CombineOVDNIdlAndDqs(string ovdnIdl, string dqs)
+        {
+            MessageBox.Show(CombineOVDNIdlAndDqsInt(ovdnIdl, dqs));
+        }
+        private static string CombineOVDNIdlAndDqsInt(string ovdnIdl, string dqs)
+        {
+            MatchCollection unknownMethodNames = Regex.Matches(ovdnIdl, @"\s+Proc\d+\(");
+            MatchCollection dqsSymbolNames = Regex.Matches(dqs, @"\s*[0-9a-f`]+\s+[0-9a-f`]+\s+\S+!(?:[^:]+::)?(\S+)");
+
+            if (unknownMethodNames.Count != dqsSymbolNames.Count)
+                return $"Different number of methods found in OVDN IDL ({unknownMethodNames.Count}) and in windbg dqs ({dqsSymbolNames.Count}). Don't forget to remove the methods of the parent interface from the DQS lines! (E.g. strip QueryInterface/AddRef/Release lines if the target is IUnknown based)";
+            for (var i = 0; i < unknownMethodNames.Count; i++)
+            {
+                ovdnIdl = ovdnIdl.Replace(unknownMethodNames[i].Groups[0].Value, " " + dqsSymbolNames[i].Groups[1].Value + "(");
+            }
+
+            // removing comments
+            ovdnIdl = Regex.Replace(ovdnIdl, @"/\*.+?\*/ ", "");
+
+            // removing in/out strings
+            ovdnIdl = Regex.Replace(ovdnIdl, @"\[[^\]]+\] ", "");
+
+            // and saving the result to the clipboard
+            Clipboard.SetText(ovdnIdl);
+            return "Alrighty, the combined lines are now on your clipboard.";
         }
     }
 }

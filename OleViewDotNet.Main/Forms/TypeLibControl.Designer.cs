@@ -53,9 +53,10 @@
             this.listViewEnums = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
-            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
-            this.inputFilter = new OleViewDotNet.InputTextBox();
             this.btnExportInterfaces = new System.Windows.Forms.Button();
+            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.btnDqs = new System.Windows.Forms.Button();
+            this.inputFilter = new OleViewDotNet.InputTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -83,6 +84,7 @@
             // 
             // splitContainer.Panel2
             // 
+            this.splitContainer.Panel2.Controls.Add(this.btnDqs);
             this.splitContainer.Panel2.Controls.Add(this.textEditor);
             this.splitContainer.Size = new System.Drawing.Size(699, 418);
             this.splitContainer.SplitterDistance = 293;
@@ -306,25 +308,6 @@
             this.panel1.Size = new System.Drawing.Size(293, 42);
             this.panel1.TabIndex = 0;
             // 
-            // textEditor
-            // 
-            this.textEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textEditor.IsReadOnly = false;
-            this.textEditor.Location = new System.Drawing.Point(0, 0);
-            this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(402, 418);
-            this.textEditor.TabIndex = 0;
-            // 
-            // inputFilter
-            // 
-            this.inputFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.inputFilter.Location = new System.Drawing.Point(7, 12);
-            this.inputFilter.Name = "inputFilter";
-            this.inputFilter.Size = new System.Drawing.Size(197, 20);
-            this.inputFilter.TabIndex = 6;
-            this.inputFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.inputFilter_KeyUp);
-            // 
             // btnExportInterfaces
             // 
             this.btnExportInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -335,6 +318,37 @@
             this.btnExportInterfaces.Text = "clpbrd!";
             this.btnExportInterfaces.UseVisualStyleBackColor = true;
             this.btnExportInterfaces.Click += new System.EventHandler(this.btnExportInterfaces_Click);
+            // 
+            // textEditor
+            // 
+            this.textEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textEditor.IsReadOnly = false;
+            this.textEditor.Location = new System.Drawing.Point(0, 42);
+            this.textEditor.Name = "textEditor";
+            this.textEditor.Size = new System.Drawing.Size(402, 376);
+            this.textEditor.TabIndex = 0;
+            // 
+            // btnDqs
+            // 
+            this.btnDqs.Location = new System.Drawing.Point(24, 12);
+            this.btnDqs.Name = "btnDqs";
+            this.btnDqs.Size = new System.Drawing.Size(119, 23);
+            this.btnDqs.TabIndex = 1;
+            this.btnDqs.Text = "Combine with dqs";
+            this.btnDqs.UseVisualStyleBackColor = true;
+            this.btnDqs.Click += new System.EventHandler(this.btnDqs_Click);
+            // 
+            // inputFilter
+            // 
+            this.inputFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.inputFilter.Location = new System.Drawing.Point(7, 12);
+            this.inputFilter.Name = "inputFilter";
+            this.inputFilter.Size = new System.Drawing.Size(197, 20);
+            this.inputFilter.TabIndex = 6;
+            this.inputFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.inputFilter_KeyUp);
             // 
             // TypeLibControl
             // 
@@ -389,5 +403,6 @@
         private System.Windows.Forms.Panel panel1;
         private InputTextBox inputFilter;
         private System.Windows.Forms.Button btnExportInterfaces;
+        private System.Windows.Forms.Button btnDqs;
     }
 }
