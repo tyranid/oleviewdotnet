@@ -357,7 +357,7 @@ namespace OleViewDotNet.Forms
             }
 
             // removing comments
-            ovdnIdl = Regex.Replace(ovdnIdl, @"/\*.+?\*/ ", "");
+            ovdnIdl = Regex.Replace(ovdnIdl, @"/\*.+?\*/\s*", "");
 
             // removing in/out strings
             ovdnIdl = Regex.Replace(ovdnIdl, @"\[[^\]]+\] ", "");
