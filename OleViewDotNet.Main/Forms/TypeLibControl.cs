@@ -314,13 +314,19 @@ namespace OleViewDotNet.Forms
         private void btnExportInterfaces_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
-            foreach(ListViewItem item in this.listViewInterfaces.Items)
+            foreach(var listView in new ListView[] { listViewEnums, listViewStructures, listViewClasses, listViewInterfaces })
             {
-                sb.Append( GetTextFromTag(item.Tag) );
+                foreach (ListViewItem item in listView.Items)
+                {
+                    sb.Append(GetTextFromTag(item.Tag));
+                    sb.AppendLine();
+                }
+
                 sb.AppendLine();
             }
 
             Clipboard.SetText(sb.ToString());
+            MessageBox.Show("View exported to the clipboard as text.");
         }
 
         private void btnDqs_Click(object sender, EventArgs e)
