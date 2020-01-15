@@ -990,6 +990,20 @@ namespace OleViewDotNet.Forms
             if((e.Control)&&(e.KeyCode == Keys.W))
             {
                 m_dockPanel.ActivePane.CloseActiveContent();
+                return;
+            }
+
+            if ((e.Control) && (e.Alt) && (e.KeyCode == Keys.Left))
+            {
+                m_dockPanel.NavigateDocument(DockPanelHelper.Direction.Left);
+                return;
+            }
+
+
+            if ((e.Control) && (e.Alt) && (e.KeyCode == Keys.Right))
+            {
+                m_dockPanel.NavigateDocument(DockPanelHelper.Direction.Right);
+                return;
             }
         }
     }
