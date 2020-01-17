@@ -54,8 +54,11 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnExportInterfaces = new System.Windows.Forms.Button();
-            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.panelProxy = new System.Windows.Forms.Panel();
             this.btnDqs = new System.Windows.Forms.Button();
+            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();
             this.inputFilter = new OleViewDotNet.InputTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
@@ -69,6 +72,7 @@
             this.tabPageStructures.SuspendLayout();
             this.tabPageEnums.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panelProxy.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -84,7 +88,7 @@
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.btnDqs);
+            this.splitContainer.Panel2.Controls.Add(this.panelProxy);
             this.splitContainer.Panel2.Controls.Add(this.textEditor);
             this.splitContainer.Size = new System.Drawing.Size(699, 418);
             this.splitContainer.SplitterDistance = 293;
@@ -319,6 +323,26 @@
             this.btnExportInterfaces.UseVisualStyleBackColor = true;
             this.btnExportInterfaces.Click += new System.EventHandler(this.btnExportInterfaces_Click);
             // 
+            // panelProxy
+            // 
+            this.panelProxy.Controls.Add(this.label1);
+            this.panelProxy.Controls.Add(this.cbProxyRenderStyle);
+            this.panelProxy.Controls.Add(this.btnDqs);
+            this.panelProxy.Location = new System.Drawing.Point(3, 3);
+            this.panelProxy.Name = "panelProxy";
+            this.panelProxy.Size = new System.Drawing.Size(396, 39);
+            this.panelProxy.TabIndex = 2;
+            // 
+            // btnDqs
+            // 
+            this.btnDqs.Location = new System.Drawing.Point(3, 9);
+            this.btnDqs.Name = "btnDqs";
+            this.btnDqs.Size = new System.Drawing.Size(119, 23);
+            this.btnDqs.TabIndex = 1;
+            this.btnDqs.Text = "Combine with dqs";
+            this.btnDqs.UseVisualStyleBackColor = true;
+            this.btnDqs.Click += new System.EventHandler(this.btnDqs_Click);
+            // 
             // textEditor
             // 
             this.textEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -330,15 +354,29 @@
             this.textEditor.Size = new System.Drawing.Size(402, 376);
             this.textEditor.TabIndex = 0;
             // 
-            // btnDqs
+            // label1
             // 
-            this.btnDqs.Location = new System.Drawing.Point(24, 12);
-            this.btnDqs.Name = "btnDqs";
-            this.btnDqs.Size = new System.Drawing.Size(119, 23);
-            this.btnDqs.TabIndex = 1;
-            this.btnDqs.Text = "Combine with dqs";
-            this.btnDqs.UseVisualStyleBackColor = true;
-            this.btnDqs.Click += new System.EventHandler(this.btnDqs_Click);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(129, 15);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(126, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Rendering style for proxy:";
+            // 
+            // cbProxyRenderStyle
+            // 
+            this.cbProxyRenderStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProxyRenderStyle.FormattingEnabled = true;
+            this.cbProxyRenderStyle.Items.AddRange(new object[] {
+            "Original",
+            "Original, no comments",
+            "C++ style",
+            "C++ style, no comments"});
+            this.cbProxyRenderStyle.Location = new System.Drawing.Point(261, 11);
+            this.cbProxyRenderStyle.Name = "cbProxyRenderStyle";
+            this.cbProxyRenderStyle.Size = new System.Drawing.Size(132, 21);
+            this.cbProxyRenderStyle.TabIndex = 2;
+            this.cbProxyRenderStyle.SelectedIndexChanged += new System.EventHandler(this.cbProxyRenderStyle_SelectedIndexChanged);
             // 
             // inputFilter
             // 
@@ -370,6 +408,8 @@
             this.tabPageEnums.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panelProxy.ResumeLayout(false);
+            this.panelProxy.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -404,5 +444,8 @@
         private InputTextBox inputFilter;
         private System.Windows.Forms.Button btnExportInterfaces;
         private System.Windows.Forms.Button btnDqs;
+        private System.Windows.Forms.Panel panelProxy;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox cbProxyRenderStyle;
     }
 }

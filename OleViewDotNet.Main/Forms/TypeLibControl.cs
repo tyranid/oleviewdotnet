@@ -137,6 +137,8 @@ namespace OleViewDotNet.Forms
             m_iids_to_names = iids_to_names;
             InitializeComponent();
 
+            cbProxyRenderStyle.SelectedIndex = 0;
+
             textEditor.SetHighlighting("C#");
             textEditor.IsReadOnly = true;
             Text = name;
@@ -203,6 +205,19 @@ namespace OleViewDotNet.Forms
         {
         }
 
+        private INdrFormatter GetNdrFormatter(bool useDemangler)
+        {
+            DefaultNdrFormatterFlags flags = cbProxyRenderStyle.SelectedIndex % 2 == 0 ? DefaultNdrFormatterFlags.None : DefaultNdrFormatterFlags.RemoveComments;
+            Func<string, string> demangler = useDemangler ? COMUtilities.DemangleWinRTName : (Func<string, string>)null;
+            bool useNtApiFormatter = this.cbProxyRenderStyle.SelectedIndex < 2;
+            return useNtApiFormatter ?
+                DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags) :
+            
+                // cpp style requested
+                CppNdrFormatter.Create(m_iids_to_names, demangler, flags)
+            ;
+        }
+
         private string GetTextFromTag(object tag)
         {
             var type = tag as Type;
@@ -215,12 +230,12 @@ namespace OleViewDotNet.Forms
             }
             else if (proxy != null)
             {
-                INdrFormatter formatter = DefaultNdrFormatter.Create(m_iids_to_names, COMUtilities.DemangleWinRTName);
+                INdrFormatter formatter = GetNdrFormatter(true);
                 return formatter.FormatComProxy(proxy);
             }
             else if (str != null)
             {
-                INdrFormatter formatter = DefaultNdrFormatter.Create(m_iids_to_names);
+                INdrFormatter formatter = GetNdrFormatter(false);
                 return formatter.FormatComplexType(str);
             }
 
@@ -356,15 +371,15 @@ namespace OleViewDotNet.Forms
                 ovdnIdl = ovdnIdl.Replace(unknownMethodNames[i].Groups[0].Value, " " + dqsSymbolNames[i].Groups[1].Value + "(");
             }
 
-            // removing comments
-            ovdnIdl = Regex.Replace(ovdnIdl, @"/\*.+?\*/\s*", "");
-
-            // removing in/out strings
-            ovdnIdl = Regex.Replace(ovdnIdl, @"\[[^\]]+\] ", "");
-
             // and saving the result to the clipboard
             Clipboard.SetText(ovdnIdl);
             return "Alrighty, the combined lines are now on your clipboard.";
+        }
+
+        private void cbProxyRenderStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if((tabControl.SelectedTab.Controls.Count > 0)&&(tabControl.SelectedTab.Controls[0] is ListView))
+                UpdateFromListView((ListView)tabControl.SelectedTab.Controls[0]);
         }
     }
 }
