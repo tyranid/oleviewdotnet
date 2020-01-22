@@ -54,12 +54,12 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnExportInterfaces = new System.Windows.Forms.Button();
+            this.textBoxFilter = new OleViewDotNet.InputTextBox();
             this.panelProxy = new System.Windows.Forms.Panel();
+            this.lblRendering = new System.Windows.Forms.Label();
+            this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();
             this.btnDqs = new System.Windows.Forms.Button();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();
-            this.inputFilter = new OleViewDotNet.InputTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -98,9 +98,9 @@
             // 
             this.panel2.Controls.Add(this.tabControl);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 42);
+            this.panel2.Location = new System.Drawing.Point(0, 46);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(293, 376);
+            this.panel2.Size = new System.Drawing.Size(293, 372);
             this.panel2.TabIndex = 1;
             // 
             // tabControl
@@ -113,7 +113,7 @@
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(293, 376);
+            this.tabControl.Size = new System.Drawing.Size(293, 372);
             this.tabControl.TabIndex = 3;
             // 
             // tabPageInterfaces
@@ -122,7 +122,7 @@
             this.tabPageInterfaces.Location = new System.Drawing.Point(4, 22);
             this.tabPageInterfaces.Name = "tabPageInterfaces";
             this.tabPageInterfaces.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInterfaces.Size = new System.Drawing.Size(285, 350);
+            this.tabPageInterfaces.Size = new System.Drawing.Size(285, 346);
             this.tabPageInterfaces.TabIndex = 0;
             this.tabPageInterfaces.Text = "Interfaces";
             this.tabPageInterfaces.UseVisualStyleBackColor = true;
@@ -139,7 +139,7 @@
             this.listViewInterfaces.HideSelection = false;
             this.listViewInterfaces.Location = new System.Drawing.Point(3, 3);
             this.listViewInterfaces.Name = "listViewInterfaces";
-            this.listViewInterfaces.Size = new System.Drawing.Size(279, 344);
+            this.listViewInterfaces.Size = new System.Drawing.Size(279, 340);
             this.listViewInterfaces.TabIndex = 0;
             this.listViewInterfaces.UseCompatibleStateImageBehavior = false;
             this.listViewInterfaces.View = System.Windows.Forms.View.Details;
@@ -200,7 +200,7 @@
             this.tabPageClasses.Location = new System.Drawing.Point(4, 22);
             this.tabPageClasses.Name = "tabPageClasses";
             this.tabPageClasses.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageClasses.Size = new System.Drawing.Size(285, 350);
+            this.tabPageClasses.Size = new System.Drawing.Size(285, 346);
             this.tabPageClasses.TabIndex = 3;
             this.tabPageClasses.Text = "Classes";
             this.tabPageClasses.UseVisualStyleBackColor = true;
@@ -217,7 +217,7 @@
             this.listViewClasses.HideSelection = false;
             this.listViewClasses.Location = new System.Drawing.Point(3, 3);
             this.listViewClasses.Name = "listViewClasses";
-            this.listViewClasses.Size = new System.Drawing.Size(279, 344);
+            this.listViewClasses.Size = new System.Drawing.Size(279, 340);
             this.listViewClasses.TabIndex = 1;
             this.listViewClasses.UseCompatibleStateImageBehavior = false;
             this.listViewClasses.View = System.Windows.Forms.View.Details;
@@ -238,7 +238,7 @@
             this.tabPageStructures.Location = new System.Drawing.Point(4, 22);
             this.tabPageStructures.Name = "tabPageStructures";
             this.tabPageStructures.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageStructures.Size = new System.Drawing.Size(285, 350);
+            this.tabPageStructures.Size = new System.Drawing.Size(285, 346);
             this.tabPageStructures.TabIndex = 1;
             this.tabPageStructures.Text = "Structures";
             this.tabPageStructures.UseVisualStyleBackColor = true;
@@ -254,7 +254,7 @@
             this.listViewStructures.HideSelection = false;
             this.listViewStructures.Location = new System.Drawing.Point(3, 3);
             this.listViewStructures.Name = "listViewStructures";
-            this.listViewStructures.Size = new System.Drawing.Size(279, 344);
+            this.listViewStructures.Size = new System.Drawing.Size(279, 340);
             this.listViewStructures.TabIndex = 1;
             this.listViewStructures.UseCompatibleStateImageBehavior = false;
             this.listViewStructures.View = System.Windows.Forms.View.Details;
@@ -275,7 +275,7 @@
             this.tabPageEnums.Location = new System.Drawing.Point(4, 22);
             this.tabPageEnums.Name = "tabPageEnums";
             this.tabPageEnums.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageEnums.Size = new System.Drawing.Size(285, 350);
+            this.tabPageEnums.Size = new System.Drawing.Size(285, 346);
             this.tabPageEnums.TabIndex = 2;
             this.tabPageEnums.Text = "Enums";
             this.tabPageEnums.UseVisualStyleBackColor = true;
@@ -291,7 +291,7 @@
             this.listViewEnums.HideSelection = false;
             this.listViewEnums.Location = new System.Drawing.Point(3, 3);
             this.listViewEnums.Name = "listViewEnums";
-            this.listViewEnums.Size = new System.Drawing.Size(279, 344);
+            this.listViewEnums.Size = new System.Drawing.Size(279, 340);
             this.listViewEnums.TabIndex = 1;
             this.listViewEnums.UseCompatibleStateImageBehavior = false;
             this.listViewEnums.View = System.Windows.Forms.View.Details;
@@ -305,36 +305,73 @@
             // panel1
             // 
             this.panel1.Controls.Add(this.btnExportInterfaces);
-            this.panel1.Controls.Add(this.inputFilter);
+            this.panel1.Controls.Add(this.textBoxFilter);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(293, 42);
+            this.panel1.Size = new System.Drawing.Size(293, 46);
             this.panel1.TabIndex = 0;
             // 
             // btnExportInterfaces
             // 
             this.btnExportInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnExportInterfaces.Location = new System.Drawing.Point(210, 12);
+            this.btnExportInterfaces.Location = new System.Drawing.Point(210, 11);
             this.btnExportInterfaces.Name = "btnExportInterfaces";
             this.btnExportInterfaces.Size = new System.Drawing.Size(73, 23);
             this.btnExportInterfaces.TabIndex = 7;
-            this.btnExportInterfaces.Text = "clpbrd!";
+            this.btnExportInterfaces.Text = "Export";
             this.btnExportInterfaces.UseVisualStyleBackColor = true;
             this.btnExportInterfaces.Click += new System.EventHandler(this.btnExportInterfaces_Click);
             // 
+            // textBoxFilter
+            // 
+            this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxFilter.Location = new System.Drawing.Point(7, 12);
+            this.textBoxFilter.Name = "textBoxFilter";
+            this.textBoxFilter.Size = new System.Drawing.Size(197, 20);
+            this.textBoxFilter.TabIndex = 6;
+            this.textBoxFilter.Enter += new System.EventHandler(this.textBoxFilter_Enter);
+            this.textBoxFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyUp);
+            // 
             // panelProxy
             // 
-            this.panelProxy.Controls.Add(this.label1);
+            this.panelProxy.Controls.Add(this.lblRendering);
             this.panelProxy.Controls.Add(this.cbProxyRenderStyle);
             this.panelProxy.Controls.Add(this.btnDqs);
             this.panelProxy.Location = new System.Drawing.Point(3, 3);
             this.panelProxy.Name = "panelProxy";
-            this.panelProxy.Size = new System.Drawing.Size(396, 39);
+            this.panelProxy.Size = new System.Drawing.Size(396, 43);
             this.panelProxy.TabIndex = 2;
+            // 
+            // lblRendering
+            // 
+            this.lblRendering.AutoSize = true;
+            this.lblRendering.Location = new System.Drawing.Point(129, 14);
+            this.lblRendering.Name = "lblRendering";
+            this.lblRendering.Size = new System.Drawing.Size(83, 13);
+            this.lblRendering.TabIndex = 3;
+            this.lblRendering.Text = "Rendering style:";
+            // 
+            // cbProxyRenderStyle
+            // 
+            this.cbProxyRenderStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProxyRenderStyle.Enabled = false;
+            this.cbProxyRenderStyle.FormattingEnabled = true;
+            this.cbProxyRenderStyle.Items.AddRange(new object[] {
+            "Original",
+            "Original, no comments",
+            "C++ style",
+            "C++ style, no comments"});
+            this.cbProxyRenderStyle.Location = new System.Drawing.Point(218, 9);
+            this.cbProxyRenderStyle.Name = "cbProxyRenderStyle";
+            this.cbProxyRenderStyle.Size = new System.Drawing.Size(175, 21);
+            this.cbProxyRenderStyle.TabIndex = 2;
+            this.cbProxyRenderStyle.SelectedIndexChanged += new System.EventHandler(this.cbProxyRenderStyle_SelectedIndexChanged);
             // 
             // btnDqs
             // 
+            this.btnDqs.Enabled = false;
             this.btnDqs.Location = new System.Drawing.Point(3, 9);
             this.btnDqs.Name = "btnDqs";
             this.btnDqs.Size = new System.Drawing.Size(119, 23);
@@ -349,44 +386,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textEditor.IsReadOnly = false;
-            this.textEditor.Location = new System.Drawing.Point(0, 42);
+            this.textEditor.Location = new System.Drawing.Point(0, 68);
             this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(402, 376);
+            this.textEditor.Size = new System.Drawing.Size(402, 350);
             this.textEditor.TabIndex = 0;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(129, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(126, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Rendering style for proxy:";
-            // 
-            // cbProxyRenderStyle
-            // 
-            this.cbProxyRenderStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProxyRenderStyle.FormattingEnabled = true;
-            this.cbProxyRenderStyle.Items.AddRange(new object[] {
-            "Original",
-            "Original, no comments",
-            "C++ style",
-            "C++ style, no comments"});
-            this.cbProxyRenderStyle.Location = new System.Drawing.Point(261, 11);
-            this.cbProxyRenderStyle.Name = "cbProxyRenderStyle";
-            this.cbProxyRenderStyle.Size = new System.Drawing.Size(132, 21);
-            this.cbProxyRenderStyle.TabIndex = 2;
-            this.cbProxyRenderStyle.SelectedIndexChanged += new System.EventHandler(this.cbProxyRenderStyle_SelectedIndexChanged);
-            // 
-            // inputFilter
-            // 
-            this.inputFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.inputFilter.Location = new System.Drawing.Point(7, 12);
-            this.inputFilter.Name = "inputFilter";
-            this.inputFilter.Size = new System.Drawing.Size(197, 20);
-            this.inputFilter.TabIndex = 6;
-            this.inputFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.inputFilter_KeyUp);
             // 
             // TypeLibControl
             // 
@@ -441,11 +444,11 @@
         private System.Windows.Forms.ListView listViewEnums;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.Panel panel1;
-        private InputTextBox inputFilter;
+        private InputTextBox textBoxFilter;
         private System.Windows.Forms.Button btnExportInterfaces;
         private System.Windows.Forms.Button btnDqs;
         private System.Windows.Forms.Panel panelProxy;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblRendering;
         private System.Windows.Forms.ComboBox cbProxyRenderStyle;
     }
 }

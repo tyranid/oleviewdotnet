@@ -2020,11 +2020,27 @@ namespace OleViewDotNet.Forms
                 {
                     try
                     {
+                        string comClassIdName = null;
+                        Guid? comClassId = null;
+                        if(this.Text == "Local Services")
+                        {
+                            comClassIdName = node.Parent.Text;
+                            COMCLSIDEntry comClassClsId = node.Parent.Tag as COMCLSIDEntry;
+                            comClassId = comClassClsId?.Clsid;
+                        }
+
                         using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
                         {
-                            EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                                COMUtilities.GetFileName(clsid.DefaultServer), 
-                                COMProxyInstance.GetFromCLSID(clsid, resolver), selected_iid));
+                            EntryPoint.GetMainForm(m_registry).HostControl(
+                                new TypeLibControl(
+                                    m_registry,
+                                    COMUtilities.GetFileName(clsid.DefaultServer), 
+                                    COMProxyInstance.GetFromCLSID(clsid, resolver), 
+                                    selected_iid,
+                                    comClassIdName, 
+                                    comClassId
+                                )
+                            );
                         }
                     }
                     catch (Exception ex)

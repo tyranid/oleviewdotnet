@@ -31,6 +31,8 @@ namespace OleViewDotNet.Forms
         private IDictionary<Guid, string> m_iids_to_names;
         private IEnumerable<ListViewItemWithGuid> interfaces;
         private Guid guid_to_view;
+        private string comClassIdName;
+        private Guid? comClassId;
 
         private const string filterDefaultString = "filter interfaces";
 
@@ -104,9 +106,11 @@ namespace OleViewDotNet.Forms
             IEnumerable<ListViewItemWithGuid> items,
             TabPage tab_page, Guid guid_to_view, bool removeIfEmpty = true)
         {
+            // clear is done outside of .Any() check so if the quick filter has no hits,
+            // the previous ones will be cleared out of the listview 
+            list.Items.Clear();
             if (items.Any())
             {
-                list.Items.Clear();
                 list.Items.AddRange(items.ToArray());
                 list.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 foreach (ListViewItemWithGuid item in list.Items)
@@ -143,7 +147,7 @@ namespace OleViewDotNet.Forms
             textEditor.IsReadOnly = true;
             Text = name;
 
-            this.inputFilter.Text = filterDefaultString;
+            this.textBoxFilter.Text = filterDefaultString;
             this.guid_to_view = guid_to_view;
             this.interfaces = interfaces;
 
@@ -174,17 +178,17 @@ namespace OleViewDotNet.Forms
 
         private void RefreshInterfaces()
         {
-            bool showAll = inputFilter.Text.Length <= 0 || inputFilter.Text.Equals(filterDefaultString);
+            bool showAll = textBoxFilter.Text.Length <= 0 || textBoxFilter.Text.Equals(filterDefaultString);
             var filteredInterfaces = interfaces;
             if(!showAll)
             {
                 filteredInterfaces = interfaces.Where(item =>
                 {
-                    if (item.Text.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1)
+                    if (item.Text.IndexOf(textBoxFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1)
                         return true;
 
                     string interfaceDescription = GetTextFromTag(item.Tag);
-                    return interfaceDescription.IndexOf(inputFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
+                    return interfaceDescription.IndexOf(textBoxFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
                 });
             }
             AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, guid_to_view, false);
@@ -198,11 +202,16 @@ namespace OleViewDotNet.Forms
         {
         }
 
-        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view)
+        public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view, string comClassIdName = null, Guid? comClassId = null)
             : this(registry.InterfacesToNames, name, guid_to_view,
                   FormatProxyInstance(proxy),
                   new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
+            // controls on this panel are not enabled by default, activating them in the proxy view only
+            this.btnDqs.Enabled = true;
+            this.cbProxyRenderStyle.Enabled = true;
+            this.comClassId = comClassId;
+            this.comClassIdName = comClassIdName;
         }
 
         private INdrFormatter GetNdrFormatter(bool useDemangler)
@@ -318,17 +327,17 @@ namespace OleViewDotNet.Forms
                 UpdateFromListView((ListView)e.TabPage.Controls[0]);
             }
         }
-        
-        private void inputFilter_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Enter) return;
-            e.Handled = true;
-            RefreshInterfaces();
-        }
 
         private void btnExportInterfaces_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
+            if((cbProxyRenderStyle.SelectedIndex > 1) && (comClassIdName != null) && (comClassId != null))
+            {
+                // C++ style is requsted, let's add a line about the CLSID being rendered
+
+                sb.AppendLine(COMUtilities.FormatGuidAsCStruct(comClassIdName, comClassId.Value));
+                sb.AppendLine();
+            }
             foreach(var listView in new ListView[] { listViewEnums, listViewStructures, listViewClasses, listViewInterfaces })
             {
                 foreach (ListViewItem item in listView.Items)
@@ -341,7 +350,7 @@ namespace OleViewDotNet.Forms
             }
 
             Clipboard.SetText(sb.ToString());
-            MessageBox.Show("View exported to the clipboard as text.");
+            MessageBox.Show("View has been exported to the clipboard as text.");
         }
 
         private void btnDqs_Click(object sender, EventArgs e)
@@ -380,6 +389,16 @@ namespace OleViewDotNet.Forms
         {
             if((tabControl.SelectedTab.Controls.Count > 0)&&(tabControl.SelectedTab.Controls[0] is ListView))
                 UpdateFromListView((ListView)tabControl.SelectedTab.Controls[0]);
+        }
+
+        private void textBoxFilter_Enter(object sender, EventArgs e)
+        {
+            textBoxFilter.SelectAll();
+        }
+
+        private void textBoxFilter_KeyUp(object sender, KeyEventArgs e)
+        {
+            RefreshInterfaces();
         }
     }
 }
