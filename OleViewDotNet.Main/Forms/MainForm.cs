@@ -984,5 +984,45 @@ namespace OleViewDotNet.Forms
                 EntryPoint.ShowError(this, ex);
             }
         }
+
+        private void FocusOnTextBoxFilter()
+        {
+            // user hit search so we set the input focus into the first inputbox (which is usually a filter input)
+            DocumentForm df = m_dockPanel.ActivePane.ActiveContent as DocumentForm;
+            if (df == null) return;
+
+            Control[] textBoxFilters = df.Controls.Find("textBoxFilter", true);
+            if (textBoxFilters.Length != 1) return;
+
+            textBoxFilters[0].Focus();
+        }
+
+        private void MainForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if((e.Control)&&(e.KeyCode == Keys.W))
+            {
+                m_dockPanel.ActivePane.CloseActiveContent();
+                return;
+            }
+
+            if ((e.Control) && (e.Alt) && (e.KeyCode == Keys.Left))
+            {
+                m_dockPanel.NavigateDocument(DockPanelHelper.Direction.Left);
+                return;
+            }
+
+
+            if ((e.Control) && (e.Alt) && (e.KeyCode == Keys.Right))
+            {
+                m_dockPanel.NavigateDocument(DockPanelHelper.Direction.Right);
+                return;
+            }
+
+            if ((e.Control) && (e.KeyCode == Keys.F))
+            {
+                FocusOnTextBoxFilter();
+                return;
+            }
+        }
     }
 }

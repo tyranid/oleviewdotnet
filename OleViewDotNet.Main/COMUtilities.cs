@@ -39,6 +39,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -2237,6 +2238,19 @@ namespace OleViewDotNet
         internal static string FormatGuid(this Guid guid)
         {
             return guid.ToString(Properties.Settings.Default.GuidFormat).ToUpper();
+        }
+
+        internal static string FormatComClassNameAsCIdentifier(string comClassName)
+        {
+            string re = "CLSID_" + Regex.Replace(comClassName, @"[^a-zA-Z0-9]", "_");
+            re = Regex.Replace(re, "__+", "_");
+            return re;
+        }
+        internal static string FormatGuidAsCStruct(string comClassName, Guid guidToFormat)
+        {
+            string id = FormatComClassNameAsCIdentifier(comClassName);
+            string re = GuidToString(guidToFormat, GuidFormat.Structure);
+            return re.Replace("guidObject", id);
         }
 
         internal static string FormatGuidDefault(this Guid guid)

@@ -75,7 +75,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NtApiDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NtApiDotNet.1.1.24\lib\net45\NtApiDotNet.dll</HintPath>
+      <HintPath>..\packages\NtApiDotNet.1.1.26\lib\net45\NtApiDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -90,6 +90,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DockPaneHelper.cs" />
     <Compile Include="Forms\AboutForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,6 +99,12 @@
     </Compile>
     <Compile Include="ActivationContext.cs" />
     <Compile Include="Database\AppxPackageName.cs" />
+    <Compile Include="Forms\TextAreaInputForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TextAreaInputForm.Designer.cs">
+      <DependentUpon>TextAreaInputForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="IComGuid.cs" />
     <Compile Include="Wrappers\BuiltinWrappers.cs" />
     <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
@@ -410,6 +417,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\StorageViewer.resx">
       <DependentUpon>StorageViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TextAreaInputForm.resx">
+      <DependentUpon>TextAreaInputForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ViewFilterControl.resx">
       <DependentUpon>ViewFilterControl.cs</DependentUpon>
