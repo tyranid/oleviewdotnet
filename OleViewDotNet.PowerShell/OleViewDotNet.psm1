@@ -1325,7 +1325,7 @@ function Get-ComObjRef {
         [object]$Object,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromPath")]
         [string]$Path,
-		[Parameter(Mandatory, Position = 0, ParameterSetName = "FromBytes")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromBytes")]
         [byte[]]$Bytes,
         [ComObjRefOutput]$Output = "Object",
         [Parameter(ParameterSetName = "FromObject", ValueFromPipelineByPropertyName)]
@@ -1354,7 +1354,7 @@ function Get-ComObjRef {
                 $ba = Get-Content -Path $Path -Encoding Byte
                 [OleViewDotNet.COMObjRef]::FromArray($ba) | Out-ObjRef -Output $Output
             }
-			"FromBytes" {
+            "FromBytes" {
                 [OleViewDotNet.COMObjRef]::FromArray($Bytes) | Out-ObjRef -Output $Output
             }
         }
@@ -2880,9 +2880,9 @@ None
 System.Guid
 #>
 function Get-ComGuid {
-	[CmdletBinding(DefaultParameterSetName="FromComGuid")]
+    [CmdletBinding(DefaultParameterSetName="FromComGuid")]
     Param(
-		[parameter(Mandatory, ParameterSetName = "FromComGuid", Position = 0, ValueFromPipeline)]
+        [parameter(Mandatory, ParameterSetName = "FromComGuid", Position = 0, ValueFromPipeline)]
         [OleViewDotNet.IComGuid[]]$ComGuid,
         [parameter(Mandatory, ParameterSetName = "FromBytes")]
         [byte[]]$Bytes,
@@ -2890,19 +2890,19 @@ function Get-ComGuid {
         [int[]]$Ints
     )
 
-	PROCESS {
-		switch($PSCmdlet.ParameterSetName) {
-			"FromBytes" {
-				[guid]::new($Bytes) | Write-Output
-			}
-			"FromInts" {
-				[OleViewDotNet.PowerShell.PowerShellUtils]::GuidFromInts($Ints) | Write-Output
-			}
-			"FromComGuid" {
-				foreach($obj in $Object) {
-					$Object.ComGuid | Write-Output
-				}
-			}
-		}
-	}
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromBytes" {
+                [guid]::new($Bytes) | Write-Output
+            }
+            "FromInts" {
+                [OleViewDotNet.PowerShell.PowerShellUtils]::GuidFromInts($Ints) | Write-Output
+            }
+            "FromComGuid" {
+                foreach($obj in $Object) {
+                    $Object.ComGuid | Write-Output
+                }
+            }
+        }
+    }
 }
