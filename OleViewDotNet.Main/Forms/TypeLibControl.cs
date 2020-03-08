@@ -398,6 +398,7 @@ namespace OleViewDotNet.Forms
 
         private void textBoxFilter_KeyUp(object sender, KeyEventArgs e)
         {
+            if (IsDisposed) return;
             RefreshInterfaces();
         }
     }
