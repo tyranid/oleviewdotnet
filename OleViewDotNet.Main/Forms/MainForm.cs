@@ -792,6 +792,10 @@ namespace OleViewDotNet.Forms
                     {
                         HostControl(new PropertiesControl(m_registry, string.Format("IPID: {0}", ipid.FormatGuid()), ipid_entry));
                     }
+                    else
+                    {
+                        throw new Exception("Couldn't find the target IPID in the remote process. Did you configure the Dbghelp and symbol paths correctly in the main settings?");
+                    }
                 }
                 else
                 {
