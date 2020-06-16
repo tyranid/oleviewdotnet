@@ -2768,15 +2768,15 @@ None
 .OUTPUTS
 OleViewDotNet.COMProgIDEntry
 .EXAMPLE
-Get-ComProgIdId
+Get-ComProgId
 Get all COM ProgIds from the current database.
 #>
 function Get-ComProgId {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [Parameter(Mandatory, ParameterSetName = "FromProgId")]
-        [Guid]$ProgId,
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromProgId")]
+        [string]$ProgId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
@@ -2791,11 +2791,11 @@ function Get-ComProgId {
         "All" {
             Write-Output $Database.Progids.Values
         }
-        "FromAppId" {
+        "FromProgId" {
             Write-Output $Database.Progids[$ProgId]
         }
         "FromName" {
-            Get-ComProgId -Database $Database | ? Name -eq $Name | Write-Output
+            Get-ComProgId -Database $Database | ? Name -match $Name | Write-Output
         }
         "FromSource" {
             Get-ComProgId -Database $Database | ? Source -eq $Source | Write-Output
