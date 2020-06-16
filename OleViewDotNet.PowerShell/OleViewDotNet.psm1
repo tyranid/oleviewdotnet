@@ -230,7 +230,8 @@ function Set-CurrentComDatabase {
 .SYNOPSIS
 Get a COM database from the registry or a file.
 .DESCRIPTION
-This cmdlet loads a COM registration information database from the current registry or a file and returns an object which can be inspected or passed to other methods.
+This cmdlet loads a COM registration information database from the current registry or a file and returns an object which can be inspected or passed to other methods. The
+database will be set as the current global data unless -PassThru is specified.
 .PARAMETER LoadMode
 Specify what to load from the registry.
 .PARAMETER User
@@ -240,8 +241,10 @@ Specify a path to load a saved COM database.
 .PARAMETER NoProgress
 Don't show progress for load.
 .PARAMETER SetCurrent
-Specify after loading that the database is set as the current database. When setting the current database the object isn't returned. To access it directly
-call Get-CurrentComDatabase.
+No longer used.
+.PARAMETER PassThru
+Specify to return the loaded database.
+.PARAMETER
 .INPUTS
 None
 .OUTPUTS
@@ -256,8 +259,8 @@ Load a user-only database for the current user.
 Get-ComDatabase -User S-1-5-X-Y-Z
 Load a merged COM database including user-only information from the user SID.
 .EXAMPLE
-Get-ComDatabase -SetCurrent
-Load a default, merged COM database then sets it as the current database.
+$db = Get-ComDatabase -PassThru
+Load a default, merged COM database and return it as an object.
 #>
 function Get-ComDatabase {
     [CmdletBinding(DefaultParameterSetName = "FromRegistry")]
@@ -269,7 +272,8 @@ function Get-ComDatabase {
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
         [switch]$NoProgress,
-        [switch]$SetCurrent
+        [switch]$SetCurrent,
+        [switch]$PassThru
     )
     $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
     $comdb = switch($PSCmdlet.ParameterSetName) {
@@ -281,10 +285,15 @@ function Get-ComDatabase {
             [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
         }
     }
+
     if ($SetCurrent) {
-        Set-CurrentComDatabase $comdb
-    } else {
+        Write-Warning "SetCurrent is now the default. Use PassThru to return a database object."
+    }
+
+    if ($PassThru) {
         Write-Output $comdb
+    } else {
+        Set-CurrentComDatabase $comdb
     }
 }
 
