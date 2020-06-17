@@ -1292,7 +1292,7 @@ Enum ComObjRefOutput
 function Out-ObjRef {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory, ValueFromPipeline)]
+        [parameter(Mandatory, Position = 0, ValueFromPipeline)]
         [OleViewDotNet.ComObjRef]$ObjRef,
         [ComObjRefOutput]$Output = "Object"
     )
@@ -2822,7 +2822,7 @@ function Get-ComProgId {
             Write-Output $Database.Progids[$ProgId]
         }
         "FromName" {
-            Get-ComProgId -Database $Database | Where-Object Name -match $Name | Write-Output
+            Get-ComProgId -Database $Database | Where-Object Name -Match $Name | Write-Output
         }
         "FromSource" {
             Get-ComProgId -Database $Database | Where-Object Source -eq $Source | Write-Output
