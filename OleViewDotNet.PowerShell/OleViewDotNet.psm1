@@ -450,6 +450,9 @@ Get all COM classes from a database.
 Get-ComClass -Clsid "ffe1df5f-9f06-46d3-af27-f1fc10d63892"
 Get a COM class with a specified CLSID.
 .EXAMPLE
+Get-ComClass -PartialClsid "ffe1df5f"
+Get COM classes with a partial CLSID.
+.EXAMPLE
 Get-ComClass -Name "TestClass"
 Get COM classes which where the name is TestClass.
 .EXAMPLE
@@ -490,8 +493,10 @@ function Get-ComClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [Parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
+        [Parameter(Mandatory, ParameterSetName = "FromPartialClsid")]
+        [string]$PartialClsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [switch]$AllowNoReg,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
@@ -539,8 +544,11 @@ function Get-ComClass {
                 Write-Output $Database.Clsids[$Clsid]
             }
         }
+        "FromPartialClsid" {
+            Get-ComClass -Database $Database | Where-Object Clsid -Match $PartialClsid | Write-Output
+        }
         "FromName" {
-            Get-ComClass -Database $Database | ? Name -eq $Name | Write-Output
+            Get-ComClass -Database $Database | Where-Object Name -eq $Name | Write-Output
         }
         "FromServer" {
             Get-ComClass -Database $Database | Where-HasComServer -ServerName $ServerName -ServerType $ServerType | Write-Output
@@ -552,13 +560,13 @@ function Get-ComClass {
             Write-Output $Database.MapProgIdToClsid($ProgId)
         }
         "FromIU" {
-            Get-ComClass -Database $Database | ? { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
+            Get-ComClass -Database $Database | Where-Object { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
         }
         "FromService" {
-            Get-ComClass -Database $Database | ? { $_.HasAppID -and $_.AppIDEntry.IsService } | Write-Output
+            Get-ComClass -Database $Database | Where-Object { $_.HasAppID -and $_.AppIDEntry.IsService } | Write-Output
         }
         "FromServiceName" {
-            Get-ComClass -Database $Database -Service | ? { $_.AppIDEntry.ServiceName -eq $ServiceName } | Write-Output
+            Get-ComClass -Database $Database -Service | Where-Object { $_.AppIDEntry.ServiceName -eq $ServiceName } | Write-Output
         }
         "FromObject" {
             $Object = Unwrap-ComObject $Object
@@ -574,10 +582,10 @@ function Get-ComClass {
             Get-ComCategory -Name $CatName | Select-Object -ExpandProperty ClassEntries | Write-Output
         }
         "FromSource" {
-            Get-ComClass -Database $Database | ? Source -eq $Source | Write-Output
+            Get-ComClass -Database $Database | Where-Object Source -eq $Source | Write-Output
         }
         "FromTrustedMarshaller" {
-            Get-ComClass -Database $Database | ? TrustedMarshaller
+            Get-ComClass -Database $Database | Where-Object TrustedMarshaller
         }
     }
 }
@@ -785,8 +793,10 @@ function Get-ComAppId {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [Parameter(Mandatory, ParameterSetName = "FromAppId")]
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromAppId")]
         [Guid]$AppId,
+        [Parameter(Mandatory, ParameterSetName = "FromPartialAppId")]
+        [string]$PartialAppId,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(ParameterSetName = "FromServiceName")]
@@ -808,17 +818,20 @@ function Get-ComAppId {
         "FromAppId" {
             Write-Output $Database.AppIDs[$AppId]
         }
+        "FromPartialAppId" {
+            Get-ComAppId -Database $Database | Where-Object AppId -Match $PartialAppId | Write-Output
+        }
         "FromName" {
-            Get-ComAppId -Database $Database | ? Name -eq $Name | Write-Output
+            Get-ComAppId -Database $Database | Where-Object Name -eq $Name | Write-Output
         }
         "FromServiceName" {
-            Get-ComAppId -Database $Database | ? ServiceName -eq $ServiceName | Write-Output
+            Get-ComAppId -Database $Database | Where-Object ServiceName -eq $ServiceName | Write-Output
         }
         "FromIsService" {
-            Get-ComAppId -Database $Database | ? IsService | Write-Output
+            Get-ComAppId -Database $Database | Where-Object IsService | Write-Output
         }
         "FromSource" {
-            Get-ComAppId -Database $Database | ? Source -eq $Source | Write-Output
+            Get-ComAppId -Database $Database | Where-Object Source -eq $Source | Write-Output
         }
     }
 }
@@ -896,7 +909,7 @@ Specify to not query for the interfaces at all and only return what's already av
 .PARAMETER NoProgress
 Don't show progress for query.
 .PARAMETER Token
-The token to use when querying for the query.
+The token to use when querying for the interfaces.
 .INPUTS
 None
 .OUTPUTS
@@ -979,7 +992,7 @@ function Get-ComRuntimeClass {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromDllPath")]
         [string]$DllPath,
@@ -1001,13 +1014,13 @@ function Get-ComRuntimeClass {
             $Database.RuntimeClasses[$Name] | Write-Output
         }
         "FromDllPath" {
-            Get-ComRuntimeClass -Database $Database | ? DllPath -eq $DllPath | Write-Output
+            Get-ComRuntimeClass -Database $Database | Where-Object DllPath -eq $DllPath | Write-Output
         }
         "FromActivationType" {
-            Get-ComRuntimeClass -Database $Database | ? ActivationType -eq $ActivationType | Write-Output
+            Get-ComRuntimeClass -Database $Database | Where-Object ActivationType -eq $ActivationType | Write-Output
         }
         "FromTrustLevel" {
-            Get-ComRuntimeClass -Database $Database | ? TrustLevel -eq $TrustLevel | Write-Output
+            Get-ComRuntimeClass -Database $Database | Where-Object TrustLevel -eq $TrustLevel | Write-Output
         }
     }
 }
@@ -1042,7 +1055,7 @@ function Get-ComRuntimeServer {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [Parameter(Mandatory, ParameterSetName = "FromName")]
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromExePath")]
         [string]$ExePath,
@@ -1064,13 +1077,13 @@ function Get-ComRuntimeServer {
             $Database.RuntimeServers[$Name] | Write-Output
         }
         "FromExePath" {
-            Get-ComRuntimeServer -Database $Database | ? ExePath -eq $ExePath | Write-Output
+            Get-ComRuntimeServer -Database $Database | Where-Object ExePath -eq $ExePath | Write-Output
         }
         "FromServerType" {
-            Get-ComRuntimeServer -Database $Database | ? ServerType -eq $ServerType | Write-Output
+            Get-ComRuntimeServer -Database $Database | Where-Object ServerType -eq $ServerType | Write-Output
         }
         "FromIdentityType" {
-            Get-ComRuntimeServer -Database $Database | ? IdentityType -eq $IdentityType | Write-Output
+            Get-ComRuntimeServer -Database $Database | Where-Object IdentityType -eq $IdentityType | Write-Output
         }
     }
 }
@@ -1117,8 +1130,10 @@ Get COM interfaces supported by an object.
 function Get-ComInterface {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
-        [Parameter(Mandatory, ParameterSetName = "FromIid", ValueFromPipelineByPropertyName)]
+        [Parameter(Position = 0, Mandatory, ParameterSetName = "FromIid", ValueFromPipelineByPropertyName)]
         [Guid]$Iid,
+        [Parameter(Mandatory, ParameterSetName = "FromPartialIid")]
+        [string]$PartialIid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [Parameter(Mandatory, ParameterSetName = "FromObject")]
@@ -1141,7 +1156,10 @@ function Get-ComInterface {
             Write-Output $Database.Interfaces.Values
         }
         "FromName" {
-            Get-ComInterface -Database $Database | ? Name -eq $Name | Write-Output
+            Get-ComInterface -Database $Database | Where-Object Name -eq $Name | Write-Output
+        }
+        "FromPartialIid" {
+            Get-ComInterface -Database $Database | Where-Object Iid -Match $PartialIid | Write-Output
         }
         "FromIid" {
             $Database.Interfaces[$Iid] | Write-Output
@@ -1150,13 +1168,13 @@ function Get-ComInterface {
             $Database.GetInterfacesForObject($Object) | Write-Output
         }
         "FromProxy" {
-            Get-ComInterface -Database $Database | ? ProxyClassEntry -ne $null | Write-Output
+            Get-ComInterface -Database $Database | Where-Object ProxyClassEntry -ne $null | Write-Output
         }
         "FromTypeLib" {
-            Get-ComInterface -Database $Database | ? TypeLibEntry -ne $null | Write-Output
+            Get-ComInterface -Database $Database | Where-Object TypeLibEntry -ne $null | Write-Output
         }
         "FromSource" {
-            Get-ComInterface -Database $Database | ? Source -eq $Source | Write-Output
+            Get-ComInterface -Database $Database | Where-Object Source -eq $Source | Write-Output
         }
     }
 }
@@ -1922,7 +1940,7 @@ function Get-ComRegisteredClass {
         return
     }
     Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
-        | select -ExpandProperty Classes | ? {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
+        | select -ExpandProperty Classes | Where-Object {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
 }
 
 <#
@@ -2030,7 +2048,7 @@ function Get-ComTypeLib {
             Get-ComTypeLib $InterfaceInstance.Iid -Database $Database | Write-Output
         }
         "FromSource" {
-            Get-ComTypeLib -Database $Database | ? Source -eq $Source | Write-Output
+            Get-ComTypeLib -Database $Database | Where-Object Source -eq $Source | Write-Output
         }
     }
 }
@@ -2336,10 +2354,10 @@ function Get-ComRuntimeInterface {
                 [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
             }
             "FromName" {
-                Get-ComRuntimeInterface | ? Name -eq $Name | Write-Output
+                Get-ComRuntimeInterface | Where-Object Name -eq $Name | Write-Output
             }
             "FromFullName" {
-                Get-ComRuntimeInterface | ? FullName -eq $FullName | Write-Output
+                Get-ComRuntimeInterface | Where-Object FullName -eq $FullName | Write-Output
             }
             "FromIid" {
                 [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
@@ -2448,7 +2466,7 @@ function Get-ComCategory {
             $Database.ImplementedCategories.Values | Write-Output 
         }
         "FromName" {
-            Get-ComCategory | ? Name -eq $Name | Write-Output
+            Get-ComCategory | Where-Object Name -eq $Name | Write-Output
         }
         "FromCatId" {
             $Database.ImplementedCategories[$CatId] | Write-Output
@@ -2748,13 +2766,13 @@ function Get-ComMimeType {
             $Database.MimeTypes | Write-Output 
         }
         "FromMimeType" {
-            $Database.MimeTypes | ? MimeType -eq $MimeType | Write-Output
+            $Database.MimeTypes | Where-Object MimeType -eq $MimeType | Write-Output
         }
         "FromExtension" {
             if (!$Extension.StartsWith(".")) {
                 $Extension = "." + $Extension
             }
-            $Database.MimeTypes | ? Extension -eq $Extension | Write-Output
+            $Database.MimeTypes | Where-Object Extension -eq $Extension | Write-Output
         }
     }
 }
@@ -2804,10 +2822,10 @@ function Get-ComProgId {
             Write-Output $Database.Progids[$ProgId]
         }
         "FromName" {
-            Get-ComProgId -Database $Database | ? Name -match $Name | Write-Output
+            Get-ComProgId -Database $Database | Where-Object Name -match $Name | Write-Output
         }
         "FromSource" {
-            Get-ComProgId -Database $Database | ? Source -eq $Source | Write-Output
+            Get-ComProgId -Database $Database | Where-Object Source -eq $Source | Write-Output
         }
     }
 }
