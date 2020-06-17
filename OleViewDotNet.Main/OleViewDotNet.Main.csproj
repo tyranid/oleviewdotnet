@@ -553,7 +553,13 @@
     <None Include="symbol_cache\D376A4B1765B8DF3E7E9CDE98DB3200E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="symbol_cache\D3D5A45D9F06797A0623DE34F0F16D8F.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="symbol_cache\ED738DC2128A0F1D48755A9FC8F91B57.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="symbol_cache\F0E2032A2AF04E2C38D2F74EE8DFC42E.sym">
