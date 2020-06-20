@@ -895,6 +895,11 @@ namespace OleViewDotNet.Database
         }
 
         /// <summary>
+        /// True if this class has the trusted marshaller category.
+        /// </summary>
+        public bool TrustedMarshallerCategory => Categories.Contains(COMCategory.CATID_TrustedMarshaler);
+
+        /// <summary>
         /// True if this class is marked as safe to script.
         /// </summary>
         public bool SafeForScripting
