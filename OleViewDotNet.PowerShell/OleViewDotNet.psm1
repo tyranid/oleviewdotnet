@@ -1575,16 +1575,22 @@ function New-ComObject {
 
     PROCESS {
         $obj = $null
+        $iid_set = $true
+        if ($Iid -eq [guid]::Empty) {
+            $Iid = "00000000-0000-0000-C000-000000000046"
+            $iid_set = $false
+        }
+
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
                 $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
             }
             "FromClsid" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, `
-                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+                    $Iid, $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
@@ -1604,12 +1610,9 @@ function New-ComObject {
         }
 
         if ($null -ne $obj) {
-            if ($null -ne $Ipid -and $Iid -eq [guid]::Empty) {
+            if ($null -ne $Ipid -and !$iid_set) {
                 Wrap-ComObject $obj -Ipid $Ipid -NoWrapper:$NoWrapper | Write-Output
             } else {
-                if ($Iid -eq [guid]::Empty) {
-                    $Iid = "00000000-0000-0000-C000-000000000046"
-                }
                 Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper -LoadType:$LoadType -DataBase $DataBase | Write-Output
             }
         }
@@ -1637,7 +1640,7 @@ Don't wrap factory object in a callable wrapper.
 function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass", ValueFromPipeline)]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
