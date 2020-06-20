@@ -1544,15 +1544,15 @@ Create the object from an existing IPID.
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass", ValueFromPipeline)]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory", ValueFromPipeline)]
         [OleViewDotNet.Wrappers.IClassFactoryWrapper]$Factory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
         [OleViewDotNet.Wrappers.IActivationFactoryWrapper]$ActivationFactory,
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
+        [Parameter(Mandatory, ParameterSetName = "FromClsid")]
+        [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
@@ -1581,10 +1581,10 @@ function New-ComObject {
             }
             "FromClsid" {
                 $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, `
-                    $Iid, $ClassContext, $RemoteServer)
+                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
+                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, "00000000-0000-0000-C000-000000000046")
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
