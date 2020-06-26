@@ -285,13 +285,13 @@ namespace OleViewDotNet
                 {
                     return COMObjrefFlags.Custom;
                 }
-                else if (this is COMObjRefStandard)
-                {
-                    return COMObjrefFlags.Standard;
-                }
                 else if (this is COMObjRefHandler)
                 {
                     return COMObjrefFlags.Handler;
+                }
+                else if (this is COMObjRefStandard)
+                {
+                    return COMObjrefFlags.Standard;
                 }
                 else
                 {
