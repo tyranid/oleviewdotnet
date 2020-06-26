@@ -19,6 +19,7 @@ using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace OleViewDotNet
 {
@@ -132,8 +133,12 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("TowerId: {0} - NetworkAddr: {1}",
-                TowerId, NetworkAddr);
+            return $"TowerId: {TowerId} - NetworkAddr: {NetworkAddr}";
+        }
+
+        internal COMStringBinding Clone()
+        {
+            return (COMStringBinding)MemberwiseClone();
         }
     }
 
@@ -179,8 +184,12 @@ namespace OleViewDotNet
 
         public override string ToString()
         {
-            return String.Format("AuthnSvc: {0} - PrincName: {1}",
-                AuthnSvc, PrincName);
+            return $"AuthnSvc: {AuthnSvc} - PrincName: {PrincName}";
+        }
+
+        internal COMSecurityBinding Clone()
+        {
+            return (COMSecurityBinding)MemberwiseClone();
         }
     }
 
@@ -268,6 +277,14 @@ namespace OleViewDotNet
             writer.Write((ushort)(stm.Length / 2));
             writer.Write(ofs);
             writer.Write(stm.ToArray());
+        }
+
+        internal COMDualStringArray Clone()
+        {
+            COMDualStringArray ret = new COMDualStringArray();
+            ret.StringBindings.AddRange(StringBindings.Select(b => b.Clone()));
+            ret.SecurityBindings.AddRange(SecurityBindings.Select(b => b.Clone()));
+            return ret;
         }
     }
 
@@ -426,6 +443,11 @@ namespace OleViewDotNet
             writer.Write(Oid);
             writer.Write(Ipid);
         }
+
+        internal COMStdObjRef Clone()
+        {
+            return (COMStdObjRef)MemberwiseClone();
+        }
     }
 
     public class COMObjRefStandard : COMObjRef
@@ -464,6 +486,12 @@ namespace OleViewDotNet
         {
         }
 
+        protected COMObjRefStandard(COMObjRefStandard std) : base(std.Iid)
+        {
+            _stdobjref = std._stdobjref.Clone();
+            _stringarray = std._stringarray.Clone();
+        }
+
         public COMObjRefStandard() : base(Guid.Empty)
         {
             _stdobjref = new COMStdObjRef();
@@ -474,6 +502,11 @@ namespace OleViewDotNet
         {
             _stdobjref.ToWriter(writer);
             _stringarray.ToWriter(writer);
+        }
+
+        public COMObjRefHandler ToHandler(Guid clsid)
+        {
+            return new COMObjRefHandler(clsid, this);
         }
     }
 
@@ -487,6 +520,11 @@ namespace OleViewDotNet
             _stdobjref = new COMStdObjRef(reader);
             Clsid = reader.ReadGuid();
             _stringarray = new COMDualStringArray(reader);
+        }
+
+        internal COMObjRefHandler(Guid clsid, COMObjRefStandard std) : base(std)
+        {
+            Clsid = clsid;
         }
 
         public COMObjRefHandler() : base()
