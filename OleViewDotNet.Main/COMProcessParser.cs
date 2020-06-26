@@ -470,7 +470,9 @@ namespace OleViewDotNet
 
             IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(NtProcess process)
             {
-                return process.ReadStruct<OXIDEntryNative>(pOXIDEntry.ToInt64());
+                if (COMUtilities.IsWindows101909OrLess)
+                    return process.ReadStruct<OXIDEntryNative>(pOXIDEntry.ToInt64());
+                return process.ReadStruct<OXIDEntryNative2004>(pOXIDEntry.ToInt64());
             }
         };
 
@@ -565,7 +567,9 @@ namespace OleViewDotNet
 
             IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(NtProcess process)
             {
-                return process.ReadStruct<OXIDEntryNative32>(pOXIDEntry);
+                if (COMUtilities.IsWindows101909OrLess)
+                    return process.ReadStruct<OXIDEntryNative32>(pOXIDEntry);
+                return process.ReadStruct<OXIDEntryNative2004_32>(pOXIDEntry);
             }
         };
 
@@ -752,6 +756,198 @@ namespace OleViewDotNet
                 try
                 {
                     return new COMDualStringArray(new IntPtr(_pBinding), process, true);
+                }
+                catch (NtException)
+                {
+                    return new COMDualStringArray();
+                }
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CONTAINERVERSION
+        {
+            public int version;
+            public long capabilityFlags;
+            public IntPtr extensions;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct OXIDInfoNative2004
+        {
+            public int _dwTid;
+            public int _dwPid;
+            public int _dwAuthnHint;
+            public COMVERSION _dcomVersion;
+            public CONTAINERVERSION _containerVersion;
+            public Guid _ipidRemUnknown;
+            public int _dwFlags;
+            public IntPtr _psa;
+            public Guid _guidProcessIdentifier;
+            public long _processHostId;
+            public int _clientDependencyBehavior;
+            public IntPtr _packageFullName;
+            public IntPtr _userSid;
+            public IntPtr _appcontainerSid;
+            public ulong _primaryOxid;
+            public Guid _primaryIpidRemUnknown;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        class OXIDEntryNative2004 : IOXIDEntry
+        {
+            public IntPtr _flink;
+            public IntPtr _blink;
+            public int m_isInList;
+            public OXIDInfoNative2004 info;
+            public long _mid;
+            public Guid _ipidRundown;
+            public Guid _moxid;
+            public byte _registered;
+            public byte _stopped;
+            public byte _pendingRelease;
+            public byte _remotingInitialized;
+            public IntPtr _hServerSTA;
+
+            int IOXIDEntry.Pid
+            {
+                get
+                {
+                    return info._dwPid;
+                }
+            }
+
+            int IOXIDEntry.Tid
+            {
+                get
+                {
+                    return info._dwTid;
+                }
+            }
+
+            Guid IOXIDEntry.MOxid
+            {
+                get
+                {
+                    return _moxid;
+                }
+            }
+
+            long IOXIDEntry.Mid
+            {
+                get
+                {
+                    return _mid;
+                }
+            }
+
+            IntPtr IOXIDEntry.ServerSTAHwnd
+            {
+                get
+                {
+                    return _hServerSTA;
+                }
+            }
+
+            COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
+            {
+                if (info._psa == IntPtr.Zero)
+                    return new COMDualStringArray();
+                try
+                {
+                    return new COMDualStringArray(info._psa, process, true);
+                }
+                catch (NtException)
+                {
+                    return new COMDualStringArray();
+                }
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct OXIDInfoNative2004_32
+        {
+            public int _dwTid;
+            public int _dwPid;
+            public int _dwAuthnHint;
+            public COMVERSION _dcomVersion;
+            public CONTAINERVERSION _containerVersion;
+            public Guid _ipidRemUnknown;
+            public int _dwFlags;
+            public int _psa;
+            public Guid _guidProcessIdentifier;
+            public long _processHostId;
+            public int _clientDependencyBehavior;
+            public int _packageFullName;
+            public int _userSid;
+            public int _appcontainerSid;
+            public ulong _primaryOxid;
+            public Guid _primaryIpidRemUnknown;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        class OXIDEntryNative2004_32 : IOXIDEntry
+        {
+            public int _flink;
+            public int _blink;
+            public int m_isInList;
+            public OXIDInfoNative2004_32 info;
+            public long _mid;
+            public Guid _ipidRundown;
+            public Guid _moxid;
+            public byte _registered;
+            public byte _stopped;
+            public byte _pendingRelease;
+            public byte _remotingInitialized;
+            public int _hServerSTA;
+
+            int IOXIDEntry.Pid
+            {
+                get
+                {
+                    return info._dwPid;
+                }
+            }
+
+            int IOXIDEntry.Tid
+            {
+                get
+                {
+                    return info._dwTid;
+                }
+            }
+
+            Guid IOXIDEntry.MOxid
+            {
+                get
+                {
+                    return _moxid;
+                }
+            }
+
+            long IOXIDEntry.Mid
+            {
+                get
+                {
+                    return _mid;
+                }
+            }
+
+            IntPtr IOXIDEntry.ServerSTAHwnd
+            {
+                get
+                {
+                    return new IntPtr(_hServerSTA);
+                }
+            }
+
+            COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
+            {
+                if (info._psa == 0)
+                    return new COMDualStringArray();
+                try
+                {
+                    return new COMDualStringArray(new IntPtr(info._psa), process, true);
                 }
                 catch (NtException)
                 {
