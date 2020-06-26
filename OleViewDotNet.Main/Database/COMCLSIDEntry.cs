@@ -731,8 +731,8 @@ namespace OleViewDotNet.Database
         public COMCLSIDEntry(COMRegistry registry, Guid clsid, COMServerType type)
             : this(registry, clsid)
         {
+            Name = clsid.ToString();
         }
-
 
         internal COMCLSIDEntry(COMRegistry registry)
         {

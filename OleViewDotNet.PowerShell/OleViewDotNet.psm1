@@ -1097,6 +1097,8 @@ This cmdlet gets COM interfaces from the database based on a set of criteria. Th
 The database to use. If not specified then the current database is used.
 .PARAMETER Iid
 Specify a IID to lookup.
+.PARAMETER AllowNoReg
+Creates an interface entry even if not registered.
 .PARAMETER Name
 Specify a name to match against the interface name.
 .PARAMETER Object
@@ -1132,6 +1134,8 @@ function Get-ComInterface {
     Param(
         [Parameter(Position = 0, Mandatory, ParameterSetName = "FromIid", ValueFromPipelineByPropertyName)]
         [Guid]$Iid,
+        [Parameter(ParameterSetName = "FromIid")]
+        [switch]$AllowNoReg,
         [Parameter(Mandatory, ParameterSetName = "FromPartialIid")]
         [string]$PartialIid,
         [Parameter(Mandatory, ParameterSetName = "FromName")]
@@ -1162,7 +1166,11 @@ function Get-ComInterface {
             Get-ComInterface -Database $Database | Where-Object Iid -Match $PartialIid | Write-Output
         }
         "FromIid" {
-            $Database.Interfaces[$Iid] | Write-Output
+            if ($AllowNoReg) {
+                $Database.MapIidToInterface($Iid) | Write-Output
+            } else {
+                $Database.Interfaces[$Iid] | Write-Output
+            }
         }
         "FromObject" {
             $Database.GetInterfacesForObject($Object) | Write-Output
