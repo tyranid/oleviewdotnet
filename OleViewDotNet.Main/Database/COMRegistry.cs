@@ -471,16 +471,7 @@ namespace OleViewDotNet.Database
             Marshal.AddRef(pObject);
             try
             {
-                foreach (var intEnt in Interfaces.Values)
-                {
-                    Guid currIID = intEnt.Iid;
-
-                    if (Marshal.QueryInterface(pObject, ref currIID, out IntPtr pRequested) == 0)
-                    {
-                        Marshal.Release(pRequested);
-                        yield return intEnt;
-                    }
-                }
+                return Interfaces.Values.Where(i => i.TestInterface(pObject));
             }
             finally
             {

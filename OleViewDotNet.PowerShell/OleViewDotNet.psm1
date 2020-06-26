@@ -2944,3 +2944,39 @@ function Get-ComGuid {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Tests if an object supports an interface.
+.DESCRIPTION
+This cmdlet queries a COM object for a specified interface.
+.PARAMETER Iid
+The IID of the interface.
+.PARAMETER Interface
+A COM interface entry.
+.PARAMETER Object
+The object to query.
+.INPUTS
+None
+.OUTPUTS
+Boolean
+#>
+function Test-ComInterface {
+    [CmdletBinding(DefaultParameterSetName="FromIid")]
+    Param(
+        [parameter(Mandatory, ParameterSetName = "FromIid", Position = 0)]
+        [Guid]$Iid,
+        [parameter(Mandatory, Position=1)]
+        [object]$Object,
+        [parameter(Mandatory, ParameterSetName = "FromIntf", Position = 0)]
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface
+    )
+
+    if($PSCmdlet.ParameterSetName -eq "FromIid") {
+        $Interface = Get-ComInterface -Iid $Iid -AllowNoReg
+    }
+
+    $Object = Unwrap-ComObject -Object $Object
+
+    return $Interface.TestInterface($Object)
+}

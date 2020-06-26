@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -370,6 +371,32 @@ namespace OleViewDotNet.Database
         public override string ToString()
         {
             return Name;
+        }
+
+        public bool TestInterface(IntPtr obj)
+        {
+            Guid iid = Iid;
+            if (Marshal.QueryInterface(obj, ref iid, out IntPtr pRequested) == 0)
+            {
+                Marshal.Release(pRequested);
+                return true;
+            }
+            return false;
+        }
+
+        public bool TestInterface(object obj)
+        {
+            IntPtr punk = IntPtr.Zero;
+            try
+            {
+                punk = Marshal.GetIUnknownForObject(obj);
+                return TestInterface(punk);
+            }
+            finally
+            {
+                if (punk != IntPtr.Zero)
+                    Marshal.Release(punk);
+            }
         }
 
         XmlSchema IXmlSerializable.GetSchema()
