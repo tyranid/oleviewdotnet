@@ -1989,6 +1989,10 @@ function Format-ComProxy {
         [OleViewDotNet.IProxyFormatter]$Proxy,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProcess")]
         [OleViewDotNet.COMProcessEntry]$Process,
+        [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromInterface")]
+        [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
+        [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName = "FromInterfaceInstance")]
+        [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [OleViewDotNet.ProxyFormatterFlags]$Flags = 0
     )
 
@@ -1999,6 +2003,12 @@ function Format-ComProxy {
             }
             "FromProcess" {
                 $Process.Ipids | Format-ComProxy -Flags $Flags
+            }
+            "FromInterface" {
+                $Interface | Get-ComProxy | Format-ComProxy -Flags $Flags
+            }
+            "FromInterfaceInstance" {
+                $InterfaceInstance | Get-ComProxy | Format-ComProxy -Flags $Flags
             }
         }
     }
