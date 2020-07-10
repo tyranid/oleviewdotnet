@@ -2500,9 +2500,16 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_runtime_interface_metadata == null)
+                try
                 {
-                    LoadRuntimeMetadata();
+                    if (m_runtime_interface_metadata == null)
+                    {
+                        LoadRuntimeMetadata();
+                    }
+                }
+                catch
+                {
+                    m_runtime_interface_metadata = new Dictionary<Guid, Type>();
                 }
                 return m_runtime_interface_metadata;
             }
@@ -2514,9 +2521,16 @@ namespace OleViewDotNet
         {
             get
             {
-                if (m_runtime_class_metadata == null)
+                try
                 {
-                    LoadRuntimeMetadata();
+                    if (m_runtime_class_metadata == null)
+                    {
+                        LoadRuntimeMetadata();
+                    }
+                }
+                catch
+                {
+                    m_runtime_class_metadata = new Dictionary<string, Type>();
                 }
                 return m_runtime_class_metadata;
             }
