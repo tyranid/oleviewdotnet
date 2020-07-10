@@ -959,7 +959,7 @@ namespace OleViewDotNet.Database
         private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry, bool load_runtime_intfs)
         {
             Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
-            foreach (COMInterfaceEntry.KnownInterfaces known_infs in Enum.GetValues(typeof(COMInterfaceEntry.KnownInterfaces)))
+            foreach (COMKnownInterfaces known_infs in Enum.GetValues(typeof(COMKnownInterfaces)))
             {
                 COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(this, known_infs);
                 interfaces.Add(unk.Iid, unk);

@@ -114,8 +114,6 @@ namespace OleViewDotNet.Database
         private Win32Exception _ex;
         private readonly bool _winrt_component;
 
-        const int GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
-
         private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
         {
             if (punk != IntPtr.Zero)
@@ -227,11 +225,19 @@ namespace OleViewDotNet.Database
 
                 try
                 {
+                    Guid[] additional_iids = new[] {
+                        COMInterfaceEntry.IID_IMarshal,
+                        COMInterfaceEntry.IID_IPSFactoryBuffer,
+                        COMInterfaceEntry.IID_IStdMarshalInfo,
+                        COMInterfaceEntry.IID_IMarshal2
+                        };
+
                     Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
-                    QueryInterface(punk, COMInterfaceEntry.IID_IMarshal, module_names, _interfaces);
-                    QueryInterface(pfactory, COMInterfaceEntry.IID_IMarshal, module_names, _factory_interfaces);
-                    QueryInterface(punk, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _interfaces);
-                    QueryInterface(pfactory, COMInterfaceEntry.IID_IPSFactoryBuffer, module_names, _factory_interfaces);
+                    foreach (var iid in additional_iids)
+                    {
+                        QueryInterface(punk, iid, module_names, _interfaces);
+                        QueryInterface(pfactory, iid, module_names, _factory_interfaces);
+                    }
 
                     var actctx = ActivationContext.FromProcess();
                     if (actctx != null)

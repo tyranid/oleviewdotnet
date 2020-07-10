@@ -25,6 +25,16 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database
 {
+    public enum COMKnownInterfaces
+    {
+        IUnknown,
+        IMarshal,
+        IPSFactoryBuffer,
+        IMarshal2,
+        IStdMarshalInfo,
+        IMarshalEnvoy
+    }
+
     public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
     {
         private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
@@ -134,115 +144,70 @@ namespace OleViewDotNet.Database
             Source = COMRegistryEntrySource.Packaged;
         }
 
-        public enum KnownInterfaces
+        public static Guid IID_IUnknown => new Guid("{00000000-0000-0000-C000-000000000046}");
+
+        public static Guid IID_IMarshal => new Guid("{00000003-0000-0000-C000-000000000046}");
+
+        public static Guid IID_IMarshal2 => new Guid("000001CF-0000-0000-C000-000000000046");
+
+        public static Guid IID_IContextMarshaler => new Guid("000001D8-0000-0000-C000-000000000046");
+
+        public static Guid IID_IStdMarshalInfo => new Guid("00000018-0000-0000-C000-000000000046");
+
+        public static Guid IID_IMarshalEnvoy => new Guid("000001C8-0000-0000-C000-000000000046");
+
+        public static Guid IID_IDispatch => new Guid("00020400-0000-0000-c000-000000000046");
+
+        public static Guid IID_IOleControl => new Guid("{b196b288-bab4-101a-b69c-00aa00341d07}");
+
+        public static Guid IID_IPersistStream => typeof(IPersistStream).GUID;
+
+        public static Guid IID_IPersistStreamInit => typeof(IPersistStreamInit).GUID;
+
+        public static Guid IID_IPSFactoryBuffer => new Guid("D5F569D0-593B-101A-B569-08002B2DBF7A");
+
+        public static Guid IID_IInspectable => new Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90");
+
+        public bool IsOleControl => (Iid == IID_IOleControl);
+
+        public bool IsDispatch => (Iid == IID_IDispatch);
+
+        public bool IsMarshal => (Iid == IID_IMarshal);
+
+        public bool IsPersistStream => (Iid == IID_IPersistStream) || (Iid == IID_IPersistStreamInit);
+
+        public bool IsClassFactory => Iid == typeof(IClassFactory).GUID;
+
+        private static COMInterfaceEntry CreateBuiltinEntry(COMRegistry registry, Guid iid, string name, int num_methods)
         {
-            IUnknown,
-            IMarshal,
-            IPSFactoryBuffer,
+            return new COMInterfaceEntry(registry)
+            {
+                Base = "",
+                Iid = iid,
+                ProxyClsid = Guid.Empty,
+                NumMethods = num_methods,
+                Name = name,
+                TypeLibVersion = string.Empty,
+                Source = COMRegistryEntrySource.Builtin
+            };
         }
 
-        public static Guid IID_IUnknown
-        {
-            get { return new Guid("{00000000-0000-0000-C000-000000000046}"); }
-        }
-
-        public static Guid IID_IMarshal
-        {
-            get { return new Guid("{00000003-0000-0000-C000-000000000046}"); }
-        }
-
-        public static Guid IID_IDispatch
-        {
-            get { return new Guid("00020400-0000-0000-c000-000000000046"); }
-        }
-
-        public static Guid IID_IOleControl
-        {
-            get { return new Guid("{b196b288-bab4-101a-b69c-00aa00341d07}"); }
-        }
-
-        public static Guid IID_IPersistStream
-        {
-            get { return typeof(IPersistStream).GUID; }
-        }
-
-        public static Guid IID_IPersistStreamInit
-        {
-            get { return typeof(IPersistStreamInit).GUID; }
-        }
-
-        public static Guid IID_IPSFactoryBuffer
-        {
-            get { return new Guid("D5F569D0-593B-101A-B569-08002B2DBF7A"); }
-        }
-
-        public static Guid IID_IInspectable
-        {
-            get { return new Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90"); }
-        }
-
-        public bool IsOleControl
-        {
-            get { return (Iid == IID_IOleControl); }
-        }
-
-        public bool IsDispatch
-        {
-            get { return (Iid == IID_IDispatch); }
-        }
-
-        public bool IsMarshal
-        {
-            get { return (Iid == IID_IMarshal); }
-        }
-
-        public bool IsPersistStream
-        {
-            get { return (Iid == IID_IPersistStream) || (Iid == IID_IPersistStreamInit); }
-        }
-
-        public bool IsClassFactory
-        {
-            get { return Iid == typeof(IClassFactory).GUID; }
-        }
-
-        public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, KnownInterfaces known)
+        public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, COMKnownInterfaces known)
         {
             switch (known)
             {
-                case KnownInterfaces.IUnknown:
-                    return new COMInterfaceEntry(registry)
-                    {
-                        Base = "",
-                        Iid = IID_IUnknown,
-                        ProxyClsid = Guid.Empty,
-                        NumMethods = 3,
-                        Name = "IUnknown",
-                        TypeLibVersion = String.Empty,
-                        Source = COMRegistryEntrySource.Builtin
-                    };
-                case KnownInterfaces.IMarshal:
-                    return new COMInterfaceEntry(registry)
-                    {
-                        Base = "",
-                        Iid = IID_IMarshal,
-                        ProxyClsid = Guid.Empty,
-                        NumMethods = 9,
-                        Name = "IMarshal",
-                        TypeLibVersion = String.Empty,
-                        Source = COMRegistryEntrySource.Builtin
-                    };
-                case KnownInterfaces.IPSFactoryBuffer:
-                    return new COMInterfaceEntry(registry)
-                    {
-                        Base = "",
-                        Iid = IID_IPSFactoryBuffer,
-                        ProxyClsid = Guid.Empty,
-                        NumMethods = 4,
-                        Name = "IPSFactoryBuffer",
-                        TypeLibVersion = String.Empty,
-                        Source = COMRegistryEntrySource.Builtin
-                    };
+                case COMKnownInterfaces.IUnknown:
+                    return CreateBuiltinEntry(registry, IID_IUnknown, "IUnknown", 3);
+                case COMKnownInterfaces.IMarshal:
+                    return CreateBuiltinEntry(registry, IID_IMarshal, "IMarshal", 9);
+                case COMKnownInterfaces.IMarshal2:
+                    return CreateBuiltinEntry(registry, IID_IMarshal2, "IMarshal2", 9);
+                case COMKnownInterfaces.IPSFactoryBuffer:
+                    return CreateBuiltinEntry(registry, IID_IPSFactoryBuffer, "IPSFactoryBuffer", 4);
+                case COMKnownInterfaces.IMarshalEnvoy:
+                    return CreateBuiltinEntry(registry, IID_IMarshalEnvoy, "IMarshalEnvoy", 7);
+                case COMKnownInterfaces.IStdMarshalInfo:
+                    return CreateBuiltinEntry(registry, IID_IStdMarshalInfo, "IStdMarshalInfo", 4);
             }
 
             return null;
@@ -258,26 +223,14 @@ namespace OleViewDotNet.Database
             get; private set;
         }
 
-        public COMInterfaceEntry InterfaceEntry
-        {
-            get
-            {
-                return m_registry.Interfaces.GetGuidEntry(Iid);
-            }
-        }
+        public COMInterfaceEntry InterfaceEntry => m_registry.Interfaces.GetGuidEntry(Iid);
 
         public Guid ProxyClsid
         {
             get; private set;
         }
 
-        public COMCLSIDEntry ProxyClassEntry
-        {
-            get
-            {
-                return m_registry.Clsids.GetGuidEntry(ProxyClsid);
-            }
-        }
+        public COMCLSIDEntry ProxyClassEntry => m_registry.Clsids.GetGuidEntry(ProxyClsid);
 
         public int NumMethods
         {
@@ -299,13 +252,7 @@ namespace OleViewDotNet.Database
             get; private set;
         }
 
-        public COMTypeLibEntry TypeLibEntry
-        {
-            get
-            {
-                return m_registry.Typelibs.GetGuidEntry(TypeLib);
-            }
-        }
+        public COMTypeLibEntry TypeLibEntry => m_registry.Typelibs.GetGuidEntry(TypeLib);
 
         public COMTypeLibVersionEntry TypeLibVersionEntry
         {
@@ -320,15 +267,9 @@ namespace OleViewDotNet.Database
             }
         }
 
-        public bool HasTypeLib
-        {
-            get { return TypeLib != Guid.Empty; }
-        }
+        public bool HasTypeLib => TypeLib != Guid.Empty;
 
-        public bool HasProxy
-        {
-            get { return ProxyClsid != Guid.Empty; }
-        }
+        public bool HasProxy => ProxyClsid != Guid.Empty;
 
         public bool RuntimeInterface
         {

@@ -1190,8 +1190,6 @@ namespace OleViewDotNet.Database
 
         public IntPtr CreateInstance(CLSCTX dwContext, string server)
         {
-            IntPtr pInterface = IntPtr.Zero;
-            
             if (dwContext == CLSCTX.ALL)
             {
                 if (DefaultServerType == COMServerType.InProcServer32)
@@ -1212,7 +1210,7 @@ namespace OleViewDotNet.Database
                 }
             }
             
-            Guid iid = COMInterfaceEntry.CreateKnownInterface(Database, COMInterfaceEntry.KnownInterfaces.IUnknown).Iid;
+            Guid iid = COMInterfaceEntry.CreateKnownInterface(Database, COMKnownInterfaces.IUnknown).Iid;
             return COMUtilities.CreateInstance(Clsid, iid, dwContext, server);
         }
 
