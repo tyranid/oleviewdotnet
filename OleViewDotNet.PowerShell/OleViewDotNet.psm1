@@ -205,6 +205,13 @@ function Get-CurrentComDatabase {
     if ($null -ne $Database) {
         $Database
     } else {
+        if ($null -eq $Script:CurrentComDatabase) {
+            $result = $Host.UI.PromptForChoice("Load COM Database?", `
+                    "No database specified, do you want to load the default?", @("&Yes", "&No"), 0)
+            if ($result -eq 0) {
+                Get-ComDatabase
+            }
+        }
         $Script:CurrentComDatabase
     }
 }
@@ -529,7 +536,7 @@ function Get-ComClass {
 
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
-        Write-Error "No database specified and current database isn't set"
+        Write-Error "No database specified and current database isn't set."
         return
     }
 
