@@ -210,7 +210,8 @@ namespace OleViewDotNet
         NOSHAREDMEM = 1,
         DIFFERENTMACHINE = 2,
         INPROC = 3,
-        CROSSCTX = 4
+        CROSSCTX = 4,
+        RESERVED1 = 5,
     }
 
     public enum MSHLFLAGS
