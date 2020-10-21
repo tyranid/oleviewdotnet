@@ -32,6 +32,8 @@ namespace OleViewDotNet
         ExecuteRemote = 4,
         ActivateLocal = 8,
         ActivateRemote = 16,
+        ExecuteContainer = 32,
+        ActivateContainer = 64,
         GenericRead = GenericAccessRights.GenericRead,
         GenericWrite = GenericAccessRights.GenericWrite,
         GenericExecute = GenericAccessRights.GenericExecute,
@@ -120,11 +122,13 @@ namespace OleViewDotNet
 
         private static bool GetGrantedAccess(string sddl, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
         {
-            GenericMapping mapping = new GenericMapping();
-            mapping.GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote);
+            GenericMapping mapping = new GenericMapping
+            {
+                GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote | COMAccessRights.ExecuteContainer)
+            };
             if (launch)
             {
-                mapping.GenericExecute = mapping.GenericExecute | (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote);
+                mapping.GenericExecute |= (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote | COMAccessRights.ActivateContainer);
             }
 
             // If SD is only a NULL DACL we get maximum rights.

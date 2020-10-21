@@ -286,7 +286,23 @@ namespace OleViewDotNet
                     {
                         bool access = view_access_sd != null;
                         SecurityDescriptor sd = new SecurityDescriptor(view_access_sd ?? view_launch_sd);
+                        bool has_container = false;
+                        if (sd.DaclPresent)
+                        {
+                            foreach (var ace in sd.Dacl)
+                            {
+                                if (ace.Mask.IsAccessGranted(COMAccessRights.ActivateContainer | COMAccessRights.ExecuteContainer))
+                                {
+                                    has_container = true;
+                                    break;
+                                }
+                            }
+                        }
                         AccessMask valid_access = access ? 0x7 : 0x1F;
+                        if (has_container)
+                        {
+                            valid_access |= (access ? 0x20 : 0x60);
+                        }
 
                         SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
                         DocumentForm frm = new DocumentForm(control);
