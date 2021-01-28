@@ -1540,7 +1540,9 @@ namespace OleViewDotNet
         struct CClassEntry32 : ICClassEntry
         {
             public int vfptr; // CClassCache::CCollectableVtbl* 
+            private int padding1;
             public int _pNextCollectee; // CClassCache::CCollectable* 
+            private int padding2;
             public ulong _qwTickLastTouched;
 
             // SMultiGUIDHashNode _hashNode;
