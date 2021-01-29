@@ -366,6 +366,7 @@ namespace OleViewDotNet.Database
 
             if (server_type == COMServerType.LocalServer32)
             {
+                CommandLine = server_string;
                 string executable = key.ReadString(valueName: "ServerExecutable");
                 if (!string.IsNullOrWhiteSpace(executable))
                 {
@@ -375,7 +376,6 @@ namespace OleViewDotNet.Database
                 {
                     process_command_line = true;
                 }
-                CommandLine = server_string;
                 ThreadingModel = COMThreadingModel.Both;
             }
             else if (server_type == COMServerType.InProcServer32)
