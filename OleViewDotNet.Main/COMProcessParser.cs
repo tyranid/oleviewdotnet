@@ -2340,11 +2340,23 @@ namespace OleViewDotNet
             {
                 return IntPtr.Zero;
             }
+
+            int reservedForOleOffset;
             if (process.Is64Bit)
             {
-                return ReadPointer(process, teb + 0x1758);
+                reservedForOleOffset = 0x1758;
             }
-            return ReadPointer(process, teb + 0xF80);
+            else
+            {
+                reservedForOleOffset = 0xF80;
+                if (Environment.Is64BitProcess)
+                {
+                    teb += 0x2000;  // teb32. Magic constant is taken from
+                                    // https://github.com/DarthTon/Blackbone/blob/607e9a3be9ca01133de2b190f2efb17b3d51db40/src/BlackBone/Subsystem/NativeSubsystem.cpp#L378
+                }
+            }
+
+            return ReadPointer(process, teb + reservedForOleOffset);
         }
 
         private static string ReadUnicodeString(NtProcess process, IntPtr ptr)
