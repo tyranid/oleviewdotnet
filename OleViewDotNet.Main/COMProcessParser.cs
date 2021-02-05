@@ -2351,8 +2351,16 @@ namespace OleViewDotNet
                 reservedForOleOffset = 0xF80;
                 if (Environment.Is64BitProcess)
                 {
-                    teb += 0x2000;  // teb32. Magic constant is taken from
-                                    // https://github.com/DarthTon/Blackbone/blob/607e9a3be9ca01133de2b190f2efb17b3d51db40/src/BlackBone/Subsystem/NativeSubsystem.cpp#L378
+                    if (COMUtilities.IsWindows81OrLess)
+                    {
+                        teb += 0x2000;  // teb32. Magic constant is taken from
+                                        // https://github.com/DarthTon/Blackbone/blob/607e9a3be9ca01133de2b190f2efb17b3d51db40/src/BlackBone/Subsystem/NativeSubsystem.cpp#L378
+                    }
+                    else
+                    {
+                        var wowTebOffset = process.ReadMemory<long>(teb.ToInt64() + 0x180C);
+                        teb = new IntPtr(teb.ToInt64() + wowTebOffset);
+                    }
                 }
             }
 
