@@ -378,7 +378,7 @@ function Compare-ComDatabase {
         [Parameter(Mandatory, Position = 1)]
         [OleViewDotNet.Database.COMRegistry]$Right,
         [OleViewDotNet.Database.COMRegistryDiffMode]$DiffMode = "LeftOnly",
-        [switch]$NoProgresss
+        [switch]$NoProgress
     )
     $callback = New-CallbackProgress -Activity "Comparing COM Registries" -NoProgress:$NoProgress
     [OleViewDotNet.Database.COMRegistry]::Diff($Left, $Right, $DiffMode, $callback)
