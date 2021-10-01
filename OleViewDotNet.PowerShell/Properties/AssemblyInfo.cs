@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany(".")]
 [assembly: AssemblyProduct("OleViewDotNet")]
-[assembly: AssemblyCopyright("Copyright © James Forshaw 2014-2018")]
+[assembly: AssemblyCopyright("Copyright © James Forshaw 2014-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -14,6 +14,6 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("ae69dc09-ef09-455c-8779-3a705e5be205")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: AssemblyInformationalVersion("1.11")]

@@ -1,24 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{81F5C6AA-AC60-4F6E-9467-426997BB9D80}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OleViewDotNet</RootNamespace>
-    <AssemblyName>OleViewDotNet.Main</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
     <ApplicationIcon>oleview.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,601 +16,190 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.1.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup />
   <ItemGroup>
     <Reference Include="Be.Windows.Forms.HexBox">
       <HintPath>.\Be.Windows.Forms.HexBox.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.TextEditor">
-      <HintPath>..\packages\ICSharpCode.TextEditor.3.2.1.6466\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NtApiDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NtApiDotNet.1.1.28\lib\net45\NtApiDotNet.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=3.0.6.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
-      <HintPath>..\packages\DockPanelSuite.3.0.6\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DockPaneHelper.cs" />
-    <Compile Include="Forms\AboutForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\AboutForm.Designer.cs">
-      <DependentUpon>AboutForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ActivationContext.cs" />
-    <Compile Include="Database\AppxPackageName.cs" />
-    <Compile Include="Forms\TextAreaInputForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\TextAreaInputForm.Designer.cs">
-      <DependentUpon>TextAreaInputForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="IComGuid.cs" />
-    <Compile Include="Wrappers\BuiltinWrappers.cs" />
-    <Compile Include="Wrappers\COMProxyInstanceConverter.cs" />
-    <Compile Include="Forms\BuildMonikerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\BuildMonikerForm.Designer.cs">
-      <DependentUpon>BuildMonikerForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Database\COMPackagedRegistry.cs" />
-    <Compile Include="COMProxyInterfaceInstance.cs" />
-    <Compile Include="Database\COMRuntimeClassEntry.cs" />
-    <Compile Include="COMInterfaces.cs" />
-    <Compile Include="COMObjRef.cs" />
-    <Compile Include="COMProcessParser.cs" />
-    <Compile Include="COMProxyInstance.cs" />
-    <Compile Include="Database\COMRuntimeExtensionEntry.cs" />
-    <Compile Include="Database\COMRuntimeServerEntry.cs" />
-    <Compile Include="COMAccessCheck.cs" />
-    <Compile Include="Wrappers\COMWrapperFactory.cs" />
-    <Compile Include="IProxyFormatter.cs" />
-    <Compile Include="RuntimeExtensionActivator.cs" />
-    <Compile Include="Forms\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\CustomMarshalEditorControl.cs">
+    <Compile Update="Forms\CustomMarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\CustomMarshalEditorControl.Designer.cs">
-      <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\DiffRegistryForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DiffRegistryForm.Designer.cs">
-      <DependentUpon>DiffRegistryForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ElevatedFactoryServerTypeViewer.cs">
+    <Compile Update="Forms\ElevatedFactoryServerTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ElevatedFactoryServerTypeViewer.Designer.cs">
-      <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SelectProcessControl.cs">
+    <Compile Update="Forms\SelectProcessControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\SelectProcessControl.Designer.cs">
-      <DependentUpon>SelectProcessControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SelectProcessForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SelectProcessForm.Designer.cs">
-      <DependentUpon>SelectProcessForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SelectSecurityCheckForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SelectSecurityCheckForm.Designer.cs">
-      <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MarshalEditorControl.cs">
+    <Compile Update="Forms\MarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\MarshalEditorControl.Designer.cs">
-      <DependentUpon>MarshalEditorControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ObjectHexEditor.cs">
+    <Compile Update="Forms\ObjectHexEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ObjectHexEditor.Designer.cs">
-      <DependentUpon>ObjectHexEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\QueryInterfacesOptionsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\QueryInterfacesOptionsForm.Designer.cs">
-      <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\RegistryViewerFilter.cs" />
-    <Compile Include="Forms\RegistryPropertiesControl.cs">
+    <Compile Update="Forms\RegistryPropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\RegistryPropertiesControl.Designer.cs">
-      <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\StandardMarshalEditorControl.cs">
+    <Compile Update="Forms\StandardMarshalEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\StandardMarshalEditorControl.Designer.cs">
-      <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="StorageWrapper.cs" />
-    <Compile Include="Forms\StorageViewer.cs">
+    <Compile Update="Forms\StorageViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\StorageViewer.Designer.cs">
-      <DependentUpon>StorageViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ViewFilterControl.cs">
+    <Compile Update="Forms\ViewFilterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ViewFilterControl.Designer.cs">
-      <DependentUpon>ViewFilterControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ViewFilterForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ViewFilterForm.Designer.cs">
-      <DependentUpon>ViewFilterForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="XmlUtils.cs" />
-    <Compile Include="Forms\ClassFactoryTypeViewer.cs">
+    <Compile Update="Forms\ClassFactoryTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ClassFactoryTypeViewer.Designer.cs">
-      <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Database\COMAppIDEntry.cs" />
-    <Compile Include="Database\COMCategory.cs" />
-    <Compile Include="Database\COMCLSIDEntry.cs" />
-    <Compile Include="Database\COMEnumerateInterfaces.cs" />
-    <Compile Include="Database\COMIELowRightsElevationPolicy.cs" />
-    <Compile Include="Database\COMInterfaceEntry.cs" />
-    <Compile Include="Database\COMMimeType.cs" />
-    <Compile Include="Database\COMTypeLibEntry.cs" />
-    <Compile Include="Forms\CreateCLSIDForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\CreateCLSIDForm.Designer.cs">
-      <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\DocumentForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DocumentForm.Designer.cs">
-      <DependentUpon>DocumentForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\HexEditorControl.cs">
+    <Compile Update="Forms\HexEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\HexEditorControl.Designer.cs">
-      <DependentUpon>HexEditorControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="InputTextBox.cs">
+    <Compile Update="InputTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ListItemComparer.cs" />
-    <Compile Include="LockedQueue.cs" />
-    <Compile Include="ObjectCache.cs" />
-    <Compile Include="Database\COMProgIDEntry.cs" />
-    <Compile Include="Forms\COMRegistryViewer.cs">
+    <Compile Update="Forms\COMRegistryViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\COMRegistryViewer.Designer.cs">
-      <DependentUpon>COMRegistryViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Database\COMRegistry.cs" />
-    <Compile Include="COMUtilities.cs" />
-    <Compile Include="Forms\CreateIStreamForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\CreateIStreamForm.Designer.cs">
-      <DependentUpon>CreateIStreamForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\GetTextForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\GetTextForm.Designer.cs">
-      <DependentUpon>GetTextForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\GetTypeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\GetTypeForm.Designer.cs">
-      <DependentUpon>GetTypeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="InterfaceViewers\BaseTypeFactory.cs" />
-    <Compile Include="InterfaceViewers\BuiltinTypeViewers.cs" />
-    <Compile Include="Forms\InvokeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\InvokeForm.Designer.cs">
-      <DependentUpon>InvokeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="IStreamImpl.cs" />
-    <Compile Include="Forms\WaitingDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\WaitingDialog.Designer.cs">
-      <DependentUpon>WaitingDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ObjectContainer.cs">
+    <Compile Update="Forms\ObjectContainer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ObjectContainer.Designer.cs">
-      <DependentUpon>ObjectContainer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\PersistStreamTypeViewer.cs">
+    <Compile Update="Forms\PersistStreamTypeViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\PersistStreamTypeViewer.Designer.cs">
-      <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\PropertiesControl.cs">
+    <Compile Update="Forms\PropertiesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\PropertiesControl.Designer.cs">
-      <DependentUpon>PropertiesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="COMSecurity.cs" />
-    <Compile Include="SimpleSyntaxModeProvider.cs" />
-    <Compile Include="Forms\TypedObjectViewer.cs">
+    <Compile Update="Forms\TypedObjectViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\TypedObjectViewer.Designer.cs">
-      <DependentUpon>TypedObjectViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ObjectInformation.cs">
+    <Compile Update="Forms\ObjectInformation.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ObjectInformation.Designer.cs">
-      <DependentUpon>ObjectInformation.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EntryPoint.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Forms\TypeLibControl.cs">
+    <Compile Update="Forms\TypeLibControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\TypeLibControl.Designer.cs">
-      <DependentUpon>TypeLibControl.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Forms\AboutForm.resx">
-      <DependentUpon>AboutForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\BuildMonikerForm.resx">
-      <DependentUpon>BuildMonikerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ClassFactoryTypeViewer.resx">
-      <DependentUpon>ClassFactoryTypeViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\COMRegistryViewer.resx">
-      <DependentUpon>COMRegistryViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\CreateCLSIDForm.resx">
-      <DependentUpon>CreateCLSIDForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\CreateIStreamForm.resx">
-      <DependentUpon>CreateIStreamForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\CustomMarshalEditorControl.resx">
-      <DependentUpon>CustomMarshalEditorControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\DiffRegistryForm.resx">
-      <DependentUpon>DiffRegistryForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\DocumentForm.resx">
-      <DependentUpon>DocumentForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ElevatedFactoryServerTypeViewer.resx">
-      <DependentUpon>ElevatedFactoryServerTypeViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SelectProcessControl.resx">
-      <DependentUpon>SelectProcessControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SelectProcessForm.resx">
-      <DependentUpon>SelectProcessForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SelectSecurityCheckForm.resx">
-      <DependentUpon>SelectSecurityCheckForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\GetTextForm.resx">
-      <DependentUpon>GetTextForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\GetTypeForm.resx">
-      <DependentUpon>GetTypeForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\HexEditorControl.resx">
-      <DependentUpon>HexEditorControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\InvokeForm.resx">
-      <DependentUpon>InvokeForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MarshalEditorControl.resx">
-      <DependentUpon>MarshalEditorControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ObjectHexEditor.resx">
-      <DependentUpon>ObjectHexEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\QueryInterfacesOptionsForm.resx">
-      <DependentUpon>QueryInterfacesOptionsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\RegistryPropertiesControl.resx">
-      <DependentUpon>RegistryPropertiesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\StandardMarshalEditorControl.resx">
-      <DependentUpon>StandardMarshalEditorControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\StorageViewer.resx">
-      <DependentUpon>StorageViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\TextAreaInputForm.resx">
-      <DependentUpon>TextAreaInputForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ViewFilterControl.resx">
-      <DependentUpon>ViewFilterControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ViewFilterForm.resx">
-      <DependentUpon>ViewFilterForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WaitingDialog.resx">
-      <DependentUpon>WaitingDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ObjectContainer.resx">
-      <DependentUpon>ObjectContainer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\PersistStreamTypeViewer.resx">
-      <DependentUpon>PersistStreamTypeViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\PropertiesControl.resx">
-      <DependentUpon>PropertiesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\TypedObjectViewer.resx">
-      <DependentUpon>TypedObjectViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ObjectInformation.resx">
-      <DependentUpon>ObjectInformation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ROTViewer.resx">
-      <DependentUpon>ROTViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\TypeLibControl.resx">
-      <DependentUpon>TypeLibControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Compile Include="Forms\ROTViewer.cs">
+    <Compile Update="Forms\ROTViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\ROTViewer.Designer.cs">
-      <DependentUpon>ROTViewer.cs</DependentUpon>
-    </Compile>
-    <None Include="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
+    <None Update="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\09F4C2218CDCBE274B6F6DB07C6D5D8C.sym">
+    <None Update="symbol_cache\09F4C2218CDCBE274B6F6DB07C6D5D8C.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
+    <None Update="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\1BB728819E20BA1B951682EE4ABF5034.sym">
+    <None Update="symbol_cache\1BB728819E20BA1B951682EE4ABF5034.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\20B0518FFDB71D9AD3393B7E31A308A2.sym">
+    <None Update="symbol_cache\20B0518FFDB71D9AD3393B7E31A308A2.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\215BDA791F9BC240EFD4BE5310F86B78.sym">
+    <None Update="symbol_cache\215BDA791F9BC240EFD4BE5310F86B78.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\240708796730EA1965F09011DE78658F.sym">
+    <None Update="symbol_cache\240708796730EA1965F09011DE78658F.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\2471D4FEEFD93183284363E012C04C7C.sym">
+    <None Update="symbol_cache\2471D4FEEFD93183284363E012C04C7C.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\2B4988FBE80A35E42AD7A6AB150395E1.sym">
+    <None Update="symbol_cache\2B4988FBE80A35E42AD7A6AB150395E1.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
+    <None Update="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\365ACA8B7435CAE799E7605AB25B3C3B.sym">
+    <None Update="symbol_cache\365ACA8B7435CAE799E7605AB25B3C3B.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\4AB47E9370AC36241341FFA48B618BBA.sym">
+    <None Update="symbol_cache\4AB47E9370AC36241341FFA48B618BBA.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\525A1F7BE5A73D4006619F1B0712E8B7.sym">
+    <None Update="symbol_cache\525A1F7BE5A73D4006619F1B0712E8B7.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\5342DBFC2B8129FF6AD81CDB3699ADBA.sym">
+    <None Update="symbol_cache\5342DBFC2B8129FF6AD81CDB3699ADBA.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
+    <None Update="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\5D5DB9BA72AF3B80B1540C0BDA3B8A04.sym">
+    <None Update="symbol_cache\5D5DB9BA72AF3B80B1540C0BDA3B8A04.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\6C28951826CB3339A320224696688F27.sym">
+    <None Update="symbol_cache\6C28951826CB3339A320224696688F27.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
+    <None Update="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\789A3A3D760237153A6E7B782432926C.sym">
+    <None Update="symbol_cache\789A3A3D760237153A6E7B782432926C.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\8AF5F0A4B784EAE7901C8B937AB7411E.sym">
+    <None Update="symbol_cache\8AF5F0A4B784EAE7901C8B937AB7411E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\90042A515118CB205BBEAD51F8EF5810.sym">
+    <None Update="symbol_cache\90042A515118CB205BBEAD51F8EF5810.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\9B19279533B9C1539FB262B8D0B0DB51.sym">
+    <None Update="symbol_cache\9B19279533B9C1539FB262B8D0B0DB51.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">
+    <None Update="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\B52200505767CD0819034CF220977439.sym">
+    <None Update="symbol_cache\B52200505767CD0819034CF220977439.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\C59DB0950A2136B6097291063068F122.sym">
+    <None Update="symbol_cache\C59DB0950A2136B6097291063068F122.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\D376A4B1765B8DF3E7E9CDE98DB3200E.sym">
+    <None Update="symbol_cache\D376A4B1765B8DF3E7E9CDE98DB3200E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\D3D5A45D9F06797A0623DE34F0F16D8F.sym">
+    <None Update="symbol_cache\D3D5A45D9F06797A0623DE34F0F16D8F.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+    <None Update="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\ED738DC2128A0F1D48755A9FC8F91B57.sym">
+    <None Update="symbol_cache\ED738DC2128A0F1D48755A9FC8F91B57.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\F0E2032A2AF04E2C38D2F74EE8DFC42E.sym">
+    <None Update="symbol_cache\F0E2032A2AF04E2C38D2F74EE8DFC42E.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
+    <None Update="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="symbol_cache\FE65FC82CB2C8948F477636563B25803.sym">
+    <None Update="symbol_cache\FE65FC82CB2C8948F477636563B25803.sym">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="interface.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="class.ico" />
-    <None Include="folder.ico" />
-    <None Include="FolderOpen.ico" />
     <Content Include="license.txt" />
     <Content Include="oleview.ico" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.VisualBasic.PowerPacks.10.0">
-      <Visible>False</Visible>
-      <ProductName>Microsoft Visual Basic PowerPacks 10.0</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DockPanelSuite" Version="3.1.0" />
+    <PackageReference Include="ICSharpCode.TextEditor" Version="3.2.1.6466" />
+    <PackageReference Include="NDesk.Options" Version="0.2.1" />
+    <PackageReference Include="NtApiDotNet" Version="1.1.32" />
+    <PackageReference Include="NtApiDotNet.Forms" Version="1.1.31" />
+  </ItemGroup>
+  <PropertyGroup />
 </Project>
