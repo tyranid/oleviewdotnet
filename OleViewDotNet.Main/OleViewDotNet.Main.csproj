@@ -192,6 +192,7 @@
     <Content Include="oleview.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
