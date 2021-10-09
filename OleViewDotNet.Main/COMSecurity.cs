@@ -49,11 +49,13 @@ namespace OleViewDotNet
                 SecurityDescriptor sd = new SecurityDescriptor(sddl);
                 AccessMask valid_access = access ? 0x7 : 0x1F;
 
+#pragma warning disable CA1416 // Validate platform compatibility
                 SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
                 EntryPoint.GetMainForm(registry).HostControl(control, name);
                 control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
                     { GenericExecute = valid_access, GenericRead = valid_access,
                     GenericWrite = valid_access, GenericAll = valid_access }, valid_access);
+#pragma warning restore CA1416 // Validate platform compatibility
             }
         }
 
