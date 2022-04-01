@@ -445,7 +445,7 @@ namespace OleViewDotNet.Forms
             try
             {
                 ICOMClassEntry entry = (ICOMClassEntry)tabPageSupportedInterfaces.Tag;
-                await entry.LoadSupportedInterfacesAsync(true, null);
+                await entry.LoadSupportedInterfacesAsync(true, null, COMServerType.UnknownServer);
                 LoadInterfaceList(entry.Interfaces, listViewInterfaces);
                 LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
             }

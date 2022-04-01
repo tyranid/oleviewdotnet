@@ -141,7 +141,7 @@ namespace OleViewDotNet.Forms
 
             if (!ent.InterfacesLoaded)
             {
-                await ent.LoadSupportedInterfacesAsync(false, null);
+                await ent.LoadSupportedInterfacesAsync(false, null, COMServerType.UnknownServer);
             }
 
             IEnumerable<COMInterfaceInstance> intfs = factory ? ent.FactoryInterfaces : ent.Interfaces;
@@ -226,7 +226,7 @@ namespace OleViewDotNet.Forms
                     props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.DefaultServer);
-                    await ent.LoadSupportedInterfacesAsync(false, null);
+                    await ent.LoadSupportedInterfacesAsync(false, null, COMServerType.UnknownServer);
 
                     if (class_factory)
                     {
@@ -357,7 +357,7 @@ namespace OleViewDotNet.Forms
                     props.Add("CLSID", ent.Clsid.FormatGuid());
                     props.Add("Name", ent.Name);
                     props.Add("Server", ent.DefaultServer);
-                    await ent.LoadSupportedInterfacesAsync(false, null);
+                    await ent.LoadSupportedInterfacesAsync(false, null, COMServerType.UnknownServer);
                     ints = ent.Interfaces.Select(i => m_registry.MapIidToInterface(i.Iid));
                 }
                 else

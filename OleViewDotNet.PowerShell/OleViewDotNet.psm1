@@ -907,6 +907,8 @@ Get a COM class or Runtime class instance interfaces.
 This cmdlet enumerates the supported interfaces for a COM class or Runtime class and returns them.
 .PARAMETER ClassEntry
 The COM or Runtime classes to enumerate.
+.PARAMETER ServerType
+Specify a type of server to match against. If specified as UnknownServer will search DefaultServerType.
 .PARAMETER Refresh
 Specify to force the interfaces to be refreshed.
 .PARAMETER Factory
@@ -936,6 +938,7 @@ function Get-ComClassInterface {
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
         [OleViewDotNet.Database.ICOMClassEntry[]]$ClassEntry,
+        [OleViewDotNet.Database.COMServerType]$ServerType = "UnknownServer",
         [switch]$Refresh,
         [switch]$Factory,
         [switch]$NoQuery,
@@ -954,7 +957,7 @@ function Get-ComClassInterface {
                         $i++
                     }
                 }
-                $class.LoadSupportedInterfaces($Refresh, $Token) | Out-Null
+                $class.LoadSupportedInterfaces($Refresh, $Token, $ServerType) | Out-Null
             }
             if ($Factory) {
                 $class.FactoryInterfaces | Write-Output

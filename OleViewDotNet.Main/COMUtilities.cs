@@ -2214,7 +2214,7 @@ namespace OleViewDotNet
                 try
                 {
                     query_progress.Report();
-                    clsid.LoadSupportedInterfaces(false, null);
+                    clsid.LoadSupportedInterfaces(false, null, COMServerType.UnknownServer);
                 }
                 catch
                 {

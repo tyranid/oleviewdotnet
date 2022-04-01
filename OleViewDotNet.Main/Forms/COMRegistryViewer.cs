@@ -1047,7 +1047,7 @@ namespace OleViewDotNet.Forms
                 node.Nodes.Add(wait_node);
                 try
                 {
-                    await clsid.LoadSupportedInterfacesAsync(bRefresh, null);
+                    await clsid.LoadSupportedInterfacesAsync(bRefresh, null, COMServerType.UnknownServer);
                     int interface_count = clsid.Interfaces.Count();
                     int factory_count = clsid.FactoryInterfaces.Count();
                     if (interface_count == 0 && factory_count == 0)
