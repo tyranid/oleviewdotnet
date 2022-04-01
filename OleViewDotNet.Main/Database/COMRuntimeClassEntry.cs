@@ -259,11 +259,11 @@ namespace OleViewDotNet.Database
             return Server.CompareTo(other.Server);
         }
 
-        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token, COMServerType serverType)
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry, token);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry, token, serverType);
             }
             catch (Win32Exception)
             {
@@ -271,11 +271,11 @@ namespace OleViewDotNet.Database
             }
         }
 
-        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token, COMServerType serverType)
         {
             if (refresh || !InterfacesLoaded)
             {
-                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token, serverType);
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
                 InterfacesLoaded = true;
@@ -290,9 +290,9 @@ namespace OleViewDotNet.Database
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public bool LoadSupportedInterfaces(bool refresh, NtToken token)
+        public bool LoadSupportedInterfaces(bool refresh, NtToken token, COMServerType serverType)
         {
-            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token, serverType);
             result.Wait();
             if (result.IsFaulted)
             {

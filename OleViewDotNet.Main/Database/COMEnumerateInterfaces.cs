@@ -352,7 +352,7 @@ namespace OleViewDotNet.Database
             _winrt_component = !string.IsNullOrWhiteSpace(_activatable_classid);
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token, COMServerType serverType)
         {
             string apartment = "s";
             if (ent.Threading == ThreadingType.Both
@@ -500,7 +500,7 @@ namespace OleViewDotNet.Database
             }
         }
 
-        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token)
+        public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token, COMServerType serverType)
         {
             string apartment = "s";
             if (ent.DefaultThreadingModel == COMThreadingModel.Both 
@@ -509,9 +509,15 @@ namespace OleViewDotNet.Database
                 apartment = "m";
             }
 
-            string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, ent.CreateContext);
+            CLSCTX createCtx;
+            if (serverType == COMServerType.UnknownServer)
+                createCtx = ent.CreateContext;
+            else
+                createCtx = COMCLSIDEntry.ServerTypeToClsCtx(serverType);
+
+            string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, createCtx);
             var interfaces = await GetInterfacesOOP(command_line, false, registry, token);
-            return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
+            return new COMEnumerateInterfaces(ent.Clsid, createCtx, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
         }
     }
 }

@@ -457,18 +457,20 @@ namespace OleViewDotNet.Database
         /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <param name="token">Token to use when querying for the interfaces.</param>
+        /// <param name="serverType">Server type to use when creating the object.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token);
+        Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token, COMServerType serverType);
 
         /// <summary>
         /// Get list of supported Interface IIDs Synchronously
         /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <param name="token">Token to use when querying for the interfaces.</param>
+        /// <param name="serverType">Server type to use when creating the object.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        bool LoadSupportedInterfaces(bool refresh, NtToken token);
+        bool LoadSupportedInterfaces(bool refresh, NtToken token, COMServerType serverType);
 
         /// <summary>
         /// Indicates that the class' interface list has been loaded.
@@ -1030,11 +1032,11 @@ namespace OleViewDotNet.Database
                 ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
         }
 
-        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
+        private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token, COMServerType serverType)
         {
             try
             {
-                return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token);
+                return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token, serverType);
             }
             catch (Win32Exception)
             {
@@ -1073,9 +1075,10 @@ namespace OleViewDotNet.Database
         /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <param name="token">Token to use when checking for the interfaces.</param>
+        /// <param name="serverType">Server type to use when creating the object.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
+        public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token, COMServerType serverType)
         {
             if (Clsid == Guid.Empty)
             {
@@ -1084,7 +1087,7 @@ namespace OleViewDotNet.Database
 
             if (refresh || !InterfacesLoaded)
             {
-                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
+                COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token, serverType);
                 m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
                 m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
                 InterfacesLoaded = true;
@@ -1098,11 +1101,12 @@ namespace OleViewDotNet.Database
         /// </summary>
         /// <param name="refresh">Force the supported interface list to refresh</param>
         /// <param name="token">Token to use when querying for the interfaces.</param>
+        /// <param name="serverType">Server type to use when creating the object.</param>
         /// <returns>Returns true if supported interfaces were refreshed.</returns>
         /// <exception cref="Win32Exception">Thrown on error.</exception>
-        public bool LoadSupportedInterfaces(bool refresh, NtToken token)
+        public bool LoadSupportedInterfaces(bool refresh, NtToken token, COMServerType serverType)
         {
-            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
+            Task<bool> result = LoadSupportedInterfacesAsync(refresh, token, serverType);
             try
             {
                 result.Wait();
@@ -1169,23 +1173,28 @@ namespace OleViewDotNet.Database
         {
             get
             {
-                CLSCTX dwContext = CLSCTX.ALL;
-
-                if (DefaultServerType == COMServerType.InProcServer32)
-                {
-                    dwContext = CLSCTX.INPROC_SERVER;
-                }
-                else if (DefaultServerType == COMServerType.LocalServer32)
-                {
-                    dwContext = CLSCTX.LOCAL_SERVER;
-                }
-                else if (DefaultServerType == COMServerType.InProcHandler32)
-                {
-                    dwContext = CLSCTX.INPROC_HANDLER;
-                }
-
-                return dwContext;
+                return ServerTypeToClsCtx(DefaultServerType);
             }
+        }
+
+        public static CLSCTX ServerTypeToClsCtx(COMServerType serverType)
+        {
+            CLSCTX dwContext = CLSCTX.ALL;
+
+            if (serverType == COMServerType.InProcServer32)
+            {
+                dwContext = CLSCTX.INPROC_SERVER;
+            }
+            else if (serverType == COMServerType.LocalServer32)
+            {
+                dwContext = CLSCTX.LOCAL_SERVER;
+            }
+            else if (serverType == COMServerType.InProcHandler32)
+            {
+                dwContext = CLSCTX.INPROC_HANDLER;
+            }
+
+            return dwContext;
         }
 
         public IntPtr CreateInstance(CLSCTX dwContext, string server)
