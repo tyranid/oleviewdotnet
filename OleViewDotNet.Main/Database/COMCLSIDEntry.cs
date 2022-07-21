@@ -257,6 +257,19 @@ namespace OleViewDotNet.Database
             {
                 if (!File.Exists(temp))
                 {
+                  if (temp.Contains(".exe"))
+                  {
+                    int index = temp.IndexOf(".exe")+4;
+        
+                      while (index > 0)
+                      {
+                        string name = temp.Substring(0, index); 
+                        filename = name;
+                        index = name.Length - 1;
+                      }
+                  }
+                  else
+                  {
                     int index = temp.IndexOf(' ');
                     while (index > 0)
                     {
@@ -267,11 +280,8 @@ namespace OleViewDotNet.Database
                             filename = name;
                             break;
                         }
-
                         index = temp.IndexOf(' ', index + 1);
                     }
-
-
                     if (index < 0)
                     {
                         // We've run out of options, just take the first string
@@ -279,6 +289,7 @@ namespace OleViewDotNet.Database
                     }
                 }
             }
+          }
 
             filename = filename.Trim();
 
