@@ -1,0 +1,3 @@
+[submodule "third_party/sandbox-attacksurface-analysis-tools"]
+	path = third_party/sandbox-attacksurface-analysis-tools
+	url = https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools.git
