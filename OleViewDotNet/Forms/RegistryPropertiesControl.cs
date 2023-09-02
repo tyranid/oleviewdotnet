@@ -39,6 +39,7 @@ namespace OleViewDotNet.Forms
             AddListItem("Created User", registry.CreatedUser);
             AddListItem("Loading Mode", registry.LoadingMode);
             AddListItem("64bit", registry.SixtyFourBit);
+            AddListItem("Architecture", registry.Architecture);
             AddListItem("File Path", registry.FilePath);
             AddListItem("CLSID Count", registry.Clsids.Count);
             AddListItem("InProcServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcServer32)).Count());

@@ -38,10 +38,10 @@ namespace OleViewDotNet.Forms
 
         private void UpdateTitle()
         {
-            Text = string.Format("OleView .NET v{0}", COMUtilities.GetVersion());
+            Text = $"OleView .NET v{COMUtilities.GetVersion()}";
             if (COMUtilities.IsAdministrator())
             {
-                Text += " - Administrator -";
+                Text += " - Administrator";
                 menuFileOpenAsAdmin.Visible = false;
             }
 
@@ -54,14 +54,14 @@ namespace OleViewDotNet.Forms
                 }
                 else
                 {
-                    Text += " - 64bit";
+                    Text += $" - 64bit ({RuntimeInformation.ProcessArchitecture})";
                     menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
 
             if (m_registry.FilePath != null)
             {
-                Text += String.Format(" - {0}", m_registry.FilePath);
+                Text += $" - {m_registry.FilePath}";
             }
         }
 

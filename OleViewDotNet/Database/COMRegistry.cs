@@ -257,6 +257,11 @@ namespace OleViewDotNet.Database
             get; private set; 
         }
 
+        public string Architecture
+        {
+            get; private set;
+        }
+
         public string Name
         {
             get
@@ -344,6 +349,7 @@ namespace OleViewDotNet.Database
                 writer.WriteOptionalAttributeString("created", CreatedDate);
                 writer.WriteOptionalAttributeString("machine", CreatedMachine);
                 writer.WriteBool("sixfour", SixtyFourBit);
+                writer.WriteOptionalAttributeString("arch", Architecture);
                 writer.WriteEnum("mode", LoadingMode);
                 writer.WriteOptionalAttributeString("user", CreatedUser);
                 writer.WriteOptionalAttributeString("access", DefaultAccessPermission);
@@ -672,7 +678,7 @@ namespace OleViewDotNet.Database
                 case COMRegistryMode.MachineOnly:
                     return Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes");
                 case COMRegistryMode.UserOnly:
-                    return Registry.Users.OpenSubKey(String.Format(@"{0}\SOFTWARE\Classes", user));
+                    return Registry.Users.OpenSubKey($@"{user}\SOFTWARE\Classes");
                 default:
                     throw new ArgumentException("Invalid mode", "mode");
             }
@@ -755,6 +761,7 @@ namespace OleViewDotNet.Database
                 CreatedDate = reader.GetAttribute("created");
                 CreatedMachine = reader.GetAttribute("machine");
                 SixtyFourBit = reader.ReadBool("sixfour");
+                Architecture = reader.ReadString("arch");
                 LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
                 CreatedUser = reader.GetAttribute("user");
                 DefaultAccessPermission = reader.ReadString("access");
@@ -797,22 +804,7 @@ namespace OleViewDotNet.Database
             CreatedDate = DateTime.Now.ToLongDateString();
             CreatedMachine = Environment.MachineName;
             SixtyFourBit = Environment.Is64BitProcess;
-        }
-
-        private static void AddEntryToDictionary(Dictionary<string, List<COMCLSIDEntry>> dict, COMCLSIDEntry entry)
-        {
-            List<COMCLSIDEntry> list = null;
-            string strServer = entry.DefaultServer.ToLower();
-            if (dict.ContainsKey(strServer))
-            {
-                list = dict[strServer];
-            }
-            else
-            {
-                list = new List<COMCLSIDEntry>();
-                dict[strServer] = list;
-            }
-            list.Add(entry);
+            Architecture = RuntimeInformation.ProcessArchitecture.ToString();
         }
 
         private string GetSecurityDescriptor(RegistryKey key, string name, string default_sd)
