@@ -50,7 +50,7 @@ DotNetFrameworkVersion = '4.6'
  CLRVersion = '4.0'
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = 'OleViewDotNet.Main.dll', 'NtApiDotNet.dll'
+RequiredAssemblies = 'OleViewDotNet.dll', 'NtApiDotNet.dll'
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = 'OleViewDotNet_Formatters.ps1xml'

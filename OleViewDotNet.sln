@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OleViewDotNet.Main", "OleViewDotNet.Main\OleViewDotNet.Main.csproj", "{81F5C6AA-AC60-4F6E-9467-426997BB9D80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OleViewDotNet", "OleViewDotNet\OleViewDotNet.csproj", "{81F5C6AA-AC60-4F6E-9467-426997BB9D80}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OleViewDotNet", "OleViewDotNet\OleViewDotNet.csproj", "{60072CB0-B13F-4578-9993-940265B6E156}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OleViewDotNetUI", "OleViewDotNetUI\OleViewDotNetUI.csproj", "{60072CB0-B13F-4578-9993-940265B6E156}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NtApiDotNet", "third_party\NtApiDotNet\NtApiDotNet.csproj", "{44641991-3F1B-46CB-A1B2-0690E6B5181E}"
 EndProject

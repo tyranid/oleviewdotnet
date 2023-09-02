@@ -816,7 +816,7 @@ namespace OleViewDotNet
 
         public static string Get32bitExePath()
         {
-            string path = Path.Combine(GetAppDirectory(), "OleViewDotNet32.exe");
+            string path = Path.Combine(GetAppDirectory(), "OleViewDotNetUI32.exe");
             if (!File.Exists(path))
             {
                 path = GetExePath();
@@ -826,7 +826,7 @@ namespace OleViewDotNet
 
         public static string GetExePath()
         {
-            return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
+            return Path.Combine(GetAppDirectory(), "OleViewDotNetUI.exe");
         }
 
         public static string GetExePathForCurrentBitness()
