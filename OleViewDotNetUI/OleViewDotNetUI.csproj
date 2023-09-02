@@ -10,13 +10,7 @@
         <ApplicationIcon>oleview.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <Authors>James Forshaw</Authors>
-        <Company>None</Company>
-        <Product>OleViewDotNet</Product>
-        <FileVersion>1.0.0.0</FileVersion>
-        <Version>1.11</Version>
-        <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
-        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <BaseOutputPath>..\bin</BaseOutputPath>
         <Configurations>Debug;Release</Configurations>
