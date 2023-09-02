@@ -3252,12 +3252,7 @@ namespace OleViewDotNet
 
         private static string GetNativeLibraryDirectory()
         {
-            if (Environment.Is64BitProcess)
-            {
-                return Path.Combine(GetAppDirectory(), "x64");
-            }
-
-            return Path.Combine(GetAppDirectory(), "x86");
+            return Path.Combine(GetAppDirectory(), RuntimeInformation.ProcessArchitecture.ToString());
         }
 
         public static string GetDefaultDbgHelp()
@@ -3268,7 +3263,7 @@ namespace OleViewDotNet
                 return path;
             }
 
-            path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{(Environment.Is64BitProcess ? "X64" : "X86")}");
+            path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{RuntimeInformation.ProcessArchitecture}");
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
             {
                 return path;
@@ -3315,6 +3310,7 @@ namespace OleViewDotNet
         internal static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
         internal static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
         internal static readonly bool IsWindows101909OrLess = Environment.OSVersion.Version < new Version(10, 0, 19041);
+        internal static readonly bool IsWindows1121H2OrLess = Environment.OSVersion.Version < new Version(10, 0, 22000);
 
         public static string GetPackagePath(string packageId)
         {
