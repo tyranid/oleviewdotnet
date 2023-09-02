@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <AssemblyName>NtApiDotNet</AssemblyName>
+        <AssemblyName>SharedNtApiLibrary</AssemblyName>
         <TargetFramework>net481</TargetFramework>
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>10.0</LangVersion>
@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet\**\*.cs"/>
+        <Compile Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet\**\*.cs" />
         <Compile Remove="..\sandbox-attacksurface-analysis-tools\NtApiDotNet\obj\**" />
         <Compile Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\*.cs" LinkBase="Forms" />
         <EmbeddedResource Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\AclViewerControl.resx" LinkBase="Forms" LogicalName="NtApiDotNet.Forms.AclViewerControl.resources" />
