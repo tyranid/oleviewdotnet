@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>NtApiDotNet</AssemblyName>
+        <TargetFramework>net481</TargetFramework>
+        <UseWindowsForms>true</UseWindowsForms>
+        <LangVersion>10.0</LangVersion>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <BaseOutputPath>..\bin</BaseOutputPath>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet\**\*.cs"/>
+        <Compile Remove="..\sandbox-attacksurface-analysis-tools\NtApiDotNet\obj\**" />
+        <Compile Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\*.cs" LinkBase="Forms" />
+        <EmbeddedResource Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\AclViewerControl.resx" LinkBase="Forms" LogicalName="NtApiDotNet.Forms.AclViewerControl.resources" />
+        <EmbeddedResource Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\SecurityDescriptorViewerControl.resx" LinkBase="NtCoreLibForms" LogicalName="NtApiDotNet.Forms.SecurityDescriptorViewerControl.resources" />
+        <EmbeddedResource Include="..\sandbox-attacksurface-analysis-tools\NtApiDotNet.Forms\SecurityDescriptorViewerForm.resx" LinkBase="NtCoreLibForms" LogicalName="NtApiDotNet.Forms.SecurityDescriptorViewerForm.resources" />
+        <Reference Include="System.DirectoryServices" />
+        <Reference Include="System.Security" />
+    </ItemGroup>
+</Project>

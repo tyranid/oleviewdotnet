@@ -18,11 +18,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NtApiDotNet" Version="1.1.28" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\OleViewDotNet.Main\OleViewDotNet.Main.csproj" />
+        <ProjectReference Include="..\third_party\sandbox-attacksurface-analysis-tools\NtApiDotNet\NtApiDotNet.csproj" />
     </ItemGroup>
 
     <ItemGroup>

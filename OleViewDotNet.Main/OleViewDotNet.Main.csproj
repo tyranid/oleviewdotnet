@@ -28,7 +28,6 @@
         <PackageReference Include="DockPanelSuite" Version="3.0.6" />
         <PackageReference Include="ICSharpCode.TextEditor" Version="3.2.1.6466" />
         <PackageReference Include="NDesk.Options" Version="0.2.1" />
-        <PackageReference Include="NtApiDotNet" Version="1.1.28" />
     </ItemGroup>
 
     <ItemGroup>
@@ -37,8 +36,9 @@
         </Reference>
         <Reference Include="System.ServiceProcess" />
     </ItemGroup>
+
     <ItemGroup>
-        <EmbeddedResource Remove="Forms\*.resx"/>
+        <EmbeddedResource Remove="Forms\*.resx" />
         <EmbeddedResource Include="Forms\AboutForm.resx" LogicalName="OleViewDotNet.Forms.AboutForm.resources" />
         <EmbeddedResource Include="Forms\BuildMonikerForm.resx" LogicalName="OleViewDotNet.Forms.BuildMonikerForm.resources" />
         <EmbeddedResource Include="Forms\ClassFactoryTypeViewer.resx" LogicalName="OleViewDotNet.Forms.ClassFactoryTypeViewer.resources" />
@@ -75,5 +75,24 @@
         <EmbeddedResource Include="Forms\ViewFilterControl.resx" LogicalName="OleViewDotNet.Forms.ViewFilterControl.resources" />
         <EmbeddedResource Include="Forms\ViewFilterForm.resx" LogicalName="OleViewDotNet.Forms.ViewFilterForm.resources" />
         <EmbeddedResource Include="Forms\WaitingDialog.resx" LogicalName="OleViewDotNet.Forms.WaitingDialog.resources" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\third_party\NtApiDotNet\NtApiDotNet.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="OleViewDotNet.psd1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="OleViewDotNet.psm1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="OleViewDotNet_Formatters.ps1xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Startup-Module.ps1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

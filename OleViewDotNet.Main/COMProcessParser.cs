@@ -98,7 +98,7 @@ namespace OleViewDotNet
                     {
                         PackageHostId = (ulong)pkghostid.Values.First();
                     }
-                    AppModelPolicies = token.AppModelPolicies.ToList().AsReadOnly();
+                    AppModelPolicies = token.AppModelPolicyDictionary.Values.ToList().AsReadOnly();
                 }
             }
         }
