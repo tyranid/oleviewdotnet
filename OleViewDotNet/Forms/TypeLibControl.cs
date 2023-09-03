@@ -72,9 +72,9 @@ namespace OleViewDotNet.Forms
 
         private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy)
         {
-            foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name)))
+            foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name, t.Iid)))
             {
-                ListViewItemWithGuid item = new ListViewItemWithGuid(COMUtilities.DemangleWinRTName(t.Name), t.Iid);
+                ListViewItemWithGuid item = new ListViewItemWithGuid(COMUtilities.DemangleWinRTName(t.Name, t.Iid), t.Iid);
                 item.SubItems.Add(t.Iid.FormatGuid());
                 item.Tag = t;
                 yield return item;
@@ -208,8 +208,8 @@ namespace OleViewDotNet.Forms
                   new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
         {
             // controls on this panel are not enabled by default, activating them in the proxy view only
-            this.btnDqs.Enabled = true;
-            this.cbProxyRenderStyle.Enabled = true;
+            btnDqs.Enabled = true;
+            cbProxyRenderStyle.Enabled = true;
             this.comClassId = comClassId;
             this.comClassIdName = comClassIdName;
         }
@@ -217,7 +217,7 @@ namespace OleViewDotNet.Forms
         private INdrFormatter GetNdrFormatter(bool useDemangler)
         {
             DefaultNdrFormatterFlags flags = cbProxyRenderStyle.SelectedIndex % 2 == 0 ? DefaultNdrFormatterFlags.None : DefaultNdrFormatterFlags.RemoveComments;
-            Func<string, string> demangler = useDemangler ? COMUtilities.DemangleWinRTName : (Func<string, string>)null;
+            Func<string, string> demangler = useDemangler ? COMUtilities.DemangleWinRTName : null;
             bool useNtApiFormatter = this.cbProxyRenderStyle.SelectedIndex < 2;
             return useNtApiFormatter ?
                 DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags) :

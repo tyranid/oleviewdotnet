@@ -28,7 +28,7 @@ namespace OleViewDotNet
         /// <summary>
         /// The name of the proxy interface.
         /// </summary>
-        public string Name => COMUtilities.DemangleWinRTName(Entry.Name);
+        public string Name => COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         /// <summary>
         /// Original name of the interface.
         /// </summary>

@@ -64,7 +64,7 @@ namespace OleViewDotNet.Database
             string name = key.GetValue(null) as string;
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Name = COMUtilities.DemangleWinRTName(name.ToString());
+                Name = COMUtilities.DemangleWinRTName(name);
                 CacheIidToName(Iid, Name);
             }
             else

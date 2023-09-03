@@ -2029,12 +2029,20 @@ namespace OleViewDotNet
             return ReadType(ref name);
         }
 
-        // TODO: This isn't exactly correct, but can't find any good documentation.
         internal static string DemangleWinRTName(string name)
         {
+            return DemangleWinRTName(name, null);
+        }
+
+        // TODO: This isn't exactly correct, but can't find any good documentation.
+        internal static string DemangleWinRTName(string name, Guid? iid)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return iid?.ToString() ?? "IInvalidName";
+            }
             name = name.Trim();
-            string result;
-            if (_demangled_names.TryGetValue(name, out result))
+            if (_demangled_names.TryGetValue(name, out string result))
             {
                 return result;
             }
