@@ -50,12 +50,10 @@ namespace OleViewDotNet.Forms
                 if (!Environment.Is64BitProcess)
                 {
                     Text += " - 32bit";
-                    menuFileOpenViewer.Text = "Open 64bit Viewer";
                 }
                 else
                 {
                     Text += $" - 64bit ({RuntimeInformation.ProcessArchitecture})";
-                    menuFileOpenViewer.Text = "Open 32bit Viewer";
                 }
             }
 
@@ -77,20 +75,19 @@ namespace OleViewDotNet.Forms
             m_dockPanel.BringToFront();
             CreatePropertyGrid(true);
 
-            if (!Environment.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
-                menuFileOpenViewer.Visible = false;
+                bool is_arm64 = NtSystemInfo.EmulationProcessorInformation.ProcessorArchitecture == ProcessorAchitecture.ARM;
+                bool is_amd64 = RuntimeInformation.ProcessArchitecture == Architecture.X64;
+                menuFileOpenARM64Viewer.Visible = Environment.Is64BitProcess && is_arm64 && is_amd64;
+                menuFileOpen64BitViewer.Visible = Environment.Is64BitProcess && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+                menuFileOpen32BitViewer.Visible = Environment.Is64BitProcess;
             }
             else
             {
-                if (!Environment.Is64BitProcess)
-                {
-                    menuFileOpenViewer.Text = "Open 64bit Viewer";
-                }
-                else
-                {
-                    menuFileOpenViewer.Text = "Open 32bit Viewer";
-                }
+                menuFileOpen32BitViewer.Visible = false;
+                menuFileOpenARM64Viewer.Visible = false;
+                menuFileOpen64BitViewer.Visible = false;
             }
 
             UpdateTitle();
@@ -363,7 +360,7 @@ namespace OleViewDotNet.Forms
                 else
                 {
                     ints = m_registry.GetInterfacesForObject(comObj).ToArray();
-                    strObjName = defaultName != null ? defaultName : clsid.FormatGuid();
+                    strObjName = defaultName ?? clsid.FormatGuid();
                     props.Add("CLSID", clsid.FormatGuid());
                 }
 
@@ -382,12 +379,9 @@ namespace OleViewDotNet.Forms
                 {
                     try
                     {
-                        using (Stream stm = dlg.OpenFile())
-                        {
-                            Guid clsid;
-                            object obj = COMUtilities.OleLoadFromStream(stm, out clsid);
-                            await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
-                        }
+                        using Stream stm = dlg.OpenFile();
+                        object obj = COMUtilities.OleLoadFromStream(stm, out Guid clsid);
+                        await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
                     }
                     catch (Exception ex)
                     {
@@ -420,18 +414,11 @@ namespace OleViewDotNet.Forms
             OpenView(COMRegistryViewer.DisplayMode.CLSIDsWithSurrogate);
         }
 
-        private void menuFileOpenViewer_Click(object sender, EventArgs e)
+        private void menuFileOpen32BitViewer_Click(object sender, EventArgs e)
         {
             try
             {
-                if (Environment.Is64BitProcess)
-                {
-                    Process.Start(COMUtilities.Get32bitExePath()).Close();
-                }
-                else
-                {
-                    Process.Start(COMUtilities.GetExePath()).Close();
-                }
+                COMUtilities.StartArchProcess(Architecture.X86, string.Empty);
             }
             catch(Exception ex)
             {
@@ -502,7 +489,7 @@ namespace OleViewDotNet.Forms
         private void SaveDatabase(bool save)
         {
             string filename = GetSaveFileName(save);
-            if (String.IsNullOrWhiteSpace(filename))
+            if (string.IsNullOrWhiteSpace(filename))
             {
                 return;
             }
@@ -525,13 +512,11 @@ namespace OleViewDotNet.Forms
 
         private void menuFileOpenDatabase_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            using OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    LoadRegistry(() => COMUtilities.LoadRegistry(this, dlg.FileName));
-                }
+                LoadRegistry(() => COMUtilities.LoadRegistry(this, dlg.FileName));
             }
         }
 
@@ -612,18 +597,16 @@ namespace OleViewDotNet.Forms
         {
             try
             {
-                using (OpenFileDialog dlg = new OpenFileDialog())
+                using OpenFileDialog dlg = new OpenFileDialog();
+                dlg.Filter = "All Files (*.*)|*.*";
+                if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    dlg.Filter = "All Files (*.*)|*.*";
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    COMCLSIDEntry entry = m_registry.GetFileClass(dlg.FileName);
+                    if (entry != null)
                     {
-                        COMCLSIDEntry entry = m_registry.GetFileClass(dlg.FileName);
-                        if (entry != null)
-                        {
-                            IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext, null);
-                            ps.Load(dlg.FileName, (int)STGM.READ);
-                            await HostObject(entry, ps, false);
-                        }
+                        IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext, null);
+                        ps.Load(dlg.FileName, (int)STGM.READ);
+                        await HostObject(entry, ps, false);
                     }
                 }
             }
@@ -703,11 +686,9 @@ namespace OleViewDotNet.Forms
                 {
                     try
                     {
-                        using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
-                        {
-                            COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
-                            HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
-                        }
+                        using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                        COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
+                        HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
                     }
                     catch (Exception ex)
                     {
@@ -1026,6 +1007,30 @@ namespace OleViewDotNet.Forms
             {
                 FocusOnTextBoxFilter();
                 return;
+            }
+        }
+
+        private void menuFileOpen64BitViewer_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                COMUtilities.StartArchProcess(Architecture.X64, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void menuFileOpenARM64Viewer_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                COMUtilities.StartArchProcess(Architecture.Arm64, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

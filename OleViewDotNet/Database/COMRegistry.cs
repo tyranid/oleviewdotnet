@@ -254,7 +254,7 @@ namespace OleViewDotNet.Database
 
         public string FilePath
         {
-            get; private set; 
+            get; set; 
         }
 
         public string Architecture
@@ -1303,20 +1303,16 @@ namespace OleViewDotNet.Database
         private static void LoadRuntimeServers(RegistryKey runtime_key, string package_id, 
             COMRegistry registry, Dictionary<string, COMRuntimeServerEntry> servers)
         {
-            using (RegistryKey server_key = runtime_key.OpenSubKey("Server"))
+            using RegistryKey server_key = runtime_key.OpenSubKey("Server");
+            List<COMRuntimeServerEntry> entries = new List<COMRuntimeServerEntry>();
+            if (server_key != null)
             {
-                List<COMRuntimeServerEntry> entries = new List<COMRuntimeServerEntry>();
-                if (server_key != null)
+                foreach (string name in server_key.GetSubKeyNames())
                 {
-                    foreach (string name in server_key.GetSubKeyNames())
+                    using RegistryKey subkey = server_key.OpenSubKey(name);
+                    if (subkey != null)
                     {
-                        using (RegistryKey subkey = server_key.OpenSubKey(name))
-                        {
-                            if (subkey != null)
-                            {
-                                servers[name] = new COMRuntimeServerEntry(registry, package_id, name, subkey);
-                            }
-                        }
+                        servers[name] = new COMRuntimeServerEntry(registry, package_id, name, subkey);
                     }
                 }
             }
@@ -1327,19 +1323,15 @@ namespace OleViewDotNet.Database
         {
             foreach (var package_id in package_key.GetSubKeyNames())
             {
-                using (var class_key = package_key.OpenSubKey($@"{package_id}\ActivatableClassId"))
+                using var class_key = package_key.OpenSubKey($@"{package_id}\ActivatableClassId");
+                if (class_key != null)
                 {
-                    if (class_key != null)
+                    foreach (var app_id in class_key.GetSubKeyNames())
                     {
-                        foreach (var app_id in class_key.GetSubKeyNames())
+                        using var app_key = class_key.OpenSubKey(app_id);
+                        if (app_key != null)
                         {
-                            using (var app_key = class_key.OpenSubKey(app_id))
-                            {
-                                if (app_key != null)
-                                {
-                                    exts.Add(new COMRuntimeExtensionEntry(package_id, contract_id, app_id, app_key, registry));
-                                }
-                            }
+                            exts.Add(new COMRuntimeExtensionEntry(package_id, contract_id, app_id, app_key, registry));
                         }
                     }
                 }

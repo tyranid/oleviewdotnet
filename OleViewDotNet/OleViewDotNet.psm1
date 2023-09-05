@@ -852,6 +852,8 @@ This cmdlet starts the main viewer application and loads a specified database fi
 The database to view.
 .PARAMETER Path
 The path to the database to view.
+.PARAMETER UseArchitecture
+Try and load the viewer with the same architecture as captured.
 .INPUTS
 None
 .OUTPUTS
@@ -872,7 +874,9 @@ function Show-ComDatabase {
         [Parameter(Position = 0, ParameterSetName = "FromDb")]
         [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFile")]
-        [string]$Path
+        [string]$Path,
+        [Parameter(ParameterSetName = "FromDb")]
+        [switch]$UseArchitecture
     )
 
     $DeleteFile = $false
@@ -892,12 +896,17 @@ function Show-ComDatabase {
             # Do nothing.
         }
     }
-    $exe = [OleViewDotNet.COMUtilities]::GetExePathForCurrentBitness()
+
     $args = @("`"-i=$Path`"")
     if ($DeleteFile) {
         $args += @("-d")
     }
-    Start-Process $exe $args
+    
+    if ($UseArchitecture) {
+        [OleViewDotNet.COMUtilities]::StartArchProcess($Database.Architecture, $args)
+    } else {
+        [OleViewDotNet.COMUtilities]::StartProcess($args)
+    }
 }
 
 <#

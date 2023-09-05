@@ -32,7 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuFile = new System.Windows.Forms.MenuItem();
-            this.menuFileOpenViewer = new System.Windows.Forms.MenuItem();
+            this.menuFileOpen32BitViewer = new System.Windows.Forms.MenuItem();
+            this.menuFileOpen64BitViewer = new System.Windows.Forms.MenuItem();
+            this.menuFileOpenARM64Viewer = new System.Windows.Forms.MenuItem();
             this.menuFileOpenAsAdmin = new System.Windows.Forms.MenuItem();
             this.menuFileOpenPowershell = new System.Windows.Forms.MenuItem();
             this.menuItem10 = new System.Windows.Forms.MenuItem();
@@ -125,7 +127,9 @@
             // 
             this.menuFile.Index = 0;
             this.menuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuFileOpenViewer,
+            this.menuFileOpen32BitViewer,
+            this.menuFileOpen64BitViewer,
+            this.menuFileOpenARM64Viewer,
             this.menuFileOpenAsAdmin,
             this.menuFileOpenPowershell,
             this.menuItem10,
@@ -146,114 +150,126 @@
             this.menuFileExit});
             this.menuFile.Text = "&File";
             // 
-            // menuFileOpenViewer
+            // menuFileOpen32BitViewer
             // 
-            this.menuFileOpenViewer.Index = 0;
-            this.menuFileOpenViewer.Text = "Open &32 Bit Viewer";
-            this.menuFileOpenViewer.Click += new System.EventHandler(this.menuFileOpenViewer_Click);
+            this.menuFileOpen32BitViewer.Index = 0;
+            this.menuFileOpen32BitViewer.Text = "Open &32 Bit Viewer";
+            this.menuFileOpen32BitViewer.Click += new System.EventHandler(this.menuFileOpen32BitViewer_Click);
+            // 
+            // menuFileOpen64BitViewer
+            // 
+            this.menuFileOpen64BitViewer.Index = 1;
+            this.menuFileOpen64BitViewer.Text = "Open &64 Bit Viewer";
+            this.menuFileOpen64BitViewer.Click += new System.EventHandler(this.menuFileOpen64BitViewer_Click);
+            // 
+            // menuFileOpenARM64Viewer
+            // 
+            this.menuFileOpenARM64Viewer.Index = 2;
+            this.menuFileOpenARM64Viewer.Text = "Open &ARM64 Viewer";
+            this.menuFileOpenARM64Viewer.Click += new System.EventHandler(this.menuFileOpenARM64Viewer_Click);
             // 
             // menuFileOpenAsAdmin
             // 
-            this.menuFileOpenAsAdmin.Index = 1;
+            this.menuFileOpenAsAdmin.Index = 3;
             this.menuFileOpenAsAdmin.Text = "Open as Administrator";
             this.menuFileOpenAsAdmin.Click += new System.EventHandler(this.menuFileOpenAsAdmin_Click);
             // 
             // menuFileOpenPowershell
             // 
-            this.menuFileOpenPowershell.Index = 2;
+            this.menuFileOpenPowershell.Index = 4;
             this.menuFileOpenPowershell.Text = "Open Powershell";
             this.menuFileOpenPowershell.Click += new System.EventHandler(this.menuFileOpenPowershell_Click);
             // 
             // menuItem10
             // 
-            this.menuItem10.Index = 3;
+            this.menuItem10.Index = 5;
             this.menuItem10.Text = "-";
             // 
             // menuFileOpenDatabase
             // 
-            this.menuFileOpenDatabase.Index = 4;
+            this.menuFileOpenDatabase.Index = 6;
             this.menuFileOpenDatabase.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.menuFileOpenDatabase.Text = "&Open Database";
             this.menuFileOpenDatabase.Click += new System.EventHandler(this.menuFileOpenDatabase_Click);
             // 
             // menuFileSaveDatabase
             // 
-            this.menuFileSaveDatabase.Index = 5;
+            this.menuFileSaveDatabase.Index = 7;
             this.menuFileSaveDatabase.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.menuFileSaveDatabase.Text = "&Save Database";
             this.menuFileSaveDatabase.Click += new System.EventHandler(this.menuFileSaveDatabase_Click);
             // 
             // menuFileSaveAsDatabase
             // 
-            this.menuFileSaveAsDatabase.Index = 6;
+            this.menuFileSaveAsDatabase.Index = 8;
             this.menuFileSaveAsDatabase.Text = "Save &as... Database";
             this.menuFileSaveAsDatabase.Click += new System.EventHandler(this.menuFileSaveAsDatabase_Click);
             // 
             // menuItem7
             // 
-            this.menuItem7.Index = 7;
+            this.menuItem7.Index = 9;
             this.menuItem7.Text = "-";
             // 
             // menuFileOpenMachineOnly
             // 
-            this.menuFileOpenMachineOnly.Index = 8;
+            this.menuFileOpenMachineOnly.Index = 10;
             this.menuFileOpenMachineOnly.Text = "Open &Machine Only";
             this.menuFileOpenMachineOnly.Click += new System.EventHandler(this.menuFileOpenMachineOnly_Click);
             // 
             // menuFileOpenUserOnly
             // 
-            this.menuFileOpenUserOnly.Index = 9;
+            this.menuFileOpenUserOnly.Index = 11;
             this.menuFileOpenUserOnly.Text = "Open &User Only";
             this.menuFileOpenUserOnly.Click += new System.EventHandler(this.menuFileOpenUserOnly_Click);
             // 
             // menuFileDiff
             // 
-            this.menuFileDiff.Index = 10;
+            this.menuFileDiff.Index = 12;
             this.menuFileDiff.Text = "&Diff Registries";
             this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
             // 
             // menuFileQueryAllInterfaces
             // 
-            this.menuFileQueryAllInterfaces.Index = 11;
+            this.menuFileQueryAllInterfaces.Index = 13;
             this.menuFileQueryAllInterfaces.Text = "&Query All Interfaces";
             this.menuFileQueryAllInterfaces.Click += new System.EventHandler(this.menuFileQueryAllInterfaces_Click);
             // 
             // menuItem8
             // 
-            this.menuItem8.Index = 12;
+            this.menuItem8.Index = 14;
             this.menuItem8.Text = "-";
             // 
             // menuFileOpenTypeLib
             // 
-            this.menuFileOpenTypeLib.Index = 13;
+            this.menuFileOpenTypeLib.Index = 15;
             this.menuFileOpenTypeLib.Text = "Open &TypeLib";
             this.menuFileOpenTypeLib.Click += new System.EventHandler(this.menuFileOpenTypeLib_Click);
             // 
             // menuFileOpenProxyDll
             // 
-            this.menuFileOpenProxyDll.Index = 14;
+            this.menuFileOpenProxyDll.Index = 16;
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
             // menuItem12
             // 
-            this.menuItem12.Index = 15;
+            this.menuItem12.Index = 17;
             this.menuItem12.Text = "-";
             // 
             // menuFileSettings
             // 
-            this.menuFileSettings.Index = 16;
+            this.menuFileSettings.Index = 18;
             this.menuFileSettings.Text = "Settings";
             this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 17;
+            this.menuItem2.Index = 19;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 18;
+            this.menuFileExit.Index = 20;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -646,12 +662,13 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(823, 448);
+            this.ClientSize = new System.Drawing.Size(1646, 862);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -691,7 +708,7 @@
         private System.Windows.Forms.MenuItem menuRegistryTypeLibraries;
         private System.Windows.Forms.MenuItem menuRegistryAppIDsIL;
         private System.Windows.Forms.MenuItem menuViewCLSIDsWithSurrogate;
-        private System.Windows.Forms.MenuItem menuFileOpenViewer;
+        private System.Windows.Forms.MenuItem menuFileOpen32BitViewer;
         private System.Windows.Forms.MenuItem menuObjectBindMoniker;
         private System.Windows.Forms.MenuItem menuFileOpenDatabase;
         private System.Windows.Forms.MenuItem menuFileSaveDatabase;
@@ -742,6 +759,8 @@
         private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem menuFileOpenPowershell;
+        private System.Windows.Forms.MenuItem menuFileOpen64BitViewer;
+        private System.Windows.Forms.MenuItem menuFileOpenARM64Viewer;
     }
 }
 

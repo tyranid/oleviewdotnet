@@ -838,6 +838,36 @@ namespace OleViewDotNet
             return Get32bitExePath();
         }
 
+
+        public static void StartArchProcess(Architecture arch, string command_line)
+        {
+            var machine_type = arch switch
+            {
+                Architecture.Arm64 => DllMachineType.ARM64,
+                Architecture.X64 => DllMachineType.AMD64,
+                Architecture.X86 => DllMachineType.I386,
+                _ => throw new ArgumentException("Unsupported architecture."),
+            };
+            if (IsWindows1121H2OrLess)
+            {
+                Process.Start(arch == Architecture.X86 ? Get32bitExePath() : GetExePath(), command_line).Close();
+                return;
+            }
+
+            Win32ProcessConfig config = new()
+            {
+                CommandLine = $"\"{GetExePath()}\" {command_line}",
+                ApplicationName = GetExePath(),
+                MachineType = machine_type
+            };
+            Win32Process.CreateProcess(config).Dispose();
+        }
+
+        public static void StartProcess(string command_line)
+        {
+            StartArchProcess(RuntimeInformation.ProcessArchitecture, command_line);
+        }
+
         public static string GetAppDataDirectory()
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OleViewDotNet");
@@ -857,7 +887,7 @@ namespace OleViewDotNet
         {
             string autosave = Path.Combine(GetAppDataDirectory(), "autosave");
             Directory.CreateDirectory(autosave);
-            return Path.Combine(autosave, Environment.Is64BitProcess ? "com64.db" : "com32.db");
+            return Path.Combine(autosave, $"com{RuntimeInformation.ProcessArchitecture}.db");
         }
 
         public static Dictionary<string, int> GetSymbolFile(bool native)

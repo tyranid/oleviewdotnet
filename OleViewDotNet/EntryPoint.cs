@@ -346,6 +346,7 @@ namespace OleViewDotNet
                     if (delete_database && database_file != null)
                     {
                         File.Delete(database_file);
+                        registry.FilePath = null;
                     }
 
                     if (query_interfaces)
