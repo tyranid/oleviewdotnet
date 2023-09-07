@@ -75,13 +75,13 @@ namespace OleViewDotNet.Forms
             m_dockPanel.BringToFront();
             CreatePropertyGrid(true);
 
-            if (Environment.Is64BitOperatingSystem)
+            if (Environment.Is64BitProcess)
             {
                 bool is_arm64 = NtSystemInfo.EmulationProcessorInformation.ProcessorArchitecture == ProcessorAchitecture.ARM;
                 bool is_amd64 = RuntimeInformation.ProcessArchitecture == Architecture.X64;
-                menuFileOpenARM64Viewer.Visible = Environment.Is64BitProcess && is_arm64 && is_amd64;
-                menuFileOpen64BitViewer.Visible = Environment.Is64BitProcess && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
-                menuFileOpen32BitViewer.Visible = Environment.Is64BitProcess;
+                menuFileOpenARM64Viewer.Visible = is_arm64 && is_amd64;
+                menuFileOpen64BitViewer.Visible = RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+                menuFileOpen32BitViewer.Visible = true;
             }
             else
             {

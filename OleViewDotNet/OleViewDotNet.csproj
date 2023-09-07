@@ -38,46 +38,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Remove="Forms\*.resx" />
-        <EmbeddedResource Include="Forms\AboutForm.resx" LogicalName="OleViewDotNet.Forms.AboutForm.resources" />
-        <EmbeddedResource Include="Forms\BuildMonikerForm.resx" LogicalName="OleViewDotNet.Forms.BuildMonikerForm.resources" />
-        <EmbeddedResource Include="Forms\ClassFactoryTypeViewer.resx" LogicalName="OleViewDotNet.Forms.ClassFactoryTypeViewer.resources" />
-        <EmbeddedResource Include="Forms\COMRegistryViewer.resx" LogicalName="OleViewDotNet.Forms.COMRegistryViewer.resources" />
-        <EmbeddedResource Include="Forms\CreateCLSIDForm.resx" LogicalName="OleViewDotNet.Forms.CreateCLSIDForm.resources" />
-        <EmbeddedResource Include="Forms\CreateIStreamForm.resx" LogicalName="OleViewDotNet.Forms.CreateIStreamForm.resources" />
-        <EmbeddedResource Include="Forms\CustomMarshalEditorControl.resx" LogicalName="OleViewDotNet.Forms.CustomMarshalEditorControl.resources" />
-        <EmbeddedResource Include="Forms\DiffRegistryForm.resx" LogicalName="OleViewDotNet.Forms.DiffRegistryForm.resources" />
-        <EmbeddedResource Include="Forms\DocumentForm.resx" LogicalName="OleViewDotNet.Forms.DocumentForm.resources" />
-        <EmbeddedResource Include="Forms\ElevatedFactoryServerTypeViewer.resx" LogicalName="OleViewDotNet.Forms.ElevatedFactoryServerTypeViewer.resources" />
-        <EmbeddedResource Include="Forms\GetTextForm.resx" LogicalName="OleViewDotNet.Forms.GetTextForm.resources" />
-        <EmbeddedResource Include="Forms\GetTypeForm.resx" LogicalName="OleViewDotNet.Forms.GetTypeForm.resources" />
-        <EmbeddedResource Include="Forms\HexEditorControl.resx" LogicalName="OleViewDotNet.Forms.HexEditorControl.resources" />
-        <EmbeddedResource Include="Forms\InvokeForm.resx" LogicalName="OleViewDotNet.Forms.InvokeForm.resources" />
-        <EmbeddedResource Include="Forms\MainForm.resx" LogicalName="OleViewDotNet.Forms.MainForm.resources" />
-        <EmbeddedResource Include="Forms\MarshalEditorControl.resx" LogicalName="OleViewDotNet.Forms.MarshalEditorControl.resources" />
-        <EmbeddedResource Include="Forms\ObjectContainer.resx" LogicalName="OleViewDotNet.Forms.ObjectContainer.resources" />
-        <EmbeddedResource Include="Forms\ObjectHexEditor.resx" LogicalName="OleViewDotNet.Forms.ObjectHexEditor.resources" />
-        <EmbeddedResource Include="Forms\ObjectInformation.resx" LogicalName="OleViewDotNet.Forms.ObjectInformation.resources" />
-        <EmbeddedResource Include="Forms\PersistStreamTypeViewer.resx" LogicalName="OleViewDotNet.Forms.PersistStreamTypeViewer.resources" />
-        <EmbeddedResource Include="Forms\PropertiesControl.resx" LogicalName="OleViewDotNet.Forms.PropertiesControl.resources" />
-        <EmbeddedResource Include="Forms\QueryInterfacesOptionsForm.resx" LogicalName="OleViewDotNet.Forms.QueryInterfacesOptionsForm.resources" />
-        <EmbeddedResource Include="Forms\RegistryPropertiesControl.resx" LogicalName="OleViewDotNet.Forms.RegistryPropertiesControl.resources" />
-        <EmbeddedResource Include="Forms\ROTViewer.resx" LogicalName="OleViewDotNet.Forms.ROTViewer.resources" />
-        <EmbeddedResource Include="Forms\SelectProcessControl.resx" LogicalName="OleViewDotNet.Forms.SelectProcessControl.resources" />
-        <EmbeddedResource Include="Forms\SelectProcessForm.resx" LogicalName="OleViewDotNet.Forms.SelectProcessForm.resources" />
-        <EmbeddedResource Include="Forms\SelectSecurityCheckForm.resx" LogicalName="OleViewDotNet.Forms.SelectSecurityCheckForm.resources" />
-        <EmbeddedResource Include="Forms\SettingsForm.resx" LogicalName="OleViewDotNet.Forms.SettingsForm.resources" />
-        <EmbeddedResource Include="Forms\StandardMarshalEditorControl.resx" LogicalName="OleViewDotNet.Forms.StandardMarshalEditorControl.resources" />
-        <EmbeddedResource Include="Forms\StorageViewer.resx" LogicalName="OleViewDotNet.Forms.StorageViewer.resources" />
-        <EmbeddedResource Include="Forms\TextAreaInputForm.resx" LogicalName="OleViewDotNet.Forms.TextAreaInputForm.resources" />
-        <EmbeddedResource Include="Forms\TypedObjectViewer.resx" LogicalName="OleViewDotNet.Forms.TypedObjectViewer.resources" />
-        <EmbeddedResource Include="Forms\TypeLibControl.resx" LogicalName="OleViewDotNet.Forms.TypeLibControl.resources" />
-        <EmbeddedResource Include="Forms\ViewFilterControl.resx" LogicalName="OleViewDotNet.Forms.ViewFilterControl.resources" />
-        <EmbeddedResource Include="Forms\ViewFilterForm.resx" LogicalName="OleViewDotNet.Forms.ViewFilterForm.resources" />
-        <EmbeddedResource Include="Forms\WaitingDialog.resx" LogicalName="OleViewDotNet.Forms.WaitingDialog.resources" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\third_party\NtApiDotNet\NtApiDotNet.csproj" />
     </ItemGroup>
 

@@ -19,7 +19,7 @@
 Import-Module "$PSScriptRoot\OleViewDotNet.psd1"
 
 if ($args.Count -gt 0) {
-    Get-ComDatabase $args[0] -NoProgress -SetCurrent
+    Get-ComDatabase $args[0] -NoProgress
     if ($args.Count -gt 1) {
         Remove-Item $args[0]
     }
