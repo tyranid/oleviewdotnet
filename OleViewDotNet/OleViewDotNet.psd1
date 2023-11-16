@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.11'
+ModuleVersion = '1.13'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -89,12 +89,9 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.11
+        ReleaseNotes = 'v1.13
 ----
-* Updated NtApiDotNet to v1.1.28.
-* Fixed OXIDEntry parsing for Windows 10 2004.
-* Added Test-ComInterface.
-* Added partial matching for CLSID/IID.
+* Fixes for Windows 11.
 '
 
     } # End of PSData hashtable

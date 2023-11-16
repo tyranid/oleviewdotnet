@@ -12,7 +12,8 @@
         <Company>None</Company>
         <Product>OleViewDotNet</Product>
         <FileVersion>1.0.0.0</FileVersion>
-        <Version>1.12</Version>
+        <Version>1.13</Version>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
