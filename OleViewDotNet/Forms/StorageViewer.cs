@@ -30,7 +30,7 @@ public partial class StorageViewer : UserControl
         {
             return name;
         }
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         foreach (char ch in name)
         {
             if (ch < 32)
@@ -77,7 +77,7 @@ public partial class StorageViewer : UserControl
         {
             return name;
         }
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         ParserState current_state = ParserState.None;
         string hexcode = string.Empty;
         foreach (char ch in name)
@@ -173,7 +173,7 @@ public partial class StorageViewer : UserControl
         while (enum_stg.Next(1, stat, out fetched) == 0)
         {
             STGTY type = (STGTY)stat[0].type;
-            TreeNode node = new TreeNode(EscapeStorageName(stat[0].pwcsName));
+            TreeNode node = new(EscapeStorageName(stat[0].pwcsName));
             byte[] bytes = new byte[0];
             node.ImageIndex = 2;
             node.SelectedImageIndex = 2;
@@ -206,7 +206,7 @@ public partial class StorageViewer : UserControl
 
     private void PopulateTree()
     {
-        TreeNode root = new TreeNode("Root");
+        TreeNode root = new("Root");
         PopulateTree(_stg, root);
         treeViewStorage.Nodes.Add(root);
         root.Expand();

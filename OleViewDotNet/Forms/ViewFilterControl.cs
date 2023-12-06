@@ -47,7 +47,7 @@ public partial class ViewFilterControl : UserControl
 
     private static ListViewItem CreateItem(RegistryViewerFilterEntry entry)
     {
-        ListViewItem item = new ListViewItem(entry.Type.ToString(), entry.Decision == FilterDecision.Include ? 1 : 0);
+        ListViewItem item = new(entry.Type.ToString(), entry.Decision == FilterDecision.Include ? 1 : 0);
         item.SubItems.Add(entry.Field.ToString());
         item.SubItems.Add(entry.Comparison.ToString());
         item.SubItems.Add(entry.Value);
@@ -70,7 +70,7 @@ public partial class ViewFilterControl : UserControl
 
     private RegistryViewerFilter BuildFilter()
     {
-        RegistryViewerFilter filter = new RegistryViewerFilter();
+        RegistryViewerFilter filter = new();
         foreach (ListViewItem item in listViewFilters.Items)
         {
             filter.Filters.Add((RegistryViewerFilterEntry)item.Tag);
@@ -178,7 +178,7 @@ public partial class ViewFilterControl : UserControl
 
     private void btnAdd_Click(object sender, EventArgs e)
     {
-        RegistryViewerFilterEntry entry = new RegistryViewerFilterEntry();
+        RegistryViewerFilterEntry entry = new();
         entry.Type = (FilterType)comboBoxFilterType.SelectedItem;
         entry.Field = ((PropertyInfo)comboBoxField.SelectedItem).Name;
         entry.Enabled = true;

@@ -39,7 +39,7 @@ public class COMProxyInstanceConverter
     private readonly string m_output_path;
     private readonly IProgress<Tuple<string, int>> m_progress;
 
-    private static Regex _identifier_regex = new Regex(@"[^a-zA-Z0-9_\.]");
+    private static Regex _identifier_regex = new(@"[^a-zA-Z0-9_\.]");
 
     public static string MakeIdentifier(string id)
     {
@@ -301,7 +301,7 @@ public class COMProxyInstanceConverter
         m_types[intf.Iid] = tb;
         tb.SetCustomAttribute(CreateAttribute<ComImportAttribute>());
         tb.SetCustomAttribute(CreateAttribute<GuidAttribute>(intf.Iid.ToString()));
-        List<NdrProcedureDefinition> procs = new List<NdrProcedureDefinition>();
+        List<NdrProcedureDefinition> procs = new();
         tb.SetCustomAttribute(GetInterfaceTypeAttribute(intf, procs));
 
         foreach (var proc in procs)

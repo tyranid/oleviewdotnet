@@ -37,7 +37,7 @@ public enum COMKnownInterfaces
 
 public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
 {
-    private static ConcurrentDictionary<Guid, string> m_iidtoname = new ConcurrentDictionary<Guid, string>();
+    private static ConcurrentDictionary<Guid, string> m_iidtoname = new();
     private readonly COMRegistry m_registry;
 
     internal static string MapIidToName(Guid iid)
@@ -144,29 +144,29 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         Source = COMRegistryEntrySource.Packaged;
     }
 
-    public static Guid IID_IUnknown => new Guid("{00000000-0000-0000-C000-000000000046}");
+    public static Guid IID_IUnknown => new("{00000000-0000-0000-C000-000000000046}");
 
-    public static Guid IID_IMarshal => new Guid("{00000003-0000-0000-C000-000000000046}");
+    public static Guid IID_IMarshal => new("{00000003-0000-0000-C000-000000000046}");
 
-    public static Guid IID_IMarshal2 => new Guid("000001CF-0000-0000-C000-000000000046");
+    public static Guid IID_IMarshal2 => new("000001CF-0000-0000-C000-000000000046");
 
-    public static Guid IID_IContextMarshaler => new Guid("000001D8-0000-0000-C000-000000000046");
+    public static Guid IID_IContextMarshaler => new("000001D8-0000-0000-C000-000000000046");
 
-    public static Guid IID_IStdMarshalInfo => new Guid("00000018-0000-0000-C000-000000000046");
+    public static Guid IID_IStdMarshalInfo => new("00000018-0000-0000-C000-000000000046");
 
-    public static Guid IID_IMarshalEnvoy => new Guid("000001C8-0000-0000-C000-000000000046");
+    public static Guid IID_IMarshalEnvoy => new("000001C8-0000-0000-C000-000000000046");
 
-    public static Guid IID_IDispatch => new Guid("00020400-0000-0000-c000-000000000046");
+    public static Guid IID_IDispatch => new("00020400-0000-0000-c000-000000000046");
 
-    public static Guid IID_IOleControl => new Guid("{b196b288-bab4-101a-b69c-00aa00341d07}");
+    public static Guid IID_IOleControl => new("{b196b288-bab4-101a-b69c-00aa00341d07}");
 
     public static Guid IID_IPersistStream => typeof(IPersistStream).GUID;
 
     public static Guid IID_IPersistStreamInit => typeof(IPersistStreamInit).GUID;
 
-    public static Guid IID_IPSFactoryBuffer => new Guid("D5F569D0-593B-101A-B569-08002B2DBF7A");
+    public static Guid IID_IPSFactoryBuffer => new("D5F569D0-593B-101A-B569-08002B2DBF7A");
 
-    public static Guid IID_IInspectable => new Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90");
+    public static Guid IID_IInspectable => new("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90");
 
     public bool IsOleControl => (Iid == IID_IOleControl);
 

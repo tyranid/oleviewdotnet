@@ -236,7 +236,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             {
                 using (RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\" + local_service))
                 {
-                    using (ServiceController service = new ServiceController(local_service))
+                    using (ServiceController service = new(local_service))
                     {
                         LocalService = new COMAppIDServiceEntry(serviceKey, service);
                     }

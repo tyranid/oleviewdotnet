@@ -285,7 +285,7 @@ internal class COMPackagedEntry
 
     private static IEnumerable<COMPackagedTypeLibVersionEntry> ReadTypeLibVersions(string packagePath, RegistryKey rootKey)
     {
-        List<COMPackagedTypeLibVersionEntry> result = new List<COMPackagedTypeLibVersionEntry>();
+        List<COMPackagedTypeLibVersionEntry> result = new();
 
         foreach (var name in rootKey.GetSubKeyNames())
         {

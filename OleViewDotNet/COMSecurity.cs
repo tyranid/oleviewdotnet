@@ -46,10 +46,10 @@ public static class COMSecurity
     {
         if (!string.IsNullOrWhiteSpace(sddl))
         {
-            SecurityDescriptor sd = new SecurityDescriptor(sddl);
+            SecurityDescriptor sd = new(sddl);
             AccessMask valid_access = access ? 0x7 : 0x1F;
 
-            SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
+            SecurityDescriptorViewerControl control = new();
             EntryPoint.GetMainForm(registry).HostControl(control, name);
             control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
                 { GenericExecute = valid_access, GenericRead = valid_access,
@@ -122,7 +122,7 @@ public static class COMSecurity
 
     private static bool GetGrantedAccess(string sddl, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
     {
-        GenericMapping mapping = new GenericMapping
+        GenericMapping mapping = new()
         {
             GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote | COMAccessRights.ExecuteContainer)
         };
@@ -244,7 +244,7 @@ public static class COMSecurity
 
         try
         {
-            SecurityDescriptor sd = new SecurityDescriptor(sddl);
+            SecurityDescriptor sd = new(sddl);
             return sd.IntegrityLevel;
         }
         catch (NtException)
@@ -262,7 +262,7 @@ public static class COMSecurity
 
         try
         {
-            SecurityDescriptor sd = new SecurityDescriptor(sddl);
+            SecurityDescriptor sd = new(sddl);
             if (allow_null_dacl && sd.Dacl == null && sd.Dacl.NullAcl)
             {
                 return true;
@@ -286,7 +286,7 @@ public static class COMSecurity
 
     public static bool SDHasAC(string sddl)
     {
-        SidIdentifierAuthority authority = new SidIdentifierAuthority(SecurityAuthority.Package);
+        SidIdentifierAuthority authority = new(SecurityAuthority.Package);
         return SDHasAllowedAce(sddl, false, ace => ace.Sid.Authority.Equals(authority));
     }
 
@@ -331,7 +331,7 @@ public static class COMSecurity
 
     public static IEnumerable<int> GetSessionIds()
     {
-        List<int> sids = new List<int>();
+        List<int> sids = new();
         IntPtr pSessions = IntPtr.Zero;
         int dwSessionCount = 0;
         try

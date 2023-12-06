@@ -234,7 +234,7 @@ public class COMEnumerateInterfaces
                     COMInterfaceEntry.IID_IMarshal2
                     };
 
-                Dictionary<IntPtr, string> module_names = new Dictionary<IntPtr, string>();
+                Dictionary<IntPtr, string> module_names = new();
                 foreach (var iid in additional_iids)
                 {
                     QueryInterface(punk, iid, module_names, _interfaces);
@@ -319,7 +319,7 @@ public class COMEnumerateInterfaces
     {
         if (timeout > 0)
         {
-            Thread timeout_thread = new Thread(ExitProcessThread);
+            Thread timeout_thread = new(ExitProcessThread);
             timeout_thread.Start(timeout);
         }
 
@@ -392,7 +392,7 @@ public class COMEnumerateInterfaces
 
     private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry, NtToken token)
     {
-        using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(PipeDirection.In,
+        using (AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null))
         {
             using (var imp_token = token?.DuplicateToken(SecurityImpersonationLevel.Impersonation))
@@ -412,8 +412,8 @@ public class COMEnumerateInterfaces
                     process = COMUtilities.Get32bitExePath();
                 }
 
-                Process proc = new Process();
-                List<string> args = new List<string>
+                Process proc = new();
+                List<string> args = new()
                 {
                     runtime_class ? "-r" : "-e",
                     server.GetClientHandleAsString(),
@@ -426,7 +426,7 @@ public class COMEnumerateInterfaces
                     args.Insert(0, "-t");
                 }
 
-                ProcessStartInfo info = new ProcessStartInfo(process, string.Join(" ", args))
+                ProcessStartInfo info = new(process, string.Join(" ", args))
                 {
                     UseShellExecute = false,
                     CreateNoWindow = true
@@ -435,11 +435,11 @@ public class COMEnumerateInterfaces
                 proc.Start();
                 try
                 {
-                    List<COMInterfaceInstance> interfaces = new List<COMInterfaceInstance>();
-                    List<COMInterfaceInstance> factory_interfaces = new List<COMInterfaceInstance>();
+                    List<COMInterfaceInstance> interfaces = new();
+                    List<COMInterfaceInstance> factory_interfaces = new();
                     server.DisposeLocalCopyOfClientHandle();
 
-                    using (StreamReader reader = new StreamReader(server))
+                    using (StreamReader reader = new(server))
                     {
                         while (true)
                         {
@@ -504,8 +504,8 @@ public class COMEnumerateInterfaces
                         int exitCode = proc.ExitCode;
                         if (exitCode != 0)
                         {
-                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
-                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new COMInterfaceInstance(COMInterfaceEntry.IID_IUnknown, registry) });
+                            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
+                            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
                         }
                         return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
                     }

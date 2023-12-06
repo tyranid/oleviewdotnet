@@ -50,7 +50,7 @@ public partial class SettingsForm : Form
 
     private void btnBrowseDbgHelpPath_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "DBGHELP DLL|dbghelp.dll";
             dlg.Multiselect = false;

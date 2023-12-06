@@ -47,7 +47,7 @@ public partial class TypeLibControl : UserControl
 
     private static ListViewItemWithGuid MapTypeToItem(Type type)
     {
-        ListViewItemWithGuid item = new ListViewItemWithGuid(type.Name, type.GUID);
+        ListViewItemWithGuid item = new(type.Name, type.GUID);
         item.SubItems.Add(type.GUID.FormatGuid());
         item.Tag = type;
         return item;
@@ -55,7 +55,7 @@ public partial class TypeLibControl : UserControl
 
     private static ListViewItemWithGuid MapTypeToItemNoSubItem(Type type)
     {
-        ListViewItemWithGuid item = new ListViewItemWithGuid(type.Name, type.GUID);
+        ListViewItemWithGuid item = new(type.Name, type.GUID);
         item.Tag = type;
         return item;
     }
@@ -74,7 +74,7 @@ public partial class TypeLibControl : UserControl
     {
         foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name, t.Iid)))
         {
-            ListViewItemWithGuid item = new ListViewItemWithGuid(COMUtilities.DemangleWinRTName(t.Name, t.Iid), t.Iid);
+            ListViewItemWithGuid item = new(COMUtilities.DemangleWinRTName(t.Name, t.Iid), t.Iid);
             item.SubItems.Add(t.Iid.FormatGuid());
             item.Tag = t;
             yield return item;
@@ -85,7 +85,7 @@ public partial class TypeLibControl : UserControl
     {
         foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
         {
-            ListViewItem item = new ListViewItem(type.Name);
+            ListViewItem item = new(type.Name);
             item.SubItems.Add(type.GetSize().ToString());
             item.Tag = type;
             yield return item;
@@ -330,7 +330,7 @@ public partial class TypeLibControl : UserControl
 
     private void btnExportInterfaces_Click(object sender, EventArgs e)
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         if((cbProxyRenderStyle.SelectedIndex > 1) && (comClassIdName != null) && (comClassId != null))
         {
             // C++ style is requsted, let's add a line about the CLSID being rendered

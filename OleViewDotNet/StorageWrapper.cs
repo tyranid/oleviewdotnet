@@ -238,7 +238,7 @@ public sealed class StorageWrapper : IDisposable
 
     public IEnumerable<STATSTGWrapper> EnumElements(bool read_stream_data)
     {
-        List<STATSTGWrapper> ret = new List<STATSTGWrapper>();
+        List<STATSTGWrapper> ret = new();
         _stg.EnumElements(0, IntPtr.Zero, 0, out IEnumSTATSTG enum_stg);
         try
         {
@@ -276,7 +276,7 @@ public sealed class StorageWrapper : IDisposable
     {
         get
         {
-            ComTypes.STATSTG stg_stat = new ComTypes.STATSTG();
+            ComTypes.STATSTG stg_stat = new();
             _stg.Stat(out stg_stat, 0);
             return new STATSTGWrapper(stg_stat.pwcsName, stg_stat, new byte[0]);
         }

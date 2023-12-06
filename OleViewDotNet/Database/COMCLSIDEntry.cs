@@ -59,7 +59,7 @@ public class COMCLSIDElevationEntry : IXmlSerializable
     {
         Enabled = COMUtilities.ReadInt(key, null, "Enabled") != 0;
         IconReference = COMUtilities.ReadString(key, null, "IconReference");
-        HashSet<Guid> vsos = new HashSet<Guid>();
+        HashSet<Guid> vsos = new();
         if (vso_key != null)
         {
             foreach (string value in vso_key.GetValueNames())
@@ -516,7 +516,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     private static HashSet<Guid> LoadAppActivatableClsids()
     {
-        HashSet<Guid> app_activatable = new HashSet<Guid>();
+        HashSet<Guid> app_activatable = new();
         using (RegistryKey activatable_key = Registry.LocalMachine.OpenSubKey(
             @"SOFTWARE\Microsoft\WindowsRuntime\AllowedCOMCLSIDs"))
         {
@@ -550,7 +550,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
                 return null;
             }
 
-            COMCLSIDServerEntry entry = new COMCLSIDServerEntry(server_key, server_type);
+            COMCLSIDServerEntry entry = new(server_key, server_type);
             if (!string.IsNullOrWhiteSpace(entry.Server))
             {
                 servers.Add(server_type, new COMCLSIDServerEntry(server_key, server_type));
@@ -561,7 +561,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     private void LoadFromKey(RegistryKey key)
     {
-        HashSet<Guid> categories = new HashSet<Guid>();
+        HashSet<Guid> categories = new();
         object name = key.GetValue(null);
         Name = null;
         if (name != null)
@@ -581,7 +581,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             Name = Clsid.FormatGuidDefault();
         }
 
-        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new();
         COMCLSIDServerEntry inproc_server = ReadServerKey(servers, key, COMServerType.InProcServer32);
         ReadServerKey(servers, key, COMServerType.LocalServer32);
         ReadServerKey(servers, key, COMServerType.InProcHandler32);
@@ -669,7 +669,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         Name = classEntry.DisplayName;
         PackageId = packageEntry.PackageId;
 
-        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new();
         if (!string.IsNullOrWhiteSpace(classEntry.DllPath))
         {
             servers.Add(COMServerType.InProcServer32, new COMCLSIDServerEntry(COMServerType.InProcServer32, classEntry.DllPath, classEntry.Threading));
@@ -700,7 +700,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         Name = proxyEntry.DisplayName;
         PackageId = packageEntry.PackageId;
 
-        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+        Dictionary<COMServerType, COMCLSIDServerEntry> servers = new();
         string dllPath = Environment.Is64BitProcess ? proxyEntry.DllPath_x64 : proxyEntry.DllPath_x86;
         if (string.IsNullOrWhiteSpace(dllPath))
         {

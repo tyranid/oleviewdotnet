@@ -41,7 +41,7 @@ public class COMProxyInstance : IProxyFormatter
 
     private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver, COMRegistry registry)
     {
-        NdrParser parser = new NdrParser(resolver);
+        NdrParser parser = new(resolver);
         Entries = parser.ReadFromComProxyFile(path, clsid);
         ComplexTypes = parser.ComplexTypes;
         m_registry = registry;
@@ -51,8 +51,8 @@ public class COMProxyInstance : IProxyFormatter
     {
     }
 
-    private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
-    private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new Dictionary<string, COMProxyInstance>(StringComparer.OrdinalIgnoreCase);
+    private static Dictionary<Guid, COMProxyInstance> m_proxies = new();
+    private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
 
     public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {
@@ -62,7 +62,7 @@ public class COMProxyInstance : IProxyFormatter
         }
         else
         {
-            COMProxyInstance proxy = new COMProxyInstance(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
+            COMProxyInstance proxy = new(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
             m_proxies[clsid.Clsid] = proxy;
             return proxy;
         }
@@ -76,7 +76,7 @@ public class COMProxyInstance : IProxyFormatter
         }
         else
         {
-            COMProxyInstance proxy = new COMProxyInstance(path, resolver, registry);
+            COMProxyInstance proxy = new(path, resolver, registry);
             m_proxies_by_file[path] = proxy;
             return proxy;
         }

@@ -69,7 +69,7 @@ public partial class HexEditorControl : UserControl
 
     private void loadFromFileToolStripMenuItem_Click(object sender, System.EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
 
@@ -89,7 +89,7 @@ public partial class HexEditorControl : UserControl
 
     private void saveToFileToolStripMenuItem_Click(object sender, System.EventArgs e)
     {
-        using (SaveFileDialog dlg = new SaveFileDialog())
+        using (SaveFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
 

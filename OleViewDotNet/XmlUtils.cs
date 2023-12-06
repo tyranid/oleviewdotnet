@@ -39,7 +39,7 @@ internal static class XmlUtils
 
     internal static IEnumerable<T> ReadSerializableObjects<T>(this XmlReader reader, string name, Func<T> factory) where T : IXmlSerializable
     {
-        List<T> ret = new List<T>();
+        List<T> ret = new();
 
         while (reader.NodeType != XmlNodeType.Element || reader.LocalName != name)
         {

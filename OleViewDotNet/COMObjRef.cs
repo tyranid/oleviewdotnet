@@ -206,7 +206,7 @@ internal class COMDualStringArray
 
     private void ReadEntries(BinaryReader new_reader, int sec_offset, bool direct_string)
     {
-        COMStringBinding str = new COMStringBinding(new_reader, direct_string);
+        COMStringBinding str = new(new_reader, direct_string);
         if (direct_string)
         {
             StringBindings.Add(str);
@@ -221,7 +221,7 @@ internal class COMDualStringArray
         }
 
         new_reader.BaseStream.Position = sec_offset * 2;
-        COMSecurityBinding sec = new COMSecurityBinding(new_reader);
+        COMSecurityBinding sec = new(new_reader);
         while (sec.AuthnSvc != 0)
         {
             SecurityBindings.Add(sec);
@@ -235,7 +235,7 @@ internal class COMDualStringArray
         int sec_offset = process.ReadMemory<ushort>(ptr.ToInt64() + 2);
         if (num_entries > 0)
         {
-            MemoryStream stm = new MemoryStream(process.ReadMemory(ptr.ToInt64() + 4, num_entries * 2));
+            MemoryStream stm = new(process.ReadMemory(ptr.ToInt64() + 4, num_entries * 2));
             ReadEntries(new BinaryReader(stm), sec_offset, direct_string);
         }
     }
@@ -247,16 +247,16 @@ internal class COMDualStringArray
 
         if (num_entries > 0)
         {
-            MemoryStream stm = new MemoryStream(reader.ReadAll(num_entries * 2));
-            BinaryReader new_reader = new BinaryReader(stm);
+            MemoryStream stm = new(reader.ReadAll(num_entries * 2));
+            BinaryReader new_reader = new(stm);
             ReadEntries(new_reader, sec_offset, false);
         }
     }
 
     public void ToWriter(BinaryWriter writer)
     {
-        MemoryStream stm = new MemoryStream();
-        BinaryWriter new_writer = new BinaryWriter(stm);
+        MemoryStream stm = new();
+        BinaryWriter new_writer = new(stm);
         if (StringBindings.Count > 0)
         {
             foreach (COMStringBinding str in StringBindings)
@@ -281,7 +281,7 @@ internal class COMDualStringArray
 
     internal COMDualStringArray Clone()
     {
-        COMDualStringArray ret = new COMDualStringArray();
+        COMDualStringArray ret = new();
         ret.StringBindings.AddRange(StringBindings.Select(b => b.Clone()));
         ret.SecurityBindings.AddRange(SecurityBindings.Select(b => b.Clone()));
         return ret;
@@ -319,8 +319,8 @@ public abstract class COMObjRef
 
     public byte[] ToArray()
     {
-        MemoryStream stm = new MemoryStream();
-        BinaryWriter writer = new BinaryWriter(stm);
+        MemoryStream stm = new();
+        BinaryWriter writer = new(stm);
         writer.Write(OBJREF_MAGIC);
         writer.Write((int)Flags);
         writer.Write(Iid);
@@ -342,8 +342,8 @@ public abstract class COMObjRef
 
     public static COMObjRef FromArray(byte[] arr)
     {
-        MemoryStream stm = new MemoryStream(arr);
-        BinaryReader reader = new BinaryReader(stm);
+        MemoryStream stm = new(arr);
+        BinaryReader reader = new(stm);
         int magic = reader.ReadInt32();
         if (magic != OBJREF_MAGIC)
         {

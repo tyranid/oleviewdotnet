@@ -144,7 +144,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<FilterType> GetFilterTypes(DisplayMode mode)
     {
-        HashSet<FilterType> filter_types = new HashSet<FilterType>();
+        HashSet<FilterType> filter_types = new();
         switch (mode)
         {
             case DisplayMode.CLSIDsByName:
@@ -252,7 +252,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateNode(string text, string image_key)
     {
-        TreeNode node = new TreeNode(text);
+        TreeNode node = new(text);
         node.ImageKey = image_key;
         node.SelectedImageKey = image_key;
         return node;
@@ -325,7 +325,7 @@ public partial class COMRegistryViewer : UserControl
     /// <returns>A string tooltip</returns>
     private static string BuildCLSIDToolTip(COMRegistry registry, COMCLSIDEntry ent)
     {
-        StringBuilder strRet = new StringBuilder();
+        StringBuilder strRet = new();
 
         AppendFormatLine(strRet, "CLSID: {0}", ent.Clsid.FormatGuid());
         AppendFormatLine(strRet, "Name: {0}", ent.Name);
@@ -403,7 +403,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildInterfaceToolTip(COMInterfaceEntry ent, COMInterfaceInstance instance)
     {            
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
 
         AppendFormatLine(builder, "Name: {0}", ent.Name);
         AppendFormatLine(builder, "IID: {0}", ent.Iid.FormatGuid());
@@ -478,7 +478,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadRuntimeServers(COMRegistry registry)
     {
-        List<TreeNode> serverNodes = new List<TreeNode>(registry.Clsids.Count);
+        List<TreeNode> serverNodes = new(registry.Clsids.Count);
         foreach (var group in registry.RuntimeClasses.Values.GroupBy(p => p.Server.ToLower()))
         {
             COMRuntimeServerEntry server = registry.MapServerNameToEntry(group.Key);
@@ -514,7 +514,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadCLSIDsByNames(COMRegistry registry)
     {
-        List<TreeNode> nodes = new List<TreeNode>(registry.Clsids.Count);
+        List<TreeNode> nodes = new(registry.Clsids.Count);
         foreach (COMCLSIDEntry ent in registry.Clsids.Values)
         {
             TreeNode node = CreateNode(ent.Name, ClassKey);
@@ -529,7 +529,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildCOMProcessTooltip(COMProcessEntry proc)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendFormat("Path: {0}", proc.ExecutablePath).AppendLine();
         builder.AppendFormat("User: {0}", proc.User).AppendLine();
         if (proc.AppId != Guid.Empty)
@@ -555,7 +555,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildCOMIpidTooltip(COMIPIDEntry ipid)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         AppendFormatLine(builder, "Interface: 0x{0:X}", ipid.Interface.ToInt64());
         if (!String.IsNullOrWhiteSpace(ipid.InterfaceVTable))
         {
@@ -682,7 +682,7 @@ public partial class COMRegistryViewer : UserControl
         else
         {
             Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>> dict = 
-                new Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>>(new COMCLSIDServerEqualityComparer());
+                new(new COMCLSIDServerEqualityComparer());
             IEnumerable<COMCLSIDEntry> clsids = registry.Clsids.Values.Where(e => e.Servers.Count > 0);
             if (serverType == ServerType.Proxies)
             {
@@ -709,7 +709,7 @@ public partial class COMRegistryViewer : UserControl
             }
         }
 
-        List<TreeNode> serverNodes = new List<TreeNode>(registry.Clsids.Count);
+        List<TreeNode> serverNodes = new(registry.Clsids.Count);
         foreach (var pair in servers)
         {
             TreeNode node = CreateNode(pair.Key.Server, FolderKey);
@@ -771,7 +771,7 @@ public partial class COMRegistryViewer : UserControl
         var clsidsByAppId = registry.ClsidsByAppId;
         var appids = registry.AppIDs;
 
-        List<TreeNode> serverNodes = new List<TreeNode>();
+        List<TreeNode> serverNodes = new();
         foreach (var pair in clsidsByAppId)
         {   
             if(appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
@@ -794,7 +794,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildAppIdTooltip(COMAppIDEntry appidEnt)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
 
         AppendFormatLine(builder, "AppID: {0}", appidEnt.AppId);
         if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
@@ -854,7 +854,7 @@ public partial class COMRegistryViewer : UserControl
         var clsidsByAppId = registry.ClsidsByAppId;
         var appids = registry.AppIDs;
 
-        List<TreeNode> serverNodes = new List<TreeNode>();
+        List<TreeNode> serverNodes = new();
         foreach (var pair in appids)
         {
             COMAppIDEntry appidEnt = appids[pair.Key];
@@ -889,7 +889,7 @@ public partial class COMRegistryViewer : UserControl
     private static IEnumerable<TreeNode> LoadImplementedCategories(COMRegistry registry)
     {
         int i = 0;
-        SortedDictionary<string, TreeNode> sortedNodes = new SortedDictionary<string, TreeNode>();
+        SortedDictionary<string, TreeNode> sortedNodes = new();
 
         foreach (var pair in registry.ImplementedCategories.Values)
         {
@@ -915,7 +915,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadPreApproved(COMRegistry registry)
     {
-        List<TreeNode> nodes = new List<TreeNode>();
+        List<TreeNode> nodes = new();
         foreach (COMCLSIDEntry ent in registry.PreApproved)
         {
             nodes.Add(CreateCLSIDNode(registry, ent));
@@ -926,11 +926,11 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadIELowRights(COMRegistry registry)
     {
-        List<TreeNode> clsidNodes = new List<TreeNode>();
+        List<TreeNode> clsidNodes = new();
         foreach (COMIELowRightsElevationPolicy ent in registry.LowRights)
         {
-            StringBuilder tooltip = new StringBuilder();
-            List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
+            StringBuilder tooltip = new();
+            List<COMCLSIDEntry> clsids = new();
             COMCLSIDEntry entry = ent.ClassEntry;
             if (entry != null)
             {
@@ -968,7 +968,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadMimeTypes(COMRegistry registry)
     {
-        List<TreeNode> nodes = new List<TreeNode>(registry.MimeTypes.Count());
+        List<TreeNode> nodes = new(registry.MimeTypes.Count());
         foreach (COMMimeType ent in registry.MimeTypes)
         {
             TreeNode node = CreateNode(ent.MimeType, FolderKey);
@@ -994,7 +994,7 @@ public partial class COMRegistryViewer : UserControl
             ClassKey);
 
         node.Tag = entry;
-        List<string> entries = new List<string>();
+        List<string> entries = new();
         if(!String.IsNullOrWhiteSpace(entry.Win32Path))
         {
             entries.Add(String.Format("Win32: {0}", entry.Win32Path));
@@ -1253,7 +1253,7 @@ public partial class COMRegistryViewer : UserControl
         createInSessionToolStripMenuItem.DropDownItems.Add(consoleToolStripMenuItem);
         foreach (int session_id in COMSecurity.GetSessionIds())
         {
-            ToolStripMenuItem item = new ToolStripMenuItem(session_id.ToString());
+            ToolStripMenuItem item = new(session_id.ToString());
             item.Tag = session_id.ToString();
             item.Click += consoleToolStripMenuItem_Click;
             createInSessionToolStripMenuItem.DropDownItems.Add(item);
@@ -1480,7 +1480,7 @@ public partial class COMRegistryViewer : UserControl
     /// <returns>The regular expression</returns>
     private static Regex GlobToRegex(string glob, bool ignoreCase)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
 
         builder.Append("^");
 
@@ -1694,7 +1694,7 @@ public partial class COMRegistryViewer : UserControl
                 }
             case FilterMode.Regex:
                 {
-                    Regex r = new Regex(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+                    Regex r = new(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
                     return n => r.IsMatch(n.Text);
                 }
@@ -1734,7 +1734,7 @@ public partial class COMRegistryViewer : UserControl
 
             if (mode == FilterMode.Complex)
             {
-                using (ViewFilterForm form = new ViewFilterForm(m_filter, m_filter_types))
+                using (ViewFilterForm form = new(m_filter, m_filter_types))
                 {
                     if (form.ShowDialog(this) == DialogResult.OK)
                     {
@@ -1752,7 +1752,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else if (mode == FilterMode.Accessible || mode == FilterMode.NotAccessible)
             {
-                using (SelectSecurityCheckForm form = new SelectSecurityCheckForm(m_mode == DisplayMode.Processes))
+                using (SelectSecurityCheckForm form = new(m_mode == DisplayMode.Processes))
                 {
                     if (form.ShowDialog(this) == DialogResult.OK)
                     {
@@ -1760,8 +1760,8 @@ public partial class COMRegistryViewer : UserControl
                         string principal = form.Principal;
                         COMAccessRights access_rights = form.AccessRights;
                         COMAccessRights launch_rights = form.LaunchRights;
-                        Dictionary<string, bool> access_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-                        Dictionary<string, bool> launch_cache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                        Dictionary<string, bool> access_cache = new(StringComparer.OrdinalIgnoreCase);
+                        Dictionary<string, bool> launch_cache = new(StringComparer.OrdinalIgnoreCase);
                         filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
                         if (mode == FilterMode.NotAccessible)
                         {
@@ -2074,11 +2074,11 @@ public partial class COMRegistryViewer : UserControl
 
     private void queryAllInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (QueryInterfacesOptionsForm options = new QueryInterfacesOptionsForm())
+        using (QueryInterfacesOptionsForm options = new())
         {
             if (options.ShowDialog(this) == DialogResult.OK)
             {
-                List<COMCLSIDEntry> clsids = new List<COMCLSIDEntry>();
+                List<COMCLSIDEntry> clsids = new();
                 GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
                 if (clsids.Count > 0)
                 {
@@ -2124,7 +2124,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void createRemoteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (GetTextForm frm = new GetTextForm("localhost"))
+        using (GetTextForm frm = new("localhost"))
         {
             frm.Text = "Enter Remote Host";
             if (frm.ShowDialog(this) == DialogResult.OK)
@@ -2136,7 +2136,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void createClassFactoryRemoteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (GetTextForm frm = new GetTextForm("localhost"))
+        using (GetTextForm frm = new("localhost"))
         {
             frm.Text = "Enter Remote Host";
             if (frm.ShowDialog(this) == DialogResult.OK)
@@ -2212,7 +2212,7 @@ public partial class COMRegistryViewer : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            using (SaveFileDialog dlg = new())
             {
                 dlg.Filter = "All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -2255,7 +2255,7 @@ public partial class COMRegistryViewer : UserControl
         {
             text = "Clone of " + text;
         }
-        COMRegistryViewer viewer = new COMRegistryViewer(m_registry, m_mode, m_processes, nodes.Select(n => (TreeNode)n.Clone()), m_filter_types, text);
+        COMRegistryViewer viewer = new(m_registry, m_mode, m_processes, nodes.Select(n => (TreeNode)n.Clone()), m_filter_types, text);
         EntryPoint.GetMainForm(m_registry).HostControl(viewer);
     }
 
@@ -2275,7 +2275,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void filteredToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (ViewFilterForm form = new ViewFilterForm(new RegistryViewerFilter(), m_filter_types))
+        using (ViewFilterForm form = new(new RegistryViewerFilter(), m_filter_types))
         {
             if (form.ShowDialog(this) == DialogResult.OK && form.Filter.Filters.Count > 0)
             {

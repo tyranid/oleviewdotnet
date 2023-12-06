@@ -311,7 +311,7 @@ public partial class PropertiesControl : UserControl
         listViewProcessIPids.Items.Clear();
         listViewProcessIPids.Items.AddRange(ipids.Where(ipid => ipid.IsRunning || show_disconnected).Select(ipid =>
         {
-            ListViewItem item = new ListViewItem(ipid.Ipid.ToString());
+            ListViewItem item = new(ipid.Ipid.ToString());
             item.SubItems.Add(m_registry.MapIidToInterface(ipid.Iid).Name);
             item.SubItems.Add(ipid.Flags.ToString());
             item.Tag = ipid;
@@ -381,7 +381,7 @@ public partial class PropertiesControl : UserControl
         textBoxIPIDStaHwnd.Text = String.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
         listViewIpidMethods.Items.AddRange(obj.Methods.Select((method, i) =>
         {
-            ListViewItem item = new ListViewItem(i.ToString());
+            ListViewItem item = new(i.ToString());
             item.SubItems.Add(method.Name);
             item.SubItems.Add(method.Address);
             item.SubItems.Add(method.Symbol);
@@ -666,7 +666,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            using (SaveFileDialog dlg = new())
             {
                 dlg.Filter = "All Files (*.*)|*.*";
                 if (dlg.ShowDialog(this) == DialogResult.OK)

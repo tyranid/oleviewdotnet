@@ -225,7 +225,7 @@ public partial class ObjectInformation : UserControl
     {
         try
         {
-            using (MemoryStream stm = new MemoryStream())
+            using (MemoryStream stm = new())
             {
                 COMUtilities.OleSaveToStream(m_pObject, stm);
                 EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Stream Editor", stm.ToArray()));
@@ -276,10 +276,10 @@ public partial class ObjectInformation : UserControl
         {
             IClassFactory factory = (IClassFactory)m_pObject;
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-            Dictionary<string, string> props = new Dictionary<string, string>();
+            Dictionary<string, string> props = new();
             props.Add("Name", m_objName);
             factory.CreateInstance(null, ref IID_IUnknown, out object new_object);
-            ObjectInformation view = new ObjectInformation(m_registry,
+            ObjectInformation view = new(m_registry,
                 m_entry, m_objName, new_object,
                 props, m_registry.GetInterfacesForObject(new_object).ToArray());
             EntryPoint.GetMainForm(m_registry).HostControl(view);

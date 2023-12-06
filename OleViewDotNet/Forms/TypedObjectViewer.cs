@@ -79,7 +79,7 @@ partial class TypedObjectViewer : UserControl
                 {
                     ListViewItem item = listViewMethods.Items.Add(mi.Name);
                     item.Tag = mi;
-                    List<string> pars = new List<string>();
+                    List<string> pars = new();
                     item.SubItems.Add(mi.ReturnType.ToString());
                     ParameterInfo[] pis = mi.GetParameters();
 
@@ -246,7 +246,7 @@ partial class TypedObjectViewer : UserControl
     {
         if (listViewMethods.SelectedItems.Count > 0)
         {
-            using (InvokeForm frm = new InvokeForm(m_registry, (MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject, m_objName))
+            using (InvokeForm frm = new(m_registry, (MethodInfo)listViewMethods.SelectedItems[0].Tag, m_pObject, m_objName))
             {
                 frm.ShowDialog();
             }
@@ -278,7 +278,7 @@ partial class TypedObjectViewer : UserControl
                     val = null;
                 }
 
-                using (GetTypeForm frm = new GetTypeForm(pi.PropertyType, val))
+                using (GetTypeForm frm = new(pi.PropertyType, val))
                 {
                     if (frm.ShowDialog() == DialogResult.OK)
                     {

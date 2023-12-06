@@ -33,7 +33,7 @@ class InputTextBox : TextBox
             EventHandler<ClipboardEventArgs> evt = TextPasted;
             if ((evt != null) && Clipboard.ContainsText())
             {                    
-                ClipboardEventArgs args = new ClipboardEventArgs(Clipboard.GetText());
+                ClipboardEventArgs args = new(Clipboard.GetText());
 
                 evt(this, args);
                 handled = args.Handled;

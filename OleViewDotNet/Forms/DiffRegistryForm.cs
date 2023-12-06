@@ -41,7 +41,7 @@ public partial class DiffRegistryForm : Form
 
     private void OpenRegistry(ComboBox comboBox)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
             if (dlg.ShowDialog(this) == DialogResult.OK)

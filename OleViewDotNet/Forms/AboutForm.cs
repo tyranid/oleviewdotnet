@@ -36,7 +36,7 @@ public partial class AboutForm : Form
 
     private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        ProcessStartInfo start_info = new ProcessStartInfo(linkLabel.Text);
+        ProcessStartInfo start_info = new(linkLabel.Text);
         start_info.UseShellExecute = true;
         start_info.Verb = "open";
         try

@@ -71,11 +71,11 @@ public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : 
 
 public static class COMWrapperFactory
 {
-    private static AssemblyName _name = new AssemblyName("ComWrapperTypes");
+    private static AssemblyName _name = new("ComWrapperTypes");
     private static AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
     private static ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
-    private static Dictionary<Type, Type> _generated_intfs = new Dictionary<Type, Type>();
-    private static Dictionary<Guid, Type> _types = new Dictionary<Guid, Type>() {
+    private static Dictionary<Type, Type> _generated_intfs = new();
+    private static Dictionary<Guid, Type> _types = new() {
         { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
         { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
         { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) },
@@ -86,7 +86,7 @@ public static class COMWrapperFactory
         { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
         { typeof(IStream).GUID, typeof(IStreamWrapper) } };
     private static MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
-    private static Dictionary<Type, ConstructorInfo> _constructors = new Dictionary<Type, ConstructorInfo>();
+    private static Dictionary<Type, ConstructorInfo> _constructors = new();
 
     private static bool FilterStructuredTypes(Type t)
     {
@@ -221,7 +221,7 @@ public static class COMWrapperFactory
             methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
         }
 
-        List<Tuple<int, int>> locals = new List<Tuple<int, int>>();
+        List<Tuple<int, int>> locals = new();
         var ilgen = methbuilder.GetILGenerator();
         ilgen.Emit(OpCodes.Ldarg_0);
         ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
@@ -288,7 +288,7 @@ public static class COMWrapperFactory
             throw new ArgumentException("Wrapper type must be a public COM interface and not reflection only.", nameof(intf_type));
         }
 
-        HashSet<Type> structured_types = new HashSet<Type>();
+        HashSet<Type> structured_types = new();
         bool created_queue = false;
         if (fixup_queue == null)
         {
@@ -303,7 +303,7 @@ public static class COMWrapperFactory
                 $"{intf_type.Name}Wrapper",
                  TypeAttributes.Public | TypeAttributes.Sealed, base_type);
             _types[intf_type.GUID] = tb;
-            HashSet<string> names = new HashSet<string>(base_type.GetMembers().Select(m => m.Name));
+            HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
             var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object) });
             _constructors[tb] = con;
             con.DefineParameter(1, ParameterAttributes.In, "obj");

@@ -46,7 +46,7 @@ public class ComClientGraphBuilder
                 return true;
             }
 
-            COMProcessToken token = new COMProcessToken(result.Result);
+            COMProcessToken token = new(result.Result);
             if (token.UserSid == string.Empty)
             {
                 return true;
@@ -68,9 +68,9 @@ public class ComClientGraphBuilder
 
     private string BuildDotGraph()
     {
-        Dictionary<int, string> procs = new Dictionary<int, string>();
-        Dictionary<int, COMProcessToken> tokens = new Dictionary<int, COMProcessToken>();
-        Dictionary<Tuple<int, int>, int> set = new Dictionary<Tuple<int, int>, int>();
+        Dictionary<int, string> procs = new();
+        Dictionary<int, COMProcessToken> tokens = new();
+        Dictionary<Tuple<int, int>, int> set = new();
 
         foreach (var client in _clients)
         {
@@ -81,7 +81,7 @@ public class ComClientGraphBuilder
                 continue;
             }
 
-            Tuple<int, int> entry = new Tuple<int, int>(client.Process.ProcessId, client.ProcessId);
+            Tuple<int, int> entry = new(client.Process.ProcessId, client.ProcessId);
             if (!set.ContainsKey(entry))
             {
                 set[entry] = 1;
@@ -123,7 +123,7 @@ public class ComClientGraphBuilder
             }
         }
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine("digraph comclients {");
 
         int index = 0;
@@ -148,7 +148,7 @@ public class ComClientGraphBuilder
             builder.AppendLine("}");
         }
 
-        HashSet<Tuple<int, int>> emitted = new HashSet<Tuple<int, int>>();
+        HashSet<Tuple<int, int>> emitted = new();
 
         foreach (var pair in set)
         {

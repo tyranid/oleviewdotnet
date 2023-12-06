@@ -106,7 +106,7 @@ public class AppxPackageName
         Publisher = package.publisher != IntPtr.Zero ? Marshal.PtrToStringUni(package.publisher) : string.Empty;
     }
 
-    private static Dictionary<string, AppxPackageName> _name_cache = new Dictionary<string, AppxPackageName>();
+    private static Dictionary<string, AppxPackageName> _name_cache = new();
 
     private static AppxPackageName FromFullNameInternal(string package_id, int flags)
     {
@@ -162,7 +162,7 @@ public class AppxPackageName
             return null;
         }
 
-        StringBuilder builder = new StringBuilder(length);
+        StringBuilder builder = new(length);
         err = GetPackageFullName(process.Handle, ref length, builder);
         if (err != 0)
         {
@@ -174,7 +174,7 @@ public class AppxPackageName
 
     public static string GetPublisherIdFromPublisher(string publisher)
     {
-        PACKAGE_ID_ALLOC pkgid = new PACKAGE_ID_ALLOC();
+        PACKAGE_ID_ALLOC pkgid = new();
         pkgid.publisher = publisher;
         pkgid.name = "Temp";
         int length = 0;
@@ -183,7 +183,7 @@ public class AppxPackageName
         {
             return null;
         }
-        StringBuilder builder = new StringBuilder(length);
+        StringBuilder builder = new(length);
         err = PackageFullNameFromId(pkgid, ref length, builder);
         if (err != 0)
         {

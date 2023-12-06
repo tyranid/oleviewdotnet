@@ -26,7 +26,7 @@ public partial class GetTypeForm : Form
     /// <summary>
     /// Dictionary of previous entries to the type field
     /// </summary>
-    private static Dictionary<Guid, string[]> m_history = new Dictionary<Guid, string[]>();
+    private static Dictionary<Guid, string[]> m_history = new();
     private const int MAX_HISTORY_ENTRIES = 10;
 
     private Type m_currType;

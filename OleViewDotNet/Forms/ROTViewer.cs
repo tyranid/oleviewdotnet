@@ -107,7 +107,7 @@ public partial class ROTViewer : UserControl
         {
             MonikerInfo info = (MonikerInfo)(listViewROT.SelectedItems[0].Tag);
 
-            Dictionary<string, string> props = new Dictionary<string, string>();
+            Dictionary<string, string> props = new();
             props.Add("Display Name", info.strDisplayName);
             props.Add("CLSID", info.clsid.FormatGuid());
 
@@ -120,7 +120,7 @@ public partial class ROTViewer : UserControl
 
                 info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
                 dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
-                ObjectInformation view = new ObjectInformation(m_registry, null, info.strDisplayName, 
+                ObjectInformation view = new(m_registry, null, info.strDisplayName, 
                     comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);
             }

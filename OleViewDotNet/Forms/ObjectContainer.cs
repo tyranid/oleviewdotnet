@@ -33,7 +33,7 @@ public partial class ObjectContainer : UserControl
 
         try
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectContainer));
+            System.ComponentModel.ComponentResourceManager resources = new(typeof(ObjectContainer));
             m_axControl = new GenericAxHost(pObject);
             ((System.ComponentModel.ISupportInitialize)(m_axControl)).BeginInit();
             SuspendLayout();

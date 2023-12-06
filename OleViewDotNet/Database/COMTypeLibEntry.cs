@@ -30,7 +30,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
 
     private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string name, string version, RegistryKey key)
     {
-        List<COMTypeLibVersionEntry> entries = new List<COMTypeLibVersionEntry>();
+        List<COMTypeLibVersionEntry> entries = new();
         foreach (string locale in key.GetSubKeyNames())
         {
             int locale_int;
@@ -40,7 +40,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
                 {
                     if (subkey != null)
                     {
-                        COMTypeLibVersionEntry entry = new COMTypeLibVersionEntry(m_registry, 
+                        COMTypeLibVersionEntry entry = new(m_registry, 
                             name, version, TypelibId, locale_int, subkey);
                         if (!string.IsNullOrWhiteSpace(entry.NativePath))
                         {
@@ -55,7 +55,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
 
     private List<COMTypeLibVersionEntry> LoadFromKey(RegistryKey key)
     {
-        List<COMTypeLibVersionEntry> ret = new List<COMTypeLibVersionEntry>();
+        List<COMTypeLibVersionEntry> ret = new();
         foreach (string version in key.GetSubKeyNames())
         {
             using (RegistryKey subKey = key.OpenSubKey(version))
@@ -118,7 +118,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
     {
         TypelibId = typelib_redirection.TypeLibraryId;
         Name = TypelibId.FormatGuid();
-        List<COMTypeLibVersionEntry> versions = new List<COMTypeLibVersionEntry>();
+        List<COMTypeLibVersionEntry> versions = new();
         versions.Add(new COMTypeLibVersionEntry(registry, typelib_redirection));
         Versions = versions.AsReadOnly();
         Source = COMRegistryEntrySource.ActCtx;

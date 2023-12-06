@@ -110,7 +110,7 @@ public partial class MainForm : Form
 
     public void HostControl(Control c, string name)
     {
-        DocumentForm frm = new DocumentForm(c)
+        DocumentForm frm = new(c)
         {
             ShowHint = DockState.Document
         };
@@ -123,7 +123,7 @@ public partial class MainForm : Form
 
     public async Task HostObject(ICOMClassEntry ent, object obj, bool factory)
     {
-        Dictionary<string, string> props = new Dictionary<string, string>();
+        Dictionary<string, string> props = new();
 
         if (ent == null)
         {
@@ -143,7 +143,7 @@ public partial class MainForm : Form
 
         IEnumerable<COMInterfaceInstance> intfs = factory ? ent.FactoryInterfaces : ent.Interfaces;
 
-        ObjectInformation view = new ObjectInformation(m_registry, ent, ent.Name, obj,
+        ObjectInformation view = new(m_registry, ent, ent.Name, obj,
             props, intfs.Select(i => m_registry.MapIidToInterface(i.Iid)).ToArray());
         HostControl(view);
     }
@@ -211,7 +211,7 @@ public partial class MainForm : Form
         try
         {
             COMCLSIDEntry ent = null;
-            Dictionary<string, string> props = new Dictionary<string, string>();
+            Dictionary<string, string> props = new();
             object comObj = null;
             string strObjName = "";
             IEnumerable<COMInterfaceEntry> ints = null;
@@ -286,7 +286,7 @@ public partial class MainForm : Form
 
     private async void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
     {
-        using (CreateCLSIDForm frm = new CreateCLSIDForm())
+        using (CreateCLSIDForm frm = new())
         {
             if (frm.ShowDialog() == DialogResult.OK)
             {
@@ -317,7 +317,7 @@ public partial class MainForm : Form
 
     private async void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
 
@@ -342,7 +342,7 @@ public partial class MainForm : Form
         if (comObj != null)
         {
             COMCLSIDEntry ent = null;
-            Dictionary<string, string> props = new Dictionary<string, string>();
+            Dictionary<string, string> props = new();
             string strObjName = "";
             IEnumerable<COMInterfaceEntry> ints = null;
             Guid clsid = COMUtilities.GetObjectClass(comObj);
@@ -371,7 +371,7 @@ public partial class MainForm : Form
 
     private async void menuObjectFromSerializedStream_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
 
@@ -393,7 +393,7 @@ public partial class MainForm : Form
 
     private void menuHelpAbout_Click(object sender, EventArgs e)
     {
-        using (AboutForm frm = new AboutForm())
+        using (AboutForm frm = new())
         {
             frm.ShowDialog(this);
         }
@@ -430,7 +430,7 @@ public partial class MainForm : Form
 
     private async Task ParseOrBindMoniker(bool bind)
     {
-        using (BuildMonikerForm frm = new BuildMonikerForm(_last_moniker))
+        using (BuildMonikerForm frm = new(_last_moniker))
         {
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
@@ -469,7 +469,7 @@ public partial class MainForm : Form
             return m_registry.FilePath;
         }
 
-        using (SaveFileDialog dlg = new SaveFileDialog())
+        using (SaveFileDialog dlg = new())
         {
             if (!String.IsNullOrWhiteSpace(m_registry.FilePath))
             {
@@ -512,7 +512,7 @@ public partial class MainForm : Form
 
     private void menuFileOpenDatabase_Click(object sender, EventArgs e)
     {
-        using OpenFileDialog dlg = new OpenFileDialog();
+        using OpenFileDialog dlg = new();
         dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
@@ -584,7 +584,7 @@ public partial class MainForm : Form
 
     private void menuFileDiff_Click(object sender, EventArgs e)
     {
-        using (DiffRegistryForm frm = new DiffRegistryForm(m_registry))
+        using (DiffRegistryForm frm = new(m_registry))
         {
             if (frm.ShowDialog(this) == DialogResult.OK)
             {
@@ -597,7 +597,7 @@ public partial class MainForm : Form
     {
         try
         {
-            using OpenFileDialog dlg = new OpenFileDialog();
+            using OpenFileDialog dlg = new();
             dlg.Filter = "All Files (*.*)|*.*";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
@@ -623,7 +623,7 @@ public partial class MainForm : Form
 
     private void OpenHexEditor(string name, byte[] bytes)
     {
-        ObjectHexEditor editor = new ObjectHexEditor(m_registry, name, bytes);
+        ObjectHexEditor editor = new(m_registry, name, bytes);
         HostControl(editor);
     }
 
@@ -631,7 +631,7 @@ public partial class MainForm : Form
     {
         try
         {
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            using (OpenFileDialog dlg = new())
             {
                 dlg.Multiselect = true;
                 dlg.Filter = "All Files (*.*)|*.*";
@@ -658,7 +658,7 @@ public partial class MainForm : Form
 
     private void menuFileOpenTypeLib_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
             if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -679,7 +679,7 @@ public partial class MainForm : Form
 
     private void menuFileOpenProxyDll_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "Executable Files (*.dll;*.ocx)|*.dll;*.ocx|All Files (*.*)|*.*";
             if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -700,7 +700,7 @@ public partial class MainForm : Form
 
     private void menuFileQueryAllInterfaces_Click(object sender, EventArgs e)
     {
-        using (QueryInterfacesOptionsForm options = new QueryInterfacesOptionsForm())
+        using (QueryInterfacesOptionsForm options = new())
         {
             if (options.ShowDialog(this) == DialogResult.OK)
             {
@@ -718,7 +718,7 @@ public partial class MainForm : Form
 
     private void menuFileSettings_Click(object sender, EventArgs e)
     {
-        using (SettingsForm frm = new SettingsForm())
+        using (SettingsForm frm = new())
         {
             frm.ShowDialog(this);
         }
@@ -740,7 +740,7 @@ public partial class MainForm : Form
             if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
                 "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                using (SettingsForm frm = new SettingsForm())
+                using (SettingsForm frm = new())
                 {
                     frm.ShowDialog(this);
                 }
@@ -827,7 +827,7 @@ public partial class MainForm : Form
     {
         try
         {
-            ProcessStartInfo start_info = new ProcessStartInfo(COMUtilities.GetExePath());
+            ProcessStartInfo start_info = new(COMUtilities.GetExePath());
             start_info.UseShellExecute = true;
             start_info.Verb = "runas";
 
@@ -855,7 +855,7 @@ public partial class MainForm : Form
             m_property_grid.ToolbarVisible = false;
             m_property_grid.PropertySort = PropertySort.Alphabetical;
             
-            DocumentForm frm = new DocumentForm(m_property_grid);
+            DocumentForm frm = new(m_property_grid);
             frm.TabText = "Object Properties";
             frm.ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight;
             frm.Show(m_dockPanel);
@@ -885,7 +885,7 @@ public partial class MainForm : Form
     {
         try
         {
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            using (OpenFileDialog dlg = new())
             {
                 dlg.ShowReadOnly = true;
                 dlg.ReadOnlyChecked = true;
@@ -908,7 +908,7 @@ public partial class MainForm : Form
     {
         try
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            using (SaveFileDialog dlg = new())
             {
                 dlg.Filter = STORAGE_FILTER;
                 if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -933,7 +933,7 @@ public partial class MainForm : Form
 
     private void menuProcessesSelectProcess_Click(object sender, EventArgs e)
     {
-        using (SelectProcessForm form = new SelectProcessForm(ProcessAccessRights.VmRead, false, true))
+        using (SelectProcessForm form = new(ProcessAccessRights.VmRead, false, true))
         {
             if (form.ShowDialog(this) == DialogResult.OK)
             {

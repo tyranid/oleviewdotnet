@@ -115,8 +115,8 @@ internal class SymbolResolverWrapper : ISymbolResolver
     private readonly SymbolLoadedModule _base_module;
     private readonly Dictionary<string, int> _resolved;
 
-    static readonly Dictionary<string, int> _resolved_32bit = new Dictionary<string, int>();
-    static readonly Dictionary<string, int> _resolved_64bit = new Dictionary<string, int>();
+    static readonly Dictionary<string, int> _resolved_32bit = new();
+    static readonly Dictionary<string, int> _resolved_64bit = new();
     static readonly string _dllname = COMUtilities.GetCOMDllName();
     static readonly string _dllprefix = $"{_dllname}!";
 
@@ -1986,8 +1986,8 @@ public static class COMProcessParser
         COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set)
         where T : struct, IPIDEntryNativeInterface
     {
-        List<COMIPIDEntry> entries = new List<COMIPIDEntry>();
-        PageAllocator palloc = new PageAllocator(process, ipid_table);
+        List<COMIPIDEntry> entries = new();
+        PageAllocator palloc = new(process, ipid_table);
         if (palloc.Pages.Length == 0 || palloc.EntrySize < Marshal.SizeOf(typeof(T)))
         {
             return entries;
@@ -2036,7 +2036,7 @@ public static class COMProcessParser
     private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config,
         COMRegistry registry, IEnumerable<Guid> ipids)
     {
-        HashSet<Guid> ipid_set = new HashSet<Guid>(ipids);
+        HashSet<Guid> ipid_set = new(ipids);
         IntPtr ipid_table = resolver.GetAddressOfSymbol(GetSymbolName("CIPIDTable::_palloc"));
         if (ipid_table == IntPtr.Zero)
         {
@@ -2137,7 +2137,7 @@ public static class COMProcessParser
         ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry) where T : I, new() where I : class
     {
         int chain_offset = ChainOffsetAttribute.GetOffset(typeof(T));
-        List<U> entries = new List<U>();
+        List<U> entries = new();
         var buckets = GetBuckets(process, resolver, bucket_symbol, 23);
         foreach (var bucket in buckets)
         {
@@ -2213,7 +2213,7 @@ public static class COMProcessParser
 
     private static IEnumerable<COMRuntimeActivableClassEntry> GetRuntimeServer(IWinRTLocalSvrClassEntry obj, NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
     {
-        return new COMRuntimeActivableClassEntry[] { new COMRuntimeActivableClassEntry(obj, process, resolver, registry) };
+        return new COMRuntimeActivableClassEntry[] { new(obj, process, resolver, registry) };
     }
 
     private static List<COMRuntimeActivableClassEntry> ReadRuntimeActivatableClasses(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
@@ -2369,7 +2369,7 @@ public static class COMProcessParser
 
     private static string ReadUnicodeString(NtProcess process, IntPtr ptr)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         int pos = 0;
         do
         {
@@ -2575,7 +2575,7 @@ public static class COMProcessParser
         COMProcessParserConfig config, IProgress<Tuple<string, int>> progress,
         COMRegistry registry, IEnumerable<Guid> ipids)
     {
-        List<COMProcessEntry> ret = new List<COMProcessEntry>();
+        List<COMProcessEntry> ret = new();
         NtToken.EnableDebugPrivilege();
         int total_count = procs.Count();
         int current_count = 0;
@@ -2881,8 +2881,8 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
 
     public byte[] ToObjref()
     {
-        MemoryStream stm = new MemoryStream();
-        BinaryWriter writer = new BinaryWriter(stm);
+        MemoryStream stm = new();
+        BinaryWriter writer = new(stm);
         writer.Write(Encoding.ASCII.GetBytes("MEOW"));
         writer.Write(1);
         writer.Write(Iid.ToByteArray());
@@ -2905,7 +2905,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
         return stm.ToArray();
     }
 
-    private Dictionary<IntPtr, COMMethodEntry> _method_cache = new Dictionary<IntPtr, COMMethodEntry>();
+    private Dictionary<IntPtr, COMMethodEntry> _method_cache = new();
 
     private static int GetPointerSize(NtProcess process)
     {
@@ -2983,8 +2983,8 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
         StrongRefs = ipid.StrongRefs;
         WeakRefs = ipid.WeakRefs;
         PrivateRefs = ipid.PrivateRefs;
-        List<COMMethodEntry> methods = new List<COMMethodEntry>();
-        List<NdrComplexTypeReference> complex_types = new List<NdrComplexTypeReference>();
+        List<COMMethodEntry> methods = new();
+        List<NdrComplexTypeReference> complex_types = new();
         IntPtr stub_vptr = IntPtr.Zero;
         if (Stub != IntPtr.Zero)
         {
@@ -3004,7 +3004,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
             // PVOID ForwardingDispatchTable - Used presumably when there's code implementation.
             if (stub_vptr != IntPtr.Zero)
             {
-                IntPtr base_ptr = new IntPtr(stub_vptr.ToInt64() - (GetPointerSize(process) * 3));
+                IntPtr base_ptr = new(stub_vptr.ToInt64() - (GetPointerSize(process) * 3));
                 IntPtr[] stub_info = COMProcessParser.ReadPointerArray(process, base_ptr, 3);
                 if (stub_info != null)
                 {
@@ -3032,7 +3032,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
                 methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, config)));
                 if (config.ParseStubMethods && server_info != IntPtr.Zero && count > 3)
                 {
-                    NdrParser parser = new NdrParser(process, resolver);
+                    NdrParser parser = new(process, resolver);
                     var procs = parser.ReadFromMidlServerInfo(server_info, 3, (int)count, methods.Skip(3).Select(m => m.Name).ToList()).ToArray();
                     for (int i = 0; i < procs.Length; ++i)
                     {

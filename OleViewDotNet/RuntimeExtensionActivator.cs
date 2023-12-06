@@ -102,7 +102,7 @@ public class RuntimeExtensionActivator
         IntPtr buffer = Marshal.AllocHGlobal(total_size);
         try
         {
-            Blob blob = new Blob() { cbSize = attrs.Length, pBlobData = buffer + struct_size };
+            Blob blob = new() { cbSize = attrs.Length, pBlobData = buffer + struct_size };
             Marshal.StructureToPtr(blob, buffer, false);
             Marshal.Copy(attrs, 0, buffer + struct_size, attrs.Length);
             _context.LpacAttributes = buffer;

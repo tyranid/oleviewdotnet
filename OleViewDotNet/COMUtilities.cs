@@ -770,7 +770,7 @@ public static class COMUtilities
 
     public static string GetCategoryName(Guid catid)
     {
-        Guid clsid = new Guid("{0002E005-0000-0000-C000-000000000046}");
+        Guid clsid = new("{0002E005-0000-0000-C000-000000000046}");
         Guid iid = typeof(ICatInformation).GUID;
         IntPtr pCatMgr;
         string strDesc = String.Empty;
@@ -1163,7 +1163,7 @@ public static class COMUtilities
             string strAssemblyPath = GetTypeLibDirectory();
             strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibGuid(typeLib).ToString() + ".dll");
 
-            TypeLibConverter conv = new TypeLibConverter();
+            TypeLibConverter conv = new();
             AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
                                     new TypeLibCallback(progress), null, null, null, null);
             asm.Save(Path.GetFileName(strAssemblyPath));
@@ -1191,7 +1191,7 @@ public static class COMUtilities
             LoadTypeLibAssemblies();
         }
 
-        COMProxyInstanceConverter converter = new COMProxyInstanceConverter(output_path, progress);
+        COMProxyInstanceConverter converter = new(output_path, progress);
         converter.AddProxy(entries);
         converter.Save();
     }
@@ -1222,7 +1222,7 @@ public static class COMUtilities
             LoadTypeLibAssemblies();
         }
 
-        COMProxyInstanceConverter converter = new COMProxyInstanceConverter($"{Guid.NewGuid()}.dll", progress);
+        COMProxyInstanceConverter converter = new($"{Guid.NewGuid()}.dll", progress);
         converter.AddProxy(entries);
         RegisterTypeInterfaces(converter.BuiltAssembly);
         return converter.BuiltAssembly;
@@ -1301,7 +1301,7 @@ public static class COMUtilities
             t.GetCustomAttributes(typeof(InterfaceTypeAttribute), false).Length > 0;
     }
 
-    private static Dictionary<Type, Type> _wrappers = new Dictionary<Type, Type>();
+    private static Dictionary<Type, Type> _wrappers = new();
 
     private static CodeParameterDeclarationExpression GetParameter(ParameterInfo pi)
     {
@@ -1314,7 +1314,7 @@ public static class COMUtilities
             baseType = baseType.Assembly.GetType(name);
         }
 
-        CodeParameterDeclarationExpression p = new CodeParameterDeclarationExpression(baseType, pi.Name);
+        CodeParameterDeclarationExpression p = new(baseType, pi.Name);
         FieldDirection d = FieldDirection.In;
 
         if ((pi.Attributes & ParameterAttributes.Out) == ParameterAttributes.Out)
@@ -1341,14 +1341,14 @@ public static class COMUtilities
 
     private static CodeMemberMethod CreateForwardingMethod(MethodInfo mi)
     {
-        CodeMemberMethod method = new CodeMemberMethod
+        CodeMemberMethod method = new()
         {
             Attributes = MemberAttributes.Public | MemberAttributes.Final,
             Name = mi.Name,
             ReturnType = new CodeTypeReference(mi.ReturnType)
         };
 
-        List<CodeExpression> parameters = new List<CodeExpression>();
+        List<CodeExpression> parameters = new();
 
         foreach (ParameterInfo pi in mi.GetParameters())
         {
@@ -1357,7 +1357,7 @@ public static class COMUtilities
             parameters.Add(new CodeDirectionExpression(p.Direction, new CodeVariableReferenceExpression(pi.Name)));
         }
 
-        CodeMethodInvokeExpression invokeExpr = new CodeMethodInvokeExpression(
+        CodeMethodInvokeExpression invokeExpr = new(
             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"),
             mi.Name, parameters.ToArray());
 
@@ -1375,12 +1375,12 @@ public static class COMUtilities
 
     private static CodeMemberProperty CreateForwardingProperty(PropertyInfo pi)
     {
-        CodeMemberProperty prop = new CodeMemberProperty();
+        CodeMemberProperty prop = new();
         prop.Attributes = MemberAttributes.Public | MemberAttributes.Final;
         prop.Name = pi.Name;
         prop.Type = new CodeTypeReference(pi.PropertyType);
 
-        CodePropertyReferenceExpression propExpr = new CodePropertyReferenceExpression(
+        CodePropertyReferenceExpression propExpr = new(
             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"),
             pi.Name);
 
@@ -1399,8 +1399,8 @@ public static class COMUtilities
 
     private static CodeTypeDeclaration CreateWrapperTypeDeclaration(Type t)
     {
-        CodeTypeDeclaration type = new CodeTypeDeclaration(t.Name + "Wrapper");
-        CodeTypeReference typeRef = new CodeTypeReference(t);
+        CodeTypeDeclaration type = new(t.Name + "Wrapper");
+        CodeTypeReference typeRef = new(t);
 
         type.IsClass = true;
         type.Attributes = MemberAttributes.Public | MemberAttributes.Final;
@@ -1408,7 +1408,7 @@ public static class COMUtilities
 
         type.Members.Add(new CodeMemberField(typeRef, "_target"));
 
-        CodeConstructor defaultConstructor = new CodeConstructor();
+        CodeConstructor defaultConstructor = new();
         defaultConstructor.Attributes = MemberAttributes.Public;
         defaultConstructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "target"));
         defaultConstructor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_target"), new CodeCastExpression(typeRef, new CodeVariableReferenceExpression("target"))));
@@ -1434,18 +1434,18 @@ public static class COMUtilities
     private static Type CreateWrapper(Type t)
     {
         Type ret = null;
-        CodeCompileUnit unit = new CodeCompileUnit();
-        CodeNamespace ns = new CodeNamespace();
+        CodeCompileUnit unit = new();
+        CodeNamespace ns = new();
 
-        CSharpCodeProvider provider = new CSharpCodeProvider();
+        CSharpCodeProvider provider = new();
 
         CodeTypeDeclaration type = CreateWrapperTypeDeclaration(t);
 
         ns.Types.Add(type);
         unit.Namespaces.Add(ns);
 
-        StringBuilder builder = new StringBuilder();
-        CodeGeneratorOptions options = new CodeGeneratorOptions();
+        StringBuilder builder = new();
+        CodeGeneratorOptions options = new();
         options.IndentString = "    ";
         options.BlankLinesBetweenMembers = false;
 
@@ -1460,8 +1460,8 @@ public static class COMUtilities
 
         try
         {
-            CompilerParameters compileParams = new CompilerParameters();
-            TempFileCollection tempFiles = new TempFileCollection(Path.GetTempPath(), false);
+            CompilerParameters compileParams = new();
+            TempFileCollection tempFiles = new(Path.GetTempPath(), false);
 
             compileParams.GenerateExecutable = false;
             compileParams.GenerateInMemory = true;
@@ -1530,7 +1530,7 @@ public static class COMUtilities
 
     public static void SaveObjectToStream(object obj, Stream stm)
     {
-        IStreamImpl istm = new IStreamImpl(stm);
+        IStreamImpl istm = new(stm);
 
         IPersistStream ps = obj as IPersistStream;
 
@@ -1548,7 +1548,7 @@ public static class COMUtilities
 
     public static void LoadObjectFromStream(object obj, Stream stm)
     {
-        IStreamImpl istm = new IStreamImpl(stm);
+        IStreamImpl istm = new(stm);
 
         IPersistStream ps = obj as IPersistStream;
 
@@ -1567,7 +1567,7 @@ public static class COMUtilities
 
     public static void OleSaveToStream(object obj, Stream stm)
     {
-        using (BinaryWriter writer = new BinaryWriter(stm))
+        using (BinaryWriter writer = new(stm))
         {
             Guid clsid = GetObjectClass(obj);
 
@@ -1579,7 +1579,7 @@ public static class COMUtilities
 
     public static object OleLoadFromStream(Stream stm, out Guid clsid)
     {
-        using (BinaryReader reader = new BinaryReader(stm))
+        using (BinaryReader reader = new(stm))
         {
             clsid = new Guid(reader.ReadBytes(16));
 
@@ -1614,7 +1614,7 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, CLSCTX clsctx)
     {
-        BIND_OPTS3 bind_opts = new BIND_OPTS3();
+        BIND_OPTS3 bind_opts = new();
         bind_opts.dwClassContext = clsctx;
         return CreateFromMoniker(moniker, bind_opts);
     }
@@ -1686,7 +1686,7 @@ public static class COMUtilities
 
     public static byte[] MarshalObject(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
     {
-        MemoryStream stm = new MemoryStream();
+        MemoryStream stm = new();
         CoMarshalInterface(new IStreamImpl(stm), ref iid, obj, mshctx, IntPtr.Zero, mshflags);
         return stm.ToArray();
     }
@@ -1762,10 +1762,10 @@ public static class COMUtilities
 
     private static string FormatParameters(IEnumerable<ParameterInfo> pis)
     {
-        List<string> pars = new List<string>();
+        List<string> pars = new();
         foreach (ParameterInfo pi in pis)
         {
-            List<string> dirs = new List<string>();
+            List<string> dirs = new();
 
             if (pi.IsOut)
             {
@@ -1807,7 +1807,7 @@ public static class COMUtilities
         }
         else if (member is PropertyInfo prop)
         {
-            List<string> propdirs = new List<string>();
+            List<string> propdirs = new();
             if (prop.CanRead)
             {
                 propdirs.Add("get;");
@@ -1865,7 +1865,7 @@ public static class COMUtilities
 
     internal static T[] EnumeratePointerList<T>(IntPtr p, Func<IntPtr, T> load_type)
     {
-        List<T> ret = new List<T>();
+        List<T> ret = new();
 
         if (p == IntPtr.Zero)
         {
@@ -1964,7 +1964,7 @@ public static class COMUtilities
 
     internal static string ReadZString(this BinaryReader reader)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         char ch = reader.ReadUnicodeChar();
         while (ch != 0)
         {
@@ -2030,13 +2030,13 @@ public static class COMUtilities
         }
         else if (token[0] == '~')
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             int type_count;
 
             name = GetNextToken(name, out type_count);
             builder.Append(token.Substring(1));
             builder.Append("<");
-            List<string> types = new List<string>();
+            List<string> types = new();
             for (int i = 0; i < type_count; ++i)
             {
                 types.Add(ReadType(ref name));
@@ -2051,7 +2051,7 @@ public static class COMUtilities
         }
     }
 
-    private static ConcurrentDictionary<string, string> _demangled_names = new ConcurrentDictionary<string, string>();
+    private static ConcurrentDictionary<string, string> _demangled_names = new();
 
     private static string DemangleGenericType(string name)
     {
@@ -2100,7 +2100,7 @@ public static class COMUtilities
     internal static COMRegistry LoadRegistry(IWin32Window window,
         Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker)
     {
-        using (WaitingDialog loader = new WaitingDialog(worker))
+        using (WaitingDialog loader = new(worker))
         {
             if (loader.ShowDialog(window) == DialogResult.OK)
             {
@@ -2134,7 +2134,7 @@ public static class COMUtilities
 
     internal static Assembly LoadTypeLib(IWin32Window window, string path)
     {
-        using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
+        using (WaitingDialog dlg = new((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
         {
             dlg.Text = String.Format("Loading TypeLib {0}", path);
             dlg.CancelEnabled = false;
@@ -2152,7 +2152,7 @@ public static class COMUtilities
 
     internal static Assembly LoadTypeLib(IWin32Window window, ITypeLib typelib)
     {
-        using (WaitingDialog dlg = new WaitingDialog((progress, token) => LoadTypeLib(typelib, progress), s => s))
+        using (WaitingDialog dlg = new((progress, token) => LoadTypeLib(typelib, progress), s => s))
         {
             dlg.Text = "Loading TypeLib";
             dlg.CancelEnabled = false;
@@ -2186,7 +2186,7 @@ public static class COMUtilities
 
     internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
     {
-        using (WaitingDialog dlg = new WaitingDialog((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s))
+        using (WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s))
         {
             dlg.Text = "Loading Processes";
             if (dlg.ShowDialog(window) == DialogResult.OK)
@@ -2240,11 +2240,11 @@ public static class COMUtilities
 
     private static bool QueryAllInterfaces(IEnumerable<COMCLSIDEntry> clsids, IProgress<Tuple<string, int>> progress, CancellationToken token, int concurrent_queries)
     {
-        ParallelOptions po = new ParallelOptions();
+        ParallelOptions po = new();
         po.CancellationToken = token;
         po.MaxDegreeOfParallelism = concurrent_queries;
 
-        ReportQueryProgress query_progress = new ReportQueryProgress(progress, clsids.Count());
+        ReportQueryProgress query_progress = new(progress, clsids.Count());
 
         Parallel.ForEach(clsids, po, clsid =>
         {
@@ -2264,7 +2264,7 @@ public static class COMUtilities
 
     internal static bool QueryAllInterfaces(IWin32Window parent, IEnumerable<COMCLSIDEntry> clsids, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
     {
-        using (WaitingDialog dlg = new WaitingDialog(
+        using (WaitingDialog dlg = new(
             (p, t) => COMUtilities.QueryAllInterfaces(clsids.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),
                         p, t, concurrent_queries),
             s => s))
@@ -2362,7 +2362,7 @@ public static class COMUtilities
 
     internal static Dictionary<int, HashSet<string>> GetServicePids()
     {
-        Dictionary<int, HashSet<string>> ret = new Dictionary<int, HashSet<string>>();
+        Dictionary<int, HashSet<string>> ret = new();
         IntPtr hSC = OpenSCManager(null, null, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
         try
         {
@@ -2377,7 +2377,7 @@ public static class COMUtilities
             int repeat_count = 5;
             while (repeat_count > 0)
             {
-                using (SafeHGlobalBuffer buf = new SafeHGlobalBuffer(bytes_needed))
+                using (SafeHGlobalBuffer buf = new(bytes_needed))
                 {
                     if (EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, buf, buf.Length, out bytes_needed, out service_count, IntPtr.Zero, null))
                     {
@@ -2465,7 +2465,7 @@ public static class COMUtilities
             Guid iid = COMInterfaceEntry.IID_IDispatch;
             if (Marshal.QueryInterface(intf, ref iid, out proxy) != 0)
             {
-                ServerInformation info = new ServerInformation();
+                ServerInformation info = new();
                 int hr = CoDecodeProxy(Process.GetCurrentProcess().Id, proxy.ToInt64(), out info);
                 if (hr == 0)
                 {
@@ -2487,7 +2487,7 @@ public static class COMUtilities
         return new ServerInformation();
     }
 
-    static Dictionary<string, Assembly> _cached_reflection_assemblies = new Dictionary<string, Assembly>();
+    static Dictionary<string, Assembly> _cached_reflection_assemblies = new();
 
     private static Assembly ResolveAssembly(string base_path, string name)
     {
@@ -2587,7 +2587,7 @@ public static class COMUtilities
 
         AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (s, a) => CurrentDomain_ReflectionOnlyAssemblyResolve(base_path, a);
         WindowsRuntimeMetadata.ReflectionOnlyNamespaceResolve += (s, a) => WindowsRuntimeMetadata_ReflectionOnlyNamespaceResolve(base_path, a);
-        DirectoryInfo dir = new DirectoryInfo(base_path);
+        DirectoryInfo dir = new(base_path);
         foreach (FileInfo file in dir.GetFiles("*.winmd"))
         {
             try
@@ -2626,7 +2626,7 @@ public static class COMUtilities
         }
     }
 
-    private static Lazy<string> _assembly_version = new Lazy<string>(() =>
+    private static Lazy<string> _assembly_version = new(() =>
     {
         Assembly asm = Assembly.GetCallingAssembly();
         return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
@@ -2667,7 +2667,7 @@ public static class COMUtilities
         {
             MULTI_QI[] qis = new MULTI_QI[1];
             qis[0] = new MULTI_QI(iid);
-            COSERVERINFO server_info = new COSERVERINFO(server);
+            COSERVERINFO server_info = new(server);
             try
             {
                 hr = COMUtilities.CoCreateInstanceEx(ref clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
@@ -2736,7 +2736,7 @@ public static class COMUtilities
         return ret;
     }
 
-    private static Guid CLSID_NewMoniker = new Guid("ecabafc6-7f19-11d2-978e-0000f8757e2a");
+    private static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
 
     private static IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string)
     {
@@ -2819,7 +2819,7 @@ public static class COMUtilities
 
     public static void GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
     {
-        COMProcessParserConfig config = new COMProcessParserConfig(dbghelp_path, symbol_path, true, true, true, true, false);
+        COMProcessParserConfig config = new(dbghelp_path, symbol_path, true, true, true, true, false);
         var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
         Dictionary<string, int> entries;
         if (Environment.Is64BitProcess)
@@ -2841,7 +2841,7 @@ public static class COMUtilities
 
         var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
         string output_file = Path.Combine(symbol_dir, $"{GetFileMD5(module.FullPath)}.sym");
-        List<string> lines = new List<string>();
+        List<string> lines = new();
         lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
         lines.AddRange(symbols.Select(p => $"{p.Value} {p.Key}"));
         File.WriteAllLines(output_file, lines);
@@ -2854,7 +2854,7 @@ public static class COMUtilities
         INdrFormatter formatter = DefaultNdrFormatter.Create(registry.InterfacesToNames,
                 DemangleWinRTName,
                 remove_comments ? DefaultNdrFormatterFlags.RemoveComments : DefaultNdrFormatterFlags.None);
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
 
         if ((flags & ProxyFormatterFlags.RemoveComplexTypes) == 0)
         {
@@ -2892,8 +2892,8 @@ public static class COMUtilities
 
     static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
     {
-        HashSet<string> matched_names = new HashSet<string>();
-        Dictionary<MethodInfo, string> ret = new Dictionary<MethodInfo, string>();
+        HashSet<string> matched_names = new();
+        Dictionary<MethodInfo, string> ret = new();
         foreach (MethodInfo mi in mis.Reverse())
         {
             int count = 2;
@@ -2948,7 +2948,7 @@ public static class COMUtilities
                 {
                     builder.AppendLine("   /* Methods */");
 
-                    Dictionary<MethodInfo, string> name_mapping = new Dictionary<MethodInfo, string>();
+                    Dictionary<MethodInfo, string> name_mapping = new();
                     if (t.IsClass)
                     {
                         name_mapping = MapMethodNamesToCOM(methods);
@@ -3023,7 +3023,7 @@ public static class COMUtilities
 
     public static string FormatComType(Type t)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         FormatComType(builder, t);
         return builder.ToString();
     }
@@ -3082,7 +3082,7 @@ public static class COMUtilities
 
     public static string FormatComAssembly(Assembly assembly, bool interfaces_only)
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         if (!interfaces_only)
         {
             FormatComTypes(builder, GetComStructs(assembly, false));
@@ -3263,7 +3263,7 @@ public static class COMUtilities
         if (address == 0)
             return string.Empty;
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         char c = process.ReadMemory<char>(address);
         while (c != 0)
         {
@@ -3368,7 +3368,7 @@ public static class COMUtilities
                 return string.Empty;
             }
 
-            StringBuilder builder = new StringBuilder(260);
+            StringBuilder builder = new(260);
             length = builder.Capacity;
             result = GetPackagePath(buffer, 0, ref length, builder);
             if (result != 0)

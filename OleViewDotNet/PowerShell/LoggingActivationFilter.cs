@@ -25,7 +25,7 @@ public class LoggingActivationFilter : IActivationFilter
 {
     static LoggingActivationFilter CreateActivationFilter()
     {
-        LoggingActivationFilter filter = new LoggingActivationFilter();
+        LoggingActivationFilter filter = new();
         int hr = COMUtilities.CoRegisterActivationFilter(filter);
         if (hr != 0)
         {
@@ -34,7 +34,7 @@ public class LoggingActivationFilter : IActivationFilter
         return filter;
     }
 
-    static Lazy<LoggingActivationFilter> _instance = new Lazy<LoggingActivationFilter>(CreateActivationFilter, true);
+    static Lazy<LoggingActivationFilter> _instance = new(CreateActivationFilter, true);
 
     private COMRegistry _registry;
     private TextWriter _writer;

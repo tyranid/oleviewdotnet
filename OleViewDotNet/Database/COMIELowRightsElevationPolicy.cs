@@ -91,7 +91,7 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
 
     private void LoadFromRegistry(RegistryKey key)
     {
-        List<Guid> clsidList = new List<Guid>();
+        List<Guid> clsidList = new();
 
         object policyValue = key.GetValue("Policy", 0);
 

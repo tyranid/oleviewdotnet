@@ -67,7 +67,7 @@ public partial class DocumentForm : DockContent
 
     private void renameToolStripMenuItem_Click(object sender, System.EventArgs e)
     {
-        using (GetTextForm frm = new GetTextForm(TabText))
+        using (GetTextForm frm = new(TabText))
         {
             frm.Text = "Edit Tab Name";
             if (frm.ShowDialog(this) == DialogResult.OK)

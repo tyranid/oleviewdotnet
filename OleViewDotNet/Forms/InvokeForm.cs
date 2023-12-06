@@ -58,7 +58,7 @@ public partial class InvokeForm : Form
         for (int i = 0; i < pis.Length; i++)
         {
             ParameterInfo pi = pis[i];
-            ParamData data = new ParamData();
+            ParamData data = new();
             m_paramdata[i] = data;
 
             data.pi = pis[i];
@@ -186,7 +186,7 @@ public partial class InvokeForm : Form
 
             if(baseType == typeof(IStream))
             {
-                using (CreateIStreamForm frm = new CreateIStreamForm())
+                using (CreateIStreamForm frm = new())
                 {
                     if (frm.ShowDialog() == DialogResult.OK)
                     {
@@ -196,7 +196,7 @@ public partial class InvokeForm : Form
             }
             else
             {
-                using (GetTypeForm frm = new GetTypeForm(data.pi.ParameterType, data.data))
+                using (GetTypeForm frm = new(data.pi.ParameterType, data.data))
                 {
                     if (frm.ShowDialog() == DialogResult.OK)
                     {

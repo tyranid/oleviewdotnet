@@ -68,7 +68,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter
 
     private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
     {
-        NdrParser parser = new NdrParser(resolver);
+        NdrParser parser = new(resolver);
         Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
         ComplexTypes = parser.ComplexTypes;
         OriginalName = intf.Name;
@@ -76,7 +76,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         m_registry = registry;
     }
 
-    private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new Dictionary<Guid, COMProxyInterfaceInstance>();
+    private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
 
     public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
     {

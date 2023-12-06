@@ -61,9 +61,9 @@ public static class EntryPoint
 
     static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
     {
-        using (AnonymousPipeClientStream client = new AnonymousPipeClientStream(PipeDirection.Out, args.Dequeue()))
+        using (AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue()))
         {
-            using (StreamWriter writer = new StreamWriter(client))
+            using (StreamWriter writer = new(client))
             {
                 Guid clsid = Guid.Empty;
                 CLSCTX clsctx = 0;
@@ -96,7 +96,7 @@ public static class EntryPoint
                     }
                 }
 
-                COMEnumerateInterfaces intf = new COMEnumerateInterfaces(clsid, clsctx, activatable_class, sta, timeout, token);
+                COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, sta, timeout, token);
                 if (intf.Exception != null)
                 {
                     writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
@@ -204,7 +204,7 @@ public static class EntryPoint
         IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
         NtToken token = null;
 
-        OptionSet opts = new OptionSet() {
+        OptionSet opts = new() {
             { "i|in=",  "Open a database file.", v => database_file = v },
             { "o|out=", "Save database and exit.", v => save_file = v },
             { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
@@ -225,7 +225,7 @@ public static class EntryPoint
             { "h|help",  "Show this message and exit.", v => show_help = v != null },
         };
 
-        List<string> additional_args = new List<string>();
+        List<string> additional_args = new();
 
         try
         {
@@ -240,7 +240,7 @@ public static class EntryPoint
 
         if (show_help || (do_enum && additional_args.Count < 4) || (symbol_dir != null && !Directory.Exists(symbol_dir)))
         {
-            StringWriter writer = new StringWriter();
+            StringWriter writer = new();
             writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
             writer.WriteLine();
             writer.WriteLine("Options:");
@@ -275,7 +275,7 @@ public static class EntryPoint
         }
         else
         {
-            AutoSaveLoadConfiguration autoload_config = new AutoSaveLoadConfiguration();
+            AutoSaveLoadConfiguration autoload_config = new();
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -285,7 +285,7 @@ public static class EntryPoint
                 if (view_access_sd != null || view_launch_sd != null)
                 {
                     bool access = view_access_sd != null;
-                    SecurityDescriptor sd = new SecurityDescriptor(view_access_sd ?? view_launch_sd);
+                    SecurityDescriptor sd = new(view_access_sd ?? view_launch_sd);
                     bool has_container = false;
                     if (sd.DaclPresent)
                     {
@@ -304,8 +304,8 @@ public static class EntryPoint
                         valid_access |= (access ? 0x20 : 0x60);
                     }
 
-                    SecurityDescriptorViewerControl control = new SecurityDescriptorViewerControl();
-                    DocumentForm frm = new DocumentForm(control);
+                    SecurityDescriptorViewerControl control = new();
+                    DocumentForm frm = new(control);
                     string title = $"{(access ? "Access Security" : "Launch Security")}";
                     if (!string.IsNullOrWhiteSpace(view_name))
                     {

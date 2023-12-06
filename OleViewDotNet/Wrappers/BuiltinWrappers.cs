@@ -86,7 +86,7 @@ public sealed class IBindCtxWrapper : BaseComWrapper<IBindCtx>
 
     public System.Runtime.InteropServices.ComTypes.BIND_OPTS GetBindOptions()
     {
-        System.Runtime.InteropServices.ComTypes.BIND_OPTS ret = new System.Runtime.InteropServices.ComTypes.BIND_OPTS();
+        System.Runtime.InteropServices.ComTypes.BIND_OPTS ret = new();
         _object.GetBindOptions(ref ret);
         return ret;
     }

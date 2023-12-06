@@ -59,11 +59,11 @@ class ObjectEntry
 
 static class ObjectCache
 {
-    private static List<ObjectEntry> m_objects = new List<ObjectEntry>();
+    private static List<ObjectEntry> m_objects = new();
 
     public static ObjectEntry Add(COMRegistry registry, string name, object instance, COMInterfaceEntry[] interfaces)
     {
-        ObjectEntry ret = new ObjectEntry(registry, name, instance, interfaces);
+        ObjectEntry ret = new(registry, name, instance, interfaces);
         m_objects.Add(ret);
 
         return ret;

@@ -338,8 +338,8 @@ public class COMRegistry
             throw new ArgumentNullException("progress");
         }
 
-        XmlWriterSettings settings = new XmlWriterSettings();
-        using (XmlTextWriter writer = new XmlTextWriter(path, Encoding.UTF8))
+        XmlWriterSettings settings = new();
+        using (XmlTextWriter writer = new(path, Encoding.UTF8))
         {
             const int total_count = 10;
 
@@ -441,7 +441,7 @@ public class COMRegistry
     public static COMRegistry Diff(COMRegistry left, COMRegistry right, COMRegistryDiffMode mode, IProgress<Tuple<string, int>> progress)
     {
         const int total_count = 10;
-        COMRegistry ret = new COMRegistry(COMRegistryMode.Diff);
+        COMRegistry ret = new(COMRegistryMode.Diff);
         Report(progress, "CLSIDs", 1, total_count);
         ret.m_clsids = DiffDicts(left.m_clsids, right.m_clsids, mode, p => p.Clsid);
         Report(progress, "ProgIDs", 2, total_count);
@@ -646,7 +646,7 @@ public class COMRegistry
 
     public override string ToString()
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         if (!String.IsNullOrWhiteSpace(m_name))
         {
             builder.AppendFormat("{0} - ", m_name);
@@ -700,7 +700,7 @@ public class COMRegistry
             {
                 actctx = ActivationContext.FromProcess();
             }
-            COMPackagedRegistry packagedRegistry = new COMPackagedRegistry();
+            COMPackagedRegistry packagedRegistry = new();
             if (include_machine_key)
             {
                 using (var packagedComKey = classes_key.OpenSubKeySafe("PackagedCom"))
@@ -743,7 +743,7 @@ public class COMRegistry
 
     private COMRegistry(string path, IProgress<Tuple<string, int>> progress)
     {
-        XmlReaderSettings settings = new XmlReaderSettings();
+        XmlReaderSettings settings = new();
         settings.DtdProcessing = DtdProcessing.Prohibit;
         settings.IgnoreComments = true;
         settings.IgnoreProcessingInstructions = true;
@@ -830,8 +830,8 @@ public class COMRegistry
 
     private void LoadCLSIDs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
     {
-        Dictionary<Guid, COMCLSIDEntry> clsids = new Dictionary<Guid, COMCLSIDEntry>();
-        Dictionary<Guid, List<Guid>> categories = new Dictionary<Guid, List<Guid>>();
+        Dictionary<Guid, COMCLSIDEntry> clsids = new();
+        Dictionary<Guid, List<Guid>> categories = new();
 
         if (actctx != null)
         {
@@ -861,7 +861,7 @@ public class COMRegistry
                     {
                         if (regKey != null)
                         {
-                            COMCLSIDEntry ent = new COMCLSIDEntry(this, clsid, regKey);
+                            COMCLSIDEntry ent = new(this, clsid, regKey);
                             clsids.Add(clsid, ent);
                             foreach (Guid catid in ent.Categories)
                             {
@@ -896,7 +896,7 @@ public class COMRegistry
 
     private void LoadProgIDs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
     {
-        Dictionary<string, COMProgIDEntry> progids = new Dictionary<string, COMProgIDEntry>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, COMProgIDEntry> progids = new(StringComparer.OrdinalIgnoreCase);
 
         if (actctx != null)
         {
@@ -920,7 +920,7 @@ public class COMRegistry
                     Guid clsid = COMUtilities.ReadGuid(regKey, "CLSID", null);
                     if (clsid != Guid.Empty)
                     {
-                        COMProgIDEntry entry = new COMProgIDEntry(this, key, clsid, regKey);
+                        COMProgIDEntry entry = new(this, key, clsid, regKey);
                         progids[key] = entry;
                     }
                 }
@@ -950,7 +950,7 @@ public class COMRegistry
 
     private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry, bool load_runtime_intfs)
     {
-        Dictionary<Guid, COMInterfaceEntry> interfaces = new Dictionary<Guid, COMInterfaceEntry>();
+        Dictionary<Guid, COMInterfaceEntry> interfaces = new();
         foreach (COMKnownInterfaces known_infs in Enum.GetValues(typeof(COMKnownInterfaces)))
         {
             COMInterfaceEntry unk = COMInterfaceEntry.CreateKnownInterface(this, known_infs);
@@ -980,7 +980,7 @@ public class COMRegistry
                             {
                                 if (regKey != null)
                                 {
-                                    COMInterfaceEntry ent = new COMInterfaceEntry(this, iid, regKey);
+                                    COMInterfaceEntry ent = new(this, iid, regKey);
                                     interfaces.Add(iid, ent);
                                 }
                             }
@@ -1019,7 +1019,7 @@ public class COMRegistry
 
     IEnumerable<Guid> ReadPreApproved(RegistryKey rootKey)
     {
-        List<Guid> ret = new List<Guid>();
+        List<Guid> ret = new();
         using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
         {
             if (key != null)
@@ -1059,7 +1059,7 @@ public class COMRegistry
 
     void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
     {
-        Dictionary<Guid, COMTypeLibEntry> typelibs = new Dictionary<Guid, COMTypeLibEntry>();
+        Dictionary<Guid, COMTypeLibEntry> typelibs = new();
         if (actctx != null)
         {
             foreach (var typelib in actctx.ComTypeLibs)
@@ -1081,7 +1081,7 @@ public class COMRegistry
                         {
                             if (subKey != null)
                             {
-                                COMTypeLibEntry typelib = new COMTypeLibEntry(this, g, subKey);
+                                COMTypeLibEntry typelib = new(this, g, subKey);
 
                                 typelibs[g] = typelib;
                             }
@@ -1115,7 +1115,7 @@ public class COMRegistry
                     {
                         using (RegistryKey rightsKey = key.OpenSubKey(s))
                         {
-                            COMIELowRightsElevationPolicy entry = new COMIELowRightsElevationPolicy(this, g, source, rightsKey);
+                            COMIELowRightsElevationPolicy entry = new(this, g, source, rightsKey);
                             if (entry.Clsid != Guid.Empty || !string.IsNullOrWhiteSpace(entry.AppPath))
                             {
                                 m_lowrights.Add(entry);
@@ -1164,7 +1164,7 @@ public class COMRegistry
             RegistryKey sub_key = key.OpenSubKey(mime_type);
             if (sub_key != null)
             {
-                COMMimeType obj = new COMMimeType(this, mime_type, sub_key);
+                COMMimeType obj = new(this, mime_type, sub_key);
                 if (obj.Clsid != Guid.Empty)
                 {
                     m_mimetypes.Add(obj);
@@ -1197,7 +1197,7 @@ public class COMRegistry
                     {
                         if (regKey != null)
                         {
-                            COMAppIDEntry ent = new COMAppIDEntry(appid, regKey, this);
+                            COMAppIDEntry ent = new(appid, regKey, this);
                             m_appid.Add(appid, ent);
                         }
                     }
@@ -1283,7 +1283,7 @@ public class COMRegistry
     {
         using (RegistryKey classes_key = runtime_key.OpenSubKey("ActivatableClassId"))
         {
-            List<COMRuntimeClassEntry> entries = new List<COMRuntimeClassEntry>();
+            List<COMRuntimeClassEntry> entries = new();
             if (classes_key != null)
             {
                 foreach (string name in classes_key.GetSubKeyNames())
@@ -1304,7 +1304,7 @@ public class COMRegistry
         COMRegistry registry, Dictionary<string, COMRuntimeServerEntry> servers)
     {
         using RegistryKey server_key = runtime_key.OpenSubKey("Server");
-        List<COMRuntimeServerEntry> entries = new List<COMRuntimeServerEntry>();
+        List<COMRuntimeServerEntry> entries = new();
         if (server_key != null)
         {
             foreach (string name in server_key.GetSubKeyNames())

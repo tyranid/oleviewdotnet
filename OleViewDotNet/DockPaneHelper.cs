@@ -34,7 +34,7 @@ public static class DockPanelHelper
     /// <returns>DockPanelDocumentInfo about the docks and the selected index</returns>
     public static DockPanelDocumentInfo GetDocumentInfo(this DockPanel dockPanel)
     {
-        DockPanelDocumentInfo re = new DockPanelDocumentInfo();
+        DockPanelDocumentInfo re = new();
         re.DockContents = new IDockContent[dockPanel.DocumentsCount];
         re.SelectedDockContentIndex = -1;
 

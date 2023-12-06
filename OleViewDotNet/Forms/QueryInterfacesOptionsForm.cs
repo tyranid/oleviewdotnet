@@ -38,7 +38,7 @@ public partial class QueryInterfacesOptionsForm : Form
         }
         else
         {
-            List<COMServerType> server_types = new List<COMServerType>();
+            List<COMServerType> server_types = new();
             if (checkBoxInProcHandler.Checked)
             {
                 server_types.Add(COMServerType.InProcHandler32);

@@ -30,7 +30,7 @@ public partial class CreateIStreamForm : Form
 
     private void btnCreateRead_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new OpenFileDialog())
+        using (OpenFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
             dlg.ShowReadOnly = false;
@@ -53,7 +53,7 @@ public partial class CreateIStreamForm : Form
 
     private void btnCreateWrite_Click(object sender, EventArgs e)
     {
-        using (SaveFileDialog dlg = new SaveFileDialog())
+        using (SaveFileDialog dlg = new())
         {
             dlg.Filter = "All Files (*.*)|*.*";
 

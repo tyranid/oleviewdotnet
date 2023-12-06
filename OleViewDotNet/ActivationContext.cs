@@ -713,12 +713,12 @@ public sealed class ActivationContext
     const uint STRING_SECTION_MAGIC = 0x64487353;
     const uint GUID_SECTION_MAGIC = 0x64487347;
 
-    private List<ActCtxComServerRedirection> _com_servers = new List<ActCtxComServerRedirection>();
-    private List<ActCtxComProgIdRedirection> _com_progids = new List<ActCtxComProgIdRedirection>();
-    private List<ActCtxDllRedirection> _dll_redir = new List<ActCtxDllRedirection>();
-    private List<ActCtxAssemblyRoster> _asm_roster = new List<ActCtxAssemblyRoster>();
-    private List<ActCtxComInterfaceRedirection> _com_interfaces = new List<ActCtxComInterfaceRedirection>();
-    private List<ActCtxComTypeLibraryRedirection> _com_typelibs = new List<ActCtxComTypeLibraryRedirection>();
+    private List<ActCtxComServerRedirection> _com_servers = new();
+    private List<ActCtxComProgIdRedirection> _com_progids = new();
+    private List<ActCtxDllRedirection> _dll_redir = new();
+    private List<ActCtxAssemblyRoster> _asm_roster = new();
+    private List<ActCtxComInterfaceRedirection> _com_interfaces = new();
+    private List<ActCtxComTypeLibraryRedirection> _com_typelibs = new();
 
     public IReadOnlyCollection<ActCtxComServerRedirection> ComServers => _com_servers;
     public IReadOnlyCollection<ActCtxComProgIdRedirection> ComProgIds => _com_progids;
@@ -737,7 +737,7 @@ public sealed class ActivationContext
 
     private IEnumerable<StringSectionEntry<T>> ReadStringSection<T>(ReadHandle handle, int base_offset, int length)
     {
-        List<StringSectionEntry<T>> ret = new List<StringSectionEntry<T>>();
+        List<StringSectionEntry<T>> ret = new();
         if (length < Marshal.SizeOf<ACTIVATION_CONTEXT_STRING_SECTION_HEADER>())
         {
             return ret;
@@ -761,7 +761,7 @@ public sealed class ActivationContext
 
     private IEnumerable<GuidSectionEntry<T>> ReadGuidSection<T>(ReadHandle handle, int base_offset, int length)
     {
-        List<GuidSectionEntry<T>> ret = new List<GuidSectionEntry<T>>();
+        List<GuidSectionEntry<T>> ret = new();
         if (length < Marshal.SizeOf<ACTIVATION_CONTEXT_GUID_SECTION_HEADER>())
         {
             return ret;
@@ -860,7 +860,7 @@ public sealed class ActivationContext
 
     public ActivationContext(byte[] actctx)
     {
-        using (ReadHandle handle = new ReadHandle(actctx))
+        using (ReadHandle handle = new(actctx))
         {
             ACTIVATION_CONTEXT_DATA header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA>(0);
             if (header.Magic != ACTCTX_MAGIC && header.FormatVersion != ACTCTX_VERSION)

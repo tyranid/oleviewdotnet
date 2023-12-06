@@ -58,11 +58,11 @@ public partial class ElevatedFactoryServerTypeViewer : UserControl
             if (vso != null)
             {
                 object new_object;
-                Dictionary<string, string> props = new Dictionary<string, string>();
+                Dictionary<string, string> props = new();
                 props.Add("Name", _name);
                 props.Add("CLSID", vso.Clsid.FormatGuid());
                 factory.ServerCreateElevatedObject(vso.Clsid, COMInterfaceEntry.IID_IUnknown, out new_object);
-                ObjectInformation view = new ObjectInformation(_registry, vso,
+                ObjectInformation view = new(_registry, vso,
                     vso.Name, new_object,
                     props, _registry.GetInterfacesForObject(new_object).ToArray());
                 EntryPoint.GetMainForm(_registry).HostControl(view);

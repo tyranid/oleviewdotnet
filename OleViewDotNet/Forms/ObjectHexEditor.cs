@@ -44,7 +44,7 @@ public partial class ObjectHexEditor : UserControl
     {
         try
         {
-            MemoryStream stm = new MemoryStream(hexEditor.Bytes);
+            MemoryStream stm = new(hexEditor.Bytes);
             Guid clsid;
             object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out clsid);
             await EntryPoint.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, false);
@@ -59,7 +59,7 @@ public partial class ObjectHexEditor : UserControl
     {
         try
         {
-            MemoryStream stm = new MemoryStream(hexEditor.Bytes);
+            MemoryStream stm = new(hexEditor.Bytes);
             object obj = COMUtilities.UnmarshalObject(hexEditor.Bytes);
             await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(obj, "Unmarshaled Object");
         }
