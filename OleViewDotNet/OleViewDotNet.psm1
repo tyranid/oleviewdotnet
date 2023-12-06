@@ -1732,7 +1732,7 @@ function Get-ComMoniker {
 
     $obj = $null
     if ($Bind) {
-        $type = [OleViewDotNet.IUnknown]
+        $type = [OleViewDotNet.Interop.IUnknown]
         $obj = [OleViewDotNet.COMUtilities]::ParseAndBindMoniker($Moniker, $Composite)
     } else {
         $type = [System.Runtime.InteropServices.ComTypes.IMoniker]
@@ -2299,7 +2299,7 @@ function New-ComStorageObject {
         [OleViewDotNet.STGFMT]$Format = "Storage"
     )
 
-    $type = [OleViewDotNet.IStorage]
+    $type = [OleViewDotNet.Interop.IStorage]
     $iid = $type.GUID
     $Path = Resolve-LocalPath $Path
     [OleViewDotNet.COMUtilities]::CreateStorage($Path, $Mode, $Format)
@@ -2336,7 +2336,7 @@ function Get-ComStorageObject {
         [OleViewDotNet.STGFMT]$Format = "Storage"
     )
 
-    $type = [OleViewDotNet.IStorage]
+    $type = [OleViewDotNet.Interop.IStorage]
     $iid = $type.GUID
     $Path = Resolve-LocalPath $Path
     if ($ReadOnly) {
@@ -2746,7 +2746,7 @@ function Start-ComRuntimeExtension {
             }
             $obj = $act.Activate()
             if ($null -ne $obj) {
-                $type = [OleViewDotNet.IUnknown]
+                $type = [OleViewDotNet.Interop.IUnknown]
                 Wrap-ComObject $obj -Type $type -NoWrapper:$NoWrapper | Write-Output
             }
         }
