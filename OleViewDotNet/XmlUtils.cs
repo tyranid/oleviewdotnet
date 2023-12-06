@@ -144,8 +144,7 @@ internal static class XmlUtils
     internal static Guid ReadGuid(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
-        Guid guid;
-        if (value == null || !Guid.TryParse(value, out guid))
+        if (value == null || !Guid.TryParse(value, out Guid guid))
         {
             return Guid.Empty;
         }

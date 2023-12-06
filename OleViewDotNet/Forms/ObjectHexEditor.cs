@@ -45,8 +45,7 @@ public partial class ObjectHexEditor : UserControl
         try
         {
             MemoryStream stm = new(hexEditor.Bytes);
-            Guid clsid;
-            object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out clsid);
+            object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out Guid clsid);
             await EntryPoint.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, false);
         }
         catch (Exception ex)

@@ -89,7 +89,6 @@ public static class COMSecurity
     {
         try
         {
-            COMAccessRights maximum_rights;
 
             if (check_il)
             {
@@ -101,7 +100,7 @@ public static class COMSecurity
                 }
             }
 
-            if (!GetGrantedAccess(sddl, principal, token, launch, out maximum_rights))
+            if (!GetGrantedAccess(sddl, principal, token, launch, out COMAccessRights maximum_rights))
             {
                 return false;
             }

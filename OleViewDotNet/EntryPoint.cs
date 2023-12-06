@@ -36,7 +36,7 @@ public static class EntryPoint
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+    private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
     {
         MessageBox.Show("Unhandled Exception: " + e.ExceptionObject.ToString(),
             "Unhandled Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -45,7 +45,7 @@ public static class EntryPoint
 
     private static ApplicationContext _appContext;
 
-    static public MainForm GetMainForm(COMRegistry registry)
+    public static MainForm GetMainForm(COMRegistry registry)
     {
         foreach (MainForm form in Application.OpenForms.OfType<MainForm>())
         {
@@ -64,7 +64,6 @@ public static class EntryPoint
         using AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue());
         using StreamWriter writer = new(client);
         Guid clsid = Guid.Empty;
-        CLSCTX clsctx = 0;
         bool sta = false;
         string activatable_class = string.Empty;
         if (runtime_class)
@@ -80,7 +79,7 @@ public static class EntryPoint
         }
 
         sta = args.Dequeue() == "s";
-        if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
+        if (!Enum.TryParse(args.Dequeue(), true, out CLSCTX clsctx))
         {
             return 1;
         }
@@ -371,7 +370,7 @@ public static class EntryPoint
             }
             catch (Exception ex)
             {
-                if (!(ex is OperationCanceledException))
+                if (ex is not OperationCanceledException)
                 {
                     ShowError(null, ex);
                 }

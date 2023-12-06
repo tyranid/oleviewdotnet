@@ -235,8 +235,7 @@ public sealed class StorageWrapper : IDisposable
         try
         {
             ComTypes.STATSTG[] stat = new ComTypes.STATSTG[1];
-            uint fetched;
-            while (enum_stg.Next(1, stat, out fetched) == 0)
+            while (enum_stg.Next(1, stat, out uint fetched) == 0)
             {
                 STGTY type = (STGTY)stat[0].type;
                 byte[] bytes = new byte[0];

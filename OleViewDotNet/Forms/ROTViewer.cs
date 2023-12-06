@@ -55,17 +55,14 @@ public partial class ROTViewer : UserControl
         try
         {
             bindCtx = COMUtilities.CreateBindCtx(trusted_only ? 1U : 0U);
-            IRunningObjectTable rot;
-            IEnumMoniker enumMoniker;
             IMoniker[] moniker = new IMoniker[1];
 
-            bindCtx.GetRunningObjectTable(out rot);
-            rot.EnumRunning(out enumMoniker);
+            bindCtx.GetRunningObjectTable(out IRunningObjectTable rot);
+            rot.EnumRunning(out IEnumMoniker enumMoniker);
             while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
             {
-                string strDisplayName;
 
-                moniker[0].GetDisplayName(bindCtx, null, out strDisplayName);
+                moniker[0].GetDisplayName(bindCtx, null, out string strDisplayName);
                 Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
                 ListViewItem item = listViewROT.Items.Add(strDisplayName);
                 item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
@@ -115,10 +112,9 @@ public partial class ROTViewer : UserControl
             {
                 IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);
                 Guid unk = COMInterfaceEntry.IID_IUnknown;
-                object comObj;
                 Type dispType;
 
-                info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
+                info.moniker.BindToObject(bindCtx, null, ref unk, out object comObj);
                 dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
                 ObjectInformation view = new(m_registry, null, info.strDisplayName, 
                     comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());

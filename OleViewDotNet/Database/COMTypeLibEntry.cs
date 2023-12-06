@@ -33,8 +33,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         List<COMTypeLibVersionEntry> entries = new();
         foreach (string locale in key.GetSubKeyNames())
         {
-            int locale_int;
-            if (int.TryParse(locale, out locale_int))
+            if (int.TryParse(locale, out int locale_int))
             {
                 using RegistryKey subkey = key.OpenSubKey(locale);
                 if (subkey != null)

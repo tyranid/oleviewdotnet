@@ -64,8 +64,7 @@ public class COMMimeType : IXmlSerializable
     {
         string clsid = key.GetValue("CLSID") as string;
         string extension = key.GetValue("Extension") as string;
-        Guid guid;
-        if ((clsid != null) && Guid.TryParse(clsid, out guid))
+        if ((clsid != null) && Guid.TryParse(clsid, out Guid guid))
         {
             Clsid = guid;
         }

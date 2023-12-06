@@ -770,17 +770,15 @@ public static class COMUtilities
     {
         Guid clsid = new("{0002E005-0000-0000-C000-000000000046}");
         Guid iid = typeof(ICatInformation).GUID;
-        IntPtr pCatMgr;
         string strDesc = string.Empty;
 
-        if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref iid, out pCatMgr) == 0)
+        if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref iid, out IntPtr pCatMgr) == 0)
         {
             ICatInformation catInfo = (ICatInformation)Marshal.GetObjectForIUnknown(pCatMgr);
-            IntPtr pStrDesc;
 
             try
             {
-                catInfo.GetCategoryDesc(ref catid, 0, out pStrDesc);
+                catInfo.GetCategoryDesc(ref catid, 0, out IntPtr pStrDesc);
                 strDesc = Marshal.PtrToStringUni(pStrDesc);
                 Marshal.FreeCoTaskMem(pStrDesc);
             }
@@ -1262,9 +1260,7 @@ public static class COMUtilities
                     disp.GetTypeInfo(0, 0x409, out typeInfo);
 
                     ITypeInfo ti = (ITypeInfo)Marshal.GetObjectForIUnknown(typeInfo);
-                    ITypeLib tl = null;
-                    int iIndex = 0;
-                    ti.GetContainingTypeLib(out tl, out iIndex);
+                    ti.GetContainingTypeLib(out ITypeLib tl, out int iIndex);
                     Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
                     Assembly asm = LoadTypeLib(parent, tl);
 
@@ -1579,11 +1575,10 @@ public static class COMUtilities
         clsid = new Guid(reader.ReadBytes(16));
 
         Guid unk = COMInterfaceEntry.IID_IUnknown;
-        IntPtr pObj;
         object ret;
 
         int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.SERVER,
-            ref unk, out pObj);
+            ref unk, out IntPtr pObj);
 
         if (iError != 0)
         {
@@ -1600,9 +1595,8 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
     {
-        object ret;
         Guid iid = COMInterfaceEntry.IID_IUnknown;
-        CoGetObject(moniker, bind_opts, ref iid, out ret);
+        CoGetObject(moniker, bind_opts, ref iid, out object ret);
         return ret;
     }
 
@@ -1668,10 +1662,9 @@ public static class COMUtilities
 
     public static string GetMonikerDisplayName(IMoniker pmk)
     {
-        string strDisplayName;
         IBindCtx bindCtx = CreateBindCtx(0);
 
-        pmk.GetDisplayName(bindCtx, null, out strDisplayName);
+        pmk.GetDisplayName(bindCtx, null, out string strDisplayName);
 
         Marshal.ReleaseComObject(bindCtx);
 
@@ -2009,8 +2002,7 @@ public static class COMUtilities
 
     private static string ReadType(ref string name)
     {
-        string token;
-        name = GetNextToken(name, out token);
+        name = GetNextToken(name, out string token);
         if (string.IsNullOrEmpty(token))
         {
             throw new InvalidDataException("Expected a type name");
@@ -2023,9 +2015,8 @@ public static class COMUtilities
         else if (token[0] == '~')
         {
             StringBuilder builder = new();
-            int type_count;
 
-            name = GetNextToken(name, out type_count);
+            name = GetNextToken(name, out int type_count);
             builder.Append(token.Substring(1));
             builder.Append("<");
             List<string> types = new();
@@ -2131,7 +2122,7 @@ public static class COMUtilities
         {
             return (Assembly)dlg.Result;
         }
-        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2147,7 +2138,7 @@ public static class COMUtilities
         {
             return (Assembly)dlg.Result;
         }
-        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2178,7 +2169,7 @@ public static class COMUtilities
         {
             return (IEnumerable<COMProcessEntry>)dlg.Result;
         }
-        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2348,9 +2339,7 @@ public static class COMUtilities
         IntPtr hSC = OpenSCManager(null, null, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
         try
         {
-            int bytes_needed = 0;
-            int service_count = 0;
-            EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, SafeHGlobalBuffer.Null, 0, out bytes_needed, out service_count, IntPtr.Zero, null);
+            EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, SafeHGlobalBuffer.Null, 0, out int bytes_needed, out int service_count, IntPtr.Zero, null);
             if (Marshal.GetLastWin32Error() != ERROR_MORE_DATA || bytes_needed <= 0)
             {
                 return ret;
@@ -2696,12 +2685,11 @@ public static class COMUtilities
 
     public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server)
     {
-        IntPtr obj;
 
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
 
         int hr = CoGetClassObject(ref clsid, server_info != null ? CLSCTX.REMOTE_SERVER
-            : context, server_info, ref iid, out obj);
+            : context, server_info, ref iid, out IntPtr obj);
         if (hr != 0)
         {
             Marshal.ThrowExceptionForHR(hr);
@@ -2719,9 +2707,8 @@ public static class COMUtilities
         if (moniker_string == "new")
         {
             Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-            IntPtr unk;
-            int hr = CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero, 
-                CLSCTX.INPROC_SERVER, ref IID_IUnknown, out unk);
+            int hr = CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero,
+                CLSCTX.INPROC_SERVER, ref IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -2742,8 +2729,7 @@ public static class COMUtilities
                 moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
                 moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
             {
-                IMoniker moniker;
-                int hr = CreateURLMonikerEx(null, moniker_string, out moniker, CreateUrlMonikerFlags.Uniform);
+                int hr = CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
                 if (hr != 0)
                 {
                     Marshal.ThrowExceptionForHR(hr);
@@ -2751,8 +2737,7 @@ public static class COMUtilities
                 return moniker;
             }
 
-            int eaten = 0;
-            return MkParseDisplayName(bind_context, moniker_string, out eaten);
+            return MkParseDisplayName(bind_context, moniker_string, out int eaten);
         }
     }
 

@@ -109,7 +109,7 @@ public class COMRuntimeExtensionEntry : IXmlSerializable
             return true;
         }
 
-        if (!(obj is COMRuntimeExtensionEntry right))
+        if (obj is not COMRuntimeExtensionEntry right)
         {
             return false;
         }

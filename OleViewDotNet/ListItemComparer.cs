@@ -31,8 +31,7 @@ public class ListItemComparer : IComparer
 
     private static IComparable GetComparableItem(string value)
     {
-        long l;
-        if (long.TryParse(value, out l))
+        if (long.TryParse(value, out long l))
         {
             return l;
         }
@@ -40,8 +39,7 @@ public class ListItemComparer : IComparer
         {
             return l;
         }
-        Guid g;
-        if (Guid.TryParse(value, out g))
+        if (Guid.TryParse(value, out Guid g))
         {
             return g;
         }

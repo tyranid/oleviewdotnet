@@ -114,9 +114,8 @@ public sealed class LockedQueue<T> : IDisposable, IEnumerable<T> where T : class
     /// <returns>The item (null will be returned if the queue has been stopped)</returns>
     public T Dequeue()
     {
-        T ret = null;
 
-        if (!Dequeue(Timeout.Infinite, out ret))
+        if (!Dequeue(Timeout.Infinite, out T ret))
         {
             return null;
         }

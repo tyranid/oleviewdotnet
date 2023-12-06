@@ -163,14 +163,11 @@ public partial class StorageViewer : UserControl
 
     private void PopulateTree(IStorage stg, TreeNode root)
     {
-        STATSTG stg_stat;
-        stg.Stat(out stg_stat, 0);
+        stg.Stat(out STATSTG stg_stat, 0);
         root.Tag = new STATSTGWrapper(EscapeStorageName(stg_stat.pwcsName), stg_stat, new byte[0]);
-        IEnumSTATSTG enum_stg;
-        stg.EnumElements(0, IntPtr.Zero, 0, out enum_stg);
+        stg.EnumElements(0, IntPtr.Zero, 0, out IEnumSTATSTG enum_stg);
         STATSTG[] stat = new STATSTG[1];
-        uint fetched;
-        while (enum_stg.Next(1, stat, out fetched) == 0)
+        while (enum_stg.Next(1, stat, out uint fetched) == 0)
         {
             STGTY type = (STGTY)stat[0].type;
             TreeNode node = new(EscapeStorageName(stat[0].pwcsName));
