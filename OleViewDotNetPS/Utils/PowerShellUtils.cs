@@ -19,7 +19,9 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 
 namespace OleViewDotNetPS.Utils;
 
@@ -104,5 +106,109 @@ public static class PowerShellUtils
         byte[] bytes = new byte[16];
         Buffer.BlockCopy(ints, 0, bytes, 0, 16);
         return new Guid(bytes);
+    }
+
+    private static void FormatAce(StringBuilder builder, Ace ace, bool sdk_name)
+    {
+        string mask_str;
+        string access_name = "Access";
+        if (ace is MandatoryLabelAce)
+        {
+            mask_str = NtSecurity.AccessMaskToString(ace.Mask.ToMandatoryLabelPolicy(), sdk_name);
+            access_name = "Policy";
+        }
+        else
+        {
+            mask_str = NtSecurity.AccessMaskToString(ace.Mask.ToSpecificAccess<COMAccessRights>(), sdk_name);
+        }
+
+        builder.AppendLine($" - Type  : {(sdk_name ? NtSecurity.AceTypeToSDKName(ace.Type) : ace.Type.ToString())}");
+        builder.AppendLine($" - Name  : {ace.Sid.Name}");
+        builder.AppendLine($" - Sid   : {ace.Sid}");
+        builder.AppendLine($" - Mask  : {ace.Mask:X08}");
+        builder.AppendLine($" - {access_name}: {mask_str}");
+        builder.AppendLine($" - Flags : {(sdk_name ? NtSecurity.AceFlagsToSDKName(ace.Flags) : ace.Flags.ToString())}");
+        if (ace.IsConditionalAce)
+        {
+            builder.AppendLine($" - Condition: {ace.Condition}");
+        }
+        builder.AppendLine();
+    }
+
+    private static void FormatAcl(StringBuilder builder, Acl acl, string name, bool sdk_name)
+    {
+        List<string> flags = new();
+        if (acl.Defaulted)
+            flags.Add("Defaulted");
+        if (acl.Protected)
+            flags.Add("Protected");
+        if (acl.AutoInherited)
+            flags.Add("Auto Inherited");
+        if (acl.AutoInheritReq)
+            flags.Add("Auth Inherit Requested");
+        if (acl.Count > 0)
+            builder.AppendLine($"{name} {string.Join(", ", flags)}");
+        else
+            builder.AppendLine(name);
+
+        if (acl.NullAcl)
+        {
+            builder.AppendLine(" - <NULL ACL>");
+            builder.AppendLine();
+        }
+        else if (acl.Count == 0)
+        {
+            builder.AppendLine(" - <EMPTY ACL>");
+            builder.AppendLine();
+        }
+        else
+        {
+            foreach (var ace in acl)
+            {
+                FormatAce(builder, ace, sdk_name);
+            }
+        }
+    }
+
+    public static string FormatSecurityDescriptor(SecurityDescriptor sd, bool sdk_name = false)
+    {
+        if (sd == null)
+            return string.Empty;
+
+        StringBuilder builder = new();
+
+        builder.AppendLine($"Control: {(sdk_name ? NtSecurity.ControlFlagsToSDKName(sd.Control) : sd.Control.ToString())}");
+        if (sd.Owner == null && sd.Group == null && sd.Dacl == null && sd.Sacl == null)
+        {
+            builder.AppendLine("<NO SECURITY INFORMATION>");
+        }
+
+        if (sd.Owner != null)
+        {
+            builder.AppendLine(sd.Owner.Defaulted ? "<Owner> (Defaulted)" : "<Owner>");
+            builder.AppendLine($" - Name   : {sd.Owner.Sid.Name}");
+            builder.AppendLine($" - Sid    : {sd.Owner.Sid}");
+            builder.AppendLine();
+        }
+
+        if (sd.Group != null)
+        {
+            builder.AppendLine(sd.Group.Defaulted ? "<Group> (Defaulted)" : "<Group>");
+            builder.AppendLine($" - Name   : {sd.Group.Sid.Name}");
+            builder.AppendLine($" - Sid    : {sd.Group.Sid}");
+            builder.AppendLine();
+        }
+
+        if (sd.DaclPresent)
+        {
+            FormatAcl(builder, sd.Dacl, "<DACL>", sdk_name);
+        }
+
+        if (sd.SaclPresent && sd.SaclAceCount > 0)
+        {
+            FormatAcl(builder, sd.Sacl, "<SACL>", sdk_name);
+        }
+
+        return builder.ToString();
     }
 }

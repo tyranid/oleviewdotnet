@@ -1442,10 +1442,10 @@ Shows a launch security descriptor from an object.
 Show-ComSecurityDescriptor $obj -ShowAccess
 Shows an access security descriptor from an object.
 .EXAMPLE
-Show-ComSecurityDescriptor "D:(A;;GA;;;WD)" 
+Show-ComSecurityDescriptor -SecurityDescriptor "D:(A;;GA;;;WD)" 
 Shows a SDDL launch security descriptor.
 .EXAMPLE
-Show-ComSecurityDescriptor "D:(A;;GA;;;WD)" -ShowAccess
+Show-ComSecurityDescriptor -SecurityDescriptor "D:(A;;GA;;;WD)" -ShowAccess
 Shows a SDDL access security descriptor.
 .EXAMPLE
 Show-ComSecurityDescriptor -Default
@@ -1464,7 +1464,7 @@ function Show-ComSecurityDescriptor {
     [CmdletBinding(DefaultParameterSetName="FromObject")]
     Param(
         [Parameter(Mandatory, ParameterSetName = "FromSddl")]
-        [string]$SecurityDescriptor,
+        [NtApiDotNet.SecurityDescriptor]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
         [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
@@ -1521,7 +1521,7 @@ function Show-ComSecurityDescriptor {
             }
         }
 
-        if ("" -ne $SecurityDescriptor) {
+        if ($null -ne $SecurityDescriptor) {
             $exe = [OleViewDotNet.Utilities.COMUtilities]::GetExePathForCurrentBitness()
             if ($ShowAccess) {
                 $cmd = "-v"
@@ -3005,4 +3005,116 @@ function Test-ComInterface {
     $Object = Unwrap-ComObject -Object $Object
 
     return $Interface.TestInterface($Object)
+}
+
+<#
+.SYNOPSIS
+Views a COM security descriptor.
+.DESCRIPTION
+This cmdlet opens a viewer for a COM security descriptor.
+.PARAMETER SecurityDescriptor
+The security descriptor to view in SDDL format.
+.PARAMETER ShowAccess
+Show access rights rather than launch rights.
+.PARAMETER InputObject
+Shows the security descriptor for a database object.
+.PARAMETER Default
+Shows the default security descriptor for the specified database.
+.PARAMETER RuntimeDefault
+Shows the default security descriptor for the Windows Runtime Broker.
+.PARAMETER Restriction
+Shows the security descriptor restriction for the specified database.
+.PARAMETER Database
+Specify the database for showing the default or restriction security descriptors.
+.PARAMETER SdkName
+Specify to format the security descriptor with SDK style names.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Format-ComSecurityDescriptor $obj
+Format a launch security descriptor from an object.
+.EXAMPLE
+Format-ComSecurityDescriptor $obj -ShowAccess
+Format an access security descriptor from an object.
+.EXAMPLE
+Format-ComSecurityDescriptor -SecurityDescriptor "D:(A;;GA;;;WD)" 
+Format a SDDL launch security descriptor.
+.EXAMPLE
+Format-ComSecurityDescriptor -SecurityDescriptor "D:(A;;GA;;;WD)" -ShowAccess
+Format a SDDL access security descriptor.
+.EXAMPLE
+Format-ComSecurityDescriptor -Default
+Format the default launch security descriptor for the current database.
+.EXAMPLE
+Format-ComSecurityDescriptor -Default -ShowAccess
+Format the default access security descriptor for the current database.
+.EXAMPLE
+Format-ComSecurityDescriptor -Restriction
+Format the launch security descriptor restriction for the current database.
+.EXAMPLE
+Format-ComSecurityDescriptor -Restriction -ShowAccess
+Format the access security descriptor restriction for the current database.
+#>
+function Format-ComSecurityDescriptor {
+    [CmdletBinding(DefaultParameterSetName="FromObject")]
+    Param(
+        [Parameter(Mandatory, ParameterSetName = "FromSddl")]
+        [NtApiDotNet.SecurityDescriptor]$SecurityDescriptor,
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
+        [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
+        [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
+        [switch]$Restriction,
+        [Parameter(Mandatory, ParameterSetName = "FromDefault")]
+        [switch]$Default,
+        [Parameter(Mandatory, ParameterSetName = "FromRuntimeDefault")]
+        [switch]$RuntimeDefault,
+        [Parameter(ParameterSetName = "FromRestriction")]
+        [Parameter(ParameterSetName = "FromDefault")]
+        [OleViewDotNet.Database.COMRegistry]$Database,
+        [switch]$ShowAccess,
+        [switch]$SdkName
+    )
+
+    PROCESS {
+        if ($PSCmdlet.ParameterSetName -eq "FromRestriction" -or $PSCmdlet.ParameterSetName -eq "FromDefault") {
+            $Database = Get-CurrentComDatabase $Database
+            if ($null -eq $Database) {
+                Write-Error "No database specified and current database isn't set"
+                return
+            }
+        }
+        switch($PSCmdlet.ParameterSetName) {
+            "FromSddl" {
+                # Do nothing.
+            }
+            "FromObject" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
+                } else {
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
+                }
+            }
+            "FromDefault" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = $Database.DefaultAccessPermission
+                } else {
+                    $SecurityDescriptor = $Database.DefaultLaunchPermission
+                }
+            }
+            "FromRestriction" {
+                if ($ShowAccess) {
+                    $SecurityDescriptor = $Database.DefaultAccessRestriction
+                } else {
+                    $SecurityDescriptor = $Database.DefaultLaunchRestriction
+                }
+            }
+            "FromRuntimeDefault" {
+                $SecurityDescriptor = [OleViewDotNet.Database.COMRuntimeClassEntry]::DefaultActivationPermission
+            }
+        }
+
+        [OleViewDotNetPS.Utils.PowerShellUtils]::FormatSecurityDescriptor($SecurityDescriptor, $SdkName)
+    }
 }
