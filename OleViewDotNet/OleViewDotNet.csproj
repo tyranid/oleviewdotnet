@@ -46,5 +46,101 @@
       <None Update="OleViewDotNet.psd1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\09F4C2218CDCBE274B6F6DB07C6D5D8C.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\16290BF8DC4D45667CDA3011788834A5.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\1BB728819E20BA1B951682EE4ABF5034.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\20B0518FFDB71D9AD3393B7E31A308A2.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\215BDA791F9BC240EFD4BE5310F86B78.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\240708796730EA1965F09011DE78658F.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\2471D4FEEFD93183284363E012C04C7C.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\2B4988FBE80A35E42AD7A6AB150395E1.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\2F872A04443BD29C380DAE1A4693AFB2.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\365ACA8B7435CAE799E7605AB25B3C3B.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\4AB47E9370AC36241341FFA48B618BBA.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\525A1F7BE5A73D4006619F1B0712E8B7.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\5342DBFC2B8129FF6AD81CDB3699ADBA.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\537064A49E5390FE93D52ADCD81318DC.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\5D5DB9BA72AF3B80B1540C0BDA3B8A04.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\6C28951826CB3339A320224696688F27.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\74CF7757A41B0416FB45AEAC52BD5952.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\789A3A3D760237153A6E7B782432926C.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\8AF5F0A4B784EAE7901C8B937AB7411E.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\90042A515118CB205BBEAD51F8EF5810.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\9B19279533B9C1539FB262B8D0B0DB51.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\9DEFDAB1B9116D6031522670A6898845.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\B52200505767CD0819034CF220977439.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\C59DB0950A2136B6097291063068F122.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\D376A4B1765B8DF3E7E9CDE98DB3200E.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\D3D5A45D9F06797A0623DE34F0F16D8F.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\D906992CF5270892AD0056DCE356CE14.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\ED738DC2128A0F1D48755A9FC8F91B57.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\F0E2032A2AF04E2C38D2F74EE8DFC42E.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\F5C43C2C7EFF27550FFC1010D7F96051.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="symbol_cache\FE65FC82CB2C8948F477636563B25803.sym">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

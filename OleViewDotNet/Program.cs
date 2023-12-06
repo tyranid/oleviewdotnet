@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet;
 
-static class Program
+internal static class Program
 {
     enum EOLE_AUTHENTICATION_CAPABILITIES
     {

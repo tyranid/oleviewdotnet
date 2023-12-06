@@ -19,7 +19,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Windows.Forms;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Utilities;
+using OleViewDotNet.Wrappers;
 using IS = System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Forms;

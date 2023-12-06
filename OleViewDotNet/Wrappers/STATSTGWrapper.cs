@@ -19,7 +19,7 @@ using System;
 using System.ComponentModel;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Wrappers;
 
 public sealed class STATSTGWrapper
 {

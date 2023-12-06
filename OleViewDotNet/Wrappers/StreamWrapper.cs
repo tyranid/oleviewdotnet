@@ -16,13 +16,12 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Wrappers;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Wrappers;
 
 public sealed class StreamWrapper : Stream
 {

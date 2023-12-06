@@ -15,13 +15,12 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Wrappers;
 
 /// <summary>
 /// A wrapper object for an IStorage.
