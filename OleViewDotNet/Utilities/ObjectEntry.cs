@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Utilities;
 
 internal class ObjectEntry
 {
@@ -50,35 +50,5 @@ internal class ObjectEntry
         {
             Interfaces[pos++] = new KeyValuePair<Guid, string>(ent.Iid, ent.Name);
         }
-    }
-}
-
-internal static class ObjectCache
-{
-    private static readonly List<ObjectEntry> m_objects = new();
-
-    public static ObjectEntry Add(string name, object instance, COMInterfaceEntry[] interfaces)
-    {
-        ObjectEntry ret = new(name, instance, interfaces);
-        m_objects.Add(ret);
-
-        return ret;
-    }
-
-    public static void Remove(ObjectEntry instance)
-    {
-        m_objects.Remove(instance);
-    }
-
-    public static ObjectEntry[] Objects => m_objects.ToArray();
-
-    public static ObjectEntry GetObjectByName(string name)
-    {
-        return m_objects.Find(o => string.Equals(name, o.Name, StringComparison.CurrentCultureIgnoreCase));
-    }
-
-    public static ObjectEntry GetObjectByGuid(Guid id)
-    {
-        return m_objects.Find(o => o.Id == id);
     }
 }

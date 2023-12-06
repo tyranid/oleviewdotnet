@@ -19,7 +19,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Utilities;
 
 public class IStreamImpl : IStream, IDisposable
 {

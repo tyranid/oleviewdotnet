@@ -51,12 +51,12 @@ public class RuntimeExtensionActivator
 
     public void RegisterConsoleHandles(SafeHandle stdInputHandle, SafeHandle stdOutputHandle, SafeHandle stdErrorHandle)
     {
-        _context.ConsoleHandlesId = COMUtilities.CoRegisterConsoleHandles(stdInputHandle, stdOutputHandle, stdErrorHandle);
+        _context.ConsoleHandlesId = NativeMethods.CoRegisterConsoleHandles(stdInputHandle, stdOutputHandle, stdErrorHandle);
     }
 
     public void RegisterRacActivationToken(NtToken racActivationToken)
     {
-        _context.RacActivationTokenId = COMUtilities.CoRegisterRacActivationToken(racActivationToken.Handle);
+        _context.RacActivationTokenId = NativeMethods.CoRegisterRacActivationToken(racActivationToken.Handle);
     }
 
     public void UseExistingHostId()
@@ -119,7 +119,7 @@ public class RuntimeExtensionActivator
             throw new ArgumentException("Only supports runtime extension activation on Windows 10 RS3 and above");
         }
 
-        _reg = COMUtilities.RoGetExtensionRegistration(contractId, packageId, activatableClassId);
+        _reg = NativeMethods.RoGetExtensionRegistration(contractId, packageId, activatableClassId);
         _context = (IExtensionActivationContext)_reg;
         _packageId = packageId;
     }

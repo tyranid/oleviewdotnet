@@ -27,7 +27,7 @@ public class LoggingActivationFilter : IActivationFilter
     private static LoggingActivationFilter CreateActivationFilter()
     {
         LoggingActivationFilter filter = new();
-        int hr = COMUtilities.CoRegisterActivationFilter(filter);
+        int hr = NativeMethods.CoRegisterActivationFilter(filter);
         if (hr != 0)
         {
             throw new Win32Exception(hr);

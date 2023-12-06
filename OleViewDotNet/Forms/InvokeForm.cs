@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -91,7 +92,7 @@ public partial class InvokeForm : Form
             }
             else if (t == typeof(IBindCtx))
             {
-                ret = COMUtilities.CreateBindCtx(0);
+                ret = NativeMethods.CreateBindCtx(0);
             }
             else
             {

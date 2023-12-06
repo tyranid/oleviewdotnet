@@ -242,11 +242,11 @@ public partial class MainForm : Form
 
                 if (class_factory)
                 {
-                    hr = COMUtilities.CoGetClassObject(clsid, clsctx, null, COMInterfaceEntry.IID_IUnknown, out pObj);
+                    hr = NativeMethods.CoGetClassObject(clsid, clsctx, null, COMInterfaceEntry.IID_IUnknown, out pObj);
                 }
                 else
                 {
-                    hr = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, clsctx,
+                    hr = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, clsctx,
                                 COMInterfaceEntry.IID_IUnknown, out pObj);
                 }
 
@@ -865,7 +865,7 @@ public partial class MainForm : Form
             dlg.Filter = STORAGE_FILTER;
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
+                IStorage stg = NativeMethods.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
 
                 HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), dlg.ReadOnlyChecked));
             }
@@ -885,7 +885,7 @@ public partial class MainForm : Form
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 Guid iid = typeof(IStorage).GUID;
-                IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName,
+                IStorage stg = NativeMethods.StgCreateStorageEx(dlg.FileName,
                     STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, iid);
                 HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), false));
             }

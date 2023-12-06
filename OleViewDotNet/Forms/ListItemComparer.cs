@@ -19,7 +19,7 @@ using System.Collections;
 using System.Globalization;
 using System.Windows.Forms;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Forms;
 
 internal class ListItemComparer : IComparer
 {

@@ -43,7 +43,7 @@ public partial class CreateCLSIDForm : Form
     {
         if (!Guid.TryParse(name, out clsid))
         {
-            if (COMUtilities.CLSIDFromProgID(name, out clsid) == 0)
+            if (NativeMethods.CLSIDFromProgID(name, out clsid) == 0)
             {
                 return true;
             }

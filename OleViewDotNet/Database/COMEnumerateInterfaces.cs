@@ -181,11 +181,11 @@ public class COMEnumerateInterfaces
         IntPtr pfactory;
         if (_winrt_component)
         {
-            hr = COMUtilities.RoGetActivationFactory(_activatable_classid, IID_IUnknown, out pfactory);
+            hr = NativeMethods.RoGetActivationFactory(_activatable_classid, IID_IUnknown, out pfactory);
         }
         else
         {
-            hr = COMUtilities.CoGetClassObject(_clsid, clsctx, null, IID_IUnknown, out pfactory);
+            hr = NativeMethods.CoGetClassObject(_clsid, clsctx, null, IID_IUnknown, out pfactory);
         }
         // If we can't get class object, no chance we'll get object.
         if (hr != 0)
@@ -196,11 +196,11 @@ public class COMEnumerateInterfaces
         IntPtr punk;
         if (_winrt_component)
         {
-            hr = COMUtilities.RoActivateInstance(_activatable_classid, out punk);
+            hr = NativeMethods.RoActivateInstance(_activatable_classid, out punk);
         }
         else
         {
-            hr = COMUtilities.CoCreateInstance(_clsid, IntPtr.Zero, clsctx,
+            hr = NativeMethods.CoCreateInstance(_clsid, IntPtr.Zero, clsctx,
                                                IID_IUnknown, out punk);
         }
         if (hr != 0)

@@ -1205,7 +1205,7 @@ public class COMRegistry
 
     public COMCLSIDEntry GetFileClass(string filename)
     {
-        COMUtilities.GetClassFile(filename, out Guid clsid);
+        NativeMethods.GetClassFile(filename, out Guid clsid);
         return MapClsidToEntry(clsid);
     }
     

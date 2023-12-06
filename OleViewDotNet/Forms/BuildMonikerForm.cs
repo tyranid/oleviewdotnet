@@ -36,7 +36,7 @@ public partial class BuildMonikerForm : Form
     {
         if (moniker_string == "new")
         {
-            int hr = COMUtilities.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
+            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -57,7 +57,7 @@ public partial class BuildMonikerForm : Form
                 moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
                 moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
             {
-                int hr = COMUtilities.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
+                int hr = NativeMethods.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
                 if (hr != 0)
                 {
                     Marshal.ThrowExceptionForHR(hr);
@@ -65,7 +65,7 @@ public partial class BuildMonikerForm : Form
                 return moniker;
             }
 
-            return COMUtilities.MkParseDisplayName(bind_context, moniker_string, out int eaten);
+            return NativeMethods.MkParseDisplayName(bind_context, moniker_string, out int eaten);
         }
     }
 
@@ -73,7 +73,7 @@ public partial class BuildMonikerForm : Form
     {
         try
         {
-            IBindCtx bind_context = COMUtilities.CreateBindCtx(0);
+            IBindCtx bind_context = NativeMethods.CreateBindCtx(0);
             if (checkBoxParseComposite.Checked)
             {
                 foreach (string m in textBoxMoniker.Text.Split('!'))

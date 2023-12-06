@@ -270,11 +270,11 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
             if (factory)
             {
-                hr = COMUtilities.RoGetActivationFactory(Name, COMInterfaceEntry.IID_IUnknown, out pObject);
+                hr = NativeMethods.RoGetActivationFactory(Name, COMInterfaceEntry.IID_IUnknown, out pObject);
             }
             else
             {
-                hr = COMUtilities.RoActivateInstance(Name, out pObject);
+                hr = NativeMethods.RoActivateInstance(Name, out pObject);
             }
             if (hr != 0)
             {

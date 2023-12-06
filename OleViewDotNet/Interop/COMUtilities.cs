@@ -22,6 +22,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;
@@ -49,161 +50,6 @@ namespace OleViewDotNet.Interop;
 
 public static class COMUtilities
 {
-    private enum RegKind
-    {
-        RegKind_Default = 0,
-        RegKind_Register = 1,
-        RegKind_None = 2
-    }
-
-    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    private static extern void LoadTypeLibEx(string strTypeLibName, RegKind regKind,
-        [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
-    [DllImport("ole32.dll")]
-    public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, in Guid riid, out IntPtr ppv);
-    [DllImport("ole32.dll")]
-    public static extern int CoCreateInstanceEx(in Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
-    [DllImport("ole32.dll")]
-    public static extern int CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid, out IntPtr ppv);
-    [DllImport("ole32.dll", PreserveSig = false)]
-    [return: MarshalAs(UnmanagedType.IUnknown)]
-    public static extern object CoUnmarshalInterface(IStream stm, in Guid riid);
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode)]
-    public static extern int RoGetActivationFactory([MarshalAs(UnmanagedType.HString)] string activatableClassId,
-        in Guid iid,
-        out IntPtr factory
-    );
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern ulong CoRegisterConsoleHandles(SafeHandle stdInputHandle, SafeHandle stdOutputHandle, SafeHandle stdErrorHandle);
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern ulong CoRegisterRacActivationToken(SafeKernelObjectHandle racActivationToken);
-
-    [DllImport("combase.dll", EntryPoint = "#65", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IExtensionRegistration RoGetExtensionRegistration([MarshalAs(UnmanagedType.HString)] string contractId,
-            [MarshalAs(UnmanagedType.HString)] string packageId,
-            [MarshalAs(UnmanagedType.HString)] string activatableClassId);
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode)]
-    public static extern int RoActivateInstance(
-        [MarshalAs(UnmanagedType.HString)] string activatableClassId,
-        out IntPtr instance);
-
-    [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IStorage StgOpenStorageEx(
-          string pwcsName,
-          STGM grfMode,
-          STGFMT stgfmt,
-          int grfAttrs,
-          [In, Out] STGOPTIONS pStgOptions,
-          IntPtr reserved2,
-          in Guid riid
-        );
-
-    [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IStorage StgOpenStorage(
-          string pwcsName,
-          IStorage pstgPriority,
-          STGM grfMode,
-          IntPtr snbExclude,
-          int reserved
-        );
-
-    [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IStorage StgCreateStorageEx(
-          string pwcsName,
-          STGM grfMode,
-          STGFMT stgfmt,
-          int grfAttrs,
-          [In] STGOPTIONS pStgOptions,
-          IntPtr pSecurityDescriptor,
-          in Guid riid
-        );
-
-    [DllImport("ole32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-    public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
-
-    [return: MarshalAs(UnmanagedType.Interface)]
-    [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
-    public static extern IBindCtx CreateBindCtx([In] uint reserved);
-
-    [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
-    public static extern IMoniker CreateObjrefMoniker([MarshalAs(UnmanagedType.Interface)] object punk);
-
-    [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-    public extern static void SHCreateStreamOnFile(string pszFile, STGM grfMode, out IntPtr ppStm);
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-    public static extern int CoGetInstanceFromFile(
-        IntPtr pServerInfo,
-        [In] OptionalGuid pClsid,
-        [In, MarshalAs(UnmanagedType.IUnknown)] object punkOuter,
-        CLSCTX dwClsCtx,
-        STGM grfMode,
-        string pwszName,
-        int dwCount,
-        [In, Out] MULTI_QI[] pResults
-    );
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-    public static extern int CoGetInstanceFromIStorage(
-        IntPtr pServerInfo,
-        [In] OptionalGuid pClsid,
-        [In, MarshalAs(UnmanagedType.IUnknown)] object punkOuter,
-        CLSCTX dwClsCtx,
-        IStorage pstg,
-        int dwCount,
-        [In, Out] MULTI_QI[] pResults
-    );
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void GetClassFile(string szFilename, out Guid clsid);
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IMoniker MkParseDisplayName(IBindCtx pbc, string szUserName, out int pchEaten);
-
-    [DllImport("urlmon.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-    public static extern int CreateURLMonikerEx(IMoniker pMkCtx,
-                                                string szURL,
-                                                out IMoniker ppmk,
-                                                CreateUrlMonikerFlags dwFlags);
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-    public static extern int CLSIDFromProgID(string lpszProgID, out Guid lpclsid);
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void CoMarshalInterface(IStream pStm, in Guid riid,
-        [MarshalAs(UnmanagedType.Interface)] object pUnk, MSHCTX dwDestContext, IntPtr pvDestContext, MSHLFLAGS mshlflags);
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void CoReleaseMarshalData(
-          IStream pStm
-        );
-
-    [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-    public static extern int CoRegisterActivationFilter(IActivationFilter pActivationFilter);
-
-    [DllImport("ole32.dll")]
-    public static extern int CoDecodeProxy(int dwClientPid, long ui64ProxyAddress, out ServerInformation pServerInformation);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    private static extern int PackageIdFromFullName(
-      string packageFullName,
-      int flags,
-      ref int bufferLength,
-      SafeBuffer buffer
-    );
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    private static extern int GetPackagePath(
-      SafeBuffer packageId,
-      int reserved,
-      ref int pathLength,
-      StringBuilder path
-    );
-
     private static Dictionary<Guid, Assembly> m_typelibs;
     private static Dictionary<string, Assembly> m_typelibsname;
     private static Dictionary<Guid, Type> m_iidtypes;
@@ -429,7 +275,7 @@ public static class COMUtilities
         Guid iid = typeof(ICatInformation).GUID;
         string strDesc = string.Empty;
 
-        if (CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, iid, out IntPtr pCatMgr) == 0)
+        if (NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, iid, out IntPtr pCatMgr) == 0)
         {
             ICatInformation catInfo = (ICatInformation)Marshal.GetObjectForIUnknown(pCatMgr);
 
@@ -768,7 +614,7 @@ public static class COMUtilities
 
         try
         {
-            LoadTypeLibEx(path, RegKind.RegKind_Default, out typeLib);
+            NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default, out typeLib);
 
             return ConvertTypeLibToAssembly(typeLib, progress);
         }
@@ -1231,7 +1077,7 @@ public static class COMUtilities
 
         object ret;
 
-        int iError = CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
+        int iError = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
             COMInterfaceEntry.IID_IUnknown, out IntPtr pObj);
 
         if (iError != 0)
@@ -1249,7 +1095,7 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
     {
-        CoGetObject(moniker, bind_opts, COMInterfaceEntry.IID_IUnknown, out object ret);
+        NativeMethods.CoGetObject(moniker, bind_opts, COMInterfaceEntry.IID_IUnknown, out object ret);
         return ret;
     }
 
@@ -1262,7 +1108,7 @@ public static class COMUtilities
 
     public static object UnmarshalObject(Stream stm, Guid iid)
     {
-        return CoUnmarshalInterface(new IStreamImpl(stm), iid);
+        return NativeMethods.CoUnmarshalInterface(new IStreamImpl(stm), iid);
     }
 
     public static object UnmarshalObject(byte[] objref)
@@ -1315,7 +1161,7 @@ public static class COMUtilities
 
     public static string GetMonikerDisplayName(IMoniker pmk)
     {
-        IBindCtx bindCtx = CreateBindCtx(0);
+        IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
 
         pmk.GetDisplayName(bindCtx, null, out string strDisplayName);
 
@@ -1327,7 +1173,7 @@ public static class COMUtilities
     public static byte[] MarshalObject(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
     {
         MemoryStream stm = new();
-        CoMarshalInterface(new IStreamImpl(stm), iid, obj, mshctx, IntPtr.Zero, mshflags);
+        NativeMethods.CoMarshalInterface(new IStreamImpl(stm), iid, obj, mshctx, IntPtr.Zero, mshflags);
         return stm.ToArray();
     }
 
@@ -2085,7 +1931,7 @@ public static class COMUtilities
             if (Marshal.QueryInterface(intf, ref iid, out proxy) != 0)
             {
                 ServerInformation info = new();
-                int hr = CoDecodeProxy(Process.GetCurrentProcess().Id, proxy.ToInt64(), out info);
+                int hr = NativeMethods.CoDecodeProxy(Process.GetCurrentProcess().Id, proxy.ToInt64(), out info);
                 if (hr == 0)
                 {
                     return info;
@@ -2287,7 +2133,7 @@ public static class COMUtilities
             COSERVERINFO server_info = new(server);
             try
             {
-                hr = CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
+                hr = NativeMethods.CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
                 if (hr == 0)
                 {
                     hr = qis[0].HResult();
@@ -2304,7 +2150,7 @@ public static class COMUtilities
         }
         else
         {
-            hr = CoCreateInstance(clsid, IntPtr.Zero, context, iid, out pInterface);
+            hr = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, context, iid, out pInterface);
         }
 
         if (hr != 0)
@@ -2340,7 +2186,7 @@ public static class COMUtilities
 
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
 
-        int hr = CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER
+        int hr = NativeMethods.CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER
             : context, server_info, iid, out IntPtr obj);
         if (hr != 0)
         {
@@ -2358,7 +2204,7 @@ public static class COMUtilities
     {
         if (moniker_string == "new")
         {
-            int hr = CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero,
+            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero,
                 CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
@@ -2380,7 +2226,7 @@ public static class COMUtilities
                 moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
                 moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
             {
-                int hr = CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
+                int hr = NativeMethods.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
                 if (hr != 0)
                 {
                     Marshal.ThrowExceptionForHR(hr);
@@ -2388,7 +2234,7 @@ public static class COMUtilities
                 return moniker;
             }
 
-            return MkParseDisplayName(bind_context, moniker_string, out int eaten);
+            return NativeMethods.MkParseDisplayName(bind_context, moniker_string, out int eaten);
         }
     }
 
@@ -2416,13 +2262,13 @@ public static class COMUtilities
 
     public static IMoniker ParseMoniker(string moniker_string, bool composite)
     {
-        IBindCtx bind_context = CreateBindCtx(0);
+        IBindCtx bind_context = NativeMethods.CreateBindCtx(0);
         return ParseMoniker(bind_context, moniker_string, composite);
     }
 
     public static object ParseAndBindMoniker(string moniker_string, bool composite)
     {
-        IBindCtx bind_context = CreateBindCtx(0);
+        IBindCtx bind_context = NativeMethods.CreateBindCtx(0);
         IMoniker moniker = ParseMoniker(bind_context, moniker_string, composite);
         Guid iid = COMInterfaceEntry.IID_IUnknown;
         moniker.BindToObject(bind_context, null, ref iid, out object comObj);
@@ -2772,7 +2618,7 @@ public static class COMUtilities
     public static StorageWrapper CreateStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
+        return new StorageWrapper(NativeMethods.StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
     }
 
     public static StorageWrapper CreateReadOnlyStorage(string name)
@@ -2783,7 +2629,7 @@ public static class COMUtilities
     public static StorageWrapper OpenStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
+        return new StorageWrapper(NativeMethods.StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
     }
 
     public static StorageWrapper OpenReadOnlyStorage(string name)
@@ -2965,14 +2811,14 @@ public static class COMUtilities
     public static string GetPackagePath(string packageId)
     {
         int length = 0;
-        int result = PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
+        int result = NativeMethods.PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
         if (result != 122)
         {
             return string.Empty;
         }
 
         using var buffer = new SafeHGlobalBuffer(length);
-        result = PackageIdFromFullName(packageId,
+        result = NativeMethods.PackageIdFromFullName(packageId,
         0, ref length, buffer);
         if (result != 0)
         {
@@ -2981,7 +2827,7 @@ public static class COMUtilities
 
         StringBuilder builder = new(260);
         length = builder.Capacity;
-        result = GetPackagePath(buffer, 0, ref length, builder);
+        result = NativeMethods.GetPackagePath(buffer, 0, ref length, builder);
         if (result != 0)
         {
             return string.Empty;

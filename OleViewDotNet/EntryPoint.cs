@@ -359,7 +359,7 @@ public static class EntryPoint
                 _appContext = new MultiApplicationContext(new MainForm(registry));
                 if (enable_activation_filter)
                 {
-                    COMUtilities.CoRegisterActivationFilter(new ActivationFilter());
+                    NativeMethods.CoRegisterActivationFilter(new ActivationFilter());
                 }
                 Application.Run(_appContext);
 

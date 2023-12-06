@@ -55,7 +55,7 @@ public partial class ROTViewer : UserControl
         listViewROT.Items.Clear();
         try
         {
-            bindCtx = COMUtilities.CreateBindCtx(trusted_only ? 1U : 0U);
+            bindCtx = NativeMethods.CreateBindCtx(trusted_only ? 1U : 0U);
             IMoniker[] moniker = new IMoniker[1];
 
             bindCtx.GetRunningObjectTable(out IRunningObjectTable rot);
@@ -111,7 +111,7 @@ public partial class ROTViewer : UserControl
 
             try
             {
-                IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);
+                IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
                 Guid unk = COMInterfaceEntry.IID_IUnknown;
                 Type dispType;
 
