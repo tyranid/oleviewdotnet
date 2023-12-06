@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -31,13 +32,14 @@ namespace OleViewDotNet.Database;
 
 public class COMEnumerateInterfaces
 {
+    #region Private Members
     private readonly HashSet<COMInterfaceInstance> _interfaces;
     private readonly HashSet<COMInterfaceInstance> _factory_interfaces;
-    private Guid _clsid;
+    private readonly Guid _clsid;
     private readonly CLSCTX _clsctx;
     private readonly string _activatable_classid;
-    private Win32Exception _ex;
     private readonly bool _winrt_component;
+    private Win32Exception _ex;
     private long _intf_count;
 
     private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
@@ -260,15 +262,6 @@ public class COMEnumerateInterfaces
         }
     }
 
-    public IEnumerable<COMInterfaceInstance> Interfaces => _interfaces;
-    public IEnumerable<COMInterfaceInstance> FactoryInterfaces => _factory_interfaces;
-    public Win32Exception Exception => _ex;
-
-    public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout, NtToken token)
-        : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
-    {
-        GetInterfaces(sta, timeout, token);
-    }
 
     private class InterfaceInstanceComparer : IEqualityComparer<COMInterfaceInstance>
     {
@@ -293,24 +286,31 @@ public class COMEnumerateInterfaces
         _winrt_component = !string.IsNullOrWhiteSpace(_activatable_classid);
     }
 
-    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
-    {
-        string apartment = "s";
-        if (ent.Threading == ThreadingType.Both
-            || ent.Threading == ThreadingType.Mta)
-        {
-            apartment = "m";
-        }
-        string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
-            ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
-        var interfaces = await GetInterfacesOOP(command_line, true, registry, token);
-        return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
-    }
 
     private class InterfaceLists
     {
         public List<COMInterfaceInstance> Interfaces { get; set; }
         public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
+    }
+
+    private MemoryMappedFile CreateInterfaceMapping(COMRegistry registry)
+    {
+        if (registry == null)
+            return null;
+        byte[] infs = registry.SerializeInterfaces();
+        MemoryMappedFile map = MemoryMappedFile.CreateNew(null, infs.Length,
+            MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.Inheritable);
+        try
+        {
+            using Stream stm = map.CreateViewStream();
+            stm.Write(infs, 0, infs.Length);
+            return map;
+        }
+        catch
+        {
+            map.Dispose();
+            throw;
+        }
     }
 
     private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry, NtToken token)
@@ -434,6 +434,36 @@ public class COMEnumerateInterfaces
             proc.Close();
         }
     }
+    #endregion
+
+    #region Public Properties
+    public IEnumerable<COMInterfaceInstance> Interfaces => _interfaces;
+    public IEnumerable<COMInterfaceInstance> FactoryInterfaces => _factory_interfaces;
+    public Win32Exception Exception => _ex;
+    #endregion
+
+    #region Constructors
+    public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout, NtToken token)
+        : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())
+    {
+        GetInterfaces(sta, timeout, token);
+    }
+    #endregion
+
+    #region Static Methods
+    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
+    {
+        string apartment = "s";
+        if (ent.Threading == ThreadingType.Both
+            || ent.Threading == ThreadingType.Mta)
+        {
+            apartment = "m";
+        }
+        string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
+            ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
+        var interfaces = await GetInterfacesOOP(command_line, true, registry, token);
+        return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
+    }
 
     public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token)
     {
@@ -448,4 +478,5 @@ public class COMEnumerateInterfaces
         var interfaces = await GetInterfacesOOP(command_line, false, registry, token);
         return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
     }
+    #endregion
 }

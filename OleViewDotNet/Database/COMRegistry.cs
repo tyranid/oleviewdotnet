@@ -19,6 +19,7 @@ using NtApiDotNet;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -56,6 +57,7 @@ public class COMRegistry
     private Dictionary<Guid, string> m_iids_to_names;
     private Dictionary<Guid, IEnumerable<COMCLSIDEntry>> m_clsids_by_appid;
     private SortedDictionary<string, IEnumerable<COMRuntimeExtensionEntry>> m_runtime_extensions_by_contract_id;
+    private byte[] m_serialized_interfaces;
 
     private SortedDictionary<string, List<COMCLSIDEntry>> GetClsidsByString(Func<COMCLSIDEntry, bool> filter, Func<COMCLSIDEntry, string> key_selector)
     {
@@ -78,17 +80,13 @@ public class COMRegistry
             throw new ArgumentNullException("user");
         }
 
-        switch (mode)
+        return mode switch
         {
-            case COMRegistryMode.Merged:
-                return Registry.ClassesRoot;
-            case COMRegistryMode.MachineOnly:
-                return Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes");
-            case COMRegistryMode.UserOnly:
-                return Registry.Users.OpenSubKey($@"{user}\SOFTWARE\Classes");
-            default:
-                throw new ArgumentException("Invalid mode", "mode");
-        }
+            COMRegistryMode.Merged => Registry.ClassesRoot,
+            COMRegistryMode.MachineOnly => Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes"),
+            COMRegistryMode.UserOnly => Registry.Users.OpenSubKey($@"{user}\SOFTWARE\Classes"),
+            _ => throw new ArgumentException("Invalid mode", "mode"),
+        };
     }
 
     /// <summary>
@@ -710,6 +708,25 @@ public class COMRegistry
                 }
             }
         }
+    }
+    #endregion
+
+    #region Internal Members
+    internal byte[] SerializeInterfaces()
+    {
+        if (m_serialized_interfaces == null)
+        {
+            MemoryStream stm = new();
+            BinaryWriter writer = new(stm);
+
+            writer.Write(Interfaces.Count);
+            foreach (var intf in Interfaces.Values)
+            {
+                writer.Write(intf.Iid.ToByteArray());
+            }
+            m_serialized_interfaces = stm.ToArray();
+        }
+        return m_serialized_interfaces;
     }
     #endregion
 
