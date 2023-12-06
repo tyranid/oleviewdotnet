@@ -32,13 +32,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Be.Windows.Forms.HexBox">
-            <HintPath>Be.Windows.Forms.HexBox.dll</HintPath>
-        </Reference>
         <Reference Include="System.ServiceProcess" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\third_party\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj" />
       <ProjectReference Include="..\third_party\NtApiDotNet\NtApiDotNet.csproj" />
     </ItemGroup>
 

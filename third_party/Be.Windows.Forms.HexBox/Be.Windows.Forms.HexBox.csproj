@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net461</TargetFramework>
+        <Nullable>disable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <LangVersion>10.0</LangVersion>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <Company>Be.</Company>
+        <Product>Be.Windows.Forms.HexBox</Product>
+        <FileVersion>1.4.2.40003</FileVersion>
+        <Version>1.4.2</Version>
+        <AssemblyVersion>1.4.2.1</AssemblyVersion>
+        <Copyright>Copyright (c) 2007 Weifen Luo (email: weifenluo@yahoo.com), Copyright (c) 2011 Bernhard Elbl</Copyright>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+</Project>
