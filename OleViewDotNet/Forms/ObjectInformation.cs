@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Marshaling;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;

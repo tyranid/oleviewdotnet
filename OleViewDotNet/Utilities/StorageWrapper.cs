@@ -14,148 +14,14 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Runtime.InteropServices;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet;
-
-public sealed class STATSTGWrapper
-{
-    private static DateTime FromFileTime(ComTypes.FILETIME filetime)
-    {
-        long result = (uint)filetime.dwLowDateTime | (((long)filetime.dwHighDateTime) << 32);
-        return DateTime.FromFileTime(result);
-    }
-
-    internal STATSTGWrapper(string name, ComTypes.STATSTG stat, byte[] bytes)
-    {
-        Name = name;
-        Type = (STGTY)stat.type;
-        Size = stat.cbSize;
-        ModifiedTime = FromFileTime(stat.mtime);
-        CreationTime = FromFileTime(stat.ctime);
-        AccessTime = FromFileTime(stat.atime);
-        Mode = (STGM)stat.grfMode;
-        LocksSupported = stat.grfLocksSupported;
-        Clsid = stat.clsid;
-        StateBits = stat.grfStateBits;
-        Bytes = bytes;
-    }
-
-    public string Name { get; private set; }
-    public STGTY Type { get; private set; }
-    public long Size { get; private set; }
-    public DateTime ModifiedTime { get; private set; }
-    public DateTime CreationTime { get; private set; }
-    public DateTime AccessTime { get; private set; }
-    public STGM Mode { get; private set; }
-    public int LocksSupported { get; private set; }
-    public Guid Clsid { get; private set; }
-    public int StateBits { get; private set; }
-    [Browsable(false)]
-    public byte[] Bytes { get; private set; }
-}
-
-public sealed class StreamWrapper : Stream
-{
-    private readonly ComTypes.IStream _stm;
-
-    public StreamWrapper(ComTypes.IStream stm)
-    {
-        _stm = stm;
-    }
-
-    private ComTypes.STATSTG Stat()
-    {
-        _stm.Stat(out ComTypes.STATSTG stat, 1);
-        return stat;
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        Marshal.FinalReleaseComObject(_stm);
-        base.Dispose(disposing);
-    }
-
-    public override bool CanRead => true;
-
-    public override bool CanSeek => true;
-
-    public override bool CanWrite
-    {
-        get
-        {
-            STGM mode = (STGM)Stat().grfMode;
-            return ((mode & STGM.WRITE) == STGM.WRITE) || ((mode & STGM.READWRITE) == STGM.READWRITE);
-        }
-    }
-
-    public override long Length => Stat().cbSize;
-
-    public override long Position
-    {
-        get
-        {
-            return Seek(0, SeekOrigin.Current);
-        }
-
-        set
-        {
-            // STREAM_SEEK_SET == 0
-            _stm.Seek(value, 0, IntPtr.Zero);
-        }
-    }
-
-    public override void Flush()
-    {
-        _stm.Commit(0);
-    }
-
-    public override int Read(byte[] buffer, int offset, int count)
-    {
-        if (offset == 0)
-        {
-            using var len = new SafeStructureInOutBuffer<int>();
-            _stm.Read(buffer, count, len.DangerousGetHandle());
-            return len.Result;
-        }
-        else
-        {
-            using var len = new SafeStructureInOutBuffer<int>();
-            byte[] temp_buffer = new byte[count];
-            _stm.Read(temp_buffer, count, len.DangerousGetHandle());
-            int read_len = len.Result;
-            Buffer.BlockCopy(temp_buffer, 0, buffer, offset, count);
-            return read_len;
-        }
-    }
-
-    public override long Seek(long offset, SeekOrigin origin)
-    {
-        using var buffer = new SafeStructureInOutBuffer<long>();
-        _stm.Seek(0, (int)origin, buffer.DangerousGetHandle());
-        return buffer.Result;
-    }
-
-    public override void SetLength(long value)
-    {
-        _stm.SetSize(value);
-    }
-
-    public override void Write(byte[] buffer, int offset, int count)
-    {
-        _stm.Write(buffer, count, IntPtr.Zero);
-    }
-
-    public IStreamWrapper Object => new IStreamWrapper(_stm);
-}
+namespace OleViewDotNet.Utilities;
 
 /// <summary>
 /// A wrapper object for an IStorage.
@@ -317,7 +183,7 @@ public sealed class StorageWrapper : IDisposable
         DateTime? atime,
         DateTime? mtime)
     {
-        _stg.SetElementTimes(string.IsNullOrEmpty(name) ? null : name, 
+        _stg.SetElementTimes(string.IsNullOrEmpty(name) ? null : name,
             DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
     }
 

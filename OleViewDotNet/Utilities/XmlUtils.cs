@@ -1,5 +1,4 @@
-﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2014. 2016
+﻿//    Copyright (C) James Forshaw 2014. 2016
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -21,7 +20,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Utilities;
 
 internal static class XmlUtils
 {
@@ -155,14 +154,14 @@ internal static class XmlUtils
     {
         if (!string.IsNullOrEmpty(value))
         {
-            writer.WriteAttributeString(name, CleanupXmlString(value));
+            writer.WriteAttributeString(name, value.CleanupXmlString());
         }
     }
 
     internal static void CheckName(this XmlReader reader, string name)
     {
         if (reader.NodeType != XmlNodeType.Element || reader.LocalName != name)
-        {                
+        {
             throw new XmlException("Unexpected Node");
         }
     }
@@ -213,7 +212,7 @@ internal static class XmlUtils
         string value = reader.GetAttribute(name);
         if (value == null)
         {
-            return default(T);
+            return default;
         }
 
         return (T)Enum.Parse(typeof(T), value);
@@ -250,10 +249,10 @@ internal static class XmlUtils
 
     internal static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> key_selector)
     {
-        return ToSortedDictionary(enumerable, key_selector, Comparer<TKey>.Default);
+        return enumerable.ToSortedDictionary(key_selector, Comparer<TKey>.Default);
     }
 
-    internal static SortedDictionary<TKey, TElement> ToSortedDictionary<TKey, TValue, TElement>(this IEnumerable<TValue> enumerable, 
+    internal static SortedDictionary<TKey, TElement> ToSortedDictionary<TKey, TValue, TElement>(this IEnumerable<TValue> enumerable,
         Func<TValue, TKey> key_selector, Func<TValue, TElement> value_selector)
     {
         return new SortedDictionary<TKey, TElement>(enumerable.ToDictionary(key_selector, value_selector));

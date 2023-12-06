@@ -14,30 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
-using OleViewDotNet.Marshaling;
-using OleViewDotNet.Utilities;
-using System.Windows.Forms;
+using System;
 
-namespace OleViewDotNet.Forms;
+namespace OleViewDotNet.Marshaling;
 
-public partial class CustomMarshalEditorControl : UserControl
+[Flags]
+public enum COMStdObjRefFlags
 {
-    private readonly COMRegistry m_registry;
-    private readonly COMObjRefCustom m_objref;
-
-    public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
-    {
-        m_objref = objref;
-        m_registry = registry;
-        InitializeComponent();
-        textBoxClsid.Text = objref.Clsid.FormatGuid();
-        COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
-        if (ent != null)
-        {
-            textBoxName.Text = ent.Name;
-        }
-
-        hexEditor.Bytes = objref.ObjectData;
-    }
+    None = 0,
+    NoPing = 0x1000
 }

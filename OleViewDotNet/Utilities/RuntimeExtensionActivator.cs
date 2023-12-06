@@ -17,12 +17,11 @@
 using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Utilities;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Utilities;
 
 public class RuntimeExtensionActivator
 {
@@ -125,7 +124,7 @@ public class RuntimeExtensionActivator
         _packageId = packageId;
     }
 
-    public RuntimeExtensionActivator(COMRuntimeExtensionEntry extension) 
+    public RuntimeExtensionActivator(COMRuntimeExtensionEntry extension)
         : this(extension.ContractId, extension.PackageId, extension.AppId)
     {
     }

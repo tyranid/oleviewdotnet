@@ -656,7 +656,7 @@ function Get-ComProcess {
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromProcess")]
         [System.Diagnostics.Process[]]$Process,
         [parameter(Mandatory, ValueFromPipeline, ParameterSetName = "FromObjRef")]
-        [OleViewDotNet.COMObjRef[]]$ObjRef,
+        [OleViewDotNet.Marshaling.COMObjRef[]]$ObjRef,
         [parameter(Mandatory, ParameterSetName = "FromName")]
         [string]$Name,
         [parameter(Mandatory, ParameterSetName = "FromServiceName")]
@@ -702,7 +702,7 @@ function Get-ComProcess {
 
         switch($PSCmdlet.ParameterSetName) {
             "FromObjRef" {
-                [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
+                [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.Marshaling.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
             }
             "FromServiceName" {
                 [OleViewDotNet.COMProcessParser]::GetProcesses($ServiceName, $config, $callback, $Database) | Write-Output
@@ -1317,7 +1317,7 @@ function Out-ObjRef {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.COMObjRef]$ObjRef,
+        [OleViewDotNet.Marshaling.COMObjRef]$ObjRef,
         [ComObjRefOutput]$Output = "Object"
     )
 
@@ -1355,7 +1355,7 @@ Specify flags for the marshal operation.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMObjRef or string.
+OleViewDotNet.Marshaling.COMObjRef or string.
 .EXAMPLE
 Get-ComObjRef $obj 
 Marshal an object to the file marshal.bin as a COMObjRef object.
@@ -1403,10 +1403,10 @@ function Get-ComObjRef {
             }
             "FromPath" {
                 $ba = Get-Content -Path $Path -Encoding Byte
-                [OleViewDotNet.COMObjRef]::FromArray($ba) | Out-ObjRef -Output $Output
+                [OleViewDotNet.Marshaling.COMObjRef]::FromArray($ba) | Out-ObjRef -Output $Output
             }
             "FromBytes" {
-                [OleViewDotNet.COMObjRef]::FromArray($Bytes) | Out-ObjRef -Output $Output
+                [OleViewDotNet.Marshaling.COMObjRef]::FromArray($Bytes) | Out-ObjRef -Output $Output
             }
         }
     }
@@ -1585,7 +1585,7 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
         [Parameter(ParameterSetName = "FromObjRef")]
-        [OleViewDotNet.COMObjRef]$ObjRef,
+        [OleViewDotNet.Marshaling.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
         [OleViewDotNet.COMIPIDEntry]$Ipid,
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
@@ -2285,7 +2285,7 @@ The format of the storage object to create.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.StorageWrapper
+OleViewDotNet.Utilities.StorageWrapper
 .EXAMPLE
 New-ComStorageObject storage.stg
 Creates a new storage object.
@@ -2321,7 +2321,7 @@ Opens storage read only. Overrides $Mode parameter.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.StorageWrapper
+OleViewDotNet.Utilities.StorageWrapper
 .EXAMPLE
 Get-ComStorageObject storage.stg
 Creates a new storage object.
@@ -2731,11 +2731,11 @@ function Start-ComRuntimeExtension {
         {
             switch($PSCmdlet.ParameterSetName) {
                 "FromParts" {
-                    $act = [OleViewDotNet.RuntimeExtensionActivator]::new($ContractId, 
+                    $act = [OleViewDotNet.Utilities.RuntimeExtensionActivator]::new($ContractId, 
                             $PackageId, $AppId)
                 }
                 "FromExtension" {
-                    $act = [OleViewDotNet.RuntimeExtensionActivator]::new($Extension)
+                    $act = [OleViewDotNet.Utilities.RuntimeExtensionActivator]::new($Extension)
                 }
             }
             

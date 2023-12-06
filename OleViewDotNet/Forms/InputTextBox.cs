@@ -17,7 +17,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Forms;
 
 internal class InputTextBox : TextBox
 {
@@ -31,8 +31,8 @@ internal class InputTextBox : TextBox
         if (m.Msg == WM_PASTE)
         {
             EventHandler<ClipboardEventArgs> evt = TextPasted;
-            if ((evt != null) && Clipboard.ContainsText())
-            {                    
+            if (evt != null && Clipboard.ContainsText())
+            {
                 ClipboardEventArgs args = new(Clipboard.GetText());
 
                 evt(this, args);

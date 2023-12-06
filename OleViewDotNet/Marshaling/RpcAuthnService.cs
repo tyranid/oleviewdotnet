@@ -14,30 +14,27 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
-using OleViewDotNet.Marshaling;
-using OleViewDotNet.Utilities;
-using System.Windows.Forms;
+namespace OleViewDotNet.Marshaling;
 
-namespace OleViewDotNet.Forms;
-
-public partial class CustomMarshalEditorControl : UserControl
+public enum RpcAuthnService : short
 {
-    private readonly COMRegistry m_registry;
-    private readonly COMObjRefCustom m_objref;
-
-    public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
-    {
-        m_objref = objref;
-        m_registry = registry;
-        InitializeComponent();
-        textBoxClsid.Text = objref.Clsid.FormatGuid();
-        COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
-        if (ent != null)
-        {
-            textBoxName.Text = ent.Name;
-        }
-
-        hexEditor.Bytes = objref.ObjectData;
-    }
+    None = 0,
+    DCEPrivate = 1,
+    DCEPublic = 2,
+    DECPublic = 4,
+    GSS_Negotiate = 9,
+    WinNT = 10,
+    GSS_SChannel = 14,
+    GSS_Kerberos = 16,
+    DPA = 17,
+    MSN = 18,
+    Digest = 21,
+    Kernel = 20,
+    NegoExtender = 30,
+    PKU2U = 31,
+    LiveSSP = 32,
+    LiveXPSSP = 35,
+    MSOnline = 82,
+    MQ = 100,
+    Default = -1,
 }

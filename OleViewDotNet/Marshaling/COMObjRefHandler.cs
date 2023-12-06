@@ -14,30 +14,38 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
-using OleViewDotNet.Marshaling;
+using OleViewDotNet;
 using OleViewDotNet.Utilities;
-using System.Windows.Forms;
+using System;
+using System.IO;
 
-namespace OleViewDotNet.Forms;
+namespace OleViewDotNet.Marshaling;
 
-public partial class CustomMarshalEditorControl : UserControl
+public class COMObjRefHandler : COMObjRefStandard
 {
-    private readonly COMRegistry m_registry;
-    private readonly COMObjRefCustom m_objref;
+    public Guid Clsid { get; set; }
 
-    public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
+    internal COMObjRefHandler(BinaryReader reader, Guid iid)
+        : base(iid)
     {
-        m_objref = objref;
-        m_registry = registry;
-        InitializeComponent();
-        textBoxClsid.Text = objref.Clsid.FormatGuid();
-        COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
-        if (ent != null)
-        {
-            textBoxName.Text = ent.Name;
-        }
+        _stdobjref = new COMStdObjRef(reader);
+        Clsid = reader.ReadGuid();
+        _stringarray = new COMDualStringArray(reader);
+    }
 
-        hexEditor.Bytes = objref.ObjectData;
+    internal COMObjRefHandler(Guid clsid, COMObjRefStandard std) : base(std)
+    {
+        Clsid = clsid;
+    }
+
+    public COMObjRefHandler() : base()
+    {
+    }
+
+    protected override void Serialize(BinaryWriter writer)
+    {
+        _stdobjref.ToWriter(writer);
+        writer.Write(Clsid);
+        _stringarray.ToWriter(writer);
     }
 }

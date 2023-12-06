@@ -54,7 +54,7 @@ partial class TypeLibControl
         this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
         this.panel1 = new System.Windows.Forms.Panel();
         this.btnExportInterfaces = new System.Windows.Forms.Button();
-        this.textBoxFilter = new OleViewDotNet.InputTextBox();
+        this.textBoxFilter = new OleViewDotNet.Forms.InputTextBox();
         this.panelProxy = new System.Windows.Forms.Panel();
         this.lblRendering = new System.Windows.Forms.Label();
         this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();

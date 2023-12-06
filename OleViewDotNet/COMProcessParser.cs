@@ -20,6 +20,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.Marshaling;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
