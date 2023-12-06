@@ -16,6 +16,7 @@
 
 using NtApiDotNet.Ndr;
 using OleViewDotNet.Database;
+using OleViewDotNet.Proxy;
 using System;
 using System.Collections.Generic;
 using System.Linq;

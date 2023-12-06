@@ -20,7 +20,7 @@ using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Proxy;
 
 public class COMProxyInstance : IProxyFormatter
 {
@@ -30,7 +30,7 @@ public class COMProxyInstance : IProxyFormatter
 
     public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
 
-    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries, 
+    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries,
                               IEnumerable<NdrComplexTypeReference> complex_types,
                               COMRegistry registry)
     {

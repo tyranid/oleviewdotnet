@@ -1811,24 +1811,24 @@ function Get-ComProxy {
     PROCESS {
         $proxy = switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
-                [OleViewDotNet.COMProxyInstance]::GetFromCLSID($Class, $null)
+                [OleViewDotNet.Proxy.COMProxyInstance]::GetFromCLSID($Class, $null)
             }
             "FromInterface" {
-                [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($Interface, $null)
+                [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($Interface, $null)
             }
             "FromInterfaceInstance" {
-                [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
+                [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
             }
             "FromIid" {
                 $intf = Get-ComInterface -Database $Database -Iid $Iid
                 if ($null -ne $intf) {
-                    [OleViewDotNet.COMProxyInterfaceInstance]::GetFromIID($intf, $null)
+                    [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($intf, $null)
                 }
             }
             "FromClsid" {
                 $class = Get-ComClass -Database $Database -Clsid $Clsid
                 if ($null -ne $class) {
-                    [OleViewDotNet.COMProxyInstance]::GetFromCLSID($class, $null)
+                    [OleViewDotNet.Proxy.COMProxyInstance]::GetFromCLSID($class, $null)
                 }
             }
         }
@@ -1982,7 +1982,7 @@ Specify flags for the formatter.
 .PARAMETER Process
 Format the IPIDs of a COM process.
 .INPUTS
-OleViewDotNet.IProxyFormatter
+OleViewDotNet.Proxy.IProxyFormatter
 .OUTPUTS
 string
 .EXAMPLE
@@ -2002,14 +2002,14 @@ function Format-ComProxy {
     [CmdletBinding(DefaultParameterSetName="FromProxy")]
     Param(
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProxy")]
-        [OleViewDotNet.IProxyFormatter]$Proxy,
+        [OleViewDotNet.Proxy.IProxyFormatter]$Proxy,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProcess")]
         [OleViewDotNet.COMProcessEntry]$Process,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromInterface")]
         [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName = "FromInterfaceInstance")]
         [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
-        [OleViewDotNet.ProxyFormatterFlags]$Flags = 0
+        [OleViewDotNet.Proxy.ProxyFormatterFlags]$Flags = 0
     )
 
     PROCESS {
@@ -2897,9 +2897,9 @@ function ConvertTo-ComAssembly {
         [parameter(Mandatory, ParameterSetName = "FromPath", Position = 0)]
         [string]$Path,
         [parameter(Mandatory, ParameterSetName = "FromProxy", Position = 0)]
-        [OleViewDotNet.COMProxyInstance]$Proxy,
+        [OleViewDotNet.Proxy.COMProxyInstance]$Proxy,
         [parameter(Mandatory, ParameterSetName = "FromProxyInterface", Position = 0)]
-        [OleViewDotNet.COMProxyInterfaceInstance]$ProxyInterface,
+        [OleViewDotNet.Proxy.COMProxyInterfaceInstance]$ProxyInterface,
         [parameter(Mandatory, ParameterSetName = "FromIpid", Position = 0)]
         [OleViewDotNet.COMIPIDEntry]$Ipid,
         [switch]$NoProgress

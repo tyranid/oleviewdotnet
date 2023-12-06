@@ -22,6 +22,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Proxy;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;

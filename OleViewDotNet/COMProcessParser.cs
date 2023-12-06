@@ -18,6 +18,7 @@ using NtApiDotNet;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Proxy;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

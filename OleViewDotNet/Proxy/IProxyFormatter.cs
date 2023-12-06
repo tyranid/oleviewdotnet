@@ -14,20 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace OleViewDotNet.Proxy;
 
-using System;
-
-namespace OleViewDotNet;
-
-[Flags]
-public enum ProxyFormatterFlags
-{
-    None,
-    RemoveComments,
-    RemoveComplexTypes
-}
-
-public interface IProxyFormatter 
+public interface IProxyFormatter
 {
     string FormatText(ProxyFormatterFlags flags);
     string FormatText();

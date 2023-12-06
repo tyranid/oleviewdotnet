@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Proxy;
 
 public class COMProxyInterfaceInstance : IProxyFormatter
 {
