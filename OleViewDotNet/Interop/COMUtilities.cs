@@ -2546,7 +2546,7 @@ public static class COMUtilities
 
     public static string ReadHStringFull(this NtProcess process, long address)
     {
-        NativeMethods.InspectHStringCallback2 callback = (c, r, l, ba) =>
+        uint callback(IntPtr c, long r, int l, IntPtr ba)
         {
             try
             {
@@ -2558,7 +2558,7 @@ public static class COMUtilities
             {
                 return 0x8000FFFF;
             }
-        };
+        }
 
         int machine = process.Is64Bit ? 0x8664 : 0x14C;
 
@@ -2572,7 +2572,7 @@ public static class COMUtilities
 
     public static string ReadHString(this NtProcess process, IntPtr address)
     {
-        NativeMethods.InspectHStringCallback callback = (c, r, l, ba) =>
+        uint callback(IntPtr c, IntPtr r, int l, IntPtr ba)
         {
             try
             {
@@ -2584,7 +2584,7 @@ public static class COMUtilities
             {
                 return 0x8000FFFF;
             }
-        };
+        }
 
         int machine = process.Is64Bit ? 0x8664 : 0x14C;
 
