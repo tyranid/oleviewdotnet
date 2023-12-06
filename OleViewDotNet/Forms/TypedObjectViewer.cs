@@ -278,20 +278,18 @@ partial class TypedObjectViewer : UserControl
                     val = null;
                 }
 
-                using (GetTypeForm frm = new(pi.PropertyType, val))
+                using GetTypeForm frm = new(pi.PropertyType, val);
+                if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    if (frm.ShowDialog() == DialogResult.OK)
+                    try
                     {
-                        try
-                        {
-                            pi.SetValue(m_pObject, frm.Data, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine(ex.ToString());
-                        }
-                        UpdateProperties();
+                        pi.SetValue(m_pObject, frm.Data, null);
                     }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    }
+                    UpdateProperties();
                 }
             }
         }

@@ -64,31 +64,29 @@ public class RuntimeExtensionActivator
         {
             foreach (var proc in procs)
             {
-                using (var result = NtToken.OpenProcessToken(proc, TokenAccessRights.Query, false))
+                using var result = NtToken.OpenProcessToken(proc, TokenAccessRights.Query, false);
+                if (!result.IsSuccess)
                 {
-                    if (!result.IsSuccess)
-                    {
-                        continue;
-                    }
-
-                    var token = result.Result;
-                    string packageId = token.PackageFullName.TrimEnd('\0');
-
-                    if (!_packageId.Equals(packageId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    var sysappid = token.GetSecurityAttributeByName("WIN://SYSAPPID");
-                    var hostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
-                    if (hostid == null || sysappid.Values.Count() != 3)
-                    {
-                        continue;
-                    }
-
-                    HostId = hostid.Values.Cast<ulong>().First();
-                    return;
+                    continue;
                 }
+
+                var token = result.Result;
+                string packageId = token.PackageFullName.TrimEnd('\0');
+
+                if (!_packageId.Equals(packageId, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var sysappid = token.GetSecurityAttributeByName("WIN://SYSAPPID");
+                var hostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
+                if (hostid == null || sysappid.Values.Count() != 3)
+                {
+                    continue;
+                }
+
+                HostId = hostid.Values.Cast<ulong>().First();
+                return;
             }
         }
 

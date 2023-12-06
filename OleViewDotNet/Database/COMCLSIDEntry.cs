@@ -543,20 +543,18 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     
     private COMCLSIDServerEntry ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
     {
-        using (RegistryKey server_key = key.OpenSubKey(server_type.ToString()))
+        using RegistryKey server_key = key.OpenSubKey(server_type.ToString());
+        if (server_key == null)
         {
-            if (server_key == null)
-            {
-                return null;
-            }
-
-            COMCLSIDServerEntry entry = new(server_key, server_type);
-            if (!string.IsNullOrWhiteSpace(entry.Server))
-            {
-                servers.Add(server_type, new COMCLSIDServerEntry(server_key, server_type));
-            }
-            return entry;
+            return null;
         }
+
+        COMCLSIDServerEntry entry = new(server_key, server_type);
+        if (!string.IsNullOrWhiteSpace(entry.Server))
+        {
+            servers.Add(server_type, new COMCLSIDServerEntry(server_key, server_type));
+        }
+        return entry;
     }
 
     private void LoadFromKey(RegistryKey key)
@@ -643,13 +641,11 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         {
             if (elev_key != null)
             {
-                using (var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, 
-                    Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default))
-                {
-                    int auto_approval = COMUtilities.ReadInt(base_key, 
-                        @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
-                    Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
-                }
+                using var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,
+                    Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default);
+                int auto_approval = COMUtilities.ReadInt(base_key,
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
+                Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
             }
         }
 

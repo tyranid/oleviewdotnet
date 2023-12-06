@@ -40,10 +40,8 @@ public static class PowerShellUtils
         }
         else
         {
-            using (var p = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation))
-            {
-                return GetProcessAccessToken(p);
-            }
+            using var p = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation);
+            return GetProcessAccessToken(p);
         }
     }
 
@@ -81,10 +79,8 @@ public static class PowerShellUtils
         COMAccessRights launch_rights,
         bool ignore_default)
     {
-        using (var process = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation))
-        {
-            return GetAccessCheck(process, principal, access_rights, launch_rights, ignore_default);
-        }
+        using var process = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation);
+        return GetAccessCheck(process, principal, access_rights, launch_rights, ignore_default);
     }
 
     public static Type GetFactoryType(ICOMClassEntry cls)

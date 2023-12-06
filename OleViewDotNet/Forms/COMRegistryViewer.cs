@@ -1734,45 +1734,41 @@ public partial class COMRegistryViewer : UserControl
 
             if (mode == FilterMode.Complex)
             {
-                using (ViewFilterForm form = new(m_filter, m_filter_types))
+                using ViewFilterForm form = new(m_filter, m_filter_types);
+                if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    if (form.ShowDialog(this) == DialogResult.OK)
+                    m_filter = form.Filter;
+                    if (m_filter.Filters.Count > 0)
                     {
-                        m_filter = form.Filter;
-                        if (m_filter.Filters.Count > 0)
-                        {
-                            filterFunc = n => RunComplexFilter(n, m_filter);
-                        }
+                        filterFunc = n => RunComplexFilter(n, m_filter);
                     }
-                    else
-                    {
-                        return;
-                    }
+                }
+                else
+                {
+                    return;
                 }
             }
             else if (mode == FilterMode.Accessible || mode == FilterMode.NotAccessible)
             {
-                using (SelectSecurityCheckForm form = new(m_mode == DisplayMode.Processes))
+                using SelectSecurityCheckForm form = new(m_mode == DisplayMode.Processes);
+                if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    if (form.ShowDialog(this) == DialogResult.OK)
+                    token = form.Token;
+                    string principal = form.Principal;
+                    COMAccessRights access_rights = form.AccessRights;
+                    COMAccessRights launch_rights = form.LaunchRights;
+                    Dictionary<string, bool> access_cache = new(StringComparer.OrdinalIgnoreCase);
+                    Dictionary<string, bool> launch_cache = new(StringComparer.OrdinalIgnoreCase);
+                    filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
+                    if (mode == FilterMode.NotAccessible)
                     {
-                        token = form.Token;
-                        string principal = form.Principal;
-                        COMAccessRights access_rights = form.AccessRights;
-                        COMAccessRights launch_rights = form.LaunchRights;
-                        Dictionary<string, bool> access_cache = new(StringComparer.OrdinalIgnoreCase);
-                        Dictionary<string, bool> launch_cache = new(StringComparer.OrdinalIgnoreCase);
-                        filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
-                        if (mode == FilterMode.NotAccessible)
-                        {
-                            Func<TreeNode, FilterResult> last_filter = filterFunc;
-                            filterFunc = n => last_filter(n) == FilterResult.Exclude ? FilterResult.Include : FilterResult.Exclude;
-                        }
+                        Func<TreeNode, FilterResult> last_filter = filterFunc;
+                        filterFunc = n => last_filter(n) == FilterResult.Exclude ? FilterResult.Include : FilterResult.Exclude;
                     }
-                    else
-                    {
-                        return;
-                    }
+                }
+                else
+                {
+                    return;
                 }
             }
             else
@@ -2007,10 +2003,7 @@ public partial class COMRegistryViewer : UserControl
             if (clsid == null && (node.Tag is COMInterfaceEntry || node.Tag is COMIPIDEntry))
             {
                 COMInterfaceEntry intf = node.Tag as COMInterfaceEntry;
-                if (intf == null)
-                {
-                    intf = m_registry.MapIidToInterface(((COMIPIDEntry)node.Tag).Iid);
-                }
+                intf ??= m_registry.MapIidToInterface(((COMIPIDEntry)node.Tag).Iid);
 
                 selected_iid = intf.Iid;
                 clsid = m_registry.Clsids[intf.ProxyClsid];
@@ -2029,19 +2022,17 @@ public partial class COMRegistryViewer : UserControl
                         comClassId = comClassClsId?.Clsid;
                     }
 
-                    using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
-                    {
-                        EntryPoint.GetMainForm(m_registry).HostControl(
-                            new TypeLibControl(
-                                m_registry,
-                                COMUtilities.GetFileName(clsid.DefaultServer), 
-                                COMProxyInstance.GetFromCLSID(clsid, resolver), 
-                                selected_iid,
-                                comClassIdName, 
-                                comClassId
-                            )
-                        );
-                    }
+                    using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                    EntryPoint.GetMainForm(m_registry).HostControl(
+                        new TypeLibControl(
+                            m_registry,
+                            COMUtilities.GetFileName(clsid.DefaultServer),
+                            COMProxyInstance.GetFromCLSID(clsid, resolver),
+                            selected_iid,
+                            comClassIdName,
+                            comClassId
+                        )
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -2074,18 +2065,16 @@ public partial class COMRegistryViewer : UserControl
 
     private void queryAllInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (QueryInterfacesOptionsForm options = new())
+        using QueryInterfacesOptionsForm options = new();
+        if (options.ShowDialog(this) == DialogResult.OK)
         {
-            if (options.ShowDialog(this) == DialogResult.OK)
+            List<COMCLSIDEntry> clsids = new();
+            GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
+            if (clsids.Count > 0)
             {
-                List<COMCLSIDEntry> clsids = new();
-                GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
-                if (clsids.Count > 0)
-                {
-                    COMUtilities.QueryAllInterfaces(this, clsids,
-                        options.ServerTypes, options.ConcurrentQueries,
-                        options.RefreshInterfaces);
-                }
+                COMUtilities.QueryAllInterfaces(this, clsids,
+                    options.ServerTypes, options.ConcurrentQueries,
+                    options.RefreshInterfaces);
             }
         }
     }
@@ -2124,25 +2113,21 @@ public partial class COMRegistryViewer : UserControl
 
     private async void createRemoteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (GetTextForm frm = new("localhost"))
+        using GetTextForm frm = new("localhost");
+        frm.Text = "Enter Remote Host";
+        if (frm.ShowDialog(this) == DialogResult.OK)
         {
-            frm.Text = "Enter Remote Host";
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                await CreateInstance(CLSCTX.REMOTE_SERVER, frm.Data);
-            }
+            await CreateInstance(CLSCTX.REMOTE_SERVER, frm.Data);
         }
     }
 
     private async void createClassFactoryRemoteToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (GetTextForm frm = new("localhost"))
+        using GetTextForm frm = new("localhost");
+        frm.Text = "Enter Remote Host";
+        if (frm.ShowDialog(this) == DialogResult.OK)
         {
-            frm.Text = "Enter Remote Host";
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                await CreateClassFactory(frm.Data);
-            }
+            await CreateClassFactory(frm.Data);
         }
     }
 
@@ -2212,19 +2197,17 @@ public partial class COMRegistryViewer : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            using (SaveFileDialog dlg = new())
+            using SaveFileDialog dlg = new();
+            dlg.Filter = "All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                try
                 {
-                    try
-                    {
-                        File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
-                    }
-                    catch (Exception ex)
-                    {
-                        EntryPoint.ShowError(this, ex);
-                    }
+                    File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
+                }
+                catch (Exception ex)
+                {
+                    EntryPoint.ShowError(this, ex);
                 }
             }
         }
@@ -2275,15 +2258,13 @@ public partial class COMRegistryViewer : UserControl
 
     private async void filteredToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using (ViewFilterForm form = new(new RegistryViewerFilter(), m_filter_types))
+        using ViewFilterForm form = new(new RegistryViewerFilter(), m_filter_types);
+        if (form.ShowDialog(this) == DialogResult.OK && form.Filter.Filters.Count > 0)
         {
-            if (form.ShowDialog(this) == DialogResult.OK && form.Filter.Filters.Count > 0)
-            {
-                IEnumerable<TreeNode> nodes = 
-                    await Task.Run(() => m_originalNodes.Where(n => 
-                    FilterNode(n, x => RunComplexFilter(x, form.Filter)) == FilterResult.Include).ToArray());
-                CreateClonedTree(nodes);
-            }
+            IEnumerable<TreeNode> nodes =
+                await Task.Run(() => m_originalNodes.Where(n =>
+                FilterNode(n, x => RunComplexFilter(x, form.Filter)) == FilterResult.Include).ToArray());
+            CreateClonedTree(nodes);
         }
     }
 

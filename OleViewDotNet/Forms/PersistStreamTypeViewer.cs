@@ -36,11 +36,9 @@ public partial class PersistStreamTypeViewer : UserControl
     {
         try
         {
-            using (MemoryStream stm = new())
-            {
-                COMUtilities.SaveObjectToStream(_obj, stm);
-                hexEditor.Bytes = stm.ToArray();
-            }
+            using MemoryStream stm = new();
+            COMUtilities.SaveObjectToStream(_obj, stm);
+            hexEditor.Bytes = stm.ToArray();
         }
         catch (Exception ex)
         {
@@ -69,10 +67,8 @@ public partial class PersistStreamTypeViewer : UserControl
     {
         try
         {
-            using (MemoryStream stm = new(hexEditor.Bytes))
-            {
-                COMUtilities.LoadObjectFromStream(_obj, stm);
-            }
+            using MemoryStream stm = new(hexEditor.Bytes);
+            COMUtilities.LoadObjectFromStream(_obj, stm);
         }
         catch (Exception ex)
         {

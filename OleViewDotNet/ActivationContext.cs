@@ -860,53 +860,51 @@ public sealed class ActivationContext
 
     public ActivationContext(byte[] actctx)
     {
-        using (ReadHandle handle = new(actctx))
+        using ReadHandle handle = new(actctx);
+        ACTIVATION_CONTEXT_DATA header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA>(0);
+        if (header.Magic != ACTCTX_MAGIC && header.FormatVersion != ACTCTX_VERSION)
         {
-            ACTIVATION_CONTEXT_DATA header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA>(0);
-            if (header.Magic != ACTCTX_MAGIC && header.FormatVersion != ACTCTX_VERSION)
-            {
-                throw new ArgumentException("Invalid header format");
-            }
-            
-            ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER roster_header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER>(header.AssemblyRosterOffset);
-            _asm_roster.AddRange(handle.ReadArray<ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY>(roster_header.FirstEntryOffset, roster_header.EntryCount).Select(e => new ActCtxAssemblyRoster(e, handle, roster_header.AssemblyInformationSectionOffset)));
+            throw new ArgumentException("Invalid header format");
+        }
 
-            ACTIVATION_CONTEXT_DATA_TOC_HEADER toc_header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_TOC_HEADER>(header.DefaultTocOffset);
-            int base_offset = toc_header.FirstEntryOffset;
-            for (int i = 0; i < toc_header.EntryCount; ++i)
+        ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER roster_header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER>(header.AssemblyRosterOffset);
+        _asm_roster.AddRange(handle.ReadArray<ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY>(roster_header.FirstEntryOffset, roster_header.EntryCount).Select(e => new ActCtxAssemblyRoster(e, handle, roster_header.AssemblyInformationSectionOffset)));
+
+        ACTIVATION_CONTEXT_DATA_TOC_HEADER toc_header = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_TOC_HEADER>(header.DefaultTocOffset);
+        int base_offset = toc_header.FirstEntryOffset;
+        for (int i = 0; i < toc_header.EntryCount; ++i)
+        {
+            ACTIVATION_CONTEXT_DATA_TOC_ENTRY toc_entry = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_TOC_ENTRY>(base_offset + i * Marshal.SizeOf<ACTIVATION_CONTEXT_DATA_TOC_ENTRY>());
+            if (toc_entry.Format == ACTIVATION_CONTEXT_SECTION_FORMAT.STRING_TABLE)
             {
-                ACTIVATION_CONTEXT_DATA_TOC_ENTRY toc_entry = handle.ReadStructure<ACTIVATION_CONTEXT_DATA_TOC_ENTRY>(base_offset + i * Marshal.SizeOf<ACTIVATION_CONTEXT_DATA_TOC_ENTRY>());
-                if (toc_entry.Format == ACTIVATION_CONTEXT_SECTION_FORMAT.STRING_TABLE)
+                switch (toc_entry.Id)
                 {
-                    switch (toc_entry.Id)
-                    {
-                        case ACTIVATION_CONTEXT_SECTION_ID.COM_PROGID_REDIRECTION:
-                            _com_progids.AddRange(ReadStringSection<ACTIVATION_CONTEXT_DATA_COM_PROGID_REDIRECTION>(handle,
-                                toc_entry.Offset, toc_entry.Length).Select(e => new ActCtxComProgIdRedirection(e, handle, toc_entry.Offset)));
-                            break;
-                        case ACTIVATION_CONTEXT_SECTION_ID.DLL_REDIRECTION:
-                            _dll_redir.AddRange(ReadStringSection<ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION>(handle, toc_entry.Offset, toc_entry.Length)
-                                .Select(e => new ActCtxDllRedirection(e, handle, toc_entry.Offset)));
-                            break;
-                    }
+                    case ACTIVATION_CONTEXT_SECTION_ID.COM_PROGID_REDIRECTION:
+                        _com_progids.AddRange(ReadStringSection<ACTIVATION_CONTEXT_DATA_COM_PROGID_REDIRECTION>(handle,
+                            toc_entry.Offset, toc_entry.Length).Select(e => new ActCtxComProgIdRedirection(e, handle, toc_entry.Offset)));
+                        break;
+                    case ACTIVATION_CONTEXT_SECTION_ID.DLL_REDIRECTION:
+                        _dll_redir.AddRange(ReadStringSection<ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION>(handle, toc_entry.Offset, toc_entry.Length)
+                            .Select(e => new ActCtxDllRedirection(e, handle, toc_entry.Offset)));
+                        break;
                 }
-                else if (toc_entry.Format == ACTIVATION_CONTEXT_SECTION_FORMAT.GUID_TABLE)
+            }
+            else if (toc_entry.Format == ACTIVATION_CONTEXT_SECTION_FORMAT.GUID_TABLE)
+            {
+                switch (toc_entry.Id)
                 {
-                    switch (toc_entry.Id)
-                    {
-                        case ACTIVATION_CONTEXT_SECTION_ID.COM_SERVER_REDIRECTION:
-                            _com_servers.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION>(handle, toc_entry.Offset,
-                                toc_entry.Length).Select(e => new ActCtxComServerRedirection(e, handle, toc_entry.Offset, e.Offset)));
-                            break;
-                        case ACTIVATION_CONTEXT_SECTION_ID.COM_INTERFACE_REDIRECTION:
-                            _com_interfaces.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION>(handle, toc_entry.Offset,
-                                toc_entry.Length).Select(e => new ActCtxComInterfaceRedirection(e, handle, toc_entry.Offset)));
-                            break;
-                        case ACTIVATION_CONTEXT_SECTION_ID.COM_TYPE_LIBRARY_REDIRECTION:
-                            _com_typelibs.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_TYPE_LIBRARY_REDIRECTION>(handle, toc_entry.Offset,
-                                toc_entry.Length).Select(e => new ActCtxComTypeLibraryRedirection(e, handle, toc_entry.Offset)));
-                            break;
-                    }
+                    case ACTIVATION_CONTEXT_SECTION_ID.COM_SERVER_REDIRECTION:
+                        _com_servers.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION>(handle, toc_entry.Offset,
+                            toc_entry.Length).Select(e => new ActCtxComServerRedirection(e, handle, toc_entry.Offset, e.Offset)));
+                        break;
+                    case ACTIVATION_CONTEXT_SECTION_ID.COM_INTERFACE_REDIRECTION:
+                        _com_interfaces.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION>(handle, toc_entry.Offset,
+                            toc_entry.Length).Select(e => new ActCtxComInterfaceRedirection(e, handle, toc_entry.Offset)));
+                        break;
+                    case ACTIVATION_CONTEXT_SECTION_ID.COM_TYPE_LIBRARY_REDIRECTION:
+                        _com_typelibs.AddRange(ReadGuidSection<ACTIVATION_CONTEXT_DATA_COM_TYPE_LIBRARY_REDIRECTION>(handle, toc_entry.Offset,
+                            toc_entry.Length).Select(e => new ActCtxComTypeLibraryRedirection(e, handle, toc_entry.Offset)));
+                        break;
                 }
             }
         }

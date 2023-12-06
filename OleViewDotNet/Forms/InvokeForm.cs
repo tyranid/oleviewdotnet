@@ -186,22 +186,18 @@ public partial class InvokeForm : Form
 
             if(baseType == typeof(IStream))
             {
-                using (CreateIStreamForm frm = new())
+                using CreateIStreamForm frm = new();
+                if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    if (frm.ShowDialog() == DialogResult.OK)
-                    {
-                        data.data = frm.Stream;
-                    }
+                    data.data = frm.Stream;
                 }
             }
             else
             {
-                using (GetTypeForm frm = new(data.pi.ParameterType, data.data))
+                using GetTypeForm frm = new(data.pi.ParameterType, data.data);
+                if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    if (frm.ShowDialog() == DialogResult.OK)
-                    {
-                        data.data = frm.Data;
-                    }
+                    data.data = frm.Data;
                 }
             }
 

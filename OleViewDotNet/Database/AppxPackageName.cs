@@ -126,21 +126,19 @@ public class AppxPackageName
             return null;
         }
 
-        using (var buffer = new SafeStructureInOutBuffer<PACKAGE_ID>(length, false))
+        using var buffer = new SafeStructureInOutBuffer<PACKAGE_ID>(length, false);
+        length = buffer.Length;
+        err = PackageIdFromFullName(package_id, flags, ref length, buffer);
+        if (err != 0)
         {
-            length = buffer.Length;
-            err = PackageIdFromFullName(package_id, flags, ref length, buffer);
-            if (err != 0)
+            if (err == ERROR_NOT_FOUND && flags == PACKAGE_INFORMATION_FULL)
             {
-                if (err == ERROR_NOT_FOUND && flags == PACKAGE_INFORMATION_FULL)
-                {
-                    return FromFullNameInternal(package_id, PACKAGE_INFORMATION_BASIC);
-                }
-
-                return null;
+                return FromFullNameInternal(package_id, PACKAGE_INFORMATION_BASIC);
             }
-            return new AppxPackageName(package_id, buffer.Result);
+
+            return null;
         }
+        return new AppxPackageName(package_id, buffer.Result);
     }
 
     public static AppxPackageName FromFullName(string package_id)

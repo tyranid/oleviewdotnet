@@ -62,24 +62,22 @@ public partial class SelectProcessControl : UserControl
                     continue;
                 }
 
-                using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false))
+                using var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false);
+                if (!result.IsSuccess && require_token)
                 {
-                    if (!result.IsSuccess && require_token)
-                    {
-                        continue;
-                    }
-
-                    ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
-                    item.SubItems.Add(p.Name);
-                    item.SubItems.Add(COMUtilities.FormatBitness(p.Is64Bit));
-                    if (result.IsSuccess)
-                    {
-                        NtToken token = result.Result;
-                        item.SubItems.Add(p.User.Name);
-                        item.SubItems.Add(token.IntegrityLevel.ToString());
-                    }
-                    item.Tag = _processes.AddResource(p.Duplicate());
+                    continue;
                 }
+
+                ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
+                item.SubItems.Add(p.Name);
+                item.SubItems.Add(COMUtilities.FormatBitness(p.Is64Bit));
+                if (result.IsSuccess)
+                {
+                    NtToken token = result.Result;
+                    item.SubItems.Add(p.User.Name);
+                    item.SubItems.Add(token.IntegrityLevel.ToString());
+                }
+                item.Tag = _processes.AddResource(p.Duplicate());
             }
         }
         listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);

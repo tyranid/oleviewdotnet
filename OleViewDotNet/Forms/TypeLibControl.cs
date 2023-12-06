@@ -355,13 +355,11 @@ public partial class TypeLibControl : UserControl
 
     private void btnDqs_Click(object sender, EventArgs e)
     {
-        using (var formInput = new TextAreaInputForm())
-        {
-            formInput.Text = "Paste the DQS lines obtained from windbg";
-            if (DialogResult.OK != formInput.ShowDialog()) return;
+        using var formInput = new TextAreaInputForm();
+        formInput.Text = "Paste the DQS lines obtained from windbg";
+        if (DialogResult.OK != formInput.ShowDialog()) return;
 
-            CombineOVDNIdlAndDqs(textEditor.Text, formInput.textEditor.Text);
-        }
+        CombineOVDNIdlAndDqs(textEditor.Text, formInput.textEditor.Text);
     }
 
     private static void CombineOVDNIdlAndDqs(string ovdnIdl, string dqs)

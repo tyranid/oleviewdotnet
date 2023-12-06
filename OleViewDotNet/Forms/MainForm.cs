@@ -125,10 +125,7 @@ public partial class MainForm : Form
     {
         Dictionary<string, string> props = new();
 
-        if (ent == null)
-        {
-            ent = new COMCLSIDEntry(m_registry, Guid.Empty, COMServerType.UnknownServer);
-        }
+        ent ??= new COMCLSIDEntry(m_registry, Guid.Empty, COMServerType.UnknownServer);
         props.Add("CLSID", ent.Clsid.FormatGuid());
         props.Add("Name", ent.Name);
         props.Add("Server", ent.DefaultServer);
@@ -286,12 +283,10 @@ public partial class MainForm : Form
 
     private async void menuViewCreateInstanceFromCLSID_Click(object sender, EventArgs e)
     {
-        using (CreateCLSIDForm frm = new())
+        using CreateCLSIDForm frm = new();
+        if (frm.ShowDialog() == DialogResult.OK)
         {
-            if (frm.ShowDialog() == DialogResult.OK)
-            {
-                await CreateInstanceFromCLSID(frm.Clsid, frm.ClsCtx, frm.ClassFactory);
-            }
+            await CreateInstanceFromCLSID(frm.Clsid, frm.ClsCtx, frm.ClassFactory);
         }
     }
 
@@ -317,22 +312,20 @@ public partial class MainForm : Form
 
     private async void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
-        {
-            dlg.Filter = "All Files (*.*)|*.*";
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "All Files (*.*)|*.*";
 
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+        {
+            try
             {
-                try
-                {
-                    byte[] data = File.ReadAllBytes(dlg.FileName);
-                    object comObj = COMUtilities.UnmarshalObject(data);
-                    await OpenObjectInformation(comObj, string.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                byte[] data = File.ReadAllBytes(dlg.FileName);
+                object comObj = COMUtilities.UnmarshalObject(data);
+                await OpenObjectInformation(comObj, string.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
@@ -371,32 +364,28 @@ public partial class MainForm : Form
 
     private async void menuObjectFromSerializedStream_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
-        {
-            dlg.Filter = "All Files (*.*)|*.*";
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "All Files (*.*)|*.*";
 
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+        {
+            try
             {
-                try
-                {
-                    using Stream stm = dlg.OpenFile();
-                    object obj = COMUtilities.OleLoadFromStream(stm, out Guid clsid);
-                    await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                using Stream stm = dlg.OpenFile();
+                object obj = COMUtilities.OleLoadFromStream(stm, out Guid clsid);
+                await HostObject(m_registry.MapClsidToEntry(clsid), obj, obj is IClassFactory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
 
     private void menuHelpAbout_Click(object sender, EventArgs e)
     {
-        using (AboutForm frm = new())
-        {
-            frm.ShowDialog(this);
-        }
+        using AboutForm frm = new();
+        frm.ShowDialog(this);
     }
 
     private void menuRegistryTypeLibs_Click(object sender, EventArgs e)
@@ -430,29 +419,27 @@ public partial class MainForm : Form
 
     private async Task ParseOrBindMoniker(bool bind)
     {
-        using (BuildMonikerForm frm = new(_last_moniker))
+        using BuildMonikerForm frm = new(_last_moniker);
+        if (frm.ShowDialog(this) == DialogResult.OK)
         {
-            if (frm.ShowDialog(this) == DialogResult.OK)
+            try
             {
-                try
+                _last_moniker = frm.MonikerString;
+                object comObj = frm.Moniker;
+                if (bind)
                 {
-                    _last_moniker = frm.MonikerString;
-                    object comObj = frm.Moniker;
-                    if (bind)
-                    {
-                        Guid iid = COMInterfaceEntry.IID_IUnknown;
-                        frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
-                    }
+                    Guid iid = COMInterfaceEntry.IID_IUnknown;
+                    frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
+                }
 
-                    if (comObj != null)
-                    {
-                        await OpenObjectInformation(comObj, _last_moniker);
-                    }
-                }
-                catch (Exception ex)
+                if (comObj != null)
                 {
-                    EntryPoint.ShowError(this, ex);
+                    await OpenObjectInformation(comObj, _last_moniker);
                 }
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -584,12 +571,10 @@ public partial class MainForm : Form
 
     private void menuFileDiff_Click(object sender, EventArgs e)
     {
-        using (DiffRegistryForm frm = new(m_registry))
+        using DiffRegistryForm frm = new(m_registry);
+        if (frm.ShowDialog(this) == DialogResult.OK)
         {
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                new MainForm(frm.DiffRegistry).Show();
-            }
+            new MainForm(frm.DiffRegistry).Show();
         }
     }
 
@@ -631,17 +616,15 @@ public partial class MainForm : Form
     {
         try
         {
-            using (OpenFileDialog dlg = new())
+            using OpenFileDialog dlg = new();
+            dlg.Multiselect = true;
+            dlg.Filter = "All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.Multiselect = true;
-                dlg.Filter = "All Files (*.*)|*.*";
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                foreach (string file in dlg.FileNames)
                 {
-                    foreach(string file in dlg.FileNames)
-                    {
-                        OpenHexEditor(Path.GetFileName(file), 
-                            File.ReadAllBytes(file));
-                    }
+                    OpenHexEditor(Path.GetFileName(file),
+                        File.ReadAllBytes(file));
                 }
             }
         }
@@ -658,16 +641,14 @@ public partial class MainForm : Form
 
     private void menuFileOpenTypeLib_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
+        if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            Assembly typelib = COMUtilities.LoadTypeLib(this, dlg.FileName);
+            if (typelib != null)
             {
-                Assembly typelib = COMUtilities.LoadTypeLib(this, dlg.FileName);
-                if (typelib != null)
-                {
-                    HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty, false));
-                }
+                HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty, false));
             }
         }
     }
@@ -679,35 +660,31 @@ public partial class MainForm : Form
 
     private void menuFileOpenProxyDll_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "Executable Files (*.dll;*.ocx)|*.dll;*.ocx|All Files (*.*)|*.*";
+        if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            dlg.Filter = "Executable Files (*.dll;*.ocx)|*.dll;*.ocx|All Files (*.*)|*.*";
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            try
             {
-                try
-                {
-                    using var resolver = EntryPoint.GetProxyParserSymbolResolver();
-                    COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
-                    HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
-                }
-                catch (Exception ex)
-                {
-                    EntryPoint.ShowError(this, ex);
-                }
+                using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
+                HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
 
     private void menuFileQueryAllInterfaces_Click(object sender, EventArgs e)
     {
-        using (QueryInterfacesOptionsForm options = new())
+        using QueryInterfacesOptionsForm options = new();
+        if (options.ShowDialog(this) == DialogResult.OK)
         {
-            if (options.ShowDialog(this) == DialogResult.OK)
-            {
-                COMUtilities.QueryAllInterfaces(this, m_registry.Clsids.Values, 
-                    options.ServerTypes, options.ConcurrentQueries,
-                    options.RefreshInterfaces);
-            }
+            COMUtilities.QueryAllInterfaces(this, m_registry.Clsids.Values,
+                options.ServerTypes, options.ConcurrentQueries,
+                options.RefreshInterfaces);
         }
     }
 
@@ -718,10 +695,8 @@ public partial class MainForm : Form
 
     private void menuFileSettings_Click(object sender, EventArgs e)
     {
-        using (SettingsForm frm = new())
-        {
-            frm.ShowDialog(this);
-        }
+        using SettingsForm frm = new();
+        frm.ShowDialog(this);
     }
 
     private static bool _configured_symbols = false;
@@ -740,10 +715,8 @@ public partial class MainForm : Form
             if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
                 "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                using (SettingsForm frm = new())
-                {
-                    frm.ShowDialog(this);
-                }
+                using SettingsForm frm = new();
+                frm.ShowDialog(this);
             }
         }
 
@@ -885,17 +858,15 @@ public partial class MainForm : Form
     {
         try
         {
-            using (OpenFileDialog dlg = new())
+            using OpenFileDialog dlg = new();
+            dlg.ShowReadOnly = true;
+            dlg.ReadOnlyChecked = true;
+            dlg.Filter = STORAGE_FILTER;
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.ShowReadOnly = true;
-                dlg.ReadOnlyChecked = true;
-                dlg.Filter = STORAGE_FILTER;
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
+                IStorage stg = COMUtilities.StgOpenStorage(dlg.FileName, null, GetStorageAccess(dlg.ReadOnlyChecked), IntPtr.Zero, 0);
 
-                    HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), dlg.ReadOnlyChecked));
-                }
+                HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), dlg.ReadOnlyChecked));
             }
         }
         catch (Exception ex)
@@ -908,16 +879,14 @@ public partial class MainForm : Form
     {
         try
         {
-            using (SaveFileDialog dlg = new())
+            using SaveFileDialog dlg = new();
+            dlg.Filter = STORAGE_FILTER;
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.Filter = STORAGE_FILTER;
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    Guid iid = typeof(IStorage).GUID;
-                    IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName,
-                        STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
-                    HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), false));
-                }
+                Guid iid = typeof(IStorage).GUID;
+                IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName,
+                    STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
+                HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), false));
             }
         }
         catch (Exception ex)
@@ -933,12 +902,10 @@ public partial class MainForm : Form
 
     private void menuProcessesSelectProcess_Click(object sender, EventArgs e)
     {
-        using (SelectProcessForm form = new(ProcessAccessRights.VmRead, false, true))
+        using SelectProcessForm form = new(ProcessAccessRights.VmRead, false, true);
+        if (form.ShowDialog(this) == DialogResult.OK)
         {
-            if (form.ShowDialog(this) == DialogResult.OK)
-            {
-                LoadProcessByProcessId(form.SelectedProcess.ProcessId);
-            }
+            LoadProcessByProcessId(form.SelectedProcess.ProcessId);
         }
     }
 

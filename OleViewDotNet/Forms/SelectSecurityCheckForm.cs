@@ -74,10 +74,8 @@ internal partial class SelectSecurityCheckForm : Form
 
     private NtToken OpenImpersonationToken()
     {
-        using (NtToken token = NtToken.OpenProcessToken())
-        {
-            return token.DuplicateToken(SecurityImpersonationLevel.Identification);
-        }
+        using NtToken token = NtToken.OpenProcessToken();
+        return token.DuplicateToken(SecurityImpersonationLevel.Identification);
     }
 
     private void btnOK_Click(object sender, EventArgs e)
@@ -96,10 +94,8 @@ internal partial class SelectSecurityCheckForm : Form
                     throw new InvalidOperationException("Please select a process from the list");
                 }
 
-                using (var token = NtToken.OpenProcessToken(process, false, TokenAccessRights.Duplicate))
-                {
-                    Token = token.DuplicateToken(TokenType.Impersonation, SecurityImpersonationLevel.Impersonation, TokenAccessRights.GenericAll);
-                }
+                using var token = NtToken.OpenProcessToken(process, false, TokenAccessRights.Duplicate);
+                Token = token.DuplicateToken(TokenType.Impersonation, SecurityImpersonationLevel.Impersonation, TokenAccessRights.GenericAll);
             }
             else if (radioAnonymous.Checked)
             {

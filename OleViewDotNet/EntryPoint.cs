@@ -61,60 +61,56 @@ public static class EntryPoint
 
     static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
     {
-        using (AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue()))
+        using AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue());
+        using StreamWriter writer = new(client);
+        Guid clsid = Guid.Empty;
+        CLSCTX clsctx = 0;
+        bool sta = false;
+        string activatable_class = string.Empty;
+        if (runtime_class)
         {
-            using (StreamWriter writer = new(client))
+            activatable_class = args.Dequeue();
+        }
+        else
+        {
+            if (!Guid.TryParse(args.Dequeue(), out clsid))
             {
-                Guid clsid = Guid.Empty;
-                CLSCTX clsctx = 0;
-                bool sta = false;
-                string activatable_class = string.Empty;
-                if (runtime_class)
-                {
-                    activatable_class = args.Dequeue();
-                }
-                else
-                {
-                    if (!Guid.TryParse(args.Dequeue(), out clsid))
-                    {
-                        return 1;
-                    }
-                }
-
-                sta = args.Dequeue() == "s";
-                if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
-                {
-                    return 1;
-                }
-
-                int timeout = 10000;
-                if (args.Count > 0)
-                {
-                    if (!int.TryParse(args.Dequeue(), out timeout) || timeout < 0)
-                    {
-                        return 1;
-                    }
-                }
-
-                COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, sta, timeout, token);
-                if (intf.Exception != null)
-                {
-                    writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
-                    return 1;
-                }
-                else
-                {
-                    foreach (COMInterfaceInstance entry in intf.Interfaces)
-                    {
-                        writer.WriteLine("{0}", entry);
-                    }
-                    foreach (COMInterfaceInstance entry in intf.FactoryInterfaces)
-                    {
-                        writer.WriteLine("*{0}", entry);
-                    }
-                    return 0;
-                }
+                return 1;
             }
+        }
+
+        sta = args.Dequeue() == "s";
+        if (!Enum.TryParse(args.Dequeue(), true, out clsctx))
+        {
+            return 1;
+        }
+
+        int timeout = 10000;
+        if (args.Count > 0)
+        {
+            if (!int.TryParse(args.Dequeue(), out timeout) || timeout < 0)
+            {
+                return 1;
+            }
+        }
+
+        COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, sta, timeout, token);
+        if (intf.Exception != null)
+        {
+            writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
+            return 1;
+        }
+        else
+        {
+            foreach (COMInterfaceInstance entry in intf.Interfaces)
+            {
+                writer.WriteLine("{0}", entry);
+            }
+            foreach (COMInterfaceInstance entry in intf.FactoryInterfaces)
+            {
+                writer.WriteLine("*{0}", entry);
+            }
+            return 0;
         }
     }
 
@@ -337,11 +333,8 @@ public static class EntryPoint
                     }
                 }
 
-                if (registry == null)
-                {
-                    registry = database_file != null ? COMUtilities.LoadRegistry(null, database_file)
+                registry ??= database_file != null ? COMUtilities.LoadRegistry(null, database_file)
                         : COMUtilities.LoadRegistry(null, mode);
-                }
 
                 if (delete_database && database_file != null)
                 {

@@ -121,32 +121,26 @@ public sealed class StreamWrapper : Stream
     {
         if (offset == 0)
         {
-            using (var len = new SafeStructureInOutBuffer<int>())
-            {
-                _stm.Read(buffer, count, len.DangerousGetHandle());
-                return len.Result;
-            }
+            using var len = new SafeStructureInOutBuffer<int>();
+            _stm.Read(buffer, count, len.DangerousGetHandle());
+            return len.Result;
         }
         else
         {
-            using (var len = new SafeStructureInOutBuffer<int>())
-            {
-                byte[] temp_buffer = new byte[count];
-                _stm.Read(temp_buffer, count, len.DangerousGetHandle());
-                int read_len = len.Result;
-                Buffer.BlockCopy(temp_buffer, 0, buffer, offset, count);
-                return read_len;
-            }
+            using var len = new SafeStructureInOutBuffer<int>();
+            byte[] temp_buffer = new byte[count];
+            _stm.Read(temp_buffer, count, len.DangerousGetHandle());
+            int read_len = len.Result;
+            Buffer.BlockCopy(temp_buffer, 0, buffer, offset, count);
+            return read_len;
         }
     }
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        using (var buffer = new SafeStructureInOutBuffer<long>())
-        {
-            _stm.Seek(0, (int)origin, buffer.DangerousGetHandle());
-            return buffer.Result;
-        }
+        using var buffer = new SafeStructureInOutBuffer<long>();
+        _stm.Seek(0, (int)origin, buffer.DangerousGetHandle());
+        return buffer.Result;
     }
 
     public override void SetLength(long value)
@@ -227,13 +221,11 @@ public sealed class StorageWrapper : IDisposable
 
     public byte[] ReadStream(string name)
     {
-        using (var stm = OpenStream(name, STGM.READ | STGM.SHARE_EXCLUSIVE))
-        {
-            long length = stm.Length;
-            byte[] ret = new byte[stm.Length];
-            stm.Read(ret, 0, ret.Length);
-            return ret;
-        }
+        using var stm = OpenStream(name, STGM.READ | STGM.SHARE_EXCLUSIVE);
+        long length = stm.Length;
+        byte[] ret = new byte[stm.Length];
+        stm.Read(ret, 0, ret.Length);
+        return ret;
     }
 
     public IEnumerable<STATSTGWrapper> EnumElements(bool read_stream_data)

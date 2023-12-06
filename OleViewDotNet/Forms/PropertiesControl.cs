@@ -604,12 +604,10 @@ public partial class PropertiesControl : UserControl
                 if (m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid))
                 {
                     COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
-                    using (var resolver = EntryPoint.GetProxyParserSymbolResolver())
-                    {
-                        EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                        COMUtilities.GetFileName(clsid.DefaultServerName), 
-                        COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
-                    }
+                    using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
+                    COMUtilities.GetFileName(clsid.DefaultServerName),
+                    COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
                 }
             }
         }
@@ -666,19 +664,17 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            using (SaveFileDialog dlg = new())
+            using SaveFileDialog dlg = new();
+            dlg.Filter = "All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                try
                 {
-                    try
-                    {
-                        File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
-                    }
-                    catch (Exception ex)
-                    {
-                        EntryPoint.ShowError(this, ex);
-                    }
+                    File.WriteAllBytes(dlg.FileName, ipid.ToObjref());
+                }
+                catch (Exception ex)
+                {
+                    EntryPoint.ShowError(this, ex);
                 }
             }
         }

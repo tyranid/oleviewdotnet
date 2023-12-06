@@ -236,12 +236,10 @@ internal class COMPackagedEntry
                     continue;
                 }
 
-                using (var valueKey = subkey.OpenSubKeySafe(name))
+                using var valueKey = subkey.OpenSubKeySafe(name);
+                if (valueKey != null)
                 {
-                    if (valueKey != null)
-                    {
-                        result[key] = valueMap(key, packagePath, valueKey);
-                    }
+                    result[key] = valueMap(key, packagePath, valueKey);
                 }
             }
         }
@@ -289,14 +287,12 @@ internal class COMPackagedEntry
 
         foreach (var name in rootKey.GetSubKeyNames())
         {
-            using (var subkey = rootKey.OpenSubKeySafe(name))
+            using var subkey = rootKey.OpenSubKeySafe(name);
+            if (subkey == null)
             {
-                if (subkey == null)
-                {
-                    continue;
-                }
-                result.Add(new COMPackagedTypeLibVersionEntry(name, packagePath, subkey));
+                continue;
             }
+            result.Add(new COMPackagedTypeLibVersionEntry(name, packagePath, subkey));
         }
 
         return result;
@@ -335,22 +331,18 @@ internal class COMPackagedRegistry
         var packages = new Dictionary<string, COMPackagedEntry>();
         Packages = packages;
 
-        using (var packageKey = rootKey.OpenSubKeySafe("Package"))
+        using var packageKey = rootKey.OpenSubKeySafe("Package");
+        if (packageKey == null)
         {
-            if (packageKey == null)
-            {
-                return;
-            }
+            return;
+        }
 
-            foreach (var packageName in packageKey.GetSubKeyNames())
+        foreach (var packageName in packageKey.GetSubKeyNames())
+        {
+            using var packageNameKey = packageKey.OpenSubKeySafe(packageName);
+            if (packageNameKey != null)
             {
-                using (var packageNameKey = packageKey.OpenSubKeySafe(packageName))
-                {
-                    if (packageNameKey != null)
-                    {
-                        packages[packageName] = new COMPackagedEntry(packageName, packageNameKey);
-                    }
-                }
+                packages[packageName] = new COMPackagedEntry(packageName, packageNameKey);
             }
         }
     }

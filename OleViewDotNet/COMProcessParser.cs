@@ -80,26 +80,24 @@ public class COMProcessToken
     {
         PackageName = AppxPackageName.FromProcess(process);
 
-        using (var result = NtToken.OpenProcessToken(process, TokenAccessRights.Query, false))
+        using var result = NtToken.OpenProcessToken(process, TokenAccessRights.Query, false);
+        if (result.IsSuccess)
         {
-            if (result.IsSuccess)
+            NtToken token = result.Result;
+            User = token.User.Sid.Name;
+            UserSid = token.User.Sid.ToString();
+            IntegrityLevel = token.IntegrityLevel;
+            Sandboxed = token.IsSandbox;
+            AppContainer = token.AppContainer;
+            Restricted = token.Restricted;
+            Elevated = token.Elevated;
+            LowPrivilegeAppContainer = token.LowPrivilegeAppContainer;
+            var pkghostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
+            if (pkghostid != null && pkghostid.ValueType == ClaimSecurityValueType.UInt64 && pkghostid.Values.Any())
             {
-                NtToken token = result.Result;
-                User = token.User.Sid.Name;
-                UserSid = token.User.Sid.ToString();
-                IntegrityLevel = token.IntegrityLevel;
-                Sandboxed = token.IsSandbox;
-                AppContainer = token.AppContainer;
-                Restricted = token.Restricted;
-                Elevated = token.Elevated;
-                LowPrivilegeAppContainer = token.LowPrivilegeAppContainer;
-                var pkghostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
-                if (pkghostid != null && pkghostid.ValueType == ClaimSecurityValueType.UInt64 && pkghostid.Values.Any())
-                {
-                    PackageHostId = (ulong)pkghostid.Values.First();
-                }
-                AppModelPolicies = token.AppModelPolicyDictionary.Values.ToList().AsReadOnly();
+                PackageHostId = (ulong)pkghostid.Values.First();
             }
+            AppModelPolicies = token.AppModelPolicyDictionary.Values.ToList().AsReadOnly();
         }
     }
 
@@ -1750,17 +1748,15 @@ public static class COMProcessParser
                 continue;
             }
 
-            using (var buf = new SafeHGlobalBuffer(data))
+            using var buf = new SafeHGlobalBuffer(data);
+            for (int entry_index = 0; entry_index < palloc.EntriesPerPage; ++entry_index)
             {
-                for (int entry_index = 0; entry_index < palloc.EntriesPerPage; ++entry_index)
+                IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
+                if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
                 {
-                    IPIDEntryNativeInterface ipid_entry = buf.Read<T>((ulong)(entry_index * palloc.EntrySize));
-                    if ((ipid_entry.Flags != 0xF1EEF1EE) && (ipid_entry.Flags != 0))
+                    if (ipid_set.Count == 0 || ipid_set.Contains(ipid_entry.Ipid))
                     {
-                        if (ipid_set.Count == 0 || ipid_set.Contains(ipid_entry.Ipid))
-                        {
-                            entries.Add(new COMIPIDEntry(ipid_entry, Guid.Empty, process, resolver, config, registry));
-                        }
+                        entries.Add(new COMIPIDEntry(ipid_entry, Guid.Empty, process, resolver, config, registry));
                     }
                 }
             }
@@ -2242,50 +2238,46 @@ public static class COMProcessParser
     {
         try
         {
-            using (var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false))
+            using var result = NtProcess.Open(pid, ProcessAccessRights.VmRead | ProcessAccessRights.QueryInformation, false);
+            if (!result.IsSuccess)
             {
-                if (!result.IsSuccess)
-                {
-                    return null;
-                }
-
-                NtProcess process = result.Result;
-
-                if (process.Is64Bit && !Environment.Is64BitProcess)
-                {
-                    return null;
-                }
-
-                using (ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
-                    SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath)))
-                {
-                    Sid user = process.User;
-
-                    return new COMProcessEntry(
-                        pid,
-                        GetProcessFileName(process),
-                        ParseIPIDEntries(process, resolver, config, registry, ipids),
-                        process.Is64Bit,
-                        GetProcessAppId(process, resolver),
-                        GetProcessAccessSecurityDescriptor(process, resolver),
-                        GetLrpcSecurityDescriptor(process, resolver),
-                        ReadString(process, resolver, "gwszLRPCEndPoint"),
-                        ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
-                        ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
-                        ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
-                        ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
-                        ReadPointer(process, resolver, "gAccessControl"),
-                        ReadPointer(process, resolver, "ghwndOleMainThread"),
-                        GetRegisteredClasses(process, resolver, config, registry),
-                        ReadActivationFilterVTable(process, resolver),
-                        ReadClients(process, resolver, config, registry),
-                        ReadRuntimeActivatableClasses(process, resolver, config, registry),
-                        new COMProcessToken(process),
-                        ReadActivationContext(process, resolver, config, registry),
-                        ReadPointer(process, resolver, "g_pMTAEmptyCtx"),
-                        ReadGuid(process, resolver, "CProcessSecret::s_guidOle32Secret"));
-                }
+                return null;
             }
+
+            NtProcess process = result.Result;
+
+            if (process.Is64Bit && !Environment.Is64BitProcess)
+            {
+                return null;
+            }
+
+            using ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
+                SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath));
+            Sid user = process.User;
+
+            return new COMProcessEntry(
+                pid,
+                GetProcessFileName(process),
+                ParseIPIDEntries(process, resolver, config, registry, ipids),
+                process.Is64Bit,
+                GetProcessAppId(process, resolver),
+                GetProcessAccessSecurityDescriptor(process, resolver),
+                GetLrpcSecurityDescriptor(process, resolver),
+                ReadString(process, resolver, "gwszLRPCEndPoint"),
+                ReadEnum<EOLE_AUTHENTICATION_CAPABILITIES>(process, resolver, "gCapabilities"),
+                ReadEnum<RPC_AUTHN_LEVEL>(process, resolver, "gAuthnLevel"),
+                ReadEnum<RPC_IMP_LEVEL>(process, resolver, "gImpLevel"),
+                ReadEnum<GLOBALOPT_UNMARSHALING_POLICY_VALUES>(process, resolver, "g_GLBOPT_UnmarshalingPolicy"),
+                ReadPointer(process, resolver, "gAccessControl"),
+                ReadPointer(process, resolver, "ghwndOleMainThread"),
+                GetRegisteredClasses(process, resolver, config, registry),
+                ReadActivationFilterVTable(process, resolver),
+                ReadClients(process, resolver, config, registry),
+                ReadRuntimeActivatableClasses(process, resolver, config, registry),
+                new COMProcessToken(process),
+                ReadActivationContext(process, resolver, config, registry),
+                ReadPointer(process, resolver, "g_pMTAEmptyCtx"),
+                ReadGuid(process, resolver, "CProcessSecret::s_guidOle32Secret"));
         }
         catch (NtException)
         {

@@ -225,11 +225,9 @@ public partial class ObjectInformation : UserControl
     {
         try
         {
-            using (MemoryStream stm = new())
-            {
-                COMUtilities.OleSaveToStream(m_pObject, stm);
-                EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Stream Editor", stm.ToArray()));
-            }
+            using MemoryStream stm = new();
+            COMUtilities.OleSaveToStream(m_pObject, stm);
+            EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, "Stream Editor", stm.ToArray()));
         }
         catch (Exception ex)
         {

@@ -39,18 +39,16 @@ public class ComClientGraphBuilder
             return true;
         }
 
-        using (var result = NtProcess.Open(ipid.ProcessId, ProcessAccessRights.QueryLimitedInformation, false))
+        using var result = NtProcess.Open(ipid.ProcessId, ProcessAccessRights.QueryLimitedInformation, false);
+        if (!result.IsSuccess)
         {
-            if (!result.IsSuccess)
-            {
-                return true;
-            }
+            return true;
+        }
 
-            COMProcessToken token = new(result.Result);
-            if (token.UserSid == string.Empty)
-            {
-                return true;
-            }
+        COMProcessToken token = new(result.Result);
+        if (token.UserSid == string.Empty)
+        {
+            return true;
         }
 
         return false;
@@ -109,16 +107,14 @@ public class ComClientGraphBuilder
         {
             if (!tokens.ContainsKey(pair.Key))
             {
-                using (var result = NtProcess.Open(pair.Key, ProcessAccessRights.QueryLimitedInformation, false))
+                using var result = NtProcess.Open(pair.Key, ProcessAccessRights.QueryLimitedInformation, false);
+                if (result.IsSuccess)
                 {
-                    if (result.IsSuccess)
-                    {
-                        tokens[pair.Key] = new COMProcessToken(result.Result);
-                    }
-                    else
-                    {
-                        tokens[pair.Key] = new COMProcessToken();
-                    }
+                    tokens[pair.Key] = new COMProcessToken(result.Result);
+                }
+                else
+                {
+                    tokens[pair.Key] = new COMProcessToken();
                 }
             }
         }

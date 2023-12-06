@@ -741,19 +741,17 @@ public static class COMUtilities
 
     public static COMRegistryEntrySource GetSource(this RegistryKey key)
     {
-        using (NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle(), false))
+        using NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle(), false);
+        string full_path = native_key.FullPath;
+        if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
         {
-            string full_path = native_key.FullPath;
-            if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
-            {
-                return COMRegistryEntrySource.LocalMachine;
-            }
-            else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
-            {
-                return COMRegistryEntrySource.User;
-            }
-            return COMRegistryEntrySource.Unknown;
+            return COMRegistryEntrySource.LocalMachine;
         }
+        else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
+        {
+            return COMRegistryEntrySource.User;
+        }
+        return COMRegistryEntrySource.Unknown;
     }
 
     public static RegistryKey OpenSubKeySafe(this RegistryKey rootKey, string keyName)
@@ -1567,41 +1565,37 @@ public static class COMUtilities
 
     public static void OleSaveToStream(object obj, Stream stm)
     {
-        using (BinaryWriter writer = new(stm))
-        {
-            Guid clsid = GetObjectClass(obj);
+        using BinaryWriter writer = new(stm);
+        Guid clsid = GetObjectClass(obj);
 
-            writer.Write(clsid.ToByteArray());
+        writer.Write(clsid.ToByteArray());
 
-            SaveObjectToStream(obj, stm);
-        }
+        SaveObjectToStream(obj, stm);
     }
 
     public static object OleLoadFromStream(Stream stm, out Guid clsid)
     {
-        using (BinaryReader reader = new(stm))
+        using BinaryReader reader = new(stm);
+        clsid = new Guid(reader.ReadBytes(16));
+
+        Guid unk = COMInterfaceEntry.IID_IUnknown;
+        IntPtr pObj;
+        object ret;
+
+        int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.SERVER,
+            ref unk, out pObj);
+
+        if (iError != 0)
         {
-            clsid = new Guid(reader.ReadBytes(16));
-
-            Guid unk = COMInterfaceEntry.IID_IUnknown;
-            IntPtr pObj;
-            object ret;
-
-            int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.SERVER,
-                ref unk, out pObj);
-
-            if (iError != 0)
-            {
-                Marshal.ThrowExceptionForHR(iError);
-            }
-
-            ret = Marshal.GetObjectForIUnknown(pObj);
-            Marshal.Release(pObj);
-
-            LoadObjectFromStream(ret, stm);
-
-            return ret;
+            Marshal.ThrowExceptionForHR(iError);
         }
+
+        ret = Marshal.GetObjectForIUnknown(pObj);
+        Marshal.Release(pObj);
+
+        LoadObjectFromStream(ret, stm);
+
+        return ret;
     }
 
     public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
@@ -1843,10 +1837,8 @@ public static class COMUtilities
 
     public static bool HasSubkey(this RegistryKey key, string name)
     {
-        using (RegistryKey subkey = key.OpenSubKey(name))
-        {
-            return subkey != null;
-        }
+        using RegistryKey subkey = key.OpenSubKey(name);
+        return subkey != null;
     }
 
     internal static int GetSafeHashCode<T>(this T obj) where T : class
@@ -2100,16 +2092,14 @@ public static class COMUtilities
     internal static COMRegistry LoadRegistry(IWin32Window window,
         Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker)
     {
-        using (WaitingDialog loader = new(worker))
+        using WaitingDialog loader = new(worker);
+        if (loader.ShowDialog(window) == DialogResult.OK)
         {
-            if (loader.ShowDialog(window) == DialogResult.OK)
-            {
-                return loader.Result as COMRegistry;
-            }
-            else
-            {
-                throw loader.Error;
-            }
+            return loader.Result as COMRegistry;
+        }
+        else
+        {
+            throw loader.Error;
         }
     }
 
@@ -2134,38 +2124,34 @@ public static class COMUtilities
 
     internal static Assembly LoadTypeLib(IWin32Window window, string path)
     {
-        using (WaitingDialog dlg = new((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
+        using WaitingDialog dlg = new((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s);
+        dlg.Text = string.Format("Loading TypeLib {0}", path);
+        dlg.CancelEnabled = false;
+        if (dlg.ShowDialog(window) == DialogResult.OK)
         {
-            dlg.Text = string.Format("Loading TypeLib {0}", path);
-            dlg.CancelEnabled = false;
-            if (dlg.ShowDialog(window) == DialogResult.OK)
-            {
-                return (Assembly)dlg.Result;
-            }
-            else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
-            {
-                EntryPoint.ShowError(window, dlg.Error);
-            }
-            return null;
+            return (Assembly)dlg.Result;
         }
+        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        {
+            EntryPoint.ShowError(window, dlg.Error);
+        }
+        return null;
     }
 
     internal static Assembly LoadTypeLib(IWin32Window window, ITypeLib typelib)
     {
-        using (WaitingDialog dlg = new((progress, token) => LoadTypeLib(typelib, progress), s => s))
+        using WaitingDialog dlg = new((progress, token) => LoadTypeLib(typelib, progress), s => s);
+        dlg.Text = "Loading TypeLib";
+        dlg.CancelEnabled = false;
+        if (dlg.ShowDialog(window) == DialogResult.OK)
         {
-            dlg.Text = "Loading TypeLib";
-            dlg.CancelEnabled = false;
-            if (dlg.ShowDialog(window) == DialogResult.OK)
-            {
-                return (Assembly)dlg.Result;
-            }
-            else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
-            {
-                EntryPoint.ShowError(window, dlg.Error);
-            }
-            return null;
+            return (Assembly)dlg.Result;
         }
+        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        {
+            EntryPoint.ShowError(window, dlg.Error);
+        }
+        return null;
     }
 
     internal static COMProcessParserConfig GetProcessParserConfig()
@@ -2186,19 +2172,17 @@ public static class COMUtilities
 
     internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
     {
-        using (WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s))
+        using WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s);
+        dlg.Text = "Loading Processes";
+        if (dlg.ShowDialog(window) == DialogResult.OK)
         {
-            dlg.Text = "Loading Processes";
-            if (dlg.ShowDialog(window) == DialogResult.OK)
-            {
-                return (IEnumerable<COMProcessEntry>)dlg.Result;
-            }
-            else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
-            {
-                EntryPoint.ShowError(window, dlg.Error);
-            }
-            return null;
+            return (IEnumerable<COMProcessEntry>)dlg.Result;
         }
+        else if ((dlg.Error != null) && !(dlg.Error is OperationCanceledException))
+        {
+            EntryPoint.ShowError(window, dlg.Error);
+        }
+        return null;
     }
 
     internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<int> pids, IWin32Window window, COMRegistry registry)
@@ -2264,14 +2248,12 @@ public static class COMUtilities
 
     internal static bool QueryAllInterfaces(IWin32Window parent, IEnumerable<COMCLSIDEntry> clsids, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
     {
-        using (WaitingDialog dlg = new(
+        using WaitingDialog dlg = new(
             (p, t) => COMUtilities.QueryAllInterfaces(clsids.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),
                         p, t, concurrent_queries),
-            s => s))
-        {
-            dlg.Text = "Querying Interfaces";
-            return dlg.ShowDialog(parent) == DialogResult.OK;
-        }
+            s => s);
+        dlg.Text = "Querying Interfaces";
+        return dlg.ShowDialog(parent) == DialogResult.OK;
     }
 
     internal static string FormatGuid(this Guid guid)
@@ -2377,28 +2359,26 @@ public static class COMUtilities
             int repeat_count = 5;
             while (repeat_count > 0)
             {
-                using (SafeHGlobalBuffer buf = new(bytes_needed))
+                using SafeHGlobalBuffer buf = new(bytes_needed);
+                if (EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, buf, buf.Length, out bytes_needed, out service_count, IntPtr.Zero, null))
                 {
-                    if (EnumServicesStatusEx(hSC, 0, SERVICE_WIN32, SERVICE_ACTIVE, buf, buf.Length, out bytes_needed, out service_count, IntPtr.Zero, null))
+                    ENUM_SERVICE_STATUS_PROCESS[] services = new ENUM_SERVICE_STATUS_PROCESS[service_count];
+                    buf.ReadArray(0, services, 0, service_count);
+                    foreach (var service in services)
                     {
-                        ENUM_SERVICE_STATUS_PROCESS[] services = new ENUM_SERVICE_STATUS_PROCESS[service_count];
-                        buf.ReadArray(0, services, 0, service_count);
-                        foreach (var service in services)
+                        string name = service.GetName();
+                        if (!string.IsNullOrWhiteSpace(name))
                         {
-                            string name = service.GetName();
-                            if (!string.IsNullOrWhiteSpace(name))
+                            if (!ret.ContainsKey(service.ServiceStatusProcess.dwProcessId))
                             {
-                                if (!ret.ContainsKey(service.ServiceStatusProcess.dwProcessId))
-                                {
-                                    ret[service.ServiceStatusProcess.dwProcessId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                                }
-
-                                ret[service.ServiceStatusProcess.dwProcessId].Add(name);
+                                ret[service.ServiceStatusProcess.dwProcessId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                             }
+
+                            ret[service.ServiceStatusProcess.dwProcessId].Add(name);
                         }
                     }
-                    --repeat_count;
                 }
+                --repeat_count;
             }
         }
         finally
@@ -2414,10 +2394,8 @@ public static class COMUtilities
 
     internal static bool IsAdministrator()
     {
-        using (WindowsIdentity id = WindowsIdentity.GetCurrent())
-        {
-            return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
-        }
+        using WindowsIdentity id = WindowsIdentity.GetCurrent();
+        return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
     }
 
     internal static string GetCOMDllName()
@@ -2644,10 +2622,8 @@ public static class COMUtilities
 
     public static string GetFileMD5(string file)
     {
-        using (var stm = File.OpenRead(file))
-        {
-            return BitConverter.ToString(MD5Cng.Create().ComputeHash(stm)).Replace("-", string.Empty);
-        }
+        using var stm = File.OpenRead(file);
+        return BitConverter.ToString(MD5Cng.Create().ComputeHash(stm)).Replace("-", string.Empty);
     }
 
     public static T GetGuidEntry<T>(this IDictionary<Guid, T> dict, Guid guid)
@@ -3359,24 +3335,22 @@ public static class COMUtilities
             return string.Empty;
         }
 
-        using (var buffer = new SafeHGlobalBuffer(length))
+        using var buffer = new SafeHGlobalBuffer(length);
+        result = PackageIdFromFullName(packageId,
+        0, ref length, buffer);
+        if (result != 0)
         {
-            result = PackageIdFromFullName(packageId,
-            0, ref length, buffer);
-            if (result != 0)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder builder = new(260);
-            length = builder.Capacity;
-            result = GetPackagePath(buffer, 0, ref length, builder);
-            if (result != 0)
-            {
-                return string.Empty;
-            }
-
-            return builder.ToString();
+            return string.Empty;
         }
+
+        StringBuilder builder = new(260);
+        length = builder.Capacity;
+        result = GetPackagePath(buffer, 0, ref length, builder);
+        if (result != 0)
+        {
+            return string.Empty;
+        }
+
+        return builder.ToString();
     }
 }

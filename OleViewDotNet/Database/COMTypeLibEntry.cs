@@ -36,16 +36,14 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
             int locale_int;
             if (int.TryParse(locale, out locale_int))
             {
-                using (RegistryKey subkey = key.OpenSubKey(locale))
+                using RegistryKey subkey = key.OpenSubKey(locale);
+                if (subkey != null)
                 {
-                    if (subkey != null)
+                    COMTypeLibVersionEntry entry = new(m_registry,
+                        name, version, TypelibId, locale_int, subkey);
+                    if (!string.IsNullOrWhiteSpace(entry.NativePath))
                     {
-                        COMTypeLibVersionEntry entry = new(m_registry, 
-                            name, version, TypelibId, locale_int, subkey);
-                        if (!string.IsNullOrWhiteSpace(entry.NativePath))
-                        {
-                            entries.Add(entry);
-                        }
+                        entries.Add(entry);
                     }
                 }
             }
@@ -58,12 +56,10 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         List<COMTypeLibVersionEntry> ret = new();
         foreach (string version in key.GetSubKeyNames())
         {
-            using (RegistryKey subKey = key.OpenSubKey(version))
+            using RegistryKey subKey = key.OpenSubKey(version);
+            if (subKey != null)
             {
-                if (subKey != null)
-                {
-                    ret.AddRange(LoadFromLocales(subKey.GetValue(null, string.Empty).ToString(), version, subKey));
-                }
+                ret.AddRange(LoadFromLocales(subKey.GetValue(null, string.Empty).ToString(), version, subKey));
             }
         }
         return ret;

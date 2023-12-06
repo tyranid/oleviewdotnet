@@ -50,14 +50,12 @@ public partial class SettingsForm : Form
 
     private void btnBrowseDbgHelpPath_Click(object sender, EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "DBGHELP DLL|dbghelp.dll";
+        dlg.Multiselect = false;
+        if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            dlg.Filter = "DBGHELP DLL|dbghelp.dll";
-            dlg.Multiselect = false;
-            if (dlg.ShowDialog(this) == DialogResult.OK)
-            {
-                textBoxDbgHelp.Text = dlg.FileName;
-            }
+            textBoxDbgHelp.Text = dlg.FileName;
         }
     }
 
@@ -66,12 +64,10 @@ public partial class SettingsForm : Form
         bool valid_dll = false;
         try
         {
-            using (SafeLoadLibraryHandle lib = SafeLoadLibraryHandle.LoadLibrary(textBoxDbgHelp.Text))
+            using SafeLoadLibraryHandle lib = SafeLoadLibraryHandle.LoadLibrary(textBoxDbgHelp.Text);
+            if (lib.GetProcAddress("SymInitializeW") != IntPtr.Zero)
             {
-                if (lib.GetProcAddress("SymInitializeW") != IntPtr.Zero)
-                {
-                    valid_dll = true;
-                }
+                valid_dll = true;
             }
         }
         catch(Win32Exception)

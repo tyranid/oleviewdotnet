@@ -49,10 +49,7 @@ partial class WaitingDialog : Form
 
     public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func, Func<string, string> format_label)
     {
-        if (format_label == null)
-        {
-            format_label = s => string.Format("Currently Processing {0}. Please Wait.", s);
-        }
+        format_label ??= s => string.Format("Currently Processing {0}. Please Wait.", s);
         m_cancellation = new CancellationTokenSource();
         CancellationToken token = m_cancellation.Token;
         m_progress = new ReportProgress(SetProgress, token, format_label);

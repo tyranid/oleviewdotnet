@@ -41,24 +41,22 @@ public partial class DiffRegistryForm : Form
 
     private void OpenRegistry(ComboBox comboBox)
     {
-        using (OpenFileDialog dlg = new())
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
+        if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            try
             {
-                try
-                {
-                    COMRegistry registry = COMUtilities.LoadRegistry(this, dlg.FileName);
-                    comboBox.Items.Add(registry);
-                    comboBox.SelectedItem = registry;
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                COMRegistry registry = COMUtilities.LoadRegistry(this, dlg.FileName);
+                comboBox.Items.Add(registry);
+                comboBox.SelectedItem = registry;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

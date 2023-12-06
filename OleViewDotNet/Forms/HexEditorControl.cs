@@ -69,40 +69,36 @@ public partial class HexEditorControl : UserControl
 
     private void loadFromFileToolStripMenuItem_Click(object sender, System.EventArgs e)
     {
-        using (OpenFileDialog dlg = new())
-        {
-            dlg.Filter = "All Files (*.*)|*.*";
+        using OpenFileDialog dlg = new();
+        dlg.Filter = "All Files (*.*)|*.*";
 
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+        {
+            try
             {
-                try
-                {
-                    Bytes = File.ReadAllBytes(dlg.FileName);
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                Bytes = File.ReadAllBytes(dlg.FileName);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
 
     private void saveToFileToolStripMenuItem_Click(object sender, System.EventArgs e)
     {
-        using (SaveFileDialog dlg = new())
-        {
-            dlg.Filter = "All Files (*.*)|*.*";
+        using SaveFileDialog dlg = new();
+        dlg.Filter = "All Files (*.*)|*.*";
 
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+        {
+            try
             {
-                try
-                {
-                    File.WriteAllBytes(dlg.FileName, Bytes);
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                File.WriteAllBytes(dlg.FileName, Bytes);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
