@@ -2706,8 +2706,8 @@ public static class COMUtilities
     public static string GetPackagePath(string packageId)
     {
         int length = 0;
-        int result = NativeMethods.PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
-        if (result != 122)
+        Win32Error result = NativeMethods.PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
+        if (result != Win32Error.ERROR_INSUFFICIENT_BUFFER)
         {
             return string.Empty;
         }
@@ -2723,7 +2723,7 @@ public static class COMUtilities
         StringBuilder builder = new(260);
         length = builder.Capacity;
         result = NativeMethods.GetPackagePath(buffer, 0, ref length, builder);
-        if (result != 0)
+        if (result != Win32Error.SUCCESS)
         {
             return string.Empty;
         }

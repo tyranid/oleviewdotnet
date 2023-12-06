@@ -166,10 +166,27 @@ internal static class NativeMethods
     );
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    public static extern int GetPackagePath(
+    public static extern Win32Error GetPackagePath(
       SafeBuffer packageId,
       int reserved,
       ref int pathLength,
       StringBuilder path
     );
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    public static extern Win32Error PackageIdFromFullName(string packageFullName, int flags,
+        ref int bufferLength,
+        SafeHGlobalBuffer buffer
+    );
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    public static extern Win32Error GetPackageFullName(
+        SafeKernelObjectHandle hProcess,
+        ref int packageFullNameLength,
+        StringBuilder packageFullName
+    );
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+    public static extern Win32Error PackageFullNameFromId(PACKAGE_ID_ALLOC packageId,
+        ref int packageFullNameLength, StringBuilder packageFullName);
 }
