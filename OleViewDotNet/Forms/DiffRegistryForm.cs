@@ -83,10 +83,7 @@ public partial class DiffRegistryForm : Form
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-        COMRegistry left = comboBoxLeft.SelectedItem as COMRegistry;
-        COMRegistry right = comboBoxRight.SelectedItem as COMRegistry;
-
-        if (left == null || right == null)
+        if (comboBoxLeft.SelectedItem is not COMRegistry left || comboBoxRight.SelectedItem is not COMRegistry right)
         {
             MessageBox.Show(this, "Please Select Two Registries", "Select Registries", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

@@ -296,7 +296,7 @@ public static class EntryPoint
                     AccessMask valid_access = access ? 0x7 : 0x1F;
                     if (has_container)
                     {
-                        valid_access |= (access ? 0x20 : 0x60);
+                        valid_access |= access ? 0x20 : 0x60;
                     }
 
                     SecurityDescriptorViewerControl control = new();

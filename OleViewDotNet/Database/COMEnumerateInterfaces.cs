@@ -26,77 +26,8 @@ using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
-
-public class COMInterfaceInstance : IXmlSerializable
-{
-    private COMRegistry m_registry;
-
-    public Guid Iid { get; private set; }
-    public string Module { get; private set; }
-    public long VTableOffset { get; private set; }
-    internal COMRegistry Database => m_registry;
-    public string Name
-    {
-        get
-        {
-            if (m_registry == null || !m_registry.InterfacesToNames.ContainsKey(Iid))
-            {
-                return string.Empty;
-            }
-            return m_registry.InterfacesToNames[Iid];
-        }
-    }
-    public COMInterfaceEntry InterfaceEntry => m_registry?.Interfaces.GetGuidEntry(Iid);
-
-    public COMInterfaceInstance(Guid iid, string module, long vtable_offset, COMRegistry registry) : this(registry)
-    {
-        Iid = iid;
-        Module = module;
-        VTableOffset = vtable_offset;
-    }
-
-    public COMInterfaceInstance(Guid iid, COMRegistry registry) : this(iid, null, 0, registry)
-    {
-    }
-
-    public COMInterfaceInstance(COMRegistry registry)
-    {
-        m_registry = registry;
-    }
-
-    public override string ToString()
-    {
-        if (!string.IsNullOrWhiteSpace(Module))
-        {
-            return string.Format("{0},{1},{2}", Iid, Module, VTableOffset);
-        }
-        return Iid.ToString();
-    }
-
-    XmlSchema IXmlSerializable.GetSchema()
-    {
-        return null;
-    }
-
-    void IXmlSerializable.ReadXml(XmlReader reader)
-    {
-        Iid = reader.ReadGuid("iid");
-        Module = reader.GetAttribute("mod");
-        VTableOffset = reader.ReadLong("ofs");
-    }
-
-    void IXmlSerializable.WriteXml(XmlWriter writer)
-    {
-        writer.WriteGuid("iid", Iid);
-        writer.WriteOptionalAttributeString("mod", Module);
-        writer.WriteLong("ofs", VTableOffset);
-    }
-}
 
 public class COMEnumerateInterfaces
 {
@@ -179,8 +110,6 @@ public class COMEnumerateInterfaces
 
     private void GetInterfacesInternal(NtToken token)
     {
-        IntPtr punk = IntPtr.Zero;
-        IntPtr pfactory = IntPtr.Zero;
         Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
         CLSCTX clsctx = _clsctx;
         if (token != null)
@@ -190,6 +119,7 @@ public class COMEnumerateInterfaces
 
         using var imp = token?.Impersonate();
         int hr = 0;
+        IntPtr pfactory;
         if (_winrt_component)
         {
             hr = COMUtilities.RoGetActivationFactory(_activatable_classid, ref IID_IUnknown, out pfactory);
@@ -204,6 +134,7 @@ public class COMEnumerateInterfaces
             throw new Win32Exception(hr);
         }
 
+        IntPtr punk;
         if (_winrt_component)
         {
             hr = COMUtilities.RoActivateInstance(_activatable_classid, out punk);

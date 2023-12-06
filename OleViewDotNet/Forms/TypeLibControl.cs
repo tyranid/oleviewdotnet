@@ -230,19 +230,17 @@ public partial class TypeLibControl : UserControl
     private string GetTextFromTag(object tag)
     {
         var type = tag as Type;
-        var proxy = tag as NdrComProxyDefinition;
-        NdrComplexTypeReference str = tag as NdrComplexTypeReference;
 
         if (type != null)
         {
             return COMUtilities.FormatComType(type);
         }
-        else if (proxy != null)
+        else if (tag is NdrComProxyDefinition proxy)
         {
             INdrFormatter formatter = GetNdrFormatter(true);
             return formatter.FormatComProxy(proxy);
         }
-        else if (str != null)
+        else if (tag is NdrComplexTypeReference str)
         {
             INdrFormatter formatter = GetNdrFormatter(false);
             return formatter.FormatComplexType(str);
@@ -272,8 +270,7 @@ public partial class TypeLibControl : UserControl
 
     private void copyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        ListView list = sender as ListView;
-        if (list != null && list.SelectedItems.Count > 0)
+        if (sender is ListView list && list.SelectedItems.Count > 0)
         {
             ListViewItem item = listViewInterfaces.SelectedItems[0];
             COMUtilities.CopyTextToClipboard(item.Text);
@@ -282,11 +279,9 @@ public partial class TypeLibControl : UserControl
 
     private void CopyGuid(object sender, GuidFormat copy_type)
     {
-        ListView list = sender as ListView;
-        if (list != null && list.SelectedItems.Count > 0)
+        if (sender is ListView list && list.SelectedItems.Count > 0)
         {
-            ListViewItemWithGuid item = list.SelectedItems[0] as ListViewItemWithGuid;
-            if (item != null)
+            if (list.SelectedItems[0] is ListViewItemWithGuid item)
             {
                 COMUtilities.CopyGuidToClipboard(item.Guid, copy_type);
             }

@@ -102,7 +102,7 @@ public partial class ROTViewer : UserControl
     {
         if (listViewROT.SelectedItems.Count != 0)
         {
-            MonikerInfo info = (MonikerInfo)(listViewROT.SelectedItems[0].Tag);
+            MonikerInfo info = (MonikerInfo)listViewROT.SelectedItems[0].Tag;
 
             Dictionary<string, string> props = new();
             props.Add("Display Name", info.strDisplayName);

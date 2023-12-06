@@ -87,8 +87,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
             return true;
         }
 
-        COMProgIDEntry right = obj as COMProgIDEntry;
-        if (right == null)
+        if (obj is not COMProgIDEntry right)
         {
             return false;
         }

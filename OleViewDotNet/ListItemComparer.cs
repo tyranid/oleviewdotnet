@@ -96,9 +96,7 @@ public class ListItemComparer : IComparer
     {
         if (view != null)
         {
-            ListItemComparer comparer = view.ListViewItemSorter as ListItemComparer;
-
-            if (comparer != null)
+            if (view.ListViewItemSorter is ListItemComparer comparer)
             {
                 if (selected_column != comparer.Column)
                 {

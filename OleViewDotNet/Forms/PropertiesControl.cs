@@ -524,8 +524,7 @@ public partial class PropertiesControl : UserControl
 
     private void copyToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        ListView view = sender as ListView;
-        if (view != null && view.SelectedIndices.Count > 0)
+        if (sender is ListView view && view.SelectedIndices.Count > 0)
         {
             ListViewItem item = view.SelectedItems[0];
             COMUtilities.CopyTextToClipboard(item.Text);
@@ -560,11 +559,10 @@ public partial class PropertiesControl : UserControl
     private ListView GetListViewForMenu(object sender)
     {
         ContextMenuStrip menu = sender as ContextMenuStrip;
-        ToolStripMenuItem item = sender as ToolStripMenuItem;
 
-        if (item != null)
+        if (sender is ToolStripMenuItem item)
         {
-            menu = item.Owner as ContextMenuStrip; 
+            menu = item.Owner as ContextMenuStrip;
         }
 
         if (menu != null)
@@ -705,8 +703,7 @@ public partial class PropertiesControl : UserControl
             return;
         }
 
-        COMCLSIDEntry clsid = listViewElevationVSOs.SelectedItems[0].Tag as COMCLSIDEntry;
-        if (clsid != null)
+        if (listViewElevationVSOs.SelectedItems[0].Tag is COMCLSIDEntry clsid)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
                     clsid.Name, clsid));
@@ -715,8 +712,7 @@ public partial class PropertiesControl : UserControl
 
     private void listView_SelectedIndexChanged(object sender, EventArgs e)
     {
-        ListView list_view = sender as ListView;
-        if (list_view != null && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
         {
             EntryPoint.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
         }

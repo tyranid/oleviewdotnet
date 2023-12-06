@@ -73,8 +73,7 @@ public class COMCategory : IXmlSerializable, IComGuid
             return true;
         }
 
-        COMCategory right = obj as COMCategory;
-        if (right == null)
+        if (obj is not COMCategory right)
         {
             return false;
         }

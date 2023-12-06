@@ -49,8 +49,7 @@ public partial class StandardMarshalEditorControl : UserControl
             textBoxProcessName.Text = "N/A";
         }
 
-        COMObjRefHandler handler = objref as COMObjRefHandler;
-        if (handler != null)
+        if (objref is COMObjRefHandler handler)
         {
             textBoxHandlerClsid.Text = handler.Clsid.FormatGuid();
             COMCLSIDEntry ent = registry.MapClsidToEntry(handler.Clsid);
@@ -88,8 +87,7 @@ public partial class StandardMarshalEditorControl : UserControl
 
     private void listView_SelectedIndexChanged(object sender, EventArgs e)
     {
-        ListView list_view = sender as ListView;
-        if (list_view != null && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
         {
             EntryPoint.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
         }

@@ -1297,11 +1297,10 @@ public partial class COMRegistryViewer : UserControl
                 contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                 contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
 
-                COMProgIDEntry progid = node.Tag as COMProgIDEntry;
                 COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
                 COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
                 ICOMClassEntry entry = node.Tag as ICOMClassEntry;
-                if (progid != null)
+                if (node.Tag is COMProgIDEntry progid)
                 {
                     clsid = m_registry.MapClsidToEntry(progid.Clsid);
                     entry = clsid;
@@ -1509,9 +1508,8 @@ public partial class COMRegistryViewer : UserControl
     {
         try
         {
-            COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
             FilterResult result = filter.Filter(node.Tag);
-            if (result == FilterResult.None && clsid != null && clsid.InterfacesLoaded)
+            if (result == FilterResult.None && node.Tag is COMCLSIDEntry clsid && clsid.InterfacesLoaded)
             {
                 foreach (COMInterfaceEntry intf in clsid.Interfaces.Concat(clsid.FactoryInterfaces).Select(i => m_registry.MapIidToInterface(i.Iid)))
                 {
@@ -1841,20 +1839,18 @@ public partial class COMRegistryViewer : UserControl
             if (ent == null)
             {
                 COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                COMProgIDEntry progid = node.Tag as COMProgIDEntry;
-                COMInterfaceEntry intf = node.Tag as COMInterfaceEntry;
-                if(progid != null)
+                if (node.Tag is COMProgIDEntry progid)
                 {
                     clsid = m_registry.MapClsidToEntry(progid.Clsid);
                 }
 
-                if(clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
+                if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                 {
                     ent = m_registry.Typelibs[clsid.TypeLib].Versions.First();
                     selected_guid = clsid.Clsid;
                 }
 
-                if (intf != null && m_registry.Typelibs.ContainsKey(intf.TypeLib))
+                if (node.Tag is COMInterfaceEntry intf && m_registry.Typelibs.ContainsKey(intf.TypeLib))
                 {
                     ent = m_registry.GetTypeLibVersionEntry(intf.TypeLib, intf.TypeLibVersion);
                     selected_guid = intf.Iid;
@@ -1976,9 +1972,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void consoleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        ToolStripMenuItem item = sender as ToolStripMenuItem;
-        COMCLSIDEntry ent = GetSelectedClassEntry() as COMCLSIDEntry;
-        if (ent != null && item != null && item.Tag is string)
+        if (GetSelectedClassEntry() is COMCLSIDEntry ent && sender is ToolStripMenuItem item && item.Tag is string)
         {
             await CreateInSession(ent, (string)item.Tag);
         }
@@ -2086,8 +2080,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void instanceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        COMCLSIDEntry clsid = GetSelectedClassEntry() as COMCLSIDEntry;
-        if (clsid != null)
+        if (GetSelectedClassEntry() is COMCLSIDEntry clsid)
         {
             await CreateElevated(clsid, false);
         }
@@ -2095,8 +2088,7 @@ public partial class COMRegistryViewer : UserControl
 
     private async void classFactoryToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        COMCLSIDEntry clsid = GetSelectedClassEntry() as COMCLSIDEntry;
-        if (clsid != null)
+        if (GetSelectedClassEntry() is COMCLSIDEntry clsid)
         {
             await CreateElevated(clsid, true);
         }
@@ -2287,11 +2279,10 @@ public partial class COMRegistryViewer : UserControl
         TreeNode node = treeComRegistry.SelectedNode;
         if (node != null)
         {
-            COMInterfaceEntry ent = node.Tag as COMInterfaceEntry;
-            if (ent != null && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(ent.Iid))
+            if (node.Tag is COMInterfaceEntry ent && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(ent.Iid))
             {
                 Assembly asm = COMUtilities.RuntimeInterfaceMetadata[ent.Iid].Assembly;
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name, 
+                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
                     COMUtilities.RuntimeInterfaceMetadata[ent.Iid].Assembly, ent.Iid, false));
             }
         }
@@ -2325,8 +2316,7 @@ public partial class COMRegistryViewer : UserControl
     {
         try
         {
-            COMRuntimeClassEntry runtime_class = GetSelectedClassEntry() as COMRuntimeClassEntry;
-            if (runtime_class != null)
+            if (GetSelectedClassEntry() is COMRuntimeClassEntry runtime_class)
             {
                 IRuntimeBroker broker = CreateBroker(per_user);
                 object comObj;

@@ -24,29 +24,6 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public enum IdentityType
-{
-    ActivateAsActivator = 0,
-    RunAs,
-    ActivateAsPackage,
-    SessionVirtual,
-    SessionUser,
-    ActivateAsActivatingUser
-}
-
-public enum ServerType
-{
-    NormalExe = 0,
-    ExeService = 1,
-    SvchostService = 2
-}
-
-public enum InstancingType
-{
-    SingleInstance = 0,
-    MultipleInstances = 1
-}
-
 public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
 {
     #region Private Members
@@ -139,8 +116,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
             return true;
         }
 
-        COMRuntimeServerEntry right = obj as COMRuntimeServerEntry;
-        if (right == null)
+        if (obj is not COMRuntimeServerEntry right)
         {
             return false;
         }

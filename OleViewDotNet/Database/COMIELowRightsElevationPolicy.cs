@@ -53,8 +53,7 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
             return true;
         }
 
-        COMIELowRightsElevationPolicy right = obj as COMIELowRightsElevationPolicy;
-        if (right == null)
+        if (obj is not COMIELowRightsElevationPolicy right)
         {
             return false;
         }

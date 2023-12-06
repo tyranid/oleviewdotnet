@@ -49,9 +49,7 @@ public partial class DocumentForm : DockContent
 
         foreach (IDockContent c in content)
         {
-            Form frm = c as Form;
-
-            if ((frm != null) && (frm != this))
+            if ((c is Form frm) && (frm != this))
             {
                 frm.Close();
             }

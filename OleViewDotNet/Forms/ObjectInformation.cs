@@ -87,8 +87,7 @@ public partial class ObjectInformation : UserControl
         try
         {
             /* Also add IObjectSafety information if available */
-            IObjectSafety objSafety = m_pObject as IObjectSafety;
-            if (objSafety != null)
+            if (m_pObject is IObjectSafety objSafety)
             {
                 Guid iid = COMInterfaceEntry.IID_IDispatch;
 
@@ -239,8 +238,7 @@ public partial class ObjectInformation : UserControl
     {
         if (listViewInterfaces.SelectedItems.Count > 0)
         {
-            COMInterfaceEntry ent = listViewInterfaces.SelectedItems[0].Tag as COMInterfaceEntry;
-            if (ent != null)
+            if (listViewInterfaces.SelectedItems[0].Tag is COMInterfaceEntry ent)
             {
                 return ent.Iid;
             }
@@ -264,7 +262,6 @@ public partial class ObjectInformation : UserControl
 
     private void listViewInterfaces_ColumnClick(object sender, ColumnClickEventArgs e)
     {
-        ListView view = sender as ListView;
         ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
     }
 
@@ -306,9 +303,8 @@ public partial class ObjectInformation : UserControl
     {
         try
         {
-            COMObjRefStandard objref = COMUtilities.MarshalObjectToObjRef(m_pObject,
-                GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) as COMObjRefStandard;
-            if (objref == null)
+            if (COMUtilities.MarshalObjectToObjRef(m_pObject,
+                GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
             {
                 throw new Exception("Object must be standard marshaled to view the interface");
             }

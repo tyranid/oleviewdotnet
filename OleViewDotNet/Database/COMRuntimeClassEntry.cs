@@ -28,27 +28,6 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public enum TrustLevel
-{
-    BaseTrust = 0,
-    PartialTrust = 1,
-    FullTrust = 2
-}
-
-public enum ActivationType
-{
-    InProcess = 0,
-    OutOfProcess = 1,
-    RemoteProcess = 2,
-}
-
-public enum ThreadingType
-{
-    Both = 0,
-    Sta = 1,
-    Mta = 2
-}
-
 public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
 {
     private List<COMInterfaceInstance> m_interfaces;
@@ -205,8 +184,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
             return true;
         }
 
-        COMRuntimeClassEntry right = obj as COMRuntimeClassEntry;
-        if (right == null)
+        if (obj is not COMRuntimeClassEntry right)
         {
             return false;
         }

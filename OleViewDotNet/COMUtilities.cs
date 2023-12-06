@@ -660,7 +660,7 @@ public static class COMUtilities
     public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
     {
         string guid = rootKey.ReadString(keyName, valueName);
-        Guid ret = Guid.Empty;
+        Guid ret;
         if (guid != null && Guid.TryParse(guid, out ret))
         {
             return ret;
@@ -1526,9 +1526,8 @@ public static class COMUtilities
     {
         IStreamImpl istm = new(stm);
 
-        IPersistStream ps = obj as IPersistStream;
 
-        if (ps != null)
+        if (obj is IPersistStream ps)
         {
             ps.Save(istm, false);
         }
@@ -1544,9 +1543,8 @@ public static class COMUtilities
     {
         IStreamImpl istm = new(stm);
 
-        IPersistStream ps = obj as IPersistStream;
 
-        if (ps != null)
+        if (obj is IPersistStream ps)
         {
             ps.Load(istm);
         }
@@ -1858,7 +1856,7 @@ public static class COMUtilities
         }
 
         IntPtr curr = p;
-        IntPtr value = IntPtr.Zero;
+        IntPtr value;
         while ((value = Marshal.ReadIntPtr(curr)) != IntPtr.Zero)
         {
             ret.Add(load_type(value));
@@ -2208,7 +2206,7 @@ public static class COMUtilities
             if ((current % MINIMUM_REPORT_SIZE) == 1)
             {
                 _progress.Report(new Tuple<string, int>(string.Format("Querying Interfaces: {0} of {1}", current, _total_count),
-                    (100 * current) / _total_count));
+                    100 * current / _total_count));
             }
         }
     }
@@ -2463,7 +2461,7 @@ public static class COMUtilities
             return _cached_reflection_assemblies[name];
         }
 
-        Assembly asm = null;
+        Assembly asm;
         if (name.Contains(","))
         {
             asm = Assembly.ReflectionOnlyLoad(name);

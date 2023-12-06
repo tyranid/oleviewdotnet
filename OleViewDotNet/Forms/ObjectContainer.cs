@@ -35,17 +35,17 @@ public partial class ObjectContainer : UserControl
         {
             System.ComponentModel.ComponentResourceManager resources = new(typeof(ObjectContainer));
             m_axControl = new GenericAxHost(pObject);
-            ((System.ComponentModel.ISupportInitialize)(m_axControl)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)m_axControl).BeginInit();
             SuspendLayout();
 
             m_axControl.Enabled = true;
             m_axControl.Location = new System.Drawing.Point(50, 39);
             m_axControl.Name = "axControl";
-            m_axControl.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axControl.OcxState")));
+            m_axControl.OcxState = (System.Windows.Forms.AxHost.State)resources.GetObject("axControl.OcxState");
             m_axControl.Dock = DockStyle.Fill;
             m_axControl.TabIndex = 0;
             Controls.Add(m_axControl);
-            ((System.ComponentModel.ISupportInitialize)(m_axControl)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)m_axControl).EndInit();
             ResumeLayout(false);
             Text = string.Format("{0} Container", m_objName);
         }

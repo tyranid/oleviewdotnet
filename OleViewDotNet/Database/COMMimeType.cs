@@ -45,8 +45,7 @@ public class COMMimeType : IXmlSerializable
             return true;
         }
 
-        COMMimeType right = obj as COMMimeType;
-        if (right == null)
+        if (obj is not COMMimeType right)
         {
             return false;
         }
@@ -62,9 +61,8 @@ public class COMMimeType : IXmlSerializable
 
     internal COMMimeType(COMRegistry registry, string mime_type, RegistryKey key) : this(registry)
     {
-        string clsid = key.GetValue("CLSID") as string;
         string extension = key.GetValue("Extension") as string;
-        if ((clsid != null) && Guid.TryParse(clsid, out Guid guid))
+        if ((key.GetValue("CLSID") is string clsid) && Guid.TryParse(clsid, out Guid guid))
         {
             Clsid = guid;
         }

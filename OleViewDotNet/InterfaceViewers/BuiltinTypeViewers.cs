@@ -62,8 +62,7 @@ class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
 
     public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {
-        COMCLSIDEntry clsid_entry = entry as COMCLSIDEntry;
-        if (clsid_entry == null)
+        if (entry is not COMCLSIDEntry clsid_entry)
         {
             throw new ArgumentException("Entry must be a COM class", "entry");
         }

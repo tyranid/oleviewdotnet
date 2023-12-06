@@ -25,19 +25,9 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public enum COMKnownInterfaces
-{
-    IUnknown,
-    IMarshal,
-    IPSFactoryBuffer,
-    IMarshal2,
-    IStdMarshalInfo,
-    IMarshalEnvoy
-}
-
 public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
 {
-    private static ConcurrentDictionary<Guid, string> m_iidtoname = new();
+    private static readonly ConcurrentDictionary<Guid, string> m_iidtoname = new();
     private readonly COMRegistry m_registry;
 
     internal static string MapIidToName(Guid iid)
@@ -168,11 +158,11 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     public static Guid IID_IInspectable => new("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90");
 
-    public bool IsOleControl => (Iid == IID_IOleControl);
+    public bool IsOleControl => Iid == IID_IOleControl;
 
-    public bool IsDispatch => (Iid == IID_IDispatch);
+    public bool IsDispatch => Iid == IID_IDispatch;
 
-    public bool IsMarshal => (Iid == IID_IMarshal);
+    public bool IsMarshal => Iid == IID_IMarshal;
 
     public bool IsPersistStream => (Iid == IID_IPersistStream) || (Iid == IID_IPersistStreamInit);
 
@@ -290,8 +280,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             return true;
         }
 
-        COMInterfaceEntry right = obj as COMInterfaceEntry;
-        if (right == null)
+        if (obj is not COMInterfaceEntry right)
         {
             return false;
         }

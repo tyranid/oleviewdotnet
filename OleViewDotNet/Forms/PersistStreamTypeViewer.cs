@@ -48,9 +48,7 @@ public partial class PersistStreamTypeViewer : UserControl
 
     private void btnInit_Click(object sender, EventArgs e)
     {
-        IPersistStreamInit psi = _obj as IPersistStreamInit;
-
-        if (psi != null)
+        if (_obj is IPersistStreamInit psi)
         {
             try
             {

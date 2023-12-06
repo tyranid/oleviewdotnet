@@ -98,7 +98,7 @@ class InterfaceViewers
         foreach (Type t in types)
         {
             /* Only allow non-generic implemented classes */
-            if ((t.IsClass) && (!t.IsAbstract) && (!t.IsGenericType))
+            if (t.IsClass && (!t.IsAbstract) && (!t.IsGenericType))
             {
                 Type[] interfaces = t.GetInterfaces();
 

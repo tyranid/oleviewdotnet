@@ -228,8 +228,7 @@ public partial class StorageViewer : UserControl
     private void treeViewStorage_AfterSelect(object sender, TreeViewEventArgs e)
     {
         propertyGridStat.SelectedObject = e.Node.Tag;
-        STATSTGWrapper stat = e.Node.Tag as STATSTGWrapper;
-        if (stat != null)
+        if (e.Node.Tag is STATSTGWrapper stat)
         {
             hexEditorStream.Bytes = stat.Bytes;
         }

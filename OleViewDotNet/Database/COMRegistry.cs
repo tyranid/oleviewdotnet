@@ -26,31 +26,6 @@ using System.Xml;
 
 namespace OleViewDotNet.Database;
 
-public enum COMRegistryMode
-{
-    Merged,
-    MachineOnly,
-    UserOnly,
-    Diff,
-}
-
-public enum COMRegistryDiffMode
-{
-    LeftOnly,
-    RightOnly,
-}
-
-public enum COMRegistryEntrySource
-{
-    Unknown,
-    LocalMachine,
-    User,
-    Packaged,
-    ActCtx,
-    Metadata,
-    Builtin
-}
-
 /// <summary>
 /// Class to hold information about the current COM registration information
 /// </summary>
@@ -239,8 +214,7 @@ public class COMRegistry
 
     private string GetSecurityDescriptor(RegistryKey key, string name, string default_sd)
     {
-        byte[] sd = key.GetValue(name) as byte[];
-        if (sd == null)
+        if (key.GetValue(name) is not byte[] sd)
         {
             return default_sd;
         }
@@ -1008,7 +982,7 @@ public class COMRegistry
 
     private static void Report(IProgress<Tuple<string, int>> progress, string report, int current, int total)
     {
-        int percent = (current * 100) / total;
+        int percent = current * 100 / total;
         progress.Report(new Tuple<string, int>(report, percent));
     }
 

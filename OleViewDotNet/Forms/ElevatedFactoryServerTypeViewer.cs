@@ -54,8 +54,7 @@ public partial class ElevatedFactoryServerTypeViewer : UserControl
         try
         {
             IElevatedFactoryServer factory = (IElevatedFactoryServer)_obj;
-            COMCLSIDEntry vso = comboBoxClass.SelectedItem as COMCLSIDEntry;
-            if (vso != null)
+            if (comboBoxClass.SelectedItem is COMCLSIDEntry vso)
             {
                 Dictionary<string, string> props = new();
                 props.Add("Name", _name);

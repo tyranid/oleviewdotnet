@@ -96,8 +96,6 @@ public sealed class LockedQueue<T> : IDisposable, IEnumerable<T> where T : class
     /// <exception cref="OperationCanceledException">The opertion was cancelled</exception>
     public bool Dequeue(int milliSecondsTimeout, out T ret)
     {
-        ret = null;
-
         if (_queue.TryTake(out ret, milliSecondsTimeout, _token))
         {
             return true;
