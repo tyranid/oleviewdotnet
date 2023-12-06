@@ -52,26 +52,21 @@ public static class COMSecurity
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 
-    internal static string GetSaclForSddl(string sddl)
-    {
-        return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
-    }
-
-    public static bool IsAccessGranted(string sddl, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
+    public static bool IsAccessGranted(SecurityDescriptor sd, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
     {
         try
         {
-            if (check_il)
+            if (sd == null)
+                return false;
+
+            sd = sd.Clone();
+
+            if (check_il || !sd.HasMandatoryLabelAce)
             {
-                string sacl = GetSaclForSddl(sddl);
-                if (string.IsNullOrEmpty(sacl))
-                {
-                    // Add medium NX SACL
-                    sddl += "S:(ML;;NX;;;ME)";
-                }
+                sd.AddMandatoryLabel(TokenIntegrityLevel.Medium, MandatoryLabelPolicy.NoExecuteUp);
             }
 
-            if (!GetGrantedAccess(sddl, principal, token, launch, out COMAccessRights maximum_rights))
+            if (!GetGrantedAccess(sd, principal, token, launch, out COMAccessRights maximum_rights))
             {
                 return false;
             }
@@ -90,7 +85,7 @@ public static class COMSecurity
         }
     }
 
-    private static bool GetGrantedAccess(string sddl, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
+    private static bool GetGrantedAccess(SecurityDescriptor sd, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
     {
         GenericMapping mapping = new()
         {
@@ -102,7 +97,7 @@ public static class COMSecurity
         }
 
         // If SD is only a NULL DACL we get maximum rights.
-        if (sddl == "D:NO_ACCESS_CONTROL")
+        if (sd.DaclNull)
         {
             maximum_rights = mapping.GenericExecute.ToSpecificAccess<COMAccessRights>();
             return true;
@@ -112,11 +107,11 @@ public static class COMSecurity
 
         if (!string.IsNullOrWhiteSpace(principal))
         {
-            mask = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, new Sid(principal), mapping);
+            mask = NtSecurity.GetMaximumAccess(sd, token, new Sid(principal), mapping);
         }
         else
         {
-            mask = NtSecurity.GetMaximumAccess(new SecurityDescriptor(sddl), token, mapping);
+            mask = NtSecurity.GetMaximumAccess(sd, token, mapping);
         }
 
         mask &= 0xFFFF;
@@ -166,40 +161,6 @@ public static class COMSecurity
     public static SecurityDescriptor GetDefaultAccessRestrictions()
     {
         return GetSecurityPermissions(COMSD.SD_ACCESSRESTRICTIONS);
-    }
-
-    public static string GetStringSDForSD(byte[] sd, SecurityInformation info)
-    {
-        try
-        {
-            if (sd == null || sd.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            return new SecurityDescriptor(sd).ToSddl(info);
-        }
-        catch (NtException)
-        {
-            return string.Empty;
-        }
-    }
-
-    public static string GetStringSDForSD(byte[] sd)
-    {
-        return GetStringSDForSD(sd, SecurityInformation.AllBasic);
-    }
-
-    public static byte[] GetSDForStringSD(string sddl)
-    {
-        try
-        {
-            return new SecurityDescriptor(sddl).ToByteArray();
-        }
-        catch (NtException)
-        {
-            return new byte[0];
-        }
     }
 
     public static TokenIntegrityLevel GetILForSD(SecurityDescriptor sd)

@@ -186,10 +186,6 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         get; private set;
     }
 
-    public string LaunchPermissionSDDL => LaunchPermission?.ToSddl() ?? string.Empty;
-
-    public string AccessPermissionSDDL => AccessPermission?.ToSddl() ?? string.Empty;
-
     public bool HasLaunchPermission => LaunchPermission != null;
 
     public bool HasAccessPermission => AccessPermission != null;

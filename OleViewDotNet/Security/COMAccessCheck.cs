@@ -127,14 +127,14 @@ public class COMAccessCheck : IDisposable
             return false;
         }
 
-        string launch_sddl = m_ignore_default ? string.Empty : obj.DefaultLaunchPermission?.ToSddl() ?? string.Empty;
-        string access_sddl = m_ignore_default ? string.Empty : obj.DefaultAccessPermission?.ToSddl() ?? string.Empty;
+        SecurityDescriptor launch_sd = m_ignore_default ? null : obj.DefaultLaunchPermission;
+        SecurityDescriptor access_sd = m_ignore_default ? null : obj.DefaultAccessPermission;
         bool check_launch = true;
         string principal = m_principal;
 
         if (obj is COMProcessEntry process)
         {
-            access_sddl = process.AccessPermissions?.ToSddl() ?? string.Empty;
+            access_sd = process.AccessPermissions;
             principal = process.UserSid;
             check_launch = false;
         }
@@ -152,79 +152,81 @@ public class COMAccessCheck : IDisposable
 
             if (appid.HasLaunchPermission)
             {
-                launch_sddl = appid.LaunchPermissionSDDL;
+                launch_sd = appid.LaunchPermission;
             }
 
             if (appid.HasAccessPermission)
             {
-                access_sddl = appid.AccessPermissionSDDL;
+                access_sd = appid.AccessPermission;
             }
         }
         else if (obj is COMRuntimeClassEntry runtime_class)
         {
             if (runtime_class.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
+                launch_sd = runtime_class.Permissions;
             }
             else if (runtime_class.ActivationType == ActivationType.OutOfProcess && runtime_class.HasServerPermission)
             {
-                launch_sddl = runtime_class.ServerPermissions?.ToSddl() ?? string.Empty;
+                launch_sd = runtime_class.ServerPermissions;
             }
             else if (runtime_class.TrustLevel == TrustLevel.PartialTrust)
             {
-                launch_sddl = COMRuntimeClassEntry.DefaultActivationPermission;
+                launch_sd = new(COMRuntimeClassEntry.DefaultActivationPermission);
             }
             else
             {
                 // Set to denied access.
-                launch_sddl = "O:SYG:SYD:";
+                launch_sd = new("O:SYG:SYD:");
             }
-            access_sddl = launch_sddl;
+            access_sd = launch_sd;
         }
         else if (obj is COMRuntimeServerEntry runtime_server)
         {
             if (runtime_server.HasPermission)
             {
-                launch_sddl = runtime_server.Permissions?.ToSddl() ?? string.Empty;
+                launch_sd = runtime_server.Permissions;
             }
             else
             {
-                launch_sddl = "O:SYG:SYD:";
+                launch_sd = new("O:SYG:SYD:");
             }
-            access_sddl = launch_sddl;
+            access_sd = launch_sd;
         }
         else
         {
             return false;
         }
 
-        if (!m_access_cache.ContainsKey(access_sddl))
+        string access_str = access_sd?.ToBase64() ?? string.Empty;
+        if (!m_access_cache.ContainsKey(access_str))
         {
             if (m_access_rights == 0)
             {
-                m_access_cache[access_sddl] = true;
+                m_access_cache[access_str] = true;
             }
             else
             {
-                m_access_cache[access_sddl] = COMSecurity.IsAccessGranted(access_sddl,
+                m_access_cache[access_str] = COMSecurity.IsAccessGranted(access_sd,
                     principal, m_access_token, false, false, m_access_rights);
             }
         }
 
-        if (check_launch && !m_launch_cache.ContainsKey(launch_sddl))
+        string launch_str = launch_sd?.ToBase64() ?? string.Empty;
+        if (check_launch && !m_launch_cache.ContainsKey(launch_str))
         {
             if (m_launch_rights == 0)
             {
-                m_launch_cache[launch_sddl] = true;
+                m_launch_cache[launch_str] = true;
             }
             else
             {
-                m_launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(launch_sddl, principal, m_access_token,
+                m_launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, principal, m_access_token,
                     true, true, m_launch_rights);
             }
         }
 
-        if (m_access_cache[access_sddl] && (!check_launch || m_launch_cache[launch_sddl]))
+        if (m_access_cache[access_str] && (!check_launch || m_launch_cache[launch_str]))
         {
             return true;
         }

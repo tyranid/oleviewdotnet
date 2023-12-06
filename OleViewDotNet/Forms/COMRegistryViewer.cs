@@ -790,6 +790,8 @@ public partial class COMRegistryViewer : UserControl
 
     private static string LimitString(string s, int max)
     {
+        if (s == null)
+            return string.Empty;
         if (s.Length > max)
         {
             return s.Substring(0, max) + "...";
@@ -828,12 +830,12 @@ public partial class COMRegistryViewer : UserControl
 
         if (appidEnt.HasLaunchPermission)
         {
-            AppendFormatLine(builder, "Launch: {0}", LimitString(appidEnt.LaunchPermissionSDDL, 64));
+            AppendFormatLine(builder, "Launch: {0}", LimitString(appidEnt.LaunchPermission?.ToSddl(), 64));
         }
 
         if (appidEnt.HasAccessPermission)
         {
-            AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermissionSDDL, 64));
+            AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermission?.ToSddl(), 64));
         }
 
         if (appidEnt.RotFlags != COMAppIDRotFlags.None)
@@ -1541,98 +1543,98 @@ public partial class COMRegistryViewer : UserControl
         COMAccessRights access_rights, 
         COMAccessRights launch_rights)
     {
-        string launch_sddl = m_registry.DefaultLaunchPermission?.ToSddl() ?? string.Empty;
-        string access_sddl = m_registry.DefaultAccessPermission?.ToSddl() ?? string.Empty;
+        SecurityDescriptor launch_sd = m_registry.DefaultLaunchPermission;
+        SecurityDescriptor access_sd = m_registry.DefaultAccessPermission;
         bool check_launch = true;
 
         if (node.Tag is COMProcessEntry)
         {
             COMProcessEntry process = (COMProcessEntry)node.Tag;
-            access_sddl = process.AccessPermissions?.ToSddl() ?? string.Empty;
+            access_sd = process.AccessPermissions;
             principal = process.UserSid;
             check_launch = false;
         }
         else if (node.Tag is COMAppIDEntry || node.Tag is COMCLSIDEntry)
         {
             COMAppIDEntry appid = node.Tag as COMAppIDEntry;
-            if (appid == null && node.Tag is COMCLSIDEntry)
+            if (appid == null && node.Tag is COMCLSIDEntry clsid_entry)
             {
-                COMCLSIDEntry clsid = (COMCLSIDEntry)node.Tag;
-                if (!m_registry.AppIDs.ContainsKey(clsid.AppID))
+                if (!m_registry.AppIDs.ContainsKey(clsid_entry.AppID))
                 {
                     return FilterResult.Exclude;
                 }
 
-                appid = m_registry.AppIDs[clsid.AppID];
+                appid = m_registry.AppIDs[clsid_entry.AppID];
             }
 
             if (appid.HasLaunchPermission)
             {
-                launch_sddl = appid.LaunchPermissionSDDL;
+                launch_sd = appid.LaunchPermission;
             }
             if (appid.HasAccessPermission)
             {
-                access_sddl = appid.AccessPermissionSDDL;
+                access_sd = appid.AccessPermission;
             }
         }
-        else if (node.Tag is COMRuntimeClassEntry)
+        else if (node.Tag is COMRuntimeClassEntry runtime_class)
         {
-            COMRuntimeClassEntry runtime_class = (COMRuntimeClassEntry)node.Tag;
             if (runtime_class.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
+                launch_sd = runtime_class.Permissions;
             }
             else
             {
                 // Set to denied access.
-                launch_sddl = "O:SYG:SYD:";
+                launch_sd = new SecurityDescriptor("O:SYG:SYD:");
             }
-            access_sddl = launch_sddl;
+            access_sd = launch_sd;
         }
-        else if (node.Tag is COMRuntimeServerEntry)
+        else if (node.Tag is COMRuntimeServerEntry runtime_server)
         {
-            COMRuntimeServerEntry runtime_class = (COMRuntimeServerEntry)node.Tag;
-            if (runtime_class.HasPermission)
+            if (runtime_server.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
+                launch_sd = runtime_server.Permissions;
             }
             else
             {
-                launch_sddl = "O:SYG:SYD:";
+                launch_sd = new SecurityDescriptor("O:SYG:SYD:");
             }
-            access_sddl = launch_sddl;
+            access_sd = launch_sd;
         }
         else
         {
             return FilterResult.Exclude;
         }
-        
-        if (!access_cache.ContainsKey(access_sddl))
+
+        string access_str = access_sd?.ToBase64() ?? string.Empty;
+
+        if (!access_cache.ContainsKey(access_str))
         {
             if (access_rights == 0)
             {
-                access_cache[access_sddl] = true;
+                access_cache[access_str] = true;
             }
             else
             {
-                access_cache[access_sddl] = COMSecurity.IsAccessGranted(access_sddl, principal, token, false, false, access_rights);
+                access_cache[access_str] = COMSecurity.IsAccessGranted(access_sd, principal, token, false, false, access_rights);
             }
         }
 
-        if (check_launch && !launch_cache.ContainsKey(launch_sddl))
+        string launch_str = launch_sd?.ToBase64() ?? string.Empty;
+        if (check_launch && !launch_cache.ContainsKey(launch_str))
         {
             if (launch_rights == 0)
             {
-                launch_cache[launch_sddl] = true;
+                launch_cache[launch_str] = true;
             }
             else
             {
-                launch_cache[launch_sddl] = COMSecurity.IsAccessGranted(launch_sddl, principal, token,
+                launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, principal, token,
                     true, true, launch_rights);
             }
         }
 
-        if (access_cache[access_sddl] && (!check_launch || launch_cache[launch_sddl]))
+        if (access_cache[access_str] && (!check_launch || launch_cache[launch_str]))
         {
             return FilterResult.Include;
         }

@@ -78,8 +78,8 @@ public partial class PropertiesControl : UserControl
     {
         textBoxAppIdName.Text = entry.Name;
         textBoxAppIdGuid.Text = entry.AppId.FormatGuid();
-        textBoxLaunchPermission.Text = entry.LaunchPermissionSDDL;
-        textBoxAccessPermission.Text = entry.AccessPermissionSDDL;
+        textBoxLaunchPermission.Text = entry.LaunchPermission?.ToSddl() ?? string.Empty;
+        textBoxAccessPermission.Text = entry.AccessPermission?.ToSddl() ?? string.Empty;
         textBoxAppIDRunAs.Text = GetStringValue(entry.RunAs);
         textBoxAppIDService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
         textBoxAppIDFlags.Text = entry.Flags.ToString();
