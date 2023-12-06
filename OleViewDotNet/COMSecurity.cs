@@ -16,10 +16,13 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Forms;
+using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace OleViewDotNet;
@@ -63,23 +66,6 @@ public static class COMSecurity
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
-    private extern static IntPtr LocalFree(IntPtr hMem);
-
-    private enum COMSD
-    {
-        SD_LAUNCHPERMISSIONS = 0,       // Machine wide launch permissions
-        SD_ACCESSPERMISSIONS = 1,       // Machine wide acesss permissions
-        SD_LAUNCHRESTRICTIONS = 2,      // Machine wide launch limits
-        SD_ACCESSRESTRICTIONS = 3       // Machine wide access limits
-    }
-
-    [DllImport("ole32.dll")]
-    private extern static int CoGetSystemSecurityPermissions(COMSD comSDType, out IntPtr ppSD);
-
-    [DllImport("advapi32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true, SetLastError = true)]
-    private extern static int GetSecurityDescriptorLength(IntPtr sd);
-    
     internal static string GetSaclForSddl(string sddl)
     {
         return GetStringSDForSD(GetSDForStringSD(sddl), SecurityInformation.Label);
@@ -89,7 +75,6 @@ public static class COMSecurity
     {
         try
         {
-
             if (check_il)
             {
                 string sacl = GetSaclForSddl(sddl);
@@ -160,22 +145,18 @@ public static class COMSecurity
         IntPtr sd = IntPtr.Zero;
         try
         {
-            int hr = CoGetSystemSecurityPermissions(sdtype, out sd);
+            int hr = NativeMethods.CoGetSystemSecurityPermissions(sdtype, out sd);
             if (hr != 0)
             {
                 throw new Win32Exception(hr);
             }
 
-            int length = GetSecurityDescriptorLength(sd);
-            byte[] ret = new byte[length];
-            Marshal.Copy(sd, ret, 0, length);
-            return GetStringSDForSD(ret);
-        }
+            return new SecurityDescriptor(sd).ToSddl(SecurityInformation.AllBasic);}
         finally
         {
             if (sd != IntPtr.Zero)
             {
-                LocalFree(sd);
+                NativeMethods.LocalFree(sd);
             }
         }
     }
@@ -268,7 +249,7 @@ public static class COMSecurity
             }
             foreach (var ace in sd.Dacl)
             {
-                if (ace.Type == NtApiDotNet.AceType.Allowed)
+                if (ace.Type == AceType.Allowed)
                 {
                     if (check_func(ace))
                     {
@@ -295,66 +276,9 @@ public static class COMSecurity
             (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
     }
 
-    private enum WTS_CONNECTSTATE_CLASS
-    {
-        WTSActive,              // User logged on to WinStation
-        WTSConnected,           // WinStation connected to client
-        WTSConnectQuery,        // In the process of connecting to client
-        WTSShadow,              // Shadowing another WinStation
-        WTSDisconnected,        // WinStation logged on without client
-        WTSIdle,                // Waiting for client to connect
-        WTSListen,              // WinStation is listening for connection
-        WTSReset,               // WinStation is being reset
-        WTSDown,                // WinStation is down due to error
-        WTSInit,                // WinStation in initialization
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct WTS_SESSION_INFO
-    {
-        public int SessionId;
-        public IntPtr pWinStationName;
-        public WTS_CONNECTSTATE_CLASS State;
-    }
-
-    [DllImport("wtsapi32.dll", SetLastError = true)]
-    private static extern bool WTSEnumerateSessions(
-            IntPtr hServer,
-            int Reserved,
-            int Version,
-            out IntPtr ppSessionInfo,
-            out int pCount);
-
-    [DllImport("wtsapi32.dll", SetLastError = true)]
-    private static extern void WTSFreeMemory(IntPtr memory);
-
     public static IEnumerable<int> GetSessionIds()
     {
-        List<int> sids = new();
-        IntPtr pSessions = IntPtr.Zero;
-        int dwSessionCount = 0;
-        try
-        {
-            if (WTSEnumerateSessions(IntPtr.Zero, 0, 1, out pSessions, out dwSessionCount))
-            {
-                IntPtr current = pSessions;
-                for (int i = 0; i < dwSessionCount; ++i)
-                {
-                    WTS_SESSION_INFO session_info = (WTS_SESSION_INFO)Marshal.PtrToStructure(current, typeof(WTS_SESSION_INFO));
-                    sids.Add(session_info.SessionId);
-                    current += Marshal.SizeOf(typeof(WTS_SESSION_INFO));
-                }
-            }
-        }
-        finally
-        {
-            if (pSessions != IntPtr.Zero)
-            {
-                WTSFreeMemory(pSessions);
-            }
-        }
-
-        return sids;
+        return Win32Utils.GetConsoleSessions().Select(c => c.SessionId).ToArray();
     }
 
     public static Sid UserToSid(string username)

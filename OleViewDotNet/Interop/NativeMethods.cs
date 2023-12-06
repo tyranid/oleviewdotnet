@@ -204,4 +204,9 @@ internal static class NativeMethods
     public static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
         IntPtr context, out int length, out IntPtr targetStringAddress);
 
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
+    public extern static IntPtr LocalFree(IntPtr hMem);
+
+    [DllImport("ole32.dll")]
+    public extern static int CoGetSystemSecurityPermissions(COMSD comSDType, out IntPtr ppSD);
 }
