@@ -1228,9 +1228,9 @@ Filter out accessible objects.
 .PARAMETER IgnoreDefault
 If the object doesn't have a specific set of launch permissions uses the system default. If this flag is specified objects without a specific launch permission are ignored.
 .INPUTS
-OleViewDotNet.ICOMAccessSecurity
+OleViewDotNet.Database.ICOMAccessSecurity
 .OUTPUTS
-OleViewDotNet.ICOMAccessSecurity
+OleViewDotNet.Database.ICOMAccessSecurity
 .EXAMPLE
 Get-ComClass | Select-ComAccess
 Get all COM classes which are accessible by the current process.
@@ -1257,7 +1257,7 @@ function Select-ComAccess {
     [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Database.ICOMAccessSecurity]$InputObject,
         [OleViewDotNet.COMAccessRights]$Access = "ExecuteLocal",
         [OleViewDotNet.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
         [Parameter(Mandatory, ParameterSetName = "FromToken")]
@@ -1317,7 +1317,7 @@ function Out-ObjRef {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.ComObjRef]$ObjRef,
+        [OleViewDotNet.COMObjRef]$ObjRef,
         [ComObjRefOutput]$Output = "Object"
     )
 
@@ -1466,7 +1466,7 @@ function Show-ComSecurityDescriptor {
         [Parameter(Mandatory, ParameterSetName = "FromSddl")]
         [string]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
-        [OleViewDotNet.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Database.ICOMAccessSecurity]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
         [switch]$Restriction,
         [Parameter(Mandatory, ParameterSetName = "FromDefault")]
@@ -1797,7 +1797,7 @@ function Get-ComProxy {
         [parameter(Mandatory, Position=0, ParameterSetName = "FromInterfaceInstance", ValueFromPipeline)]
         [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromClass")]
-        [OleViewDotNet.Database.COMClsidEntry]$Class,
+        [OleViewDotNet.Database.COMCLSIDEntry]$Class,
         [parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]

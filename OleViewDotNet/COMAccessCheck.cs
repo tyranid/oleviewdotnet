@@ -21,12 +21,6 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet;
 
-public interface ICOMAccessSecurity
-{
-    string DefaultAccessPermission { get; }
-    string DefaultLaunchPermission { get; }
-}
-
 public class COMAccessCheck : IDisposable
 {
     private readonly Dictionary<string, bool> m_access_cache;

@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2019
+//    Copyright (C) James Forshaw 2018
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
+namespace OleViewDotNet.Database;
 
-namespace OleViewDotNet;
-
-public interface IComGuid
+public interface ICOMAccessSecurity
 {
-    Guid ComGuid { get; }
+    string DefaultAccessPermission { get; }
+    string DefaultLaunchPermission { get; }
 }
