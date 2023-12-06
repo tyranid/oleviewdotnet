@@ -60,7 +60,7 @@ public static class EntryPoint
         return (MainForm)_appContext.MainForm;
     }
 
-    static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
+    private static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
     {
         using AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue());
         using StreamWriter writer = new(client);
@@ -114,7 +114,7 @@ public static class EntryPoint
         }
     }
 
-    class MultiApplicationContext : ApplicationContext
+    private class MultiApplicationContext : ApplicationContext
     {
         public MultiApplicationContext(Form main_form) : base(main_form)
         {
@@ -134,7 +134,7 @@ public static class EntryPoint
         }
     }
 
-    class ActivationFilter : IActivationFilter
+    private class ActivationFilter : IActivationFilter
     {
         public void HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, in Guid rclsid, out Guid pReplacementClsId)
         {
@@ -143,7 +143,7 @@ public static class EntryPoint
         }
     }
 
-    class AutoSaveLoadConfiguration
+    private class AutoSaveLoadConfiguration
     {
         public bool AutoLoad { get; }
         public bool AutoSave { get; }
@@ -170,7 +170,7 @@ public static class EntryPoint
         }
     }
 
-    static IEnumerable<COMServerType> ParseServerTypes(string servers)
+    private static IEnumerable<COMServerType> ParseServerTypes(string servers)
     {
         string[] ss = servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         return ss.Select(s => (COMServerType)Enum.Parse(typeof(COMServerType), s, true)).ToArray();

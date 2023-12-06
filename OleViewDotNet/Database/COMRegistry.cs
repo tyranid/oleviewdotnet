@@ -412,7 +412,7 @@ public class COMRegistry
         m_interfaces = new SortedDictionary<Guid, COMInterfaceEntry>(interfaces);
     }
 
-    IEnumerable<Guid> ReadPreApproved(RegistryKey rootKey)
+    private IEnumerable<Guid> ReadPreApproved(RegistryKey rootKey)
     {
         List<Guid> ret = new();
         using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
@@ -432,7 +432,7 @@ public class COMRegistry
         return ret;
     }
 
-    void LoadPreApproved(COMRegistryMode mode, Sid user)
+    private void LoadPreApproved(COMRegistryMode mode, Sid user)
     {
         m_preapproved = new List<Guid>();
         if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
@@ -450,7 +450,7 @@ public class COMRegistry
         }
     }
 
-    void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
+    private void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
     {
         Dictionary<Guid, COMTypeLibEntry> typelibs = new();
         if (actctx != null)
@@ -971,7 +971,7 @@ public class COMRegistry
         return Load(path, new DummyProgress());
     }
 
-    static IEnumerable<T> DiffLists<T>(IEnumerable<T> left, IEnumerable<T> right, COMRegistryDiffMode mode)
+    private static IEnumerable<T> DiffLists<T>(IEnumerable<T> left, IEnumerable<T> right, COMRegistryDiffMode mode)
     {
         switch (mode)
         {
@@ -984,7 +984,7 @@ public class COMRegistry
         }
     }
 
-    static IComparer<S> GetComparer<S, T>(IDictionary<S, T> dict)
+    private static IComparer<S> GetComparer<S, T>(IDictionary<S, T> dict)
     {
         if (dict is SortedDictionary<S, T> sorted_dict)
         {
@@ -993,7 +993,7 @@ public class COMRegistry
         return Comparer<S>.Default;
     }
 
-    static SortedDictionary<S, T> DiffDicts<S, T>(IDictionary<S, T> left, IDictionary<S, T> right, COMRegistryDiffMode mode, Func<T, S> key_selector)
+    private static SortedDictionary<S, T> DiffDicts<S, T>(IDictionary<S, T> left, IDictionary<S, T> right, COMRegistryDiffMode mode, Func<T, S> key_selector)
     {
         return DiffLists(left.Values, right.Values, mode).ToSortedDictionary(key_selector, GetComparer(left));
     }

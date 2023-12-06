@@ -640,7 +640,7 @@ public partial class COMRegistryViewer : UserControl
         return processes.Where(p => p.Ipids.Any()).Select(p => CreateCOMProcessNode(registry, p, appsByPid, clsidsByAppId));
     }
 
-    enum ServerType
+    private enum ServerType
     {
         None,
         Local,
@@ -785,7 +785,7 @@ public partial class COMRegistryViewer : UserControl
         return serverNodes.OrderBy(n => n.Text);
     }
 
-    static string LimitString(string s, int max)
+    private static string LimitString(string s, int max)
     {
         if (s.Length > max)
         {
@@ -2292,13 +2292,13 @@ public partial class COMRegistryViewer : UserControl
 
     [Guid("D63B10C5-BB46-4990-A94F-E40B9D520160")]
     [ComImport]
-    class RuntimeBroker
+    private class RuntimeBroker
     {
     }
 
     [Guid("2593F8B9-4EAF-457C-B68A-50F6B8EA6B54")]
     [ComImport]
-    class PerUserRuntimeBroker
+    private class PerUserRuntimeBroker
     {
     }
 

@@ -25,7 +25,7 @@ namespace OleViewDotNet.Forms;
 /// <summary>
 /// Generic interface viewer from a type
 /// </summary>
-partial class TypedObjectViewer : UserControl
+internal partial class TypedObjectViewer : UserControl
 {
     private readonly string m_objName;
     private readonly ObjectEntry m_pEntry;

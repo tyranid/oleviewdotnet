@@ -19,7 +19,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet;
 
-class InputTextBox : TextBox
+internal class InputTextBox : TextBox
 {
     public event EventHandler<ClipboardEventArgs> TextPasted;
 

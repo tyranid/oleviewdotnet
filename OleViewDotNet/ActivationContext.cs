@@ -26,7 +26,7 @@ namespace OleViewDotNet;
 
 // Structure definitions taken from https://github.com/deroko/activationcontext/blob/master/sxstypes.h
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA
+internal struct ACTIVATION_CONTEXT_DATA
 {
     public uint Magic;
     public int HeaderSize;
@@ -39,7 +39,7 @@ struct ACTIVATION_CONTEXT_DATA
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_DATA_TOC_HEADER_FLAGS
+internal enum ACTIVATION_CONTEXT_DATA_TOC_HEADER_FLAGS
 {
     NONE = 0,
     DENSE = 1,
@@ -47,7 +47,7 @@ enum ACTIVATION_CONTEXT_DATA_TOC_HEADER_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_TOC_HEADER
+internal struct ACTIVATION_CONTEXT_DATA_TOC_HEADER
 {
     public int HeaderSize;
     public int EntryCount;
@@ -79,7 +79,7 @@ public enum ACTIVATION_CONTEXT_SECTION_ID
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_TOC_ENTRY
+internal struct ACTIVATION_CONTEXT_DATA_TOC_ENTRY
 {
     public ACTIVATION_CONTEXT_SECTION_ID Id;
     public int Offset;            // from ACTIVATION_CONTEXT_DATA base
@@ -88,7 +88,7 @@ struct ACTIVATION_CONTEXT_DATA_TOC_ENTRY
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_HEADER
+internal struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_HEADER
 {
     public int HeaderSize;
     public int EntryCount;
@@ -97,7 +97,7 @@ struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_HEADER
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_ENTRY
+internal struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_ENTRY
 {
     public Guid ExtensionGuid;
     public int TocOffset;            // from ACTIVATION_CONTEXT_DATA base
@@ -105,7 +105,7 @@ struct ACTIVATION_CONTEXT_DATA_EXTENDED_TOC_ENTRY
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER
+internal struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER
 {
     public int HeaderSize;
     public uint HashAlgorithm;
@@ -118,7 +118,7 @@ struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_HEADER
                                                  // from their section base to the strings etc.
 }
 
-enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY_FLAGS
+internal enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY_FLAGS
 {
     NONE = 0,
     INVALID = 1,
@@ -126,7 +126,7 @@ enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY
+internal struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY
 {
     public ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY_FLAGS Flags;
     public uint PseudoKey;                // case-insentively-hashed assembly name
@@ -137,7 +137,7 @@ struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_ROSTER_ENTRY
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION_FLAGS
+internal enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION_FLAGS
 {
     ROOT_ASSEMBLY = 0x00000001,
     POLICY_APPLIED = 0x00000002,
@@ -146,7 +146,7 @@ enum ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION_FLAGS
     PRIVATE_ASSEMBLY = 0x00000010,
 }
 
-enum ACTCTX_REQUESTED_RUN_LEVEL
+internal enum ACTCTX_REQUESTED_RUN_LEVEL
 {
     UNSPECIFIED,
     AS_INVOKER,
@@ -156,7 +156,7 @@ enum ACTCTX_REQUESTED_RUN_LEVEL
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
-struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION
+internal struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION
 {
     public int Size;                                 // size of this structure, in bytes
     public ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION_FLAGS Flags;
@@ -182,7 +182,7 @@ struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION
     public int NumOfFilesInAssembly;
     public int LanguageLength; // in bytes
     public int LanguageOffset; // from section header base
-    readonly ACTCTX_REQUESTED_RUN_LEVEL RunLevel;
+    private readonly ACTCTX_REQUESTED_RUN_LEVEL RunLevel;
     public int UiAccess;
 }
 
@@ -218,7 +218,7 @@ public class ActCtxAssemblyRoster
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_STRING_SECTION_FLAGS
+internal enum ACTIVATION_CONTEXT_STRING_SECTION_FLAGS
 {
     NONE = 0,
     CASE_INSENSITIVE = 1,
@@ -226,7 +226,7 @@ enum ACTIVATION_CONTEXT_STRING_SECTION_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_STRING_SECTION_HEADER
+internal struct ACTIVATION_CONTEXT_STRING_SECTION_HEADER
 {
     public uint Magic;
     public int HeaderSize;               // in bytes
@@ -242,21 +242,21 @@ struct ACTIVATION_CONTEXT_STRING_SECTION_HEADER
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_STRING_SECTION_HASH_TABLE
+internal struct ACTIVATION_CONTEXT_STRING_SECTION_HASH_TABLE
 {
     public int BucketTableEntryCount;
     public int BucketTableOffset;        // offset from section header
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_STRING_SECTION_HASH_BUCKET
+internal struct ACTIVATION_CONTEXT_STRING_SECTION_HASH_BUCKET
 {
     public int ChainCount;
     public int ChainOffset;              // offset from section header
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_STRING_SECTION_ENTRY
+internal struct ACTIVATION_CONTEXT_STRING_SECTION_ENTRY
 {
     public int PseudoKey;
     public int KeyOffset;            // offset from the section header
@@ -269,14 +269,14 @@ struct ACTIVATION_CONTEXT_STRING_SECTION_ENTRY
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_GUID_SECTION_FLAGS
+internal enum ACTIVATION_CONTEXT_GUID_SECTION_FLAGS
 {
     NONE = 0,
     ENTRIES_IN_ORDER = 0x00000001
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_GUID_SECTION_HEADER
+internal struct ACTIVATION_CONTEXT_GUID_SECTION_HEADER
 {
     public uint Magic;
     public int HeaderSize;               // in bytes
@@ -291,14 +291,14 @@ struct ACTIVATION_CONTEXT_GUID_SECTION_HEADER
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_GUID_SECTION_HASH_TABLE
+internal struct ACTIVATION_CONTEXT_GUID_SECTION_HASH_TABLE
 {
     public int BucketTableEntryCount;
     public int BucketTableOffset;        // offset from section header
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_GUID_SECTION_HASH_BUCKET
+internal struct ACTIVATION_CONTEXT_GUID_SECTION_HASH_BUCKET
 {
     public int ChainCount;
     public int ChainOffset;              // offset from section header
@@ -307,7 +307,7 @@ struct ACTIVATION_CONTEXT_GUID_SECTION_HASH_BUCKET
 // The hash table bucket chain is then a list of offsets from the section header to
 // the section entries for the chain.
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_GUID_SECTION_ENTRY
+internal struct ACTIVATION_CONTEXT_GUID_SECTION_ENTRY
 {
     public Guid Guid;
     public int Offset;               // offset from the section header
@@ -317,7 +317,7 @@ struct ACTIVATION_CONTEXT_GUID_SECTION_ENTRY
                                      // an assembly, zero.
 }
 
-enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_THREADING_MODEL
+internal enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_THREADING_MODEL
 {
     INVALID = 0,
     APARTMENT = 1,
@@ -328,7 +328,7 @@ enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_THREADING_MODEL
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_DATA_COM_SERVER_FLAGS
+internal enum ACTIVATION_CONTEXT_DATA_COM_SERVER_FLAGS
 {
     HAS_DEFAULT = 0x01 << 8,
     HAS_ICON = 0x02 << 8,
@@ -338,7 +338,7 @@ enum ACTIVATION_CONTEXT_DATA_COM_SERVER_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION
+internal struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION
 {
     public int Size;
     public ACTIVATION_CONTEXT_DATA_COM_SERVER_FLAGS Flags;
@@ -422,7 +422,7 @@ public class ActCtxComProgIdRedirection
     }
 }
 
-enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE
+internal enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE
 {
     UNKNOWN = 0,
     OTHER = 1,
@@ -430,11 +430,11 @@ enum ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM
+internal struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM
 {
     public int Size;
     public int Flags;
-    readonly ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE Type;
+    private readonly ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE Type;
     public int ModuleLength; // in bytes
     public int ModuleOffset; // offset from section base
     public int TypeLength; // in bytes
@@ -446,7 +446,7 @@ struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_COM_PROGID_REDIRECTION
+internal struct ACTIVATION_CONTEXT_DATA_COM_PROGID_REDIRECTION
 {
     public int Size;
     public int Flags;
@@ -464,7 +464,7 @@ public enum ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION_PATH_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION
+internal struct ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION
 {
     public int Size;
     public ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION_PATH_FLAGS Flags;
@@ -474,7 +474,7 @@ struct ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION_PATH_SEGMENT
+internal struct ACTIVATION_CONTEXT_DATA_DLL_REDIRECTION_PATH_SEGMENT
 {
     public int Length; // in bytes
     public int Offset; // from section header so that individual entries can share
@@ -496,7 +496,7 @@ public class ActCtxDllRedirection
 }
 
 [Flags]
-enum ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION_FLAGS
+internal enum ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION_FLAGS
 {
     NONE = 0,
     NUM_METHODS_VALID = 1,
@@ -504,7 +504,7 @@ enum ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION_FLAGS
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION
+internal struct ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION
 {
     public int Size;
     public ACTIVATION_CONTEXT_DATA_COM_INTERFACE_REDIRECTION_FLAGS Flags;
@@ -538,7 +538,7 @@ public class ActCtxComInterfaceRedirection
 }
 
 [StructLayout(LayoutKind.Sequential)]
-struct ACTIVATION_CONTEXT_DATA_COM_TYPE_LIBRARY_REDIRECTION
+internal struct ACTIVATION_CONTEXT_DATA_COM_TYPE_LIBRARY_REDIRECTION
 {
     public int Size;
     public int Flags;
@@ -582,7 +582,7 @@ public class ActCtxComTypeLibraryRedirection
     }
 }
 
-class StringSectionEntry<T>
+internal class StringSectionEntry<T>
 {
     public string Key { get; }
     public T Entry { get; }
@@ -598,7 +598,7 @@ class StringSectionEntry<T>
     }
 }
 
-class GuidSectionEntry<T>
+internal class GuidSectionEntry<T>
 {
     public Guid Key { get; }
     public T Entry { get; }
@@ -614,7 +614,7 @@ class GuidSectionEntry<T>
     }
 }
 
-sealed class ReadHandle : IDisposable
+internal sealed class ReadHandle : IDisposable
 {
     private readonly GCHandle _handle;
     private readonly ReadHandle _root;
@@ -708,10 +708,10 @@ sealed class ReadHandle : IDisposable
 
 public sealed class ActivationContext
 {
-    const uint ACTCTX_MAGIC = 0x78746341;
-    const int ACTCTX_VERSION = 1;
-    const uint STRING_SECTION_MAGIC = 0x64487353;
-    const uint GUID_SECTION_MAGIC = 0x64487347;
+    private const uint ACTCTX_MAGIC = 0x78746341;
+    private const int ACTCTX_VERSION = 1;
+    private const uint STRING_SECTION_MAGIC = 0x64487353;
+    private const uint GUID_SECTION_MAGIC = 0x64487347;
 
     private readonly List<ActCtxComServerRedirection> _com_servers = new();
     private readonly List<ActCtxComProgIdRedirection> _com_progids = new();
@@ -782,10 +782,10 @@ public sealed class ActivationContext
         return ret;
     }
 
-    const int ACTCTX_PEB_OFFSET_32 = 0x1F8;
-    const int ACTCTX_PEB_OFFSET_64 = 0x2F8;
-    const int DEFAULT_ACTCTX_PEB_OFFSET_32 = 0x200;
-    const int DEFAULT_ACTCTX_PEB_OFFSET_64 = 0x308;
+    private const int ACTCTX_PEB_OFFSET_32 = 0x1F8;
+    private const int ACTCTX_PEB_OFFSET_64 = 0x2F8;
+    private const int DEFAULT_ACTCTX_PEB_OFFSET_32 = 0x200;
+    private const int DEFAULT_ACTCTX_PEB_OFFSET_64 = 0x308;
 
     public static ActivationContext FromProcess()
     {

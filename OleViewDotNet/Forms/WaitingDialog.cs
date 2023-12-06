@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-partial class WaitingDialog : Form
+internal partial class WaitingDialog : Form
 {
     private class ReportProgress : IProgress<Tuple<string, int>>
     {

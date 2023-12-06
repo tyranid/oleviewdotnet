@@ -23,6 +23,7 @@ using System.Security;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
+using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Database;
 

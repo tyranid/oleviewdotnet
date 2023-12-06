@@ -66,7 +66,7 @@ public static class COMSecurity
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
     private extern static IntPtr LocalFree(IntPtr hMem);
 
-    enum COMSD
+    private enum COMSD
     {
         SD_LAUNCHPERMISSIONS = 0,       // Machine wide launch permissions
         SD_ACCESSPERMISSIONS = 1,       // Machine wide acesss permissions
@@ -295,7 +295,7 @@ public static class COMSecurity
             (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
     }
 
-    enum WTS_CONNECTSTATE_CLASS
+    private enum WTS_CONNECTSTATE_CLASS
     {
         WTSActive,              // User logged on to WinStation
         WTSConnected,           // WinStation connected to client
@@ -310,7 +310,7 @@ public static class COMSecurity
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct WTS_SESSION_INFO
+    private struct WTS_SESSION_INFO
     {
         public int SessionId;
         public IntPtr pWinStationName;
@@ -318,7 +318,7 @@ public static class COMSecurity
     }
 
     [DllImport("wtsapi32.dll", SetLastError = true)]
-    static extern bool WTSEnumerateSessions(
+    private static extern bool WTSEnumerateSessions(
             IntPtr hServer,
             int Reserved,
             int Version,
@@ -326,7 +326,7 @@ public static class COMSecurity
             out int pCount);
 
     [DllImport("wtsapi32.dll", SetLastError = true)]
-    static extern void WTSFreeMemory(IntPtr memory);
+    private static extern void WTSFreeMemory(IntPtr memory);
 
     public static IEnumerable<int> GetSessionIds()
     {

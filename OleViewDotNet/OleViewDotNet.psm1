@@ -16,11 +16,11 @@
 
 Set-StrictMode -Version Latest
 
-$Script:GlobalDbgHelpPath = [OleViewDotNet.COMUtilities]::GetDefaultDbgHelp()
+$Script:GlobalDbgHelpPath = [OleViewDotNet.Interop.COMUtilities]::GetDefaultDbgHelp()
 $Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
 $Script:CurrentComDatabase = $null
 
-[OleViewDotNet.COMUtilities]::SetupCachedSymbols()
+[OleViewDotNet.Interop.COMUtilities]::SetupCachedSymbols()
 
 function New-CallbackProgress {
     Param(
@@ -577,7 +577,7 @@ function Get-ComClass {
         }
         "FromObject" {
             $Object = Unwrap-ComObject $Object
-            $Clsid = [OleViewDotNet.COMUtilities]::GetObjectClass($Object)
+            $Clsid = [OleViewDotNet.Interop.COMUtilities]::GetObjectClass($Object)
             if ($Clsid -ne [Guid]::Empty) {
                 Get-ComClass -Database $Database -Clsid $Clsid | Write-Output
             }
@@ -903,9 +903,9 @@ function Show-ComDatabase {
     }
     
     if ($UseArchitecture) {
-        [OleViewDotNet.COMUtilities]::StartArchProcess($Database.Architecture, $args)
+        [OleViewDotNet.Interop.COMUtilities]::StartArchProcess($Database.Architecture, $args)
     } else {
-        [OleViewDotNet.COMUtilities]::StartProcess($args)
+        [OleViewDotNet.Interop.COMUtilities]::StartProcess($args)
     }
 }
 
@@ -1382,7 +1382,7 @@ function Get-ComObjRef {
         [Parameter(ParameterSetName = "FromObject", ValueFromPipelineByPropertyName)]
         [Guid]$Iid = "00000000-0000-0000-C000-000000000046",
         [Parameter(ParameterSetName = "FromObject")]
-        [OleViewDotNet.MSHCTX]$MarshalContext = "DIFFERENTMACHINE",
+        [OleViewDotNet.Interop.MSHCTX]$MarshalContext = "DIFFERENTMACHINE",
         [Parameter(ParameterSetName = "FromObject")]
         [OleViewdotNet.MSHLFLAGS]$MarshalFlags = "NORMAL"
     )
@@ -1398,7 +1398,7 @@ function Get-ComObjRef {
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
             "FromObject" {
-                [OleViewDotNet.COMUtilities]::MarshalObjectToObjRef($Object, `
+                [OleViewDotNet.Interop.COMUtilities]::MarshalObjectToObjRef($Object, `
                         $Iid, $MarshalContext, $MarshalFlags) | Out-ObjRef -Output $Output
             }
             "FromPath" {
@@ -1522,7 +1522,7 @@ function Show-ComSecurityDescriptor {
         }
 
         if ("" -ne $SecurityDescriptor) {
-            $exe = [OleViewDotNet.COMUtilities]::GetExePathForCurrentBitness()
+            $exe = [OleViewDotNet.Interop.COMUtilities]::GetExePathForCurrentBitness()
             if ($ShowAccess) {
                 $cmd = "-v"
             } else {
@@ -1580,7 +1580,7 @@ function New-ComObject {
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
-        [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
+        [OleViewDotNet.Interop.CLSCTX]$ClassContext = "ALL",
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
@@ -1610,20 +1610,20 @@ function New-ComObject {
                 $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
             }
             "FromClsid" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceAsObject($Clsid, `
+                $obj = [OleViewDotNet.Interop.COMUtilities]::CreateInstanceAsObject($Clsid, `
                     $Iid, $ClassContext, $RemoteServer)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
+                $obj = [OleViewDotNet.Interop.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()
             }
             "FromObjRef" {
-                $obj = [OleViewDotNet.COMUtilities]::UnmarshalObject($ObjRef)
+                $obj = [OleViewDotNet.Interop.COMUtilities]::UnmarshalObject($ObjRef)
             }
             "FromIpid" {
-                $obj = [OleViewDotNet.COMUtilities]::UnmarshalObject($Ipid.ToObjRef())
+                $obj = [OleViewDotNet.Interop.COMUtilities]::UnmarshalObject($Ipid.ToObjRef())
             }
             "FromSessionIdClass" {
                 $obj = Get-ComMoniker "session:$SessionId!new:$($Class.Clsid)" -Bind -NoWrapper
@@ -1672,7 +1672,7 @@ function New-ComObjectFactory {
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
-        [OleViewDotNet.CLSCTX]$ClassContext = "ALL",
+        [OleViewDotNet.Interop.CLSCTX]$ClassContext = "ALL",
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
@@ -1689,7 +1689,7 @@ function New-ComObjectFactory {
                 $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer)
             }
             "FromClsid" {
-                $obj = [OleViewDotNet.COMUtilities]::CreateClassFactory($Clsid, `
+                $obj = [OleViewDotNet.Interop.COMUtilities]::CreateClassFactory($Clsid, `
                     "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
             }
             "FromSessionIdClass" {
@@ -1733,10 +1733,10 @@ function Get-ComMoniker {
     $obj = $null
     if ($Bind) {
         $type = [OleViewDotNet.Interop.IUnknown]
-        $obj = [OleViewDotNet.COMUtilities]::ParseAndBindMoniker($Moniker, $Composite)
+        $obj = [OleViewDotNet.Interop.COMUtilities]::ParseAndBindMoniker($Moniker, $Composite)
     } else {
         $type = [System.Runtime.InteropServices.ComTypes.IMoniker]
-        $obj = [OleViewDotNet.COMUtilities]::ParseMoniker($Moniker, $Composite)
+        $obj = [OleViewDotNet.Interop.COMUtilities]::ParseMoniker($Moniker, $Composite)
     }
 
     if ($null -ne $obj) {
@@ -1758,7 +1758,7 @@ function Get-ComMonikerDisplayName {
         [System.Runtime.InteropServices.ComTypes.IMoniker]$Moniker
     )
 
-    [OleViewDotNet.COMUtilities]::GetMonikerDisplayName($Moniker) | Write-Output
+    [OleViewDotNet.Interop.COMUtilities]::GetMonikerDisplayName($Moniker) | Write-Output
 }
 
 <#
@@ -2131,7 +2131,7 @@ function Get-ComTypeLibAssembly {
             }
         }
         if ($Path -ne "") {
-            [OleViewDotNet.COMUtilities]::LoadTypeLib($Path, $callback) | Write-Output
+            [OleViewDotNet.Interop.COMUtilities]::LoadTypeLib($Path, $callback) | Write-Output
         }
     }
 }
@@ -2187,10 +2187,10 @@ function Format-ComTypeLib {
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
             "FromAssembly" {
-                [OleViewDotNet.COMUtilities]::FormatComAssembly($Assembly, $InterfacesOnly) | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::FormatComAssembly($Assembly, $InterfacesOnly) | Write-Output
             }
             "FromType" {
-                [OleViewDotNet.COMUtilities]::FormatComType($Type) | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::FormatComType($Type) | Write-Output
             }
             "FromTypeLib" {
                 Get-ComTypeLibAssembly -TypeLib $TypeLib -NoProgress:$NoProgress | Format-ComTypeLib -InterfacesOnly:$InterfacesOnly
@@ -2223,11 +2223,11 @@ function Format-ComGuid {
     Param(
         [parameter(Mandatory, ValueFromPipeline, Position=0)]
         [Guid]$Guid,
-        [OleViewDotNet.GuidFormat]$Format = "String"
+        [OleViewDotNet.Interop.GuidFormat]$Format = "String"
     )
 
     PROCESS {
-        [OleViewDotNet.COMUtilities]::GuidToString($Guid, $Format)
+        [OleViewDotNet.Interop.COMUtilities]::GuidToString($Guid, $Format)
     }
 }
 
@@ -2265,9 +2265,9 @@ function Set-ComSymbolCache {
     $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
     $Path = Resolve-Path $Path
     if ($null -ne $Path) {
-        [OleViewDotNet.COMUtilities]::ClearCachedSymbols()
-        [OleViewDotNet.COMUtilities]::GenerateSymbolFile($Path, $resolver.DbgHelpPath, $resolver.SymbolPath)
-        [OleViewDotNet.COMUtilities]::SetupCachedSymbols()
+        [OleViewDotNet.Interop.COMUtilities]::ClearCachedSymbols()
+        [OleViewDotNet.Interop.COMUtilities]::GenerateSymbolFile($Path, $resolver.DbgHelpPath, $resolver.SymbolPath)
+        [OleViewDotNet.Interop.COMUtilities]::SetupCachedSymbols()
     }
 }
 
@@ -2295,14 +2295,14 @@ function New-ComStorageObject {
     Param(
         [parameter(Mandatory, Position = 0)]
         [string]$Path,
-        [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
-        [OleViewDotNet.STGFMT]$Format = "Storage"
+        [OleViewDotNet.Interop.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
+        [OleViewDotNet.Interop.STGFMT]$Format = "Storage"
     )
 
     $type = [OleViewDotNet.Interop.IStorage]
     $iid = $type.GUID
     $Path = Resolve-LocalPath $Path
-    [OleViewDotNet.COMUtilities]::CreateStorage($Path, $Mode, $Format)
+    [OleViewDotNet.Interop.COMUtilities]::CreateStorage($Path, $Mode, $Format)
 }
 
 <#
@@ -2332,8 +2332,8 @@ function Get-ComStorageObject {
         [parameter(Mandatory, Position = 0)]
         [string]$Path,
         [switch]$ReadOnly,
-        [OleViewDotNet.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
-        [OleViewDotNet.STGFMT]$Format = "Storage"
+        [OleViewDotNet.Interop.STGM]$Mode = "SHARE_EXCLUSIVE, READWRITE",
+        [OleViewDotNet.Interop.STGFMT]$Format = "Storage"
     )
 
     $type = [OleViewDotNet.Interop.IStorage]
@@ -2343,7 +2343,7 @@ function Get-ComStorageObject {
         $Mode = "SHARE_EXCLUSIVE, READ"
     }
 
-    [OleViewDotNet.COMUtilities]::OpenStorage($Path, $Mode, $Format)
+    [OleViewDotNet.Interop.COMUtilities]::OpenStorage($Path, $Mode, $Format)
 }
 
 <#
@@ -2388,7 +2388,7 @@ function Get-ComRuntimeInterface {
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
             "All" {
-                [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
+                [OleViewDotNet.Interop.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
             }
             "FromName" {
                 Get-ComRuntimeInterface | Where-Object Name -eq $Name | Write-Output
@@ -2397,7 +2397,7 @@ function Get-ComRuntimeInterface {
                 Get-ComRuntimeInterface | Where-Object FullName -eq $FullName | Write-Output
             }
             "FromIid" {
-                [OleViewDotNet.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
             }
         }
     }
@@ -2915,13 +2915,13 @@ function ConvertTo-ComAssembly {
                 Get-ComTypeLibAssembly -Path $TypeLib -NoProgress:$NoProgress | Write-Output
             }
             "FromProxy" {
-                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($Proxy, $callback) | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::ConvertProxyToAssembly($Proxy, $callback) | Write-Output
             }
             "FromProxyInterface" {
-                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($ProxyInterface, $callback) | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::ConvertProxyToAssembly($ProxyInterface, $callback) | Write-Output
             }
             "FromIpid" {
-                [OleViewDotNet.COMUtilities]::ConvertProxyToAssembly($Ipid, $callback) | Write-Output
+                [OleViewDotNet.Interop.COMUtilities]::ConvertProxyToAssembly($Ipid, $callback) | Write-Output
             }
         }
     }

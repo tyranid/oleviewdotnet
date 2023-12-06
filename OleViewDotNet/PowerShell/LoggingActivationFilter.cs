@@ -24,7 +24,7 @@ namespace OleViewDotNet.PowerShell;
 
 public class LoggingActivationFilter : IActivationFilter
 {
-    static LoggingActivationFilter CreateActivationFilter()
+    private static LoggingActivationFilter CreateActivationFilter()
     {
         LoggingActivationFilter filter = new();
         int hr = COMUtilities.CoRegisterActivationFilter(filter);
@@ -35,7 +35,7 @@ public class LoggingActivationFilter : IActivationFilter
         return filter;
     }
 
-    static readonly Lazy<LoggingActivationFilter> _instance = new(CreateActivationFilter, true);
+    private static readonly Lazy<LoggingActivationFilter> _instance = new(CreateActivationFilter, true);
 
     private COMRegistry _registry;
     private TextWriter _writer;

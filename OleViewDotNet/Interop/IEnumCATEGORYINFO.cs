@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [Guid("0002E011-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface IEnumCATEGORYINFO
+internal interface IEnumCATEGORYINFO
 {
     int Next(
         int celt,

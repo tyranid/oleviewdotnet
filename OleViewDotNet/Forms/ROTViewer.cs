@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ public partial class ROTViewer : UserControl
 {
     private readonly COMRegistry m_registry;
 
-    struct MonikerInfo
+    private struct MonikerInfo
     {
         public string strDisplayName;
         public Guid clsid;
@@ -47,7 +48,7 @@ public partial class ROTViewer : UserControl
         InitializeComponent();
     }
 
-    void LoadROT(bool trusted_only)
+    private void LoadROT(bool trusted_only)
     {
         IBindCtx bindCtx;
 

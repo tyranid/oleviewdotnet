@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -31,7 +32,7 @@ public partial class InvokeForm : Form
     private readonly string m_objName;
     private readonly COMRegistry m_registry;
 
-    class ParamData
+    private class ParamData
     {
         public ParameterInfo pi;
         public object data;

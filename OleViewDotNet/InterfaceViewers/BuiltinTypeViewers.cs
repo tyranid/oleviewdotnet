@@ -23,27 +23,27 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers;
 
-class MonikerViewerFactory : GenericTypeViewerFactory<IMoniker>
+internal class MonikerViewerFactory : GenericTypeViewerFactory<IMoniker>
 {
 }
 
-class PersistFileViewerFactory : GenericTypeViewerFactory<IPersistFile>
+internal class PersistFileViewerFactory : GenericTypeViewerFactory<IPersistFile>
 {
 }
 
-class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
+internal class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
 {
 }
 
-class PersistPropertyBagViewerFactory : GenericTypeViewerFactory<IPersistPropertyBag>
+internal class PersistPropertyBagViewerFactory : GenericTypeViewerFactory<IPersistPropertyBag>
 {
 }
 
-class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
+internal class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
 {
 }
 
-class ClassFactoryViewerFactory : BaseTypeViewerFactory
+internal class ClassFactoryViewerFactory : BaseTypeViewerFactory
 {
     public ClassFactoryViewerFactory() : base(typeof(IClassFactory))
     {
@@ -55,7 +55,7 @@ class ClassFactoryViewerFactory : BaseTypeViewerFactory
     }
 }
 
-class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
+internal class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
 {
     public ElevatedFactoryServerViewerFactory() : base(typeof(IElevatedFactoryServer))
     {
@@ -71,7 +71,7 @@ class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
     }
 }
 
-class PersistStreamViewerFactory : ITypeViewerFactory
+internal class PersistStreamViewerFactory : ITypeViewerFactory
 {
     public Guid Iid => COMInterfaceEntry.IID_IPersistStream;
 
@@ -83,7 +83,7 @@ class PersistStreamViewerFactory : ITypeViewerFactory
     }
 }
 
-class PersistStreamInitViewerFactory : ITypeViewerFactory
+internal class PersistStreamInitViewerFactory : ITypeViewerFactory
 {
     public Guid Iid => COMInterfaceEntry.IID_IPersistStreamInit;
 

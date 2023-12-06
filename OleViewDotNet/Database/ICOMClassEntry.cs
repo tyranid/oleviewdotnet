@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using NtApiDotNet;
+using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Database;
 

@@ -21,7 +21,7 @@ namespace OleViewDotNet.Interop;
 
 [Guid("6040ec14-6557-41f9-a3f7-b1cab7b42120")]
 [InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
-interface IRuntimeBroker
+internal interface IRuntimeBroker
 {
     [return: MarshalAs(UnmanagedType.IInspectable)] object ActivateInstance([MarshalAs(UnmanagedType.LPWStr)] string instanceName);
     [return: MarshalAs(UnmanagedType.IUnknown)] object GetActivationFactory([MarshalAs(UnmanagedType.LPWStr)] string instanceName, in Guid uuid);

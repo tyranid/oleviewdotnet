@@ -17,6 +17,7 @@
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;

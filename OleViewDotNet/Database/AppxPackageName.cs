@@ -92,7 +92,7 @@ public class AppxPackageName
     );
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-    static extern int PackageFullNameFromId(PACKAGE_ID_ALLOC packageId, 
+    private static extern int PackageFullNameFromId(PACKAGE_ID_ALLOC packageId, 
         ref int packageFullNameLength, StringBuilder packageFullName);
 
     private AppxPackageName(string package_id, PACKAGE_ID package)

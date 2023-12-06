@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers;
 
-interface ITypeViewerFactory
+internal interface ITypeViewerFactory
 {
     Guid Iid { get; }
     string IidName { get; }
@@ -34,7 +35,7 @@ interface ITypeViewerFactory
 /// <summary>
 /// Simple base implementation to reduce the amount of code to write
 /// </summary>
-abstract class BaseTypeViewerFactory : ITypeViewerFactory
+internal abstract class BaseTypeViewerFactory : ITypeViewerFactory
 {
     public BaseTypeViewerFactory(string strName, Guid iid)
     {
@@ -57,7 +58,7 @@ abstract class BaseTypeViewerFactory : ITypeViewerFactory
 /// Generic factory implementation for use if we have a predefined type
 /// </summary>
 /// <typeparam name="T">The interface type to create the factory for</typeparam>
-class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
+internal class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
 {
     public GenericTypeViewerFactory() : base(typeof(T))
     {
@@ -72,9 +73,9 @@ class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
 /// <summary>
 /// Generic factory implementation for use when we have a instantiated type object
 /// </summary>
-class InstanceTypeViewerFactory : BaseTypeViewerFactory
+internal class InstanceTypeViewerFactory : BaseTypeViewerFactory
 {
-    readonly Type m_type;
+    private readonly Type m_type;
     public InstanceTypeViewerFactory(Type t)
         : base(t)
     {
@@ -88,7 +89,7 @@ class InstanceTypeViewerFactory : BaseTypeViewerFactory
     }
 }
 
-class InterfaceViewers
+internal class InterfaceViewers
 {
     private static Dictionary<Guid, ITypeViewerFactory> m_viewfactory;
 

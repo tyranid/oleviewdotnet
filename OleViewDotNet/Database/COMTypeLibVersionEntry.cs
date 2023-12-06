@@ -19,6 +19,7 @@ using System;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
+using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Database;
 

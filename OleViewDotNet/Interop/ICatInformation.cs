@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [Guid("0002E013-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface ICatInformation
+internal interface ICatInformation
 {
     int EnumCategories(int lcid, out IEnumCATEGORYINFO ppenumCategoryInfo);
     int GetCategoryDesc(in Guid rcatid, int lcid, out IntPtr pszDesc);

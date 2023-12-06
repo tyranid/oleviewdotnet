@@ -18,6 +18,7 @@ using NtApiDotNet;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using System;
 using System.Collections.Generic;
@@ -113,11 +114,10 @@ internal class SymbolResolverWrapper : ISymbolResolver
     private readonly ISymbolResolver _resolver;
     private readonly SymbolLoadedModule _base_module;
     private readonly Dictionary<string, int> _resolved;
-
-    static readonly Dictionary<string, int> _resolved_32bit = new();
-    static readonly Dictionary<string, int> _resolved_64bit = new();
-    static readonly string _dllname = COMUtilities.GetCOMDllName();
-    static readonly string _dllprefix = $"{_dllname}!";
+    private static readonly Dictionary<string, int> _resolved_32bit = new();
+    private static readonly Dictionary<string, int> _resolved_64bit = new();
+    private static readonly string _dllname = COMUtilities.GetCOMDllName();
+    private static readonly string _dllprefix = $"{_dllname}!";
 
     public SymbolResolverWrapper(bool is64bit, ISymbolResolver resolver)
     {
@@ -248,13 +248,13 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct PageEntry
+    private struct PageEntry
     {
         public IntPtr pNext;
         public int dwFlag;
     };
 
-    interface IPageAllocator
+    private interface IPageAllocator
     {
         int Pages { get; }
         int EntrySize { get; }
@@ -264,7 +264,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CInternalPageAllocator : IPageAllocator
+    private struct CInternalPageAllocator : IPageAllocator
     {
         public int _cPages;
         public IntPtr _pPageListStart;
@@ -289,7 +289,7 @@ public static class COMProcessParser
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CPageAllocator
+    private struct CPageAllocator
     {
         public CInternalPageAllocator _pgalloc;
         public IntPtr _hHeap;
@@ -298,14 +298,14 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct PageEntry32
+    private struct PageEntry32
     {
         public int pNext;
         public int dwFlag;
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CInternalPageAllocator32 : IPageAllocator
+    private struct CInternalPageAllocator32 : IPageAllocator
     {
         public int _cPages;
         public int _pPageListStart;
@@ -343,7 +343,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct IPIDEntryNative : IPIDEntryNativeInterface
+    private struct IPIDEntryNative : IPIDEntryNativeInterface
     {
         public IntPtr pNextIPID;
         public uint dwFlags;
@@ -392,7 +392,7 @@ public static class COMProcessParser
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct IPIDEntryNative32 : IPIDEntryNativeInterface
+    private struct IPIDEntryNative32 : IPIDEntryNativeInterface
     {
         public int pNextIPID;
         public uint dwFlags;
@@ -441,7 +441,7 @@ public static class COMProcessParser
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct COMVERSION
+    private struct COMVERSION
     {
         public ushort MajorVersion;
         public ushort MinorVersion;
@@ -458,7 +458,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct OXIDEntryNative : IOXIDEntry
+    private struct OXIDEntryNative : IOXIDEntry
     {
         public IntPtr _pNext;
         public IntPtr _pPrev;
@@ -482,7 +482,7 @@ public static class COMProcessParser
         public int _cCalls;
         public int _cResolverRef;
         public int _dwExpiredTime;
-        COMVERSION _version;
+        private COMVERSION _version;
         public IntPtr _pAppContainerServerSecurityDescriptor;
         public int _ulMarshaledTargetInfoLength;
         public IntPtr _pMarshaledTargetInfo;
@@ -515,7 +515,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct OXIDEntryNative32 : IOXIDEntry
+    private struct OXIDEntryNative32 : IOXIDEntry
     {
         public int _pNext;
         public int _pPrev;
@@ -539,7 +539,7 @@ public static class COMProcessParser
         public int _cCalls;
         public int _cResolverRef;
         public int _dwExpiredTime;
-        COMVERSION _version;
+        private COMVERSION _version;
         public int _pAppContainerServerSecurityDescriptor;
         public int _ulMarshaledTargetInfoLength;
         public int _pMarshaledTargetInfo;
@@ -572,7 +572,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CONTAINERVERSION
+    private struct CONTAINERVERSION
     {
         public int version;
         public long capabilityFlags;
@@ -580,7 +580,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct OXIDInfoNative2004
+    private struct OXIDInfoNative2004
     {
         public int _dwTid;
         public int _dwPid;
@@ -601,7 +601,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    class OXIDEntryNative2004 : IOXIDEntry
+    private class OXIDEntryNative2004 : IOXIDEntry
     {
         public IntPtr _flink;
         public IntPtr _blink;
@@ -642,7 +642,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct OXIDInfoNative2004_32
+    private struct OXIDInfoNative2004_32
     {
         public int _dwTid;
         public int _dwPid;
@@ -663,7 +663,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    class OXIDEntryNative2004_32 : IOXIDEntry
+    private class OXIDEntryNative2004_32 : IOXIDEntry
     {
         public int _flink;
         public int _blink;
@@ -703,7 +703,7 @@ public static class COMProcessParser
         }
     }
 
-    interface IStdIdentity
+    private interface IStdIdentity
     {
         int GetIPIDCount();
         IPIDEntryNativeInterface GetFirstIpid(NtProcess process);
@@ -711,7 +711,7 @@ public static class COMProcessParser
     }
 
     [Flags]
-    enum STDID_FLAGS
+    private enum STDID_FLAGS
     {
         STDID_SERVER = 0x0,
         STDID_CLIENT = 0x1,
@@ -741,7 +741,7 @@ public static class COMProcessParser
     };
 
     [Flags]
-    enum SMFLAGS
+    private enum SMFLAGS
     {
         SMFLAGS_CLIENT_SIDE = 0x1,
         SMFLAGS_PENDINGDISCONNECT = 0x2,
@@ -778,7 +778,7 @@ public static class COMProcessParser
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CStdIdentity : IStdIdentity
+    private struct CStdIdentity : IStdIdentity
     {
         public IntPtr VTablePtr;
         public IntPtr VTablePtr2;
@@ -805,7 +805,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CStdIdentity32 : IStdIdentity
+    private struct CStdIdentity32 : IStdIdentity
     {
         public int VTablePtr;
         public int VTablePtr2;
@@ -832,7 +832,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CStdIdentity32RS4 : IStdIdentity
+    private struct CStdIdentity32RS4 : IStdIdentity
     {
         public int VTablePtr;
         public int DummyValue; // This seems to be here to ensure the rest of the struct is 8 byte aligned.
@@ -859,7 +859,7 @@ public static class COMProcessParser
         }
     }
 
-    interface IIFaceEntry
+    private interface IIFaceEntry
     {
         IntPtr GetProxy();
         IIFaceEntry GetNext(NtProcess process);
@@ -867,7 +867,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct IFaceEntry : IIFaceEntry
+    private struct IFaceEntry : IIFaceEntry
     {
         public IntPtr _pNext; // IFaceEntry*
         public IntPtr _pProxy; // void* 
@@ -900,7 +900,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct IFaceEntry32 : IIFaceEntry
+    private struct IFaceEntry32 : IIFaceEntry
     {
         public int _pNext; // IFaceEntry*
         public int _pProxy; // void* 
@@ -932,7 +932,7 @@ public static class COMProcessParser
         }
     }
 
-    interface IStdWrapper
+    private interface IStdWrapper
     {
         int GetIFaceCount();
         IntPtr GetVtableAddress();
@@ -940,7 +940,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CStdWrapper : IStdWrapper
+    private struct CStdWrapper : IStdWrapper
     {
         public IntPtr VTablePtr;
         public uint _dwState;
@@ -973,7 +973,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CStdWrapper32 : IStdWrapper
+    private struct CStdWrapper32 : IStdWrapper
     {
         public int VTablePtr;
         public uint _dwState;
@@ -1005,7 +1005,7 @@ public static class COMProcessParser
         }
     }
 
-    interface IIDObject
+    private interface IIDObject
     {
         Guid GetOid();
         IStdWrapper GetStdWrapper(NtProcess process);
@@ -1013,7 +1013,7 @@ public static class COMProcessParser
         IStdIdentity GetStdIdentity(NtProcess process);
     }
 
-    interface ISHashChain
+    private interface ISHashChain
     {
         IntPtr GetNext();
         IntPtr GetPrev();
@@ -1021,7 +1021,7 @@ public static class COMProcessParser
         I GetNextObject<T, I>(NtProcess process, int offset) where I : class where T : I, new();
     }
 
-    class SHashChainEntry
+    private class SHashChainEntry
     {
         public IntPtr BaseAddress { get; }
         public ISHashChain StartEntry { get; }
@@ -1033,7 +1033,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct SHashChain : ISHashChain
+    private struct SHashChain : ISHashChain
     {
         public IntPtr pNext;
         public IntPtr pPrev;
@@ -1064,7 +1064,7 @@ public static class COMProcessParser
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    sealed class ChainOffsetAttribute : Attribute
+    private sealed class ChainOffsetAttribute : Attribute
     {
         public static int GetOffset(Type t)
         {
@@ -1080,7 +1080,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CIDObject : IIDObject
+    private struct CIDObject : IIDObject
     {
         public IntPtr VTablePtr;
         public SHashChain _pidChain;
@@ -1130,7 +1130,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct SHashChain32 : ISHashChain
+    private struct SHashChain32 : ISHashChain
     {
         public int pNext;
         public int pPrev;
@@ -1161,7 +1161,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CIDObject32 : IIDObject
+    private struct CIDObject32 : IIDObject
     {
         public int VTablePtr;
         public SHashChain32 _pidChain;
@@ -1224,7 +1224,7 @@ public static class COMProcessParser
         public int EntrySize { get; private set; }
         public int EntriesPerPage { get; private set; }
 
-        void Init<T>(NtProcess process, IntPtr ipid_table) where T : IPageAllocator, new()
+        private void Init<T>(NtProcess process, IntPtr ipid_table) where T : IPageAllocator, new()
         {
             IPageAllocator page_alloc = process.ReadStruct<T>(ipid_table.ToInt64());
             Pages = page_alloc.ReadPages(process);
@@ -1245,13 +1245,13 @@ public static class COMProcessParser
         }
     }
 
-    interface ICClassEntry
+    private interface ICClassEntry
     {
         Guid[] GetGuids();
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CClassEntry : ICClassEntry
+    private struct CClassEntry : ICClassEntry
     {
         public IntPtr vfptr; // CClassCache::CCollectableVtbl* 
         public IntPtr _pNextCollectee; // CClassCache::CCollectable* 
@@ -1284,7 +1284,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CClassEntry32 : ICClassEntry
+    private struct CClassEntry32 : ICClassEntry
     {
         public int vfptr; // CClassCache::CCollectableVtbl* 
         private readonly int padding1;
@@ -1318,7 +1318,7 @@ public static class COMProcessParser
         }
     }
 
-    interface ICLSvrClassEntry
+    private interface ICLSvrClassEntry
     {
         IntPtr GetNext();
         IntPtr GetIUnknown();
@@ -1329,7 +1329,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CLSvrClassEntry : ICLSvrClassEntry
+    private struct CLSvrClassEntry : ICLSvrClassEntry
     {
         public IntPtr vfptr; // CClassCache::CBaseClassEntryVtbl*
         public IntPtr _pNext; // CClassCache::CBaseClassEntry*
@@ -1386,7 +1386,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CLSvrClassEntry32 : ICLSvrClassEntry
+    private struct CLSvrClassEntry32 : ICLSvrClassEntry
     {
         public int vfptr; // CClassCache::CBaseClassEntryVtbl*
         public int _pNext; // CClassCache::CBaseClassEntry*
@@ -1450,14 +1450,14 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct SActivatableClassIdHashNode
+    private struct SActivatableClassIdHashNode
     {
         public SHashChain chain;
         public IntPtr activatableClassId;
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntry : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntry : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode _hashNode;
@@ -1502,7 +1502,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntryRS5 : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntryRS5 : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode _hashNode;
@@ -1546,14 +1546,14 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct SActivatableClassIdHashNode32
+    private struct SActivatableClassIdHashNode32
     {
         public SHashChain32 chain;
         public int activatableClassId;
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntry32 : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntry32 : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode32 _hashNode;
@@ -1598,7 +1598,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntryRS532 : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntryRS532 : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode32 _hashNode;
@@ -1642,7 +1642,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntryWin8 : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntryWin8 : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode _hashNode;
@@ -1686,7 +1686,7 @@ public static class COMProcessParser
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CWinRTLocalSvrClassEntry32Win8 : IWinRTLocalSvrClassEntry
+    private struct CWinRTLocalSvrClassEntry32Win8 : IWinRTLocalSvrClassEntry
     {
         [ChainOffset]
         public SActivatableClassIdHashNode32 _hashNode;
@@ -1729,7 +1729,7 @@ public static class COMProcessParser
         }
     }
 
-    static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver,
+    private static List<COMIPIDEntry> ParseIPIDEntries<T>(NtProcess process, IntPtr ipid_table, ISymbolResolver resolver,
         COMProcessParserConfig config, COMRegistry registry, HashSet<Guid> ipid_set)
         where T : struct, IPIDEntryNativeInterface
     {
@@ -1766,9 +1766,9 @@ public static class COMProcessParser
         return entries;
     }
 
-    static readonly string _dllname = COMUtilities.GetCOMDllName();
+    private static readonly string _dllname = COMUtilities.GetCOMDllName();
 
-    static string GetSymbolName(string name)
+    private static string GetSymbolName(string name)
     {
         return $"{_dllname}!{name}";
     }

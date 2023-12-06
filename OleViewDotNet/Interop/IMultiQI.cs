@@ -21,7 +21,7 @@ namespace OleViewDotNet.Interop;
 
 [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("00000020-0000-0000-C000-000000000046")]
-interface IMultiQI
+internal interface IMultiQI
 {
     [PreserveSig]
     int QueryMultipleInterfaces(

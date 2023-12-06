@@ -21,7 +21,7 @@ namespace OleViewDotNet.Interop;
 
 [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("533148e2-ee0a-4b06-8500-7fda28f92ae2")]
-interface IExtensionActivationContext
+internal interface IExtensionActivationContext
 {
     ulong HostId { get; set; }
     ulong UserContext { get; set; }

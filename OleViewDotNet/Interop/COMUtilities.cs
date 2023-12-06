@@ -21,7 +21,6 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
-using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Wrappers;
 using System;
@@ -46,351 +45,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OleViewDotNet;
-
-class TypeLibCallback : ITypeLibImporterNotifySink
-{
-    public Assembly ResolveRef(object tl)
-    {
-        return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);
-    }
-
-    public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
-    {
-        if ((eventKind == ImporterEventKind.NOTIF_TYPECONVERTED) && (_progress != null))
-        {
-            _progress.Report(new Tuple<string, int>(eventMsg, -1));
-        }
-    }
-
-    public TypeLibCallback(IProgress<Tuple<string, int>> progress)
-    {
-        _progress = progress;
-    }
-
-    private readonly IProgress<Tuple<string, int>> _progress;
-}
-
-public class RegistryValue
-{
-    public string Name { get; }
-    public object Value { get; }
-
-    internal RegistryValue(string name, object value)
-    {
-        Name = name;
-        Value = value ?? string.Empty;
-    }
-}
-
-[Flags]
-public enum CLSCTX : uint
-{
-    INPROC_SERVER = 0x1,
-    INPROC_HANDLER = 0x2,
-    LOCAL_SERVER = 0x4,
-    INPROC_SERVER16 = 0x8,
-    REMOTE_SERVER = 0x10,
-    INPROC_HANDLER16 = 0x20,
-    RESERVED1 = 0x40,
-    RESERVED2 = 0x80,
-    RESERVED3 = 0x100,
-    RESERVED4 = 0x200,
-    NO_CODE_DOWNLOAD = 0x400,
-    RESERVED5 = 0x800,
-    NO_CUSTOM_MARSHAL = 0x1000,
-    ENABLE_CODE_DOWNLOAD = 0x2000,
-    NO_FAILURE_LOG = 0x4000,
-    DISABLE_AAA = 0x8000,
-    ENABLE_AAA = 0x10000,
-    FROM_DEFAULT_CONTEXT = 0x20000,
-    ACTIVATE_32_BIT_SERVER = 0x40000,
-    ACTIVATE_64_BIT_SERVER = 0x80000,
-    ENABLE_CLOAKING = 0x100000,
-    APPCONTAINER = 0x400000,
-    ACTIVATE_AAA_AS_IU = 0x800000,
-    ACTIVATE_NATIVE_SERVER = 0x1000000,
-    ACTIVATE_ARM32_SERVER = 0x2000000,
-    PS_DLL = 0x80000000,
-    SERVER = INPROC_SERVER | LOCAL_SERVER | REMOTE_SERVER,
-    ALL = INPROC_SERVER | INPROC_HANDLER | LOCAL_SERVER | REMOTE_SERVER
-}
-
-[Flags]
-public enum REGCLS
-{
-    SINGLEUSE = 0,
-    MULTIPLEUSE = 1,
-    MULTI_SEPARATE = 2,
-    SUSPENDED = 4,
-    SURROGATE = 8,
-    AGILE = 0x10,
-}
-
-[Flags]
-public enum STGM
-{
-    READ = 0x00000000,
-    WRITE = 0x00000001,
-    READWRITE = 0x00000002,
-    SHARE_DENY_NONE = 0x00000040,
-    SHARE_DENY_READ = 0x00000030,
-    SHARE_DENY_WRITE = 0x00000020,
-    SHARE_EXCLUSIVE = 0x00000010,
-    PRIORITY = 0x00040000,
-    CREATE = 0x00001000,
-    CONVERT = 0x00020000,
-    FAILIFTHERE = READ,
-    DIRECT = READ,
-    TRANSACTED = 0x00010000,
-    NOSCRATCH = 0x00100000,
-    NOSNAPSHOT = 0x00200000,
-    SIMPLE = 0x08000000,
-    DIRECT_SWMR = 0x00400000,
-    DELETEONRELEASE = 0x04000000
-}
-
-public enum STGC
-{
-    DEFAULT,
-    OVERWRITE,
-    ONLYIFCURRENT,
-    DANGEROUSLYCOMMITMERELYTODISKCACHE,
-    CONSOLIDATE
-}
-
-[Flags]
-public enum EOLE_AUTHENTICATION_CAPABILITIES
-{
-    NONE = 0,
-    MUTUAL_AUTH = 0x1,
-    STATIC_CLOAKING = 0x20,
-    DYNAMIC_CLOAKING = 0x40,
-    ANY_AUTHORITY = 0x80,
-    MAKE_FULLSIC = 0x100,
-    DEFAULT = 0x800,
-    SECURE_REFS = 0x2,
-    ACCESS_CONTROL = 0x4,
-    APPID = 0x8,
-    DYNAMIC = 0x10,
-    REQUIRE_FULLSIC = 0x200,
-    AUTO_IMPERSONATE = 0x400,
-    NO_CUSTOM_MARSHAL = 0x2000,
-    DISABLE_AAA = 0x1000
-}
-
-public enum RPC_AUTHN_LEVEL
-{
-    DEFAULT       = 0,
-    NONE          = 1,
-    CONNECT       = 2,
-    CALL          = 3,
-    PKT           = 4,
-    PKT_INTEGRITY = 5,
-    PKT_PRIVACY   = 6,
-}
-
-public enum RPC_IMP_LEVEL
-{
-    DEFAULT      = 0,
-    ANONYMOUS    = 1,
-    IDENTIFY     = 2,
-    IMPERSONATE  = 3,
-    DELEGATE     = 4,
-}
-
-public enum GLOBALOPT_UNMARSHALING_POLICY_VALUES
-{
-    NORMAL = 0,
-    STRONG = 1,
-    HYBRID = 2
-}
-
-public enum MSHCTX
-{
-    LOCAL = 0,
-    NOSHAREDMEM = 1,
-    DIFFERENTMACHINE = 2,
-    INPROC = 3,
-    CROSSCTX = 4,
-    RESERVED1 = 5,
-}
-
-public enum MSHLFLAGS
-{
-    NORMAL = 0,
-    TABLESTRONG = 1,
-    TABLEWEAK = 2,
-    NOPING = 4
-}
-
-public enum GuidFormat
-{
-    String,
-    Structure,
-    Object,
-    HexString,
-    CSGuid,
-    CSGuidAttribute,
-    RpcUuid
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public struct OptionalGuid : IDisposable
-{
-    IntPtr pGuid;
-
-    void IDisposable.Dispose()
-    {
-        if (pGuid != IntPtr.Zero)
-        {
-            Marshal.FreeCoTaskMem(pGuid);
-            pGuid = IntPtr.Zero;
-        }
-    }
-
-    public OptionalGuid(Guid guid)
-    {
-        pGuid = Marshal.AllocCoTaskMem(16);
-        Marshal.Copy(guid.ToByteArray(), 0, pGuid, 16);
-    }
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public struct MULTI_QI : IDisposable
-{
-    OptionalGuid pIID;
-    IntPtr pItf;
-    readonly int hr;
-
-    public object GetObject()
-    {
-        if (pItf == IntPtr.Zero)
-        {
-            return null;
-        }
-        else
-        {
-            return Marshal.GetObjectForIUnknown(pItf);
-        }
-    }
-
-    public IntPtr GetObjectPointer()
-    {
-        if (pItf != IntPtr.Zero)
-        {
-            Marshal.AddRef(pItf);
-        }
-        return pItf;
-    }
-
-    public int HResult()
-    {
-        return hr;
-    }
-
-    void IDisposable.Dispose()
-    {
-        ((IDisposable)pIID).Dispose();
-        if (pItf != IntPtr.Zero)
-        {
-            Marshal.Release(pItf);
-            pItf = IntPtr.Zero;
-        }
-    }
-
-    public MULTI_QI(Guid iid)
-    {
-        pIID = new OptionalGuid(iid);
-        pItf = IntPtr.Zero;
-        hr = 0;
-    }
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public sealed class COSERVERINFO : IDisposable
-{
-    readonly int dwReserved1;
-    [MarshalAs(UnmanagedType.LPWStr)]
-    readonly string pwszName;
-    readonly IntPtr pAuthInfo;
-    readonly int dwReserved2;
-
-    void IDisposable.Dispose()
-    {
-        if (pAuthInfo != IntPtr.Zero)
-        {
-            Marshal.FreeCoTaskMem(pAuthInfo);
-        }
-    }
-
-    public COSERVERINFO(string name)
-    {
-        pwszName = name;
-    }   
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public class BIND_OPTS3
-{
-    readonly int cbStruct;
-    public int grfFlags;
-    public int grfMode;
-    public int dwTickCountDeadline;
-    public int dwTrackFlags;
-    public CLSCTX dwClassContext;
-    public int locale;
-    public IntPtr pServerInfo;
-    public IntPtr hwnd;
-
-    public BIND_OPTS3()
-    {
-        cbStruct = Marshal.SizeOf(this);
-    }
-}
-
-[Flags]
-public enum CreateUrlMonikerFlags
-{
-    Legacy = 0,
-    Uniform = 1,
-    NoCanonicalize = 2,
-}
-
-public enum STGFMT
-{
-    Storage = 0,
-    File = 3,
-    Any = 4,
-    Docfile = 5
-}
-
-public enum STGTY
-{
-    None = 0,
-    Storage = 1,
-    Stream = 2,
-    Lockbytes = 3,
-    Property = 4
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public class STGOPTIONS
-{
-    public short usVersion;
-    public short reserved;
-    public int ulSectorSize;
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public string pwcsTemplateFile;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public struct ServerInformation
-{
-    public int dwServerPid;
-    public int dwServerTid;
-    public long ui64ServerAddress;
-}
+namespace OleViewDotNet.Interop;
 
 public static class COMUtilities
 {
@@ -427,9 +82,9 @@ public static class COMUtilities
     public static extern ulong CoRegisterRacActivationToken(SafeKernelObjectHandle racActivationToken);
 
     [DllImport("combase.dll", EntryPoint = "#65", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern IExtensionRegistration RoGetExtensionRegistration([MarshalAs(UnmanagedType.HString)]string contractId,
-            [MarshalAs(UnmanagedType.HString)]string packageId,
-            [MarshalAs(UnmanagedType.HString)]string activatableClassId);
+    public static extern IExtensionRegistration RoGetExtensionRegistration([MarshalAs(UnmanagedType.HString)] string contractId,
+            [MarshalAs(UnmanagedType.HString)] string packageId,
+            [MarshalAs(UnmanagedType.HString)] string activatableClassId);
 
     [DllImport("combase.dll", CharSet = CharSet.Unicode)]
     public static extern int RoActivateInstance(
@@ -534,7 +189,7 @@ public static class COMUtilities
     public static extern int CoDecodeProxy(int dwClientPid, long ui64ProxyAddress, out ServerInformation pServerInformation);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    static extern int PackageIdFromFullName(
+    private static extern int PackageIdFromFullName(
       string packageFullName,
       int flags,
       ref int bufferLength,
@@ -542,7 +197,7 @@ public static class COMUtilities
     );
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    static extern int GetPackagePath(
+    private static extern int GetPackagePath(
       SafeBuffer packageId,
       int reserved,
       ref int pathLength,
@@ -558,7 +213,7 @@ public static class COMUtilities
         AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
     }
 
-    static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
         if (m_typelibsname != null)
         {
@@ -602,7 +257,7 @@ public static class COMUtilities
 
     public static string ReadString(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
     {
-        object valueObject = ReadObject(rootKey, keyName, valueName, options);
+        object valueObject = rootKey.ReadObject(keyName, valueName, options);
         string valueString = string.Empty;
         if (valueObject != null)
         {
@@ -620,7 +275,7 @@ public static class COMUtilities
 
     public static string ReadStringPath(this RegistryKey rootKey, string basePath, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
     {
-        string filePath = ReadString(rootKey, keyName, valueName, options);
+        string filePath = rootKey.ReadString(keyName, valueName, options);
         if (string.IsNullOrWhiteSpace(filePath))
         {
             return string.Empty;
@@ -656,7 +311,7 @@ public static class COMUtilities
 
     public static bool ReadBool(this RegistryKey rootKey, string valueName = null, string keyName = null)
     {
-        return ReadInt(rootKey, keyName, valueName) != 0;
+        return rootKey.ReadInt(keyName, valueName) != 0;
     }
 
     public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
@@ -1474,7 +1129,7 @@ public static class COMUtilities
             {
                 foreach (CompilerError e in results.Errors)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.ToString());
+                    Debug.WriteLine(e.ToString());
                 }
             }
             else
@@ -1576,7 +1231,7 @@ public static class COMUtilities
 
         object ret;
 
-        int iError = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
+        int iError = CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
             COMInterfaceEntry.IID_IUnknown, out IntPtr pObj);
 
         if (iError != 0)
@@ -1883,7 +1538,7 @@ public static class COMUtilities
             IntPtr curr = Marshal.ReadIntPtr(p, i * IntPtr.Size);
             if (curr == IntPtr.Zero)
             {
-                ret[i] = default(T);
+                ret[i] = default;
             }
             else
             {
@@ -2113,14 +1768,14 @@ public static class COMUtilities
 
     internal static Assembly LoadTypeLib(IWin32Window window, string path)
     {
-        using WaitingDialog dlg = new((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s);
+        using WaitingDialog dlg = new((progress, token) => LoadTypeLib(path, progress), s => s);
         dlg.Text = string.Format("Loading TypeLib {0}", path);
         dlg.CancelEnabled = false;
         if (dlg.ShowDialog(window) == DialogResult.OK)
         {
             return (Assembly)dlg.Result;
         }
-        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2136,7 +1791,7 @@ public static class COMUtilities
         {
             return (Assembly)dlg.Result;
         }
-        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2167,7 +1822,7 @@ public static class COMUtilities
         {
             return (IEnumerable<COMProcessEntry>)dlg.Result;
         }
-        else if ((dlg.Error != null) && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -2191,8 +1846,7 @@ public static class COMUtilities
         private readonly int _total_count;
         private int _current;
         private readonly IProgress<Tuple<string, int>> _progress;
-
-        const int MINIMUM_REPORT_SIZE = 25;
+        private const int MINIMUM_REPORT_SIZE = 25;
 
         public ReportQueryProgress(IProgress<Tuple<string, int>> progress, int total_count)
         {
@@ -2203,7 +1857,7 @@ public static class COMUtilities
         public void Report()
         {
             int current = Interlocked.Increment(ref _current);
-            if ((current % MINIMUM_REPORT_SIZE) == 1)
+            if (current % MINIMUM_REPORT_SIZE == 1)
             {
                 _progress.Report(new Tuple<string, int>(string.Format("Querying Interfaces: {0} of {1}", current, _total_count),
                     100 * current / _total_count));
@@ -2238,7 +1892,7 @@ public static class COMUtilities
     internal static bool QueryAllInterfaces(IWin32Window parent, IEnumerable<COMCLSIDEntry> clsids, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
     {
         using WaitingDialog dlg = new(
-            (p, t) => COMUtilities.QueryAllInterfaces(clsids.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),
+            (p, t) => QueryAllInterfaces(clsids.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),
                         p, t, concurrent_queries),
             s => s);
         dlg.Text = "Querying Interfaces";
@@ -2269,7 +1923,7 @@ public static class COMUtilities
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct SERVICE_STATUS_PROCESS
+    private struct SERVICE_STATUS_PROCESS
     {
         public int dwServiceType;
         public int dwCurrentState;
@@ -2283,7 +1937,7 @@ public static class COMUtilities
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct ENUM_SERVICE_STATUS_PROCESS
+    private struct ENUM_SERVICE_STATUS_PROCESS
     {
         public IntPtr lpServiceName;
         public IntPtr lpDisplayName;
@@ -2299,26 +1953,26 @@ public static class COMUtilities
         }
     }
 
-    const int SC_MANAGER_CONNECT = 0x0001;
-    const int SC_MANAGER_ENUMERATE_SERVICE = 0x0004;
-    const int SERVICE_WIN32 = 0x00000030;
-    const int SERVICE_ACTIVE = 0x00000001;
-    const int ERROR_MORE_DATA = 234;
+    private const int SC_MANAGER_CONNECT = 0x0001;
+    private const int SC_MANAGER_ENUMERATE_SERVICE = 0x0004;
+    private const int SERVICE_WIN32 = 0x00000030;
+    private const int SERVICE_ACTIVE = 0x00000001;
+    private const int ERROR_MORE_DATA = 234;
 
     [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern IntPtr OpenSCManager(
+    private static extern IntPtr OpenSCManager(
           string lpMachineName,
           string lpDatabaseName,
           int dwDesiredAccess
         );
 
     [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern bool CloseServiceHandle(
+    private static extern bool CloseServiceHandle(
               IntPtr hSCObject
             );
 
     [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern bool EnumServicesStatusEx(
+    private static extern bool EnumServicesStatusEx(
           IntPtr hSCManager,
           int InfoLevel,
           int dwServiceType,
@@ -2452,7 +2106,7 @@ public static class COMUtilities
         return new ServerInformation();
     }
 
-    static readonly Dictionary<string, Assembly> _cached_reflection_assemblies = new();
+    private static readonly Dictionary<string, Assembly> _cached_reflection_assemblies = new();
 
     private static Assembly ResolveAssembly(string base_path, string name)
     {
@@ -2584,9 +2238,9 @@ public static class COMUtilities
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
+                Debug.WriteLine(ex.ToString());
             }
         }
     }
@@ -2610,7 +2264,7 @@ public static class COMUtilities
     public static string GetFileMD5(string file)
     {
         using var stm = File.OpenRead(file);
-        return BitConverter.ToString(MD5Cng.Create().ComputeHash(stm)).Replace("-", string.Empty);
+        return BitConverter.ToString(MD5.Create().ComputeHash(stm)).Replace("-", string.Empty);
     }
 
     public static T GetGuidEntry<T>(this IDictionary<Guid, T> dict, Guid guid)
@@ -2619,7 +2273,7 @@ public static class COMUtilities
         {
             return dict[guid];
         }
-        return default(T);
+        return default;
     }
 
     public static IntPtr CreateInstance(Guid clsid, Guid iid, CLSCTX context, string server)
@@ -2633,7 +2287,7 @@ public static class COMUtilities
             COSERVERINFO server_info = new(server);
             try
             {
-                hr = COMUtilities.CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
+                hr = CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
                 if (hr == 0)
                 {
                     hr = qis[0].HResult();
@@ -2650,7 +2304,7 @@ public static class COMUtilities
         }
         else
         {
-            hr = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, context, iid, out pInterface);
+            hr = CoCreateInstance(clsid, IntPtr.Zero, context, iid, out pInterface);
         }
 
         if (hr != 0)
@@ -2805,7 +2459,7 @@ public static class COMUtilities
         File.WriteAllLines(output_file, lines);
     }
 
-    public static string FormatProxy(COMRegistry registry, IEnumerable<NdrComplexTypeReference> complex_types, 
+    public static string FormatProxy(COMRegistry registry, IEnumerable<NdrComplexTypeReference> complex_types,
         IEnumerable<NdrComProxyDefinition> proxies, ProxyFormatterFlags flags)
     {
         bool remove_comments = (flags & ProxyFormatterFlags.RemoveComments) != 0;
@@ -2831,7 +2485,7 @@ public static class COMUtilities
         return builder.ToString();
     }
 
-    static void EmitMember(StringBuilder builder, MemberInfo mi)
+    private static void EmitMember(StringBuilder builder, MemberInfo mi)
     {
         string name = MemberInfoToString(mi);
         if (!string.IsNullOrWhiteSpace(name))
@@ -2848,7 +2502,7 @@ public static class COMUtilities
         }
     }
 
-    static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
+    private static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
     {
         HashSet<string> matched_names = new();
         Dictionary<MethodInfo, string> ret = new();
@@ -2865,7 +2519,7 @@ public static class COMUtilities
         return ret;
     }
 
-    static Dictionary<string, object> GetEnumValues(Type enum_type)
+    private static Dictionary<string, object> GetEnumValues(Type enum_type)
     {
         return enum_type.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(e => e.Name, e => e.GetRawConstantValue());
     }
@@ -2985,7 +2639,7 @@ public static class COMUtilities
         FormatComType(builder, t);
         return builder.ToString();
     }
-    
+
     public static IEnumerable<Type> GetComClasses(Assembly typelib, bool com_visible)
     {
         return GetComTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
@@ -3064,7 +2718,7 @@ public static class COMUtilities
             catch (ExternalException)
             {
             }
-            System.Threading.Thread.Sleep(100);
+            Thread.Sleep(100);
             tries--;
         }
     }
@@ -3151,10 +2805,10 @@ public static class COMUtilities
 
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
+    private delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
 
     [DllImport("combase.dll")]
-    static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback, 
+    private static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback,
         IntPtr context, out int length, out long targetStringAddress);
 
     public static string ReadHStringFull(this NtProcess process, long address)
@@ -3184,10 +2838,10 @@ public static class COMUtilities
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
+    private delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
 
     [DllImport("combase.dll")]
-    static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
+    private static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
         IntPtr context, out int length, out IntPtr targetStringAddress);
 
     public static string ReadHString(this NtProcess process, IntPtr address)

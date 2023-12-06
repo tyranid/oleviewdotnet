@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using OleViewDotNet.Interop;
 using System;
 
 namespace OleViewDotNet.Database;

@@ -24,7 +24,7 @@ namespace OleViewDotNet.PowerShell;
 
 public static class PowerShellUtils
 {
-    static NtToken GetProcessAccessToken(NtProcess process)
+    private static NtToken GetProcessAccessToken(NtProcess process)
     {
         return process.OpenToken();
     }

@@ -56,7 +56,7 @@ public partial class ObjectContainer : UserControl
     }
 }
 
-class GenericAxHost : AxHost
+internal class GenericAxHost : AxHost
 {
     private readonly object m_pObject;
 

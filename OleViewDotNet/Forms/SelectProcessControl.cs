@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using OleViewDotNet.Interop;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class SelectProcessControl : UserControl
 {
-    DisposableList<NtProcess> _processes;
+    private DisposableList<NtProcess> _processes;
 
     public SelectProcessControl()
     {

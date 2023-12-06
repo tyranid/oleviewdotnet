@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-struct CATEGORYINFO
+internal struct CATEGORYINFO
 {
     public Guid catid;
     public int lcid;

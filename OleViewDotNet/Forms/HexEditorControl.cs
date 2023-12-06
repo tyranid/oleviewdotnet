@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Be.Windows.Forms;
+using OleViewDotNet.Interop;
 using System;
 using System.IO;
 using System.Windows.Forms;
@@ -23,7 +24,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class HexEditorControl : UserControl
 {
-    DynamicByteProvider _bytes;
+    private DynamicByteProvider _bytes;
 
     public HexEditorControl()
     {

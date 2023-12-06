@@ -21,7 +21,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class DocumentForm : DockContent
 {
-    readonly Control _control;
+    private readonly Control _control;
 
     public DocumentForm(Control c)
     {
@@ -33,7 +33,7 @@ public partial class DocumentForm : DockContent
         c.TextChanged += control_TextChanged;
     }
 
-    void control_TextChanged(object sender, System.EventArgs e)
+    private void control_TextChanged(object sender, System.EventArgs e)
     {
         TabText = _control.Text;
     }

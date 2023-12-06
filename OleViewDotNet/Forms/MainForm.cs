@@ -853,7 +853,7 @@ public partial class MainForm : Form
         }
     }
 
-    const string STORAGE_FILTER = "All Files (*.*)|*.*|Doc Files (*.doc)|*.doc";
+    private const string STORAGE_FILTER = "All Files (*.*)|*.*|Doc Files (*.doc)|*.doc";
 
     private void menuStorageOpenStorage_Click(object sender, EventArgs e)
     {
