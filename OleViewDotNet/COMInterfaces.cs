@@ -455,4 +455,14 @@ namespace OleViewDotNet
         ulong ConsoleHandlesId { get; set; }
         uint AAMActivationId { get; set; }
     }
+
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("00000020-0000-0000-C000-000000000046")]
+    interface IMultiQI
+    {
+        [PreserveSig]
+        int QueryMultipleInterfaces(
+            int cMQIs,
+            [In, Out] MULTI_QI[] pMQIs);
+    };
 }
