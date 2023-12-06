@@ -14,17 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Forms;
 
-
-public static class DockPanelHelper
+internal static class DockPanelHelper
 {
     public enum Direction { Left = -1, Right = 1 };
     /// <summary>
@@ -34,9 +28,11 @@ public static class DockPanelHelper
     /// <returns>DockPanelDocumentInfo about the docks and the selected index</returns>
     public static DockPanelDocumentInfo GetDocumentInfo(this DockPanel dockPanel)
     {
-        DockPanelDocumentInfo re = new();
-        re.DockContents = new IDockContent[dockPanel.DocumentsCount];
-        re.SelectedDockContentIndex = -1;
+        DockPanelDocumentInfo re = new()
+        {
+            DockContents = new IDockContent[dockPanel.DocumentsCount],
+            SelectedDockContentIndex = -1
+        };
 
         var i = 0;
         foreach (var idc in dockPanel.Documents)
@@ -63,7 +59,7 @@ public static class DockPanelHelper
         if (info.SelectedDockContent != null)
         {
             var newIndex = info.SelectedDockContentIndex + (int)direction;
-            if ((newIndex > -1) && (newIndex < info.DockContents.Length))
+            if (newIndex > -1 && newIndex < info.DockContents.Length)
             {
                 // the desired new index belongs to the current dock panel, we can navigate internally.
                 info.DockContents[newIndex].DockHandler.Activate();
@@ -71,11 +67,4 @@ public static class DockPanelHelper
             }
         }
     }
-}
-
-public struct DockPanelDocumentInfo
-{
-    public int SelectedDockContentIndex;
-    public IDockContent SelectedDockContent;
-    public IDockContent[] DockContents;
 }
