@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2018
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,10 +14,23 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace OleViewDotNet.Database;
+using NtApiDotNet;
+using System;
 
-public interface ICOMAccessSecurity
+namespace OleViewDotNet.Security;
+
+[Flags]
+public enum COMAccessRights : uint
 {
-    string DefaultAccessPermission { get; }
-    string DefaultLaunchPermission { get; }
+    Execute = 1,
+    ExecuteLocal = 2,
+    ExecuteRemote = 4,
+    ActivateLocal = 8,
+    ActivateRemote = 16,
+    ExecuteContainer = 32,
+    ActivateContainer = 64,
+    GenericRead = GenericAccessRights.GenericRead,
+    GenericWrite = GenericAccessRights.GenericWrite,
+    GenericExecute = GenericAccessRights.GenericExecute,
+    GenericAll = GenericAccessRights.GenericAll,
 }

@@ -255,7 +255,7 @@ Specify to return the loaded database.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMRegistry
+OleViewDotNet.Database.COMRegistry
 .EXAMPLE
 Get-ComDatabase
 Load a default, merged COM database.
@@ -362,7 +362,7 @@ Don't show progress for compare.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMRegistry
+OleViewDotNet.Database.COMRegistry
 .EXAMPLE
 Compare-ComRegistry -Left $comdb1 -Right $comdb2
 Compare two databases, returning the differences in the left database.
@@ -446,7 +446,7 @@ Specify looking up the COM classes based on a source type.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMCLSIDEntry
+OleViewDotNet.Database.COMCLSIDEntry
 .EXAMPLE
 Get-ComClass 
 Get all COM classes from the current databae.
@@ -791,7 +791,7 @@ Specify looking up the COM AppIDs based on a source type.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMAppIDEntry
+OleViewDotNet.Database.COMAppIDEntry
 .EXAMPLE
 Get-ComAppId -Database $comdb
 Get all COM AppIDs from a database.
@@ -929,7 +929,7 @@ The token to use when querying for the interfaces.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMInterfaceInstance[]
+OleViewDotNet.Database.COMInterfaceInstance[]
 .EXAMPLE
 Get-ComClassInterface -ClassEntry $cls
 Get instance interfaces for a COM class.
@@ -990,7 +990,7 @@ Specify a type of activation to match against.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMRuntimeClassEntry
+OleViewDotNet.Database.COMRuntimeClassEntry
 .EXAMPLE
 Get-ComRuntimeClass $comdb
 Get all COM Runtime classes from the current database.
@@ -1059,7 +1059,7 @@ Specify the identity type of the server to match against.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMRuntimeClassEntry
+OleViewDotNet.Database.COMRuntimeClassEntry
 .EXAMPLE
 Get-ComRuntimeServer
 Get all COM Runtime classes from the current data database.
@@ -1128,7 +1128,7 @@ Return interfaces which came from a specific source.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMInterfaceEntry
+OleViewDotNet.Database.COMInterfaceEntry
 .EXAMPLE
 Get-ComInterface
 Get all COM interfaces from the current database.
@@ -1228,9 +1228,9 @@ Filter out accessible objects.
 .PARAMETER IgnoreDefault
 If the object doesn't have a specific set of launch permissions uses the system default. If this flag is specified objects without a specific launch permission are ignored.
 .INPUTS
-OleViewDotNet.Database.ICOMAccessSecurity
+OleViewDotNet.Security.ICOMAccessSecurity
 .OUTPUTS
-OleViewDotNet.Database.ICOMAccessSecurity
+OleViewDotNet.Security.ICOMAccessSecurity
 .EXAMPLE
 Get-ComClass | Select-ComAccess
 Get all COM classes which are accessible by the current process.
@@ -1257,9 +1257,9 @@ function Select-ComAccess {
     [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.Database.ICOMAccessSecurity]$InputObject,
-        [OleViewDotNet.COMAccessRights]$Access = "ExecuteLocal",
-        [OleViewDotNet.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
+        [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
+        [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
         [Parameter(Mandatory, ParameterSetName = "FromToken")]
         [NtApiDotNet.NtToken]$Token,
         [Parameter(Mandatory, ParameterSetName = "FromProcess")]
@@ -1466,7 +1466,7 @@ function Show-ComSecurityDescriptor {
         [Parameter(Mandatory, ParameterSetName = "FromSddl")]
         [string]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
-        [OleViewDotNet.Database.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
         [switch]$Restriction,
         [Parameter(Mandatory, ParameterSetName = "FromDefault")]
@@ -1494,9 +1494,9 @@ function Show-ComSecurityDescriptor {
             }
             "FromObject" {
                 if ($ShowAccess) {
-                    $SecurityDescriptor = [OleViewDotNet.COMAccessCheck]::GetAccessPermission($InputObject)
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
                 } else {
-                    $SecurityDescriptor = [OleViewDotNet.COMAccessCheck]::GetLaunchPermission($InputObject)
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
                 }
                 $name = $InputObject.Name.Replace("`"", " ")
             }
@@ -2471,7 +2471,7 @@ The COM database to use.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMCategory
+OleViewDotNet.Database.COMCategory
 .EXAMPLE
 Get-ComCategory
 Get all COM categories.
@@ -2535,9 +2535,9 @@ Specify to return classes which do not implement one of the interfaces.
 .PARAMETER NoProgress
 Don't show progress for query.
 .INPUTS
-OleViewDotNet.ICOMClassEntry
+OleViewDotNet.Database.ICOMClassEntry
 .OUTPUTS
-OleViewDotNet.ICOMClassEntry
+OleViewDotNet.Database.ICOMClassEntry
 .EXAMPLE
 Get-ComClass | Select-ComClassInterface -Name "IDispatch"
 Get all COM classes which implement IDispatch.
@@ -2618,7 +2618,7 @@ The COM database to use.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMRuntimeExtensionEntry
+OleViewDotNet.Database.COMRuntimeExtensionEntry
 .EXAMPLE
 Get-ComRuntimeExtension
 Get all Windows Runtime extensions.
@@ -2694,7 +2694,7 @@ Specify the host ID to use for the activation.
 .PARAMETER NoWrapper
 Don't wrap object in a callable wrapper.
 .INPUTS
-OleViewDotNet.COMRuntimeExtensionEntry
+OleViewDotNet.Database.COMRuntimeExtensionEntry
 .OUTPUTS
 COM object instance.
 .EXAMPLE
@@ -2771,7 +2771,7 @@ The COM database to use.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMMimeType
+OleViewDotNet.Database.COMMimeType
 .EXAMPLE
 Get-ComMimeType
 Get all COM MIME types from the current database.
@@ -2830,7 +2830,7 @@ Specify a source where the ProgID came from.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMProgIDEntry
+OleViewDotNet.Database.COMProgIDEntry
 .EXAMPLE
 Get-ComProgId
 Get all COM ProgIds from the current database.

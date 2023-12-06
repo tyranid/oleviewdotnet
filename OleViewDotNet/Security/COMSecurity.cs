@@ -23,25 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 
-namespace OleViewDotNet;
-
-[Flags]
-public enum COMAccessRights : uint
-{
-    Execute = 1,
-    ExecuteLocal = 2,
-    ExecuteRemote = 4,
-    ActivateLocal = 8,
-    ActivateRemote = 16,
-    ExecuteContainer = 32,
-    ActivateContainer = 64,
-    GenericRead = GenericAccessRights.GenericRead,
-    GenericWrite = GenericAccessRights.GenericWrite,
-    GenericExecute = GenericAccessRights.GenericExecute,
-    GenericAll = GenericAccessRights.GenericAll,
-}
+namespace OleViewDotNet.Security;
 
 public static class COMSecurity
 {
@@ -55,8 +38,12 @@ public static class COMSecurity
             SecurityDescriptorViewerControl control = new();
             EntryPoint.GetMainForm(registry).HostControl(control, name);
             control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
-                { GenericExecute = valid_access, GenericRead = valid_access,
-                GenericWrite = valid_access, GenericAll = valid_access }, valid_access);
+            {
+                GenericExecute = valid_access,
+                GenericRead = valid_access,
+                GenericWrite = valid_access,
+                GenericAll = valid_access
+            }, valid_access);
         }
     }
 
@@ -151,7 +138,8 @@ public static class COMSecurity
                 throw new Win32Exception(hr);
             }
 
-            return new SecurityDescriptor(sd).ToSddl(SecurityInformation.AllBasic);}
+            return new SecurityDescriptor(sd).ToSddl(SecurityInformation.AllBasic);
+        }
         finally
         {
             if (sd != IntPtr.Zero)
@@ -272,7 +260,7 @@ public static class COMSecurity
 
     public static bool SDHasRemoteAccess(string sddl)
     {
-        return SDHasAllowedAce(sddl, true, a => a.Mask == COMAccessRights.Execute || 
+        return SDHasAllowedAce(sddl, true, a => a.Mask == COMAccessRights.Execute ||
             (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
     }
 

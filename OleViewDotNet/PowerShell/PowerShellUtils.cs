@@ -17,6 +17,7 @@
 using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Security;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 

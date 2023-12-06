@@ -19,7 +19,7 @@ using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 
-namespace OleViewDotNet;
+namespace OleViewDotNet.Security;
 
 public class COMAccessCheck : IDisposable
 {
@@ -206,7 +206,7 @@ public class COMAccessCheck : IDisposable
             }
             else
             {
-                m_access_cache[access_sddl] = COMSecurity.IsAccessGranted(access_sddl, 
+                m_access_cache[access_sddl] = COMSecurity.IsAccessGranted(access_sddl,
                     principal, m_access_token, false, false, m_access_rights);
             }
         }

@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;

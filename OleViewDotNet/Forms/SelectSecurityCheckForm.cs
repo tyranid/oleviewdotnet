@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Win32;
+using OleViewDotNet.Security;
 using System;
 using System.ComponentModel;
 using System.Linq;

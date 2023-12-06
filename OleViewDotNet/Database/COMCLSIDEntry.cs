@@ -29,6 +29,7 @@ using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.Security;
 
 namespace OleViewDotNet.Database;
 

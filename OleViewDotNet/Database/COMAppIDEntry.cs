@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using NtApiDotNet;
+using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
