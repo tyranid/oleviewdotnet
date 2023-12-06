@@ -42,7 +42,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         RunAs = string.Empty;
         Name = server.DisplayName;
         LaunchPermission = server.LaunchAndActivationPermission;
-        AccessPermission = string.Empty;
+        AccessPermission = null;
         Source = COMRegistryEntrySource.Packaged;
         DllSurrogate = server.Executable;
         if (string.IsNullOrWhiteSpace(DllSurrogate))
@@ -64,8 +64,8 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             Name = AppId.FormatGuidDefault();
         }
 
-        AccessPermission = key.ReadSddl("AccessPermission");
-        LaunchPermission = key.ReadSddl("LaunchPermission");
+        AccessPermission = key.ReadSecurityDescriptor("AccessPermission");
+        LaunchPermission = key.ReadSecurityDescriptor("LaunchPermission");
 
         DllSurrogate = key.GetValue("DllSurrogate") as string;
         if (DllSurrogate != null)
@@ -176,19 +176,23 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         }
     }
 
-    public string LaunchPermission
+    public SecurityDescriptor LaunchPermission
     {
         get; private set;
     }
 
-    public string AccessPermission
+    public SecurityDescriptor AccessPermission
     {
         get; private set;
     }
 
-    public bool HasLaunchPermission => !string.IsNullOrWhiteSpace(LaunchPermission);
+    public string LaunchPermissionSDDL => LaunchPermission?.ToSddl() ?? string.Empty;
 
-    public bool HasAccessPermission => !string.IsNullOrWhiteSpace(AccessPermission);
+    public string AccessPermissionSDDL => AccessPermission?.ToSddl() ?? string.Empty;
+
+    public bool HasLaunchPermission => LaunchPermission != null;
+
+    public bool HasAccessPermission => AccessPermission != null;
 
     public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
@@ -196,7 +200,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public bool HasLowILLaunch => COMSecurity.GetILForSD(LaunchPermission) <= TokenIntegrityLevel.Low;
 
-    public bool HasACAccess => COMSecurity.SDHasAC(AccessPermission);
+    public bool HasACAccess =>  COMSecurity.SDHasAC(AccessPermission);
 
     public bool HasACLaunch => COMSecurity.SDHasAC(LaunchPermission);
 
@@ -230,9 +234,9 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     internal COMRegistry Database { get; }
 
-    string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
+    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-    string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
     Guid IComGuid.ComGuid => AppId;
 
@@ -266,7 +270,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         }
 
         return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
-            && LaunchPermission == right.LaunchPermission && AccessPermission == right.AccessPermission && RotFlags == right.RotFlags 
+            && LaunchPermission.SDIsEqual(right.LaunchPermission) && AccessPermission.SDIsEqual(right.AccessPermission) && RotFlags == right.RotFlags 
             && PreferredServerBitness == right.PreferredServerBitness && Source == right.Source;
     }
 
@@ -274,7 +278,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
     {
         return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode()
             ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
-            LaunchPermission.GetSafeHashCode() ^ AccessPermission.GetSafeHashCode() ^
+            LaunchPermission.GetSDHashCode() ^ AccessPermission.GetSDHashCode() ^
             LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode()
             ^ Source.GetHashCode();
     }
@@ -297,8 +301,8 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         Name = reader.ReadString("name");
         string flags = reader.ReadString("flags").Replace("Reserved2", "RequireSideLoadedPackage");
         Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), flags, true);
-        LaunchPermission = reader.ReadString("launchperm");
-        AccessPermission = reader.ReadString("accessperm");
+        LaunchPermission = reader.ReadSecurityDescriptor("launchperm");
+        AccessPermission = reader.ReadSecurityDescriptor("accessperm");
         RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
         PreferredServerBitness = reader.ReadEnum<PreferredServerBitness>("bit");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
@@ -317,8 +321,8 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         writer.WriteOptionalAttributeString("runas", RunAs);
         writer.WriteOptionalAttributeString("name", Name);
         writer.WriteOptionalAttributeString("flags", Flags.ToString());
-        writer.WriteOptionalAttributeString("launchperm", LaunchPermission);
-        writer.WriteOptionalAttributeString("accessperm", AccessPermission);
+        writer.WriteSecurityDescriptor("launchperm", LaunchPermission);
+        writer.WriteSecurityDescriptor("accessperm", AccessPermission);
         writer.WriteEnum("rot", RotFlags);
         writer.WriteEnum("bit", PreferredServerBitness);
         writer.WriteEnum("src", Source);

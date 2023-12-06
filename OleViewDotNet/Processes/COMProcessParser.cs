@@ -1611,24 +1611,24 @@ public static class COMProcessParser
         return process.ReadStruct<Guid>(appid.ToInt64());
     }
 
-    private static string ReadSecurityDescriptorFromAddress(NtProcess process, IntPtr address)
+    private static SecurityDescriptor ReadSecurityDescriptorFromAddress(NtProcess process, IntPtr address)
     {
         try
         {
-            return new SecurityDescriptor(process, address).ToSddl();
+            return new SecurityDescriptor(process, address);
         }
         catch (NtException)
         {
-            return string.Empty;
+            return null;
         }
     }
 
-    private static string ReadSecurityDescriptor(NtProcess process, ISymbolResolver resolver, string symbol)
+    private static SecurityDescriptor ReadSecurityDescriptor(NtProcess process, ISymbolResolver resolver, string symbol)
     {
         IntPtr sd = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
         if (sd == IntPtr.Zero)
         {
-            return string.Empty;
+            return null;
         }
         IntPtr sd_ptr;
         if (process.Is64Bit)
@@ -1642,18 +1642,18 @@ public static class COMProcessParser
 
         if (sd_ptr == IntPtr.Zero)
         {
-            return "D:NO_ACCESS_CONTROL";
+            return new SecurityDescriptor() { Dacl = new Acl() { NullAcl = true } };
         }
 
         return ReadSecurityDescriptorFromAddress(process, sd_ptr);
     }
 
-    private static string GetProcessAccessSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
+    private static SecurityDescriptor GetProcessAccessSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
     {
         return ReadSecurityDescriptor(process, resolver, "gSecDesc");
     }
 
-    private static string GetLrpcSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
+    private static SecurityDescriptor GetLrpcSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
     {
         return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
     }

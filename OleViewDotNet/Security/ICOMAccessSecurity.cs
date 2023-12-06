@@ -14,10 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
+
 namespace OleViewDotNet.Security;
 
 public interface ICOMAccessSecurity
 {
-    string DefaultAccessPermission { get; }
-    string DefaultLaunchPermission { get; }
+    SecurityDescriptor DefaultAccessPermission { get; }
+    SecurityDescriptor DefaultLaunchPermission { get; }
 }

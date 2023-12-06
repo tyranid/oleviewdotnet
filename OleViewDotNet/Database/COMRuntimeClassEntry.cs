@@ -66,16 +66,16 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
     public ActivationType ActivationType { get; private set; }
 
-    public string Permissions
+    public SecurityDescriptor Permissions
     {
         get; private set;
     }
 
-    public bool HasPermission => !string.IsNullOrWhiteSpace(Permissions);
+    public bool HasPermission => Permissions != null;
 
-    public string ServerPermissions => ServerEntry?.Permissions ?? string.Empty;
+    public SecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
 
-    public bool HasServerPermission => !string.IsNullOrWhiteSpace(ServerPermissions);
+    public bool HasServerPermission => ServerPermissions != null;
 
     public TrustLevel TrustLevel
     {
@@ -105,8 +105,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         Threading = (ThreadingType)COMUtilities.ReadInt(key, null, "Threading");
         DllPath = COMUtilities.ReadString(key, null, "DllPath");
         Server = COMUtilities.ReadString(key, null, "Server");
-        byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
-        Permissions = COMSecurity.GetStringSDForSD(permissions);
+        Permissions = key.ReadSecurityDescriptor(valueName: "Permissions");
         ActivateInSharedBroker = COMUtilities.ReadInt(key, null, "ActivateInSharedBroker") != 0;
     }
 
@@ -116,7 +115,6 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         Name = name;
         DllPath = string.Empty;
         Server = string.Empty;
-        Permissions = string.Empty;
         PackageId = package_id ?? string.Empty;
     }
 
@@ -145,7 +143,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         DllPath = reader.ReadString("dllpath");
         Server = reader.ReadString("server");
         ActivationType = reader.ReadEnum<ActivationType>("type");
-        Permissions = reader.ReadString("perms");
+        Permissions = reader.ReadSecurityDescriptor("perms");
         TrustLevel = reader.ReadEnum<TrustLevel>("trust");
         Threading = reader.ReadEnum<ThreadingType>("thread");
         ActivateInSharedBroker = reader.ReadBool("shared");
@@ -167,7 +165,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         writer.WriteOptionalAttributeString("server", Server);
         writer.WriteEnum("type", ActivationType);
         writer.WriteEnum("trust", TrustLevel);
-        writer.WriteOptionalAttributeString("perms", Permissions);
+        writer.WriteSecurityDescriptor("perms", Permissions);
         writer.WriteEnum("thread", Threading);
         writer.WriteBool("shared", ActivateInSharedBroker);
         writer.WriteOptionalAttributeString("pkg", PackageId);
@@ -194,7 +192,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
         return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
             && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
-            Permissions == right.Permissions && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
+            Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
             && PackageId == right.PackageId && Source == right.Source;
     }
 
@@ -202,7 +200,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
     {
         return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
             ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
-            ^ Permissions.GetSafeHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
+            ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
             ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
     }
 
@@ -349,7 +347,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         }
     }
 
-    string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
+    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
-    string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
+    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
 }

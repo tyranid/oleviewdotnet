@@ -828,12 +828,12 @@ public partial class COMRegistryViewer : UserControl
 
         if (appidEnt.HasLaunchPermission)
         {
-            AppendFormatLine(builder, "Launch: {0}", LimitString(appidEnt.LaunchPermission, 64));
+            AppendFormatLine(builder, "Launch: {0}", LimitString(appidEnt.LaunchPermissionSDDL, 64));
         }
 
         if (appidEnt.HasAccessPermission)
         {
-            AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermission, 64));
+            AppendFormatLine(builder, "Access: {0}", LimitString(appidEnt.AccessPermissionSDDL, 64));
         }
 
         if (appidEnt.RotFlags != COMAppIDRotFlags.None)
@@ -870,7 +870,7 @@ public partial class COMRegistryViewer : UserControl
                 continue;
             }
 
-            if (filterAC && !COMSecurity.SDHasAC(appidEnt.AccessPermission) && !COMSecurity.SDHasAC(appidEnt.LaunchPermission))
+            if (filterAC && !appidEnt.HasACAccess && !appidEnt.HasACLaunch)
             {
                 continue;
             }
@@ -1541,14 +1541,14 @@ public partial class COMRegistryViewer : UserControl
         COMAccessRights access_rights, 
         COMAccessRights launch_rights)
     {
-        string launch_sddl = m_registry.DefaultLaunchPermission;
-        string access_sddl = m_registry.DefaultAccessPermission;
+        string launch_sddl = m_registry.DefaultLaunchPermission?.ToSddl() ?? string.Empty;
+        string access_sddl = m_registry.DefaultAccessPermission?.ToSddl() ?? string.Empty;
         bool check_launch = true;
 
         if (node.Tag is COMProcessEntry)
         {
             COMProcessEntry process = (COMProcessEntry)node.Tag;
-            access_sddl = process.AccessPermissions;
+            access_sddl = process.AccessPermissions?.ToSddl() ?? string.Empty;
             principal = process.UserSid;
             check_launch = false;
         }
@@ -1568,11 +1568,11 @@ public partial class COMRegistryViewer : UserControl
 
             if (appid.HasLaunchPermission)
             {
-                launch_sddl = appid.LaunchPermission;
+                launch_sddl = appid.LaunchPermissionSDDL;
             }
             if (appid.HasAccessPermission)
             {
-                access_sddl = appid.AccessPermission;
+                access_sddl = appid.AccessPermissionSDDL;
             }
         }
         else if (node.Tag is COMRuntimeClassEntry)
@@ -1580,7 +1580,7 @@ public partial class COMRegistryViewer : UserControl
             COMRuntimeClassEntry runtime_class = (COMRuntimeClassEntry)node.Tag;
             if (runtime_class.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions;
+                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
             }
             else
             {
@@ -1594,7 +1594,7 @@ public partial class COMRegistryViewer : UserControl
             COMRuntimeServerEntry runtime_class = (COMRuntimeServerEntry)node.Tag;
             if (runtime_class.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions;
+                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
             }
             else
             {
@@ -1902,7 +1902,7 @@ public partial class COMRegistryViewer : UserControl
                     runtime_server = m_registry.MapServerNameToEntry(runtime_class.Server);
                 }
                 
-                string perms = runtime_server != null ? runtime_server.Permissions : runtime_class.Permissions;
+                SecurityDescriptor perms = runtime_server?.Permissions ?? runtime_class.Permissions;
 
                 COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", name), perms, false);
             }

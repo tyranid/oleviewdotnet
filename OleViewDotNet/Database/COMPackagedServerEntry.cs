@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet;
 using OleViewDotNet.Utilities;
 using System;
 
@@ -31,7 +32,7 @@ internal class COMPackagedServerEntry
     public string CommandLine { get; }
     public string ExecutionPackageFamily { get; }
     public bool IsSystemExecutable { get; }
-    public string LaunchAndActivationPermission { get; }
+    public SecurityDescriptor LaunchAndActivationPermission { get; }
     public Guid SurrogateAppId { get; }
     public string SystemExecutableArchitecture { get; }
 
@@ -45,7 +46,7 @@ internal class COMPackagedServerEntry
         ExecutionPackageFamily = rootKey.ReadString(valueName: "ExecutionPackageName");
         IsSystemExecutable = rootKey.ReadBool("IsSystemExecutable");
         Executable = rootKey.ReadStringPath(IsSystemExecutable ? Environment.GetFolderPath(Environment.SpecialFolder.System) : packagePath, valueName: "Executable");
-        LaunchAndActivationPermission = rootKey.ReadSddl(valueName: "LaunchAndActivationPermission");
+        LaunchAndActivationPermission = rootKey.ReadSecurityDescriptor(valueName: "LaunchAndActivationPermission");
         SystemExecutableArchitecture = rootKey.ReadString(valueName: "SystemExecutableArchitecture");
         if (!string.IsNullOrWhiteSpace(Arguments))
         {

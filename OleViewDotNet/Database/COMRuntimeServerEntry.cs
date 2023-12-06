@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using NtApiDotNet;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
@@ -40,9 +41,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
         Identity = COMUtilities.ReadString(key, null, "Identity");
         ServiceName = COMUtilities.ReadString(key, null, "ServiceName");
         ExePath = COMUtilities.ReadString(key, null, "ExePath");
-        Permissions = string.Empty;
-        byte[] permissions = key.GetValue("Permissions", new byte[0]) as byte[];
-        Permissions = COMSecurity.GetStringSDForSD(permissions);
+        Permissions = key.ReadSecurityDescriptor(valueName: "Permissions");
     }
     #endregion
 
@@ -70,9 +69,9 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
         return Name.CompareTo(other.Name);
     }
 
-    string ICOMAccessSecurity.DefaultAccessPermission => "O:SYG:SYD:";
+    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
-    string ICOMAccessSecurity.DefaultLaunchPermission => "O:SYG:SYD:";
+    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
     #endregion
 
     #region XML Serialization
@@ -90,7 +89,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
         ServiceName = reader.ReadString("servicename");
         ExePath = reader.ReadString("exepath");
         Identity = reader.ReadString("identity");
-        Permissions = reader.ReadString("perms");
+        Permissions = reader.ReadSecurityDescriptor("perms");
         PackageId = reader.ReadString("pkg");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
     }
@@ -103,7 +102,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
         writer.WriteEnum("instancetype", InstancingType);
         writer.WriteOptionalAttributeString("servicename", ServiceName);
         writer.WriteOptionalAttributeString("exepath", ExePath);
-        writer.WriteOptionalAttributeString("perms", Permissions);
+        writer.WriteSecurityDescriptor("perms", Permissions);
         writer.WriteOptionalAttributeString("identity", Identity);
         writer.WriteOptionalAttributeString("pkg", PackageId);
         writer.WriteEnum("src", Source);
@@ -125,14 +124,14 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
 
         return IdentityType == right.IdentityType && ServerType == right.ServerType &&
             InstancingType == right.InstancingType && ServiceName == right.ServiceName &&
-            ExePath == right.ExePath && Permissions == right.Permissions &&
+            ExePath == right.ExePath && Permissions.SDIsEqual(right.Permissions) &&
             Identity == right.Identity && PackageId == right.PackageId && Source == right.Source;
     }
 
     public override int GetHashCode()
     {
         return IdentityType.GetHashCode() ^ ServerType.GetHashCode() ^ InstancingType.GetHashCode() ^
-            ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSafeHashCode() ^
+            ServiceName.GetSafeHashCode() ^ ExePath.GetSafeHashCode() ^ Permissions.GetSDHashCode() ^
             Identity.GetSafeHashCode() ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
     }
 
@@ -148,8 +147,8 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     public string ServiceName { get; private set; }
     public string ExePath { get; private set; }
     public string ExeName => COMUtilities.GetFileName(ExePath);
-    public string Permissions { get; private set; }
-    public bool HasPermission => !string.IsNullOrWhiteSpace(Permissions);
+    public SecurityDescriptor Permissions { get; private set; }
+    public bool HasPermission => Permissions != null;
     public IdentityType IdentityType { get; private set; }
     public ServerType ServerType { get; private set; }
     public InstancingType InstancingType { get; private set; }

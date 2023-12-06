@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using System;
@@ -26,28 +27,28 @@ namespace OleViewDotNet.Processes;
 
 public class COMProcessEntry : ICOMAccessSecurity
 {
-    public int ProcessId { get; private set; }
-    public string ExecutablePath { get; private set; }
+    public int ProcessId { get; }
+    public string ExecutablePath { get; }
     public string Name => Path.GetFileNameWithoutExtension(ExecutablePath);
-    public IEnumerable<COMIPIDEntry> Ipids { get; private set; }
+    public IEnumerable<COMIPIDEntry> Ipids { get; }
     public IEnumerable<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning);
-    public bool Is64Bit { get; private set; }
-    public Guid AppId { get; private set; }
-    public string AccessPermissions { get; private set; }
-    public string LRpcPermissions { get; private set; }
+    public bool Is64Bit { get; }
+    public Guid AppId { get; }
+    public SecurityDescriptor AccessPermissions { get; }
+    public SecurityDescriptor LRpcPermissions { get; }
     public string User => Token.User;
     public string UserSid => Token.UserSid;
     public string RpcEndpoint { get; private set; }
-    public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; private set; }
-    public RPC_AUTHN_LEVEL AuthnLevel { get; private set; }
-    public RPC_IMP_LEVEL ImpLevel { get; private set; }
-    public IntPtr AccessControl { get; private set; }
-    public IntPtr STAMainHWnd { get; private set; }
-    public IEnumerable<COMProcessClassRegistration> Classes { get; private set; }
-    public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; private set; }
-    public IEnumerable<COMIPIDEntry> Clients { get; private set; }
-    public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; private set; }
-    public COMProcessToken Token { get; private set; }
+    public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; }
+    public RPC_AUTHN_LEVEL AuthnLevel { get; }
+    public RPC_IMP_LEVEL ImpLevel { get; }
+    public IntPtr AccessControl { get; }
+    public IntPtr STAMainHWnd { get; }
+    public IEnumerable<COMProcessClassRegistration> Classes { get; }
+    public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; }
+    public IEnumerable<COMIPIDEntry> Clients { get; }
+    public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; }
+    public COMProcessToken Token { get; }
     public ActivationContext ActivationContext { get; }
     public IntPtr MTAContext { get; }
     public Guid ProcessSecret { get; }
@@ -86,12 +87,12 @@ public class COMProcessEntry : ICOMAccessSecurity
         get;
     }
 
-    string ICOMAccessSecurity.DefaultAccessPermission => string.Empty;
+    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => null;
 
-    string ICOMAccessSecurity.DefaultLaunchPermission => string.Empty;
+    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => null;
 
     internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids,
-        bool is64bit, Guid appid, string access_perm, string lrpc_perm, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
+        bool is64bit, Guid appid, SecurityDescriptor access_perm, SecurityDescriptor lrpc_perm, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
         RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
         IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
         string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes,

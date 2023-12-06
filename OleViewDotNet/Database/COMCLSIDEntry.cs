@@ -345,61 +345,19 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     /// </summary>
     public bool SafeForInitializing => Categories.Contains(COMCategory.CATID_SafeForInitializing);
 
-    public bool HasLaunchPermission
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.HasLaunchPermission : false;
-        }
-    }
+    public bool HasLaunchPermission => AppIDEntry?.HasLaunchPermission ?? false;
 
-    public bool HasAccessPermission
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.HasAccessPermission : false;
-        }
-    }
+    public bool HasAccessPermission => AppIDEntry?.HasAccessPermission ?? false;
 
     public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
-    public string LaunchPermission
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.LaunchPermission : string.Empty;
-        }
-    }
+    public SecurityDescriptor LaunchPermission => AppIDEntry?.LaunchPermission;
 
-    public string AccessPermission
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.AccessPermission : string.Empty;
-        }
-    }
+    public SecurityDescriptor AccessPermission => AppIDEntry?.AccessPermission;
 
-    public bool HasRunAs
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.HasRunAs : false;
-        }
-    }
+    public bool HasRunAs => AppIDEntry?.HasRunAs ?? false;
 
-    public string RunAs
-    {
-        get
-        {
-            var appid = AppIDEntry;
-            return appid != null ? appid.RunAs : string.Empty;
-        }
-    }
+    public string RunAs => AppIDEntry?.RunAs ?? string.Empty;
 
     public string PackageId { get; private set; }
 
@@ -659,9 +617,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     internal COMRegistry Database { get; }
 
-    string ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
+    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-    string ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
     Guid IComGuid.ComGuid => Clsid;
 

@@ -13,6 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,6 +208,13 @@ internal static class XmlUtils
         writer.WriteAttributeString(name, value.ToString());
     }
 
+    internal static void WriteSecurityDescriptor(this XmlWriter writer, string name, SecurityDescriptor sd)
+    {
+        if (sd == null)
+            return;
+        writer.WriteOptionalAttributeString(name, sd.ToBase64());
+    }
+
     internal static T ReadEnum<T>(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
@@ -216,6 +224,20 @@ internal static class XmlUtils
         }
 
         return (T)Enum.Parse(typeof(T), value);
+    }
+
+    internal static SecurityDescriptor ReadSecurityDescriptor(this XmlReader reader, string name)
+    {
+        string value = reader.ReadString(name);
+        if (string.IsNullOrEmpty(value))
+            return null;
+        var sd = SecurityDescriptor.ParseBase64(value, false);
+        if (sd.IsSuccess)
+            return sd.Result;
+        sd = SecurityDescriptor.Parse(value, false);
+        if (sd.IsSuccess)
+            return sd.Result;
+        return null;
     }
 
     internal static void WriteBool(this XmlWriter writer, string name, bool value)

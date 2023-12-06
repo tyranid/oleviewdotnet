@@ -78,8 +78,8 @@ public partial class PropertiesControl : UserControl
     {
         textBoxAppIdName.Text = entry.Name;
         textBoxAppIdGuid.Text = entry.AppId.FormatGuid();
-        textBoxLaunchPermission.Text = entry.LaunchPermission;
-        textBoxAccessPermission.Text = entry.AccessPermission;
+        textBoxLaunchPermission.Text = entry.LaunchPermissionSDDL;
+        textBoxAccessPermission.Text = entry.AccessPermissionSDDL;
         textBoxAppIDRunAs.Text = GetStringValue(entry.RunAs);
         textBoxAppIDService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
         textBoxAppIDFlags.Text = entry.Flags.ToString();
@@ -226,7 +226,7 @@ public partial class PropertiesControl : UserControl
     {
         textBoxRuntimeServerName.Text = entry.Name;
         textBoxRuntimeServerExePath.Text = GetStringValue(entry.ExePath);
-        textBoxRuntimeServerPermissions.Text = GetStringValue(entry.Permissions);
+        textBoxRuntimeServerPermissions.Text = GetStringValue(entry.Permissions?.ToSddl());
         btnRuntimeServerViewPermissions.Enabled = entry.HasPermission;
         textBoxRuntimeServerServiceName.Text = GetStringValue(entry.ServiceName);
         textBoxRuntimeServerType.Text = entry.ServerType.ToString();
@@ -242,7 +242,7 @@ public partial class PropertiesControl : UserControl
         textBoxRuntimeClassName.Text = entry.Name;
         textBoxRuntimeClassCLSID.Text = GetGuidValue(entry.Clsid);
         textBoxRuntimeClassServer.Text = GetStringValue(entry.Server);
-        textBoxRuntimeClassPermissions.Text = GetStringValue(entry.Permissions);
+        textBoxRuntimeClassPermissions.Text = GetStringValue(entry.Permissions?.ToSddl());
         textBoxRuntimeClassDllPath.Text = GetStringValue(entry.DllPath);
         textBoxRuntimeClassActivationType.Text = entry.ActivationType.ToString();
         textBoxRuntimeClassTrustLevel.Text = entry.TrustLevel.ToString();
@@ -332,9 +332,9 @@ public partial class PropertiesControl : UserControl
         textBoxProcessExecutablePath.Text = obj.ExecutablePath;
         textBoxProcessProcessId.Text = obj.ProcessId.ToString();
         textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
-        textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions);
-        btnProcessViewAccessPermissions.Enabled = !string.IsNullOrWhiteSpace(obj.AccessPermissions);
-        textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions);
+        textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions?.ToSddl());
+        btnProcessViewAccessPermissions.Enabled = obj.AccessPermissions != null;
+        textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions?.ToSddl());
         textBoxProcessUser.Text = GetStringValue(obj.User);
         textBoxProcessSecurity.Text = string.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}, Unmarshal Policy: {3}",
             obj.Capabilities, obj.AuthnLevel, obj.ImpLevel, obj.UnmarshalPolicy);

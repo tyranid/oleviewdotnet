@@ -172,10 +172,10 @@ public class COMRegistry
             Architecture = reader.ReadString("arch");
             LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
             CreatedUser = reader.GetAttribute("user");
-            DefaultAccessPermission = reader.ReadString("access");
-            DefaultAccessRestriction = reader.ReadString("accessr");
-            DefaultLaunchPermission = reader.ReadString("launch");
-            DefaultLaunchRestriction = reader.ReadString("launchr");
+            DefaultAccessPermission = reader.ReadSecurityDescriptor("access");
+            DefaultAccessRestriction = reader.ReadSecurityDescriptor("accessr");
+            DefaultLaunchPermission = reader.ReadSecurityDescriptor("launch");
+            DefaultLaunchRestriction = reader.ReadSecurityDescriptor("launchr");
             Report(progress, "CLSIDs", 1, total_count);
             m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
             Report(progress, "ProgIDs", 2, total_count);
@@ -215,13 +215,13 @@ public class COMRegistry
         Architecture = RuntimeInformation.ProcessArchitecture.ToString();
     }
 
-    private string GetSecurityDescriptor(RegistryKey key, string name, string default_sd)
+    private SecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, SecurityDescriptor default_sd)
     {
         if (key.GetValue(name) is not byte[] sd)
         {
             return default_sd;
         }
-        return COMSecurity.GetStringSDForSD(sd);
+        return new SecurityDescriptor(sd);
     }
 
     private void LoadDefaultSecurity()
@@ -858,22 +858,22 @@ public class COMRegistry
         }
     }
 
-    public string DefaultAccessPermission
+    public SecurityDescriptor DefaultAccessPermission
     {
         get; private set;
     }
 
-    public string DefaultAccessRestriction
+    public SecurityDescriptor DefaultAccessRestriction
     {
         get; private set;
     }
 
-    public string DefaultLaunchPermission
+    public SecurityDescriptor DefaultLaunchPermission
     {
         get; private set;
     }
 
-    public string DefaultLaunchRestriction
+    public SecurityDescriptor DefaultLaunchRestriction
     {
         get; private set;
     }
@@ -927,10 +927,10 @@ public class COMRegistry
             writer.WriteOptionalAttributeString("arch", Architecture);
             writer.WriteEnum("mode", LoadingMode);
             writer.WriteOptionalAttributeString("user", CreatedUser);
-            writer.WriteOptionalAttributeString("access", DefaultAccessPermission);
-            writer.WriteOptionalAttributeString("accessr", DefaultAccessRestriction);
-            writer.WriteOptionalAttributeString("launch", DefaultLaunchPermission);
-            writer.WriteOptionalAttributeString("launchr", DefaultLaunchRestriction);
+            writer.WriteSecurityDescriptor("access", DefaultAccessPermission);
+            writer.WriteSecurityDescriptor("accessr", DefaultAccessRestriction);
+            writer.WriteSecurityDescriptor("launch", DefaultLaunchPermission);
+            writer.WriteSecurityDescriptor("launchr", DefaultLaunchRestriction);
             Report(progress, "CLSIDs", 1, total_count);
             writer.WriteSerializableObjects("clsids", m_clsids.Values);
             Report(progress, "ProgIDs", 2, total_count);

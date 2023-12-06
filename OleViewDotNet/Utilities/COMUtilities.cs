@@ -176,6 +176,17 @@ public static class COMUtilities
         return Guid.Empty;
     }
 
+    public static SecurityDescriptor ReadSecurityDescriptor(this RegistryKey rootKey, string valueName = null, string keyName = null)
+    {
+        byte[] ba = rootKey.ReadObject(keyName, valueName) as byte[];
+        if (ba == null)
+            return null;
+        var sd = SecurityDescriptor.Parse(ba, false);
+        if (!sd.IsSuccess)
+            return null;
+        return sd.Result;
+    }
+
     public static string ReadSddl(this RegistryKey rootKey, string valueName = null, string keyName = null)
     {
         return COMSecurity.GetStringSDForSD(rootKey.ReadObject(keyName, valueName) as byte[]);

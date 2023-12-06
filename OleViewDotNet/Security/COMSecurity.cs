@@ -28,23 +28,22 @@ namespace OleViewDotNet.Security;
 
 public static class COMSecurity
 {
-    public static void ViewSecurity(COMRegistry registry, string name, string sddl, bool access)
+    public static void ViewSecurity(COMRegistry registry, string name, SecurityDescriptor sd, bool access)
     {
-        if (!string.IsNullOrWhiteSpace(sddl))
-        {
-            SecurityDescriptor sd = new(sddl);
-            AccessMask valid_access = access ? 0x7 : 0x1F;
+        if (sd == null)
+            return;
 
-            SecurityDescriptorViewerControl control = new();
-            EntryPoint.GetMainForm(registry).HostControl(control, name);
-            control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
-            {
-                GenericExecute = valid_access,
-                GenericRead = valid_access,
-                GenericWrite = valid_access,
-                GenericAll = valid_access
-            }, valid_access);
-        }
+        AccessMask valid_access = access ? 0x7 : 0x1F;
+
+        SecurityDescriptorViewerControl control = new();
+        EntryPoint.GetMainForm(registry).HostControl(control, name);
+        control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
+        {
+            GenericExecute = valid_access,
+            GenericRead = valid_access,
+            GenericWrite = valid_access,
+            GenericAll = valid_access
+        }, valid_access);
     }
 
     public static void ViewSecurity(COMRegistry registry, COMAppIDEntry appid, bool access)
@@ -127,7 +126,7 @@ public static class COMSecurity
         return mask != 0;
     }
 
-    private static string GetSecurityPermissions(COMSD sdtype)
+    private static SecurityDescriptor GetSecurityPermissions(COMSD sdtype)
     {
         IntPtr sd = IntPtr.Zero;
         try
@@ -138,7 +137,7 @@ public static class COMSecurity
                 throw new Win32Exception(hr);
             }
 
-            return new SecurityDescriptor(sd).ToSddl(SecurityInformation.AllBasic);
+            return new SecurityDescriptor(sd);
         }
         finally
         {
@@ -149,22 +148,22 @@ public static class COMSecurity
         }
     }
 
-    public static string GetDefaultLaunchPermissions()
+    public static SecurityDescriptor GetDefaultLaunchPermissions()
     {
         return GetSecurityPermissions(COMSD.SD_LAUNCHPERMISSIONS);
     }
 
-    public static string GetDefaultAccessPermissions()
+    public static SecurityDescriptor GetDefaultAccessPermissions()
     {
         return GetSecurityPermissions(COMSD.SD_ACCESSPERMISSIONS);
     }
 
-    public static string GetDefaultLaunchRestrictions()
+    public static SecurityDescriptor GetDefaultLaunchRestrictions()
     {
         return GetSecurityPermissions(COMSD.SD_LAUNCHRESTRICTIONS);
     }
 
-    public static string GetDefaultAccessRestrictions()
+    public static SecurityDescriptor GetDefaultAccessRestrictions()
     {
         return GetSecurityPermissions(COMSD.SD_ACCESSRESTRICTIONS);
     }
@@ -203,35 +202,21 @@ public static class COMSecurity
         }
     }
 
-    public static TokenIntegrityLevel GetILForSD(string sddl)
+    public static TokenIntegrityLevel GetILForSD(SecurityDescriptor sd)
     {
-        if (string.IsNullOrWhiteSpace(sddl))
-        {
-            return TokenIntegrityLevel.Medium;
-        }
-
-        try
-        {
-            SecurityDescriptor sd = new(sddl);
-            return sd.IntegrityLevel;
-        }
-        catch (NtException)
-        {
-            return TokenIntegrityLevel.Medium;
-        }
+        return sd?.IntegrityLevel ?? TokenIntegrityLevel.Medium;
     }
 
-    private static bool SDHasAllowedAce(string sddl, bool allow_null_dacl, Func<Ace, bool> check_func)
+    private static bool SDHasAllowedAce(SecurityDescriptor sd, bool allow_null_dacl, Func<Ace, bool> check_func)
     {
-        if (string.IsNullOrWhiteSpace(sddl))
+        if (sd == null)
         {
             return allow_null_dacl;
         }
 
         try
         {
-            SecurityDescriptor sd = new(sddl);
-            if (allow_null_dacl && sd.Dacl == null && sd.Dacl.NullAcl)
+            if (allow_null_dacl && (sd.Dacl == null || sd.Dacl.NullAcl))
             {
                 return true;
             }
@@ -252,15 +237,15 @@ public static class COMSecurity
         return false;
     }
 
-    public static bool SDHasAC(string sddl)
+    public static bool SDHasAC(SecurityDescriptor sd)
     {
         SidIdentifierAuthority authority = new(SecurityAuthority.Package);
-        return SDHasAllowedAce(sddl, false, ace => ace.Sid.Authority.Equals(authority));
+        return SDHasAllowedAce(sd, false, ace => ace.Sid.Authority.Equals(authority));
     }
 
-    public static bool SDHasRemoteAccess(string sddl)
+    public static bool SDHasRemoteAccess(SecurityDescriptor sd)
     {
-        return SDHasAllowedAce(sddl, true, a => a.Mask == COMAccessRights.Execute ||
+        return SDHasAllowedAce(sd, true, a => a.Mask == COMAccessRights.Execute ||
             (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
     }
 
@@ -279,5 +264,19 @@ public static class COMSecurity
         {
             return new Sid(username);
         }
+    }
+
+    internal static int GetSDHashCode(this SecurityDescriptor sd)
+    {
+        if (sd == null)
+            return 0;
+        return sd.ToBase64().GetHashCode();
+    }
+
+    internal static bool SDIsEqual(this SecurityDescriptor left, SecurityDescriptor right)
+    {
+        string left_str = left?.ToBase64();
+        string right_str = right?.ToBase64();
+        return left_str == right_str;
     }
 }

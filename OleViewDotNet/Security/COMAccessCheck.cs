@@ -32,7 +32,7 @@ public class COMAccessCheck : IDisposable
     private readonly COMAccessRights m_launch_rights;
     private readonly bool m_ignore_default;
 
-    public static string GetAccessPermission(ICOMAccessSecurity obj)
+    public static SecurityDescriptor GetAccessPermission(ICOMAccessSecurity obj)
     {
         if (obj is COMProcessEntry process)
         {
@@ -60,7 +60,7 @@ public class COMAccessCheck : IDisposable
         throw new ArgumentException("Can't get access permission for object");
     }
 
-    public static string GetLaunchPermission(ICOMAccessSecurity obj)
+    public static SecurityDescriptor GetLaunchPermission(ICOMAccessSecurity obj)
     {
         if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
         {
@@ -120,22 +120,21 @@ public class COMAccessCheck : IDisposable
         m_ignore_default = ignore_default;
     }
 
-    public bool AccessCheck(
-        ICOMAccessSecurity obj)
+    public bool AccessCheck(ICOMAccessSecurity obj)
     {
         if (obj == null)
         {
             return false;
         }
 
-        string launch_sddl = m_ignore_default ? string.Empty : obj.DefaultLaunchPermission;
-        string access_sddl = m_ignore_default ? string.Empty : obj.DefaultAccessPermission;
+        string launch_sddl = m_ignore_default ? string.Empty : obj.DefaultLaunchPermission?.ToSddl() ?? string.Empty;
+        string access_sddl = m_ignore_default ? string.Empty : obj.DefaultAccessPermission?.ToSddl() ?? string.Empty;
         bool check_launch = true;
         string principal = m_principal;
 
         if (obj is COMProcessEntry process)
         {
-            access_sddl = process.AccessPermissions;
+            access_sddl = process.AccessPermissions?.ToSddl() ?? string.Empty;
             principal = process.UserSid;
             check_launch = false;
         }
@@ -153,23 +152,23 @@ public class COMAccessCheck : IDisposable
 
             if (appid.HasLaunchPermission)
             {
-                launch_sddl = appid.LaunchPermission;
+                launch_sddl = appid.LaunchPermissionSDDL;
             }
 
             if (appid.HasAccessPermission)
             {
-                access_sddl = appid.AccessPermission;
+                access_sddl = appid.AccessPermissionSDDL;
             }
         }
         else if (obj is COMRuntimeClassEntry runtime_class)
         {
             if (runtime_class.HasPermission)
             {
-                launch_sddl = runtime_class.Permissions;
+                launch_sddl = runtime_class.Permissions?.ToSddl() ?? string.Empty;
             }
             else if (runtime_class.ActivationType == ActivationType.OutOfProcess && runtime_class.HasServerPermission)
             {
-                launch_sddl = runtime_class.ServerPermissions;
+                launch_sddl = runtime_class.ServerPermissions?.ToSddl() ?? string.Empty;
             }
             else if (runtime_class.TrustLevel == TrustLevel.PartialTrust)
             {
@@ -186,7 +185,7 @@ public class COMAccessCheck : IDisposable
         {
             if (runtime_server.HasPermission)
             {
-                launch_sddl = runtime_server.Permissions;
+                launch_sddl = runtime_server.Permissions?.ToSddl() ?? string.Empty;
             }
             else
             {
