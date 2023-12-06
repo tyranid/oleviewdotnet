@@ -44,10 +44,9 @@ public partial class ClassFactoryTypeViewer : UserControl
         try
         {
             IClassFactory factory = (IClassFactory)_obj;
-            Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
             Dictionary<string, string> props = new();
             props.Add("Name", _name);
-            factory.CreateInstance(null, ref IID_IUnknown, out object new_object);
+            factory.CreateInstance(null, COMInterfaceEntry.IID_IUnknown, out object new_object);
             ObjectInformation view = new(_registry, _entry, _name, new_object,
                 props, _registry.GetInterfacesForObject(new_object).ToArray());
             EntryPoint.GetMainForm(_registry).HostControl(view);

@@ -135,7 +135,7 @@ public static class EntryPoint
 
     class ActivationFilter : IActivationFilter
     {
-        public void HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+        public void HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, in Guid rclsid, out Guid pReplacementClsId)
         {
             pReplacementClsId = rclsid;
             System.Diagnostics.Trace.WriteLine(string.Format("{0} {1}", dwActivationType, rclsid));

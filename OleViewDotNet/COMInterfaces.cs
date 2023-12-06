@@ -38,8 +38,8 @@ public interface IUnknown
 [ComImport, Guid("CB5BDC81-93C1-11CF-8F20-00805F2CD064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IObjectSafety
 {
-    void GetInterfaceSafetyOptions(ref Guid riid, out uint pdwSupportedOptions, out uint pdwEnabledOptions);
-    void SetInterfaceSafetyOptions(ref Guid riid, uint dwOptionSetMask, uint dwEnabledOptions);
+    void GetInterfaceSafetyOptions(in Guid riid, out uint pdwSupportedOptions, out uint pdwEnabledOptions);
+    void SetInterfaceSafetyOptions(in Guid riid, uint dwOptionSetMask, uint dwEnabledOptions);
 }
 
 [ComImport, Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -179,7 +179,7 @@ public interface IStorage
     void DestroyElement([In, MarshalAs(UnmanagedType.BStr)] string pwcsName);
     void RenameElement([In, MarshalAs(UnmanagedType.BStr)] string pwcsOldName, [In, MarshalAs(UnmanagedType.BStr)] string pwcsNewName);
     void SetElementTimes([In, MarshalAs(UnmanagedType.BStr)] string pwcsName, [In] FILETIMEOptional pctime, [In] FILETIMEOptional patime, [In] FILETIMEOptional pmtime);
-    void SetClass([In] ref Guid clsid);
+    void SetClass([In] in Guid clsid);
     void SetStateBits(int grfStateBits, int grfMask);
     void Stat(out System.Runtime.InteropServices.ComTypes.STATSTG pStatStg, int grfStatFlag);
 }
@@ -213,15 +213,15 @@ public interface IPersistMoniker
 public interface IClassFactory
 {
     void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter,
-        ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
+        in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
     void LockServer(bool fLock);
 }
 
 [ComImport, Guid("804bd226-af47-4d71-b492-443a57610b08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IElevatedFactoryServer
 {
-    void ServerCreateElevatedObject(ref Guid clsid, 
-        ref Guid iid, 
+    void ServerCreateElevatedObject(in Guid clsid, 
+        in Guid iid, 
         [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 }
 
@@ -262,25 +262,25 @@ interface IEnumGUID
 interface ICatInformation
 {
     int EnumCategories(int lcid, out IEnumCATEGORYINFO ppenumCategoryInfo);
-    int GetCategoryDesc(ref Guid rcatid, int lcid, out IntPtr pszDesc);
+    int GetCategoryDesc(in Guid rcatid, int lcid, out IntPtr pszDesc);
     void EnumClassesOfCategories(int cImplemented,
         Guid[] rgcatidImpl,
         int cRequired,
         Guid[] rgcatidReq,
         out IEnumGUID ppenumClsid);
 
-    void IsClassOfCategories(ref Guid rclsid,
+    void IsClassOfCategories(in Guid rclsid,
         int cImplemented,
         Guid[] rgcatidImpl,
         int cRequired,
         Guid[] rgcatidReq);
 
     void EnumImplCategoriesOfClass(
-        ref Guid rclsid,
+        in Guid rclsid,
         out IEnumGUID ppenumCatid);
 
     void EnumReqCategoriesOfClass(
-        ref Guid rclsid,
+        in Guid rclsid,
         out IEnumGUID ppenumCatid);
 }
 
@@ -289,8 +289,8 @@ public interface IDispatch
 {
     void GetTypeInfoCount(out uint pctinfo);
     void GetTypeInfo(uint iTypeInfo, uint lcid, out IntPtr pTypeInfo);
-    void GetIDsOfNames(ref Guid riid, string[] rszNames, uint cNames, uint lcid, ref int[] dispIDs);
-    void Invoke(int dispIdMember, ref Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
+    void GetIDsOfNames(in Guid riid, string[] rszNames, uint cNames, uint lcid, ref int[] dispIDs);
+    void Invoke(int dispIdMember, in Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
                 out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);
 }
 
@@ -311,7 +311,7 @@ public interface IActivationFilter
 {
     void HandleActivation(
         FILTER_ACTIVATIONTYPE dwActivationType,
-        ref Guid rclsid,
+        in Guid rclsid,
         out Guid pReplacementClsId);
 };
 
@@ -320,7 +320,7 @@ public interface IActivationFilter
 interface IRuntimeBroker
 {
     [return: MarshalAs(UnmanagedType.IInspectable)] object ActivateInstance([MarshalAs(UnmanagedType.LPWStr)] string instanceName);
-    [return: MarshalAs(UnmanagedType.IUnknown)] object GetActivationFactory([MarshalAs(UnmanagedType.LPWStr)] string instanceName, ref Guid uuid);
+    [return: MarshalAs(UnmanagedType.IUnknown)] object GetActivationFactory([MarshalAs(UnmanagedType.LPWStr)] string instanceName, in Guid uuid);
     void SetErrorFlags(uint error_flags);
     uint GetErrorFlags();
     void DebuggerAddRef();

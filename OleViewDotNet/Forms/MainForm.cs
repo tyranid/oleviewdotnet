@@ -235,18 +235,17 @@ public partial class MainForm : Form
             }
             else
             {
-                Guid unk = COMInterfaceEntry.IID_IUnknown;
                 IntPtr pObj;
                 int hr;
 
                 if (class_factory)
                 {
-                    hr = COMUtilities.CoGetClassObject(ref clsid, clsctx, null, ref unk, out pObj);
+                    hr = COMUtilities.CoGetClassObject(clsid, clsctx, null, COMInterfaceEntry.IID_IUnknown, out pObj);
                 }
                 else
                 {
-                    hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, clsctx,
-                                ref unk, out pObj);
+                    hr = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, clsctx,
+                                COMInterfaceEntry.IID_IUnknown, out pObj);
                 }
 
                 if (hr != 0)
@@ -885,7 +884,7 @@ public partial class MainForm : Form
             {
                 Guid iid = typeof(IStorage).GUID;
                 IStorage stg = COMUtilities.StgCreateStorageEx(dlg.FileName,
-                    STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, ref iid);
+                    STGM.SHARE_EXCLUSIVE | STGM.READWRITE, STGFMT.Storage, 0, null, IntPtr.Zero, iid);
                 HostControl(new StorageViewer(stg, Path.GetFileName(dlg.FileName), false));
             }
         }

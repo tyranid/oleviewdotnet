@@ -35,8 +35,7 @@ public partial class BuildMonikerForm : Form
     {
         if (moniker_string == "new")
         {
-            Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-            int hr = COMUtilities.CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref IID_IUnknown, out IntPtr unk);
+            int hr = COMUtilities.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);

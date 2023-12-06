@@ -2322,8 +2322,7 @@ public partial class COMRegistryViewer : UserControl
                 object comObj;
                 if (factory)
                 {
-                    Guid iid = COMInterfaceEntry.IID_IUnknown;
-                    comObj = broker.GetActivationFactory(runtime_class.Name, ref iid);
+                    comObj = broker.GetActivationFactory(runtime_class.Name, COMInterfaceEntry.IID_IUnknown);
                 }
                 else
                 {

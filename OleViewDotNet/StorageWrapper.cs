@@ -281,7 +281,7 @@ public sealed class StorageWrapper : IDisposable
         }
         set
         {
-            _stg.SetClass(ref value);
+            _stg.SetClass(value);
         }
     }
 

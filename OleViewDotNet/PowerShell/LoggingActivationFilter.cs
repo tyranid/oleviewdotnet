@@ -61,7 +61,7 @@ public class LoggingActivationFilter : IActivationFilter
         }
     }
 
-    void IActivationFilter.HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+    void IActivationFilter.HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, in Guid rclsid, out Guid pReplacementClsId)
     {
         pReplacementClsId = rclsid;
         lock (this)

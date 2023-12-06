@@ -403,18 +403,18 @@ public static class COMUtilities
     private static extern void LoadTypeLibEx(string strTypeLibName, RegKind regKind,
         [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
     [DllImport("ole32.dll")]
-    public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
+    public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, in Guid riid, out IntPtr ppv);
     [DllImport("ole32.dll")]
-    public static extern int CoCreateInstanceEx(ref Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
+    public static extern int CoCreateInstanceEx(in Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
     [DllImport("ole32.dll")]
-    public static extern int CoGetClassObject(ref Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, ref Guid riid, out IntPtr ppv);
+    public static extern int CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid, out IntPtr ppv);
     [DllImport("ole32.dll", PreserveSig = false)]
     [return: MarshalAs(UnmanagedType.IUnknown)]
-    public static extern object CoUnmarshalInterface(IStream stm, ref Guid riid);
+    public static extern object CoUnmarshalInterface(IStream stm, in Guid riid);
 
     [DllImport("combase.dll", CharSet = CharSet.Unicode)]
     public static extern int RoGetActivationFactory([MarshalAs(UnmanagedType.HString)] string activatableClassId,
-        ref Guid iid,
+        in Guid iid,
         out IntPtr factory
     );
 
@@ -442,7 +442,7 @@ public static class COMUtilities
           int grfAttrs,
           [In, Out] STGOPTIONS pStgOptions,
           IntPtr reserved2,
-          ref Guid riid
+          in Guid riid
         );
 
     [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
@@ -462,11 +462,11 @@ public static class COMUtilities
           int grfAttrs,
           [In] STGOPTIONS pStgOptions,
           IntPtr pSecurityDescriptor,
-          ref Guid riid
+          in Guid riid
         );
 
     [DllImport("ole32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = false)]
-    public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+    public static extern void CoGetObject(string pszName, BIND_OPTS3 pBindOptions, in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
 
     [return: MarshalAs(UnmanagedType.Interface)]
     [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
@@ -517,7 +517,7 @@ public static class COMUtilities
     public static extern int CLSIDFromProgID(string lpszProgID, out Guid lpclsid);
 
     [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void CoMarshalInterface(IStream pStm, ref Guid riid,
+    public static extern void CoMarshalInterface(IStream pStm, in Guid riid,
         [MarshalAs(UnmanagedType.Interface)] object pUnk, MSHCTX dwDestContext, IntPtr pvDestContext, MSHLFLAGS mshlflags);
 
     [DllImport("ole32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, PreserveSig = false)]
@@ -772,13 +772,13 @@ public static class COMUtilities
         Guid iid = typeof(ICatInformation).GUID;
         string strDesc = string.Empty;
 
-        if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref iid, out IntPtr pCatMgr) == 0)
+        if (CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, iid, out IntPtr pCatMgr) == 0)
         {
             ICatInformation catInfo = (ICatInformation)Marshal.GetObjectForIUnknown(pCatMgr);
 
             try
             {
-                catInfo.GetCategoryDesc(ref catid, 0, out IntPtr pStrDesc);
+                catInfo.GetCategoryDesc(catid, 0, out IntPtr pStrDesc);
                 strDesc = Marshal.PtrToStringUni(pStrDesc);
                 Marshal.FreeCoTaskMem(pStrDesc);
             }
@@ -1572,11 +1572,10 @@ public static class COMUtilities
         using BinaryReader reader = new(stm);
         clsid = new Guid(reader.ReadBytes(16));
 
-        Guid unk = COMInterfaceEntry.IID_IUnknown;
         object ret;
 
-        int iError = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.SERVER,
-            ref unk, out IntPtr pObj);
+        int iError = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
+            COMInterfaceEntry.IID_IUnknown, out IntPtr pObj);
 
         if (iError != 0)
         {
@@ -1593,8 +1592,7 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
     {
-        Guid iid = COMInterfaceEntry.IID_IUnknown;
-        CoGetObject(moniker, bind_opts, ref iid, out object ret);
+        CoGetObject(moniker, bind_opts, COMInterfaceEntry.IID_IUnknown, out object ret);
         return ret;
     }
 
@@ -1607,7 +1605,7 @@ public static class COMUtilities
 
     public static object UnmarshalObject(Stream stm, Guid iid)
     {
-        return CoUnmarshalInterface(new IStreamImpl(stm), ref iid);
+        return CoUnmarshalInterface(new IStreamImpl(stm), iid);
     }
 
     public static object UnmarshalObject(byte[] objref)
@@ -1672,7 +1670,7 @@ public static class COMUtilities
     public static byte[] MarshalObject(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
     {
         MemoryStream stm = new();
-        CoMarshalInterface(new IStreamImpl(stm), ref iid, obj, mshctx, IntPtr.Zero, mshflags);
+        CoMarshalInterface(new IStreamImpl(stm), iid, obj, mshctx, IntPtr.Zero, mshflags);
         return stm.ToArray();
     }
 
@@ -2633,7 +2631,7 @@ public static class COMUtilities
             COSERVERINFO server_info = new(server);
             try
             {
-                hr = COMUtilities.CoCreateInstanceEx(ref clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
+                hr = COMUtilities.CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
                 if (hr == 0)
                 {
                     hr = qis[0].HResult();
@@ -2650,7 +2648,7 @@ public static class COMUtilities
         }
         else
         {
-            hr = COMUtilities.CoCreateInstance(ref clsid, IntPtr.Zero, context, ref iid, out pInterface);
+            hr = COMUtilities.CoCreateInstance(clsid, IntPtr.Zero, context, iid, out pInterface);
         }
 
         if (hr != 0)
@@ -2677,7 +2675,7 @@ public static class COMUtilities
 
     public static object CreateInstanceFromFactory(IClassFactoryWrapper factory, Guid iid)
     {
-        factory.CreateInstance(null, ref iid, out object ret);
+        factory.CreateInstance(null, iid, out object ret);
         return ret;
     }
 
@@ -2686,8 +2684,8 @@ public static class COMUtilities
 
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
 
-        int hr = CoGetClassObject(ref clsid, server_info != null ? CLSCTX.REMOTE_SERVER
-            : context, server_info, ref iid, out IntPtr obj);
+        int hr = CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER
+            : context, server_info, iid, out IntPtr obj);
         if (hr != 0)
         {
             Marshal.ThrowExceptionForHR(hr);
@@ -2704,9 +2702,8 @@ public static class COMUtilities
     {
         if (moniker_string == "new")
         {
-            Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-            int hr = CoCreateInstance(ref CLSID_NewMoniker, IntPtr.Zero,
-                CLSCTX.INPROC_SERVER, ref IID_IUnknown, out IntPtr unk);
+            int hr = CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero,
+                CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -3119,7 +3116,7 @@ public static class COMUtilities
     public static StorageWrapper CreateStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, ref iid));
+        return new StorageWrapper(StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
     }
 
     public static StorageWrapper CreateReadOnlyStorage(string name)
@@ -3130,7 +3127,7 @@ public static class COMUtilities
     public static StorageWrapper OpenStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, ref iid));
+        return new StorageWrapper(StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
     }
 
     public static StorageWrapper OpenReadOnlyStorage(string name)

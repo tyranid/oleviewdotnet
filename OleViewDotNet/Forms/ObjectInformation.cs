@@ -91,7 +91,7 @@ public partial class ObjectInformation : UserControl
             {
                 Guid iid = COMInterfaceEntry.IID_IDispatch;
 
-                objSafety.GetInterfaceSafetyOptions(ref iid, out uint supportedOptions, out uint enabledOptions);
+                objSafety.GetInterfaceSafetyOptions(iid, out uint supportedOptions, out uint enabledOptions);
                 for (int i = 0; i < 4; i++)
                 {
                     int val = 1 << i;
@@ -270,10 +270,9 @@ public partial class ObjectInformation : UserControl
         try
         {
             IClassFactory factory = (IClassFactory)m_pObject;
-            Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
             Dictionary<string, string> props = new();
             props.Add("Name", m_objName);
-            factory.CreateInstance(null, ref IID_IUnknown, out object new_object);
+            factory.CreateInstance(null, COMInterfaceEntry.IID_IUnknown, out object new_object);
             ObjectInformation view = new(m_registry,
                 m_entry, m_objName, new_object,
                 props, m_registry.GetInterfacesForObject(new_object).ToArray());

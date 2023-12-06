@@ -269,8 +269,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
             if (factory)
             {
-                Guid iid = COMInterfaceEntry.IID_IUnknown;
-                hr = COMUtilities.RoGetActivationFactory(Name, ref iid, out pObject);
+                hr = COMUtilities.RoGetActivationFactory(Name, COMInterfaceEntry.IID_IUnknown, out pObject);
             }
             else
             {
