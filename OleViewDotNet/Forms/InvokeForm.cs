@@ -86,7 +86,7 @@ public partial class InvokeForm : Form
            
             if (t == typeof(string))
             {
-                ret = String.Empty;
+                ret = string.Empty;
             }
             else if (t == typeof(IBindCtx))
             {

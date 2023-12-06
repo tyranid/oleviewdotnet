@@ -77,22 +77,10 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
     public bool RuntimeClass => string.IsNullOrEmpty(PackageId);
     public string Server { get; private set; }
-    public string DefaultServer { get { return Server; } }
-    public bool HasServer
-    {
-        get
-        {
-            return !string.IsNullOrWhiteSpace(Server);
-        }
-    }
+    public string DefaultServer => Server;
+    public bool HasServer => !string.IsNullOrWhiteSpace(Server);
 
-    public COMRuntimeServerEntry ServerEntry
-    {
-        get
-        {
-            return m_registry.MapRuntimeClassToServerEntry(this);
-        }
-    }
+    public COMRuntimeServerEntry ServerEntry => m_registry.MapRuntimeClassToServerEntry(this);
 
     public ActivationType ActivationType { get; private set; }
 
@@ -101,17 +89,11 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         get; private set;
     }
 
-    public bool HasPermission
-    {
-        get { return !string.IsNullOrWhiteSpace(Permissions); }
-    }
+    public bool HasPermission => !string.IsNullOrWhiteSpace(Permissions);
 
     public string ServerPermissions => ServerEntry?.Permissions ?? string.Empty;
 
-    public bool HasServerPermission
-    {
-        get { return !string.IsNullOrWhiteSpace(ServerPermissions); }
-    }
+    public bool HasServerPermission => !string.IsNullOrWhiteSpace(ServerPermissions);
 
     public TrustLevel TrustLevel
     {
@@ -126,13 +108,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         get; private set;
     }
 
-    public Type RuntimeType
-    {
-        get
-        {
-            return Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
-        }
-    }
+    public Type RuntimeType => Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
 
     public COMRegistryEntrySource Source
     {
@@ -348,7 +324,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         return CreateInstance(server, true);
     }
 
-    public bool SupportsRemoteActivation { get { return false; } }
+    public bool SupportsRemoteActivation => false;
 
     /// <summary>
     /// Indicates that the class' interface list has been loaded.

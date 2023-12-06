@@ -61,7 +61,7 @@ public partial class PropertiesControl : UserControl
 
     private static string GetStringValue(string value)
     {
-        return String.IsNullOrWhiteSpace(value) ? "N/A" : value;
+        return string.IsNullOrWhiteSpace(value) ? "N/A" : value;
     }
 
     private static string GetGuidValue(Guid guid)
@@ -328,12 +328,12 @@ public partial class PropertiesControl : UserControl
         textBoxProcessProcessId.Text = obj.ProcessId.ToString();
         textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
         textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions);
-        btnProcessViewAccessPermissions.Enabled = !String.IsNullOrWhiteSpace(obj.AccessPermissions);
+        btnProcessViewAccessPermissions.Enabled = !string.IsNullOrWhiteSpace(obj.AccessPermissions);
         textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions);
         textBoxProcessUser.Text = GetStringValue(obj.User);
-        textBoxProcessSecurity.Text = String.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}, Unmarshal Policy: {3}",
+        textBoxProcessSecurity.Text = string.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}, Unmarshal Policy: {3}",
             obj.Capabilities, obj.AuthnLevel, obj.ImpLevel, obj.UnmarshalPolicy);
-        textBoxProcessStaHwnd.Text = String.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
+        textBoxProcessStaHwnd.Text = string.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
         SetupIpidEntries(obj.Ipids, false);
         listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
         lblProcess64bit.Text = COMUtilities.FormatBitness(obj.Is64Bit);
@@ -368,17 +368,17 @@ public partial class PropertiesControl : UserControl
         textBoxIPIDIID.Text = obj.Iid.FormatGuid();
         textBoxIPIDIIDName.Text = m_registry.MapIidToInterface(obj.Iid).Name;
         textBoxIPIDFlags.Text = obj.Flags.ToString();
-        textBoxIPIDInterface.Text = String.Format("0x{0:X}", obj.Interface.ToInt64());
+        textBoxIPIDInterface.Text = string.Format("0x{0:X}", obj.Interface.ToInt64());
         textBoxIPIDInterfaceVTable.Text = GetStringValue(obj.InterfaceVTable);
-        textBoxIPIDStub.Text = String.Format("0x{0:X}", obj.Stub.ToInt64());
+        textBoxIPIDStub.Text = string.Format("0x{0:X}", obj.Stub.ToInt64());
         textBoxIPIDStubVTable.Text = GetStringValue(obj.StubVTable);
         textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
-        textBoxIPIDReferences.Text = String.Format("Strong: {0}, Weak: {1}, Private: {2}",
+        textBoxIPIDReferences.Text = string.Format("Strong: {0}, Weak: {1}, Private: {2}",
             obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);
         
         textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
         textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
-        textBoxIPIDStaHwnd.Text = String.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
+        textBoxIPIDStaHwnd.Text = string.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
         listViewIpidMethods.Items.AddRange(obj.Methods.Select((method, i) =>
         {
             ListViewItem item = new(i.ToString());
@@ -437,7 +437,7 @@ public partial class PropertiesControl : UserControl
         listViewFactoryInterfaces.Columns.Add("Methods", 100);
         listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
         m_obj = obj;
-        this.Text = String.Format("{0} Properties", name.Replace("&", "&&"));
+        this.Text = string.Format("{0} Properties", name.Replace("&", "&&"));
     }
 
     private async void btnRefreshInterfaces_Click(object sender, EventArgs e)
@@ -621,7 +621,7 @@ public partial class PropertiesControl : UserControl
 
     private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
     {
-        COMSecurity.ViewSecurity(m_registry, String.Format("{0} Access", m_process.Name), 
+        COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", m_process.Name), 
             m_process.AccessPermissions, true);
     }
 
@@ -639,7 +639,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Interface.ToInt64()));
+            COMUtilities.CopyTextToClipboard(string.Format("0x{0:X}", ipid.Interface.ToInt64()));
         }
     }
 
@@ -648,7 +648,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard(String.Format("0x{0:X}", ipid.Stub.ToInt64()));
+            COMUtilities.CopyTextToClipboard(string.Format("0x{0:X}", ipid.Stub.ToInt64()));
         }
     }
 
@@ -692,8 +692,8 @@ public partial class PropertiesControl : UserControl
             try
             {
                 await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(
-                    COMUtilities.UnmarshalObject(ipid.ToObjref()), 
-                    String.Format("IPID {0}", ipid.Ipid));
+                    COMUtilities.UnmarshalObject(ipid.ToObjref()),
+                    string.Format("IPID {0}", ipid.Ipid));
             }
             catch (Exception ex)
             {

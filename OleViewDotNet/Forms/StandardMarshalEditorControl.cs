@@ -31,10 +31,10 @@ public partial class StandardMarshalEditorControl : UserControl
         m_objref = objref;
         m_registry = registry;
         InitializeComponent();
-        textBoxStandardFlags.Text = String.Format("0x{0:X}", objref.StdFlags);
+        textBoxStandardFlags.Text = string.Format("0x{0:X}", objref.StdFlags);
         textBoxPublicRefs.Text = objref.PublicRefs.ToString();
-        textBoxOxid.Text = String.Format("0x{0:X016}", objref.Oxid);
-        textBoxOid.Text = String.Format("0x{0:X016}", objref.Oid);
+        textBoxOxid.Text = string.Format("0x{0:X016}", objref.Oxid);
+        textBoxOid.Text = string.Format("0x{0:X016}", objref.Oid);
         textBoxIpid.Text = objref.Ipid.FormatGuid();
         textBoxApartmentId.Text = COMUtilities.GetApartmentIdStringFromIPid(objref.Ipid);
         int pid = COMUtilities.GetProcessIdFromIPid(objref.Ipid);

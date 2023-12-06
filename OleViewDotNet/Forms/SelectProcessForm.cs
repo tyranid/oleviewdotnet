@@ -43,11 +43,5 @@ public partial class SelectProcessForm : Form
     }
 
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public NtProcess SelectedProcess
-    {
-        get
-        {
-            return selectProcessControl.SelectedProcess;
-        }
-    }
+    public NtProcess SelectedProcess => selectProcessControl.SelectedProcess;
 }

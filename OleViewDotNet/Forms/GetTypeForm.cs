@@ -32,11 +32,8 @@ public partial class GetTypeForm : Form
     private Type m_currType;
     private object m_data;
 
-    public object Data
-    {
-        get { return m_data; }
-    }
-    
+    public object Data => m_data;
+
     public GetTypeForm(Type currType, object data)
     {
         if (currType.GetElementType() != null)
@@ -62,7 +59,7 @@ public partial class GetTypeForm : Form
         
         if (m_currType == typeof(object))
         {
-            comboBoxTypes.Items.Add(typeof(String));
+            comboBoxTypes.Items.Add(typeof(string));
             comboBoxTypes.Items.Add(typeof(byte));
             comboBoxTypes.Items.Add(typeof(sbyte));
             comboBoxTypes.Items.Add(typeof(ushort));

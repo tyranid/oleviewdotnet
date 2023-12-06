@@ -159,7 +159,7 @@ public sealed class StreamWrapper : Stream
         _stm.Write(buffer, count, IntPtr.Zero);
     }
 
-    public IStreamWrapper Object { get { return new IStreamWrapper(_stm); } }
+    public IStreamWrapper Object => new IStreamWrapper(_stm);
 }
 
 /// <summary>
@@ -329,5 +329,5 @@ public sealed class StorageWrapper : IDisposable
             DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
     }
 
-    public BaseComWrapper<IStorage> Object { get { return COMWrapperFactory.Wrap<IStorage>(_stg); } }
+    public BaseComWrapper<IStorage> Object => COMWrapperFactory.Wrap<IStorage>(_stg);
 }

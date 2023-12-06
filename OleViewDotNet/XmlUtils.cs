@@ -118,7 +118,7 @@ internal static class XmlUtils
     {
         if (guids.Any())
         {
-            writer.WriteAttributeString(name, String.Join(",", guids.Select(g => g.ToString())));
+            writer.WriteAttributeString(name, string.Join(",", guids.Select(g => g.ToString())));
         }
     }
 
@@ -241,7 +241,7 @@ internal static class XmlUtils
 
     internal static string ReadString(this XmlReader reader, string name)
     {
-        return reader.GetAttribute(name) ?? String.Empty;
+        return reader.GetAttribute(name) ?? string.Empty;
     }
 
     internal static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> key_selector, IComparer<TKey> comparer)
@@ -268,6 +268,6 @@ internal static class XmlUtils
 
     internal static string CleanupXmlString(this string str)
     {
-        return new string(str.Where(c => c >= ' ' && !Char.IsSurrogate(c) && c != 0xFFFF).ToArray());
+        return new string(str.Where(c => c >= ' ' && !char.IsSurrogate(c) && c != 0xFFFF).ToArray());
     }
 }

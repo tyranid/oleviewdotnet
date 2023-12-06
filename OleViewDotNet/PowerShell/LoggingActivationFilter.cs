@@ -39,13 +39,7 @@ public class LoggingActivationFilter : IActivationFilter
     private COMRegistry _registry;
     private TextWriter _writer;
 
-    public static LoggingActivationFilter Instance
-    {
-        get
-        {
-            return _instance.Value;
-        }
-    }
+    public static LoggingActivationFilter Instance => _instance.Value;
 
     public void Stop()
     {

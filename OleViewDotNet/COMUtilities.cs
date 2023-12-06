@@ -400,7 +400,7 @@ public static class COMUtilities
     }
 
     [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    private static extern void LoadTypeLibEx(String strTypeLibName, RegKind regKind,
+    private static extern void LoadTypeLibEx(string strTypeLibName, RegKind regKind,
         [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstance(ref Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, ref Guid riid, out IntPtr ppv);
@@ -773,7 +773,7 @@ public static class COMUtilities
         Guid clsid = new("{0002E005-0000-0000-C000-000000000046}");
         Guid iid = typeof(ICatInformation).GUID;
         IntPtr pCatMgr;
-        string strDesc = String.Empty;
+        string strDesc = string.Empty;
 
         if (CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX.INPROC_SERVER, ref iid, out pCatMgr) == 0)
         {
@@ -794,7 +794,7 @@ public static class COMUtilities
             Marshal.Release(pCatMgr);
         }
 
-        if (String.IsNullOrWhiteSpace(strDesc))
+        if (string.IsNullOrWhiteSpace(strDesc))
         {
             if (catid == new Guid("59fb2056-d625-48d0-a944-1a85b5ab2640"))
             {
@@ -1786,22 +1786,22 @@ public static class COMUtilities
                 dirs.Add("Optional");
             }
 
-            string text = String.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
+            string text = string.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
 
             if (dirs.Count > 0)
             {
-                text = String.Format("[{0}] {1}", string.Join(",", dirs), text);
+                text = string.Format("[{0}] {1}", string.Join(",", dirs), text);
             }
             pars.Add(text);
         }
-        return String.Join(", ", pars);
+        return string.Join(", ", pars);
     }
 
     public static string MemberInfoToString(MemberInfo member)
     {
         if (member is MethodInfo mi)
         {
-            return String.Format("{0} {1}({2});",
+            return string.Format("{0} {1}({2});",
                 ConvertTypeToName(mi.ReturnType),
                 mi.Name, FormatParameters(mi.GetParameters()));
         }
@@ -1819,17 +1819,17 @@ public static class COMUtilities
             }
 
             ParameterInfo[] index_params = prop.GetIndexParameters();
-            string ps = String.Empty;
+            string ps = string.Empty;
             if (index_params.Length > 0)
             {
-                ps = String.Format("({0})", FormatParameters(index_params));
+                ps = string.Format("({0})", FormatParameters(index_params));
             }
 
-            return String.Format("{0} {1}{2} {{ {3} }}", ConvertTypeToName(prop.PropertyType), prop.Name, ps, string.Join(" ", propdirs));
+            return string.Format("{0} {1}{2} {{ {3} }}", ConvertTypeToName(prop.PropertyType), prop.Name, ps, string.Join(" ", propdirs));
         }
         else if (member is FieldInfo fi)
         {
-            return String.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
+            return string.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
         }
         else if (member is EventInfo ei)
         {
@@ -2019,7 +2019,7 @@ public static class COMUtilities
     {
         string token;
         name = GetNextToken(name, out token);
-        if (String.IsNullOrEmpty(token))
+        if (string.IsNullOrEmpty(token))
         {
             throw new InvalidDataException("Expected a type name");
         }
@@ -2041,7 +2041,7 @@ public static class COMUtilities
             {
                 types.Add(ReadType(ref name));
             }
-            builder.Append(String.Join(",", types));
+            builder.Append(string.Join(",", types));
             builder.Append(">");
             return builder.ToString();
         }
@@ -2136,7 +2136,7 @@ public static class COMUtilities
     {
         using (WaitingDialog dlg = new((progress, token) => COMUtilities.LoadTypeLib(path, progress), s => s))
         {
-            dlg.Text = String.Format("Loading TypeLib {0}", path);
+            dlg.Text = string.Format("Loading TypeLib {0}", path);
             dlg.CancelEnabled = false;
             if (dlg.ShowDialog(window) == DialogResult.OK)
             {
@@ -2232,7 +2232,7 @@ public static class COMUtilities
             int current = Interlocked.Increment(ref _current);
             if ((current % MINIMUM_REPORT_SIZE) == 1)
             {
-                _progress.Report(new Tuple<string, int>(String.Format("Querying Interfaces: {0} of {1}", current, _total_count),
+                _progress.Report(new Tuple<string, int>(string.Format("Querying Interfaces: {0} of {1}", current, _total_count),
                     (100 * current) / _total_count));
             }
         }
@@ -2324,7 +2324,7 @@ public static class COMUtilities
             {
                 return Marshal.PtrToStringUni(lpServiceName);
             }
-            return String.Empty;
+            return string.Empty;
         }
     }
 
@@ -2386,7 +2386,7 @@ public static class COMUtilities
                         foreach (var service in services)
                         {
                             string name = service.GetName();
-                            if (!String.IsNullOrWhiteSpace(name))
+                            if (!string.IsNullOrWhiteSpace(name))
                             {
                                 if (!ret.ContainsKey(service.ServiceStatusProcess.dwProcessId))
                                 {
@@ -2452,7 +2452,7 @@ public static class COMUtilities
             case -1:
                 return "MTA";
             default:
-                return String.Format("STA (Thread ID {0})", appid);
+                return string.Format("STA (Thread ID {0})", appid);
         }
     }
 
@@ -2900,7 +2900,7 @@ public static class COMUtilities
             string name = mi.Name;
             while (!matched_names.Add(name))
             {
-                name = String.Format("{0}_{1}", mi.Name, count++);
+                name = string.Format("{0}_{1}", mi.Name, count++);
             }
             ret.Add(mi, name);
         }

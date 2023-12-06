@@ -51,7 +51,7 @@ partial class WaitingDialog : Form
     {
         if (format_label == null)
         {
-            format_label = s => String.Format("Currently Processing {0}. Please Wait.", s);
+            format_label = s => string.Format("Currently Processing {0}. Please Wait.", s);
         }
         m_cancellation = new CancellationTokenSource();
         CancellationToken token = m_cancellation.Token;
@@ -60,7 +60,7 @@ partial class WaitingDialog : Form
         m_worker.DoWork += (sender, e) => Result = worker_func(m_progress, token);
         m_worker.RunWorkerCompleted += RunWorkerCompletedCallback;
         InitializeComponent();
-        SetProgress(String.Empty, 0);
+        SetProgress(string.Empty, 0);
     }
 
     public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func) 

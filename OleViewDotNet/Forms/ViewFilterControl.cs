@@ -150,7 +150,7 @@ public partial class ViewFilterControl : UserControl
     private void comboBoxField_SelectedIndexChanged(object sender, EventArgs e)
     {
         comboBoxValue.Items.Clear();
-        comboBoxValue.Text = String.Empty;
+        comboBoxValue.Text = string.Empty;
 
         PropertyInfo pi = (PropertyInfo)comboBoxField.SelectedItem;
         Type type = pi.PropertyType;

@@ -28,13 +28,7 @@ public class COMMimeType : IXmlSerializable
 
     public string MimeType { get; private set; }
     public Guid Clsid { get; private set; }
-    public COMCLSIDEntry ClassEntry
-    {
-        get
-        {
-            return m_registry.Clsids.GetGuidEntry(Clsid);
-        }
-    }
+    public COMCLSIDEntry ClassEntry => m_registry.Clsids.GetGuidEntry(Clsid);
 
     public string Extension { get; private set; }
     public string Name => ClassEntry?.Name ?? string.Empty;

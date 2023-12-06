@@ -276,22 +276,19 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public string DllSurrogate { get; private set; }
 
-    public bool HasDllSurrogate { get { return !string.IsNullOrWhiteSpace(DllSurrogate); } }
+    public bool HasDllSurrogate => !string.IsNullOrWhiteSpace(DllSurrogate);
 
     public COMAppIDServiceEntry LocalService { get; private set; }
 
     public string RunAs { get; private set; }
 
-    public bool HasRunAs { get { return !String.IsNullOrWhiteSpace(RunAs); } }
+    public bool HasRunAs => !string.IsNullOrWhiteSpace(RunAs);
 
     public string Name { get; private set; }
 
     public COMAppIDFlags Flags { get; private set; }
 
-    public bool IsService
-    {
-        get { return LocalService != null; }
-    }
+    public bool IsService => LocalService != null;
 
     public string ServiceName
     {
@@ -327,50 +324,23 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         get; private set;
     }
 
-    public bool HasLaunchPermission
-    {
-        get { return !String.IsNullOrWhiteSpace(LaunchPermission); }
-    }
+    public bool HasLaunchPermission => !string.IsNullOrWhiteSpace(LaunchPermission);
 
-    public bool HasAccessPermission
-    {
-        get { return !String.IsNullOrWhiteSpace(AccessPermission); }
-    }
+    public bool HasAccessPermission => !string.IsNullOrWhiteSpace(AccessPermission);
 
-    public bool HasPermission
-    {
-        get { return HasLaunchPermission || HasAccessPermission; }
-    }
+    public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
-    public bool HasLowILAccess
-    {
-        get { return COMSecurity.GetILForSD(AccessPermission) <= TokenIntegrityLevel.Low; }
-    }
+    public bool HasLowILAccess => COMSecurity.GetILForSD(AccessPermission) <= TokenIntegrityLevel.Low;
 
-    public bool HasLowILLaunch
-    {
-        get { return COMSecurity.GetILForSD(LaunchPermission) <= TokenIntegrityLevel.Low; }
-    }
+    public bool HasLowILLaunch => COMSecurity.GetILForSD(LaunchPermission) <= TokenIntegrityLevel.Low;
 
-    public bool HasACAccess
-    {
-        get { return COMSecurity.SDHasAC(AccessPermission); }
-    }
+    public bool HasACAccess => COMSecurity.SDHasAC(AccessPermission);
 
-    public bool HasACLaunch
-    {
-        get { return COMSecurity.SDHasAC(LaunchPermission); }
-    }
+    public bool HasACLaunch => COMSecurity.SDHasAC(LaunchPermission);
 
-    public bool HasRemoteAccess
-    {
-        get { return COMSecurity.SDHasRemoteAccess(AccessPermission); }
-    }
+    public bool HasRemoteAccess => COMSecurity.SDHasRemoteAccess(AccessPermission);
 
-    public bool HasRemoteLaunch
-    {
-        get { return COMSecurity.SDHasRemoteAccess(LaunchPermission); }
-    }
+    public bool HasRemoteLaunch => COMSecurity.SDHasRemoteAccess(LaunchPermission);
 
     public COMAppIDRotFlags RotFlags
     {

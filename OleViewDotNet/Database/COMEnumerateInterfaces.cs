@@ -39,7 +39,7 @@ public class COMInterfaceInstance : IXmlSerializable
     public Guid Iid { get; private set; }
     public string Module { get; private set; }
     public long VTableOffset { get; private set; }
-    internal COMRegistry Database { get { return m_registry; } }
+    internal COMRegistry Database => m_registry;
     public string Name
     {
         get
@@ -51,13 +51,7 @@ public class COMInterfaceInstance : IXmlSerializable
             return m_registry.InterfacesToNames[Iid];
         }
     }
-    public COMInterfaceEntry InterfaceEntry
-    {
-        get
-        {
-            return m_registry?.Interfaces.GetGuidEntry(Iid);
-        }
-    }
+    public COMInterfaceEntry InterfaceEntry => m_registry?.Interfaces.GetGuidEntry(Iid);
 
     public COMInterfaceInstance(Guid iid, string module, long vtable_offset, COMRegistry registry) : this(registry)
     {
@@ -337,9 +331,9 @@ public class COMEnumerateInterfaces
         }
     }
 
-    public IEnumerable<COMInterfaceInstance> Interfaces { get { return _interfaces; } }
-    public IEnumerable<COMInterfaceInstance> FactoryInterfaces { get { return _factory_interfaces; } }
-    public Win32Exception Exception { get { return _ex; } }
+    public IEnumerable<COMInterfaceInstance> Interfaces => _interfaces;
+    public IEnumerable<COMInterfaceInstance> FactoryInterfaces => _factory_interfaces;
+    public Win32Exception Exception => _ex;
 
     public COMEnumerateInterfaces(Guid clsid, CLSCTX clsctx, string activatable_classid, bool sta, int timeout, NtToken token)
         : this(clsid, clsctx, activatable_classid, new List<COMInterfaceInstance>(), new List<COMInterfaceInstance>())

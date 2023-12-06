@@ -129,13 +129,7 @@ public sealed class LockedQueue<T> : IDisposable, IEnumerable<T> where T : class
     /// <summary>
     /// Gets the count of items in the queue
     /// </summary>
-    public int Count
-    {
-        get
-        {
-            return _queue.Count;
-        }
-    }
+    public int Count => _queue.Count;
 
     /// <summary>
     /// Stop the queue and try and unlock all waiting threads

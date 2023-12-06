@@ -206,7 +206,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
     /// </summary>
     public COMThreadingModel ThreadingModel { get; private set; }
     public COMCLSIDServerDotNetEntry DotNet { get; private set; }
-    public bool HasDotNet { get { return DotNet != null; } }
+    public bool HasDotNet => DotNet != null;
     public string RawServer { get; private set; }
 
     public override bool Equals(object obj)
@@ -754,91 +754,31 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public string Name { get; private set; }
 
-    public string DefaultServer
-    {
-        get
-        {
-            return GetDefaultServer().Server;
-        }
-    }
+    public string DefaultServer => GetDefaultServer().Server;
 
-    public string DefaultServerName
-    {
-        get
-        {
-            return COMUtilities.GetFileName(DefaultServer);
-        }
-    }
+    public string DefaultServerName => COMUtilities.GetFileName(DefaultServer);
 
-    public string DefaultCmdLine
-    {
-        get
-        {
-            return GetDefaultServer().CommandLine;
-        }
-    }
+    public string DefaultCmdLine => GetDefaultServer().CommandLine;
 
-    public COMServerType DefaultServerType
-    {
-        get
-        {
-            return GetDefaultServer().ServerType;
-        }
-    }
+    public COMServerType DefaultServerType => GetDefaultServer().ServerType;
 
     public Guid TreatAs { get; private set; }
 
     public Guid AppID { get; private set; }
 
-    public COMAppIDEntry AppIDEntry
-    {
-        get
-        {
-            return Database.AppIDs.GetGuidEntry(AppID);
-        }
-    }
+    public COMAppIDEntry AppIDEntry => Database.AppIDs.GetGuidEntry(AppID);
 
-    public bool HasAppID
-    {
-        get
-        {
-            return AppIDEntry != null;
-        }
-    }
+    public bool HasAppID => AppIDEntry != null;
 
     public Guid TypeLib { get; private set; }
 
-    public COMTypeLibEntry TypeLibEntry
-    {
-        get
-        {
-            return Database.Typelibs.GetGuidEntry(TypeLib);
-        }
-    }
+    public COMTypeLibEntry TypeLibEntry => Database.Typelibs.GetGuidEntry(TypeLib);
 
-    public bool HasTypeLib
-    {
-        get
-        {
-            return TypeLib != Guid.Empty;
-        }
-    }
+    public bool HasTypeLib => TypeLib != Guid.Empty;
 
-    public bool CanElevate
-    {
-        get
-        {
-            return Elevation != null && Elevation.Enabled;
-        }
-    }
+    public bool CanElevate => Elevation != null && Elevation.Enabled;
 
-    public bool AutoElevation
-    {
-        get
-        {
-            return CanElevate && Elevation.AutoApproval;
-        }
-    }
+    public bool AutoElevation => CanElevate && Elevation.AutoApproval;
 
     public COMCLSIDElevationEntry Elevation { get; private set; }
 
@@ -849,37 +789,13 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         get; private set;
     }
 
-    public IEnumerable<COMCategory> CategoryEntries
-    {
-        get
-        {
-            return Categories.Select(c => Database.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
-        }
-    }
+    public IEnumerable<COMCategory> CategoryEntries => Categories.Select(c => Database.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
 
-    public IEnumerable<string> ProgIds
-    {
-        get
-        {
-            return ProgIdEntries.Select(p => p.ProgID);
-        }
-    }
+    public IEnumerable<string> ProgIds => ProgIdEntries.Select(p => p.ProgID);
 
-    public IEnumerable<COMProgIDEntry> ProgIdEntries
-    {
-        get
-        {
-            return Database.GetProgIdsForClsid(Clsid);
-        }
-    }
+    public IEnumerable<COMProgIDEntry> ProgIdEntries => Database.GetProgIdsForClsid(Clsid);
 
-    public COMThreadingModel DefaultThreadingModel
-    {
-        get
-        {
-            return GetDefaultServer().ThreadingModel;
-        }
-    }
+    public COMThreadingModel DefaultThreadingModel => GetDefaultServer().ThreadingModel;
 
     public bool ActivatableFromApp
     {
@@ -902,24 +818,12 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     /// <summary>
     /// True if this class is marked as safe to script.
     /// </summary>
-    public bool SafeForScripting
-    {
-        get
-        {
-            return Categories.Contains(COMCategory.CATID_SafeForScripting);
-        }
-    }
+    public bool SafeForScripting => Categories.Contains(COMCategory.CATID_SafeForScripting);
 
     /// <summary>
     /// True if this class is marked as safe to initialize.
     /// </summary>
-    public bool SafeForInitializing
-    {
-        get
-        {
-            return Categories.Contains(COMCategory.CATID_SafeForInitializing);
-        }
-    }
+    public bool SafeForInitializing => Categories.Contains(COMCategory.CATID_SafeForInitializing);
 
     public bool HasLaunchPermission
     {
@@ -939,13 +843,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
     }
 
-    public bool HasPermission
-    {
-        get
-        {
-            return HasLaunchPermission || HasAccessPermission;
-        }
-    }
+    public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
     public string LaunchPermission
     {
@@ -1238,7 +1136,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         return COMUtilities.CreateClassFactory(Clsid, COMInterfaceEntry.IID_IUnknown, dwContext, server);
     }
 
-    public bool SupportsRemoteActivation { get { return true; } }
+    public bool SupportsRemoteActivation => true;
 
     internal COMRegistry Database { get; }
 

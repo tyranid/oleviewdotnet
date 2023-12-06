@@ -169,18 +169,9 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     public string Name { get; private set; }
     public string ServiceName { get; private set; }
     public string ExePath { get; private set; }
-    public string ExeName
-    {
-        get
-        {
-            return COMUtilities.GetFileName(ExePath);
-        }
-    }
+    public string ExeName => COMUtilities.GetFileName(ExePath);
     public string Permissions { get; private set; }
-    public bool HasPermission
-    {
-        get { return !string.IsNullOrWhiteSpace(Permissions); }
-    }
+    public bool HasPermission => !string.IsNullOrWhiteSpace(Permissions);
     public IdentityType IdentityType { get; private set; }
     public ServerType ServerType { get; private set; }
     public InstancingType InstancingType { get; private set; }

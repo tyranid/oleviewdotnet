@@ -277,29 +277,11 @@ public static class COMProcessParser
         public ushort _cEntriesPerPage;
         public IntPtr _pLock;
 
-        int IPageAllocator.Pages
-        {
-            get
-            {
-                return _cPages;
-            }
-        }
+        int IPageAllocator.Pages => _cPages;
 
-        int IPageAllocator.EntrySize
-        {
-            get
-            {
-                return _cbPerEntry.ToInt32();
-            }
-        }
+        int IPageAllocator.EntrySize => _cbPerEntry.ToInt32();
 
-        int IPageAllocator.EntriesPerPage
-        {
-            get
-            {
-                return _cEntriesPerPage;
-            }
-        }
+        int IPageAllocator.EntriesPerPage => _cEntriesPerPage;
 
         IntPtr[] IPageAllocator.ReadPages(NtProcess process)
         {
@@ -336,29 +318,11 @@ public static class COMProcessParser
         public ushort _cEntriesPerPage;
         public int _pLock;
 
-        int IPageAllocator.Pages
-        {
-            get
-            {
-                return _cPages;
-            }
-        }
+        int IPageAllocator.Pages => _cPages;
 
-        int IPageAllocator.EntrySize
-        {
-            get
-            {
-                return _cbPerEntry;
-            }
-        }
+        int IPageAllocator.EntrySize => _cbPerEntry;
 
-        int IPageAllocator.EntriesPerPage
-        {
-            get
-            {
-                return _cEntriesPerPage;
-            }
-        }
+        int IPageAllocator.EntriesPerPage => _cEntriesPerPage;
         IntPtr[] IPageAllocator.ReadPages(NtProcess process)
         {
             return process.ReadMemoryArray<int>(_pPageListStart, _cPages).Select(i => new IntPtr(i)).ToArray();
@@ -397,69 +361,21 @@ public static class COMProcessParser
         public IntPtr pOIDFLink;
         public IntPtr pOIDBLink;
 
-        uint IPIDEntryNativeInterface.Flags
-        {
-            get
-            {
-                return dwFlags;
-            }
-        }
+        uint IPIDEntryNativeInterface.Flags => dwFlags;
 
-        IntPtr IPIDEntryNativeInterface.Interface
-        {
-            get
-            {
-                return pv;
-            }
-        }
+        IntPtr IPIDEntryNativeInterface.Interface => pv;
 
-        IntPtr IPIDEntryNativeInterface.Stub
-        {
-            get
-            {
-                return pStub;
-            }
-        }
+        IntPtr IPIDEntryNativeInterface.Stub => pStub;
 
-        Guid IPIDEntryNativeInterface.Ipid
-        {
-            get
-            {
-                return ipid;
-            }
-        }
+        Guid IPIDEntryNativeInterface.Ipid => ipid;
 
-        Guid IPIDEntryNativeInterface.Iid
-        {
-            get
-            {
-                return iid;
-            }
-        }
+        Guid IPIDEntryNativeInterface.Iid => iid;
 
-        int IPIDEntryNativeInterface.StrongRefs
-        {
-            get
-            {
-                return cStrongRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.StrongRefs => cStrongRefs;
 
-        int IPIDEntryNativeInterface.WeakRefs
-        {
-            get
-            {
-                return cWeakRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.WeakRefs => cWeakRefs;
 
-        int IPIDEntryNativeInterface.PrivateRefs
-        {
-            get
-            {
-                return cPrivateRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.PrivateRefs => cPrivateRefs;
 
         IPIDEntryNativeInterface IPIDEntryNativeInterface.GetNext(NtProcess process)
         {
@@ -494,69 +410,21 @@ public static class COMProcessParser
         public int pOIDFLink;
         public int pOIDBLink;
 
-        uint IPIDEntryNativeInterface.Flags
-        {
-            get
-            {
-                return dwFlags;
-            }
-        }
+        uint IPIDEntryNativeInterface.Flags => dwFlags;
 
-        IntPtr IPIDEntryNativeInterface.Interface
-        {
-            get
-            {
-                return new IntPtr(pv);
-            }
-        }
+        IntPtr IPIDEntryNativeInterface.Interface => new IntPtr(pv);
 
-        IntPtr IPIDEntryNativeInterface.Stub
-        {
-            get
-            {
-                return new IntPtr(pStub);
-            }
-        }
+        IntPtr IPIDEntryNativeInterface.Stub => new IntPtr(pStub);
 
-        Guid IPIDEntryNativeInterface.Ipid
-        {
-            get
-            {
-                return ipid;
-            }
-        }
+        Guid IPIDEntryNativeInterface.Ipid => ipid;
 
-        Guid IPIDEntryNativeInterface.Iid
-        {
-            get
-            {
-                return iid;
-            }
-        }
+        Guid IPIDEntryNativeInterface.Iid => iid;
 
-        int IPIDEntryNativeInterface.StrongRefs
-        {
-            get
-            {
-                return cStrongRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.StrongRefs => cStrongRefs;
 
-        int IPIDEntryNativeInterface.WeakRefs
-        {
-            get
-            {
-                return cWeakRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.WeakRefs => cWeakRefs;
 
-        int IPIDEntryNativeInterface.PrivateRefs
-        {
-            get
-            {
-                return cPrivateRefs;
-            }
-        }
+        int IPIDEntryNativeInterface.PrivateRefs => cPrivateRefs;
 
         IPIDEntryNativeInterface IPIDEntryNativeInterface.GetNext(NtProcess process)
         {
@@ -622,45 +490,15 @@ public static class COMProcessParser
         public IntPtr _pszServerPackageFullName;
         public Guid _guidProcessIdentifier;
 
-        int IOXIDEntry.Pid
-        {
-            get
-            {
-                return _dwPid;
-            }
-        }
+        int IOXIDEntry.Pid => _dwPid;
 
-        int IOXIDEntry.Tid
-        {
-            get
-            {
-                return _dwTid;
-            }
-        }
+        int IOXIDEntry.Tid => _dwTid;
 
-        Guid IOXIDEntry.MOxid
-        {
-            get
-            {
-                return _moxid;
-            }
-        }
+        Guid IOXIDEntry.MOxid => _moxid;
 
-        long IOXIDEntry.Mid
-        {
-            get
-            {
-                return _mid;
-            }
-        }
+        long IOXIDEntry.Mid => _mid;
 
-        IntPtr IOXIDEntry.ServerSTAHwnd
-        {
-            get
-            {
-                return _hServerSTA;
-            }
-        }
+        IntPtr IOXIDEntry.ServerSTAHwnd => _hServerSTA;
 
         COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
         {
@@ -709,45 +547,15 @@ public static class COMProcessParser
         public int _pszServerPackageFullName;
         public Guid _guidProcessIdentifier;
 
-        int IOXIDEntry.Pid
-        {
-            get
-            {
-                return _dwPid;
-            }
-        }
+        int IOXIDEntry.Pid => _dwPid;
 
-        int IOXIDEntry.Tid
-        {
-            get
-            {
-                return _dwTid;
-            }
-        }
+        int IOXIDEntry.Tid => _dwTid;
 
-        Guid IOXIDEntry.MOxid
-        {
-            get
-            {
-                return _moxid;
-            }
-        }
+        Guid IOXIDEntry.MOxid => _moxid;
 
-        long IOXIDEntry.Mid
-        {
-            get
-            {
-                return _mid;
-            }
-        }
+        long IOXIDEntry.Mid => _mid;
 
-        IntPtr IOXIDEntry.ServerSTAHwnd
-        {
-            get
-            {
-                return new IntPtr(_hServerSTA);
-            }
-        }
+        IntPtr IOXIDEntry.ServerSTAHwnd => new IntPtr(_hServerSTA);
 
         COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
         {
@@ -809,45 +617,15 @@ public static class COMProcessParser
         public byte _remotingInitialized;
         public IntPtr _hServerSTA;
 
-        int IOXIDEntry.Pid
-        {
-            get
-            {
-                return info._dwPid;
-            }
-        }
+        int IOXIDEntry.Pid => info._dwPid;
 
-        int IOXIDEntry.Tid
-        {
-            get
-            {
-                return info._dwTid;
-            }
-        }
+        int IOXIDEntry.Tid => info._dwTid;
 
-        Guid IOXIDEntry.MOxid
-        {
-            get
-            {
-                return _moxid;
-            }
-        }
+        Guid IOXIDEntry.MOxid => _moxid;
 
-        long IOXIDEntry.Mid
-        {
-            get
-            {
-                return _mid;
-            }
-        }
+        long IOXIDEntry.Mid => _mid;
 
-        IntPtr IOXIDEntry.ServerSTAHwnd
-        {
-            get
-            {
-                return _hServerSTA;
-            }
-        }
+        IntPtr IOXIDEntry.ServerSTAHwnd => _hServerSTA;
 
         COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
         {
@@ -901,45 +679,15 @@ public static class COMProcessParser
         public byte _remotingInitialized;
         public int _hServerSTA;
 
-        int IOXIDEntry.Pid
-        {
-            get
-            {
-                return info._dwPid;
-            }
-        }
+        int IOXIDEntry.Pid => info._dwPid;
 
-        int IOXIDEntry.Tid
-        {
-            get
-            {
-                return info._dwTid;
-            }
-        }
+        int IOXIDEntry.Tid => info._dwTid;
 
-        Guid IOXIDEntry.MOxid
-        {
-            get
-            {
-                return _moxid;
-            }
-        }
+        Guid IOXIDEntry.MOxid => _moxid;
 
-        long IOXIDEntry.Mid
-        {
-            get
-            {
-                return _mid;
-            }
-        }
+        long IOXIDEntry.Mid => _mid;
 
-        IntPtr IOXIDEntry.ServerSTAHwnd
-        {
-            get
-            {
-                return new IntPtr(_hServerSTA);
-            }
-        }
+        IntPtr IOXIDEntry.ServerSTAHwnd => new IntPtr(_hServerSTA);
 
         COMDualStringArray IOXIDEntry.GetBinding(NtProcess process)
         {
@@ -2030,7 +1778,7 @@ public static class COMProcessParser
 
     internal static string SymbolFromAddress(ISymbolResolver resolver, bool is64bit, IntPtr address)
     {
-        return String.Format("0x{0:X}", address.ToInt64());
+        return string.Format("0x{0:X}", address.ToInt64());
     }
 
     private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config,
@@ -2080,7 +1828,7 @@ public static class COMProcessParser
         IntPtr sd = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
         if (sd == IntPtr.Zero)
         {
-            return String.Empty;
+            return string.Empty;
         }
         IntPtr sd_ptr;
         if (process.Is64Bit)
@@ -2397,7 +2145,7 @@ public static class COMProcessParser
         {
             return ReadUnicodeString(process, str);
         }
-        return String.Empty;
+        return string.Empty;
     }
 
     internal static int ReadInt(NtProcess process, ISymbolResolver resolver, string symbol)
@@ -2585,7 +2333,7 @@ public static class COMProcessParser
             {
                 if (progress != null)
                 {
-                    progress.Report(new Tuple<string, int>(String.Format("Parsing process {0}", p.ProcessName),
+                    progress.Report(new Tuple<string, int>(string.Format("Parsing process {0}", p.ProcessName),
                         100 * current_count++ / total_count));
                 }
                 COMProcessEntry proc = ParseProcess(p.Id,
@@ -2660,13 +2408,7 @@ public class COMProcessEntry : ICOMAccessSecurity
 {
     public int ProcessId { get; private set; }
     public string ExecutablePath { get; private set; }
-    public string Name
-    {
-        get
-        {
-            return Path.GetFileNameWithoutExtension(ExecutablePath);
-        }
-    }
+    public string Name => Path.GetFileNameWithoutExtension(ExecutablePath);
     public IEnumerable<COMIPIDEntry> Ipids { get; private set; }
     public IEnumerable<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning);
     public bool Is64Bit { get; private set; }
@@ -2715,21 +2457,9 @@ public class COMProcessEntry : ICOMAccessSecurity
         }
     }
 
-    public bool CustomMarshalAllowed
-    {
-        get
-        {
-            return CustomMarshalAllowedInternal(false);
-        }
-    }
+    public bool CustomMarshalAllowed => CustomMarshalAllowedInternal(false);
 
-    public bool CustomMarshalAllowedFromAppContainer
-    {
-        get
-        {
-            return CustomMarshalAllowedInternal(true);
-        }
-    }
+    public bool CustomMarshalAllowedFromAppContainer => CustomMarshalAllowedInternal(true);
 
     public string ActivationFilterVTable
     {
@@ -2851,21 +2581,9 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
     public int WeakRefs { get; private set; }
     public int PrivateRefs { get; private set; }
     public IntPtr ServerSTAHwnd { get; private set; }
-    public int ApartmentId
-    {
-        get
-        {
-            return COMUtilities.GetApartmentIdFromIPid(Ipid);
-        }
-    }
+    public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
 
-    public bool IsRunning
-    {
-        get
-        {
-            return (Flags & (IPIDFlags.IPIDF_DISCONNECTED | IPIDFlags.IPIDF_DEACTIVATED)) == 0;
-        }
-    }
+    public bool IsRunning => (Flags & (IPIDFlags.IPIDF_DISCONNECTED | IPIDFlags.IPIDF_DEACTIVATED)) == 0;
 
     public COMProcessEntry Process { get; internal set; }
 

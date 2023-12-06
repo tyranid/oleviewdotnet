@@ -217,7 +217,7 @@ public partial class COMRegistryViewer : UserControl
 
     private void UpdateStatusLabel()
     {
-        toolStripStatusLabelCount.Text = String.Format("Showing {0} of {1} entries", treeComRegistry.Nodes.Count, m_originalNodes.Length);
+        toolStripStatusLabelCount.Text = string.Format("Showing {0} of {1} entries", treeComRegistry.Nodes.Count, m_originalNodes.Length);
     }
 
     /// <summary>
@@ -366,11 +366,11 @@ public partial class COMRegistryViewer : UserControl
             {
                 AppendFormatLine(strRet, "Assembly: {0}", server.DotNet.AssemblyName);
                 AppendFormatLine(strRet, "Class: {0}", server.DotNet.ClassName);
-                if (!String.IsNullOrWhiteSpace(server.DotNet.CodeBase))
+                if (!string.IsNullOrWhiteSpace(server.DotNet.CodeBase))
                 {
                     AppendFormatLine(strRet, "Codebase: {0}", server.DotNet.CodeBase);
                 }
-                if (!String.IsNullOrWhiteSpace(server.DotNet.RuntimeVersion))
+                if (!string.IsNullOrWhiteSpace(server.DotNet.RuntimeVersion))
                 {
                     AppendFormatLine(strRet, "Runtime Version: {0}", server.DotNet.RuntimeVersion);
                 }
@@ -395,7 +395,7 @@ public partial class COMRegistryViewer : UserControl
         }
         else
         {
-            strRet = String.Format("CLSID: {0}\n", ent.Clsid.FormatGuid());
+            strRet = string.Format("CLSID: {0}\n", ent.Clsid.FormatGuid());
         }
 
         return strRet;
@@ -425,7 +425,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateCLSIDNode(COMRegistry registry, COMCLSIDEntry ent)
     {
-        TreeNode nodeRet = CreateNode(String.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassKey);
+        TreeNode nodeRet = CreateNode(string.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassKey);
         nodeRet.ToolTipText = BuildCLSIDToolTip(registry, ent);
         nodeRet.Tag = ent;
         nodeRet.Nodes.Add("IUnknown");
@@ -435,7 +435,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateInterfaceNode(COMRegistry registry, COMInterfaceEntry ent)
     {
-        TreeNode nodeRet = CreateNode(String.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceKey);
+        TreeNode nodeRet = CreateNode(string.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceKey);
         nodeRet.ToolTipText = BuildInterfaceToolTip(ent, null);
         nodeRet.Tag = ent;
 
@@ -538,7 +538,7 @@ public partial class COMRegistryViewer : UserControl
         }
         builder.AppendFormat("Access Permissions: {0}", proc.AccessPermissions).AppendLine();
         builder.AppendFormat("LRPC Permissions: {0}", proc.LRpcPermissions).AppendLine();
-        if (!String.IsNullOrEmpty(proc.RpcEndpoint))
+        if (!string.IsNullOrEmpty(proc.RpcEndpoint))
         {
             builder.AppendFormat("LRPC Endpoint: {0}", proc.RpcEndpoint).AppendLine();
         }
@@ -557,12 +557,12 @@ public partial class COMRegistryViewer : UserControl
     {
         StringBuilder builder = new();
         AppendFormatLine(builder, "Interface: 0x{0:X}", ipid.Interface.ToInt64());
-        if (!String.IsNullOrWhiteSpace(ipid.InterfaceVTable))
+        if (!string.IsNullOrWhiteSpace(ipid.InterfaceVTable))
         {
             AppendFormatLine(builder, "Interface VTable: {0}", ipid.InterfaceVTable);
         }
         AppendFormatLine(builder, "Stub: 0x{0:X}", ipid.Stub.ToInt64());
-        if (!String.IsNullOrWhiteSpace(ipid.StubVTable))
+        if (!string.IsNullOrWhiteSpace(ipid.StubVTable))
         {
             AppendFormatLine(builder, "Stub VTable: {0}", ipid.StubVTable);
         }
@@ -576,7 +576,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildCOMProcessName(COMProcessEntry proc)
     {
-        return String.Format("{0,-8} - {1} - {2}", proc.ProcessId, proc.Name, proc.User);
+        return string.Format("{0,-8} - {1} - {2}", proc.ProcessId, proc.Name, proc.User);
     }
 
     private static void PopulatorIpids(COMRegistry registry, TreeNode node, COMProcessEntry proc)
@@ -584,7 +584,7 @@ public partial class COMRegistryViewer : UserControl
         foreach (COMIPIDEntry ipid in proc.Ipids.Where(i => i.IsRunning))
         {
             COMInterfaceEntry intf = registry.MapIidToInterface(ipid.Iid);
-            TreeNode ipid_node = CreateNode(String.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
+            TreeNode ipid_node = CreateNode(string.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
             ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
             ipid_node.Tag = ipid;
             node.Nodes.Add(ipid_node);
@@ -653,7 +653,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static bool HasSurrogate(COMRegistry registry, COMCLSIDEntry ent)
     {
-        return registry.AppIDs.ContainsKey(ent.AppID) && !String.IsNullOrWhiteSpace(registry.AppIDs[ent.AppID].DllSurrogate);
+        return registry.AppIDs.ContainsKey(ent.AppID) && !string.IsNullOrWhiteSpace(registry.AppIDs[ent.AppID].DllSurrogate);
     }
 
     private class COMCLSIDServerEqualityComparer : IEqualityComparer<COMCLSIDServerEntry>
@@ -754,7 +754,7 @@ public partial class COMRegistryViewer : UserControl
     private static TreeNode CreateLocalServiceNode(COMRegistry registry, COMAppIDEntry appidEnt, IEnumerable<COMCLSIDEntry> clsids)
     {
         string name = appidEnt.LocalService.DisplayName;
-        if (String.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(name))
         {
             name = appidEnt.LocalService.Name;
         }
@@ -797,7 +797,7 @@ public partial class COMRegistryViewer : UserControl
         StringBuilder builder = new();
 
         AppendFormatLine(builder, "AppID: {0}", appidEnt.AppId);
-        if (!String.IsNullOrWhiteSpace(appidEnt.RunAs))
+        if (!string.IsNullOrWhiteSpace(appidEnt.RunAs))
         {
             AppendFormatLine(builder, "RunAs: {0}", appidEnt.RunAs);
         }
@@ -806,16 +806,16 @@ public partial class COMRegistryViewer : UserControl
         {
             COMAppIDServiceEntry service = appidEnt.LocalService;
             AppendFormatLine(builder, "Service Name: {0}", service.Name);
-            if (!String.IsNullOrWhiteSpace(service.DisplayName))
+            if (!string.IsNullOrWhiteSpace(service.DisplayName))
             {
                 AppendFormatLine(builder, "Display Name: {0}", service.DisplayName);
             }
-            if (!String.IsNullOrWhiteSpace(service.UserName))
+            if (!string.IsNullOrWhiteSpace(service.UserName))
             {
                 AppendFormatLine(builder, "Service User: {0}", service.UserName);
             }
             AppendFormatLine(builder, "Image Path: {0}", service.ImagePath);
-            if (!String.IsNullOrWhiteSpace(service.ServiceDll))
+            if (!string.IsNullOrWhiteSpace(service.ServiceDll))
             {
                 AppendFormatLine(builder, "Service DLL: {0}", service.ServiceDll);
             }
@@ -836,7 +836,7 @@ public partial class COMRegistryViewer : UserControl
             AppendFormatLine(builder, "RotFlags: {0}", appidEnt.RotFlags);
         }
 
-        if (!String.IsNullOrWhiteSpace(appidEnt.DllSurrogate))
+        if (!string.IsNullOrWhiteSpace(appidEnt.DllSurrogate))
         {
             AppendFormatLine(builder, "DLL Surrogate: {0}", appidEnt.DllSurrogate);
         }
@@ -895,7 +895,7 @@ public partial class COMRegistryViewer : UserControl
         {
             TreeNode currNode = CreateNode(pair.Name, FolderKey);
             currNode.Tag = pair;
-            currNode.ToolTipText = String.Format("CATID: {0}", pair.CategoryID.FormatGuid());
+            currNode.ToolTipText = string.Format("CATID: {0}", pair.CategoryID.FormatGuid());
             sortedNodes.Add(currNode.Text, currNode);
 
             IEnumerable<COMCLSIDEntry> clsids = pair.ClassEntries.OrderBy(c => c.Name);
@@ -937,7 +937,7 @@ public partial class COMRegistryViewer : UserControl
                 clsids.Add(entry);
             }
 
-            if (!String.IsNullOrWhiteSpace(ent.AppPath) && registry.ClsidsByServer.ContainsKey(ent.AppPath))
+            if (!string.IsNullOrWhiteSpace(ent.AppPath) && registry.ClsidsByServer.ContainsKey(ent.AppPath))
             {
                 clsids.AddRange(registry.ClsidsByServer[ent.AppPath]);
                 tooltip.AppendFormat("{0}", ent.AppPath);
@@ -977,9 +977,9 @@ public partial class COMRegistryViewer : UserControl
                 node.Nodes.Add(CreateCLSIDNode(registry, registry.Clsids[ent.Clsid]));
             }
 
-            if (!String.IsNullOrWhiteSpace(ent.Extension))
+            if (!string.IsNullOrWhiteSpace(ent.Extension))
             {
-                node.ToolTipText = String.Format("Extension {0}", ent.Extension);
+                node.ToolTipText = string.Format("Extension {0}", ent.Extension);
             }
             node.Tag = ent;
             nodes.Add(node);
@@ -990,20 +990,20 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
     {
-        TreeNode node = CreateNode(String.Format("{0} : Version {1}", entry.Name, entry.Version), 
+        TreeNode node = CreateNode(string.Format("{0} : Version {1}", entry.Name, entry.Version), 
             ClassKey);
 
         node.Tag = entry;
         List<string> entries = new();
-        if(!String.IsNullOrWhiteSpace(entry.Win32Path))
+        if(!string.IsNullOrWhiteSpace(entry.Win32Path))
         {
-            entries.Add(String.Format("Win32: {0}", entry.Win32Path));
+            entries.Add(string.Format("Win32: {0}", entry.Win32Path));
         }
-        if(!String.IsNullOrWhiteSpace(entry.Win64Path))
+        if(!string.IsNullOrWhiteSpace(entry.Win64Path))
         {
-            entries.Add(String.Format("Win64: {0}", entry.Win64Path));
+            entries.Add(string.Format("Win64: {0}", entry.Win64Path));
         }
-        node.ToolTipText = String.Join("\r\n", entries);
+        node.ToolTipText = string.Join("\r\n", entries);
 
         return node;
     }
@@ -1076,7 +1076,7 @@ public partial class COMRegistryViewer : UserControl
             }
             catch (Win32Exception ex)
             {
-                wait_node.Text = String.Format("Error querying COM interfaces - {0}", ex.Message);
+                wait_node.Text = string.Format("Error querying COM interfaces - {0}", ex.Message);
             }
         }
     }
@@ -1496,7 +1496,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else
             {
-                builder.Append(Regex.Escape(new String(ch, 1)));
+                builder.Append(Regex.Escape(new string(ch, 1)));
             }
         }
 
@@ -1654,7 +1654,7 @@ public partial class COMRegistryViewer : UserControl
         StringComparison comp;
 
         filter = filter.Trim();
-        if (String.IsNullOrEmpty(filter))
+        if (string.IsNullOrEmpty(filter))
         {
             return null;
         }
@@ -1893,7 +1893,7 @@ public partial class COMRegistryViewer : UserControl
             if (node.Tag is COMProcessEntry)
             {
                 COMProcessEntry proc = (COMProcessEntry)node.Tag;
-                COMSecurity.ViewSecurity(m_registry, String.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
+                COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
             }
             else if (node.Tag is COMRuntimeClassEntry || node.Tag is COMRuntimeServerEntry)
             {
@@ -1969,12 +1969,12 @@ public partial class COMRegistryViewer : UserControl
 
     private async Task CreateInSession(COMCLSIDEntry ent, string session_id)
     {
-        await CreateFromMoniker(ent, String.Format("session:{0}!new:{1}", session_id, ent.Clsid));
+        await CreateFromMoniker(ent, string.Format("session:{0}!new:{1}", session_id, ent.Clsid));
     }
 
     private async Task CreateElevated(COMCLSIDEntry ent, bool factory)
     {
-        await CreateFromMoniker(ent, String.Format("Elevation:Administrator!{0}:{1}", 
+        await CreateFromMoniker(ent, string.Format("Elevation:Administrator!{0}:{1}", 
             factory ? "clsid" : "new", ent.Clsid));
     }
 
@@ -2239,7 +2239,7 @@ public partial class COMRegistryViewer : UserControl
             {
                 await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(
                     COMUtilities.UnmarshalObject(ipid.ToObjref()),
-                    String.Format("IPID {0}", ipid.Ipid));
+                    string.Format("IPID {0}", ipid.Ipid));
             }
             catch (Exception ex)
             {

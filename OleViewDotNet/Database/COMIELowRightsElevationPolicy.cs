@@ -41,13 +41,7 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
     public string Name { get; private set; }
     public Guid Uuid { get; private set; }
     public Guid Clsid { get; private set; }
-    public COMCLSIDEntry ClassEntry
-    {
-        get
-        {
-            return m_registry.MapClsidToEntry(Clsid);
-        }
-    }
+    public COMCLSIDEntry ClassEntry => m_registry.MapClsidToEntry(Clsid);
     public string AppPath { get; private set; }
     public IEElevationPolicy Policy { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
@@ -91,11 +85,9 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
 
     private void LoadFromRegistry(RegistryKey key)
     {
-        List<Guid> clsidList = new();
-
         object policyValue = key.GetValue("Policy", 0);
 
-        if (policyValue != null && !String.IsNullOrEmpty(policyValue.ToString()))
+        if (policyValue != null && !string.IsNullOrEmpty(policyValue.ToString()))
         {
             Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
         }

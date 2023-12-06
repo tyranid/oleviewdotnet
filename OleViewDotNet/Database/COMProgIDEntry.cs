@@ -67,13 +67,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
 
     public Guid Clsid { get; private set; }
 
-    public COMCLSIDEntry ClassEntry
-    {
-        get
-        {
-            return m_registry.Clsids.GetGuidEntry(Clsid);
-        }
-    }
+    public COMCLSIDEntry ClassEntry => m_registry.Clsids.GetGuidEntry(Clsid);
 
     public string Name { get; private set; }
 

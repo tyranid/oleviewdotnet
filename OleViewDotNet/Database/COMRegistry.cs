@@ -86,29 +86,11 @@ public class COMRegistry
 
     #region Public Properties
 
-    public IDictionary<Guid, COMCLSIDEntry> Clsids
-    {
-        get 
-        {
-            return m_clsids; 
-        }
-    }
+    public IDictionary<Guid, COMCLSIDEntry> Clsids => m_clsids;
 
-    public IDictionary<Guid, COMInterfaceEntry> Interfaces
-    {
-        get 
-        {
-            return m_interfaces; 
-        }
-    }
+    public IDictionary<Guid, COMInterfaceEntry> Interfaces => m_interfaces;
 
-    public IDictionary<string, COMProgIDEntry> Progids
-    {
-        get 
-        {
-            return m_progids; 
-        }
-    }
+    public IDictionary<string, COMProgIDEntry> Progids => m_progids;
 
     private SortedDictionary<string, List<COMCLSIDEntry>> GetClsidsByString(Func<COMCLSIDEntry, bool> filter, Func<COMCLSIDEntry, string> key_selector)
     {
@@ -123,7 +105,7 @@ public class COMRegistry
         {
             if (m_clsidbyserver == null)
             {
-                m_clsidbyserver = GetClsidsByString(e => !String.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType != COMServerType.UnknownServer,
+                m_clsidbyserver = GetClsidsByString(e => !string.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType != COMServerType.UnknownServer,
                     e => e.DefaultServer);
             }
 
@@ -143,25 +125,13 @@ public class COMRegistry
         }
     }
 
-    public IDictionary<Guid, COMCategory> ImplementedCategories
-    {
-        get { return m_categories; }
-    }
+    public IDictionary<Guid, COMCategory> ImplementedCategories => m_categories;
 
-    public IEnumerable<COMCLSIDEntry> PreApproved
-    {
-        get { return m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e != null); }
-    }
+    public IEnumerable<COMCLSIDEntry> PreApproved => m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e != null);
 
-    public IEnumerable<COMIELowRightsElevationPolicy> LowRights
-    {
-        get { return m_lowrights.AsReadOnly(); }
-    }
+    public IEnumerable<COMIELowRightsElevationPolicy> LowRights => m_lowrights.AsReadOnly();
 
-    public IDictionary<Guid, COMAppIDEntry> AppIDs
-    {
-        get { return m_appid; }
-    }
+    public IDictionary<Guid, COMAppIDEntry> AppIDs => m_appid;
 
     public IDictionary<Guid, IEnumerable<COMCLSIDEntry>> ClsidsByAppId
     {
@@ -176,10 +146,7 @@ public class COMRegistry
         }
     }
 
-    public IDictionary<Guid, COMTypeLibEntry> Typelibs
-    {
-        get { return m_typelibs; }
-    }
+    public IDictionary<Guid, COMTypeLibEntry> Typelibs => m_typelibs;
 
     public IDictionary<Guid, IEnumerable<COMInterfaceEntry>> ProxiesByClsid
     {
@@ -194,25 +161,13 @@ public class COMRegistry
         }
     }
 
-    public IEnumerable<COMMimeType> MimeTypes
-    {
-        get { return m_mimetypes; }
-    }
+    public IEnumerable<COMMimeType> MimeTypes => m_mimetypes;
 
-    public IDictionary<string, COMRuntimeClassEntry> RuntimeClasses
-    {
-        get { return m_runtime_classes; }
-    }
+    public IDictionary<string, COMRuntimeClassEntry> RuntimeClasses => m_runtime_classes;
 
-    public IDictionary<string, COMRuntimeServerEntry> RuntimeServers
-    {
-        get { return m_runtime_servers; }
-    }
+    public IDictionary<string, COMRuntimeServerEntry> RuntimeServers => m_runtime_servers;
 
-    public IEnumerable<COMRuntimeExtensionEntry> RuntimeExtensions
-    {
-        get { return m_runtime_extensions; }
-    }
+    public IEnumerable<COMRuntimeExtensionEntry> RuntimeExtensions => m_runtime_extensions;
 
     public IDictionary<string, IEnumerable<COMRuntimeExtensionEntry>> RuntimeExtensionsByContractId
     {
@@ -271,7 +226,7 @@ public class COMRegistry
 
         set
         {
-            m_name = value ?? String.Empty;
+            m_name = value ?? string.Empty;
         }
     }
 
@@ -647,13 +602,13 @@ public class COMRegistry
     public override string ToString()
     {
         StringBuilder builder = new();
-        if (!String.IsNullOrWhiteSpace(m_name))
+        if (!string.IsNullOrWhiteSpace(m_name))
         {
             builder.AppendFormat("{0} - ", m_name);
         }
 
         builder.AppendFormat("Created: {0}", CreatedDate);
-        if (!String.IsNullOrWhiteSpace(FilePath))
+        if (!string.IsNullOrWhiteSpace(FilePath))
         {
             builder.AppendFormat(" Path: {0}", FilePath);
         }

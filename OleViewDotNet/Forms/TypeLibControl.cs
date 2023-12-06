@@ -248,12 +248,12 @@ public partial class TypeLibControl : UserControl
             return formatter.FormatComplexType(str);
         }
 
-        return String.Empty;
+        return string.Empty;
     }
 
     private void UpdateFromListView(ListView list)
     {
-        string text = String.Empty;
+        string text = string.Empty;
 
         if (list.SelectedItems.Count > 0)
         {

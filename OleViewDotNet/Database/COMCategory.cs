@@ -30,13 +30,7 @@ public class COMCategory : IXmlSerializable, IComGuid
     public Guid CategoryID { get; private set; }
     public string Name { get; private set; }
     public IEnumerable<Guid> Clsids { get; private set; }
-    public IEnumerable<COMCLSIDEntry> ClassEntries
-    {
-        get
-        {
-            return Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
-        }
-    }
+    public IEnumerable<COMCLSIDEntry> ClassEntries => Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
 
     Guid IComGuid.ComGuid => CategoryID;
 

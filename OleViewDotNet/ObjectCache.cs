@@ -74,13 +74,7 @@ static class ObjectCache
         m_objects.Remove(instance);
     }
 
-    public static ObjectEntry[] Objects
-    {
-        get
-        {
-            return m_objects.ToArray();
-        }
-    }
+    public static ObjectEntry[] Objects => m_objects.ToArray();
 
     public static ObjectEntry GetObjectByName(string name)
     {

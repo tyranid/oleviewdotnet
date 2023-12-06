@@ -26,13 +26,7 @@ internal class SimpleSyntaxModeProvider : ISyntaxModeFileProvider
     private List<SyntaxMode> syntaxModes = null;
     private string _syntaxMode;
 
-    public ICollection<SyntaxMode> SyntaxModes
-    {
-        get
-        {
-            return syntaxModes;
-        }
-    }
+    public ICollection<SyntaxMode> SyntaxModes => syntaxModes;
 
     public SimpleSyntaxModeProvider(string filename, string name, string extensions, string syntaxMode)
     {

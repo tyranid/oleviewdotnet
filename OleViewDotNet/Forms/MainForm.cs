@@ -327,7 +327,7 @@ public partial class MainForm : Form
                 {
                     byte[] data = File.ReadAllBytes(dlg.FileName);
                     object comObj = COMUtilities.UnmarshalObject(data);
-                    await OpenObjectInformation(comObj, String.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
+                    await OpenObjectInformation(comObj, string.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
                 }
                 catch (Exception ex)
                 {
@@ -464,14 +464,14 @@ public partial class MainForm : Form
 
     private string GetSaveFileName(bool save)
     {
-        if (save && !String.IsNullOrWhiteSpace(m_registry.FilePath))
+        if (save && !string.IsNullOrWhiteSpace(m_registry.FilePath))
         {
             return m_registry.FilePath;
         }
 
         using (SaveFileDialog dlg = new())
         {
-            if (!String.IsNullOrWhiteSpace(m_registry.FilePath))
+            if (!string.IsNullOrWhiteSpace(m_registry.FilePath))
             {
                 dlg.FileName = m_registry.FilePath;
             }
@@ -483,7 +483,7 @@ public partial class MainForm : Form
             }
         }
 
-        return String.Empty;
+        return string.Empty;
     }
 
     private void SaveDatabase(bool save)
@@ -550,7 +550,7 @@ public partial class MainForm : Form
         COMSecurity.ViewSecurity(m_registry, "Default Launch Restrictions", m_registry.DefaultLaunchRestriction, false);
     }
 
-    public COMRegistry Registry { get { return m_registry; } }
+    public COMRegistry Registry => m_registry;
 
     private void menuRegistryProperties_Click(object sender, EventArgs e)
     {

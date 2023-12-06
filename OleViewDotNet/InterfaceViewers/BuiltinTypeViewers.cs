@@ -73,15 +73,9 @@ class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
 
 class PersistStreamViewerFactory : ITypeViewerFactory
 {
-    public Guid Iid
-    {
-        get { return COMInterfaceEntry.IID_IPersistStream; }
-    }
+    public Guid Iid => COMInterfaceEntry.IID_IPersistStream;
 
-    public string IidName
-    {
-        get { return "IPersistStream"; }
-    }
+    public string IidName => "IPersistStream";
 
     public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {
@@ -91,15 +85,9 @@ class PersistStreamViewerFactory : ITypeViewerFactory
 
 class PersistStreamInitViewerFactory : ITypeViewerFactory
 {
-    public Guid Iid
-    {
-        get { return COMInterfaceEntry.IID_IPersistStreamInit; }
-    }
+    public Guid Iid => COMInterfaceEntry.IID_IPersistStreamInit;
 
-    public string IidName
-    {
-        get { return "IPersistStreamInit"; }
-    }
+    public string IidName => "IPersistStreamInit";
 
     public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {

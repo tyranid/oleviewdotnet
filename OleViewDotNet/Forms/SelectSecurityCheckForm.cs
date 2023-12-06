@@ -32,7 +32,7 @@ internal partial class SelectSecurityCheckForm : Form
         InitializeComponent();
         _process_security = process_security;
         Disposed += SelectSecurityCheckForm_Disposed;
-        string username = String.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
+        string username = string.Format(@"{0}\{1}", Environment.UserDomainName, Environment.UserName);
         textBoxPrincipal.Text = username;
         selectProcessControl.UpdateProcessList(ProcessAccessRights.None, true, false);
         foreach (object value in Enum.GetValues(typeof(TokenIntegrityLevel)))
