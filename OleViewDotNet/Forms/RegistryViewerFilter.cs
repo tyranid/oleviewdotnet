@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using OleViewDotNet.Database;
+using OleViewDotNet.Processes;
 
 namespace OleViewDotNet.Forms;
 

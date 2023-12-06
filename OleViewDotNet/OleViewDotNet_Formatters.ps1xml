@@ -260,7 +260,7 @@
         <View>
             <Name>COMProcessClassRegistrationTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMProcessClassRegistration</TypeName>
+                <TypeName>OleViewDotNet.Processes.COMProcessClassRegistration</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>
@@ -316,7 +316,7 @@
         <View>
             <Name>COMIPIDEntryTable</Name>
             <ViewSelectedBy>
-                <TypeName>OleViewDotNet.COMIPIDEntry</TypeName>
+                <TypeName>OleViewDotNet.Processes.COMIPIDEntry</TypeName>
             </ViewSelectedBy>
             <TableControl>
                 <TableHeaders>

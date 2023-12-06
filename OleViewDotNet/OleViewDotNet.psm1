@@ -63,7 +63,7 @@ function Wrap-ComObject {
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterfaceInstance")]
         [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIpid")]
-        [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [OleViewDotNet.Processes.COMIPIDEntry]$Ipid,
         [switch]$NoWrapper,
         [OleViewDotNet.Database.COMRegistry]$Database
     )
@@ -627,7 +627,7 @@ Specify names of services to parse.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMProcessEntry
+OleViewDotNet.Processes.COMProcessEntry
 .EXAMPLE
 Get-ComProcess
 Get all COM processes using the current database.
@@ -697,18 +697,18 @@ function Get-ComProcess {
             return
         }
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
-        $config = [OleViewDotNet.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
+        $config = [OleViewDotNet.Processes.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
                     $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses, $ParseClients, $ParseActivationContext)
 
         switch($PSCmdlet.ParameterSetName) {
             "FromObjRef" {
-                [OleViewDotNet.COMProcessParser]::GetProcesses([OleViewDotNet.Marshaling.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
+                [OleViewDotNet.Processes.COMProcessParser]::GetProcesses([OleViewDotNet.Marshaling.COMObjRef[]]$objrefs, $config, $callback, $Database) | Write-Output
             }
             "FromServiceName" {
-                [OleViewDotNet.COMProcessParser]::GetProcesses($ServiceName, $config, $callback, $Database) | Write-Output
+                [OleViewDotNet.Processes.COMProcessParser]::GetProcesses($ServiceName, $config, $callback, $Database) | Write-Output
             }
             default {
-                [OleViewDotNet.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
+                [OleViewDotNet.Processes.COMProcessParser]::GetProcesses([System.Diagnostics.Process[]]$procs, $config, $callback, $Database) | Write-Output
             }
         }
     }
@@ -1587,7 +1587,7 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromObjRef")]
         [OleViewDotNet.Marshaling.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
-        [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [OleViewDotNet.Processes.COMIPIDEntry]$Ipid,
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
@@ -1898,7 +1898,7 @@ Specify to try and resolve method names for interfaces.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMIPIDEntry[]
+OleViewDotNet.Processes.COMIPIDEntry[]
 .EXAMPLE
 Get-ComObjectIpid $comdb $obj
 Get all
@@ -2004,7 +2004,7 @@ function Format-ComProxy {
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProxy")]
         [OleViewDotNet.Proxy.IProxyFormatter]$Proxy,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromProcess")]
-        [OleViewDotNet.COMProcessEntry]$Process,
+        [OleViewDotNet.Processes.COMProcessEntry]$Process,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromInterface")]
         [OleViewDotNet.Database.COMInterfaceEntry]$Interface,
         [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName = "FromInterfaceInstance")]
@@ -2433,7 +2433,7 @@ function Format-ComProcessClient {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.COMProcessEntry[]]$Process,
+        [OleViewDotNet.Processes.COMProcessEntry[]]$Process,
         [int[]]$IncludePid,
         [string[]]$IncludeName,
         [switch]$RemoveUnknownProcess,
@@ -2901,7 +2901,7 @@ function ConvertTo-ComAssembly {
         [parameter(Mandatory, ParameterSetName = "FromProxyInterface", Position = 0)]
         [OleViewDotNet.Proxy.COMProxyInterfaceInstance]$ProxyInterface,
         [parameter(Mandatory, ParameterSetName = "FromIpid", Position = 0)]
-        [OleViewDotNet.COMIPIDEntry]$Ipid,
+        [OleViewDotNet.Processes.COMIPIDEntry]$Ipid,
         [switch]$NoProgress
     )
 

@@ -23,6 +23,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.Wrappers;

@@ -17,6 +17,7 @@
 using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
