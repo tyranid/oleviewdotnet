@@ -19,6 +19,7 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using System;
@@ -30,6 +31,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using ActivationContext = OleViewDotNet.Interop.SxS.ActivationContext;
 
 namespace OleViewDotNet;
 

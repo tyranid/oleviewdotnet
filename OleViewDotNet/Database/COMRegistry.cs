@@ -17,6 +17,7 @@
 using Microsoft.Win32;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
@@ -26,6 +27,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
+using ActivationContext = OleViewDotNet.Interop.SxS.ActivationContext;
 
 namespace OleViewDotNet.Database;
 

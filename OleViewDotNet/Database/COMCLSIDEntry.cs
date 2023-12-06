@@ -28,6 +28,7 @@ using System.Collections.ObjectModel;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Interop.SxS;
 
 namespace OleViewDotNet.Database;
 
