@@ -113,11 +113,13 @@ namespace OleViewDotNet.Database
         private readonly string _activatable_classid;
         private Win32Exception _ex;
         private readonly bool _winrt_component;
+        private long _intf_count;
 
         private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
         {
             if (punk != IntPtr.Zero)
             {
+                Interlocked.Increment(ref _intf_count);
                 if (Marshal.QueryInterface(punk, ref iid, out IntPtr ppout) == 0)
                 {
                     IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
@@ -291,9 +293,25 @@ namespace OleViewDotNet.Database
             }
         }
 
-        private void ExitProcessThread(object timeout)
+        private void ExitProcessThread(object arg)
         {
-            Thread.Sleep((int)timeout);
+            int timeout = (int)arg;
+            int curr_timeout = 0;
+            long last_intf_count = 0;
+            while (curr_timeout < timeout)
+            {
+                Thread.Sleep(1000);
+                long next_intf_count = _intf_count;
+                if (next_intf_count == last_intf_count)
+                {
+                    curr_timeout += 1000;
+                }
+                else
+                {
+                    curr_timeout = 0;
+                    last_intf_count = next_intf_count;
+                }
+            }
             Environment.Exit(1);
         }
 
