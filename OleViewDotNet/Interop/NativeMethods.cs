@@ -189,4 +189,19 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
     public static extern Win32Error PackageFullNameFromId(PACKAGE_ID_ALLOC packageId,
         ref int packageFullNameLength, StringBuilder packageFullName);
+
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
+
+    [DllImport("combase.dll")]
+    public static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback,
+        IntPtr context, out int length, out long targetStringAddress);
+
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
+
+    [DllImport("combase.dll")]
+    public static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
+        IntPtr context, out int length, out IntPtr targetStringAddress);
+
 }

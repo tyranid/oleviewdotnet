@@ -2544,17 +2544,9 @@ public static class COMUtilities
         }
     }
 
-
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
-
-    [DllImport("combase.dll")]
-    private static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback,
-        IntPtr context, out int length, out long targetStringAddress);
-
     public static string ReadHStringFull(this NtProcess process, long address)
     {
-        InspectHStringCallback2 callback = (c, r, l, ba) =>
+        NativeMethods.InspectHStringCallback2 callback = (c, r, l, ba) =>
         {
             try
             {
@@ -2570,7 +2562,7 @@ public static class COMUtilities
 
         int machine = process.Is64Bit ? 0x8664 : 0x14C;
 
-        if (WindowsInspectString2(address, machine, callback, IntPtr.Zero, out int length, out long target_addr) == 0)
+        if (NativeMethods.WindowsInspectString2(address, machine, callback, IntPtr.Zero, out int length, out long target_addr) == 0)
         {
             return Encoding.Unicode.GetString(process.ReadMemory(target_addr, length * 2));
         }
@@ -2578,16 +2570,9 @@ public static class COMUtilities
         return string.Empty;
     }
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
-
-    [DllImport("combase.dll")]
-    private static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
-        IntPtr context, out int length, out IntPtr targetStringAddress);
-
     public static string ReadHString(this NtProcess process, IntPtr address)
     {
-        InspectHStringCallback callback = (c, r, l, ba) =>
+        NativeMethods.InspectHStringCallback callback = (c, r, l, ba) =>
         {
             try
             {
@@ -2603,7 +2588,7 @@ public static class COMUtilities
 
         int machine = process.Is64Bit ? 0x8664 : 0x14C;
 
-        if (WindowsInspectString(address, machine, callback, IntPtr.Zero, out int length, out IntPtr target_addr) == 0)
+        if (NativeMethods.WindowsInspectString(address, machine, callback, IntPtr.Zero, out int length, out IntPtr target_addr) == 0)
         {
             return Encoding.Unicode.GetString(process.ReadMemory(target_addr.ToInt64(), length * 2));
         }
