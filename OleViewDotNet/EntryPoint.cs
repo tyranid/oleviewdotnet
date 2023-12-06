@@ -20,6 +20,7 @@ using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
 using System.IO;

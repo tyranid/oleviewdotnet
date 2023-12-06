@@ -90,18 +90,13 @@ public class IStreamImpl : IStream, IDisposable
 
     public void Seek(long dlibMove, int dwOrigin, IntPtr plibNewPosition)
     {
-        SeekOrigin origin;
-
-        switch (dwOrigin)
+        var origin = dwOrigin switch
         {
-            case 0: origin = SeekOrigin.Begin;
-                break;
-            case 1: origin = SeekOrigin.Current;
-                break;
-            case 2: origin = SeekOrigin.End;
-                break;
-            default: throw new ArgumentException();
-        }
+            0 => SeekOrigin.Begin,
+            1 => SeekOrigin.Current,
+            2 => SeekOrigin.End,
+            _ => throw new ArgumentException(),
+        };
         m_stream.Seek(dlibMove, origin);
         if (plibNewPosition != IntPtr.Zero)
         {

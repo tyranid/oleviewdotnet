@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
+using OleViewDotNet.Interop;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;

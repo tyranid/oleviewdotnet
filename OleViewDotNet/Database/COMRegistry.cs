@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using NtApiDotNet;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
