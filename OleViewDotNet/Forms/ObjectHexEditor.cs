@@ -15,7 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.IO;
 using System.Windows.Forms;

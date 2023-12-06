@@ -19,7 +19,7 @@ using System.Xml;
 using Microsoft.Win32;
 using System.Xml.Serialization;
 using System.Xml.Schema;
-using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Database;
 

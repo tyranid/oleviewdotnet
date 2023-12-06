@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;

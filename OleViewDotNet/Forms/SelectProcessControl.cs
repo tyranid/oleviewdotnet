@@ -15,7 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
-using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.ComponentModel;
 using System.Linq;

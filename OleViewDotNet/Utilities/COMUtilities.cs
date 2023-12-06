@@ -21,8 +21,8 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
-using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;
@@ -46,7 +46,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Interop;
+namespace OleViewDotNet.Utilities;
 
 public static class COMUtilities
 {
@@ -1127,29 +1127,29 @@ public static class COMUtilities
 
         try
         {
-            if (p is IPersist)
+            if (p is IPersist persist)
             {
-                ((IPersist)p).GetClassID(out ret);
+                persist.GetClassID(out ret);
             }
-            else if (p is IPersistStream)
+            else if (p is IPersistStream stream)
             {
-                ((IPersistStream)p).GetClassID(out ret);
+                stream.GetClassID(out ret);
             }
-            else if (p is IPersistStreamInit)
+            else if (p is IPersistStreamInit init)
             {
-                ((IPersistStreamInit)p).GetClassID(out ret);
+                init.GetClassID(out ret);
             }
-            else if (p is IPersistFile)
+            else if (p is IPersistFile file)
             {
-                ((IPersistFile)p).GetClassID(out ret);
+                file.GetClassID(out ret);
             }
-            else if (p is IPersistMoniker)
+            else if (p is IPersistMoniker moniker)
             {
-                ((IPersistMoniker)p).GetClassID(out ret);
+                moniker.GetClassID(out ret);
             }
-            else if (p is IPersistStorage)
+            else if (p is IPersistStorage storage)
             {
-                ((IPersistStorage)p).GetClassID(out ret);
+                storage.GetClassID(out ret);
             }
         }
         catch
@@ -1164,7 +1164,6 @@ public static class COMUtilities
         IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
 
         pmk.GetDisplayName(bindCtx, null, out string strDisplayName);
-
         Marshal.ReleaseComObject(bindCtx);
 
         return strDisplayName;

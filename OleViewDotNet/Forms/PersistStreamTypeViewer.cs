@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Forms;
 
