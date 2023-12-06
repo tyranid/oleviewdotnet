@@ -1057,14 +1057,44 @@ public class COMRegistry
     /// <returns>List of interfaces supported</returns>
     public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(object obj)
     {
-        IntPtr pObject = Marshal.GetIUnknownForObject(obj);
-        try
+        if (obj is IMultiQI multi_qi)
         {
-            return GetInterfacesForIUnknown(pObject);
+            try
+            {
+                List<COMInterfaceEntry> ret = new();
+                foreach (var part in Interfaces.Values.Partition(50))
+                {
+                    using DisposableList<MULTI_QI> list = new(part.Select(p => new MULTI_QI(p.Iid)));
+                    var qis = list.ToArray();
+                    int hr = multi_qi.QueryMultipleInterfaces(qis.Length, qis);
+                    if (hr < 0)
+                        continue;
+                    for (int i = 0; i < qis.Length; ++i)
+                    {
+                        if (qis[i].HResult() == 0)
+                        {
+                            ret.Add(part[i]);
+                        }
+                    }
+                }
+                return ret.AsReadOnly();
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(multi_qi);
+            }
         }
-        finally
+        else
         {
-            Marshal.Release(pObject);
+            IntPtr pObject = Marshal.GetIUnknownForObject(obj);
+            try
+            {
+                return GetInterfacesForIUnknown(pObject);
+            }
+            finally
+            {
+                Marshal.Release(pObject);
+            }
         }
     }
 

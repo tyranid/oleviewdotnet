@@ -462,6 +462,5 @@ interface IMultiQI
 {
     [PreserveSig]
     int QueryMultipleInterfaces(
-        int cMQIs,
-        [In, Out] MULTI_QI[] pMQIs);
+        int cMQIs, [In, Out, MarshalAs(UnmanagedType.LPArray)] MULTI_QI[] pMQIs);
 };

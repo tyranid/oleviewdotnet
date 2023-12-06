@@ -3333,4 +3333,20 @@ public static class COMUtilities
 
         return builder.ToString();
     }
+
+    public static IEnumerable<T[]> Partition<T>(this IEnumerable<T> values, int partition_size)
+    {
+        List<T> list = new();
+        foreach (var value in values)
+        {
+            list.Add(value);
+            if (list.Count > partition_size)
+            {
+                yield return list.ToArray();
+                list.Clear();
+            }
+        }
+        if (list.Count > 0)
+            yield return list.ToArray();
+    }
 }
