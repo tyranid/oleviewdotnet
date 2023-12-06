@@ -87,6 +87,6 @@ static class Program
     static void Main(string[] args)
     {
         Debug.Assert(_security_init == 0);
-        EntryPoint.Main(args);
+        EntryPoint.Run(args);
     }
 }

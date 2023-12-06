@@ -34,11 +34,11 @@ function Find-MissingTypes {
             $ns = $ns | Sort-Object -Unique
         }
 
-        $asm = [OleViewDotNet.EntryPoint].Assembly
+        $core_asm = [OleViewDotNet.EntryPoint].Assembly
         
         foreach($n in $ns) {
-            $t = $asm.GetType($n)
-        
+            $t = $core_asm.GetType($n)
+
             if ($t -eq $null) {
                 Write-Host "$n missing."
             }

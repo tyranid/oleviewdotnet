@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OleViewDotNet.PowerShell;
+namespace OleViewDotNetPS.Utils;
 
 public class ComClientGraphBuilder
 {
@@ -74,8 +74,8 @@ public class ComClientGraphBuilder
         foreach (var client in _clients)
         {
             if (RemoveUnknownProcess(client) ||
-                (!IncludeProcess(client.ProcessId, client.ProcessName) &&
-                !IncludeProcess(client.Process.ProcessId, client.Process.Name)))
+                !IncludeProcess(client.ProcessId, client.ProcessName) &&
+                !IncludeProcess(client.Process.ProcessId, client.Process.Name))
             {
                 continue;
             }
@@ -181,7 +181,7 @@ public class ComClientGraphBuilder
         RemoveUnknownProcesses = remove_unknown_procs;
     }
 
-    public ComClientGraphBuilder() 
+    public ComClientGraphBuilder()
         : this(Enumerable.Empty<int>(), Enumerable.Empty<string>(), false)
     {
     }

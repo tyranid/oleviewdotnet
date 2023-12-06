@@ -21,7 +21,7 @@ using OleViewDotNet.Security;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace OleViewDotNet.PowerShell;
+namespace OleViewDotNetPS.Utils;
 
 public static class PowerShellUtils
 {

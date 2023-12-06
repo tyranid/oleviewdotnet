@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>OleViewDotNetPS</AssemblyName>
+        <TargetFramework>net481</TargetFramework>
+        <Authors>James Forshaw</Authors>
+        <Company>None</Company>
+        <Product>OleViewDotNet</Product>
+        <FileVersion>1.0.0.0</FileVersion>
+        <Version>1.13</Version>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <LangVersion>10.0</LangVersion>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <BaseOutputPath>..\bin</BaseOutputPath>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="BuildTools\**" />
+      <EmbeddedResource Remove="BuildTools\**" />
+      <None Remove="BuildTools\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\OleViewDotNet\OleViewDotNet.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="OleViewDotNet.psd1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="OleViewDotNet.psm1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="OleViewDotNet_Formatters.ps1xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Startup-Module.ps1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+</Project>

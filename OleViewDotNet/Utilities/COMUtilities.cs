@@ -32,6 +32,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -318,7 +319,7 @@ public static class COMUtilities
 
     public static string Get32bitExePath()
     {
-        string path = Path.Combine(GetAppDirectory(), "OleViewDotNetUI32.exe");
+        string path = Path.Combine(GetAppDirectory(), "OleViewDotNet32.exe");
         if (!File.Exists(path))
         {
             path = GetExePath();
@@ -328,7 +329,7 @@ public static class COMUtilities
 
     public static string GetExePath()
     {
-        return Path.Combine(GetAppDirectory(), "OleViewDotNetUI.exe");
+        return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
     }
 
     public static string GetExePathForCurrentBitness()
@@ -2732,5 +2733,14 @@ public static class COMUtilities
         }
         if (list.Count > 0)
             yield return list.ToArray();
+    }
+
+    public static void RegisterActivationFilter(IActivationFilter filter)
+    {
+        int hr = NativeMethods.CoRegisterActivationFilter(filter);
+        if (hr != 0)
+        {
+            throw new Win32Exception(hr);
+        }
     }
 }

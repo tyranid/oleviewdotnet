@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet;
 
-public static class EntryPoint
+internal static class EntryPoint
 {
     /// <summary>
     /// Unhandled exception event handler
@@ -181,7 +181,7 @@ public static class EntryPoint
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
-    public static void Main(string[] args)
+    public static void Run(string[] args)
     {
         string database_file = null;
         string save_file = null;

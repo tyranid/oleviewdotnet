@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <AssemblyName>OleViewDotNet</AssemblyName>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>net481</TargetFramework>
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>10.0</LangVersion>
@@ -13,6 +14,7 @@
         <Product>OleViewDotNet</Product>
         <FileVersion>1.0.0.0</FileVersion>
         <Version>1.13</Version>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
@@ -42,15 +44,6 @@
 
     <ItemGroup>
       <None Update="OleViewDotNet.psd1">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="OleViewDotNet.psm1">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="OleViewDotNet_Formatters.ps1xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Startup-Module.ps1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -16,22 +16,18 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
-using System.ComponentModel;
 using System.IO;
 
-namespace OleViewDotNet.PowerShell;
+namespace OleViewDotNetPS.Utils;
 
 public class LoggingActivationFilter : IActivationFilter
 {
     private static LoggingActivationFilter CreateActivationFilter()
     {
         LoggingActivationFilter filter = new();
-        int hr = NativeMethods.CoRegisterActivationFilter(filter);
-        if (hr != 0)
-        {
-            throw new Win32Exception(hr);
-        }
+        COMUtilities.RegisterActivationFilter(filter);
         return filter;
     }
 
@@ -75,12 +71,12 @@ public class LoggingActivationFilter : IActivationFilter
             COMCLSIDEntry entry = _registry?.MapClsidToEntry(rclsid);
             if (entry == null)
             {
-                _writer.WriteLine("dwActivationType: {0} rclsid: {1}", 
+                _writer.WriteLine("dwActivationType: {0} rclsid: {1}",
                     dwActivationType, rclsid);
             }
             else
             {
-                _writer.WriteLine("dwActivationType: {0} rclsid: {1} name '{2}'", 
+                _writer.WriteLine("dwActivationType: {0} rclsid: {1} name '{2}'",
                     dwActivationType, rclsid, entry.Name);
             }
         }

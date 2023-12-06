@@ -35,7 +35,7 @@ function New-CallbackProgress {
         $callback = { Write-Progress -Activity $args[0] -Status "Processing $($args[1])" -PercentComplete $args[2] }
     }
 
-    [OleViewDotNet.PowerShell.CallbackProgress]::new($Activity, [Action[string, string, int]]$callback)
+    [OleViewDotNetPS.Utils.CallbackProgress]::new($Activity, [Action[string, string, int]]$callback)
 }
 
 function Resolve-LocalPath {
@@ -751,7 +751,7 @@ function Start-ComActivationLog {
 
     $Database = Get-CurrentComDatabase $Database
     $Path = Resolve-LocalPath $Path
-    [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
+    [OleViewDotNetPS.Utils.LoggingActivationFilter]::Instance.Start($Path, $Append, $Database)
 }
 
 <#
@@ -768,7 +768,7 @@ Stop-ComActivationLog
 Stop COM activation log.
 #>
 function Stop-ComActivationLog {
-    [OleViewDotNet.PowerShell.LoggingActivationFilter]::Instance.Stop()
+    [OleViewDotNetPS.Utils.LoggingActivationFilter]::Instance.Stop()
 }
 
 <#
@@ -1275,15 +1275,15 @@ function Select-ComAccess {
     BEGIN {
         switch($PSCmdlet.ParameterSetName) {
             "FromProcessId" {
-                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($ProcessId, `
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
                     $Principal, $Access, $LaunchAccess, $IgnoreDefault)
             }
             "FromProcess" {
-                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($Process, `
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
                     $Principal, $Access, $LaunchAccess, $IgnoreDefault)
             }
             "FromToken" {
-                $access_check = [OleViewDotNet.PowerShell.PowerShellUtils]::GetAccessCheck($Token, `
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Token, `
                     $Principal, $Access, $LaunchAccess, $IgnoreDefault)
             }
         }
@@ -1701,7 +1701,7 @@ function New-ComObjectFactory {
         }
 
         if ($null -ne $obj) {
-            $type = [OleViewDotNet.PowerShell.PowerShellUtils]::GetFactoryType($Class)
+            $type = [OleViewDotNetPS.Utils.PowerShellUtils]::GetFactoryType($Class)
             Wrap-ComObject $obj $type -NoWrapper:$NoWrapper | Write-Output
         }
     }
@@ -2441,7 +2441,7 @@ function Format-ComProcessClient {
     )
 
     BEGIN {
-        $builder = [OleViewDotNet.PowerShell.ComClientGraphBuilder]::new($IncludePid, $IncludeName, $RemoveUnknownProcess)
+        $builder = [OleViewDotNetPS.Utils.ComClientGraphBuilder]::new($IncludePid, $IncludeName, $RemoveUnknownProcess)
     }
 
     PROCESS {
@@ -2960,7 +2960,7 @@ function Get-ComGuid {
                 [guid]::new($Bytes) | Write-Output
             }
             "FromInts" {
-                [OleViewDotNet.PowerShell.PowerShellUtils]::GuidFromInts($Ints) | Write-Output
+                [OleViewDotNetPS.Utils.PowerShellUtils]::GuidFromInts($Ints) | Write-Output
             }
             "FromComGuid" {
                 foreach($obj in $Object) {

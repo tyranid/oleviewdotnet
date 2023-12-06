@@ -35,7 +35,7 @@ Author = 'James Forshaw'
 CompanyName = 'None'
 
 # Copyright statement for this module
-Copyright = 'James Forshaw (c) 2020'
+Copyright = 'James Forshaw (c) 2023'
 
 # Description of the functionality provided by this module
 Description = 'PowerShell module for OleViewDotNet'
@@ -50,7 +50,7 @@ DotNetFrameworkVersion = '4.6'
  CLRVersion = '4.0'
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = 'OleViewDotNet.dll'
+RequiredAssemblies = 'OleViewDotNetPS.dll'
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = 'OleViewDotNet_Formatters.ps1xml'

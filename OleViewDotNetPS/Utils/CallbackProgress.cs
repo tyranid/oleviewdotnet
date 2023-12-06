@@ -16,7 +16,7 @@
 
 using System;
 
-namespace OleViewDotNet.PowerShell;
+namespace OleViewDotNetPS.Utils;
 
 /// <summary>
 /// Class to make it easier for PowerShell to implement a IProgress callback.
