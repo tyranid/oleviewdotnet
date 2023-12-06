@@ -35,7 +35,7 @@ public class LoggingActivationFilter : IActivationFilter
         return filter;
     }
 
-    static Lazy<LoggingActivationFilter> _instance = new(CreateActivationFilter, true);
+    static readonly Lazy<LoggingActivationFilter> _instance = new(CreateActivationFilter, true);
 
     private COMRegistry _registry;
     private TextWriter _writer;

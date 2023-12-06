@@ -21,9 +21,9 @@ namespace OleViewDotNet.Forms;
 
 public partial class ObjectContainer : UserControl
 {
-    private string m_objName;
-    private object m_pObject;
-    private GenericAxHost m_axControl;
+    private readonly string m_objName;
+    private readonly object m_pObject;
+    private readonly GenericAxHost m_axControl;
 
     public ObjectContainer(string strObjName, object pObject)
     {
@@ -58,7 +58,7 @@ public partial class ObjectContainer : UserControl
 
 class GenericAxHost : AxHost
 {
-    private object m_pObject;
+    private readonly object m_pObject;
 
     public GenericAxHost(object pObject) : base(Guid.Empty.ToString())
     {

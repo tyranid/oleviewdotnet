@@ -67,7 +67,7 @@ class TypeLibCallback : ITypeLibImporterNotifySink
         _progress = progress;
     }
 
-    private IProgress<Tuple<string, int>> _progress;
+    private readonly IProgress<Tuple<string, int>> _progress;
 }
 
 public class RegistryValue
@@ -260,7 +260,7 @@ public struct MULTI_QI : IDisposable
 {
     OptionalGuid pIID;
     IntPtr pItf;
-    int hr;
+    readonly int hr;
 
     public object GetObject()
     {
@@ -309,11 +309,11 @@ public struct MULTI_QI : IDisposable
 [StructLayout(LayoutKind.Sequential)]
 public sealed class COSERVERINFO : IDisposable
 {
-    int dwReserved1;
+    readonly int dwReserved1;
     [MarshalAs(UnmanagedType.LPWStr)]
-    string pwszName;
-    IntPtr pAuthInfo;
-    int dwReserved2;
+    readonly string pwszName;
+    readonly IntPtr pAuthInfo;
+    readonly int dwReserved2;
 
     void IDisposable.Dispose()
     {
@@ -332,7 +332,7 @@ public sealed class COSERVERINFO : IDisposable
 [StructLayout(LayoutKind.Sequential)]
 public class BIND_OPTS3
 {
-    int cbStruct;
+    readonly int cbStruct;
     public int grfFlags;
     public int grfMode;
     public int dwTickCountDeadline;
@@ -1296,7 +1296,7 @@ public static class COMUtilities
             t.GetCustomAttributes(typeof(InterfaceTypeAttribute), false).Length > 0;
     }
 
-    private static Dictionary<Type, Type> _wrappers = new();
+    private static readonly Dictionary<Type, Type> _wrappers = new();
 
     private static CodeParameterDeclarationExpression GetParameter(ParameterInfo pi)
     {
@@ -2031,7 +2031,7 @@ public static class COMUtilities
         }
     }
 
-    private static ConcurrentDictionary<string, string> _demangled_names = new();
+    private static readonly ConcurrentDictionary<string, string> _demangled_names = new();
 
     private static string DemangleGenericType(string name)
     {
@@ -2187,9 +2187,9 @@ public static class COMUtilities
 
     private class ReportQueryProgress
     {
-        private int _total_count;
+        private readonly int _total_count;
         private int _current;
-        private IProgress<Tuple<string, int>> _progress;
+        private readonly IProgress<Tuple<string, int>> _progress;
 
         const int MINIMUM_REPORT_SIZE = 25;
 
@@ -2451,7 +2451,7 @@ public static class COMUtilities
         return new ServerInformation();
     }
 
-    static Dictionary<string, Assembly> _cached_reflection_assemblies = new();
+    static readonly Dictionary<string, Assembly> _cached_reflection_assemblies = new();
 
     private static Assembly ResolveAssembly(string base_path, string name)
     {
@@ -2590,7 +2590,7 @@ public static class COMUtilities
         }
     }
 
-    private static Lazy<string> _assembly_version = new(() =>
+    private static readonly Lazy<string> _assembly_version = new(() =>
     {
         Assembly asm = Assembly.GetCallingAssembly();
         return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;

@@ -26,10 +26,10 @@ public partial class GetTypeForm : Form
     /// <summary>
     /// Dictionary of previous entries to the type field
     /// </summary>
-    private static Dictionary<Guid, string[]> m_history = new();
+    private static readonly Dictionary<Guid, string[]> m_history = new();
     private const int MAX_HISTORY_ENTRIES = 10;
 
-    private Type m_currType;
+    private readonly Type m_currType;
     private object m_data;
 
     public object Data => m_data;

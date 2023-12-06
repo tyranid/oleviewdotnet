@@ -26,8 +26,8 @@ partial class WaitingDialog : Form
     private class ReportProgress : IProgress<Tuple<string, int>>
     {
         private CancellationToken _token;
-        private Action<string, int> _report;
-        private Func<string, string> _format;
+        private readonly Action<string, int> _report;
+        private readonly Func<string, string> _format;
 
         public void Report(Tuple<string, int> data)
         {
@@ -43,9 +43,9 @@ partial class WaitingDialog : Form
         }
     }
 
-    private ReportProgress m_progress;
-    private BackgroundWorker m_worker;
-    private CancellationTokenSource m_cancellation;
+    private readonly ReportProgress m_progress;
+    private readonly BackgroundWorker m_worker;
+    private readonly CancellationTokenSource m_cancellation;
 
     public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func, Func<string, string> format_label)
     {

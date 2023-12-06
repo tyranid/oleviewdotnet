@@ -21,8 +21,8 @@ namespace OleViewDotNet.Forms;
 
 public partial class CustomMarshalEditorControl : UserControl
 {
-    private COMRegistry m_registry;
-    private COMObjRefCustom m_objref;
+    private readonly COMRegistry m_registry;
+    private readonly COMObjRefCustom m_objref;
 
     public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
     {

@@ -51,8 +51,8 @@ public class COMProxyInstance : IProxyFormatter
     {
     }
 
-    private static Dictionary<Guid, COMProxyInstance> m_proxies = new();
-    private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<Guid, COMProxyInstance> m_proxies = new();
+    private static readonly Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
 
     public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {

@@ -23,7 +23,7 @@ namespace OleViewDotNet.Database;
 
 public class COMInterfaceInstance : IXmlSerializable
 {
-    private COMRegistry m_registry;
+    private readonly COMRegistry m_registry;
 
     public Guid Iid { get; private set; }
     public string Module { get; private set; }

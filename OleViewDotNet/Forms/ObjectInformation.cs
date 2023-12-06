@@ -29,13 +29,13 @@ namespace OleViewDotNet.Forms;
 /// </summary>
 public partial class ObjectInformation : UserControl
 {
-    private ObjectEntry m_pEntry;
-    private object m_pObject;
-    private Dictionary<string, string> m_properties;
-    private COMInterfaceEntry[] m_interfaces;
-    private string m_objName;
-    private COMRegistry m_registry;
-    private ICOMClassEntry m_entry;
+    private readonly ObjectEntry m_pEntry;
+    private readonly object m_pObject;
+    private readonly Dictionary<string, string> m_properties;
+    private readonly COMInterfaceEntry[] m_interfaces;
+    private readonly string m_objName;
+    private readonly COMRegistry m_registry;
+    private readonly ICOMClassEntry m_entry;
 
     /// <summary>
     /// Constructor
@@ -57,7 +57,7 @@ public partial class ObjectInformation : UserControl
         }
 
         m_registry = registry;
-        m_pEntry = ObjectCache.Add(registry, objName, pObject, interfaces);
+        m_pEntry = ObjectCache.Add(objName, pObject, interfaces);
         m_pObject = pObject;
         m_properties = properties;
         m_interfaces = interfaces.OrderBy(i => i.Name).ToArray();

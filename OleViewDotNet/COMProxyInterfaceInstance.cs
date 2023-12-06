@@ -76,7 +76,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         m_registry = registry;
     }
 
-    private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
+    private static readonly Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
 
     public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
     {

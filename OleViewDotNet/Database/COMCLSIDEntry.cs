@@ -54,7 +54,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         return app_activatable;
     }
 
-    private static HashSet<Guid> _app_activatable = LoadAppActivatableClsids();
+    private static readonly HashSet<Guid> _app_activatable = LoadAppActivatableClsids();
 
     public int CompareTo(COMCLSIDEntry right)
     {

@@ -23,7 +23,7 @@ namespace OleViewDotNet;
 
 public class IStreamImpl : IStream, IDisposable
 {
-    private Stream m_stream;
+    private readonly Stream m_stream;
 
     public IStreamImpl(Stream stream)
     {

@@ -33,8 +33,8 @@ namespace OleViewDotNet.Forms;
 
 public partial class MainForm : Form
 {
-    private DockPanel   m_dockPanel;
-    private COMRegistry m_registry;
+    private readonly DockPanel   m_dockPanel;
+    private readonly COMRegistry m_registry;
     private PropertyGrid m_property_grid;
 
     private void UpdateTitle()

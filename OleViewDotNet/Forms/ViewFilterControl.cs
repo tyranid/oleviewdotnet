@@ -43,7 +43,7 @@ public partial class ViewFilterControl : UserControl
         }
     }
 
-    private FilterSorter m_sorter;
+    private readonly FilterSorter m_sorter;
 
     private static ListViewItem CreateItem(RegistryViewerFilterEntry entry)
     {

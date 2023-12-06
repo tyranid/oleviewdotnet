@@ -15,17 +15,14 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace OleViewDotNet;
 
-class ObjectEntry
+internal class ObjectEntry
 {
-    private readonly COMRegistry m_registry;
-
     public string Name { get; private set; }
     public object Instance { get; private set; }
     public Guid Id { get; private set; }
@@ -37,13 +34,12 @@ class ObjectEntry
     }
 
     public ObjectEntry(COMRegistry registry, string name, object instance)
-        : this(registry, name, instance, registry.GetInterfacesForObject(instance).OrderBy(i => i.Name).ToArray())
+        : this(name, instance, registry.GetInterfacesForObject(instance).OrderBy(i => i.Name).ToArray())
     {
     }
 
-    public ObjectEntry(COMRegistry registry, string name, object instance, COMInterfaceEntry[] interfaces)
+    public ObjectEntry(string name, object instance, COMInterfaceEntry[] interfaces)
     {
-        m_registry = registry;
         Name = name;
         Instance = instance;
         Id = Guid.NewGuid();
@@ -57,13 +53,13 @@ class ObjectEntry
     }
 }
 
-static class ObjectCache
+internal static class ObjectCache
 {
-    private static List<ObjectEntry> m_objects = new();
+    private static readonly List<ObjectEntry> m_objects = new();
 
-    public static ObjectEntry Add(COMRegistry registry, string name, object instance, COMInterfaceEntry[] interfaces)
+    public static ObjectEntry Add(string name, object instance, COMInterfaceEntry[] interfaces)
     {
-        ObjectEntry ret = new(registry, name, instance, interfaces);
+        ObjectEntry ret = new(name, instance, interfaces);
         m_objects.Add(ret);
 
         return ret;

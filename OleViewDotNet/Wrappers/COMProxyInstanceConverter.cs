@@ -39,7 +39,7 @@ public class COMProxyInstanceConverter
     private readonly string m_output_path;
     private readonly IProgress<Tuple<string, int>> m_progress;
 
-    private static Regex _identifier_regex = new(@"[^a-zA-Z0-9_\.]");
+    private static readonly Regex _identifier_regex = new(@"[^a-zA-Z0-9_\.]");
 
     public static string MakeIdentifier(string id)
     {

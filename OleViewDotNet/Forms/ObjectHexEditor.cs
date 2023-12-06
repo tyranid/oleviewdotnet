@@ -23,7 +23,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class ObjectHexEditor : UserControl
 {
-    private COMRegistry m_registry;
+    private readonly COMRegistry m_registry;
 
     public ObjectHexEditor(COMRegistry registry, string name, byte[] bytes)
     {

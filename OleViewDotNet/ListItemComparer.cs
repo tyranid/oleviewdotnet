@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet;
 
-public class ListItemComparer : IComparer
+internal class ListItemComparer : IComparer
 {
     public ListItemComparer(int column)
     {

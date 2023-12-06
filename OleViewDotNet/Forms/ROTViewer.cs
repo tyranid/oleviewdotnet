@@ -25,7 +25,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class ROTViewer : UserControl
 {
-    private COMRegistry m_registry;
+    private readonly COMRegistry m_registry;
 
     struct MonikerInfo
     {

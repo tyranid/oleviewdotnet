@@ -28,10 +28,10 @@ namespace OleViewDotNet.Forms;
 
 public partial class TypeLibControl : UserControl
 {
-    private IDictionary<Guid, string> m_iids_to_names;
-    private IEnumerable<ListViewItemWithGuid> interfaces;
+    private readonly IDictionary<Guid, string> m_iids_to_names;
+    private readonly IEnumerable<ListViewItemWithGuid> interfaces;
     private Guid guid_to_view;
-    private string comClassIdName;
+    private readonly string comClassIdName;
     private Guid? comClassId;
 
     private const string filterDefaultString = "filter interfaces";

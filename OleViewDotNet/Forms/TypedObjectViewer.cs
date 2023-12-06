@@ -27,11 +27,11 @@ namespace OleViewDotNet.Forms;
 /// </summary>
 partial class TypedObjectViewer : UserControl
 {
-    private string m_objName;
-    private ObjectEntry m_pEntry;
-    private object m_pObject;
-    private Type m_dispType;
-    private COMRegistry m_registry;
+    private readonly string m_objName;
+    private readonly ObjectEntry m_pEntry;
+    private readonly object m_pObject;
+    private readonly Type m_dispType;
+    private readonly COMRegistry m_registry;
 
     /// <summary>
     /// Constructor

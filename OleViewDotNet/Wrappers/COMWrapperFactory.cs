@@ -72,11 +72,11 @@ public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : 
 
 public static class COMWrapperFactory
 {
-    private static AssemblyName _name = new("ComWrapperTypes");
-    private static AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
-    private static ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
-    private static Dictionary<Type, Type> _generated_intfs = new();
-    private static Dictionary<Guid, Type> _types = new() {
+    private static readonly AssemblyName _name = new("ComWrapperTypes");
+    private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
+    private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
+    private static readonly Dictionary<Type, Type> _generated_intfs = new();
+    private static readonly Dictionary<Guid, Type> _types = new() {
         { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
         { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
         { typeof(IActivationFactory).GUID, typeof(IActivationFactoryWrapper) },
@@ -86,8 +86,8 @@ public static class COMWrapperFactory
         { typeof(IEnumString).GUID, typeof(IEnumStringWrapper) },
         { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
         { typeof(IStream).GUID, typeof(IStreamWrapper) } };
-    private static MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
-    private static Dictionary<Type, ConstructorInfo> _constructors = new();
+    private static readonly MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
+    private static readonly Dictionary<Type, ConstructorInfo> _constructors = new();
 
     private static bool FilterStructuredTypes(Type t)
     {

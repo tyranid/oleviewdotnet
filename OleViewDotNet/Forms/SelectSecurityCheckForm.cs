@@ -25,7 +25,7 @@ namespace OleViewDotNet.Forms;
 
 internal partial class SelectSecurityCheckForm : Form
 {
-    private bool _process_security;
+    private readonly bool _process_security;
 
     public SelectSecurityCheckForm(bool process_security)
     {

@@ -1286,9 +1286,9 @@ public static class COMProcessParser
     struct CClassEntry32 : ICClassEntry
     {
         public int vfptr; // CClassCache::CCollectableVtbl* 
-        private int padding1;
+        private readonly int padding1;
         public int _pNextCollectee; // CClassCache::CCollectable* 
-        private int padding2;
+        private readonly int padding2;
         public ulong _qwTickLastTouched;
 
         // SMultiGUIDHashNode _hashNode;
@@ -2579,7 +2579,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
 
     public COMProcessEntry Process { get; internal set; }
 
-    private COMDualStringArray _stringarray;
+    private readonly COMDualStringArray _stringarray;
 
     public Guid Oid { get; }
     public IEnumerable<COMStringBinding> StringBindings => _stringarray.StringBindings.AsReadOnly();
@@ -2615,7 +2615,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
         return stm.ToArray();
     }
 
-    private Dictionary<IntPtr, COMMethodEntry> _method_cache = new();
+    private readonly Dictionary<IntPtr, COMMethodEntry> _method_cache = new();
 
     private static int GetPointerSize(NtProcess process)
     {

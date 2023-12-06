@@ -25,11 +25,11 @@ namespace OleViewDotNet.Forms;
 
 public partial class InvokeForm : Form
 {
-    private MethodInfo m_mi;
-    private object m_pObject;
+    private readonly MethodInfo m_mi;
+    private readonly object m_pObject;
     private object m_ret;
-    private string m_objName;
-    private COMRegistry m_registry;
+    private readonly string m_objName;
+    private readonly COMRegistry m_registry;
 
     class ParamData
     {

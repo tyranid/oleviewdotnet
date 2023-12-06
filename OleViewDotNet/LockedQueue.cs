@@ -16,11 +16,10 @@
 
 
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Collections;
 
 namespace OleViewDotNet;
 
@@ -30,7 +29,7 @@ namespace OleViewDotNet;
 /// <typeparam name="T">Type of object to queue, must be a reference type</typeparam>
 public sealed class LockedQueue<T> : IDisposable, IEnumerable<T> where T : class
 {
-    private BlockingCollection<T> _queue;
+    private readonly BlockingCollection<T> _queue;
     private CancellationToken _token; 
 
     /// <summary>

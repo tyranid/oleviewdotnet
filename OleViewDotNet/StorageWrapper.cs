@@ -65,7 +65,7 @@ public sealed class STATSTGWrapper
 
 public sealed class StreamWrapper : Stream
 {
-    private ComTypes.IStream _stm;
+    private readonly ComTypes.IStream _stm;
 
     public StreamWrapper(ComTypes.IStream stm)
     {

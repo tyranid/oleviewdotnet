@@ -21,7 +21,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class DocumentForm : DockContent
 {
-    Control _control;
+    readonly Control _control;
 
     public DocumentForm(Control c)
     {

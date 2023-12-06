@@ -27,7 +27,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class PropertiesControl : UserControl
 {
-    private COMRegistry m_registry;
+    private readonly COMRegistry m_registry;
     private COMAppIDEntry m_appid;
     private COMCLSIDEntry m_clsid;
     private COMInterfaceEntry m_interface;
@@ -35,7 +35,7 @@ public partial class PropertiesControl : UserControl
     private COMProcessEntry m_process;
     private COMRuntimeClassEntry m_runtime_class;
     private COMRuntimeServerEntry m_runtime_server;
-    private object m_obj;
+    private readonly object m_obj;
     private COMIPIDEntry m_ipid;
 
     private void LoadInterfaceList(IEnumerable<COMInterfaceInstance> entries, ListView view)

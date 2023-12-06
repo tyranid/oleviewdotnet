@@ -25,10 +25,10 @@ namespace OleViewDotNet.Forms;
 
 public partial class ElevatedFactoryServerTypeViewer : UserControl
 {
-    private object _obj;
-    private string _name;
-    private COMRegistry _registry;
-    private COMCLSIDEntry _entry;
+    private readonly object _obj;
+    private readonly string _name;
+    private readonly COMRegistry _registry;
+    private readonly COMCLSIDEntry _entry;
 
     public ElevatedFactoryServerTypeViewer(COMRegistry registry, COMCLSIDEntry entry, string objName, object obj)
     {

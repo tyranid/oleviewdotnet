@@ -106,7 +106,7 @@ public class AppxPackageName
         Publisher = package.publisher != IntPtr.Zero ? Marshal.PtrToStringUni(package.publisher) : string.Empty;
     }
 
-    private static Dictionary<string, AppxPackageName> _name_cache = new();
+    private static readonly Dictionary<string, AppxPackageName> _name_cache = new();
 
     private static AppxPackageName FromFullNameInternal(string package_id, int flags)
     {

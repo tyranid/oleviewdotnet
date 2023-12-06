@@ -182,7 +182,7 @@ struct ACTIVATION_CONTEXT_DATA_ASSEMBLY_INFORMATION
     public int NumOfFilesInAssembly;
     public int LanguageLength; // in bytes
     public int LanguageOffset; // from section header base
-    ACTCTX_REQUESTED_RUN_LEVEL RunLevel;
+    readonly ACTCTX_REQUESTED_RUN_LEVEL RunLevel;
     public int UiAccess;
 }
 
@@ -434,7 +434,7 @@ struct ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM
 {
     public int Size;
     public int Flags;
-    ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE Type;
+    readonly ACTIVATION_CONTEXT_DATA_COM_SERVER_REDIRECTION_SHIM_TYPE Type;
     public int ModuleLength; // in bytes
     public int ModuleOffset; // offset from section base
     public int TypeLength; // in bytes
@@ -713,12 +713,12 @@ public sealed class ActivationContext
     const uint STRING_SECTION_MAGIC = 0x64487353;
     const uint GUID_SECTION_MAGIC = 0x64487347;
 
-    private List<ActCtxComServerRedirection> _com_servers = new();
-    private List<ActCtxComProgIdRedirection> _com_progids = new();
-    private List<ActCtxDllRedirection> _dll_redir = new();
-    private List<ActCtxAssemblyRoster> _asm_roster = new();
-    private List<ActCtxComInterfaceRedirection> _com_interfaces = new();
-    private List<ActCtxComTypeLibraryRedirection> _com_typelibs = new();
+    private readonly List<ActCtxComServerRedirection> _com_servers = new();
+    private readonly List<ActCtxComProgIdRedirection> _com_progids = new();
+    private readonly List<ActCtxDllRedirection> _dll_redir = new();
+    private readonly List<ActCtxAssemblyRoster> _asm_roster = new();
+    private readonly List<ActCtxComInterfaceRedirection> _com_interfaces = new();
+    private readonly List<ActCtxComTypeLibraryRedirection> _com_typelibs = new();
 
     public IReadOnlyCollection<ActCtxComServerRedirection> ComServers => _com_servers;
     public IReadOnlyCollection<ActCtxComProgIdRedirection> ComProgIds => _com_progids;
