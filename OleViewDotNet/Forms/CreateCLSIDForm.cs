@@ -17,56 +17,55 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class CreateCLSIDForm : Form
 {
-    public partial class CreateCLSIDForm : Form
+    public Guid Clsid { get; private set; }
+    public CLSCTX ClsCtx { get; private set; }
+    public bool ClassFactory { get; private set; }
+
+    public CreateCLSIDForm()
     {
-        public Guid Clsid { get; private set; }
-        public CLSCTX ClsCtx { get; private set; }
-        public bool ClassFactory { get; private set; }
+        InitializeComponent();
+        ClsCtx = CLSCTX.SERVER;
+        comboBoxClsCtx.Items.Add(CLSCTX.SERVER);
+        comboBoxClsCtx.Items.Add(CLSCTX.INPROC_SERVER);
+        comboBoxClsCtx.Items.Add(CLSCTX.LOCAL_SERVER);
+        comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_32_BIT_SERVER | CLSCTX.LOCAL_SERVER);
+        comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_64_BIT_SERVER | CLSCTX.LOCAL_SERVER);
+        comboBoxClsCtx.SelectedIndex = 0;
+        textBoxCLSID.Text = "Specify CLSID or ProgID";
+    }
 
-        public CreateCLSIDForm()
+    private bool GetClsid(string name, out Guid clsid)
+    {
+        if (!Guid.TryParse(name, out clsid))
         {
-            InitializeComponent();
-            ClsCtx = CLSCTX.SERVER;
-            comboBoxClsCtx.Items.Add(CLSCTX.SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.INPROC_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_32_BIT_SERVER | CLSCTX.LOCAL_SERVER);
-            comboBoxClsCtx.Items.Add(CLSCTX.ACTIVATE_64_BIT_SERVER | CLSCTX.LOCAL_SERVER);
-            comboBoxClsCtx.SelectedIndex = 0;
-            textBoxCLSID.Text = "Specify CLSID or ProgID";
+            if (COMUtilities.CLSIDFromProgID(name, out clsid) == 0)
+            {
+                return true;
+            }
+            return false;
         }
+        return true;
+    }
 
-        private bool GetClsid(string name, out Guid clsid)
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+
+        if ((GetClsid(textBoxCLSID.Text.Trim(), out Guid clsid) && (comboBoxClsCtx.SelectedItem != null)))
         {
-            if (!Guid.TryParse(name, out clsid))
-            {
-                if (COMUtilities.CLSIDFromProgID(name, out clsid) == 0)
-                {
-                    return true;
-                }
-                return false;
-            }
-            return true;
+            Clsid = clsid;
+            ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;
+            ClassFactory = checkBoxClassFactory.Checked;
+
+            DialogResult = DialogResult.OK;
+            Close();
         }
-
-        private void btnOK_Click(object sender, EventArgs e)
+        else
         {
-
-            if ((GetClsid(textBoxCLSID.Text.Trim(), out Guid clsid) && (comboBoxClsCtx.SelectedItem != null)))
-            {
-                Clsid = clsid;
-                ClsCtx = (CLSCTX)comboBoxClsCtx.SelectedItem;
-                ClassFactory = checkBoxClassFactory.Checked;
-
-                DialogResult = DialogResult.OK;
-                Close();
-            }
-            else
-            {
-                MessageBox.Show(this, "Invalid CLSID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            MessageBox.Show(this, "Invalid CLSID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

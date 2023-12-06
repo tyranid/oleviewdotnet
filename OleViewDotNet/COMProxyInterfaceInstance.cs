@@ -21,96 +21,95 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OleViewDotNet
+namespace OleViewDotNet;
+
+public class COMProxyInterfaceInstance : IProxyFormatter
 {
-    public class COMProxyInterfaceInstance : IProxyFormatter
+    /// <summary>
+    /// The name of the proxy interface.
+    /// </summary>
+    public string Name => COMUtilities.DemangleWinRTName(Entry.Name, Iid);
+    /// <summary>
+    /// Original name of the interface.
+    /// </summary>
+    public string OriginalName { get; }
+    /// <summary>
+    /// The IID of the proxy interface.
+    /// </summary>
+    public Guid Iid => Entry.Iid;
+    /// <summary>
+    /// The base IID of the proxy interface.
+    /// </summary>
+    public Guid BaseIid => Entry.BaseIid;
+    /// <summary>
+    /// Get name of the base IID if known.
+    /// </summary>
+    public string BaseIidName => m_registry.MapIidToInterface(BaseIid).Name;
+    /// <summary>
+    /// The number of dispatch methods on the interface.
+    /// </summary>
+    public int DispatchCount => Entry.DispatchCount;
+    /// <summary>
+    /// List of parsed procedures for the interface.
+    /// </summary>
+    public IList<NdrProcedureDefinition> Procedures => Entry.Procedures;
+
+    public NdrComProxyDefinition Entry { get; }
+
+    public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; }
+
+    public string Path => ClassEntry.DefaultServer;
+
+    public Guid Clsid => ClassEntry.Clsid;
+
+    public COMCLSIDEntry ClassEntry { get; }
+
+    private readonly COMRegistry m_registry;
+
+    private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
     {
-        /// <summary>
-        /// The name of the proxy interface.
-        /// </summary>
-        public string Name => COMUtilities.DemangleWinRTName(Entry.Name, Iid);
-        /// <summary>
-        /// Original name of the interface.
-        /// </summary>
-        public string OriginalName { get; }
-        /// <summary>
-        /// The IID of the proxy interface.
-        /// </summary>
-        public Guid Iid => Entry.Iid;
-        /// <summary>
-        /// The base IID of the proxy interface.
-        /// </summary>
-        public Guid BaseIid => Entry.BaseIid;
-        /// <summary>
-        /// Get name of the base IID if known.
-        /// </summary>
-        public string BaseIidName => m_registry.MapIidToInterface(BaseIid).Name;
-        /// <summary>
-        /// The number of dispatch methods on the interface.
-        /// </summary>
-        public int DispatchCount => Entry.DispatchCount;
-        /// <summary>
-        /// List of parsed procedures for the interface.
-        /// </summary>
-        public IList<NdrProcedureDefinition> Procedures => Entry.Procedures;
+        NdrParser parser = new NdrParser(resolver);
+        Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
+        ComplexTypes = parser.ComplexTypes;
+        OriginalName = intf.Name;
+        ClassEntry = clsid;
+        m_registry = registry;
+    }
 
-        public NdrComProxyDefinition Entry { get; }
+    private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new Dictionary<Guid, COMProxyInterfaceInstance>();
 
-        public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; }
-
-        public string Path => ClassEntry.DefaultServer;
-
-        public Guid Clsid => ClassEntry.Clsid;
-
-        public COMCLSIDEntry ClassEntry { get; }
-
-        private readonly COMRegistry m_registry;
-
-        private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
+    public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
+    {
+        if (intf == null || !intf.HasProxy)
         {
-            NdrParser parser = new NdrParser(resolver);
-            Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
-            ComplexTypes = parser.ComplexTypes;
-            OriginalName = intf.Name;
-            ClassEntry = clsid;
-            m_registry = registry;
+            throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
         }
 
-        private static Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new Dictionary<Guid, COMProxyInterfaceInstance>();
-
-        public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
+        COMCLSIDEntry clsid = intf.ProxyClassEntry;
+        if (m_proxies.ContainsKey(intf.Iid))
         {
-            if (intf == null || !intf.HasProxy)
-            {
-                throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
-            }
-
-            COMCLSIDEntry clsid = intf.ProxyClassEntry;
-            if (m_proxies.ContainsKey(intf.Iid))
-            {
-                return m_proxies[intf.Iid];
-            }
-            else
-            {
-                var instance = new COMProxyInterfaceInstance(clsid, resolver, intf, clsid.Database);
-                m_proxies[intf.Iid] = instance;
-                return instance;
-            }
+            return m_proxies[intf.Iid];
         }
-
-        public static COMProxyInterfaceInstance GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
+        else
         {
-            return GetFromIID(intf.InterfaceEntry, resolver);
+            var instance = new COMProxyInterfaceInstance(clsid, resolver, intf, clsid.Database);
+            m_proxies[intf.Iid] = instance;
+            return instance;
         }
+    }
 
-        public string FormatText(ProxyFormatterFlags flags)
-        {
-            return COMUtilities.FormatProxy(m_registry, ComplexTypes, new NdrComProxyDefinition[] { Entry }, flags);
-        }
+    public static COMProxyInterfaceInstance GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
+    {
+        return GetFromIID(intf.InterfaceEntry, resolver);
+    }
 
-        public string FormatText()
-        {
-            return FormatText(ProxyFormatterFlags.None);
-        }
+    public string FormatText(ProxyFormatterFlags flags)
+    {
+        return COMUtilities.FormatProxy(m_registry, ComplexTypes, new NdrComProxyDefinition[] { Entry }, flags);
+    }
+
+    public string FormatText()
+    {
+        return FormatText(ProxyFormatterFlags.None);
     }
 }

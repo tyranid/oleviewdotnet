@@ -19,36 +19,35 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace OleViewDotNet
+namespace OleViewDotNet;
+
+internal class SimpleSyntaxModeProvider : ISyntaxModeFileProvider
 {
-    internal class SimpleSyntaxModeProvider : ISyntaxModeFileProvider
+    private List<SyntaxMode> syntaxModes = null;
+    private string _syntaxMode;
+
+    public ICollection<SyntaxMode> SyntaxModes
     {
-        private List<SyntaxMode> syntaxModes = null;
-        private string _syntaxMode;
-
-        public ICollection<SyntaxMode> SyntaxModes
+        get
         {
-            get
-            {
-                return syntaxModes;
-            }
+            return syntaxModes;
         }
+    }
 
-        public SimpleSyntaxModeProvider(string filename, string name, string extensions, string syntaxMode)
-        {
-            syntaxModes = new List<SyntaxMode>();
-            _syntaxMode = syntaxMode;
-            syntaxModes.Add(new SyntaxMode(filename, name, extensions));
-        }
+    public SimpleSyntaxModeProvider(string filename, string name, string extensions, string syntaxMode)
+    {
+        syntaxModes = new List<SyntaxMode>();
+        _syntaxMode = syntaxMode;
+        syntaxModes.Add(new SyntaxMode(filename, name, extensions));
+    }
 
-        public XmlTextReader GetSyntaxModeFile(SyntaxMode syntaxMode)
-        {
-            return new XmlTextReader(new StringReader(_syntaxMode));
-        }
+    public XmlTextReader GetSyntaxModeFile(SyntaxMode syntaxMode)
+    {
+        return new XmlTextReader(new StringReader(_syntaxMode));
+    }
 
-        public void UpdateSyntaxModeList()
-        {
-            // resources don't change during runtime
-        }
+    public void UpdateSyntaxModeList()
+    {
+        // resources don't change during runtime
     }
 }

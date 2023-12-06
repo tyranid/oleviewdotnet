@@ -16,10 +16,9 @@
 
 using System;
 
-namespace OleViewDotNet
+namespace OleViewDotNet;
+
+public interface IComGuid
 {
-    public interface IComGuid
-    {
-        Guid ComGuid { get; }
-    }
+    Guid ComGuid { get; }
 }

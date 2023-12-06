@@ -17,57 +17,56 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class ObjectContainer : UserControl
 {
-    public partial class ObjectContainer : UserControl
+    private string m_objName;
+    private object m_pObject;
+    private GenericAxHost m_axControl;
+
+    public ObjectContainer(string strObjName, object pObject)
     {
-        private string m_objName;
-        private object m_pObject;
-        private GenericAxHost m_axControl;
+        m_objName = strObjName;
+        m_pObject = pObject;
+        InitializeComponent();
 
-        public ObjectContainer(string strObjName, object pObject)
+        try
         {
-            m_objName = strObjName;
-            m_pObject = pObject;
-            InitializeComponent();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectContainer));
+            m_axControl = new GenericAxHost(pObject);
+            ((System.ComponentModel.ISupportInitialize)(m_axControl)).BeginInit();
+            SuspendLayout();
 
-            try
-            {
-                System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectContainer));
-                m_axControl = new GenericAxHost(pObject);
-                ((System.ComponentModel.ISupportInitialize)(m_axControl)).BeginInit();
-                SuspendLayout();
-
-                m_axControl.Enabled = true;
-                m_axControl.Location = new System.Drawing.Point(50, 39);
-                m_axControl.Name = "axControl";
-                m_axControl.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axControl.OcxState")));
-                m_axControl.Dock = DockStyle.Fill;
-                m_axControl.TabIndex = 0;
-                Controls.Add(m_axControl);
-                ((System.ComponentModel.ISupportInitialize)(m_axControl)).EndInit();
-                ResumeLayout(false);
-                Text = String.Format("{0} Container", m_objName);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());                
-            }
+            m_axControl.Enabled = true;
+            m_axControl.Location = new System.Drawing.Point(50, 39);
+            m_axControl.Name = "axControl";
+            m_axControl.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axControl.OcxState")));
+            m_axControl.Dock = DockStyle.Fill;
+            m_axControl.TabIndex = 0;
+            Controls.Add(m_axControl);
+            ((System.ComponentModel.ISupportInitialize)(m_axControl)).EndInit();
+            ResumeLayout(false);
+            Text = String.Format("{0} Container", m_objName);
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(e.ToString());                
         }
     }
+}
 
-    class GenericAxHost : AxHost
+class GenericAxHost : AxHost
+{
+    private object m_pObject;
+
+    public GenericAxHost(object pObject) : base(Guid.Empty.ToString())
     {
-        private object m_pObject;
+        m_pObject = pObject;
+    }
 
-        public GenericAxHost(object pObject) : base(Guid.Empty.ToString())
-        {
-            m_pObject = pObject;
-        }
-
-        protected override object CreateInstanceCore(Guid clsid)
-        {
-            return m_pObject;
-        }
+    protected override object CreateInstanceCore(Guid clsid)
+    {
+        return m_pObject;
     }
 }

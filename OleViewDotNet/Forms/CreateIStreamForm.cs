@@ -17,62 +17,61 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
-{
-    public partial class CreateIStreamForm : Form
-    {      
-        public CreateIStreamForm()
-        {
-            InitializeComponent();
-        }
+namespace OleViewDotNet.Forms;
 
-        public IStreamImpl Stream { get; private set; }
+public partial class CreateIStreamForm : Form
+{      
+    public CreateIStreamForm()
+    {
+        InitializeComponent();
+    }
 
-        private void btnCreateRead_Click(object sender, EventArgs e)
+    public IStreamImpl Stream { get; private set; }
+
+    private void btnCreateRead_Click(object sender, EventArgs e)
+    {
+        using (OpenFileDialog dlg = new OpenFileDialog())
         {
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            dlg.Filter = "All Files (*.*)|*.*";
+            dlg.ShowReadOnly = false;
+            this.DialogResult = dlg.ShowDialog();
+            if (this.DialogResult == DialogResult.OK)
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-                dlg.ShowReadOnly = false;
-                this.DialogResult = dlg.ShowDialog();
-                if (this.DialogResult == DialogResult.OK)
+                try
                 {
-                    try
-                    {
-                        Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            
-            Close();
         }
+        
+        Close();
+    }
 
-        private void btnCreateWrite_Click(object sender, EventArgs e)
+    private void btnCreateWrite_Click(object sender, EventArgs e)
+    {
+        using (SaveFileDialog dlg = new SaveFileDialog())
         {
-            using (SaveFileDialog dlg = new SaveFileDialog())
+            dlg.Filter = "All Files (*.*)|*.*";
+
+            this.DialogResult = dlg.ShowDialog();
+
+            if (this.DialogResult == DialogResult.OK)
             {
-                dlg.Filter = "All Files (*.*)|*.*";
-
-                this.DialogResult = dlg.ShowDialog();
-
-                if (this.DialogResult == DialogResult.OK)
+                try
                 {
-                    try
-                    {
-                        Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.CreateNew, System.IO.FileAccess.ReadWrite, System.IO.FileShare.Read);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    Stream = new IStreamImpl(dlg.FileName, System.IO.FileMode.CreateNew, System.IO.FileAccess.ReadWrite, System.IO.FileShare.Read);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
-            Close();
         }
+
+        Close();
     }
 }

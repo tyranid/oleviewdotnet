@@ -21,113 +21,112 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class ROTViewer : UserControl
 {
-    public partial class ROTViewer : UserControl
+    private COMRegistry m_registry;
+
+    struct MonikerInfo
     {
-        private COMRegistry m_registry;
+        public string strDisplayName;
+        public Guid clsid;
+        public IMoniker moniker;
 
-        struct MonikerInfo
+        public MonikerInfo(string name, Guid guid, IMoniker mon)
         {
-            public string strDisplayName;
-            public Guid clsid;
-            public IMoniker moniker;
+            strDisplayName = name;
+            clsid = guid;
+            moniker = mon;
+        }
+    }
 
-            public MonikerInfo(string name, Guid guid, IMoniker mon)
+    public ROTViewer(COMRegistry reg)
+    {
+        m_registry = reg;
+        InitializeComponent();
+    }
+
+    void LoadROT(bool trusted_only)
+    {
+        IBindCtx bindCtx;
+
+        listViewROT.Items.Clear();
+        try
+        {
+            bindCtx = COMUtilities.CreateBindCtx(trusted_only ? 1U : 0U);
+            IRunningObjectTable rot;
+            IEnumMoniker enumMoniker;
+            IMoniker[] moniker = new IMoniker[1];
+
+            bindCtx.GetRunningObjectTable(out rot);
+            rot.EnumRunning(out enumMoniker);
+            while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
             {
-                strDisplayName = name;
-                clsid = guid;
-                moniker = mon;
+                string strDisplayName;
+
+                moniker[0].GetDisplayName(bindCtx, null, out strDisplayName);
+                Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
+                ListViewItem item = listViewROT.Items.Add(strDisplayName);
+                item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
+                
+                if (m_registry.Clsids.ContainsKey(clsid))
+                {
+                    item.SubItems.Add(m_registry.Clsids[clsid].Name);
+                }
+                else
+                {
+                    item.SubItems.Add(clsid.FormatGuid());
+                }
             }
         }
-
-        public ROTViewer(COMRegistry reg)
+        catch (Exception e)
         {
-            m_registry = reg;
-            InitializeComponent();
+            EntryPoint.ShowError(this, e);
         }
 
-        void LoadROT(bool trusted_only)
-        {
-            IBindCtx bindCtx;
+        listViewROT.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+    }
 
-            listViewROT.Items.Clear();
+    private void ROTViewer_Load(object sender, EventArgs e)
+    {
+        listViewROT.Columns.Add("Display Name");
+        listViewROT.Columns.Add("CLSID");
+        LoadROT(false);
+        Text = "ROT";
+    }
+
+    private void menuROTRefresh_Click(object sender, EventArgs e)
+    {
+        LoadROT(checkBoxTrustedOnly.Checked);
+    }
+
+    private void menuROTBindToObject_Click(object sender, EventArgs e)
+    {
+        if (listViewROT.SelectedItems.Count != 0)
+        {
+            MonikerInfo info = (MonikerInfo)(listViewROT.SelectedItems[0].Tag);
+
+            Dictionary<string, string> props = new Dictionary<string, string>();
+            props.Add("Display Name", info.strDisplayName);
+            props.Add("CLSID", info.clsid.FormatGuid());
+
             try
             {
-                bindCtx = COMUtilities.CreateBindCtx(trusted_only ? 1U : 0U);
-                IRunningObjectTable rot;
-                IEnumMoniker enumMoniker;
-                IMoniker[] moniker = new IMoniker[1];
+                IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);
+                Guid unk = COMInterfaceEntry.IID_IUnknown;
+                object comObj;
+                Type dispType;
 
-                bindCtx.GetRunningObjectTable(out rot);
-                rot.EnumRunning(out enumMoniker);
-                while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
-                {
-                    string strDisplayName;
-
-                    moniker[0].GetDisplayName(bindCtx, null, out strDisplayName);
-                    Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
-                    ListViewItem item = listViewROT.Items.Add(strDisplayName);
-                    item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
-                    
-                    if (m_registry.Clsids.ContainsKey(clsid))
-                    {
-                        item.SubItems.Add(m_registry.Clsids[clsid].Name);
-                    }
-                    else
-                    {
-                        item.SubItems.Add(clsid.FormatGuid());
-                    }
-                }
+                info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
+                dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
+                ObjectInformation view = new ObjectInformation(m_registry, null, info.strDisplayName, 
+                    comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
+                EntryPoint.GetMainForm(m_registry).HostControl(view);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                EntryPoint.ShowError(this, e);
-            }
-
-            listViewROT.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-        }
-
-        private void ROTViewer_Load(object sender, EventArgs e)
-        {
-            listViewROT.Columns.Add("Display Name");
-            listViewROT.Columns.Add("CLSID");
-            LoadROT(false);
-            Text = "ROT";
-        }
-
-        private void menuROTRefresh_Click(object sender, EventArgs e)
-        {
-            LoadROT(checkBoxTrustedOnly.Checked);
-        }
-
-        private void menuROTBindToObject_Click(object sender, EventArgs e)
-        {
-            if (listViewROT.SelectedItems.Count != 0)
-            {
-                MonikerInfo info = (MonikerInfo)(listViewROT.SelectedItems[0].Tag);
-
-                Dictionary<string, string> props = new Dictionary<string, string>();
-                props.Add("Display Name", info.strDisplayName);
-                props.Add("CLSID", info.clsid.FormatGuid());
-
-                try
-                {
-                    IBindCtx bindCtx = COMUtilities.CreateBindCtx(0);
-                    Guid unk = COMInterfaceEntry.IID_IUnknown;
-                    object comObj;
-                    Type dispType;
-
-                    info.moniker.BindToObject(bindCtx, null, ref unk, out comObj);
-                    dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
-                    ObjectInformation view = new ObjectInformation(m_registry, null, info.strDisplayName, 
-                        comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
-                    EntryPoint.GetMainForm(m_registry).HostControl(view);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

@@ -19,141 +19,140 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class GetTypeForm : Form
 {
-    public partial class GetTypeForm : Form
+    /// <summary>
+    /// Dictionary of previous entries to the type field
+    /// </summary>
+    private static Dictionary<Guid, string[]> m_history = new Dictionary<Guid, string[]>();
+    private const int MAX_HISTORY_ENTRIES = 10;
+
+    private Type m_currType;
+    private object m_data;
+
+    public object Data
     {
-        /// <summary>
-        /// Dictionary of previous entries to the type field
-        /// </summary>
-        private static Dictionary<Guid, string[]> m_history = new Dictionary<Guid, string[]>();
-        private const int MAX_HISTORY_ENTRIES = 10;
-
-        private Type m_currType;
-        private object m_data;
-
-        public object Data
+        get { return m_data; }
+    }
+    
+    public GetTypeForm(Type currType, object data)
+    {
+        if (currType.GetElementType() != null)
         {
-            get { return m_data; }
+            m_currType = currType.GetElementType();
+        }
+        else
+        {
+            m_currType = currType;
         }
         
-        public GetTypeForm(Type currType, object data)
+        m_data = data;
+
+        InitializeComponent();
+    }
+
+    private void GetTypeForm_Load(object sender, EventArgs e)
+    {
+        if (m_data == null)
         {
-            if (currType.GetElementType() != null)
+            checkBoxSetNULL.Checked = true;
+        }
+        
+        if (m_currType == typeof(object))
+        {
+            comboBoxTypes.Items.Add(typeof(String));
+            comboBoxTypes.Items.Add(typeof(byte));
+            comboBoxTypes.Items.Add(typeof(sbyte));
+            comboBoxTypes.Items.Add(typeof(ushort));
+            comboBoxTypes.Items.Add(typeof(short));
+            comboBoxTypes.Items.Add(typeof(uint));
+            comboBoxTypes.Items.Add(typeof(int));
+            comboBoxTypes.Items.Add(typeof(ulong));
+            comboBoxTypes.Items.Add(typeof(long));
+            comboBoxTypes.Items.Add(typeof(bool));
+            comboBoxTypes.Items.Add(typeof(double));
+            comboBoxTypes.Items.Add(typeof(float));
+            comboBoxTypes.Items.Add(typeof(decimal));
+            comboBoxTypes.Items.Add(typeof(DateTime));
+            comboBoxTypes.Items.Add(typeof(Guid));
+        }
+        else
+        {
+            comboBoxTypes.Items.Add(m_currType);
+            comboBoxTypes.Enabled = false;
+        }
+
+        if (m_data != null)
+        {
+            comboBoxValue.Items.Add(m_data.ToString());
+            comboBoxValue.SelectedIndex = 0;
+        }
+
+        comboBoxTypes.SelectedIndex = 0;
+    }
+
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (checkBoxSetNULL.Checked == false)
             {
-                m_currType = currType.GetElementType();
+                Type t = (Type)comboBoxTypes.SelectedItem;
+
+                if (t != null)
+                {
+                    /* First check if this type has a constructor which takes a string */
+                    ConstructorInfo ci = t.GetConstructor(new Type[] { typeof(string) });
+                    if (ci != null)
+                    {
+                        m_data = ci.Invoke(new object[] { comboBoxValue.Text });
+                    }                        
+                    else
+                    {
+                        /* Try default conversion */
+                        m_data = Convert.ChangeType(comboBoxValue.Text, t);
+                    }
+
+                    if (!m_history.ContainsKey(t.GUID))
+                    {
+                        m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];                            
+                    }
+                    Array.Copy(m_history[t.GUID], 0, m_history[t.GUID], 1, MAX_HISTORY_ENTRIES - 1);
+                    m_history[t.GUID][0] = comboBoxValue.Text;
+                }
             }
             else
             {
-                m_currType = currType;
+                m_data = null;
             }
-            
-            m_data = data;
 
-            InitializeComponent();
+            DialogResult = DialogResult.OK;
+            Close();
         }
-
-        private void GetTypeForm_Load(object sender, EventArgs e)
+        catch (Exception ex)
         {
-            if (m_data == null)
-            {
-                checkBoxSetNULL.Checked = true;
-            }
-            
-            if (m_currType == typeof(object))
-            {
-                comboBoxTypes.Items.Add(typeof(String));
-                comboBoxTypes.Items.Add(typeof(byte));
-                comboBoxTypes.Items.Add(typeof(sbyte));
-                comboBoxTypes.Items.Add(typeof(ushort));
-                comboBoxTypes.Items.Add(typeof(short));
-                comboBoxTypes.Items.Add(typeof(uint));
-                comboBoxTypes.Items.Add(typeof(int));
-                comboBoxTypes.Items.Add(typeof(ulong));
-                comboBoxTypes.Items.Add(typeof(long));
-                comboBoxTypes.Items.Add(typeof(bool));
-                comboBoxTypes.Items.Add(typeof(double));
-                comboBoxTypes.Items.Add(typeof(float));
-                comboBoxTypes.Items.Add(typeof(decimal));
-                comboBoxTypes.Items.Add(typeof(DateTime));
-                comboBoxTypes.Items.Add(typeof(Guid));
-            }
-            else
-            {
-                comboBoxTypes.Items.Add(m_currType);
-                comboBoxTypes.Enabled = false;
-            }
+            MessageBox.Show(ex.Message, "Type Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }            
+    }
 
-            if (m_data != null)
-            {
-                comboBoxValue.Items.Add(m_data.ToString());
-                comboBoxValue.SelectedIndex = 0;
-            }
-
-            comboBoxTypes.SelectedIndex = 0;
-        }
-
-        private void btnOK_Click(object sender, EventArgs e)
+    private void comboBoxTypes_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        Type t = (Type)comboBoxTypes.SelectedItem;
+        comboBoxValue.Items.Clear();
+        if (t != null)
         {
-            try
+            if (m_history.ContainsKey(t.GUID))
             {
-                if (checkBoxSetNULL.Checked == false)
+                foreach (string s in m_history[t.GUID])
                 {
-                    Type t = (Type)comboBoxTypes.SelectedItem;
-
-                    if (t != null)
+                    if (s != null)
                     {
-                        /* First check if this type has a constructor which takes a string */
-                        ConstructorInfo ci = t.GetConstructor(new Type[] { typeof(string) });
-                        if (ci != null)
-                        {
-                            m_data = ci.Invoke(new object[] { comboBoxValue.Text });
-                        }                        
-                        else
-                        {
-                            /* Try default conversion */
-                            m_data = Convert.ChangeType(comboBoxValue.Text, t);
-                        }
-
-                        if (!m_history.ContainsKey(t.GUID))
-                        {
-                            m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];                            
-                        }
-                        Array.Copy(m_history[t.GUID], 0, m_history[t.GUID], 1, MAX_HISTORY_ENTRIES - 1);
-                        m_history[t.GUID][0] = comboBoxValue.Text;
+                        comboBoxValue.Items.Add(s);
                     }
                 }
-                else
-                {
-                    m_data = null;
-                }
-
-                DialogResult = DialogResult.OK;
-                Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Type Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }            
-        }
-
-        private void comboBoxTypes_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Type t = (Type)comboBoxTypes.SelectedItem;
-            comboBoxValue.Items.Clear();
-            if (t != null)
-            {
-                if (m_history.ContainsKey(t.GUID))
-                {
-                    foreach (string s in m_history[t.GUID])
-                    {
-                        if (s != null)
-                        {
-                            comboBoxValue.Items.Add(s);
-                        }
-                    }
-                    comboBoxValue.Text = "";
-                }
+                comboBoxValue.Text = "";
             }
         }
     }

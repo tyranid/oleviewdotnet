@@ -19,337 +19,336 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OleViewDotNet.Database
+namespace OleViewDotNet.Database;
+
+internal class COMPackagedClassEntry
 {
-    internal class COMPackagedClassEntry
-    {
-        // Class\{Clsid}
-        public Guid Clsid { get; }
-        public string AutoConvertTo { get; }
-        public string ConversionReadable { get; }
-        public string ConversionReadWritable { get; }
-        public string DataFormats { get; }
-        public string DefaultFormatName { get; }
-        public string DefaultIcon { get; }
-        public string DisplayName { get; }
-        public string DllPath { get; }
-        public bool EnableOleDefaultHandler { get; }
-        public List<Guid> ImplementedCategories { get; }
-        public bool InsertableObject { get; }
-        public string MiscStatusAspects { get; }
-        public string MiscStatusDefault { get; }
-        public string ProgId { get; }
-        public int ServerId { get; }
-        public string ShortDisplayName { get; }
-        public COMThreadingModel Threading { get; }
-        public string ToolboxBitmap32 { get; }
-        public List<Tuple<string, string>> Verbs { get; }
-        public string VersionIndependentProgId { get; }
+    // Class\{Clsid}
+    public Guid Clsid { get; }
+    public string AutoConvertTo { get; }
+    public string ConversionReadable { get; }
+    public string ConversionReadWritable { get; }
+    public string DataFormats { get; }
+    public string DefaultFormatName { get; }
+    public string DefaultIcon { get; }
+    public string DisplayName { get; }
+    public string DllPath { get; }
+    public bool EnableOleDefaultHandler { get; }
+    public List<Guid> ImplementedCategories { get; }
+    public bool InsertableObject { get; }
+    public string MiscStatusAspects { get; }
+    public string MiscStatusDefault { get; }
+    public string ProgId { get; }
+    public int ServerId { get; }
+    public string ShortDisplayName { get; }
+    public COMThreadingModel Threading { get; }
+    public string ToolboxBitmap32 { get; }
+    public List<Tuple<string, string>> Verbs { get; }
+    public string VersionIndependentProgId { get; }
 
-        internal COMPackagedClassEntry(Guid clsid, string packagePath, RegistryKey rootKey)
+    internal COMPackagedClassEntry(Guid clsid, string packagePath, RegistryKey rootKey)
+    {
+        Clsid = clsid;
+        AutoConvertTo = rootKey.ReadString(valueName: "AutoConvertTo");
+        ConversionReadable = rootKey.ReadString(valueName: "ConversionReadable");
+        ConversionReadWritable = rootKey.ReadString(valueName: "ConversionReadWritable");
+        ConversionReadWritable = rootKey.ReadString(valueName: "ConversionReadWritable");
+        DataFormats = rootKey.ReadString(valueName: "DataFormats");
+        DefaultFormatName = rootKey.ReadString(valueName: "DefaultFormatName");
+        DefaultIcon = rootKey.ReadString(valueName: "DefaultIcon");
+        DisplayName = rootKey.ReadString(valueName: "DisplayName");
+        DllPath = rootKey.ReadStringPath(packagePath, valueName: "DllPath");
+        EnableOleDefaultHandler = rootKey.ReadBool("EnableOleDefaultHandler");
+        ImplementedCategories = rootKey.ReadValueNames("ImplementedCategories")
+            .Select(n => COMUtilities.ReadOptionalGuid(n)).Where(g => g.HasValue)
+            .Select(g => g.Value).ToList();
+        InsertableObject = rootKey.ReadBool(valueName: "InsertableObject");
+        MiscStatusAspects = rootKey.ReadString(valueName: "MiscStatusAspects");
+        MiscStatusDefault = rootKey.ReadString(valueName: "MiscStatusDefault");
+        ProgId = rootKey.ReadString(valueName: "ProgId");
+        ServerId = rootKey.ReadInt(null, "ServerId");
+        ShortDisplayName = rootKey.ReadString(valueName: "ShortDisplayName");
+        Threading = (COMThreadingModel)rootKey.ReadInt(null, "Threading");
+        ToolboxBitmap32 = rootKey.ReadString(valueName: "ToolboxBitmap32");
+        Verbs = rootKey.ReadValues("Verbs").Select(v => Tuple.Create(v.Name, v.Value.ToString())).ToList();
+        VersionIndependentProgId = rootKey.ReadString(valueName: "VersionIndependentProgId");
+    }
+}
+
+internal class COMPackagedServerEntry
+{
+    // Server\{Index}
+    public string ApplicationDisplayName { get; }
+    public string ApplicationId { get; }
+    public string Arguments { get; }
+    public string DisplayName { get; }
+    public string Executable { get; }
+    public string CommandLine { get; }
+    public string ExecutionPackageFamily { get; }
+    public bool IsSystemExecutable { get; }
+    public string LaunchAndActivationPermission { get; }
+    public Guid SurrogateAppId { get; }
+    public string SystemExecutableArchitecture { get; }
+
+    internal COMPackagedServerEntry(string packagePath, RegistryKey rootKey)
+    {
+        SurrogateAppId = rootKey.ReadGuid(null, "SurrogateAppId");
+        ApplicationDisplayName = rootKey.ReadString(valueName: "ApplicationDisplayName");
+        ApplicationId = rootKey.ReadString(valueName: "ApplicationId");
+        Arguments = rootKey.ReadString(valueName: "Arguments");
+        DisplayName = rootKey.ReadString(valueName: "DisplayName");
+        ExecutionPackageFamily = rootKey.ReadString(valueName: "ExecutionPackageName");
+        IsSystemExecutable = rootKey.ReadBool("IsSystemExecutable");
+        Executable = rootKey.ReadStringPath(IsSystemExecutable ? Environment.GetFolderPath(Environment.SpecialFolder.System) : packagePath, valueName: "Executable");
+        LaunchAndActivationPermission = rootKey.ReadSddl(valueName: "LaunchAndActivationPermission");
+        SystemExecutableArchitecture = rootKey.ReadString(valueName: "SystemExecutableArchitecture");
+        if (!string.IsNullOrWhiteSpace(Arguments))
         {
-            Clsid = clsid;
-            AutoConvertTo = rootKey.ReadString(valueName: "AutoConvertTo");
-            ConversionReadable = rootKey.ReadString(valueName: "ConversionReadable");
-            ConversionReadWritable = rootKey.ReadString(valueName: "ConversionReadWritable");
-            ConversionReadWritable = rootKey.ReadString(valueName: "ConversionReadWritable");
-            DataFormats = rootKey.ReadString(valueName: "DataFormats");
-            DefaultFormatName = rootKey.ReadString(valueName: "DefaultFormatName");
-            DefaultIcon = rootKey.ReadString(valueName: "DefaultIcon");
-            DisplayName = rootKey.ReadString(valueName: "DisplayName");
-            DllPath = rootKey.ReadStringPath(packagePath, valueName: "DllPath");
-            EnableOleDefaultHandler = rootKey.ReadBool("EnableOleDefaultHandler");
-            ImplementedCategories = rootKey.ReadValueNames("ImplementedCategories")
-                .Select(n => COMUtilities.ReadOptionalGuid(n)).Where(g => g.HasValue)
-                .Select(g => g.Value).ToList();
-            InsertableObject = rootKey.ReadBool(valueName: "InsertableObject");
-            MiscStatusAspects = rootKey.ReadString(valueName: "MiscStatusAspects");
-            MiscStatusDefault = rootKey.ReadString(valueName: "MiscStatusDefault");
-            ProgId = rootKey.ReadString(valueName: "ProgId");
-            ServerId = rootKey.ReadInt(null, "ServerId");
-            ShortDisplayName = rootKey.ReadString(valueName: "ShortDisplayName");
-            Threading = (COMThreadingModel)rootKey.ReadInt(null, "Threading");
-            ToolboxBitmap32 = rootKey.ReadString(valueName: "ToolboxBitmap32");
-            Verbs = rootKey.ReadValues("Verbs").Select(v => Tuple.Create(v.Name, v.Value.ToString())).ToList();
-            VersionIndependentProgId = rootKey.ReadString(valueName: "VersionIndependentProgId");
+            CommandLine = $"\"{Executable}\" {Arguments}";
+        }
+        else
+        {
+            CommandLine = Executable;
         }
     }
+}
 
-    internal class COMPackagedServerEntry
+internal class COMPackagedTreatAsClassEntry
+{
+    // TreatAsClass\{Clsid}
+    public string AutoConvertTo { get; }
+    public string DisplayName { get; }
+    public Guid TreatAs { get; }
+
+    internal COMPackagedTreatAsClassEntry(RegistryKey rootKey)
     {
-        // Server\{Index}
-        public string ApplicationDisplayName { get; }
-        public string ApplicationId { get; }
-        public string Arguments { get; }
-        public string DisplayName { get; }
-        public string Executable { get; }
-        public string CommandLine { get; }
-        public string ExecutionPackageFamily { get; }
-        public bool IsSystemExecutable { get; }
-        public string LaunchAndActivationPermission { get; }
-        public Guid SurrogateAppId { get; }
-        public string SystemExecutableArchitecture { get; }
+        AutoConvertTo = rootKey.ReadString(valueName: "AutoConvertTo");
+        DisplayName = rootKey.ReadString(valueName: "DisplayName");
+        TreatAs = rootKey.ReadGuid(null, "TreatAs");
+    }
+}
 
-        internal COMPackagedServerEntry(string packagePath, RegistryKey rootKey)
+internal class COMPackagedInterfaceEntry
+{
+    public Guid Iid { get; }
+    public Guid ProxyStubCLSID { get; }
+    public bool UseUniversalMarshaler { get; }
+    public Guid SynchronousInterface { get; }
+    public Guid AsynchronousInterface { get; }
+    public Guid TypeLibId { get; }
+    public string TypeLibVersionNumber { get; }
+
+    internal COMPackagedInterfaceEntry(Guid iid, RegistryKey rootKey)
+    {
+        Iid = iid;
+        ProxyStubCLSID = rootKey.ReadGuid(null, "ProxyStubCLSID");
+        UseUniversalMarshaler = rootKey.ReadBool(valueName: "UseUniversalMarshaler");
+        SynchronousInterface = rootKey.ReadGuid(null, "SynchronousInterface");
+        AsynchronousInterface = rootKey.ReadGuid(null, "AsynchronousInterface");
+        TypeLibId = rootKey.ReadGuid(null, "TypeLibId");
+        TypeLibVersionNumber = rootKey.ReadString(valueName: "TypeLibVersionNumber");
+    }
+}
+
+internal class COMPackagedProxyStubEntry
+{
+    public Guid Clsid { get; }
+    public string DisplayName { get; }
+    public string DllPath { get; }
+    public string DllPath_x86 { get; }
+    public string DllPath_x64 { get; }
+    public string DllPath_arm { get; }
+    public string DllPath_arm64 { get; }
+
+    internal COMPackagedProxyStubEntry(Guid clsid, string packagePath, RegistryKey rootKey)
+    {
+        Clsid = clsid;
+        DisplayName = rootKey.ReadString(valueName: "DisplayName");
+        DllPath = rootKey.ReadStringPath(packagePath, valueName: "DllPath");
+        DllPath_x86 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_x86");
+        DllPath_x64 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_x64");
+        DllPath_arm = rootKey.ReadStringPath(packagePath, valueName: "DllPath_arm");
+        DllPath_arm64 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_arm64");
+    }
+}
+
+internal class COMPackagedTypeLibVersionEntry
+{
+    public string Version { get; }
+    public string DisplayName { get; }
+    public int Flags { get; }
+    public string HelpDirectory { get; }
+    public int LocaleId { get; }
+    public string Win32Path { get; }
+    public string Win64Path { get; }
+
+    internal COMPackagedTypeLibVersionEntry(string version, string packagePath, RegistryKey rootKey)
+    {
+        Version = version;
+        DisplayName = rootKey.ReadString(valueName: "DisplayName");
+        Flags = rootKey.ReadInt(null, valueName: "Flags");
+        HelpDirectory = rootKey.ReadStringPath(packagePath, valueName: "HelpDirectory");
+        LocaleId = rootKey.ReadInt(null, "LocaleId");
+        Win32Path = rootKey.ReadStringPath(packagePath, valueName: "Win32Path");
+        Win64Path = rootKey.ReadStringPath(packagePath, valueName: "Win64Path");
+    }
+}
+
+internal class COMPackagedTypeLibEntry
+{
+    public Guid TypeLibId { get; }
+    public List<COMPackagedTypeLibVersionEntry> Versions { get; }
+
+    internal COMPackagedTypeLibEntry(Guid typelibId, IEnumerable<COMPackagedTypeLibVersionEntry> versions)
+    {
+        TypeLibId = typelibId;
+        Versions = new List<COMPackagedTypeLibVersionEntry>(versions);
+    }
+}
+
+internal class COMPackagedEntry
+{
+    public string PackageId { get; }
+    public string PackagePath { get; }
+    public IReadOnlyDictionary<int, COMPackagedServerEntry> Servers { get; }
+    public IReadOnlyDictionary<Guid, COMPackagedClassEntry> Classes { get; }
+    public IReadOnlyDictionary<Guid, COMPackagedTreatAsClassEntry> TreatAs { get; }
+    public IReadOnlyDictionary<Guid, COMPackagedInterfaceEntry> Interfaces { get; }
+    public IReadOnlyDictionary<Guid, COMPackagedProxyStubEntry> ProxyStubs { get; }
+    public IReadOnlyDictionary<Guid, COMPackagedTypeLibEntry> TypeLibs { get; }
+
+    private delegate bool KeyMapFunction<K>(string name, out K key);
+
+    private static Dictionary<K, T> ReadRegistryKeys<K, T>(RegistryKey rootKey, string rootName, string packagePath, KeyMapFunction<K> keyMap, Func<K, string, RegistryKey, T> valueMap)
+    {
+        var result = new Dictionary<K, T>();
+        using (var subkey = rootKey.OpenSubKeySafe(rootName))
         {
-            SurrogateAppId = rootKey.ReadGuid(null, "SurrogateAppId");
-            ApplicationDisplayName = rootKey.ReadString(valueName: "ApplicationDisplayName");
-            ApplicationId = rootKey.ReadString(valueName: "ApplicationId");
-            Arguments = rootKey.ReadString(valueName: "Arguments");
-            DisplayName = rootKey.ReadString(valueName: "DisplayName");
-            ExecutionPackageFamily = rootKey.ReadString(valueName: "ExecutionPackageName");
-            IsSystemExecutable = rootKey.ReadBool("IsSystemExecutable");
-            Executable = rootKey.ReadStringPath(IsSystemExecutable ? Environment.GetFolderPath(Environment.SpecialFolder.System) : packagePath, valueName: "Executable");
-            LaunchAndActivationPermission = rootKey.ReadSddl(valueName: "LaunchAndActivationPermission");
-            SystemExecutableArchitecture = rootKey.ReadString(valueName: "SystemExecutableArchitecture");
-            if (!string.IsNullOrWhiteSpace(Arguments))
+            if (subkey == null)
             {
-                CommandLine = $"\"{Executable}\" {Arguments}";
+                return result;
             }
-            else
+
+            foreach (var name in subkey.GetSubKeyNames())
             {
-                CommandLine = Executable;
+                if (!keyMap(name, out K key))
+                {
+                    continue;
+                }
+
+                using (var valueKey = subkey.OpenSubKeySafe(name))
+                {
+                    if (valueKey != null)
+                    {
+                        result[key] = valueMap(key, packagePath, valueKey);
+                    }
+                }
             }
         }
+
+        return result;
     }
 
-    internal class COMPackagedTreatAsClassEntry
+    private static Dictionary<Guid, T> ReadGuidRegistryKeys<T>(RegistryKey rootKey, string rootName, string packagePath, Func<Guid, string, RegistryKey, T> valueMap)
     {
-        // TreatAsClass\{Clsid}
-        public string AutoConvertTo { get; }
-        public string DisplayName { get; }
-        public Guid TreatAs { get; }
-
-        internal COMPackagedTreatAsClassEntry(RegistryKey rootKey)
-        {
-            AutoConvertTo = rootKey.ReadString(valueName: "AutoConvertTo");
-            DisplayName = rootKey.ReadString(valueName: "DisplayName");
-            TreatAs = rootKey.ReadGuid(null, "TreatAs");
-        }
+        return ReadRegistryKeys(rootKey, rootName, packagePath, new KeyMapFunction<Guid>(Guid.TryParse), valueMap);
     }
 
-    internal class COMPackagedInterfaceEntry
+    private static Dictionary<int, COMPackagedServerEntry> ReadServers(string packagePath, RegistryKey rootKey)
     {
-        public Guid Iid { get; }
-        public Guid ProxyStubCLSID { get; }
-        public bool UseUniversalMarshaler { get; }
-        public Guid SynchronousInterface { get; }
-        public Guid AsynchronousInterface { get; }
-        public Guid TypeLibId { get; }
-        public string TypeLibVersionNumber { get; }
-
-        internal COMPackagedInterfaceEntry(Guid iid, RegistryKey rootKey)
-        {
-            Iid = iid;
-            ProxyStubCLSID = rootKey.ReadGuid(null, "ProxyStubCLSID");
-            UseUniversalMarshaler = rootKey.ReadBool(valueName: "UseUniversalMarshaler");
-            SynchronousInterface = rootKey.ReadGuid(null, "SynchronousInterface");
-            AsynchronousInterface = rootKey.ReadGuid(null, "AsynchronousInterface");
-            TypeLibId = rootKey.ReadGuid(null, "TypeLibId");
-            TypeLibVersionNumber = rootKey.ReadString(valueName: "TypeLibVersionNumber");
-        }
+        return ReadRegistryKeys(rootKey, "Server", packagePath, new KeyMapFunction<int>(int.TryParse), (k, pp, reg) => new COMPackagedServerEntry(pp, reg));
     }
 
-    internal class COMPackagedProxyStubEntry
+    private static Dictionary<Guid, COMPackagedClassEntry> ReadClasses(string packagePath, RegistryKey rootKey)
     {
-        public Guid Clsid { get; }
-        public string DisplayName { get; }
-        public string DllPath { get; }
-        public string DllPath_x86 { get; }
-        public string DllPath_x64 { get; }
-        public string DllPath_arm { get; }
-        public string DllPath_arm64 { get; }
-
-        internal COMPackagedProxyStubEntry(Guid clsid, string packagePath, RegistryKey rootKey)
-        {
-            Clsid = clsid;
-            DisplayName = rootKey.ReadString(valueName: "DisplayName");
-            DllPath = rootKey.ReadStringPath(packagePath, valueName: "DllPath");
-            DllPath_x86 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_x86");
-            DllPath_x64 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_x64");
-            DllPath_arm = rootKey.ReadStringPath(packagePath, valueName: "DllPath_arm");
-            DllPath_arm64 = rootKey.ReadStringPath(packagePath, valueName: "DllPath_arm64");
-        }
+        return ReadGuidRegistryKeys(rootKey, "Class", packagePath, 
+            (key, pp, reg) => new COMPackagedClassEntry(key, pp, reg));
     }
 
-    internal class COMPackagedTypeLibVersionEntry
+    private static Dictionary<Guid, COMPackagedInterfaceEntry> ReadInterfaces(string packagePath, RegistryKey rootKey)
     {
-        public string Version { get; }
-        public string DisplayName { get; }
-        public int Flags { get; }
-        public string HelpDirectory { get; }
-        public int LocaleId { get; }
-        public string Win32Path { get; }
-        public string Win64Path { get; }
-
-        internal COMPackagedTypeLibVersionEntry(string version, string packagePath, RegistryKey rootKey)
-        {
-            Version = version;
-            DisplayName = rootKey.ReadString(valueName: "DisplayName");
-            Flags = rootKey.ReadInt(null, valueName: "Flags");
-            HelpDirectory = rootKey.ReadStringPath(packagePath, valueName: "HelpDirectory");
-            LocaleId = rootKey.ReadInt(null, "LocaleId");
-            Win32Path = rootKey.ReadStringPath(packagePath, valueName: "Win32Path");
-            Win64Path = rootKey.ReadStringPath(packagePath, valueName: "Win64Path");
-        }
+        return ReadGuidRegistryKeys(rootKey, "Interface", packagePath, 
+            (key, pp, reg) => new COMPackagedInterfaceEntry(key, reg));
     }
 
-    internal class COMPackagedTypeLibEntry
+    private static Dictionary<Guid, COMPackagedTreatAsClassEntry> ReadTreatAs(RegistryKey rootKey)
     {
-        public Guid TypeLibId { get; }
-        public List<COMPackagedTypeLibVersionEntry> Versions { get; }
-
-        internal COMPackagedTypeLibEntry(Guid typelibId, IEnumerable<COMPackagedTypeLibVersionEntry> versions)
-        {
-            TypeLibId = typelibId;
-            Versions = new List<COMPackagedTypeLibVersionEntry>(versions);
-        }
+        return ReadGuidRegistryKeys(rootKey, "TreatAsClass", string.Empty,
+            (key, pp, reg) => new COMPackagedTreatAsClassEntry(reg));
     }
 
-    internal class COMPackagedEntry
+    private static Dictionary<Guid, COMPackagedProxyStubEntry> ReadProxyStubs(string packagePath, RegistryKey rootKey)
     {
-        public string PackageId { get; }
-        public string PackagePath { get; }
-        public IReadOnlyDictionary<int, COMPackagedServerEntry> Servers { get; }
-        public IReadOnlyDictionary<Guid, COMPackagedClassEntry> Classes { get; }
-        public IReadOnlyDictionary<Guid, COMPackagedTreatAsClassEntry> TreatAs { get; }
-        public IReadOnlyDictionary<Guid, COMPackagedInterfaceEntry> Interfaces { get; }
-        public IReadOnlyDictionary<Guid, COMPackagedProxyStubEntry> ProxyStubs { get; }
-        public IReadOnlyDictionary<Guid, COMPackagedTypeLibEntry> TypeLibs { get; }
+        return ReadGuidRegistryKeys(rootKey, "ProxyStub", packagePath,
+            (key, pp, reg) => new COMPackagedProxyStubEntry(key, pp, reg));
+    }
 
-        private delegate bool KeyMapFunction<K>(string name, out K key);
+    private static IEnumerable<COMPackagedTypeLibVersionEntry> ReadTypeLibVersions(string packagePath, RegistryKey rootKey)
+    {
+        List<COMPackagedTypeLibVersionEntry> result = new List<COMPackagedTypeLibVersionEntry>();
 
-        private static Dictionary<K, T> ReadRegistryKeys<K, T>(RegistryKey rootKey, string rootName, string packagePath, KeyMapFunction<K> keyMap, Func<K, string, RegistryKey, T> valueMap)
+        foreach (var name in rootKey.GetSubKeyNames())
         {
-            var result = new Dictionary<K, T>();
-            using (var subkey = rootKey.OpenSubKeySafe(rootName))
+            using (var subkey = rootKey.OpenSubKeySafe(name))
             {
                 if (subkey == null)
                 {
-                    return result;
+                    continue;
                 }
-
-                foreach (var name in subkey.GetSubKeyNames())
-                {
-                    if (!keyMap(name, out K key))
-                    {
-                        continue;
-                    }
-
-                    using (var valueKey = subkey.OpenSubKeySafe(name))
-                    {
-                        if (valueKey != null)
-                        {
-                            result[key] = valueMap(key, packagePath, valueKey);
-                        }
-                    }
-                }
+                result.Add(new COMPackagedTypeLibVersionEntry(name, packagePath, subkey));
             }
-
-            return result;
         }
 
-        private static Dictionary<Guid, T> ReadGuidRegistryKeys<T>(RegistryKey rootKey, string rootName, string packagePath, Func<Guid, string, RegistryKey, T> valueMap)
-        {
-            return ReadRegistryKeys(rootKey, rootName, packagePath, new KeyMapFunction<Guid>(Guid.TryParse), valueMap);
-        }
-
-        private static Dictionary<int, COMPackagedServerEntry> ReadServers(string packagePath, RegistryKey rootKey)
-        {
-            return ReadRegistryKeys(rootKey, "Server", packagePath, new KeyMapFunction<int>(int.TryParse), (k, pp, reg) => new COMPackagedServerEntry(pp, reg));
-        }
-
-        private static Dictionary<Guid, COMPackagedClassEntry> ReadClasses(string packagePath, RegistryKey rootKey)
-        {
-            return ReadGuidRegistryKeys(rootKey, "Class", packagePath, 
-                (key, pp, reg) => new COMPackagedClassEntry(key, pp, reg));
-        }
-
-        private static Dictionary<Guid, COMPackagedInterfaceEntry> ReadInterfaces(string packagePath, RegistryKey rootKey)
-        {
-            return ReadGuidRegistryKeys(rootKey, "Interface", packagePath, 
-                (key, pp, reg) => new COMPackagedInterfaceEntry(key, reg));
-        }
-
-        private static Dictionary<Guid, COMPackagedTreatAsClassEntry> ReadTreatAs(RegistryKey rootKey)
-        {
-            return ReadGuidRegistryKeys(rootKey, "TreatAsClass", string.Empty,
-                (key, pp, reg) => new COMPackagedTreatAsClassEntry(reg));
-        }
-
-        private static Dictionary<Guid, COMPackagedProxyStubEntry> ReadProxyStubs(string packagePath, RegistryKey rootKey)
-        {
-            return ReadGuidRegistryKeys(rootKey, "ProxyStub", packagePath,
-                (key, pp, reg) => new COMPackagedProxyStubEntry(key, pp, reg));
-        }
-
-        private static IEnumerable<COMPackagedTypeLibVersionEntry> ReadTypeLibVersions(string packagePath, RegistryKey rootKey)
-        {
-            List<COMPackagedTypeLibVersionEntry> result = new List<COMPackagedTypeLibVersionEntry>();
-
-            foreach (var name in rootKey.GetSubKeyNames())
-            {
-                using (var subkey = rootKey.OpenSubKeySafe(name))
-                {
-                    if (subkey == null)
-                    {
-                        continue;
-                    }
-                    result.Add(new COMPackagedTypeLibVersionEntry(name, packagePath, subkey));
-                }
-            }
-
-            return result;
-        }
-
-        private static Dictionary<Guid, COMPackagedTypeLibEntry> ReadTypeLibs(string packagePath, RegistryKey rootKey)
-        {
-            return ReadGuidRegistryKeys(rootKey, "TypeLib", packagePath,
-                (key, pp, reg) => new COMPackagedTypeLibEntry(key, ReadTypeLibVersions(pp, reg)));
-        }
-
-        internal COMPackagedEntry(string packageId, RegistryKey rootKey)
-        {
-            PackageId = packageId;
-            PackagePath = COMUtilities.GetPackagePath(packageId);
-            Servers = ReadServers(PackagePath, rootKey);
-            Classes = ReadClasses(PackagePath, rootKey);
-            TreatAs = ReadTreatAs(rootKey);
-            Interfaces = ReadInterfaces(PackagePath, rootKey);
-            ProxyStubs = ReadProxyStubs(PackagePath, rootKey);
-            TypeLibs = ReadTypeLibs(PackagePath, rootKey);
-        }
+        return result;
     }
 
-    internal class COMPackagedRegistry
+    private static Dictionary<Guid, COMPackagedTypeLibEntry> ReadTypeLibs(string packagePath, RegistryKey rootKey)
     {
-        public IReadOnlyDictionary<string, COMPackagedEntry> Packages { get; }
+        return ReadGuidRegistryKeys(rootKey, "TypeLib", packagePath,
+            (key, pp, reg) => new COMPackagedTypeLibEntry(key, ReadTypeLibVersions(pp, reg)));
+    }
 
-        internal COMPackagedRegistry()
+    internal COMPackagedEntry(string packageId, RegistryKey rootKey)
+    {
+        PackageId = packageId;
+        PackagePath = COMUtilities.GetPackagePath(packageId);
+        Servers = ReadServers(PackagePath, rootKey);
+        Classes = ReadClasses(PackagePath, rootKey);
+        TreatAs = ReadTreatAs(rootKey);
+        Interfaces = ReadInterfaces(PackagePath, rootKey);
+        ProxyStubs = ReadProxyStubs(PackagePath, rootKey);
+        TypeLibs = ReadTypeLibs(PackagePath, rootKey);
+    }
+}
+
+internal class COMPackagedRegistry
+{
+    public IReadOnlyDictionary<string, COMPackagedEntry> Packages { get; }
+
+    internal COMPackagedRegistry()
+    {
+        Packages = new Dictionary<string, COMPackagedEntry>();
+    }
+
+    internal COMPackagedRegistry(RegistryKey rootKey)
+    {
+        var packages = new Dictionary<string, COMPackagedEntry>();
+        Packages = packages;
+
+        using (var packageKey = rootKey.OpenSubKeySafe("Package"))
         {
-            Packages = new Dictionary<string, COMPackagedEntry>();
-        }
-
-        internal COMPackagedRegistry(RegistryKey rootKey)
-        {
-            var packages = new Dictionary<string, COMPackagedEntry>();
-            Packages = packages;
-
-            using (var packageKey = rootKey.OpenSubKeySafe("Package"))
+            if (packageKey == null)
             {
-                if (packageKey == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                foreach (var packageName in packageKey.GetSubKeyNames())
+            foreach (var packageName in packageKey.GetSubKeyNames())
+            {
+                using (var packageNameKey = packageKey.OpenSubKeySafe(packageName))
                 {
-                    using (var packageNameKey = packageKey.OpenSubKeySafe(packageName))
+                    if (packageNameKey != null)
                     {
-                        if (packageNameKey != null)
-                        {
-                            packages[packageName] = new COMPackagedEntry(packageName, packageNameKey);
-                        }
+                        packages[packageName] = new COMPackagedEntry(packageName, packageNameKey);
                     }
                 }
             }

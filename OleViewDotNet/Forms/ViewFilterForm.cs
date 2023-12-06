@@ -18,27 +18,26 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class ViewFilterForm : Form
 {
-    public partial class ViewFilterForm : Form
+    public ViewFilterForm(RegistryViewerFilter filter, IEnumerable<FilterType> types)
     {
-        public ViewFilterForm(RegistryViewerFilter filter, IEnumerable<FilterType> types)
-        {
-            InitializeComponent();
-            viewFilterControl.Filter = filter;
-            viewFilterControl.SetTypes(types);
-        }
+        InitializeComponent();
+        viewFilterControl.Filter = filter;
+        viewFilterControl.SetTypes(types);
+    }
 
-        public RegistryViewerFilter Filter
-        {
-            get; private set;
-        }
+    public RegistryViewerFilter Filter
+    {
+        get; private set;
+    }
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            Filter = viewFilterControl.Filter;
-            DialogResult = DialogResult.OK;
-            Close();
-        }
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        Filter = viewFilterControl.Filter;
+        DialogResult = DialogResult.OK;
+        Close();
     }
 }

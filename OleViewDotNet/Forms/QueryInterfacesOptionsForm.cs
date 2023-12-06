@@ -19,63 +19,62 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class QueryInterfacesOptionsForm : Form
 {
-    public partial class QueryInterfacesOptionsForm : Form
+    public QueryInterfacesOptionsForm()
     {
-        public QueryInterfacesOptionsForm()
-        {
-            InitializeComponent();
-            numericUpDownConcurrentQueries.Maximum = Environment.ProcessorCount * 2;
-            numericUpDownConcurrentQueries.Value = Environment.ProcessorCount;
-        }
-
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            if (!checkBoxInProcHandler.Checked && !checkBoxLocalServer.Checked && !checkBoxInProcServer.Checked)
-            {
-                MessageBox.Show(this, "Must check at least one server type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-            {
-                List<COMServerType> server_types = new List<COMServerType>();
-                if (checkBoxInProcHandler.Checked)
-                {
-                    server_types.Add(COMServerType.InProcHandler32);
-                }
-
-                if (checkBoxInProcServer.Checked)
-                {
-                    server_types.Add(COMServerType.InProcServer32);
-                }
-
-                if (checkBoxLocalServer.Checked)
-                {
-                    server_types.Add(COMServerType.LocalServer32);
-                }
-
-                ServerTypes = server_types.AsReadOnly();
-                ConcurrentQueries = (int)numericUpDownConcurrentQueries.Value;
-                RefreshInterfaces = checkBoxRefreshInterfaces.Checked;
-                DialogResult = DialogResult.OK;
-                Close();
-            }
-        }
-
-        public IEnumerable<COMServerType> ServerTypes
-        {
-            get; private set;
-        }
-
-        public int ConcurrentQueries
-        {
-            get; private set; 
-        }
-
-        public bool RefreshInterfaces
-        {
-            get; private set;
-        }
-            
+        InitializeComponent();
+        numericUpDownConcurrentQueries.Maximum = Environment.ProcessorCount * 2;
+        numericUpDownConcurrentQueries.Value = Environment.ProcessorCount;
     }
+
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        if (!checkBoxInProcHandler.Checked && !checkBoxLocalServer.Checked && !checkBoxInProcServer.Checked)
+        {
+            MessageBox.Show(this, "Must check at least one server type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        else
+        {
+            List<COMServerType> server_types = new List<COMServerType>();
+            if (checkBoxInProcHandler.Checked)
+            {
+                server_types.Add(COMServerType.InProcHandler32);
+            }
+
+            if (checkBoxInProcServer.Checked)
+            {
+                server_types.Add(COMServerType.InProcServer32);
+            }
+
+            if (checkBoxLocalServer.Checked)
+            {
+                server_types.Add(COMServerType.LocalServer32);
+            }
+
+            ServerTypes = server_types.AsReadOnly();
+            ConcurrentQueries = (int)numericUpDownConcurrentQueries.Value;
+            RefreshInterfaces = checkBoxRefreshInterfaces.Checked;
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+    }
+
+    public IEnumerable<COMServerType> ServerTypes
+    {
+        get; private set;
+    }
+
+    public int ConcurrentQueries
+    {
+        get; private set; 
+    }
+
+    public bool RefreshInterfaces
+    {
+        get; private set;
+    }
+        
 }

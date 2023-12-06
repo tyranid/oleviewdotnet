@@ -20,76 +20,75 @@ using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 
-namespace OleViewDotNet
+namespace OleViewDotNet;
+
+public class COMProxyInstance : IProxyFormatter
 {
-    public class COMProxyInstance : IProxyFormatter
+    private readonly COMRegistry m_registry;
+
+    public IEnumerable<NdrComProxyDefinition> Entries { get; private set; }
+
+    public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
+
+    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries, 
+                              IEnumerable<NdrComplexTypeReference> complex_types,
+                              COMRegistry registry)
     {
-        private readonly COMRegistry m_registry;
+        Entries = new List<NdrComProxyDefinition>(entries).AsReadOnly();
+        ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
+        m_registry = registry;
+    }
 
-        public IEnumerable<NdrComProxyDefinition> Entries { get; private set; }
+    private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver, COMRegistry registry)
+    {
+        NdrParser parser = new NdrParser(resolver);
+        Entries = parser.ReadFromComProxyFile(path, clsid);
+        ComplexTypes = parser.ComplexTypes;
+        m_registry = registry;
+    }
 
-        public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
+    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) : this(path, Guid.Empty, resolver, registry)
+    {
+    }
 
-        internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries, 
-                                  IEnumerable<NdrComplexTypeReference> complex_types,
-                                  COMRegistry registry)
+    private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
+    private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new Dictionary<string, COMProxyInstance>(StringComparer.OrdinalIgnoreCase);
+
+    public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
+    {
+        if (m_proxies.ContainsKey(clsid.Clsid))
         {
-            Entries = new List<NdrComProxyDefinition>(entries).AsReadOnly();
-            ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
-            m_registry = registry;
+            return m_proxies[clsid.Clsid];
         }
-
-        private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver, COMRegistry registry)
+        else
         {
-            NdrParser parser = new NdrParser(resolver);
-            Entries = parser.ReadFromComProxyFile(path, clsid);
-            ComplexTypes = parser.ComplexTypes;
-            m_registry = registry;
+            COMProxyInstance proxy = new COMProxyInstance(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
+            m_proxies[clsid.Clsid] = proxy;
+            return proxy;
         }
+    }
 
-        private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) : this(path, Guid.Empty, resolver, registry)
+    public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
+    {
+        if (m_proxies_by_file.ContainsKey(path))
         {
+            return m_proxies_by_file[path];
         }
-
-        private static Dictionary<Guid, COMProxyInstance> m_proxies = new Dictionary<Guid, COMProxyInstance>();
-        private static Dictionary<string, COMProxyInstance> m_proxies_by_file = new Dictionary<string, COMProxyInstance>(StringComparer.OrdinalIgnoreCase);
-
-        public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
+        else
         {
-            if (m_proxies.ContainsKey(clsid.Clsid))
-            {
-                return m_proxies[clsid.Clsid];
-            }
-            else
-            {
-                COMProxyInstance proxy = new COMProxyInstance(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
-                m_proxies[clsid.Clsid] = proxy;
-                return proxy;
-            }
+            COMProxyInstance proxy = new COMProxyInstance(path, resolver, registry);
+            m_proxies_by_file[path] = proxy;
+            return proxy;
         }
+    }
 
-        public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
-        {
-            if (m_proxies_by_file.ContainsKey(path))
-            {
-                return m_proxies_by_file[path];
-            }
-            else
-            {
-                COMProxyInstance proxy = new COMProxyInstance(path, resolver, registry);
-                m_proxies_by_file[path] = proxy;
-                return proxy;
-            }
-        }
+    public string FormatText(ProxyFormatterFlags flags)
+    {
+        return COMUtilities.FormatProxy(m_registry, ComplexTypes, Entries, flags);
+    }
 
-        public string FormatText(ProxyFormatterFlags flags)
-        {
-            return COMUtilities.FormatProxy(m_registry, ComplexTypes, Entries, flags);
-        }
-
-        public string FormatText()
-        {
-            return FormatText(ProxyFormatterFlags.None);
-        }
+    public string FormatText()
+    {
+        return FormatText(ProxyFormatterFlags.None);
     }
 }

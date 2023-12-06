@@ -18,66 +18,65 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class PersistStreamTypeViewer : UserControl
 {
-    public partial class PersistStreamTypeViewer : UserControl
+    private object _obj;
+
+    public PersistStreamTypeViewer(string objName, object obj)
     {
-        private object _obj;
+        InitializeComponent();
+        _obj = obj;
+        btnInit.Enabled = obj is IPersistStreamInit;
+        Text = objName + " Persist Stream";
+    }
 
-        public PersistStreamTypeViewer(string objName, object obj)
+    private void btnSave_Click(object sender, EventArgs e)
+    {
+        try
         {
-            InitializeComponent();
-            _obj = obj;
-            btnInit.Enabled = obj is IPersistStreamInit;
-            Text = objName + " Persist Stream";
+            using (MemoryStream stm = new MemoryStream())
+            {
+                COMUtilities.SaveObjectToStream(_obj, stm);
+                hexEditor.Bytes = stm.ToArray();
+            }
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
 
-        private void btnSave_Click(object sender, EventArgs e)
+    private void btnInit_Click(object sender, EventArgs e)
+    {
+        IPersistStreamInit psi = _obj as IPersistStreamInit;
+
+        if (psi != null)
         {
             try
             {
-                using (MemoryStream stm = new MemoryStream())
-                {
-                    COMUtilities.SaveObjectToStream(_obj, stm);
-                    hexEditor.Bytes = stm.ToArray();
-                }
+                psi.InitNew();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+    }
 
-        private void btnInit_Click(object sender, EventArgs e)
+    private void btnLoad_Click(object sender, EventArgs e)
+    {
+        try
         {
-            IPersistStreamInit psi = _obj as IPersistStreamInit;
-
-            if (psi != null)
+            using (MemoryStream stm = new MemoryStream(hexEditor.Bytes))
             {
-                try
-                {
-                    psi.InitNew();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                COMUtilities.LoadObjectFromStream(_obj, stm);
             }
         }
-
-        private void btnLoad_Click(object sender, EventArgs e)
+        catch (Exception ex)
         {
-            try
-            {
-                using (MemoryStream stm = new MemoryStream(hexEditor.Bytes))
-                {
-                    COMUtilities.LoadObjectFromStream(_obj, stm);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

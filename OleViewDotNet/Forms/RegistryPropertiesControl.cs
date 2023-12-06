@@ -18,46 +18,45 @@ using OleViewDotNet.Database;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
-{
-    public partial class RegistryPropertiesControl : UserControl
-    {
-        private void AddListItem(string name, object value)
-        {
-            if (value != null)
-            {
-                ListViewItem item = listViewProperties.Items.Add(name);
-                item.SubItems.Add(value.ToString());
-            }
-        }
+namespace OleViewDotNet.Forms;
 
-        public RegistryPropertiesControl(COMRegistry registry)
+public partial class RegistryPropertiesControl : UserControl
+{
+    private void AddListItem(string name, object value)
+    {
+        if (value != null)
         {
-            InitializeComponent();
-            AddListItem("Created Date", registry.CreatedDate);
-            AddListItem("Created Machine", registry.CreatedMachine);
-            AddListItem("Created User", registry.CreatedUser);
-            AddListItem("Loading Mode", registry.LoadingMode);
-            AddListItem("64bit", registry.SixtyFourBit);
-            AddListItem("Architecture", registry.Architecture);
-            AddListItem("File Path", registry.FilePath);
-            AddListItem("CLSID Count", registry.Clsids.Count);
-            AddListItem("InProcServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcServer32)).Count());
-            AddListItem("LocalServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.LocalServer32)).Count());
-            AddListItem("InProcHandler CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcHandler32)).Count());
-            AddListItem("AppID Count", registry.AppIDs.Count);
-            AddListItem("ProgID Count", registry.Progids.Count);
-            AddListItem("Interfaces Count", registry.Interfaces.Count);
-            AddListItem("Implemented Categories Count", registry.ImplementedCategories.Count);
-            AddListItem("Low Rights Policy Count", registry.LowRights.Count());
-            AddListItem("MIME Types Count", registry.MimeTypes.Count());
-            AddListItem("Pre-Approved Count", registry.PreApproved.Count());
-            AddListItem("Type Libs Count", registry.Typelibs.Count);
-            AddListItem("Runtime Class Count", registry.RuntimeClasses.Count);
-            AddListItem("Runtime Server Count", registry.RuntimeServers.Count);
-            listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-            Text = "Registry Properties";
+            ListViewItem item = listViewProperties.Items.Add(name);
+            item.SubItems.Add(value.ToString());
         }
+    }
+
+    public RegistryPropertiesControl(COMRegistry registry)
+    {
+        InitializeComponent();
+        AddListItem("Created Date", registry.CreatedDate);
+        AddListItem("Created Machine", registry.CreatedMachine);
+        AddListItem("Created User", registry.CreatedUser);
+        AddListItem("Loading Mode", registry.LoadingMode);
+        AddListItem("64bit", registry.SixtyFourBit);
+        AddListItem("Architecture", registry.Architecture);
+        AddListItem("File Path", registry.FilePath);
+        AddListItem("CLSID Count", registry.Clsids.Count);
+        AddListItem("InProcServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcServer32)).Count());
+        AddListItem("LocalServer CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.LocalServer32)).Count());
+        AddListItem("InProcHandler CLSID Count", registry.Clsids.Values.Where(c => c.Servers.ContainsKey(COMServerType.InProcHandler32)).Count());
+        AddListItem("AppID Count", registry.AppIDs.Count);
+        AddListItem("ProgID Count", registry.Progids.Count);
+        AddListItem("Interfaces Count", registry.Interfaces.Count);
+        AddListItem("Implemented Categories Count", registry.ImplementedCategories.Count);
+        AddListItem("Low Rights Policy Count", registry.LowRights.Count());
+        AddListItem("MIME Types Count", registry.MimeTypes.Count());
+        AddListItem("Pre-Approved Count", registry.PreApproved.Count());
+        AddListItem("Type Libs Count", registry.Typelibs.Count);
+        AddListItem("Runtime Class Count", registry.RuntimeClasses.Count);
+        AddListItem("Runtime Server Count", registry.RuntimeServers.Count);
+        listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+        listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        Text = "Registry Properties";
     }
 }

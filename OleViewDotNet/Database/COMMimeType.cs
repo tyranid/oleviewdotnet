@@ -20,87 +20,86 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace OleViewDotNet.Database
+namespace OleViewDotNet.Database;
+
+public class COMMimeType : IXmlSerializable
 {
-    public class COMMimeType : IXmlSerializable
+    private readonly COMRegistry m_registry;
+
+    public string MimeType { get; private set; }
+    public Guid Clsid { get; private set; }
+    public COMCLSIDEntry ClassEntry
     {
-        private readonly COMRegistry m_registry;
-
-        public string MimeType { get; private set; }
-        public Guid Clsid { get; private set; }
-        public COMCLSIDEntry ClassEntry
+        get
         {
-            get
-            {
-                return m_registry.Clsids.GetGuidEntry(Clsid);
-            }
+            return m_registry.Clsids.GetGuidEntry(Clsid);
+        }
+    }
+
+    public string Extension { get; private set; }
+    public string Name => ClassEntry?.Name ?? string.Empty;
+
+    public override string ToString()
+    {
+        return MimeType;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
         }
 
-        public string Extension { get; private set; }
-        public string Name => ClassEntry?.Name ?? string.Empty;
-
-        public override string ToString()
+        COMMimeType right = obj as COMMimeType;
+        if (right == null)
         {
-            return MimeType;
+            return false;
         }
 
-        public override bool Equals(object obj)
+        return MimeType == right.MimeType && 
+            Clsid == right.Clsid && Extension == right.Extension;
+    }
+
+    public override int GetHashCode()
+    {
+        return MimeType.GetSafeHashCode() ^ Clsid.GetHashCode() ^ Extension.GetSafeHashCode();
+    }
+
+    internal COMMimeType(COMRegistry registry, string mime_type, RegistryKey key) : this(registry)
+    {
+        string clsid = key.GetValue("CLSID") as string;
+        string extension = key.GetValue("Extension") as string;
+        Guid guid;
+        if ((clsid != null) && Guid.TryParse(clsid, out guid))
         {
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-
-            COMMimeType right = obj as COMMimeType;
-            if (right == null)
-            {
-                return false;
-            }
-
-            return MimeType == right.MimeType && 
-                Clsid == right.Clsid && Extension == right.Extension;
+            Clsid = guid;
         }
+        Extension = extension;
+        MimeType = mime_type;
+    }
 
-        public override int GetHashCode()
-        {
-            return MimeType.GetSafeHashCode() ^ Clsid.GetHashCode() ^ Extension.GetSafeHashCode();
-        }
+    internal COMMimeType(COMRegistry registry)
+    {
+        m_registry = registry;
+    }
 
-        internal COMMimeType(COMRegistry registry, string mime_type, RegistryKey key) : this(registry)
-        {
-            string clsid = key.GetValue("CLSID") as string;
-            string extension = key.GetValue("Extension") as string;
-            Guid guid;
-            if ((clsid != null) && Guid.TryParse(clsid, out guid))
-            {
-                Clsid = guid;
-            }
-            Extension = extension;
-            MimeType = mime_type;
-        }
+    XmlSchema IXmlSerializable.GetSchema()
+    {
+        return null;
+    }
 
-        internal COMMimeType(COMRegistry registry)
-        {
-            m_registry = registry;
-        }
+    void IXmlSerializable.ReadXml(XmlReader reader)
+    {
+        MimeType = reader.GetAttribute("mimetype");
+        Clsid = reader.ReadGuid("clsid");
+        Extension = reader.GetAttribute("ext");
+    }
 
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            MimeType = reader.GetAttribute("mimetype");
-            Clsid = reader.ReadGuid("clsid");
-            Extension = reader.GetAttribute("ext");
-        }
-
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteOptionalAttributeString("mimetype", MimeType);
-            writer.WriteGuid("clsid", Clsid);
-            writer.WriteOptionalAttributeString("ext", Extension);
-        }
+    void IXmlSerializable.WriteXml(XmlWriter writer)
+    {
+        writer.WriteOptionalAttributeString("mimetype", MimeType);
+        writer.WriteGuid("clsid", Clsid);
+        writer.WriteOptionalAttributeString("ext", Extension);
     }
 }

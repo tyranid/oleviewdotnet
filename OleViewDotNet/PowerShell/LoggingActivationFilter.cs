@@ -19,75 +19,74 @@ using System;
 using System.ComponentModel;
 using System.IO;
 
-namespace OleViewDotNet.PowerShell
+namespace OleViewDotNet.PowerShell;
+
+public class LoggingActivationFilter : IActivationFilter
 {
-    public class LoggingActivationFilter : IActivationFilter
+    static LoggingActivationFilter CreateActivationFilter()
     {
-        static LoggingActivationFilter CreateActivationFilter()
+        LoggingActivationFilter filter = new LoggingActivationFilter();
+        int hr = COMUtilities.CoRegisterActivationFilter(filter);
+        if (hr != 0)
         {
-            LoggingActivationFilter filter = new LoggingActivationFilter();
-            int hr = COMUtilities.CoRegisterActivationFilter(filter);
-            if (hr != 0)
-            {
-                throw new Win32Exception(hr);
-            }
-            return filter;
+            throw new Win32Exception(hr);
         }
+        return filter;
+    }
 
-        static Lazy<LoggingActivationFilter> _instance = new Lazy<LoggingActivationFilter>(CreateActivationFilter, true);
+    static Lazy<LoggingActivationFilter> _instance = new Lazy<LoggingActivationFilter>(CreateActivationFilter, true);
 
-        private COMRegistry _registry;
-        private TextWriter _writer;
+    private COMRegistry _registry;
+    private TextWriter _writer;
 
-        public static LoggingActivationFilter Instance
+    public static LoggingActivationFilter Instance
+    {
+        get
         {
-            get
-            {
-                return _instance.Value;
-            }
+            return _instance.Value;
         }
+    }
 
-        public void Stop()
+    public void Stop()
+    {
+        lock (this)
         {
-            lock (this)
-            {
-                _registry = null;
-                _writer?.Dispose();
-                _writer = null;
-            }
+            _registry = null;
+            _writer?.Dispose();
+            _writer = null;
         }
+    }
 
-        public void Start(string path, bool append, COMRegistry registry)
+    public void Start(string path, bool append, COMRegistry registry)
+    {
+        lock (this)
         {
-            lock (this)
-            {
-                Stop();
-                _writer = new StreamWriter(path, append);
-                _registry = registry;
-            }
+            Stop();
+            _writer = new StreamWriter(path, append);
+            _registry = registry;
         }
+    }
 
-        void IActivationFilter.HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+    void IActivationFilter.HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, ref Guid rclsid, out Guid pReplacementClsId)
+    {
+        pReplacementClsId = rclsid;
+        lock (this)
         {
-            pReplacementClsId = rclsid;
-            lock (this)
+            if (_writer == null)
             {
-                if (_writer == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                COMCLSIDEntry entry = _registry?.MapClsidToEntry(rclsid);
-                if (entry == null)
-                {
-                    _writer.WriteLine("dwActivationType: {0} rclsid: {1}", 
-                        dwActivationType, rclsid);
-                }
-                else
-                {
-                    _writer.WriteLine("dwActivationType: {0} rclsid: {1} name '{2}'", 
-                        dwActivationType, rclsid, entry.Name);
-                }
+            COMCLSIDEntry entry = _registry?.MapClsidToEntry(rclsid);
+            if (entry == null)
+            {
+                _writer.WriteLine("dwActivationType: {0} rclsid: {1}", 
+                    dwActivationType, rclsid);
+            }
+            else
+            {
+                _writer.WriteLine("dwActivationType: {0} rclsid: {1} name '{2}'", 
+                    dwActivationType, rclsid, entry.Name);
             }
         }
     }

@@ -19,67 +19,66 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class ObjectHexEditor : UserControl
 {
-    public partial class ObjectHexEditor : UserControl
+    private COMRegistry m_registry;
+
+    public ObjectHexEditor(COMRegistry registry, string name, byte[] bytes)
     {
-        private COMRegistry m_registry;
-
-        public ObjectHexEditor(COMRegistry registry, string name, byte[] bytes)
+        InitializeComponent();
+        hexEditor.Bytes = bytes;
+        if (name != null)
         {
-            InitializeComponent();
-            hexEditor.Bytes = bytes;
-            if (name != null)
-            {
-                Text = name;
-            }
-            else
-            {
-                Text = "Hex Editor";
-            }
-            m_registry = registry;
+            Text = name;
         }
-
-        private async void btnLoadFromStream_Click(object sender, System.EventArgs e)
+        else
         {
-            try
-            {
-                MemoryStream stm = new MemoryStream(hexEditor.Bytes);
-                Guid clsid;
-                object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out clsid);
-                await EntryPoint.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, false);
-            }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+            Text = "Hex Editor";
         }
+        m_registry = registry;
+    }
 
-        private async void btnUnmarshal_Click(object sender, EventArgs e)
+    private async void btnLoadFromStream_Click(object sender, System.EventArgs e)
+    {
+        try
         {
-            try
-            {
-                MemoryStream stm = new MemoryStream(hexEditor.Bytes);
-                object obj = COMUtilities.UnmarshalObject(hexEditor.Bytes);
-                await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(obj, "Unmarshaled Object");
-            }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+            MemoryStream stm = new MemoryStream(hexEditor.Bytes);
+            Guid clsid;
+            object obj = COMUtilities.OleLoadFromStream(new MemoryStream(hexEditor.Bytes), out clsid);
+            await EntryPoint.GetMainForm(m_registry).HostObject(m_registry.MapClsidToEntry(clsid), obj, false);
         }
-
-        private void btnMarshalProps_Click(object sender, EventArgs e)
+        catch (Exception ex)
         {
-            try
-            {
-                COMObjRef objref = COMObjRef.FromArray(hexEditor.Bytes);
-                EntryPoint.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, objref));
-            }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+            EntryPoint.ShowError(this, ex);
+        }
+    }
+
+    private async void btnUnmarshal_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            MemoryStream stm = new MemoryStream(hexEditor.Bytes);
+            object obj = COMUtilities.UnmarshalObject(hexEditor.Bytes);
+            await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(obj, "Unmarshaled Object");
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
+    }
+
+    private void btnMarshalProps_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            COMObjRef objref = COMObjRef.FromArray(hexEditor.Bytes);
+            EntryPoint.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry, objref));
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
         }
     }
 }

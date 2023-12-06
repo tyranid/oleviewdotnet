@@ -17,38 +17,37 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class GetTextForm : Form
 {
-    public partial class GetTextForm : Form
+    public string Data
     {
-        public string Data
-        {
-            get;
-            private set;
-        }
+        get;
+        private set;
+    }
 
-        public GetTextForm(string strInitial)
-        {
-            Data = strInitial;
-            InitializeComponent();
-        }
+    public GetTextForm(string strInitial)
+    {
+        Data = strInitial;
+        InitializeComponent();
+    }
 
-        private void GetTextForm_Load(object sender, EventArgs e)
-        {
-            textBox.Text = Data;
-        }
+    private void GetTextForm_Load(object sender, EventArgs e)
+    {
+        textBox.Text = Data;
+    }
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            Data = textBox.Text;
-            DialogResult = DialogResult.OK;
-            Close();
-        }
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        Data = textBox.Text;
+        DialogResult = DialogResult.OK;
+        Close();
+    }
 
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.Cancel;
-            Close();
-        }
+    private void btnCancel_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 }

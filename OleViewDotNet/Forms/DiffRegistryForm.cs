@@ -19,86 +19,38 @@ using System;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class DiffRegistryForm : Form
 {
-    public partial class DiffRegistryForm : Form
+    public DiffRegistryForm(COMRegistry current_registry)
     {
-        public DiffRegistryForm(COMRegistry current_registry)
+        InitializeComponent();
+        PopulateComboBox(comboBoxLeft);
+        PopulateComboBox(comboBoxRight);
+        comboBoxLeft.SelectedItem = current_registry;
+    }
+
+    private void PopulateComboBox(ComboBox comboxBox)
+    {
+        foreach (MainForm form in Application.OpenForms.OfType<MainForm>())
         {
-            InitializeComponent();
-            PopulateComboBox(comboBoxLeft);
-            PopulateComboBox(comboBoxRight);
-            comboBoxLeft.SelectedItem = current_registry;
+            comboxBox.Items.Add(form.Registry);
         }
+    }
 
-        private void PopulateComboBox(ComboBox comboxBox)
+    private void OpenRegistry(ComboBox comboBox)
+    {
+        using (OpenFileDialog dlg = new OpenFileDialog())
         {
-            foreach (MainForm form in Application.OpenForms.OfType<MainForm>())
-            {
-                comboxBox.Items.Add(form.Registry);
-            }
-        }
-
-        private void OpenRegistry(ComboBox comboBox)
-        {
-            using (OpenFileDialog dlg = new OpenFileDialog())
-            {
-                dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    try
-                    {
-                        COMRegistry registry = COMUtilities.LoadRegistry(this, dlg.FileName);
-                        comboBox.Items.Add(registry);
-                        comboBox.SelectedItem = registry;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
-
-        private COMRegistryDiffMode GetDiffMode()
-        {
-            if (radioLeftOnly.Checked)
-            {
-                return COMRegistryDiffMode.LeftOnly;
-            }
-
-            return COMRegistryDiffMode.RightOnly;
-        }
-
-        private void btnAddLeft_Click(object sender, EventArgs e)
-        {
-            OpenRegistry(comboBoxLeft);
-        }
-
-        private void btnAddRight_Click(object sender, EventArgs e)
-        {
-            OpenRegistry(comboBoxRight);
-        }
-
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            COMRegistry left = comboBoxLeft.SelectedItem as COMRegistry;
-            COMRegistry right = comboBoxRight.SelectedItem as COMRegistry;
-
-            if (left == null || right == null)
-            {
-                MessageBox.Show(this, "Please Select Two Registries", "Select Registries", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
+            dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 try
                 {
-                    DiffRegistry = COMUtilities.DiffRegistry(this, left, right, GetDiffMode());
-                    DialogResult = DialogResult.OK;
-                    Close();
+                    COMRegistry registry = COMUtilities.LoadRegistry(this, dlg.FileName);
+                    comboBox.Items.Add(registry);
+                    comboBox.SelectedItem = registry;
                 }
                 catch (OperationCanceledException)
                 {
@@ -109,10 +61,57 @@ namespace OleViewDotNet.Forms
                 }
             }
         }
+    }
 
-        public COMRegistry DiffRegistry
+    private COMRegistryDiffMode GetDiffMode()
+    {
+        if (radioLeftOnly.Checked)
         {
-            get; private set;
+            return COMRegistryDiffMode.LeftOnly;
         }
+
+        return COMRegistryDiffMode.RightOnly;
+    }
+
+    private void btnAddLeft_Click(object sender, EventArgs e)
+    {
+        OpenRegistry(comboBoxLeft);
+    }
+
+    private void btnAddRight_Click(object sender, EventArgs e)
+    {
+        OpenRegistry(comboBoxRight);
+    }
+
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        COMRegistry left = comboBoxLeft.SelectedItem as COMRegistry;
+        COMRegistry right = comboBoxRight.SelectedItem as COMRegistry;
+
+        if (left == null || right == null)
+        {
+            MessageBox.Show(this, "Please Select Two Registries", "Select Registries", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        else
+        {
+            try
+            {
+                DiffRegistry = COMUtilities.DiffRegistry(this, left, right, GetDiffMode());
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
+
+    public COMRegistry DiffRegistry
+    {
+        get; private set;
     }
 }

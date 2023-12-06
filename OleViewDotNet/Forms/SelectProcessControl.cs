@@ -20,94 +20,93 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class SelectProcessControl : UserControl
 {
-    public partial class SelectProcessControl : UserControl
+    DisposableList<NtProcess> _processes;
+
+    public SelectProcessControl()
     {
-        DisposableList<NtProcess> _processes;
+        InitializeComponent();
+        Disposed += SelectProcessControl_Disposed;
+    }
 
-        public SelectProcessControl()
-        {
-            InitializeComponent();
-            Disposed += SelectProcessControl_Disposed;
-        }
+    private void SelectProcessControl_Disposed(object sender, EventArgs e)
+    {
+        ClearListView();
+    }
 
-        private void SelectProcessControl_Disposed(object sender, EventArgs e)
-        {
-            ClearListView();
-        }
+    private void listViewProcesses_ColumnClick(object sender, ColumnClickEventArgs e)
+    {
+        ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
+    }
 
-        private void listViewProcesses_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
-        }
+    private void ClearListView()
+    {
+        _processes?.Dispose();
+        _processes = new DisposableList<NtProcess>();
+        listViewProcesses.Items.Clear();
+    }
 
-        private void ClearListView()
+    public void UpdateProcessList(ProcessAccessRights desired_access, bool require_token, bool filter_native)
+    {
+        NtToken.EnableDebugPrivilege();
+        ClearListView();
+        using (var ps = NtProcess.GetProcesses(ProcessAccessRights.QueryLimitedInformation | desired_access, true).ToDisposableList())
         {
-            _processes?.Dispose();
-            _processes = new DisposableList<NtProcess>();
-            listViewProcesses.Items.Clear();
-        }
-
-        public void UpdateProcessList(ProcessAccessRights desired_access, bool require_token, bool filter_native)
-        {
-            NtToken.EnableDebugPrivilege();
-            ClearListView();
-            using (var ps = NtProcess.GetProcesses(ProcessAccessRights.QueryLimitedInformation | desired_access, true).ToDisposableList())
+            foreach (var p in ps.OrderBy(p => p.ProcessId))
             {
-                foreach (var p in ps.OrderBy(p => p.ProcessId))
+                if (p.Is64Bit && !Environment.Is64BitProcess && filter_native)
                 {
-                    if (p.Is64Bit && !Environment.Is64BitProcess && filter_native)
+                    continue;
+                }
+
+                using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false))
+                {
+                    if (!result.IsSuccess && require_token)
                     {
                         continue;
                     }
 
-                    using (var result = NtToken.OpenProcessToken(p, TokenAccessRights.Query, false))
+                    ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
+                    item.SubItems.Add(p.Name);
+                    item.SubItems.Add(COMUtilities.FormatBitness(p.Is64Bit));
+                    if (result.IsSuccess)
                     {
-                        if (!result.IsSuccess && require_token)
-                        {
-                            continue;
-                        }
-
-                        ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
-                        item.SubItems.Add(p.Name);
-                        item.SubItems.Add(COMUtilities.FormatBitness(p.Is64Bit));
-                        if (result.IsSuccess)
-                        {
-                            NtToken token = result.Result;
-                            item.SubItems.Add(p.User.Name);
-                            item.SubItems.Add(token.IntegrityLevel.ToString());
-                        }
-                        item.Tag = _processes.AddResource(p.Duplicate());
+                        NtToken token = result.Result;
+                        item.SubItems.Add(p.User.Name);
+                        item.SubItems.Add(token.IntegrityLevel.ToString());
                     }
+                    item.Tag = _processes.AddResource(p.Duplicate());
                 }
             }
-            listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-            listViewProcesses.ListViewItemSorter = new ListItemComparer(0);
         }
+        listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+        listViewProcesses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        listViewProcesses.ListViewItemSorter = new ListItemComparer(0);
+    }
 
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public NtProcess SelectedProcess
-        {
-            get
-            {
-                if (listViewProcesses.SelectedItems.Count > 0)
-                {
-                    return listViewProcesses.SelectedItems[0].Tag as NtProcess;
-                }
-                return null;
-            }
-        }
-
-        public event EventHandler ProcessSelected;
-
-        private void listViewProcesses_DoubleClick(object sender, EventArgs e)
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public NtProcess SelectedProcess
+    {
+        get
         {
             if (listViewProcesses.SelectedItems.Count > 0)
             {
-                ProcessSelected?.Invoke(this, new EventArgs());
+                return listViewProcesses.SelectedItems[0].Tag as NtProcess;
             }
+            return null;
+        }
+    }
+
+    public event EventHandler ProcessSelected;
+
+    private void listViewProcesses_DoubleClick(object sender, EventArgs e)
+    {
+        if (listViewProcesses.SelectedItems.Count > 0)
+        {
+            ProcessSelected?.Invoke(this, new EventArgs());
         }
     }
 }

@@ -19,109 +19,108 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+partial class WaitingDialog : Form
 {
-    partial class WaitingDialog : Form
+    private class ReportProgress : IProgress<Tuple<string, int>>
     {
-        private class ReportProgress : IProgress<Tuple<string, int>>
+        private CancellationToken _token;
+        private Action<string, int> _report;
+        private Func<string, string> _format;
+
+        public void Report(Tuple<string, int> data)
         {
-            private CancellationToken _token;
-            private Action<string, int> _report;
-            private Func<string, string> _format;
-
-            public void Report(Tuple<string, int> data)
-            {
-                _token.ThrowIfCancellationRequested();
-                _report(_format(data.Item1), data.Item2);
-            }
-
-            public ReportProgress(Action<string, int> report, CancellationToken token, Func<string, string> format)
-            {
-                _token = token;
-                _format = format;
-                _report = report;
-            }
+            _token.ThrowIfCancellationRequested();
+            _report(_format(data.Item1), data.Item2);
         }
 
-        private ReportProgress m_progress;
-        private BackgroundWorker m_worker;
-        private CancellationTokenSource m_cancellation;
-
-        public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func, Func<string, string> format_label)
+        public ReportProgress(Action<string, int> report, CancellationToken token, Func<string, string> format)
         {
-            if (format_label == null)
-            {
-                format_label = s => String.Format("Currently Processing {0}. Please Wait.", s);
-            }
-            m_cancellation = new CancellationTokenSource();
-            CancellationToken token = m_cancellation.Token;
-            m_progress = new ReportProgress(SetProgress, token, format_label);
-            m_worker = new BackgroundWorker();
-            m_worker.DoWork += (sender, e) => Result = worker_func(m_progress, token);
-            m_worker.RunWorkerCompleted += RunWorkerCompletedCallback;
-            InitializeComponent();
-            SetProgress(String.Empty, 0);
+            _token = token;
+            _format = format;
+            _report = report;
         }
+    }
 
-        public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func) 
-            : this(worker_func, null)
+    private ReportProgress m_progress;
+    private BackgroundWorker m_worker;
+    private CancellationTokenSource m_cancellation;
+
+    public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func, Func<string, string> format_label)
+    {
+        if (format_label == null)
         {
+            format_label = s => String.Format("Currently Processing {0}. Please Wait.", s);
         }
+        m_cancellation = new CancellationTokenSource();
+        CancellationToken token = m_cancellation.Token;
+        m_progress = new ReportProgress(SetProgress, token, format_label);
+        m_worker = new BackgroundWorker();
+        m_worker.DoWork += (sender, e) => Result = worker_func(m_progress, token);
+        m_worker.RunWorkerCompleted += RunWorkerCompletedCallback;
+        InitializeComponent();
+        SetProgress(String.Empty, 0);
+    }
 
-        private void SetProgress(string value, int percent)
+    public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func) 
+        : this(worker_func, null)
+    {
+    }
+
+    private void SetProgress(string value, int percent)
+    {
+        Action set = () => SetProgress(value, percent);
+        if (InvokeRequired)
         {
-            Action set = () => SetProgress(value, percent);
-            if (InvokeRequired)
-            {
-                Invoke(set);
-            }
-            else
-            {
-                if (percent < 0)
-                {
-                    progressBar.Style = ProgressBarStyle.Marquee;
-                }
-                else
-                {
-                    progressBar.Style = ProgressBarStyle.Continuous;
-                    progressBar.Value = percent;
-                }
-
-                lblProgress.Text = value;
-            }
+            Invoke(set);
         }
-
-        private void LoadingDialog_Load(object sender, EventArgs e)
-        {                        
-            m_worker.RunWorkerAsync();
-        }
-
-        private void RunWorkerCompletedCallback(object sender, RunWorkerCompletedEventArgs e)
+        else
         {
-            if (e.Error != null)
+            if (percent < 0)
             {
-                DialogResult = DialogResult.Cancel;
-                Error = e.Error;
+                progressBar.Style = ProgressBarStyle.Marquee;
             }
             else
             {
-                DialogResult = DialogResult.OK;
+                progressBar.Style = ProgressBarStyle.Continuous;
+                progressBar.Value = percent;
             }
-            Close();
+
+            lblProgress.Text = value;
         }
+    }
 
-        public Exception Error { get; private set; }
-        public object Result { get; private set; }
+    private void LoadingDialog_Load(object sender, EventArgs e)
+    {                        
+        m_worker.RunWorkerAsync();
+    }
 
-        public bool CancelEnabled
+    private void RunWorkerCompletedCallback(object sender, RunWorkerCompletedEventArgs e)
+    {
+        if (e.Error != null)
         {
-            get { return btnCancel.Enabled; }
-            set { btnCancel.Enabled = value; }
+            DialogResult = DialogResult.Cancel;
+            Error = e.Error;
         }
-
-        private void btnCancel_Click(object sender, EventArgs e)
+        else
         {
-            m_cancellation.Cancel();
+            DialogResult = DialogResult.OK;
         }
+        Close();
+    }
+
+    public Exception Error { get; private set; }
+    public object Result { get; private set; }
+
+    public bool CancelEnabled
+    {
+        get { return btnCancel.Enabled; }
+        set { btnCancel.Enabled = value; }
+    }
+
+    private void btnCancel_Click(object sender, EventArgs e)
+    {
+        m_cancellation.Cancel();
     }
 }

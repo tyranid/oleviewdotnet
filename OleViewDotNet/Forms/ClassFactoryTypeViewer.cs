@@ -20,43 +20,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class ClassFactoryTypeViewer : UserControl
 {
-    public partial class ClassFactoryTypeViewer : UserControl
+    private object _obj;
+    private string _name;
+    private COMRegistry _registry;
+    private ICOMClassEntry _entry;
+
+    public ClassFactoryTypeViewer(COMRegistry registry, ICOMClassEntry entry, string objName, object obj)
     {
-        private object _obj;
-        private string _name;
-        private COMRegistry _registry;
-        private ICOMClassEntry _entry;
+        InitializeComponent();
+        _obj = obj;
+        _name = objName;
+        _registry = registry;
+        _entry = entry;
+        Text = objName + " ClassFactory";
+    }
 
-        public ClassFactoryTypeViewer(COMRegistry registry, ICOMClassEntry entry, string objName, object obj)
+    private void btnCreateInstance_Click(object sender, EventArgs e)
+    {
+        try
         {
-            InitializeComponent();
-            _obj = obj;
-            _name = objName;
-            _registry = registry;
-            _entry = entry;
-            Text = objName + " ClassFactory";
+            IClassFactory factory = (IClassFactory)_obj;
+            object new_object;
+            Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
+            Dictionary<string, string> props = new Dictionary<string, string>();
+            props.Add("Name", _name);
+            factory.CreateInstance(null, ref IID_IUnknown, out new_object);
+            ObjectInformation view = new ObjectInformation(_registry, _entry, _name, new_object,
+                props, _registry.GetInterfacesForObject(new_object).ToArray());
+            EntryPoint.GetMainForm(_registry).HostControl(view);
         }
-
-        private void btnCreateInstance_Click(object sender, EventArgs e)
+        catch (Exception ex)
         {
-            try
-            {
-                IClassFactory factory = (IClassFactory)_obj;
-                object new_object;
-                Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
-                Dictionary<string, string> props = new Dictionary<string, string>();
-                props.Add("Name", _name);
-                factory.CreateInstance(null, ref IID_IUnknown, out new_object);
-                ObjectInformation view = new ObjectInformation(_registry, _entry, _name, new_object,
-                    props, _registry.GetInterfacesForObject(new_object).ToArray());
-                EntryPoint.GetMainForm(_registry).HostControl(view);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

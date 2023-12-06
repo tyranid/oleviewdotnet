@@ -17,19 +17,18 @@
 
 using System;
 
-namespace OleViewDotNet
-{
-    [Flags]
-    public enum ProxyFormatterFlags
-    {
-        None,
-        RemoveComments,
-        RemoveComplexTypes
-    }
+namespace OleViewDotNet;
 
-    public interface IProxyFormatter 
-    {
-        string FormatText(ProxyFormatterFlags flags);
-        string FormatText();
-    }
+[Flags]
+public enum ProxyFormatterFlags
+{
+    None,
+    RemoveComments,
+    RemoveComplexTypes
+}
+
+public interface IProxyFormatter 
+{
+    string FormatText(ProxyFormatterFlags flags);
+    string FormatText();
 }

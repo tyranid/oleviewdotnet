@@ -19,36 +19,35 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class SelectProcessForm : Form
 {
-    public partial class SelectProcessForm : Form
+    public SelectProcessForm(ProcessAccessRights desired_access, bool require_token, bool filter_native)
     {
-        public SelectProcessForm(ProcessAccessRights desired_access, bool require_token, bool filter_native)
-        {
-            InitializeComponent();
-            selectProcessControl.UpdateProcessList(desired_access, require_token, filter_native);
-            selectProcessControl.ProcessSelected += btnOK_Click;
-            Disposed += SelectProcessForm_Disposed;
-        }
+        InitializeComponent();
+        selectProcessControl.UpdateProcessList(desired_access, require_token, filter_native);
+        selectProcessControl.ProcessSelected += btnOK_Click;
+        Disposed += SelectProcessForm_Disposed;
+    }
 
-        private void SelectProcessForm_Disposed(object sender, EventArgs e)
-        {
-            selectProcessControl.Dispose();
-        }
+    private void SelectProcessForm_Disposed(object sender, EventArgs e)
+    {
+        selectProcessControl.Dispose();
+    }
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.OK;
-            Close();
-        }
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.OK;
+        Close();
+    }
 
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public NtProcess SelectedProcess
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public NtProcess SelectedProcess
+    {
+        get
         {
-            get
-            {
-                return selectProcessControl.SelectedProcess;
-            }
+            return selectProcessControl.SelectedProcess;
         }
     }
 }

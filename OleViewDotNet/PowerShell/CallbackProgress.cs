@@ -16,25 +16,24 @@
 
 using System;
 
-namespace OleViewDotNet.PowerShell
+namespace OleViewDotNet.PowerShell;
+
+/// <summary>
+/// Class to make it easier for PowerShell to implement a IProgress callback.
+/// </summary>
+public class CallbackProgress : IProgress<Tuple<string, int>>
 {
-    /// <summary>
-    /// Class to make it easier for PowerShell to implement a IProgress callback.
-    /// </summary>
-    public class CallbackProgress : IProgress<Tuple<string, int>>
+    private readonly string _activity;
+    private readonly Action<string, string, int> _callback;
+
+    public CallbackProgress(string activity, Action<string, string, int> callback)
     {
-        private readonly string _activity;
-        private readonly Action<string, string, int> _callback;
+        _callback = callback;
+        _activity = activity;
+    }
 
-        public CallbackProgress(string activity, Action<string, string, int> callback)
-        {
-            _callback = callback;
-            _activity = activity;
-        }
-
-        void IProgress<Tuple<string, int>>.Report(Tuple<string, int> value)
-        {
-            _callback(_activity, value.Item1, value.Item2);
-        }
+    void IProgress<Tuple<string, int>>.Report(Tuple<string, int> value)
+    {
+        _callback(_activity, value.Item1, value.Item2);
     }
 }

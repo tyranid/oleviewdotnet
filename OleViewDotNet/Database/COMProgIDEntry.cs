@@ -20,114 +20,113 @@ using Microsoft.Win32;
 using System.Xml.Serialization;
 using System.Xml.Schema;
 
-namespace OleViewDotNet.Database
+namespace OleViewDotNet.Database;
+
+public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid
 {
-    public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid
+    private readonly COMRegistry m_registry;
+
+    public COMProgIDEntry(COMRegistry registry, 
+        string progid, Guid clsid, RegistryKey rootKey) : this(registry)
     {
-        private readonly COMRegistry m_registry;
+        Clsid = clsid;
+        ProgID = progid;
+        Name = rootKey.GetValue(null, string.Empty).ToString();
+        Source = rootKey.GetSource();
+    }
 
-        public COMProgIDEntry(COMRegistry registry, 
-            string progid, Guid clsid, RegistryKey rootKey) : this(registry)
+    internal COMProgIDEntry(COMRegistry registry,
+        ActCtxComProgIdRedirection progid_redirection)
+    {
+        Clsid = progid_redirection.Clsid;
+        ProgID = progid_redirection.ProgId;
+        Name = ProgID;
+        Source = COMRegistryEntrySource.ActCtx;
+    }
+
+    internal COMProgIDEntry(COMRegistry registry,
+        string progid, Guid clsid, COMPackagedClassEntry classEntry) : this(registry)
+    {
+        Clsid = clsid;
+        ProgID = progid;
+        Name = classEntry.DisplayName;
+        Source = COMRegistryEntrySource.Packaged;
+    }
+
+    internal COMProgIDEntry(COMRegistry registry)
+    {
+        m_registry = registry;
+    }
+
+    public int CompareTo(COMProgIDEntry right)
+    {
+        return string.Compare(ProgID, right.ProgID);
+    }
+
+    public string ProgID { get; private set; }
+
+    public Guid Clsid { get; private set; }
+
+    public COMCLSIDEntry ClassEntry
+    {
+        get
         {
-            Clsid = clsid;
-            ProgID = progid;
-            Name = rootKey.GetValue(null, string.Empty).ToString();
-            Source = rootKey.GetSource();
+            return m_registry.Clsids.GetGuidEntry(Clsid);
+        }
+    }
+
+    public string Name { get; private set; }
+
+    public COMRegistryEntrySource Source { get; private set; }
+
+    Guid IComGuid.ComGuid => Clsid;
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
         }
 
-        internal COMProgIDEntry(COMRegistry registry,
-            ActCtxComProgIdRedirection progid_redirection)
+        COMProgIDEntry right = obj as COMProgIDEntry;
+        if (right == null)
         {
-            Clsid = progid_redirection.Clsid;
-            ProgID = progid_redirection.ProgId;
-            Name = ProgID;
-            Source = COMRegistryEntrySource.ActCtx;
+            return false;
         }
 
-        internal COMProgIDEntry(COMRegistry registry,
-            string progid, Guid clsid, COMPackagedClassEntry classEntry) : this(registry)
-        {
-            Clsid = clsid;
-            ProgID = progid;
-            Name = classEntry.DisplayName;
-            Source = COMRegistryEntrySource.Packaged;
-        }
+        return ProgID == right.ProgID && Name == right.Name && Clsid == right.Clsid
+                && Source == right.Source;
+    }
 
-        internal COMProgIDEntry(COMRegistry registry)
-        {
-            m_registry = registry;
-        }
+    public override int GetHashCode()
+    {
+        return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode()
+            ^ Source.GetHashCode();
+    }
 
-        public int CompareTo(COMProgIDEntry right)
-        {
-            return string.Compare(ProgID, right.ProgID);
-        }
+    XmlSchema IXmlSerializable.GetSchema()
+    {
+        return null;
+    }
 
-        public string ProgID { get; private set; }
+    void IXmlSerializable.ReadXml(XmlReader reader)
+    {
+        ProgID = reader.ReadString("progid");
+        Clsid = reader.ReadGuid("clsid");
+        Name = reader.ReadString("name");
+        Source = reader.ReadEnum<COMRegistryEntrySource>("src");
+    }
 
-        public Guid Clsid { get; private set; }
-
-        public COMCLSIDEntry ClassEntry
-        {
-            get
-            {
-                return m_registry.Clsids.GetGuidEntry(Clsid);
-            }
-        }
-
-        public string Name { get; private set; }
-
-        public COMRegistryEntrySource Source { get; private set; }
-
-        Guid IComGuid.ComGuid => Clsid;
-
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-
-            COMProgIDEntry right = obj as COMProgIDEntry;
-            if (right == null)
-            {
-                return false;
-            }
-
-            return ProgID == right.ProgID && Name == right.Name && Clsid == right.Clsid
-                    && Source == right.Source;
-        }
-
-        public override int GetHashCode()
-        {
-            return ProgID.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Clsid.GetHashCode()
-                ^ Source.GetHashCode();
-        }
-
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            ProgID = reader.ReadString("progid");
-            Clsid = reader.ReadGuid("clsid");
-            Name = reader.ReadString("name");
-            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
-        }
-
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteOptionalAttributeString("progid", ProgID);
-            writer.WriteGuid("clsid", Clsid);
-            writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteEnum("src", Source);
-        }
+    void IXmlSerializable.WriteXml(XmlWriter writer)
+    {
+        writer.WriteOptionalAttributeString("progid", ProgID);
+        writer.WriteGuid("clsid", Clsid);
+        writer.WriteOptionalAttributeString("name", Name);
+        writer.WriteEnum("src", Source);
     }
 }

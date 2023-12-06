@@ -20,199 +20,198 @@ using System.Reflection;
 using System;
 using OleViewDotNet.Database;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public enum FilterDecision
 {
-    public enum FilterDecision
+    Include,
+    Exclude
+}
+
+public enum FilterType
+{
+    CLSID,
+    AppID,
+    Category,
+    Interface,
+    ProgID,
+    TypeLib,
+    LowRights,
+    MimeType,
+    Server,
+    Process,
+    Ipid,
+    RuntimeClass,
+    RuntimeServer,
+}
+
+public enum FilterComparison
+{
+    Contains,
+    Excludes,
+    Equals,
+    NotEquals,
+    StartsWith,
+    EndsWith,
+}
+
+public enum FilterResult
+{
+    None,
+    Include,
+    Exclude,
+}
+
+public class RegistryViewerFilterEntry
+{
+    public FilterDecision Decision { get; set; }
+    public FilterType Type { get; set; }
+    public FilterComparison Comparison { get; set; }
+    public string Field { get; set; }
+    public bool Enabled { get; set; }
+    public string Value { get; set; }
+
+    public RegistryViewerFilterEntry Clone()
     {
-        Include,
-        Exclude
+        return (RegistryViewerFilterEntry)MemberwiseClone();
     }
-
-    public enum FilterType
+    
+    public bool IsMatch(object entry)
     {
-        CLSID,
-        AppID,
-        Category,
-        Interface,
-        ProgID,
-        TypeLib,
-        LowRights,
-        MimeType,
-        Server,
-        Process,
-        Ipid,
-        RuntimeClass,
-        RuntimeServer,
-    }
-
-    public enum FilterComparison
-    {
-        Contains,
-        Excludes,
-        Equals,
-        NotEquals,
-        StartsWith,
-        EndsWith,
-    }
-
-    public enum FilterResult
-    {
-        None,
-        Include,
-        Exclude,
-    }
-
-    public class RegistryViewerFilterEntry
-    {
-        public FilterDecision Decision { get; set; }
-        public FilterType Type { get; set; }
-        public FilterComparison Comparison { get; set; }
-        public string Field { get; set; }
-        public bool Enabled { get; set; }
-        public string Value { get; set; }
-
-        public RegistryViewerFilterEntry Clone()
+        try
         {
-            return (RegistryViewerFilterEntry)MemberwiseClone();
-        }
-        
-        public bool IsMatch(object entry)
-        {
-            try
-            {
-                Type t = RegistryViewerFilter.GetTypeForFilter(Type);
-                if (t != entry.GetType())
-                {
-                    return false;
-                }
-
-                PropertyInfo pi = RegistryViewerFilter.GetFieldForTypeAndName(Type, Field);
-                object value_obj = pi.GetValue(entry);
-                if (value_obj == null)
-                {
-                    return false;
-                }
-
-                string value = value_obj.ToString().ToLower();
-                string value_compare = Value.ToLower();
-                switch (Comparison)
-                {
-                    case FilterComparison.Contains:
-                        return value.Contains(value_compare);
-                    case FilterComparison.EndsWith:
-                        return value.EndsWith(value_compare);
-                    case FilterComparison.Equals:
-                        return value.Equals(value_compare);
-                    case FilterComparison.Excludes:
-                        return !value.Contains(value_compare);
-                    case FilterComparison.NotEquals:
-                        return !value.Equals(value_compare);
-                    case FilterComparison.StartsWith:
-                        return value.StartsWith(value_compare);
-                }
-            }
-            catch(ArgumentException)
+            Type t = RegistryViewerFilter.GetTypeForFilter(Type);
+            if (t != entry.GetType())
             {
                 return false;
             }
 
+            PropertyInfo pi = RegistryViewerFilter.GetFieldForTypeAndName(Type, Field);
+            object value_obj = pi.GetValue(entry);
+            if (value_obj == null)
+            {
+                return false;
+            }
+
+            string value = value_obj.ToString().ToLower();
+            string value_compare = Value.ToLower();
+            switch (Comparison)
+            {
+                case FilterComparison.Contains:
+                    return value.Contains(value_compare);
+                case FilterComparison.EndsWith:
+                    return value.EndsWith(value_compare);
+                case FilterComparison.Equals:
+                    return value.Equals(value_compare);
+                case FilterComparison.Excludes:
+                    return !value.Contains(value_compare);
+                case FilterComparison.NotEquals:
+                    return !value.Equals(value_compare);
+                case FilterComparison.StartsWith:
+                    return value.StartsWith(value_compare);
+            }
+        }
+        catch(ArgumentException)
+        {
             return false;
         }
+
+        return false;
+    }
+}
+
+public class RegistryViewerFilter
+{
+    public List<RegistryViewerFilterEntry> Filters { get; private set; }
+
+    public RegistryViewerFilter()
+    {
+        Filters = new List<RegistryViewerFilterEntry>();
     }
 
-    public class RegistryViewerFilter
+    public FilterResult Filter(object entry)
     {
-        public List<RegistryViewerFilterEntry> Filters { get; private set; }
-
-        public RegistryViewerFilter()
+        if (entry != null)
         {
-            Filters = new List<RegistryViewerFilterEntry>();
-        }
-
-        public FilterResult Filter(object entry)
-        {
-            if (entry != null)
+            foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Exclude))
             {
-                foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Exclude))
+                if (filter.IsMatch(entry))
                 {
-                    if (filter.IsMatch(entry))
-                    {
-                        return FilterResult.Exclude;
-                    }
+                    return FilterResult.Exclude;
                 }
+            }
 
-                var include_filters = Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include);
-                if (!include_filters.Any())
+            var include_filters = Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Include);
+            if (!include_filters.Any())
+            {
+                return FilterResult.Include;
+            }
+
+            foreach (var filter in include_filters)
+            {
+                if (filter.IsMatch(entry))
                 {
                     return FilterResult.Include;
                 }
-
-                foreach (var filter in include_filters)
-                {
-                    if (filter.IsMatch(entry))
-                    {
-                        return FilterResult.Include;
-                    }
-                }
-            }
-
-            return FilterResult.None;
-        }
-
-        public static Type GetTypeForFilter(FilterType type)
-        {
-            switch (type)
-            {
-                case FilterType.AppID:
-                    return typeof(COMAppIDEntry);
-                case FilterType.Category:
-                    return typeof(COMCategory);
-                case FilterType.CLSID:
-                    return typeof(COMCLSIDEntry);
-                case FilterType.Interface:
-                    return typeof(COMInterfaceEntry);
-                case FilterType.LowRights:
-                    return typeof(COMIELowRightsElevationPolicy);
-                case FilterType.MimeType:
-                    return typeof(COMMimeType);
-                case FilterType.ProgID:
-                    return typeof(COMProgIDEntry);
-                case FilterType.Server:
-                    return typeof(COMCLSIDServerEntry);
-                case FilterType.TypeLib:
-                    return typeof(COMTypeLibVersionEntry);
-                case FilterType.Process:
-                    return typeof(COMProcessEntry);
-                case FilterType.Ipid:
-                    return typeof(COMIPIDEntry);
-                case FilterType.RuntimeClass:
-                    return typeof(COMRuntimeClassEntry);
-                case FilterType.RuntimeServer:
-                    return typeof(COMRuntimeServerEntry);
-                default:
-                    throw new ArgumentException("Invalid filter type", nameof(type));
             }
         }
 
-        private static bool IsFilterProperty(PropertyInfo pi)
-        {
-            Type t = pi.PropertyType;
-            return !pi.GetMethod.IsStatic && (t.IsPrimitive || t.IsEnum || t == typeof(Guid) || t == typeof(string));
-        }
+        return FilterResult.None;
+    }
 
-        public static IEnumerable<PropertyInfo> GetFieldsForType(FilterType type)
+    public static Type GetTypeForFilter(FilterType type)
+    {
+        switch (type)
         {
-            return GetTypeForFilter(type).GetProperties().Where(f => IsFilterProperty(f)).OrderBy(f => f.Name);
+            case FilterType.AppID:
+                return typeof(COMAppIDEntry);
+            case FilterType.Category:
+                return typeof(COMCategory);
+            case FilterType.CLSID:
+                return typeof(COMCLSIDEntry);
+            case FilterType.Interface:
+                return typeof(COMInterfaceEntry);
+            case FilterType.LowRights:
+                return typeof(COMIELowRightsElevationPolicy);
+            case FilterType.MimeType:
+                return typeof(COMMimeType);
+            case FilterType.ProgID:
+                return typeof(COMProgIDEntry);
+            case FilterType.Server:
+                return typeof(COMCLSIDServerEntry);
+            case FilterType.TypeLib:
+                return typeof(COMTypeLibVersionEntry);
+            case FilterType.Process:
+                return typeof(COMProcessEntry);
+            case FilterType.Ipid:
+                return typeof(COMIPIDEntry);
+            case FilterType.RuntimeClass:
+                return typeof(COMRuntimeClassEntry);
+            case FilterType.RuntimeServer:
+                return typeof(COMRuntimeServerEntry);
+            default:
+                throw new ArgumentException("Invalid filter type", nameof(type));
         }
+    }
 
-        public static PropertyInfo GetFieldForTypeAndName(FilterType type, string name)
+    private static bool IsFilterProperty(PropertyInfo pi)
+    {
+        Type t = pi.PropertyType;
+        return !pi.GetMethod.IsStatic && (t.IsPrimitive || t.IsEnum || t == typeof(Guid) || t == typeof(string));
+    }
+
+    public static IEnumerable<PropertyInfo> GetFieldsForType(FilterType type)
+    {
+        return GetTypeForFilter(type).GetProperties().Where(f => IsFilterProperty(f)).OrderBy(f => f.Name);
+    }
+
+    public static PropertyInfo GetFieldForTypeAndName(FilterType type, string name)
+    {
+        PropertyInfo pi = GetTypeForFilter(type).GetProperty(name);
+        if (pi == null || !IsFilterProperty(pi))
         {
-            PropertyInfo pi = GetTypeForFilter(type).GetProperty(name);
-            if (pi == null || !IsFilterProperty(pi))
-            {
-                throw new ArgumentException("Invalid field for filter", nameof(name));
-            }
-            return pi;
+            throw new ArgumentException("Invalid field for filter", nameof(name));
         }
+        return pi;
     }
 }

@@ -17,40 +17,39 @@
 using OleViewDotNet.Database;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class MarshalEditorControl : UserControl
 {
-    public partial class MarshalEditorControl : UserControl
+    private COMRegistry m_registry;
+    private COMObjRef m_objref;
+
+    public MarshalEditorControl(COMRegistry registry, COMObjRef objref)
     {
-        private COMRegistry m_registry;
-        private COMObjRef m_objref;
+        m_objref = objref;
+        m_registry = registry;
+        InitializeComponent();
+        textBoxObjRefType.Text = objref.Flags.ToString();
+        textBoxIid.Text = objref.Iid.FormatGuid();
+        textBoxIIdName.Text = registry.MapIidToInterface(objref.Iid).Name;
+        Control ctl = null;
 
-        public MarshalEditorControl(COMRegistry registry, COMObjRef objref)
+        if (objref is COMObjRefStandard)
         {
-            m_objref = objref;
-            m_registry = registry;
-            InitializeComponent();
-            textBoxObjRefType.Text = objref.Flags.ToString();
-            textBoxIid.Text = objref.Iid.FormatGuid();
-            textBoxIIdName.Text = registry.MapIidToInterface(objref.Iid).Name;
-            Control ctl = null;
-
-            if (objref is COMObjRefStandard)
-            {
-                ctl = new StandardMarshalEditorControl(registry, (COMObjRefStandard)objref);
-            }
-            else if (objref is COMObjRefCustom)
-            {
-                ctl = new CustomMarshalEditorControl(registry, (COMObjRefCustom)objref);
-            }
-
-            if (ctl != null)
-            {
-                tableLayoutPanel.Controls.Add(ctl, 0, 1);
-                tableLayoutPanel.SetColumnSpan(ctl, tableLayoutPanel.ColumnCount);
-                ctl.Dock = DockStyle.Fill;
-            }
-
-            Text = string.Format("Marshal Viewer - {0}", objref.Flags);
+            ctl = new StandardMarshalEditorControl(registry, (COMObjRefStandard)objref);
         }
+        else if (objref is COMObjRefCustom)
+        {
+            ctl = new CustomMarshalEditorControl(registry, (COMObjRefCustom)objref);
+        }
+
+        if (ctl != null)
+        {
+            tableLayoutPanel.Controls.Add(ctl, 0, 1);
+            tableLayoutPanel.SetColumnSpan(ctl, tableLayoutPanel.ColumnCount);
+            ctl.Dock = DockStyle.Fill;
+        }
+
+        Text = string.Format("Marshal Viewer - {0}", objref.Flags);
     }
 }

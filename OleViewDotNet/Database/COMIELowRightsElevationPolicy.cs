@@ -22,152 +22,151 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace OleViewDotNet.Database
+namespace OleViewDotNet.Database;
+
+public enum IEElevationPolicy
 {
-    public enum IEElevationPolicy
+    NoRun = 0,
+    RunAtCurrent = 1,
+    RunAfterPrompt = 2,
+    RunAtMedium = 3,
+    BlockCOM = 0x10,
+    KillBit = 0x20,
+}
+
+public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
+{
+    private readonly COMRegistry m_registry;
+    
+    public string Name { get; private set; }
+    public Guid Uuid { get; private set; }
+    public Guid Clsid { get; private set; }
+    public COMCLSIDEntry ClassEntry
     {
-        NoRun = 0,
-        RunAtCurrent = 1,
-        RunAfterPrompt = 2,
-        RunAtMedium = 3,
-        BlockCOM = 0x10,
-        KillBit = 0x20,
+        get
+        {
+            return m_registry.MapClsidToEntry(Clsid);
+        }
+    }
+    public string AppPath { get; private set; }
+    public IEElevationPolicy Policy { get; private set; }
+    public COMRegistryEntrySource Source { get; private set; }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        COMIELowRightsElevationPolicy right = obj as COMIELowRightsElevationPolicy;
+        if (right == null)
+        {
+            return false;
+        }
+
+        return Name == right.Name && Uuid == right.Uuid && Clsid == right.Clsid
+            && AppPath == right.AppPath && Policy == right.Policy && Source == right.Source;
     }
 
-    public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
+    public override int GetHashCode()
     {
-        private readonly COMRegistry m_registry;
+        return Name.GetSafeHashCode() ^ Uuid.GetHashCode() 
+            ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode()
+            ^ Source.GetHashCode();
+    }
+
+    private static string HandleNulTerminate(string s)
+    {
+        int index = s.IndexOf('\0');
+        if (index >= 0)
+        {
+            return s.Substring(0, index);
+        }
+        else
+        {
+            return s;
+        }
+    }
+
+    private void LoadFromRegistry(RegistryKey key)
+    {
+        List<Guid> clsidList = new List<Guid>();
+
+        object policyValue = key.GetValue("Policy", 0);
+
+        if (policyValue != null && !String.IsNullOrEmpty(policyValue.ToString()))
+        {
+            Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
+        }
         
-        public string Name { get; private set; }
-        public Guid Uuid { get; private set; }
-        public Guid Clsid { get; private set; }
-        public COMCLSIDEntry ClassEntry
+        string clsid = (string)key.GetValue("CLSID");
+        if (clsid != null)
         {
-            get
+
+            if (Guid.TryParse(clsid, out Guid cls))
             {
-                return m_registry.MapClsidToEntry(Clsid);
+                Clsid = cls;
             }
         }
-        public string AppPath { get; private set; }
-        public IEElevationPolicy Policy { get; private set; }
-        public COMRegistryEntrySource Source { get; private set; }
+        
+        string appName = (string)key.GetValue("AppName", null);
+        string appPath = (string)key.GetValue("AppPath");
 
-        public override bool Equals(object obj)
+        if ((appName != null) && (appPath != null))
         {
-            if (base.Equals(obj))
+            try
             {
-                return true;
+                Name = HandleNulTerminate(appName);
+                AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();
             }
-
-            COMIELowRightsElevationPolicy right = obj as COMIELowRightsElevationPolicy;
-            if (right == null)
+            catch (ArgumentException)
             {
-                return false;
-            }
-
-            return Name == right.Name && Uuid == right.Uuid && Clsid == right.Clsid
-                && AppPath == right.AppPath && Policy == right.Policy && Source == right.Source;
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetSafeHashCode() ^ Uuid.GetHashCode() 
-                ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode()
-                ^ Source.GetHashCode();
-        }
-
-        private static string HandleNulTerminate(string s)
-        {
-            int index = s.IndexOf('\0');
-            if (index >= 0)
-            {
-                return s.Substring(0, index);
-            }
-            else
-            {
-                return s;
             }
         }
+    }
 
-        private void LoadFromRegistry(RegistryKey key)
-        {
-            List<Guid> clsidList = new List<Guid>();
+    public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key) 
+        : this(registry)
+    {
+        Uuid = guid;
+        Name = Uuid.FormatGuidDefault();
+        Source = source;
+        LoadFromRegistry(key);
+    }
 
-            object policyValue = key.GetValue("Policy", 0);
+    internal COMIELowRightsElevationPolicy(COMRegistry registry)
+    {
+        m_registry = registry;
+    }
 
-            if (policyValue != null && !String.IsNullOrEmpty(policyValue.ToString()))
-            {
-                Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
-            }
-            
-            string clsid = (string)key.GetValue("CLSID");
-            if (clsid != null)
-            {
+    public int CompareTo(COMIELowRightsElevationPolicy other)
+    {
+        return Uuid.CompareTo(other.Uuid);
+    }
 
-                if (Guid.TryParse(clsid, out Guid cls))
-                {
-                    Clsid = cls;
-                }
-            }
-            
-            string appName = (string)key.GetValue("AppName", null);
-            string appPath = (string)key.GetValue("AppPath");
+    XmlSchema IXmlSerializable.GetSchema()
+    {
+        return null;
+    }
 
-            if ((appName != null) && (appPath != null))
-            {
-                try
-                {
-                    Name = HandleNulTerminate(appName);
-                    AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();
-                }
-                catch (ArgumentException)
-                {
-                }
-            }
-        }
+    void IXmlSerializable.ReadXml(XmlReader reader)
+    {
+        Name = reader.GetAttribute("name");
+        Uuid = reader.ReadGuid("uuid");
+        Clsid = reader.ReadGuid("clsid");
+        AppPath = reader.GetAttribute("path");
+        Policy = reader.ReadEnum<IEElevationPolicy>("policy");
+        Source = reader.ReadEnum<COMRegistryEntrySource>("src");
+    }
 
-        public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key) 
-            : this(registry)
-        {
-            Uuid = guid;
-            Name = Uuid.FormatGuidDefault();
-            Source = source;
-            LoadFromRegistry(key);
-        }
-
-        internal COMIELowRightsElevationPolicy(COMRegistry registry)
-        {
-            m_registry = registry;
-        }
-
-        public int CompareTo(COMIELowRightsElevationPolicy other)
-        {
-            return Uuid.CompareTo(other.Uuid);
-        }
-
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            Name = reader.GetAttribute("name");
-            Uuid = reader.ReadGuid("uuid");
-            Clsid = reader.ReadGuid("clsid");
-            AppPath = reader.GetAttribute("path");
-            Policy = reader.ReadEnum<IEElevationPolicy>("policy");
-            Source = reader.ReadEnum<COMRegistryEntrySource>("src");
-        }
-
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteGuid("uuid", Uuid);
-            writer.WriteGuid("clsid", Clsid);
-            writer.WriteOptionalAttributeString("path", AppPath);
-            writer.WriteEnum("policy", Policy);
-            writer.WriteEnum("src", Source);
-        }
+    void IXmlSerializable.WriteXml(XmlWriter writer)
+    {
+        writer.WriteOptionalAttributeString("name", Name);
+        writer.WriteGuid("uuid", Uuid);
+        writer.WriteGuid("clsid", Clsid);
+        writer.WriteOptionalAttributeString("path", AppPath);
+        writer.WriteEnum("policy", Policy);
+        writer.WriteEnum("src", Source);
     }
 }

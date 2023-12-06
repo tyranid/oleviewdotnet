@@ -17,43 +17,42 @@
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet
+namespace OleViewDotNet;
+
+class InputTextBox : TextBox
 {
-    class InputTextBox : TextBox
+    public event EventHandler<ClipboardEventArgs> TextPasted;
+
+    private const int WM_PASTE = 0x0302;
+    protected override void WndProc(ref Message m)
     {
-        public event EventHandler<ClipboardEventArgs> TextPasted;
+        bool handled = false;
 
-        private const int WM_PASTE = 0x0302;
-        protected override void WndProc(ref Message m)
+        if (m.Msg == WM_PASTE)
         {
-            bool handled = false;
+            EventHandler<ClipboardEventArgs> evt = TextPasted;
+            if ((evt != null) && Clipboard.ContainsText())
+            {                    
+                ClipboardEventArgs args = new ClipboardEventArgs(Clipboard.GetText());
 
-            if (m.Msg == WM_PASTE)
-            {
-                EventHandler<ClipboardEventArgs> evt = TextPasted;
-                if ((evt != null) && Clipboard.ContainsText())
-                {                    
-                    ClipboardEventArgs args = new ClipboardEventArgs(Clipboard.GetText());
-
-                    evt(this, args);
-                    handled = args.Handled;
-                }
+                evt(this, args);
+                handled = args.Handled;
             }
+        }
 
-            if (!handled)
-            {
-                base.WndProc(ref m);
-            }
+        if (!handled)
+        {
+            base.WndProc(ref m);
         }
     }
+}
 
-    public class ClipboardEventArgs : EventArgs
+public class ClipboardEventArgs : EventArgs
+{
+    public string ClipboardText { get; set; }
+    public bool Handled { get; set; }
+    public ClipboardEventArgs(string clipboardText)
     {
-        public string ClipboardText { get; set; }
-        public bool Handled { get; set; }
-        public ClipboardEventArgs(string clipboardText)
-        {
-            ClipboardText = clipboardText;
-        }
+        ClipboardText = clipboardText;
     }
 }

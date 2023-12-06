@@ -17,63 +17,62 @@
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class DocumentForm : DockContent
 {
-    public partial class DocumentForm : DockContent
+    Control _control;
+
+    public DocumentForm(Control c)
     {
-        Control _control;
+        InitializeComponent();
+        this.Controls.Add(c);
+        _control = c;
+        c.Dock = DockStyle.Fill;
+        TabText = c.Text;
+        c.TextChanged += control_TextChanged;
+    }
 
-        public DocumentForm(Control c)
+    void control_TextChanged(object sender, System.EventArgs e)
+    {
+        TabText = _control.Text;
+    }
+
+    private void closeToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        Close();
+    }
+
+    private void closeAllButThisToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        IDockContent[] content = DockPanel.DocumentsToArray();
+
+        foreach (IDockContent c in content)
         {
-            InitializeComponent();
-            this.Controls.Add(c);
-            _control = c;
-            c.Dock = DockStyle.Fill;
-            TabText = c.Text;
-            c.TextChanged += control_TextChanged;
-        }
+            Form frm = c as Form;
 
-        void control_TextChanged(object sender, System.EventArgs e)
-        {
-            TabText = _control.Text;
-        }
-
-        private void closeToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-
-        private void closeAllButThisToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            IDockContent[] content = DockPanel.DocumentsToArray();
-
-            foreach (IDockContent c in content)
+            if ((frm != null) && (frm != this))
             {
-                Form frm = c as Form;
-
-                if ((frm != null) && (frm != this))
-                {
-                    frm.Close();
-                }
+                frm.Close();
             }
         }
+    }
 
-        private void closeAllToolStripMenuItem_Click(object sender, System.EventArgs e)
+    private void closeAllToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        closeAllButThisToolStripMenuItem_Click(sender, e);
+
+        Close();
+    }
+
+    private void renameToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        using (GetTextForm frm = new GetTextForm(TabText))
         {
-            closeAllButThisToolStripMenuItem_Click(sender, e);
-
-            Close();
-        }
-
-        private void renameToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            using (GetTextForm frm = new GetTextForm(TabText))
+            frm.Text = "Edit Tab Name";
+            if (frm.ShowDialog(this) == DialogResult.OK)
             {
-                frm.Text = "Edit Tab Name";
-                if (frm.ShowDialog(this) == DialogResult.OK)
-                {
-                    TabText = frm.Data;
-                }
+                TabText = frm.Data;
             }
         }
     }

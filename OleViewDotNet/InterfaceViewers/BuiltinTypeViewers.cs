@@ -20,90 +20,89 @@ using System;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.InterfaceViewers
+namespace OleViewDotNet.InterfaceViewers;
+
+class MonikerViewerFactory : GenericTypeViewerFactory<IMoniker>
 {
-    class MonikerViewerFactory : GenericTypeViewerFactory<IMoniker>
+}
+
+class PersistFileViewerFactory : GenericTypeViewerFactory<IPersistFile>
+{
+}
+
+class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
+{
+}
+
+class PersistPropertyBagViewerFactory : GenericTypeViewerFactory<IPersistPropertyBag>
+{
+}
+
+class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
+{
+}
+
+class ClassFactoryViewerFactory : BaseTypeViewerFactory
+{
+    public ClassFactoryViewerFactory() : base(typeof(IClassFactory))
     {
     }
 
-    class PersistFileViewerFactory : GenericTypeViewerFactory<IPersistFile>
+    public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
+    {
+        return new ClassFactoryTypeViewer(registry, entry, strObjName, pObject.Instance);
+    }
+}
+
+class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
+{
+    public ElevatedFactoryServerViewerFactory() : base(typeof(IElevatedFactoryServer))
     {
     }
 
-    class PersistStorageViewerFactory : GenericTypeViewerFactory<IPersistStorage>
+    public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {
+        COMCLSIDEntry clsid_entry = entry as COMCLSIDEntry;
+        if (clsid_entry == null)
+        {
+            throw new ArgumentException("Entry must be a COM class", "entry");
+        }
+        return new ElevatedFactoryServerTypeViewer(registry, clsid_entry, strObjName, pObject.Instance);
+    }
+}
+
+class PersistStreamViewerFactory : ITypeViewerFactory
+{
+    public Guid Iid
+    {
+        get { return COMInterfaceEntry.IID_IPersistStream; }
     }
 
-    class PersistPropertyBagViewerFactory : GenericTypeViewerFactory<IPersistPropertyBag>
+    public string IidName
     {
+        get { return "IPersistStream"; }
     }
 
-    class PersistMonikerViewerFactory : GenericTypeViewerFactory<IPersistMoniker>
+    public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {
+        return new PersistStreamTypeViewer(strObjName, pObject.Instance);
+    }
+}
+
+class PersistStreamInitViewerFactory : ITypeViewerFactory
+{
+    public Guid Iid
+    {
+        get { return COMInterfaceEntry.IID_IPersistStreamInit; }
     }
 
-    class ClassFactoryViewerFactory : BaseTypeViewerFactory
+    public string IidName
     {
-        public ClassFactoryViewerFactory() : base(typeof(IClassFactory))
-        {
-        }
-
-        public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-        {
-            return new ClassFactoryTypeViewer(registry, entry, strObjName, pObject.Instance);
-        }
+        get { return "IPersistStreamInit"; }
     }
 
-    class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
+    public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
     {
-        public ElevatedFactoryServerViewerFactory() : base(typeof(IElevatedFactoryServer))
-        {
-        }
-
-        public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-        {
-            COMCLSIDEntry clsid_entry = entry as COMCLSIDEntry;
-            if (clsid_entry == null)
-            {
-                throw new ArgumentException("Entry must be a COM class", "entry");
-            }
-            return new ElevatedFactoryServerTypeViewer(registry, clsid_entry, strObjName, pObject.Instance);
-        }
-    }
-
-    class PersistStreamViewerFactory : ITypeViewerFactory
-    {
-        public Guid Iid
-        {
-            get { return COMInterfaceEntry.IID_IPersistStream; }
-        }
-
-        public string IidName
-        {
-            get { return "IPersistStream"; }
-        }
-
-        public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-        {
-            return new PersistStreamTypeViewer(strObjName, pObject.Instance);
-        }
-    }
-
-    class PersistStreamInitViewerFactory : ITypeViewerFactory
-    {
-        public Guid Iid
-        {
-            get { return COMInterfaceEntry.IID_IPersistStreamInit; }
-        }
-
-        public string IidName
-        {
-            get { return "IPersistStreamInit"; }
-        }
-
-        public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-        {
-            return new PersistStreamTypeViewer(strObjName, pObject.Instance);
-        }
+        return new PersistStreamTypeViewer(strObjName, pObject.Instance);
     }
 }

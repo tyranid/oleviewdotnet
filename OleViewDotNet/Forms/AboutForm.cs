@@ -18,37 +18,36 @@ using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class AboutForm : Form
 {
-    public partial class AboutForm : Form
+    public AboutForm()
     {
-        public AboutForm()
-        {
-            InitializeComponent();
-            labelText.Text = string.Format(labelText.Text, COMUtilities.GetVersion());
-        }
+        InitializeComponent();
+        labelText.Text = string.Format(labelText.Text, COMUtilities.GetVersion());
+    }
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.OK;
-            Close();
-        }
+    private void btnOK_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.OK;
+        Close();
+    }
 
-        private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        ProcessStartInfo start_info = new ProcessStartInfo(linkLabel.Text);
+        start_info.UseShellExecute = true;
+        start_info.Verb = "open";
+        try
         {
-            ProcessStartInfo start_info = new ProcessStartInfo(linkLabel.Text);
-            start_info.UseShellExecute = true;
-            start_info.Verb = "open";
-            try
+            using (Process.Start(start_info))
             {
-                using (Process.Start(start_info))
-                {
-                }
             }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
         }
     }
 }

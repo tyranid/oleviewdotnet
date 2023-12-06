@@ -21,89 +21,88 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace OleViewDotNet.Database
+namespace OleViewDotNet.Database;
+
+public class COMCategory : IXmlSerializable, IComGuid
 {
-    public class COMCategory : IXmlSerializable, IComGuid
+    private readonly COMRegistry m_registry;
+    
+    public Guid CategoryID { get; private set; }
+    public string Name { get; private set; }
+    public IEnumerable<Guid> Clsids { get; private set; }
+    public IEnumerable<COMCLSIDEntry> ClassEntries
     {
-        private readonly COMRegistry m_registry;
-        
-        public Guid CategoryID { get; private set; }
-        public string Name { get; private set; }
-        public IEnumerable<Guid> Clsids { get; private set; }
-        public IEnumerable<COMCLSIDEntry> ClassEntries
+        get
         {
-            get
-            {
-                return Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
-            }
+            return Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e != null);
         }
-
-        Guid IComGuid.ComGuid => CategoryID;
-
-        internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
-            : this(registry)
-        {
-            CategoryID = catid;
-            Clsids = clsids.ToArray();
-            Name = COMUtilities.GetCategoryName(catid);
-        }
-
-        internal COMCategory(COMRegistry registry)
-        {
-            m_registry = registry;
-        }
-
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            Name = reader.ReadString("name");
-            CategoryID = reader.ReadGuid("catid");
-            Clsids = reader.ReadGuids("clsids").ToArray();
-        }
-
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteOptionalAttributeString("name", Name);
-            writer.WriteGuid("catid", CategoryID);
-            writer.WriteGuids("clsids", Clsids);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-
-            COMCategory right = obj as COMCategory;
-            if (right == null)
-            {
-                return false;
-            }
-
-            return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
-        }
-
-        public override int GetHashCode()
-        {
-            return CategoryID.GetHashCode() ^ Name.GetSafeHashCode() 
-                ^ Clsids.GetEnumHashCode();
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        public static readonly Guid CATID_TrustedMarshaler = new Guid("00000003-0000-0000-C000-000000000046");
-        public static readonly Guid CATID_SafeForScripting = new Guid("7DD95801-9882-11CF-9FA9-00AA006C42C4");
-        public static readonly Guid CATID_SafeForInitializing = new Guid("7DD95802-9882-11CF-9FA9-00AA006C42C4");
-        public static readonly Guid CATID_Control = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
-        public static readonly Guid CATID_Insertable = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
-        public static readonly Guid CATID_Document = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
     }
+
+    Guid IComGuid.ComGuid => CategoryID;
+
+    internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
+        : this(registry)
+    {
+        CategoryID = catid;
+        Clsids = clsids.ToArray();
+        Name = COMUtilities.GetCategoryName(catid);
+    }
+
+    internal COMCategory(COMRegistry registry)
+    {
+        m_registry = registry;
+    }
+
+    XmlSchema IXmlSerializable.GetSchema()
+    {
+        return null;
+    }
+
+    void IXmlSerializable.ReadXml(XmlReader reader)
+    {
+        Name = reader.ReadString("name");
+        CategoryID = reader.ReadGuid("catid");
+        Clsids = reader.ReadGuids("clsids").ToArray();
+    }
+
+    void IXmlSerializable.WriteXml(XmlWriter writer)
+    {
+        writer.WriteOptionalAttributeString("name", Name);
+        writer.WriteGuid("catid", CategoryID);
+        writer.WriteGuids("clsids", Clsids);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        COMCategory right = obj as COMCategory;
+        if (right == null)
+        {
+            return false;
+        }
+
+        return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
+    }
+
+    public override int GetHashCode()
+    {
+        return CategoryID.GetHashCode() ^ Name.GetSafeHashCode() 
+            ^ Clsids.GetEnumHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public static readonly Guid CATID_TrustedMarshaler = new Guid("00000003-0000-0000-C000-000000000046");
+    public static readonly Guid CATID_SafeForScripting = new Guid("7DD95801-9882-11CF-9FA9-00AA006C42C4");
+    public static readonly Guid CATID_SafeForInitializing = new Guid("7DD95802-9882-11CF-9FA9-00AA006C42C4");
+    public static readonly Guid CATID_Control = new Guid("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
+    public static readonly Guid CATID_Insertable = new Guid("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
+    public static readonly Guid CATID_Document = new Guid("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 }

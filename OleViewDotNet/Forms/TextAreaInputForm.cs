@@ -24,13 +24,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class TextAreaInputForm : Form
 {
-    public partial class TextAreaInputForm : Form
+    public TextAreaInputForm()
     {
-        public TextAreaInputForm()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

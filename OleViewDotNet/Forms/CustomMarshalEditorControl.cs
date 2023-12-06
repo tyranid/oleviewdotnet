@@ -17,26 +17,25 @@
 using OleViewDotNet.Database;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.Forms
+namespace OleViewDotNet.Forms;
+
+public partial class CustomMarshalEditorControl : UserControl
 {
-    public partial class CustomMarshalEditorControl : UserControl
+    private COMRegistry m_registry;
+    private COMObjRefCustom m_objref;
+
+    public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
     {
-        private COMRegistry m_registry;
-        private COMObjRefCustom m_objref;
-
-        public CustomMarshalEditorControl(COMRegistry registry, COMObjRefCustom objref)
+        m_objref = objref;
+        m_registry = registry;
+        InitializeComponent();
+        textBoxClsid.Text = objref.Clsid.FormatGuid();
+        COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
+        if (ent != null)
         {
-            m_objref = objref;
-            m_registry = registry;
-            InitializeComponent();
-            textBoxClsid.Text = objref.Clsid.FormatGuid();
-            COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
-            if (ent != null)
-            {
-                textBoxName.Text = ent.Name;
-            }
-
-            hexEditor.Bytes = objref.ObjectData;
+            textBoxName.Text = ent.Name;
         }
+
+        hexEditor.Bytes = objref.ObjectData;
     }
 }
