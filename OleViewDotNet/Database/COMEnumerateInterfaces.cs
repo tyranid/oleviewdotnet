@@ -22,8 +22,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,35 +44,77 @@ public class COMEnumerateInterfaces
 
     private void QueryInterface(IntPtr punk, Guid iid, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
     {
-        if (punk != IntPtr.Zero)
+        if (punk == IntPtr.Zero)
+            return;
+        Interlocked.Increment(ref _intf_count);
+        if (Marshal.QueryInterface(punk, ref iid, out IntPtr ppout) == 0)
         {
-            Interlocked.Increment(ref _intf_count);
-            if (Marshal.QueryInterface(punk, ref iid, out IntPtr ppout) == 0)
-            {
-                IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
-                COMInterfaceInstance intf;
+            IntPtr vtable = Marshal.ReadIntPtr(ppout, 0);
+            COMInterfaceInstance intf;
 
-                using (SafeLoadLibraryHandle module = SafeLoadLibraryHandle.GetModuleHandle(vtable))
+            using (SafeLoadLibraryHandle module = SafeLoadLibraryHandle.GetModuleHandle(vtable))
+            {
+                if (_clsctx == CLSCTX.INPROC_SERVER && module != null)
                 {
-                    if (_clsctx == CLSCTX.INPROC_SERVER && module != null)
+                    if (!module_names.ContainsKey(module.DangerousGetHandle()))
                     {
-                        if (!module_names.ContainsKey(module.DangerousGetHandle()))
-                        {
-                            module_names[module.DangerousGetHandle()] = module.Name;
-                        }
-                        intf = new COMInterfaceInstance(iid,
-                            module_names[module.DangerousGetHandle()],
-                            vtable.ToInt64() - module.DangerousGetHandle().ToInt64(), null);
+                        module_names[module.DangerousGetHandle()] = module.Name;
                     }
-                    else
+                    intf = new COMInterfaceInstance(iid,
+                        module_names[module.DangerousGetHandle()],
+                        vtable.ToInt64() - module.DangerousGetHandle().ToInt64(), null);
+                }
+                else
+                {
+                    intf = new COMInterfaceInstance(iid, null);
+                }
+            }
+
+
+            list.Add(intf);
+            Marshal.Release(ppout);
+        }
+    }
+
+    private void QueryInterface(IntPtr punk, IEnumerable<Guid> iids, Dictionary<IntPtr, string> module_names, HashSet<COMInterfaceInstance> list)
+    {
+        if (punk == IntPtr.Zero)
+            return;
+
+        Guid IID_IMultiQI = typeof(IMultiQI).GUID;
+
+        if (Marshal.QueryInterface(punk, ref IID_IMultiQI, out IntPtr pqi) == 0)
+        {
+            try
+            {
+                IMultiQI multi_qi = (IMultiQI)Marshal.GetObjectForIUnknown(punk);
+                List<COMInterfaceEntry> ret = new();
+                foreach (var part in iids.Partition(50))
+                {
+                    using DisposableList<MULTI_QI> qi_list = new(part.Select(p => new MULTI_QI(p)));
+                    var qis = qi_list.ToArray();
+                    int hr = multi_qi.QueryMultipleInterfaces(qis.Length, qis);
+                    if (hr < 0)
+                        continue;
+                    for (int i = 0; i < qis.Length; ++i)
                     {
-                        intf = new COMInterfaceInstance(iid, null);
+                        if (qis[i].HResult() == 0)
+                        {
+                            list.Add(new COMInterfaceInstance(part[i], null));
+                        }
                     }
                 }
-
-
-                list.Add(intf);
-                Marshal.Release(ppout);
+            }
+            finally
+            {
+                Marshal.Release(pqi);
+            }
+        }
+        else
+        {
+            foreach (var iid in iids)
+            {
+                QueryInterface(punk, iid, module_names, list);
             }
         }
     }
@@ -108,6 +150,20 @@ public class COMEnumerateInterfaces
                 }
             }
         }
+    }
+
+    private static List<Guid> GetInterfacesFromRegistry()
+    {
+        List<Guid> ret = new();
+        using RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface");
+        foreach (string iid_string in interface_key.GetSubKeyNames())
+        {
+            if (Guid.TryParse(iid_string, out Guid iid))
+            {
+                ret.Add(iid);
+            }
+        }
+        return ret;
     }
 
     private void GetInterfacesInternal(NtToken token)
@@ -153,42 +209,27 @@ public class COMEnumerateInterfaces
 
         try
         {
-            Guid[] additional_iids = new[] {
-                    COMInterfaceEntry.IID_IMarshal,
-                    COMInterfaceEntry.IID_IPSFactoryBuffer,
-                    COMInterfaceEntry.IID_IStdMarshalInfo,
-                    COMInterfaceEntry.IID_IMarshal2
-                    };
+            HashSet<Guid> intfs = new(GetInterfacesFromRegistry())
+            {
+                COMInterfaceEntry.IID_IMarshal,
+                COMInterfaceEntry.IID_IPSFactoryBuffer,
+                COMInterfaceEntry.IID_IStdMarshalInfo,
+                COMInterfaceEntry.IID_IMarshal2
+            };
 
             Dictionary<IntPtr, string> module_names = new();
-            foreach (var iid in additional_iids)
-            {
-                QueryInterface(punk, iid, module_names, _interfaces);
-                QueryInterface(pfactory, iid, module_names, _factory_interfaces);
-            }
-
+            
             var actctx = ActivationContext.FromProcess();
             if (actctx != null)
             {
                 foreach (var intf in actctx.ComInterfaces)
                 {
-                    QueryInterface(punk, intf.Iid, module_names, _interfaces);
-                    QueryInterface(pfactory, intf.Iid, module_names, _factory_interfaces);
+                    intfs.Add(intf.Iid);
                 }
             }
 
-            using (RegistryKey interface_key = Registry.ClassesRoot.OpenSubKey("Interface"))
-            {
-                foreach (string iid_string in interface_key.GetSubKeyNames())
-                {
-                    if (Guid.TryParse(iid_string, out Guid iid))
-                    {
-                        QueryInterface(punk, iid, module_names, _interfaces);
-                        QueryInterface(pfactory, iid, module_names, _factory_interfaces);
-                    }
-                }
-            }
-
+            QueryInterface(punk, intfs, module_names, _interfaces);
+            QueryInterface(pfactory, intfs, module_names, _factory_interfaces);
             QueryInspectableInterfaces(punk, module_names, _interfaces);
             QueryInspectableInterfaces(pfactory, module_names, _factory_interfaces);
         }
@@ -291,26 +332,6 @@ public class COMEnumerateInterfaces
     {
         public List<COMInterfaceInstance> Interfaces { get; set; }
         public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
-    }
-
-    private MemoryMappedFile CreateInterfaceMapping(COMRegistry registry)
-    {
-        if (registry == null)
-            return null;
-        byte[] infs = registry.SerializeInterfaces();
-        MemoryMappedFile map = MemoryMappedFile.CreateNew(null, infs.Length,
-            MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.Inheritable);
-        try
-        {
-            using Stream stm = map.CreateViewStream();
-            stm.Write(infs, 0, infs.Length);
-            return map;
-        }
-        catch
-        {
-            map.Dispose();
-            throw;
-        }
     }
 
     private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry, NtToken token)
