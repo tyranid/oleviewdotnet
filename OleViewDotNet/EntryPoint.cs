@@ -62,41 +62,23 @@ internal static class EntryPoint
         return (MainForm)_appContext.MainForm;
     }
 
-    private static int EnumInterfaces(Queue<string> args, bool runtime_class, NtToken token)
+    private static int EnumInterfaces(string enum_class, bool mta, int timeout, string pipe, NtToken token, CLSCTX clsctx)
     {
-        using AnonymousPipeClientStream client = new(PipeDirection.Out, args.Dequeue());
+        if (string.IsNullOrWhiteSpace(pipe))
+        {
+            throw new ArgumentException($"'{nameof(pipe)}' cannot be null or whitespace.", nameof(pipe));
+        }
+
+        using AnonymousPipeClientStream client = new(PipeDirection.Out, pipe);
         using StreamWriter writer = new(client);
-        Guid clsid = Guid.Empty;
-        bool sta = false;
-        string activatable_class = string.Empty;
-        if (runtime_class)
+
+        string activatable_class = null;
+        if (!Guid.TryParse(enum_class, out Guid clsid))
         {
-            activatable_class = args.Dequeue();
-        }
-        else
-        {
-            if (!Guid.TryParse(args.Dequeue(), out clsid))
-            {
-                return 1;
-            }
+            activatable_class = enum_class;
         }
 
-        sta = args.Dequeue() == "s";
-        if (!Enum.TryParse(args.Dequeue(), true, out CLSCTX clsctx))
-        {
-            return 1;
-        }
-
-        int timeout = 10000;
-        if (args.Count > 0)
-        {
-            if (!int.TryParse(args.Dequeue(), out timeout) || timeout < 0)
-            {
-                return 1;
-            }
-        }
-
-        COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, sta, timeout, token);
+        COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, !mta, timeout, token);
         if (intf.Exception != null)
         {
             writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
@@ -186,8 +168,6 @@ internal static class EntryPoint
         string database_file = null;
         string save_file = null;
         bool do_enum = false;
-        bool enum_clsid = false;
-        bool enum_runtime = false;
         bool show_help = false;
         bool query_interfaces = false;
         int concurrent_queries = Environment.ProcessorCount;
@@ -199,14 +179,19 @@ internal static class EntryPoint
         string view_launch_sd = null;
         string view_name = null;
         COMRegistryMode mode = COMRegistryMode.Merged;
-        IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, COMServerType.InProcServer32, COMServerType.LocalServer32 };
-        NtToken token = null;
+        IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, 
+            COMServerType.InProcServer32, COMServerType.LocalServer32 };
+        NtToken enum_token = null;
+        string enum_class = null;
+        bool enum_mta = false;
+        int enum_timeout = 10000;
+        string enum_pipe = null;
+        CLSCTX enum_clsctx = CLSCTX.SERVER;
 
         OptionSet opts = new() {
             { "i|in=",  "Open a database file.", v => database_file = v },
             { "o|out=", "Save database and exit.", v => save_file = v },
-            { "e|enum",  "Enumerate the provided CLSID (GUID).", v => enum_clsid = v != null },
-            { "r|rt",  "Enumerate the provided Runtime Class.", v => enum_runtime = v != null },
+            { "e|enum=",  "Enumerate the provided CLSID (GUID) or runtime class (string).", v => enum_class = v },
             { "q|query", "Query all interfaces for database", v => query_interfaces = v != null },
             { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
             { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
@@ -219,7 +204,11 @@ internal static class EntryPoint
             { "v=", "View a COM access security descriptor (specify the SDDL)", v => view_access_sd = v },
             { "l=", "View a COM launch security descriptor (specify the SDDL)", v => view_launch_sd = v },
             { "n=", "Name any simple form display such as security descriptor", v => view_name = v },
-            { "t=", "Specify a token to use when enumerating interfaces", v => token = NtToken.FromHandle(new IntPtr(int.Parse(v))) },
+            { "t=", "Specify a token to use when enumerating interfaces", v => enum_token = NtToken.FromHandle(new IntPtr(int.Parse(v))) },
+            { "mta", "Specify to use MTA for interface enumeration. Default is STA.", v => enum_mta = v != null },
+            { "timeout=", "Specify the timeout for interface enumeration. Default is 10000ms.", v => enum_timeout = int.Parse(v) },
+            { "pipe=", "Specify the pipe to send interface enumeration output.", v => enum_pipe = v },
+            { "clsctx=", "Specify the CLSCTX to create the object for interface enumeration.", v => enum_clsctx = (CLSCTX)Enum.Parse(typeof(CLSCTX), v, true) },
             { "h|help",  "Show this message and exit.", v => show_help = v != null },
         };
 
@@ -234,8 +223,6 @@ internal static class EntryPoint
             show_help = true;
         }
 
-        do_enum = enum_clsid || enum_runtime;
-
         if (show_help || (do_enum && additional_args.Count < 4) || (symbol_dir != null && !Directory.Exists(symbol_dir)))
         {
             StringWriter writer = new();
@@ -247,11 +234,11 @@ internal static class EntryPoint
             Environment.Exit(1);
         }
 
-        if (do_enum)
+        if (!string.IsNullOrWhiteSpace(enum_class))
         {
             try
             {
-                Environment.Exit(EnumInterfaces(new Queue<string>(additional_args), enum_runtime, token));
+                Environment.Exit(EnumInterfaces(enum_class, enum_mta, enum_timeout, enum_pipe, enum_token, enum_clsctx));
             }
             catch
             {

@@ -338,7 +338,7 @@ public class COMEnumerateInterfaces
         public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
     }
 
-    private async static Task<InterfaceLists> GetInterfacesOOP(string command_line, bool runtime_class, COMRegistry registry, NtToken token)
+    private async static Task<InterfaceLists> GetInterfacesOOP(string class_name, bool mta, COMRegistry registry, NtToken token, CLSCTX clsctx)
     {
         using AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null);
@@ -359,18 +359,18 @@ public class COMEnumerateInterfaces
         }
 
         Process proc = new();
-        List<string> args = new()
-                {
-                    runtime_class ? "-r" : "-e",
-                    server.GetClientHandleAsString(),
-                    command_line
-                };
-
+        List<string> args = new() { "-e", class_name };
+        if (mta)
+            args.Add("-mta");
         if (imp_token != null)
         {
-            args.Insert(0, imp_token.Handle.DangerousGetHandle().ToInt32().ToString());
-            args.Insert(0, "-t");
+            args.Add("-t");
+            args.Add(imp_token.Handle.DangerousGetHandle().ToInt32().ToString());
         }
+        args.Add("-pipe");
+        args.Add(server.GetClientHandleAsString());
+        args.Add("-clsctx");
+        args.Add(clsctx.ToString());
 
         ProcessStartInfo info = new(process, string.Join(" ", args))
         {
@@ -478,29 +478,17 @@ public class COMEnumerateInterfaces
     #region Static Methods
     public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
     {
-        string apartment = "s";
-        if (ent.Threading == ThreadingType.Both
-            || ent.Threading == ThreadingType.Mta)
-        {
-            apartment = "m";
-        }
-        string command_line = string.Format("{0} {1} {2}", ent.Name, apartment, 
-            ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER);
-        var interfaces = await GetInterfacesOOP(command_line, true, registry, token);
+        bool mta = ent.Threading == ThreadingType.Both || ent.Threading == ThreadingType.Mta;
+        CLSCTX clsctx = ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER;
+        var interfaces = await GetInterfacesOOP(ent.Name, mta, registry, token, clsctx);
         return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
     }
 
     public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token)
     {
-        string apartment = "s";
-        if (ent.DefaultThreadingModel == COMThreadingModel.Both 
-            || ent.DefaultThreadingModel == COMThreadingModel.Free)
-        {
-            apartment = "m";
-        }
+        bool mta = ent.DefaultThreadingModel == COMThreadingModel.Both || ent.DefaultThreadingModel == COMThreadingModel.Free;
 
-        string command_line = string.Format("{0} {1} \"{2}\"", ent.Clsid.ToString("B"), apartment, ent.CreateContext);
-        var interfaces = await GetInterfacesOOP(command_line, false, registry, token);
+        var interfaces = await GetInterfacesOOP(ent.Clsid.ToString("B"), mta, registry, token, ent.CreateContext);
         return new COMEnumerateInterfaces(ent.Clsid, ent.CreateContext, string.Empty, interfaces.Interfaces, interfaces.FactoryInterfaces);
     }
     #endregion
