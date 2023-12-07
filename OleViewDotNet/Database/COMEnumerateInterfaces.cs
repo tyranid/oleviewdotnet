@@ -94,6 +94,7 @@ public class COMEnumerateInterfaces
                 List<COMInterfaceEntry> ret = new();
                 foreach (var part in iids.Partition(50))
                 {
+                    Interlocked.Increment(ref _intf_count);
                     using DisposableList<MULTI_QI> qi_list = new(part.Select(p => new MULTI_QI(p)));
                     var qis = qi_list.ToArray();
                     int hr = multi_qi.QueryMultipleInterfaces(qis.Length, qis);
