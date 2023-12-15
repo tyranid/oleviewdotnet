@@ -14,9 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.Win32;
+using NtApiDotNet.Win32;
 using OleViewDotNet.Utilities;
-using System.ServiceProcess;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -31,28 +30,17 @@ public class COMAppIDServiceEntry : IXmlSerializable
     public string UserName { get; private set; }
     public string ImagePath { get; private set; }
     public string ServiceDll { get; private set; }
-    public ServiceProtectionLevel ProtectionLevel { get; private set; }
+    public ServiceLaunchProtectedType ProtectionLevel { get; private set; }
 
-    internal COMAppIDServiceEntry(RegistryKey key, 
-        ServiceController service)
+    internal COMAppIDServiceEntry(Win32Service service)
     {
         DisplayName = service.DisplayName;
-        Name = service.ServiceName;
+        Name = service.Name;
         ServiceType = service.ServiceType;
-        ServiceDll = string.Empty;
-        ImagePath = string.Empty;
-        UserName = string.Empty;
-        if (key != null)
-        {
-            UserName = key.ReadString(null, "ObjectName");
-            ImagePath = key.ReadString(null, "ImagePath");
-            ServiceDll = key.ReadString("Parameters", "ServiceDll");
-            if (string.IsNullOrEmpty(ServiceDll))
-            {
-                ServiceDll = key.ReadString(null, "ServiceDll");
-            }
-            ProtectionLevel = (ServiceProtectionLevel) COMUtilities.ReadInt(key, null, "LaunchProtected");
-        }
+        ServiceDll = service.ServiceDll;
+        ImagePath = service.ImagePath;
+        UserName = service.UserName;
+        ProtectionLevel = service.LaunchProtected;
     }
 
     internal COMAppIDServiceEntry()
@@ -72,7 +60,7 @@ public class COMAppIDServiceEntry : IXmlSerializable
         UserName = reader.ReadString("user");
         ImagePath = reader.ReadString("path");
         ServiceDll = reader.ReadString("dll");
-        ProtectionLevel = reader.ReadEnum<ServiceProtectionLevel>("prot");
+        ProtectionLevel = reader.ReadEnum<ServiceLaunchProtectedType>("prot");
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)

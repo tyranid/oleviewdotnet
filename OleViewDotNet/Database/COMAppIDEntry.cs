@@ -16,12 +16,12 @@
 
 using Microsoft.Win32;
 using NtApiDotNet;
+using NtApiDotNet.Win32;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceProcess;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -100,9 +100,8 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         {
             try
             {
-                using RegistryKey serviceKey = Registry.LocalMachine.OpenSubKey(@"System\CurrentControlSet\Services\" + local_service);
-                using ServiceController service = new(local_service);
-                LocalService = new COMAppIDServiceEntry(serviceKey, service);
+                var service = ServiceUtils.GetService(local_service);
+                LocalService = new COMAppIDServiceEntry(service);
             }
             catch
             {
@@ -152,29 +151,9 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public bool IsService => LocalService != null;
 
-    public string ServiceName
-    {
-        get
-        {
-            if (IsService)
-            {
-                return LocalService.Name;
-            }
-            return string.Empty;
-        }
-    }
+    public string ServiceName => IsService ? LocalService.Name : string.Empty;
 
-    public ServiceProtectionLevel ServiceProtectionLevel
-    {
-        get
-        {
-            if (IsService)
-            {
-                return LocalService.ProtectionLevel;
-            }
-            return ServiceProtectionLevel.None;
-        }
-    }
+    public ServiceLaunchProtectedType ServiceProtectionLevel => IsService ? LocalService.ProtectionLevel : ServiceLaunchProtectedType.None;
 
     public SecurityDescriptor LaunchPermission
     {

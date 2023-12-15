@@ -100,53 +100,43 @@ public class COMRegistry
     private COMRegistry(COMRegistryMode mode, Sid user, IProgress<Tuple<string, int>> progress)
         : this(mode)
     {
-        using (RegistryKey classes_key = OpenClassesKey(mode, user))
+        using RegistryKey classes_key = OpenClassesKey(mode, user);
+        bool include_machine_key = mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly;
+        const int total_count = 9;
+        LoadDefaultSecurity();
+        ActivationContext actctx = null;
+        if (mode == COMRegistryMode.Merged)
         {
-            bool include_machine_key = mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly;
-            const int total_count = 9;
-            LoadDefaultSecurity();
-            ActivationContext actctx = null;
-            if (mode == COMRegistryMode.Merged)
+            actctx = ActivationContext.FromProcess();
+        }
+        COMPackagedRegistry packagedRegistry = new();
+        if (include_machine_key)
+        {
+            using var packagedComKey = classes_key.OpenSubKeySafe("PackagedCom");
+            if (packagedComKey != null)
             {
-                actctx = ActivationContext.FromProcess();
+                packagedRegistry = new COMPackagedRegistry(packagedComKey);
             }
-            COMPackagedRegistry packagedRegistry = new();
-            if (include_machine_key)
-            {
-                using var packagedComKey = classes_key.OpenSubKeySafe("PackagedCom");
-                if (packagedComKey != null)
-                {
-                    packagedRegistry = new COMPackagedRegistry(packagedComKey);
-                }
-            }
-            Report(progress, "CLSIDs", 1, total_count);
-            LoadCLSIDs(classes_key, actctx, packagedRegistry);
-            Report(progress, "AppIDs", 2, total_count);
-            LoadAppIDs(classes_key, packagedRegistry);
-            Report(progress, "ProgIDs", 3, total_count);
-            LoadProgIDs(classes_key, actctx, packagedRegistry);
-            Report(progress, "Interfaces", 4, total_count);
-            LoadInterfaces(classes_key, actctx, packagedRegistry, include_machine_key);
-            Report(progress, "MIME Types", 5, total_count);
-            LoadMimeTypes(classes_key);
-            Report(progress, "PreApproved", 6, total_count);
-            LoadPreApproved(mode, user);
-            Report(progress, "LowRights", 7, total_count);
-            LoadLowRights(mode, user);
-            Report(progress, "TypeLibs", 8, total_count);
-            LoadTypelibs(classes_key, actctx, packagedRegistry);
-            Report(progress, "Runtime Classes", 9, total_count);
-            LoadWindowsRuntime(classes_key, mode);
         }
-
-        try
-        {
-            CreatedUser = user.Name;
-        }
-        catch
-        {
-            CreatedUser = user.ToString();
-        }
+        Report(progress, "CLSIDs", 1, total_count);
+        LoadCLSIDs(classes_key, actctx, packagedRegistry);
+        Report(progress, "AppIDs", 2, total_count);
+        LoadAppIDs(classes_key, packagedRegistry);
+        Report(progress, "ProgIDs", 3, total_count);
+        LoadProgIDs(classes_key, actctx, packagedRegistry);
+        Report(progress, "Interfaces", 4, total_count);
+        LoadInterfaces(classes_key, actctx, packagedRegistry, include_machine_key);
+        Report(progress, "MIME Types", 5, total_count);
+        LoadMimeTypes(classes_key);
+        Report(progress, "PreApproved", 6, total_count);
+        LoadPreApproved(mode, user);
+        Report(progress, "LowRights", 7, total_count);
+        LoadLowRights(mode, user);
+        Report(progress, "TypeLibs", 8, total_count);
+        LoadTypelibs(classes_key, actctx, packagedRegistry);
+        Report(progress, "Runtime Classes", 9, total_count);
+        LoadWindowsRuntime(classes_key, mode);
+        CreatedUser = user.GetName().Name;
     }
 
     private COMRegistry(string path, IProgress<Tuple<string, int>> progress)
@@ -157,52 +147,50 @@ public class COMRegistry
         settings.IgnoreProcessingInstructions = true;
         settings.IgnoreWhitespace = true;
         settings.CheckCharacters = false;
-        using (XmlReader reader = XmlReader.Create(path, settings))
+        using XmlReader reader = XmlReader.Create(path, settings);
+        if (!reader.IsStartElement("comregistry"))
         {
-            if (!reader.IsStartElement("comregistry"))
-            {
-                throw new XmlException("Invalid root node");
-            }
-
-            const int total_count = 9;
-
-            CreatedDate = reader.GetAttribute("created");
-            CreatedMachine = reader.GetAttribute("machine");
-            SixtyFourBit = reader.ReadBool("sixfour");
-            Architecture = reader.ReadString("arch");
-            LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
-            CreatedUser = reader.GetAttribute("user");
-            DefaultAccessPermission = reader.ReadSecurityDescriptor("access");
-            DefaultAccessRestriction = reader.ReadSecurityDescriptor("accessr");
-            DefaultLaunchPermission = reader.ReadSecurityDescriptor("launch");
-            DefaultLaunchRestriction = reader.ReadSecurityDescriptor("launchr");
-            Report(progress, "CLSIDs", 1, total_count);
-            m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
-            Report(progress, "ProgIDs", 2, total_count);
-            m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry(this)).ToSortedDictionary(p => p.ProgID, StringComparer.OrdinalIgnoreCase);
-            Report(progress, "MIME Types", 3, total_count);
-            m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType(this)).ToList();
-            Report(progress, "AppIDs", 4, total_count);
-            m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry(this)).ToSortedDictionary(p => p.AppId);
-            Report(progress, "Interfaces", 5, total_count);
-            m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry(this)).ToSortedDictionary(p => p.Iid);
-            Report(progress, "Categories", 6, total_count);
-            m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory(this)).ToSortedDictionary(p => p.CategoryID);
-            Report(progress, "LowRights", 7, total_count);
-            m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy(this)).ToList();
-            Report(progress, "TypeLibs", 8, total_count);
-            m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry(this)).ToSortedDictionary(p => p.TypelibId);
-            Report(progress, "PreApproved", 9, total_count);
-            if (reader.IsStartElement("preapp"))
-            {
-                m_preapproved = reader.ReadGuids("clsids").ToList();
-                reader.Read();
-            }
-            m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-            m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-            m_runtime_extensions = reader.ReadSerializableObjects("rtexts", () => new COMRuntimeExtensionEntry(this)).ToList();
-            reader.ReadEndElement();
+            throw new XmlException("Invalid root node");
         }
+
+        const int total_count = 9;
+
+        CreatedDate = reader.GetAttribute("created");
+        CreatedMachine = reader.GetAttribute("machine");
+        SixtyFourBit = reader.ReadBool("sixfour");
+        Architecture = reader.ReadString("arch");
+        LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
+        CreatedUser = reader.GetAttribute("user");
+        DefaultAccessPermission = reader.ReadSecurityDescriptor("access");
+        DefaultAccessRestriction = reader.ReadSecurityDescriptor("accessr");
+        DefaultLaunchPermission = reader.ReadSecurityDescriptor("launch");
+        DefaultLaunchRestriction = reader.ReadSecurityDescriptor("launchr");
+        Report(progress, "CLSIDs", 1, total_count);
+        m_clsids = reader.ReadSerializableObjects("clsids", () => new COMCLSIDEntry(this)).ToSortedDictionary(p => p.Clsid);
+        Report(progress, "ProgIDs", 2, total_count);
+        m_progids = reader.ReadSerializableObjects("progids", () => new COMProgIDEntry(this)).ToSortedDictionary(p => p.ProgID, StringComparer.OrdinalIgnoreCase);
+        Report(progress, "MIME Types", 3, total_count);
+        m_mimetypes = reader.ReadSerializableObjects("mimetypes", () => new COMMimeType(this)).ToList();
+        Report(progress, "AppIDs", 4, total_count);
+        m_appid = reader.ReadSerializableObjects("appids", () => new COMAppIDEntry(this)).ToSortedDictionary(p => p.AppId);
+        Report(progress, "Interfaces", 5, total_count);
+        m_interfaces = reader.ReadSerializableObjects("intfs", () => new COMInterfaceEntry(this)).ToSortedDictionary(p => p.Iid);
+        Report(progress, "Categories", 6, total_count);
+        m_categories = reader.ReadSerializableObjects("catids", () => new COMCategory(this)).ToSortedDictionary(p => p.CategoryID);
+        Report(progress, "LowRights", 7, total_count);
+        m_lowrights = reader.ReadSerializableObjects("lowies", () => new COMIELowRightsElevationPolicy(this)).ToList();
+        Report(progress, "TypeLibs", 8, total_count);
+        m_typelibs = reader.ReadSerializableObjects("typelibs", () => new COMTypeLibEntry(this)).ToSortedDictionary(p => p.TypelibId);
+        Report(progress, "PreApproved", 9, total_count);
+        if (reader.IsStartElement("preapp"))
+        {
+            m_preapproved = reader.ReadGuids("clsids").ToList();
+            reader.Read();
+        }
+        m_runtime_classes = reader.ReadSerializableObjects("runtime", () => new COMRuntimeClassEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+        m_runtime_servers = reader.ReadSerializableObjects("rtservers", () => new COMRuntimeServerEntry(this)).ToSortedDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+        m_runtime_extensions = reader.ReadSerializableObjects("rtexts", () => new COMRuntimeExtensionEntry(this)).ToList();
+        reader.ReadEndElement();
         FilePath = path;
     }
 
