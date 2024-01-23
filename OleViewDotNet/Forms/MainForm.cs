@@ -1003,4 +1003,25 @@ public partial class MainForm : Form
             MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
+
+    private void menuFileExportInterfaceList_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            using SaveFileDialog dlg = new();
+            dlg.Filter = "Text File (*.txt)|*.txt|All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                using StreamWriter writer = new(dlg.FileName);
+                foreach (var pair in m_registry.InterfacesToNames)
+                {
+                    writer.WriteLine($"{pair.Key}\t{pair.Value}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
 }
