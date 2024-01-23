@@ -84,20 +84,13 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     private void LoadFromKey(RegistryKey key)
     {
         HashSet<Guid> categories = new();
-        object name = key.GetValue(null);
-        Name = null;
-        if (name != null)
-        {
-            string s = name.ToString().Trim();
-
-            if (s.Length > 0)
-            {
-                Name = name.ToString();
-            }
-        }
-
+        string name = key.GetValue(null) as string ?? string.Empty;
         bool fake_name = false;
-        if (Name == null)
+        if (!string.IsNullOrWhiteSpace(name.Trim()))
+        {
+            Name = name;
+        }
+        else
         {
             fake_name = true;
             Name = Clsid.FormatGuidDefault();
