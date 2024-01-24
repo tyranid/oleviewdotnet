@@ -41,7 +41,7 @@ public partial class TypeLibControl : UserControl
 
     private class ListViewItemWithGuid : ListViewItem
     {
-        public Guid Guid { get; private set; }
+        public Guid Guid { get; }
         public ListViewItemWithGuid(string name, Guid iid) : base(name)
         {
             Guid = iid;
@@ -58,9 +58,10 @@ public partial class TypeLibControl : UserControl
 
     private static ListViewItemWithGuid MapTypeToItemNoSubItem(Type type)
     {
-        ListViewItemWithGuid item = new(type.Name, type.GUID);
-        item.Tag = type;
-        return item;
+        return new(type.Name, type.GUID)
+        {
+            Tag = type
+        };
     }
 
     private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(Assembly typelib, bool com_visible)
@@ -73,13 +74,26 @@ public partial class TypeLibControl : UserControl
         return COMUtilities.GetComClasses(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy)
+    private static string GetComProxyName(NdrComProxyDefinition proxy, IDictionary<Guid, string> iids_to_names)
     {
-        foreach (var t in proxy.Entries.OrderBy(t => COMUtilities.DemangleWinRTName(t.Name, t.Iid)))
+        if (!string.IsNullOrWhiteSpace(proxy.Name))
         {
-            ListViewItemWithGuid item = new(COMUtilities.DemangleWinRTName(t.Name, t.Iid), t.Iid);
-            item.SubItems.Add(t.Iid.FormatGuid());
-            item.Tag = t;
+            return COMUtilities.DemangleWinRTName(proxy.Name, proxy.Iid);
+        }
+        if (iids_to_names != null && iids_to_names.TryGetValue(proxy.Iid, out string name))
+        {
+            return name;
+        }
+        return $"intf_{proxy.Iid.ToString().Replace('-', '_')}";
+    }
+
+    private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy, IDictionary<Guid, string> iids_to_names)
+    {
+        foreach (var entry in proxy.Entries.Select(t => Tuple.Create(GetComProxyName(t, iids_to_names), t)).OrderBy(t => t.Item1))
+        {
+            ListViewItemWithGuid item = new(entry.Item1, entry.Item2.Iid);
+            item.SubItems.Add(entry.Item2.Iid.FormatGuid());
+            item.Tag = entry.Item2;
             yield return item;
         }
     }
@@ -207,7 +221,7 @@ public partial class TypeLibControl : UserControl
 
     public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view, string comClassIdName = null, Guid? comClassId = null)
         : this(registry.InterfacesToNames, name, guid_to_view,
-              FormatProxyInstance(proxy),
+              FormatProxyInstance(proxy, registry.InterfacesToNames),
               new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
     {
         // controls on this panel are not enabled by default, activating them in the proxy view only
@@ -217,17 +231,15 @@ public partial class TypeLibControl : UserControl
         this.comClassIdName = comClassIdName;
     }
 
-    private INdrFormatter GetNdrFormatter(bool useDemangler)
+    private INdrFormatter GetNdrFormatter(NdrComProxyDefinition proxy = null)
     {
         DefaultNdrFormatterFlags flags = cbProxyRenderStyle.SelectedIndex % 2 == 0 ? DefaultNdrFormatterFlags.None : DefaultNdrFormatterFlags.RemoveComments;
-        Func<string, string> demangler = useDemangler ? COMUtilities.DemangleWinRTName : null;
-        bool useNtApiFormatter = this.cbProxyRenderStyle.SelectedIndex < 2;
+        Func<string, string> demangler = proxy != null ? n => GetComProxyName(proxy, m_iids_to_names) : null;
+        bool useNtApiFormatter = cbProxyRenderStyle.SelectedIndex < 2;
         return useNtApiFormatter ?
             DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags) :
-        
             // cpp style requested
-            CppNdrFormatter.Create(m_iids_to_names, demangler, flags)
-        ;
+            CppNdrFormatter.Create(m_iids_to_names, demangler, flags);
     }
 
     private string GetTextFromTag(object tag)
@@ -240,12 +252,12 @@ public partial class TypeLibControl : UserControl
         }
         else if (tag is NdrComProxyDefinition proxy)
         {
-            INdrFormatter formatter = GetNdrFormatter(true);
+            INdrFormatter formatter = GetNdrFormatter(proxy);
             return formatter.FormatComProxy(proxy);
         }
         else if (tag is NdrComplexTypeReference str)
         {
-            INdrFormatter formatter = GetNdrFormatter(false);
+            INdrFormatter formatter = GetNdrFormatter();
             return formatter.FormatComplexType(str);
         }
 
@@ -364,6 +376,7 @@ public partial class TypeLibControl : UserControl
     {
         MessageBox.Show(CombineOVDNIdlAndDqsInt(ovdnIdl, dqs));
     }
+
     private static string CombineOVDNIdlAndDqsInt(string ovdnIdl, string dqs)
     {
         MatchCollection unknownMethodNames = Regex.Matches(ovdnIdl, @"\s+Proc\d+\(");
@@ -383,8 +396,10 @@ public partial class TypeLibControl : UserControl
 
     private void cbProxyRenderStyle_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if((tabControl.SelectedTab.Controls.Count > 0)&&(tabControl.SelectedTab.Controls[0] is ListView))
-            UpdateFromListView((ListView)tabControl.SelectedTab.Controls[0]);
+        if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
+        {
+            UpdateFromListView(view);
+        }
     }
 
     private void textBoxFilter_Enter(object sender, EventArgs e)
