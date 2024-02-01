@@ -3085,36 +3085,53 @@ function Format-ComSecurityDescriptor {
                 return
             }
         }
-        switch($PSCmdlet.ParameterSetName) {
-            "FromSddl" {
-                # Do nothing.
-            }
-            "FromObject" {
-                if ($ShowAccess) {
-                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
-                } else {
-                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
-                }
-            }
-            "FromDefault" {
-                if ($ShowAccess) {
-                    $SecurityDescriptor = $Database.DefaultAccessPermission
-                } else {
-                    $SecurityDescriptor = $Database.DefaultLaunchPermission
-                }
-            }
-            "FromRestriction" {
-                if ($ShowAccess) {
-                    $SecurityDescriptor = $Database.DefaultAccessRestriction
-                } else {
-                    $SecurityDescriptor = $Database.DefaultLaunchRestriction
-                }
-            }
-            "FromRuntimeDefault" {
-                $SecurityDescriptor = [OleViewDotNet.Database.COMRuntimeClassEntry]::DefaultActivationPermission
-            }
-        }
 
-        [OleViewDotNetPS.Utils.PowerShellUtils]::FormatSecurityDescriptor($SecurityDescriptor, $SdkName)
+        try {
+            $name = ""
+            switch($PSCmdlet.ParameterSetName) {
+                "FromSddl" {
+                    # Do nothing.
+                }
+                "FromObject" {
+                    $name = $InputObject.Name
+                    if ($ShowAccess) {
+                        $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
+                    } else {
+                        $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
+                    }
+                }
+                "FromDefault" {
+                    $name = "Default"
+                    if ($ShowAccess) {
+                        $SecurityDescriptor = $Database.DefaultAccessPermission
+                    } else {
+                        $SecurityDescriptor = $Database.DefaultLaunchPermission
+                    }
+                }
+                "FromRestriction" {
+                    $name = "Restriction"
+                    if ($ShowAccess) {
+                        $SecurityDescriptor = $Database.DefaultAccessRestriction
+                    } else {
+                        $SecurityDescriptor = $Database.DefaultLaunchRestriction
+                    }
+                }
+                "FromRuntimeDefault" {
+                    $SecurityDescriptor = [OleViewDotNet.Database.COMRuntimeClassEntry]::DefaultActivationPermission
+                }
+            }
+
+            if ("" -ne $name) {
+                "Name   : $name"
+                if ($ShowAccess) {
+                    "Type   : Access"
+                } else {
+                    "Type   : Launch/Activate"
+                }
+            }
+            [OleViewDotNetPS.Utils.PowerShellUtils]::FormatSecurityDescriptor($SecurityDescriptor, $SdkName)
+        } catch {
+            Write-Error $_
+        }
     }
 }

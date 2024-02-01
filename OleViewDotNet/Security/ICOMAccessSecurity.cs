@@ -20,6 +20,7 @@ namespace OleViewDotNet.Security;
 
 public interface ICOMAccessSecurity
 {
+    string Name { get; }
     SecurityDescriptor DefaultAccessPermission { get; }
     SecurityDescriptor DefaultLaunchPermission { get; }
 }

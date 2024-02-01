@@ -342,10 +342,13 @@ public class COMEnumerateInterfaces
     {
         using AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null);
+        Win32ProcessConfig config = new();
+        config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
         using var imp_token = token?.DuplicateToken(SecurityImpersonationLevel.Impersonation);
         if (imp_token != null)
         {
             imp_token.Inherit = true;
+            config.AddInheritedHandle(imp_token);
         }
 
         string process = null;
