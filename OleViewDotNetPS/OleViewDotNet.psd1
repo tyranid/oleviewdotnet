@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.13'
+ModuleVersion = '1.14'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -89,7 +89,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.13
+        ReleaseNotes = 'v1.14
 ----
 * Fixes for Windows 11.
 '
