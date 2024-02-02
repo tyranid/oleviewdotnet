@@ -55,7 +55,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     private void LoadFromKey(RegistryKey key)
     {
         string name = key.GetValue(null) as string;
-        if (!string.IsNullOrWhiteSpace(name?.Trim()))
+        if (!string.IsNullOrWhiteSpace(name?.Trim()) || m_iidtoname.TryGetValue(Iid, out name))
         {
             Name = COMUtilities.DemangleWinRTName(name);
             CacheIidToName(Iid, Name);

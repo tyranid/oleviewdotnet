@@ -1015,6 +1015,10 @@ public partial class MainForm : Form
                 using StreamWriter writer = new(dlg.FileName);
                 foreach (var pair in m_registry.InterfacesToNames)
                 {
+                    if (Guid.TryParse(pair.Value, out Guid iid) && iid == pair.Key)
+                    {
+                        continue;
+                    }
                     writer.WriteLine($"{pair.Key}\t{pair.Value}");
                 }
             }
