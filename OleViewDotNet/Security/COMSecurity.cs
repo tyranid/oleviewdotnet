@@ -52,7 +52,7 @@ public static class COMSecurity
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 
-    public static bool IsAccessGranted(SecurityDescriptor sd, string principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
+    public static bool IsAccessGranted(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
     {
         try
         {
@@ -85,7 +85,7 @@ public static class COMSecurity
         }
     }
 
-    private static bool GetGrantedAccess(SecurityDescriptor sd, string principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
+    private static bool GetGrantedAccess(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
     {
         GenericMapping mapping = new()
         {
@@ -105,9 +105,9 @@ public static class COMSecurity
 
         AccessMask mask;
 
-        if (!string.IsNullOrWhiteSpace(principal))
+        if (principal != null)
         {
-            mask = NtSecurity.GetMaximumAccess(sd, token, new Sid(principal), mapping);
+            mask = NtSecurity.GetMaximumAccess(sd, token, principal.Sid, mapping);
         }
         else
         {

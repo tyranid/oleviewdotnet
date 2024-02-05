@@ -35,7 +35,7 @@ public class ComClientGraphBuilder
             return false;
         }
 
-        if (ipid.Process.Token.UserSid == string.Empty)
+        if (ipid.Process.Token.UserSid == null)
         {
             return true;
         }
@@ -47,7 +47,7 @@ public class ComClientGraphBuilder
         }
 
         COMProcessToken token = new(result.Result);
-        if (token.UserSid == string.Empty)
+        if (token.UserSid == null)
         {
             return true;
         }

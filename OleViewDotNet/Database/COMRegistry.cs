@@ -78,7 +78,7 @@ public class COMRegistry
         }
     }
 
-    private static RegistryKey OpenClassesKey(COMRegistryMode mode, Sid user)
+    private static RegistryKey OpenClassesKey(COMRegistryMode mode, COMSid user)
     {
         if (user == null)
         {
@@ -97,7 +97,7 @@ public class COMRegistry
     /// <summary>
     /// Default constructor
     /// </summary>
-    private COMRegistry(COMRegistryMode mode, Sid user, IProgress<Tuple<string, int>> progress)
+    private COMRegistry(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress)
         : this(mode)
     {
         using RegistryKey classes_key = OpenClassesKey(mode, user);
@@ -136,7 +136,7 @@ public class COMRegistry
         LoadTypelibs(classes_key, actctx, packagedRegistry);
         Report(progress, "Runtime Classes", 9, total_count);
         LoadWindowsRuntime(classes_key, mode);
-        CreatedUser = user.GetName().Name;
+        CreatedUser = user.Name;
     }
 
     private COMRegistry(string path, IProgress<Tuple<string, int>> progress)
@@ -424,7 +424,7 @@ public class COMRegistry
         return ret;
     }
 
-    private void LoadPreApproved(COMRegistryMode mode, Sid user)
+    private void LoadPreApproved(COMRegistryMode mode, COMSid user)
     {
         m_preapproved = new List<Guid>();
         if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly)
@@ -506,7 +506,7 @@ public class COMRegistry
         }
     }
 
-    private void LoadLowRights(COMRegistryMode mode, Sid user)
+    private void LoadLowRights(COMRegistryMode mode, COMSid user)
     {
         m_lowrights = new List<COMIELowRightsElevationPolicy>();
 
@@ -869,7 +869,7 @@ public class COMRegistry
     #endregion
 
     #region Public Methods
-    public static COMRegistry Load(COMRegistryMode mode, Sid user, IProgress<Tuple<string, int>> progress)
+    public static COMRegistry Load(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress)
     {
         if (progress == null)
         {
@@ -878,7 +878,7 @@ public class COMRegistry
 
         if (user == null)
         {
-            user = NtProcess.Current.User;
+            user = new COMSid(NtProcess.Current.User);
         }
 
         return new COMRegistry(mode, user, progress);

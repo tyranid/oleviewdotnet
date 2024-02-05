@@ -275,7 +275,7 @@ function Get-ComDatabase {
         [Parameter(ParameterSetName = "FromRegistry")]
         [OleViewDotNet.Database.COMRegistryMode]$LoadMode = "Merged",
         [Parameter(ParameterSetName = "FromRegistry")]
-        [NtApiDotNet.Sid]$User,
+        [OleViewDotNet.Security.COMSid]$User,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
         [switch]$NoProgress,
@@ -1219,7 +1219,7 @@ A process to get the access token from for the access check.
 A process ID to get the access token from for the access check.
 .PARAMETER Access
 The access mask to check, for access permissions. Defaults to local execute.
-.PARAMETER Access
+.PARAMETER LaunchAccess
 The access mask to check, for launch permissions. Defaults to local execute and activation.
 .PARAMETER Principal
 The principal for the access check, defaults to the current user.
@@ -1267,7 +1267,7 @@ function Select-ComAccess {
         [Parameter(ParameterSetName = "FromProcessId")]
         [alias("pid")]
         [int]$ProcessId = $pid,
-        [NtApiDotNet.Sid]$Principal = [NtApiDotNet.NtProcess]::Current.User,
+        [OleViewDotNet.Security.COMSid]$Principal,
         [switch]$NotAccessible,
         [switch]$IgnoreDefault
     )
@@ -1303,6 +1303,72 @@ function Select-ComAccess {
         if ($null -ne $access_check) {
             $access_check.Dispose()
         }
+    }
+}
+
+<#
+.SYNOPSIS
+Test accessible COM database information.
+.DESCRIPTION
+This cmdlet tests of a COM database object is accessible.
+.PARAMETER InputObject
+The COM object entry to test.
+.PARAMETER Token
+An access token to perform the access check on.
+.PARAMETER Process
+A process to get the access token from for the access check.
+.PARAMETER ProcessId
+A process ID to get the access token from for the access check.
+.PARAMETER Access
+The access mask to check, for access permissions. Defaults to local execute.
+.PARAMETER LaunchAccess
+The access mask to check, for launch permissions. Defaults to local execute and activation.
+.PARAMETER Principal
+The principal for the COM access check, defaults to the current user.
+.PARAMETER IgnoreDefault
+If the object doesn't have a specific set of launch permissions uses the system default. If this flag is specified objects without a specific launch permission are ignored.
+.INPUTS
+OleViewDotNet.Security.ICOMAccessSecurity
+.OUTPUTS
+bool
+#>
+function Test-ComAccess {
+    [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
+        [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
+        [Parameter(Mandatory, ParameterSetName = "FromToken")]
+        [NtApiDotNet.NtToken]$Token,
+        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
+        [NtApiDotNet.NtProcess]$Process,
+        [Parameter(ParameterSetName = "FromProcessId")]
+        [alias("pid")]
+        [int]$ProcessId = $pid,
+        [OleViewDotNet.Security.COMSid]$Principal,
+        [switch]$IgnoreDefault
+    )
+
+    $access_check = switch($PSCmdlet.ParameterSetName) {
+        "FromProcessId" {
+            [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
+                $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+        }
+        "FromProcess" {
+            [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
+                $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+        }
+        "FromToken" {
+            [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Token, `
+                $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+        }
+    }
+
+    $access_check.AccessCheck($InputObject)
+
+    if ($null -ne $access_check) {
+        $access_check.Dispose()
     }
 }
 
@@ -3132,39 +3198,6 @@ function Format-ComSecurityDescriptor {
             [OleViewDotNetPS.Utils.PowerShellUtils]::FormatSecurityDescriptor($SecurityDescriptor, $SdkName)
         } catch {
             Write-Error $_
-        }
-    }
-}
-
-<#
-.SYNOPSIS
-Get a SID from a name or SDDL.
-.DESCRIPTION
-This cmdlet gets a SID object from a name or SDDL.
-.PARAMETER Name
-The name for the user or group or an SDDL SID string.
-.PARAMETER KnownSid
-A known SID to use.
-.INPUTS
-None
-.OUTPUTS
-NtApiDotNet.Sid
-#>
-function Get-ComSid {
-[CmdletBinding(DefaultParameterSetName="FromName")]
-    Param(
-        [Parameter(Mandatory, Position=0, ParameterSetName = "FromName")]
-        [string]$Name,
-        [Parameter(Mandatory, ParameterSetName = "FromKnownSid")]
-        [NtApiDotNet.KnownSidValue]$KnownSid
-    )
-
-    switch($PSCmdlet.ParameterSetName) {
-        "FromName" {
-            [OleViewDotNetPS.Utils.PowerShellUtils]::GetSidFromString($Name)
-        }
-        "FromKnownSid" {
-            [NtApiDotNet.KnownSids]::GetKnownSid($KnownSid)
         }
     }
 }

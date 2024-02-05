@@ -50,7 +50,7 @@ public static class PowerShellUtils
     }
 
     public static COMAccessCheck GetAccessCheck(NtToken token,
-        string principal,
+        COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
@@ -64,7 +64,7 @@ public static class PowerShellUtils
     }
 
     public static COMAccessCheck GetAccessCheck(NtProcess process,
-        string principal,
+        COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
@@ -78,7 +78,7 @@ public static class PowerShellUtils
     }
 
     public static COMAccessCheck GetAccessCheck(int process_id,
-        string principal,
+        COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
@@ -210,13 +210,5 @@ public static class PowerShellUtils
         }
 
         return builder.ToString();
-    }
-
-    public static Sid GetSidFromString(string name)
-    {
-        var sid = Sid.Parse(name, false);
-        if (sid.IsSuccess)
-            return sid.Result;
-        return NtSecurity.LookupAccountName(name);
     }
 }

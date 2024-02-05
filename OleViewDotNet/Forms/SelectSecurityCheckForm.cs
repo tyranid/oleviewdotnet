@@ -19,7 +19,6 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Security;
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
@@ -43,11 +42,12 @@ internal partial class SelectSecurityCheckForm : Form
         comboBoxIL.SelectedItem = TokenIntegrityLevel.Low;
         if (process_security)
         {
-            textBoxPrincipal.Enabled = false;
+            textBoxPrincipal.Text = string.Empty;
             checkBoxLocalLaunch.Enabled = false;
             checkBoxRemoteLaunch.Enabled = false;
             checkBoxLocalActivate.Enabled = false;
             checkBoxRemoteActivate.Enabled = false;
+            checkBoxIgnoreDefault.Enabled = false;
         }
     }
 
@@ -60,13 +60,16 @@ internal partial class SelectSecurityCheckForm : Form
     internal NtToken Token { get; private set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-    internal string Principal { get; private set; }
+    internal COMSid Principal { get; private set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
     internal COMAccessRights AccessRights { get; private set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
     internal COMAccessRights LaunchRights { get; private set; }
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    internal bool IgnoreDefault { get; private set; }
 
     private void radioSpecificProcess_CheckedChanged(object sender, EventArgs e)
     {
@@ -89,12 +92,7 @@ internal partial class SelectSecurityCheckForm : Form
             }
             else if (radioSpecificProcess.Checked)
             {
-                NtProcess process = selectProcessControl.SelectedProcess;
-                if (process == null)
-                {
-                    throw new InvalidOperationException("Please select a process from the list");
-                }
-
+                NtProcess process = selectProcessControl.SelectedProcess ?? throw new InvalidOperationException("Please select a process from the list");
                 using var token = NtToken.OpenProcessToken(process, false, TokenAccessRights.Duplicate);
                 Token = token.DuplicateToken(TokenType.Impersonation, SecurityImpersonationLevel.Impersonation, TokenAccessRights.GenericAll);
             }
@@ -116,6 +114,10 @@ internal partial class SelectSecurityCheckForm : Form
             {
                 AccessRights |= COMAccessRights.ExecuteRemote;
             }
+            if (!string.IsNullOrWhiteSpace(textBoxPrincipal.Text))
+            {
+                Principal = COMSid.Parse(textBoxPrincipal.Text);
+            }
 
             if (!_process_security)
             {
@@ -135,10 +137,7 @@ internal partial class SelectSecurityCheckForm : Form
                 {
                     LaunchRights |= COMAccessRights.ActivateRemote;
                 }
-                if (!_process_security)
-                {
-                    Principal = COMSecurity.UserToSid(textBoxPrincipal.Text).ToString();
-                }
+                IgnoreDefault = checkBoxIgnoreDefault.Checked;
             }
 
             DialogResult = DialogResult.OK;

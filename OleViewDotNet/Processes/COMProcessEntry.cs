@@ -37,7 +37,7 @@ public class COMProcessEntry : ICOMAccessSecurity
     public SecurityDescriptor AccessPermissions { get; }
     public SecurityDescriptor LRpcPermissions { get; }
     public string User => Token.User;
-    public string UserSid => Token.UserSid;
+    public COMSid UserSid => Token.UserSid;
     public string RpcEndpoint { get; private set; }
     public EOLE_AUTHENTICATION_CAPABILITIES Capabilities { get; }
     public RPC_AUTHN_LEVEL AuthnLevel { get; }
@@ -65,17 +65,13 @@ public class COMProcessEntry : ICOMAccessSecurity
             return false;
         }
 
-        switch (UnmarshalPolicy)
+        return UnmarshalPolicy switch
         {
-            case GLOBALOPT_UNMARSHALING_POLICY_VALUES.NORMAL:
-                return true;
-            case GLOBALOPT_UNMARSHALING_POLICY_VALUES.HYBRID:
-                return !ac;
-            case GLOBALOPT_UNMARSHALING_POLICY_VALUES.STRONG:
-                return false;
-            default:
-                return false;
-        }
+            GLOBALOPT_UNMARSHALING_POLICY_VALUES.NORMAL => true,
+            GLOBALOPT_UNMARSHALING_POLICY_VALUES.HYBRID => !ac,
+            GLOBALOPT_UNMARSHALING_POLICY_VALUES.STRONG => false,
+            _ => false,
+        };
     }
 
     public bool CustomMarshalAllowed => CustomMarshalAllowedInternal(false);

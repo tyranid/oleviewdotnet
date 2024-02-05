@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Database;
+using OleViewDotNet.Security;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,7 +25,7 @@ namespace OleViewDotNet.Processes;
 public class COMProcessToken
 {
     public string User { get; }
-    public string UserSid { get; }
+    public COMSid UserSid { get; }
     public TokenIntegrityLevel IntegrityLevel { get; }
     public bool Sandboxed { get; }
     public bool AppContainer { get; }
@@ -38,7 +39,7 @@ public class COMProcessToken
     public COMProcessToken()
     {
         User = "UNKNOWN";
-        UserSid = string.Empty;
+        UserSid = null;
         IntegrityLevel = TokenIntegrityLevel.Medium;
     }
 
@@ -51,7 +52,7 @@ public class COMProcessToken
         {
             NtToken token = result.Result;
             User = token.User.Sid.Name;
-            UserSid = token.User.Sid.ToString();
+            UserSid = new COMSid(token.User.Sid);
             IntegrityLevel = token.IntegrityLevel;
             Sandboxed = token.IsSandbox;
             AppContainer = token.AppContainer;

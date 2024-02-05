@@ -27,10 +27,15 @@ public class COMAccessCheck : IDisposable
     private readonly Dictionary<string, bool> m_access_cache;
     private readonly Dictionary<string, bool> m_launch_cache;
     private readonly NtToken m_access_token;
-    private readonly string m_principal;
+    private readonly COMSid m_principal;
     private readonly COMAccessRights m_access_rights;
     private readonly COMAccessRights m_launch_rights;
     private readonly bool m_ignore_default;
+
+    private static string GetCacheKey(COMSid principal, SecurityDescriptor sd)
+    {
+        return $"{principal}:{sd?.ToBase64() ?? string.Empty}";
+    }
 
     public static SecurityDescriptor GetAccessPermission(ICOMAccessSecurity obj)
     {
@@ -104,7 +109,7 @@ public class COMAccessCheck : IDisposable
     }
 
     public COMAccessCheck(NtToken token,
-        string principal,
+        COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
@@ -130,12 +135,13 @@ public class COMAccessCheck : IDisposable
         SecurityDescriptor launch_sd = m_ignore_default ? null : obj.DefaultLaunchPermission;
         SecurityDescriptor access_sd = m_ignore_default ? null : obj.DefaultAccessPermission;
         bool check_launch = true;
-        string principal = m_principal;
+        COMSid access_principal = m_principal;
+        COMSid launch_principal = null;
 
         if (obj is COMProcessEntry process)
         {
             access_sd = process.AccessPermissions;
-            principal = process.UserSid;
+            access_principal ??= process.UserSid;
             check_launch = false;
         }
         else if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
@@ -158,6 +164,25 @@ public class COMAccessCheck : IDisposable
             if (appid.HasAccessPermission)
             {
                 access_sd = appid.AccessPermission;
+            }
+
+            if (appid.Flags.HasFlag(COMAppIDFlags.IUServerSelfSidInLaunchPermission))
+            {
+                if (appid.IsService)
+                {
+                    if (appid.LocalService.UserName == "LocalSystem")
+                        launch_principal = new COMSid(KnownSids.LocalSystem);
+                    else
+                        COMSid.TryParse(appid.LocalService.UserName, out launch_principal);
+                }
+                else if (appid.HasRunAs && !appid.IsInteractiveUser)
+                {
+                    COMSid.TryParse(appid.RunAs, out launch_principal);
+                }
+                else
+                {
+                    launch_principal = COMSid.CurrentUser;
+                }
             }
         }
         else if (obj is COMRuntimeClassEntry runtime_class)
@@ -198,7 +223,9 @@ public class COMAccessCheck : IDisposable
             return false;
         }
 
-        string access_str = access_sd?.ToBase64() ?? string.Empty;
+        access_principal ??= COMSid.CurrentUser;
+
+        string access_str = GetCacheKey(access_principal, access_sd);
         if (!m_access_cache.ContainsKey(access_str))
         {
             if (m_access_rights == 0)
@@ -208,11 +235,11 @@ public class COMAccessCheck : IDisposable
             else
             {
                 m_access_cache[access_str] = COMSecurity.IsAccessGranted(access_sd,
-                    principal, m_access_token, false, false, m_access_rights);
+                    access_principal, m_access_token, false, false, m_access_rights);
             }
         }
 
-        string launch_str = launch_sd?.ToBase64() ?? string.Empty;
+        string launch_str = GetCacheKey(launch_principal, launch_sd);
         if (check_launch && !m_launch_cache.ContainsKey(launch_str))
         {
             if (m_launch_rights == 0)
@@ -221,7 +248,7 @@ public class COMAccessCheck : IDisposable
             }
             else
             {
-                m_launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, principal, m_access_token,
+                m_launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, launch_principal, m_access_token,
                     true, true, m_launch_rights);
             }
         }

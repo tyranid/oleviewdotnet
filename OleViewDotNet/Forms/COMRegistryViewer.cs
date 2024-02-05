@@ -1535,110 +1535,14 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    private FilterResult RunAccessibleFilter(TreeNode node, 
-        Dictionary<string, bool> access_cache, 
-        Dictionary<string, bool> launch_cache, 
-        NtToken token, 
-        string principal,
-        COMAccessRights access_rights, 
-        COMAccessRights launch_rights)
+    private FilterResult RunAccessibleFilter(TreeNode node, COMAccessCheck access_check)
     {
-        SecurityDescriptor launch_sd = m_registry.DefaultLaunchPermission;
-        SecurityDescriptor access_sd = m_registry.DefaultAccessPermission;
-        bool check_launch = true;
-
-        if (node.Tag is COMProcessEntry)
-        {
-            COMProcessEntry process = (COMProcessEntry)node.Tag;
-            access_sd = process.AccessPermissions;
-            principal = process.UserSid;
-            check_launch = false;
-        }
-        else if (node.Tag is COMAppIDEntry || node.Tag is COMCLSIDEntry)
-        {
-            COMAppIDEntry appid = node.Tag as COMAppIDEntry;
-            if (appid == null && node.Tag is COMCLSIDEntry clsid_entry)
-            {
-                if (!m_registry.AppIDs.ContainsKey(clsid_entry.AppID))
-                {
-                    return FilterResult.Exclude;
-                }
-
-                appid = m_registry.AppIDs[clsid_entry.AppID];
-            }
-
-            if (appid.HasLaunchPermission)
-            {
-                launch_sd = appid.LaunchPermission;
-            }
-            if (appid.HasAccessPermission)
-            {
-                access_sd = appid.AccessPermission;
-            }
-        }
-        else if (node.Tag is COMRuntimeClassEntry runtime_class)
-        {
-            if (runtime_class.HasPermission)
-            {
-                launch_sd = runtime_class.Permissions;
-            }
-            else
-            {
-                // Set to denied access.
-                launch_sd = new SecurityDescriptor("O:SYG:SYD:");
-            }
-            access_sd = launch_sd;
-        }
-        else if (node.Tag is COMRuntimeServerEntry runtime_server)
-        {
-            if (runtime_server.HasPermission)
-            {
-                launch_sd = runtime_server.Permissions;
-            }
-            else
-            {
-                launch_sd = new SecurityDescriptor("O:SYG:SYD:");
-            }
-            access_sd = launch_sd;
-        }
-        else
+        if (node.Tag is not ICOMAccessSecurity obj)
         {
             return FilterResult.Exclude;
         }
 
-        string access_str = access_sd?.ToBase64() ?? string.Empty;
-
-        if (!access_cache.ContainsKey(access_str))
-        {
-            if (access_rights == 0)
-            {
-                access_cache[access_str] = true;
-            }
-            else
-            {
-                access_cache[access_str] = COMSecurity.IsAccessGranted(access_sd, principal, token, false, false, access_rights);
-            }
-        }
-
-        string launch_str = launch_sd?.ToBase64() ?? string.Empty;
-        if (check_launch && !launch_cache.ContainsKey(launch_str))
-        {
-            if (launch_rights == 0)
-            {
-                launch_cache[launch_str] = true;
-            }
-            else
-            {
-                launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, principal, token,
-                    true, true, launch_rights);
-            }
-        }
-
-        if (access_cache[access_str] && (!check_launch || launch_cache[launch_str]))
-        {
-            return FilterResult.Include;
-        }
-        return FilterResult.Exclude;
+        return access_check.AccessCheck(obj) ? FilterResult.Include : FilterResult.Exclude;
     }
 
     private enum FilterMode
@@ -1758,13 +1662,8 @@ public partial class COMRegistryViewer : UserControl
                 using SelectSecurityCheckForm form = new(m_mode == DisplayMode.Processes);
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    token = form.Token;
-                    string principal = form.Principal;
-                    COMAccessRights access_rights = form.AccessRights;
-                    COMAccessRights launch_rights = form.LaunchRights;
-                    Dictionary<string, bool> access_cache = new(StringComparer.OrdinalIgnoreCase);
-                    Dictionary<string, bool> launch_cache = new(StringComparer.OrdinalIgnoreCase);
-                    filterFunc = n => RunAccessibleFilter(n, access_cache, launch_cache, token, principal, access_rights, launch_rights);
+                    COMAccessCheck access_check = new(form.Token, form.Principal, form.AccessRights, form.LaunchRights, form.IgnoreDefault);
+                    filterFunc = n => RunAccessibleFilter(n, access_check);
                     if (mode == FilterMode.NotAccessible)
                     {
                         Func<TreeNode, FilterResult> last_filter = filterFunc;
