@@ -3135,3 +3135,36 @@ function Format-ComSecurityDescriptor {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Get a SID from a name or SDDL.
+.DESCRIPTION
+This cmdlet gets a SID object from a name or SDDL.
+.PARAMETER Name
+The name for the user or group or an SDDL SID string.
+.PARAMETER KnownSid
+A known SID to use.
+.INPUTS
+None
+.OUTPUTS
+NtApiDotNet.Sid
+#>
+function Get-ComSid {
+[CmdletBinding(DefaultParameterSetName="FromName")]
+    Param(
+        [Parameter(Mandatory, Position=0, ParameterSetName = "FromName")]
+        [string]$Name,
+        [Parameter(Mandatory, ParameterSetName = "FromKnownSid")]
+        [NtApiDotNet.KnownSidValue]$KnownSid
+    )
+
+    switch($PSCmdlet.ParameterSetName) {
+        "FromName" {
+            [OleViewDotNetPS.Utils.PowerShellUtils]::GetSidFromString($Name)
+        }
+        "FromKnownSid" {
+            [NtApiDotNet.KnownSids]::GetKnownSid($KnownSid)
+        }
+    }
+}

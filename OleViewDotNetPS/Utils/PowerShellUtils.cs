@@ -211,4 +211,12 @@ public static class PowerShellUtils
 
         return builder.ToString();
     }
+
+    public static Sid GetSidFromString(string name)
+    {
+        var sid = Sid.Parse(name, false);
+        if (sid.IsSuccess)
+            return sid.Result;
+        return NtSecurity.LookupAccountName(name);
+    }
 }
