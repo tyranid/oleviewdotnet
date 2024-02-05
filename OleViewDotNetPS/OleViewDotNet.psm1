@@ -1372,6 +1372,79 @@ function Test-ComAccess {
     }
 }
 
+<#
+.SYNOPSIS
+Gets accessible COM database information.
+.DESCRIPTION
+This cmdlet gets the maximum access for various types of COM database information such as Classes, AppIDs and processes 
+to only those launchable accessible by certain processes or tokens.
+.PARAMETER InputObject
+The COM object entry to get.
+.PARAMETER Token
+An access token to perform the access check on.
+.PARAMETER Process
+A process to get the access token from for the access check.
+.PARAMETER ProcessId
+A process ID to get the access token from for the access check.
+.PARAMETER Access
+The access mask to check, for access permissions. Defaults to local execute.
+.PARAMETER LaunchAccess
+The access mask to check, for launch permissions. Defaults to local execute and activation.
+.PARAMETER Principal
+The principal for the access check, defaults to the current user.
+.PARAMETER IgnoreDefault
+If the object doesn't have a specific set of launch permissions uses the system default. If this flag is specified objects without a specific launch permission are ignored.
+.INPUTS
+OleViewDotNet.Security.ICOMAccessSecurity
+.OUTPUTS
+OleViewDotNet.Security.COMAccessCheckResult
+#>
+function Get-ComAccess {
+    [CmdletBinding(DefaultParameterSetName = "FromProcessId")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
+        [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
+        [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
+        [Parameter(Mandatory, ParameterSetName = "FromToken")]
+        [NtApiDotNet.NtToken]$Token,
+        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
+        [NtApiDotNet.NtProcess]$Process,
+        [Parameter(ParameterSetName = "FromProcessId")]
+        [alias("pid")]
+        [int]$ProcessId = $pid,
+        [OleViewDotNet.Security.COMSid]$Principal,
+        [switch]$IgnoreDefault
+    )
+
+    BEGIN {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromProcessId" {
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+            "FromProcess" {
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+            "FromToken" {
+                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Token, `
+                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
+            }
+        }
+    }
+
+    PROCESS {
+        $access_check.GetMaximumAccess($InputObject)
+    }
+
+    END {
+        if ($null -ne $access_check) {
+            $access_check.Dispose()
+        }
+    }
+}
+
 Enum ComObjRefOutput
 {
     Object

@@ -1639,6 +1639,7 @@ public partial class COMRegistryViewer : UserControl
         {
             TreeNode[] nodes = null;
             Func<TreeNode, FilterResult> filterFunc = null;
+            IDisposable filter_object = null;
             FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
 
             if (mode == FilterMode.Complex)
@@ -1663,6 +1664,7 @@ public partial class COMRegistryViewer : UserControl
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     COMAccessCheck access_check = new(form.Token, form.Principal, form.AccessRights, form.LaunchRights, form.IgnoreDefault);
+                    filter_object = access_check;
                     filterFunc = n => RunAccessibleFilter(n, access_check);
                     if (mode == FilterMode.NotAccessible)
                     {
@@ -1686,7 +1688,10 @@ public partial class COMRegistryViewer : UserControl
 
             if (filterFunc != null)
             {
-                nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc) == FilterResult.Include).ToArray());
+                using (filter_object)
+                {
+                    nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc) == FilterResult.Include).ToArray());
+                }
             }
             else
             {

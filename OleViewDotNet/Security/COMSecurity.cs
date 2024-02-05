@@ -53,75 +53,6 @@ public static class COMSecurity
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 
-    public static bool IsAccessGranted(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch, bool check_il, COMAccessRights desired_access)
-    {
-        try
-        {
-            if (sd == null)
-                return false;
-
-            sd = sd.Clone();
-
-            if (check_il || !sd.HasMandatoryLabelAce)
-            {
-                sd.AddMandatoryLabel(TokenIntegrityLevel.Medium, MandatoryLabelPolicy.NoExecuteUp);
-            }
-
-            if (!GetGrantedAccess(sd, principal, token, launch, out COMAccessRights maximum_rights))
-            {
-                return false;
-            }
-
-            // If old style SD then all accesses are granted.
-            if (maximum_rights == COMAccessRights.Execute)
-            {
-                return true;
-            }
-
-            return (maximum_rights & desired_access) == desired_access;
-        }
-        catch (Win32Exception)
-        {
-            return false;
-        }
-    }
-
-    private static bool GetGrantedAccess(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch, out COMAccessRights maximum_rights)
-    {
-        GenericMapping mapping = new()
-        {
-            GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote | COMAccessRights.ExecuteContainer)
-        };
-        if (launch)
-        {
-            mapping.GenericExecute |= (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote | COMAccessRights.ActivateContainer);
-        }
-
-        // If SD is only a NULL DACL we get maximum rights.
-        if (sd.DaclNull)
-        {
-            maximum_rights = mapping.GenericExecute.ToSpecificAccess<COMAccessRights>();
-            return true;
-        }
-
-        AccessMask mask;
-
-        if (principal != null)
-        {
-            mask = NtSecurity.GetMaximumAccess(sd, token, principal.Sid, mapping);
-        }
-        else
-        {
-            mask = NtSecurity.GetMaximumAccess(sd, token, mapping);
-        }
-
-        mask &= 0xFFFF;
-
-        maximum_rights = mask.ToSpecificAccess<COMAccessRights>();
-
-        return mask != 0;
-    }
-
     private static SecurityDescriptor GetSecurityPermissions(COMSD sdtype)
     {
         IntPtr sd = IntPtr.Zero;
@@ -311,5 +242,16 @@ public static class COMSecurity
         string left_str = left?.ToBase64();
         string right_str = right?.ToBase64();
         return left_str == right_str;
+    }
+
+    internal static bool IsAccessGranted(this COMAccessRights maximum_rights, COMAccessRights desired_access)
+    {
+        // If old style SD then all accesses are granted.
+        if (maximum_rights == COMAccessRights.Execute)
+        {
+            return true;
+        }
+
+        return (maximum_rights & desired_access) == desired_access;
     }
 }

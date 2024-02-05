@@ -22,10 +22,10 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Security;
 
-public class COMAccessCheck : IDisposable
+public sealed class COMAccessCheck : IDisposable
 {
-    private readonly Dictionary<string, bool> m_access_cache;
-    private readonly Dictionary<string, bool> m_launch_cache;
+    private readonly Dictionary<string, COMAccessRights> m_access_cache;
+    private readonly Dictionary<string, COMAccessRights> m_launch_cache;
     private readonly NtToken m_access_token;
     private readonly COMSid m_principal;
     private readonly COMAccessRights m_access_rights;
@@ -37,16 +37,45 @@ public class COMAccessCheck : IDisposable
         return $"{principal}:{sd?.ToBase64() ?? string.Empty}";
     }
 
+    private static COMAccessRights GetGrantedAccess(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch)
+    {
+        if (sd == null)
+            return 0;
+
+        sd = sd.Clone();
+
+        if (launch || !sd.HasMandatoryLabelAce)
+        {
+            sd.AddMandatoryLabel(TokenIntegrityLevel.Medium, MandatoryLabelPolicy.NoExecuteUp);
+        }
+
+        GenericMapping mapping = new()
+        {
+            GenericExecute = (uint)(COMAccessRights.Execute | COMAccessRights.ExecuteLocal | COMAccessRights.ExecuteRemote | COMAccessRights.ExecuteContainer)
+        };
+        if (launch)
+        {
+            mapping.GenericExecute |= (uint)(COMAccessRights.ActivateLocal | COMAccessRights.ActivateRemote | COMAccessRights.ActivateContainer);
+        }
+
+        // If SD is only a NULL DACL we get maximum rights.
+        if (sd.DaclNull)
+        {
+            return mapping.GenericExecute.ToSpecificAccess<COMAccessRights>();
+        }
+
+        AccessMask mask = NtSecurity.GetMaximumAccess(sd, token, principal?.Sid, mapping) & 0xFFFF;
+        return mask.ToSpecificAccess<COMAccessRights>();
+    }
+
     public COMAccessCheck(NtToken token,
         COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
     {
-        m_access_cache = new Dictionary<string, bool>();
-        m_launch_cache = new Dictionary<string, bool>();
-        m_access_cache[string.Empty] = false;
-        m_launch_cache[string.Empty] = false;
+        m_access_cache = new Dictionary<string, COMAccessRights>();
+        m_launch_cache = new Dictionary<string, COMAccessRights>();
         m_access_token = token.DuplicateToken(SecurityImpersonationLevel.Identification);
         m_principal = principal;
         m_access_rights = access_rights;
@@ -54,11 +83,11 @@ public class COMAccessCheck : IDisposable
         m_ignore_default = ignore_default;
     }
 
-    public bool AccessCheck(ICOMAccessSecurity obj)
+    public COMAccessCheckResult GetMaximumAccess(ICOMAccessSecurity obj)
     {
         if (obj == null)
         {
-            return false;
+            return default;
         }
 
         SecurityDescriptor launch_sd = m_ignore_default ? null : obj.DefaultLaunchPermission;
@@ -81,7 +110,7 @@ public class COMAccessCheck : IDisposable
                 appid = clsid.AppIDEntry;
                 if (appid == null)
                 {
-                    return false;
+                    return default;
                 }
             }
 
@@ -149,7 +178,7 @@ public class COMAccessCheck : IDisposable
         }
         else
         {
-            return false;
+            return default;
         }
 
         access_principal ??= COMSid.CurrentUser;
@@ -157,36 +186,31 @@ public class COMAccessCheck : IDisposable
         string access_str = GetCacheKey(access_principal, access_sd);
         if (!m_access_cache.ContainsKey(access_str))
         {
-            if (m_access_rights == 0)
-            {
-                m_access_cache[access_str] = true;
-            }
-            else
-            {
-                m_access_cache[access_str] = COMSecurity.IsAccessGranted(access_sd,
-                    access_principal, m_access_token, false, false, m_access_rights);
-            }
+            m_access_cache[access_str] = GetGrantedAccess(access_sd,
+                access_principal, m_access_token, false);
         }
 
         string launch_str = GetCacheKey(launch_principal, launch_sd);
         if (check_launch && !m_launch_cache.ContainsKey(launch_str))
         {
-            if (m_launch_rights == 0)
-            {
-                m_launch_cache[launch_str] = true;
-            }
-            else
-            {
-                m_launch_cache[launch_str] = COMSecurity.IsAccessGranted(launch_sd, launch_principal, m_access_token,
-                    true, true, m_launch_rights);
-            }
+            m_launch_cache[launch_str] = GetGrantedAccess(launch_sd, launch_principal, m_access_token,
+                    true);
         }
 
-        if (m_access_cache[access_str] && (!check_launch || m_launch_cache[launch_str]))
-        {
-            return true;
-        }
-        return false;
+        return new COMAccessCheckResult(m_access_cache[access_str], 
+            check_launch ? m_launch_cache[launch_str] : 0, obj, 
+            access_sd, launch_sd, check_launch);
+    }
+
+    public bool AccessCheck(ICOMAccessSecurity obj)
+    {
+        COMAccessCheckResult result = GetMaximumAccess(obj);
+        if (!result.IsValid)
+            return false;
+
+        bool access_allowed = m_access_rights == 0 || result.IsAccessGranted(m_access_rights);
+        bool launch_allowed = m_launch_rights == 0 || result.IsLaunchGranted(m_launch_rights);
+        return access_allowed && launch_allowed;
     }
 
     public void Dispose()
