@@ -567,7 +567,7 @@ function Get-ComClass {
             Write-Output $Database.MapProgIdToClsid($ProgId)
         }
         "FromIU" {
-            Get-ComClass -Database $Database | Where-Object { $_.HasAppID -and $_.AppIDEntry.RunAs -eq  "Interactive User" } | Write-Output
+            Get-ComClass -Database $Database | Where-Object IsInteractiveUser | Write-Output
         }
         "FromService" {
             Get-ComClass -Database $Database | Where-Object { $_.HasAppID -and $_.AppIDEntry.IsService } | Write-Output
@@ -1384,7 +1384,7 @@ function Get-ComObjRef {
         [Parameter(ParameterSetName = "FromObject")]
         [OleViewDotNet.Interop.MSHCTX]$MarshalContext = "DIFFERENTMACHINE",
         [Parameter(ParameterSetName = "FromObject")]
-        [OleViewdotNet.MSHLFLAGS]$MarshalFlags = "NORMAL"
+        [OleViewDotNet.Interop.MSHLFLAGS]$MarshalFlags = "NORMAL"
     )
 
     BEGIN {

@@ -145,6 +145,8 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public bool HasRunAs => !string.IsNullOrWhiteSpace(RunAs);
 
+    public bool IsInteractiveUser => RunAs?.Equals("Interactive User") ?? false;
+
     public string Name { get; private set; }
 
     public COMAppIDFlags Flags { get; private set; }

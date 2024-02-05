@@ -354,6 +354,8 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public string PackageId { get; private set; }
 
+    public bool IsInteractiveUser => AppIDEntry?.IsInteractiveUser ?? false;
+
     public COMRegistryEntrySource Source
     {
         get; private set;
