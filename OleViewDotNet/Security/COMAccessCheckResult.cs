@@ -33,7 +33,7 @@ public readonly struct COMAccessCheckResult
     public bool LocalActivate => IsLaunchGranted(COMAccessRights.ActivateLocal);
     public bool RemoteActivate => IsLaunchGranted(COMAccessRights.ActivateRemote);
     public bool LocalLaunch => IsLaunchGranted(COMAccessRights.ExecuteLocal);
-    public bool RemoveLaunch => IsLaunchGranted(COMAccessRights.ExecuteRemote);
+    public bool RemoteLaunch => IsLaunchGranted(COMAccessRights.ExecuteRemote);
 
     internal COMAccessCheckResult(COMAccessRights access, COMAccessRights launch, ICOMAccessSecurity obj, 
         SecurityDescriptor access_security, SecurityDescriptor launch_security, bool launch_checked)
