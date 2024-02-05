@@ -1560,9 +1560,9 @@ function Show-ComSecurityDescriptor {
             }
             "FromObject" {
                 if ($ShowAccess) {
-                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMSecurity]::GetAccessPermission($InputObject)
                 } else {
-                    $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
+                    $SecurityDescriptor = [OleViewDotNet.Security.COMSecurity]::GetLaunchPermission($InputObject)
                 }
                 $name = $InputObject.Name.Replace("`"", " ")
             }
@@ -3161,9 +3161,9 @@ function Format-ComSecurityDescriptor {
                 "FromObject" {
                     $name = $InputObject.Name
                     if ($ShowAccess) {
-                        $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetAccessPermission($InputObject)
+                        $SecurityDescriptor = [OleViewDotNet.Security.COMSecurity]::GetAccessPermission($InputObject)
                     } else {
-                        $SecurityDescriptor = [OleViewDotNet.Security.COMAccessCheck]::GetLaunchPermission($InputObject)
+                        $SecurityDescriptor = [OleViewDotNet.Security.COMSecurity]::GetLaunchPermission($InputObject)
                     }
                 }
                 "FromDefault" {

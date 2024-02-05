@@ -19,6 +19,7 @@ using NtApiDotNet.Forms;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Processes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -166,6 +167,77 @@ public static class COMSecurity
     public static TokenIntegrityLevel GetILForSD(SecurityDescriptor sd)
     {
         return sd?.IntegrityLevel ?? TokenIntegrityLevel.Medium;
+    }
+
+    public static SecurityDescriptor GetAccessPermission(ICOMAccessSecurity obj)
+    {
+        if (obj is COMProcessEntry process)
+        {
+            return process.AccessPermissions;
+        }
+        else if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
+        {
+            COMAppIDEntry appid = obj as COMAppIDEntry;
+            if (appid == null && obj is COMCLSIDEntry clsid)
+            {
+                appid = clsid.AppIDEntry;
+                if (appid == null)
+                {
+                    throw new ArgumentException("No AppID available for class");
+                }
+            }
+
+            if (appid.HasAccessPermission)
+            {
+                return appid.AccessPermission;
+            }
+            throw new ArgumentException("AppID doesn't have an access permission");
+        }
+
+        throw new ArgumentException("Can't get access permission for object");
+    }
+
+    public static SecurityDescriptor GetLaunchPermission(ICOMAccessSecurity obj)
+    {
+        if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
+        {
+            COMAppIDEntry appid = obj as COMAppIDEntry;
+            if (appid == null && obj is COMCLSIDEntry clsid)
+            {
+                appid = clsid.AppIDEntry;
+                if (appid == null)
+                {
+                    throw new ArgumentException("No AppID available for class");
+                }
+            }
+
+            if (appid.HasLaunchPermission)
+            {
+                return appid.LaunchPermission;
+            }
+            throw new ArgumentException("AppID doesn't have an launch permission");
+        }
+        else if (obj is COMRuntimeClassEntry runtime_class)
+        {
+            if (runtime_class.HasPermission)
+            {
+                return runtime_class.Permissions;
+            }
+            else if (runtime_class.ActivationType == ActivationType.OutOfProcess && runtime_class.HasServerPermission)
+            {
+                return runtime_class.ServerPermissions;
+            }
+            throw new ArgumentException("RuntimeClass doesn't have an launch permission");
+        }
+        else if (obj is COMRuntimeServerEntry runtime_server)
+        {
+            if (runtime_server.HasPermission)
+            {
+                return runtime_server.Permissions;
+            }
+            throw new ArgumentException("RuntimeServer doesn't have an launch permission");
+        }
+        throw new ArgumentException("Can't get launch permission for object");
     }
 
     private static bool SDHasAllowedAce(SecurityDescriptor sd, bool allow_null_dacl, Func<Ace, bool> check_func)
