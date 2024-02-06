@@ -194,7 +194,7 @@ Gets the current COM database.
 .DESCRIPTION
 This cmdlet gets the current COM database.
 .PARAMETER Database
-A database parameter to test. This function returns $Database if it's not $null, otherwise returns the current database.
+This function returns $Database if it's not $null, otherwise returns the current database.
 #>
 function Get-CurrentComDatabase {
     Param(
@@ -206,11 +206,7 @@ function Get-CurrentComDatabase {
         $Database
     } else {
         if ($null -eq $Script:CurrentComDatabase) {
-            $result = $Host.UI.PromptForChoice("Load COM Database?", `
-                    "No database specified, do you want to load the default?", @("&Yes", "&No"), 0)
-            if ($result -eq 0) {
-                Get-ComDatabase
-            }
+            Get-ComDatabase -Default
         }
         $Script:CurrentComDatabase
     }
@@ -247,18 +243,17 @@ Specify a user to load when loading user-specific COM registration information.
 Specify a path to load a saved COM database.
 .PARAMETER NoProgress
 Don't show progress for load.
-.PARAMETER SetCurrent
-No longer used.
 .PARAMETER PassThru
 Specify to return the loaded database.
-.PARAMETER
+.PARAMETER Default
+Specify to load the default database, this is from a static file or from the registry.
 .INPUTS
 None
 .OUTPUTS
 OleViewDotNet.Database.COMRegistry
 .EXAMPLE
 Get-ComDatabase
-Load a default, merged COM database.
+Load merged COM database from the registry.
 .EXAMPLE
 Get-ComDatabase -LoadMode UserOnly
 Load a user-only database for the current user.
@@ -267,7 +262,10 @@ Get-ComDatabase -User S-1-5-X-Y-Z
 Load a merged COM database including user-only information from the user SID.
 .EXAMPLE
 $db = Get-ComDatabase -PassThru
-Load a default, merged COM database and return it as an object.
+Load a merged COM database from the registry and return it as an object.
+.EXAMPLE
+Get-ComDatabase -Default
+Load the default database.
 #>
 function Get-ComDatabase {
     [CmdletBinding(DefaultParameterSetName = "FromRegistry")]
@@ -278,29 +276,45 @@ function Get-ComDatabase {
         [OleViewDotNet.Security.COMSid]$User,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
+        [Parameter(Mandatory, ParameterSetName = "FromDefault")]
+        [switch]$Default,
         [switch]$NoProgress,
-        [switch]$SetCurrent,
         [switch]$PassThru
     )
-    $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
-    $comdb = switch($PSCmdlet.ParameterSetName) {
-        "FromRegistry" {
-            [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $User, $callback)
-        }
-        "FromFile" {
-            $Path = Resolve-Path $Path
-            [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
-        }
-    }
 
-    if ($SetCurrent) {
-        Write-Warning "SetCurrent is now the default. Use PassThru to return a database object."
-    }
+    try {
+        $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
+        $comdb = switch($PSCmdlet.ParameterSetName) {
+            "FromRegistry" {
+                [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $User, $callback)
+            }
+            "FromFile" {
+                $Path = Resolve-Path $Path
+                [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
+            }
+            "FromDefault" {
+                $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+                if (Test-Path $Path) {
+                    [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
+                } else {
+                    $result = $Host.UI.PromptForChoice("Load COM Database?", `
+                        "No default database available, do you want to load from the registry?", @("&Yes", "&No"), 0)
+                    if ($result -eq 0) {
+                        [OleViewDotNet.Database.COMRegistry]::Load("Merged", $null, $callback)
+                    } else {
+                        return
+                    }
+                }
+            }
+        }
 
-    if ($PassThru) {
-        Write-Output $comdb
-    } else {
-        Set-CurrentComDatabase $comdb
+        if ($PassThru) {
+            Write-Output $comdb
+        } else {
+            Set-CurrentComDatabase $comdb
+        }
+    } catch {
+        Write-Error $_
     }
 }
 
@@ -315,6 +329,8 @@ The path to save the database to.
 The database to save.
 .PARAMETER NoProgress
 Don't show progress for save.
+.PARAMETER Default
+Save to the default database location.
 .INPUTS
 None
 .OUTPUTS
@@ -327,10 +343,12 @@ Set-ComDatabase -Path output.db -Database $comdb
 Save a specific database to the file output.db
 #>
 function Set-ComDatabase {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="ToPath")]
     Param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory,Position=0, ParameterSetName="ToPath")]
         [string]$Path,
+        [Parameter(Mandatory,Position=0, ParameterSetName="ToDefault")]
+        [switch]$Default,
         [OleViewDotNet.Database.COMRegistry]$Database,
         [switch]$NoProgress
     )
@@ -341,9 +359,36 @@ function Set-ComDatabase {
         return
     }
 
-    $callback = New-CallbackProgress -Activity "Saving COM Registry" -NoProgress:$NoProgress
-    $Path = Resolve-LocalPath $Path
-    $Database.Save($Path, $callback)
+    try {
+        $callback = New-CallbackProgress -Activity "Saving COM Registry" -NoProgress:$NoProgress
+        if ($PSCmdlet.ParameterSetName -eq "ToPath") {
+            $Path = Resolve-LocalPath $Path
+        } else {
+            $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+        }
+        $Database.Save($Path, $callback)
+    } catch {
+        Write-Error $_
+    }
+}
+
+<#
+.SYNOPSIS
+Delete the default COM database file.
+.DESCRIPTION
+This cmdlet removes the default COM database file.
+.INPUTS
+None
+.OUTPUTS
+None
+#>
+function Clear-ComDatabase {
+    try {
+        $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+        Remove-Item $Path
+    } catch {
+        Write-Error $_
+    }
 }
 
 <#
