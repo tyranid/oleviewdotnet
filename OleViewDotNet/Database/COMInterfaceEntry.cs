@@ -19,7 +19,6 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.Utilities;
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -30,22 +29,8 @@ namespace OleViewDotNet.Database;
 
 public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
 {
-    private static readonly ConcurrentDictionary<Guid, string> m_iidtoname = new();
     private readonly COMRegistry m_registry;
-
-    internal static string MapIidToName(Guid iid)
-    {
-        if (m_iidtoname.TryGetValue(iid, out string ret))
-        {
-            return ret;
-        }
-        return iid.FormatGuid();
-    }
-
-    internal static void CacheIidToName(Guid iid, string name)
-    {
-        m_iidtoname.TryAdd(iid, name);
-    }
+    private string m_name;
 
     public int CompareTo(COMInterfaceEntry right)
     {
@@ -55,14 +40,14 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     private void LoadFromKey(RegistryKey key)
     {
         string name = key.GetValue(null) as string;
-        if (!string.IsNullOrWhiteSpace(name?.Trim()) || m_iidtoname.TryGetValue(Iid, out name))
+        if (!string.IsNullOrWhiteSpace(name?.Trim()) || m_registry.IidNameCache.TryGetValue(Iid, out name))
         {
-            Name = COMUtilities.DemangleWinRTName(name);
-            CacheIidToName(Iid, Name);
+            m_name = name;
+            m_registry.IidNameCache.TryAdd(Iid, m_name);
         }
         else
         {
-            Name = Iid.FormatGuidDefault();
+            m_name = string.Empty;
         }
 
         ProxyClsid = COMUtilities.ReadGuid(key, "ProxyStubCLSID32", null);
@@ -95,7 +80,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         ProxyClsid = proxyclsid;
         NumMethods = nummethods;
         Base = baseName;
-        Name = name;
+        m_name = name;
         TypeLibVersion = string.Empty;
     }
 
@@ -107,26 +92,31 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         Source = COMRegistryEntrySource.ActCtx;
     }
 
-    internal COMInterfaceEntry(COMRegistry registry, Type type) : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
+    internal COMInterfaceEntry(COMRegistry registry, Type type) 
+        : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
-        CacheIidToName(Iid, Name);
+        m_registry.IidNameCache.TryAdd(Iid, m_name);
         RuntimeInterface = true;
         Source = COMRegistryEntrySource.Metadata;
     }
 
     public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
-        : this(registry, iid, Guid.Empty, 3, "IUnknown", "")
+        : this(registry, iid, Guid.Empty, 3, "IUnknown", string.Empty)
     {
         LoadFromKey(rootKey);
     }
 
     public COMInterfaceEntry(COMRegistry registry, Guid iid)
-        : this(registry, iid, Guid.Empty, 3, "IUnknown", MapIidToName(iid))
+        : this(registry, iid, Guid.Empty, 3, "IUnknown", string.Empty)
     {
+        if (m_registry.IidNameCache.TryGetValue(iid, out string name))
+        {
+            m_name = name;
+        }
     }
 
     internal COMInterfaceEntry(COMRegistry registry, COMPackagedInterfaceEntry entry) 
-        : this(registry, entry.Iid, entry.ProxyStubCLSID, 3, "IUnknown", entry.Iid.FormatGuidDefault())
+        : this(registry, entry.Iid, entry.ProxyStubCLSID, 3, "IUnknown", string.Empty)
     {
         if (entry.UseUniversalMarshaler)
         {
@@ -179,7 +169,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             Iid = iid,
             ProxyClsid = Guid.Empty,
             NumMethods = num_methods,
-            Name = name,
+            m_name = name,
             TypeLibVersion = string.Empty,
             Source = COMRegistryEntrySource.Builtin
         };
@@ -187,29 +177,19 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, COMKnownInterfaces known)
     {
-        switch (known)
+        return known switch
         {
-            case COMKnownInterfaces.IUnknown:
-                return CreateBuiltinEntry(registry, IID_IUnknown, "IUnknown", 3);
-            case COMKnownInterfaces.IMarshal:
-                return CreateBuiltinEntry(registry, IID_IMarshal, "IMarshal", 9);
-            case COMKnownInterfaces.IMarshal2:
-                return CreateBuiltinEntry(registry, IID_IMarshal2, "IMarshal2", 9);
-            case COMKnownInterfaces.IPSFactoryBuffer:
-                return CreateBuiltinEntry(registry, IID_IPSFactoryBuffer, "IPSFactoryBuffer", 4);
-            case COMKnownInterfaces.IMarshalEnvoy:
-                return CreateBuiltinEntry(registry, IID_IMarshalEnvoy, "IMarshalEnvoy", 7);
-            case COMKnownInterfaces.IStdMarshalInfo:
-                return CreateBuiltinEntry(registry, IID_IStdMarshalInfo, "IStdMarshalInfo", 4);
-        }
-
-        return null;
+            COMKnownInterfaces.IUnknown => CreateBuiltinEntry(registry, IID_IUnknown, "IUnknown", 3),
+            COMKnownInterfaces.IMarshal => CreateBuiltinEntry(registry, IID_IMarshal, "IMarshal", 9),
+            COMKnownInterfaces.IMarshal2 => CreateBuiltinEntry(registry, IID_IMarshal2, "IMarshal2", 9),
+            COMKnownInterfaces.IPSFactoryBuffer => CreateBuiltinEntry(registry, IID_IPSFactoryBuffer, "IPSFactoryBuffer", 4),
+            COMKnownInterfaces.IMarshalEnvoy => CreateBuiltinEntry(registry, IID_IMarshalEnvoy, "IMarshalEnvoy", 7),
+            COMKnownInterfaces.IStdMarshalInfo => CreateBuiltinEntry(registry, IID_IStdMarshalInfo, "IStdMarshalInfo", 4),
+            _ => null,
+        };
     }
 
-    public string Name
-    {
-        get; private set;
-    }
+    public string Name => string.IsNullOrWhiteSpace(m_name) ? Iid.FormatGuid() : COMUtilities.DemangleWinRTName(m_name);
 
     public Guid Iid
     {
@@ -288,7 +268,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             return false;
         }
 
-        return Name == right.Name && Iid == right.Iid && ProxyClsid == right.ProxyClsid
+        return m_name == right.m_name && Iid == right.Iid && ProxyClsid == right.ProxyClsid
             && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
             && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
             && Source == right.Source;
@@ -296,7 +276,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     public override int GetHashCode()
     {
-        return Name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
+        return m_name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
             ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
             ^ Source.GetHashCode();
     }
@@ -339,7 +319,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     void IXmlSerializable.ReadXml(XmlReader reader)
     {
-        Name = reader.ReadString("name");
+        m_name = reader.ReadString("name");
         Iid = reader.ReadGuid("iid");
         ProxyClsid = reader.ReadGuid("proxy");
         NumMethods = reader.ReadInt("num");
@@ -349,12 +329,15 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         RuntimeInterface = reader.ReadBool("rt");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
-        m_iidtoname.TryAdd(Iid, Name);
+        if (!string.IsNullOrWhiteSpace(m_name))
+        {
+            m_registry.IidNameCache.TryAdd(Iid, m_name);
+        }
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
     {
-        writer.WriteOptionalAttributeString("name", Name);
+        writer.WriteOptionalAttributeString("name", m_name);
         writer.WriteGuid("iid", Iid);
         writer.WriteGuid("proxy", ProxyClsid);
         writer.WriteInt("num", NumMethods);

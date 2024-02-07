@@ -274,6 +274,8 @@ function Get-ComDatabase {
         [OleViewDotNet.Database.COMRegistryMode]$LoadMode = "Merged",
         [Parameter(ParameterSetName = "FromRegistry")]
         [OleViewDotNet.Security.COMSid]$User,
+        [Parameter(ParameterSetName = "FromRegistry")]
+        [string]$IidNameCachePath,
         [Parameter(Mandatory, ParameterSetName = "FromFile", Position = 0)]
         [string]$Path,
         [Parameter(Mandatory, ParameterSetName = "FromDefault")]
@@ -286,7 +288,10 @@ function Get-ComDatabase {
         $callback = New-CallbackProgress -Activity "Loading COM Registry" -NoProgress:$NoProgress
         $comdb = switch($PSCmdlet.ParameterSetName) {
             "FromRegistry" {
-                [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $User, $callback)
+                if ("" -ne $IidNameCachePath) {
+                    $IidNameCachePath = Resolve-Path $IidNameCachePath
+                }
+                [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $User, $callback, $IidNameCachePath)
             }
             "FromFile" {
                 $Path = Resolve-Path $Path
@@ -3318,4 +3323,34 @@ function Format-ComSecurityDescriptor {
             Write-Error $_
         }
     }
+}
+
+<#
+.SYNOPSIS
+Exports interface name cache list to a file.
+.DESCRIPTION
+This cmdlet exports an interface name cache list to a file.
+.PARAMETER Path
+The path to the file to export to.
+.INPUTS
+None
+.OUTPUTS
+None
+#>
+function Export-ComInterfaceNameCache {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position = 0)]
+        [string]$Path,
+        [OleViewDotNet.Database.COMRegistry]$Database
+    )
+
+    $Database = Get-CurrentComDatabase $Database
+    if ($null -eq $Database) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+    $writer = [System.IO.StringWriter]::new()
+    $Database.ExportIidNameCache($writer)
+    $writer.ToString() | Set-Content -Path $Path
 }

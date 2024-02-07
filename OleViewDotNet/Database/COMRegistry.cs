@@ -17,11 +17,11 @@
 using Microsoft.Win32;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,6 +54,7 @@ public class COMRegistry
     private List<COMMimeType> m_mimetypes;
     private List<Guid> m_preapproved;
     private List<COMRuntimeExtensionEntry> m_runtime_extensions;
+    private ConcurrentDictionary<Guid, string> m_iid_name_cache;
 
     // These are built on demand, just different views.
     private SortedDictionary<string, List<COMCLSIDEntry>> m_clsidbyserver;
@@ -94,12 +95,31 @@ public class COMRegistry
         };
     }
 
+    private static ConcurrentDictionary<Guid, string> LoadIidToNameCache(string path)
+    {
+        ConcurrentDictionary<Guid, string> ret = new();
+        using StreamReader reader = new(path);
+        for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
+        {
+            string[] values = line.Split(new[] { '\t' }, 2);
+            if (values.Length == 2 && Guid.TryParse(values[0], out Guid iid))
+            {
+                ret.TryAdd(iid, values[1]);
+            }
+        }
+        return ret;
+    }
+
     /// <summary>
     /// Default constructor
     /// </summary>
-    private COMRegistry(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress)
+    private COMRegistry(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress, string iid_to_name_cache_path)
         : this(mode)
     {
+        if (!string.IsNullOrEmpty(iid_to_name_cache_path))
+        {
+            m_iid_name_cache = LoadIidToNameCache(iid_to_name_cache_path);
+        }
         using RegistryKey classes_key = OpenClassesKey(mode, user);
         bool include_machine_key = mode == COMRegistryMode.Merged || mode == COMRegistryMode.MachineOnly;
         const int total_count = 9;
@@ -721,6 +741,15 @@ public class COMRegistry
         }
         return m_serialized_interfaces;
     }
+
+    internal ConcurrentDictionary<Guid, string> IidNameCache
+    {
+        get
+        {
+            m_iid_name_cache ??= new();
+            return m_iid_name_cache;
+        }
+    }
     #endregion
 
     #region Public Properties
@@ -869,24 +898,10 @@ public class COMRegistry
     #endregion
 
     #region Public Methods
-    public static COMRegistry Load(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress)
+    public static COMRegistry Load(COMRegistryMode mode, COMSid user = null, IProgress<Tuple<string, int>> progress = null, string iid_to_name_cache_path = null)
     {
-        if (progress == null)
-        {
-            throw new ArgumentNullException("progress");
-        }
-
-        if (user == null)
-        {
-            user = new COMSid(NtProcess.Current.User);
-        }
-
-        return new COMRegistry(mode, user, progress);
-    }
-
-    public static COMRegistry Load(COMRegistryMode mode)
-    {
-        return Load(mode, null, new DummyProgress());
+        return new COMRegistry(mode, user ?? new COMSid(NtProcess.Current.User), 
+            progress ?? new DummyProgress(), iid_to_name_cache_path);
     }
 
     public void Save(string path)
@@ -901,7 +916,6 @@ public class COMRegistry
             throw new ArgumentNullException("progress");
         }
 
-        XmlWriterSettings settings = new();
         using (XmlTextWriter writer = new(path, Encoding.UTF8))
         {
             const int total_count = 10;
@@ -1223,6 +1237,19 @@ public class COMRegistry
         }
 
         return m_progids[progid].ClassEntry;
+    }
+
+    public void ExportIidNameCache(TextWriter writer)
+    {
+        if (writer is null)
+        {
+            throw new ArgumentNullException(nameof(writer));
+        }
+
+        foreach (var pair in m_iid_name_cache)
+        {
+            writer.WriteLine($"{pair.Key}\t{pair.Value}");
+        }
     }
 
     public override string ToString()
