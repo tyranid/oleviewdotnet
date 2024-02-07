@@ -157,12 +157,12 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public ServiceLaunchProtectedType ServiceProtectionLevel => IsService ? LocalService.ProtectionLevel : ServiceLaunchProtectedType.None;
 
-    public SecurityDescriptor LaunchPermission
+    public COMSecurityDescriptor LaunchPermission
     {
         get; private set;
     }
 
-    public SecurityDescriptor AccessPermission
+    public COMSecurityDescriptor AccessPermission
     {
         get; private set;
     }
@@ -211,9 +211,9 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     internal COMRegistry Database { get; }
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
     Guid IComGuid.ComGuid => AppId;
 

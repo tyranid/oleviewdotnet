@@ -66,14 +66,14 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
     public ActivationType ActivationType { get; private set; }
 
-    public SecurityDescriptor Permissions
+    public COMSecurityDescriptor Permissions
     {
         get; private set;
     }
 
     public bool HasPermission => Permissions != null;
 
-    public SecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
+    public COMSecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
 
     public bool HasServerPermission => ServerPermissions != null;
 
@@ -347,7 +347,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         }
     }
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
 }

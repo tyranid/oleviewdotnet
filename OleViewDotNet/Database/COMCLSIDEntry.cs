@@ -344,9 +344,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
-    public SecurityDescriptor LaunchPermission => AppIDEntry?.LaunchPermission;
+    public COMSecurityDescriptor LaunchPermission => AppIDEntry?.LaunchPermission;
 
-    public SecurityDescriptor AccessPermission => AppIDEntry?.AccessPermission;
+    public COMSecurityDescriptor AccessPermission => AppIDEntry?.AccessPermission;
 
     public bool HasRunAs => AppIDEntry?.HasRunAs ?? false;
 
@@ -612,9 +612,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     internal COMRegistry Database { get; }
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
     Guid IComGuid.ComGuid => Clsid;
 

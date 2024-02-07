@@ -223,13 +223,13 @@ public class COMRegistry
         Architecture = RuntimeInformation.ProcessArchitecture.ToString();
     }
 
-    private SecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, SecurityDescriptor default_sd)
+    private COMSecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, COMSecurityDescriptor default_sd)
     {
         if (key.GetValue(name) is not byte[] sd)
         {
             return default_sd;
         }
-        return new SecurityDescriptor(sd);
+        return new(new SecurityDescriptor(sd));
     }
 
     private void LoadDefaultSecurity()
@@ -875,22 +875,22 @@ public class COMRegistry
         }
     }
 
-    public SecurityDescriptor DefaultAccessPermission
+    public COMSecurityDescriptor DefaultAccessPermission
     {
         get; private set;
     }
 
-    public SecurityDescriptor DefaultAccessRestriction
+    public COMSecurityDescriptor DefaultAccessRestriction
     {
         get; private set;
     }
 
-    public SecurityDescriptor DefaultLaunchPermission
+    public COMSecurityDescriptor DefaultLaunchPermission
     {
         get; private set;
     }
 
-    public SecurityDescriptor DefaultLaunchRestriction
+    public COMSecurityDescriptor DefaultLaunchRestriction
     {
         get; private set;
     }

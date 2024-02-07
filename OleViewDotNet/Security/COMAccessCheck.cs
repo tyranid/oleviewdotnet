@@ -32,17 +32,17 @@ public sealed class COMAccessCheck : IDisposable
     private readonly COMAccessRights m_launch_rights;
     private readonly bool m_ignore_default;
 
-    private static string GetCacheKey(COMSid principal, SecurityDescriptor sd)
+    private static string GetCacheKey(COMSid principal, COMSecurityDescriptor sd)
     {
         return $"{principal}:{sd?.ToBase64() ?? string.Empty}";
     }
 
-    private static COMAccessRights GetGrantedAccess(SecurityDescriptor sd, COMSid principal, NtToken token, bool launch)
+    private static COMAccessRights GetGrantedAccess(COMSecurityDescriptor desc, COMSid principal, NtToken token, bool launch)
     {
-        if (sd == null)
+        if (desc == null)
             return 0;
 
-        sd = sd.Clone();
+        SecurityDescriptor sd = desc.SecurityDescriptor.Clone();
 
         if (launch || !sd.HasMandatoryLabelAce)
         {
@@ -90,8 +90,8 @@ public sealed class COMAccessCheck : IDisposable
             return default;
         }
 
-        SecurityDescriptor launch_sd = m_ignore_default ? null : obj.DefaultLaunchPermission;
-        SecurityDescriptor access_sd = m_ignore_default ? null : obj.DefaultAccessPermission;
+        COMSecurityDescriptor launch_sd = m_ignore_default ? null : obj.DefaultLaunchPermission;
+        COMSecurityDescriptor access_sd = m_ignore_default ? null : obj.DefaultAccessPermission;
         bool check_launch = true;
         COMSid access_principal = m_principal;
         COMSid launch_principal = null;

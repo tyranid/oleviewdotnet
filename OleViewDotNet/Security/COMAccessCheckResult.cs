@@ -24,8 +24,8 @@ public readonly struct COMAccessCheckResult
     public COMAccessRights Access { get; }
     public COMAccessRights Launch { get; }
     public ICOMAccessSecurity ComObject { get; }
-    public SecurityDescriptor AccessSecurity { get; }
-    public SecurityDescriptor LaunchSecurity { get; }
+    public COMSecurityDescriptor AccessSecurity { get; }
+    public COMSecurityDescriptor LaunchSecurity { get; }
     public bool IsValid => ComObject != null;
     public bool LaunchChecked { get; }
     public bool LocalAccess => IsAccessGranted(COMAccessRights.ExecuteLocal);
@@ -36,7 +36,7 @@ public readonly struct COMAccessCheckResult
     public bool RemoteLaunch => IsLaunchGranted(COMAccessRights.ExecuteRemote);
 
     internal COMAccessCheckResult(COMAccessRights access, COMAccessRights launch, ICOMAccessSecurity obj, 
-        SecurityDescriptor access_security, SecurityDescriptor launch_security, bool launch_checked)
+        COMSecurityDescriptor access_security, COMSecurityDescriptor launch_security, bool launch_checked)
     {
         Access = access;
         Launch = launch;

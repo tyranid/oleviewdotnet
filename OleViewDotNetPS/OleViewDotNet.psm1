@@ -1653,7 +1653,7 @@ function Show-ComSecurityDescriptor {
     [CmdletBinding(DefaultParameterSetName="FromObject")]
     Param(
         [Parameter(Mandatory, ParameterSetName = "FromSddl")]
-        [NtApiDotNet.SecurityDescriptor]$SecurityDescriptor,
+        [OleViewDotNet.Security.COMSecurityDescriptor]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
         [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromRestriction")]
@@ -3250,7 +3250,7 @@ function Format-ComSecurityDescriptor {
     [CmdletBinding(DefaultParameterSetName="FromObject")]
     Param(
         [Parameter(Mandatory, ParameterSetName = "FromSddl")]
-        [NtApiDotNet.SecurityDescriptor]$SecurityDescriptor,
+        [OleViewDotNet.Security.COMSecurityDescriptor]$SecurityDescriptor,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = "FromObject")]
         [OleViewDotNet.Security.ICOMAccessSecurity]$InputObject,
         [Parameter(Mandatory, ParameterSetName = "FromRestriction")]

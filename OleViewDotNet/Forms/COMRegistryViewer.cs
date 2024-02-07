@@ -1808,7 +1808,7 @@ public partial class COMRegistryViewer : UserControl
                     runtime_server = m_registry.MapServerNameToEntry(runtime_class.Server);
                 }
                 
-                SecurityDescriptor perms = runtime_server?.Permissions ?? runtime_class.Permissions;
+                COMSecurityDescriptor perms = runtime_server?.Permissions ?? runtime_class.Permissions;
 
                 COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", name), perms, false);
             }

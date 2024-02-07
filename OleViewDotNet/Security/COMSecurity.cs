@@ -29,7 +29,7 @@ namespace OleViewDotNet.Security;
 
 public static class COMSecurity
 {
-    public static void ViewSecurity(COMRegistry registry, string name, SecurityDescriptor sd, bool access)
+    public static void ViewSecurity(COMRegistry registry, string name, COMSecurityDescriptor sd, bool access)
     {
         if (sd == null)
             return;
@@ -38,7 +38,7 @@ public static class COMSecurity
 
         SecurityDescriptorViewerControl control = new();
         EntryPoint.GetMainForm(registry).HostControl(control, name);
-        control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
+        control.SetSecurityDescriptor(sd.SecurityDescriptor, typeof(COMAccessRights), new GenericMapping()
         {
             GenericExecute = valid_access,
             GenericRead = valid_access,
@@ -53,7 +53,7 @@ public static class COMSecurity
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 
-    private static SecurityDescriptor GetSecurityPermissions(COMSD sdtype)
+    private static COMSecurityDescriptor GetSecurityPermissions(COMSD sdtype)
     {
         IntPtr sd = IntPtr.Zero;
         try
@@ -64,7 +64,7 @@ public static class COMSecurity
                 throw new Win32Exception(hr);
             }
 
-            return new SecurityDescriptor(sd);
+            return new(new SecurityDescriptor(sd));
         }
         finally
         {
@@ -75,32 +75,32 @@ public static class COMSecurity
         }
     }
 
-    public static SecurityDescriptor GetDefaultLaunchPermissions()
+    public static COMSecurityDescriptor GetDefaultLaunchPermissions()
     {
         return GetSecurityPermissions(COMSD.SD_LAUNCHPERMISSIONS);
     }
 
-    public static SecurityDescriptor GetDefaultAccessPermissions()
+    public static COMSecurityDescriptor GetDefaultAccessPermissions()
     {
         return GetSecurityPermissions(COMSD.SD_ACCESSPERMISSIONS);
     }
 
-    public static SecurityDescriptor GetDefaultLaunchRestrictions()
+    public static COMSecurityDescriptor GetDefaultLaunchRestrictions()
     {
         return GetSecurityPermissions(COMSD.SD_LAUNCHRESTRICTIONS);
     }
 
-    public static SecurityDescriptor GetDefaultAccessRestrictions()
+    public static COMSecurityDescriptor GetDefaultAccessRestrictions()
     {
         return GetSecurityPermissions(COMSD.SD_ACCESSRESTRICTIONS);
     }
 
-    public static TokenIntegrityLevel GetILForSD(SecurityDescriptor sd)
+    public static TokenIntegrityLevel GetILForSD(COMSecurityDescriptor sd)
     {
-        return sd?.IntegrityLevel ?? TokenIntegrityLevel.Medium;
+        return sd?.SecurityDescriptor.IntegrityLevel ?? TokenIntegrityLevel.Medium;
     }
 
-    public static SecurityDescriptor GetAccessPermission(ICOMAccessSecurity obj)
+    public static COMSecurityDescriptor GetAccessPermission(ICOMAccessSecurity obj)
     {
         if (obj is COMProcessEntry process)
         {
@@ -128,7 +128,7 @@ public static class COMSecurity
         throw new ArgumentException("Can't get access permission for object");
     }
 
-    public static SecurityDescriptor GetLaunchPermission(ICOMAccessSecurity obj)
+    public static COMSecurityDescriptor GetLaunchPermission(ICOMAccessSecurity obj)
     {
         if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
         {
@@ -171,12 +171,14 @@ public static class COMSecurity
         throw new ArgumentException("Can't get launch permission for object");
     }
 
-    private static bool SDHasAllowedAce(SecurityDescriptor sd, bool allow_null_dacl, Func<Ace, bool> check_func)
+    private static bool SDHasAllowedAce(COMSecurityDescriptor desc, bool allow_null_dacl, Func<Ace, bool> check_func)
     {
-        if (sd == null)
+        if (desc == null)
         {
             return allow_null_dacl;
         }
+
+        var sd = desc.SecurityDescriptor;
 
         try
         {
@@ -201,13 +203,13 @@ public static class COMSecurity
         return false;
     }
 
-    public static bool SDHasAC(SecurityDescriptor sd)
+    public static bool SDHasAC(COMSecurityDescriptor sd)
     {
         SidIdentifierAuthority authority = new(SecurityAuthority.Package);
         return SDHasAllowedAce(sd, false, ace => ace.Sid.Authority.Equals(authority));
     }
 
-    public static bool SDHasRemoteAccess(SecurityDescriptor sd)
+    public static bool SDHasRemoteAccess(COMSecurityDescriptor sd)
     {
         return SDHasAllowedAce(sd, true, a => a.Mask == COMAccessRights.Execute ||
             (a.Mask & (COMAccessRights.ExecuteRemote | COMAccessRights.ActivateRemote)) != 0);
@@ -230,14 +232,14 @@ public static class COMSecurity
         }
     }
 
-    internal static int GetSDHashCode(this SecurityDescriptor sd)
+    internal static int GetSDHashCode(this COMSecurityDescriptor sd)
     {
         if (sd == null)
             return 0;
         return sd.ToBase64().GetHashCode();
     }
 
-    internal static bool SDIsEqual(this SecurityDescriptor left, SecurityDescriptor right)
+    internal static bool SDIsEqual(this COMSecurityDescriptor left, COMSecurityDescriptor right)
     {
         string left_str = left?.ToBase64();
         string right_str = right?.ToBase64();

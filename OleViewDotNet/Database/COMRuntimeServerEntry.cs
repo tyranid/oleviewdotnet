@@ -69,9 +69,9 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
         return Name.CompareTo(other.Name);
     }
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
     #endregion
 
     #region XML Serialization
@@ -147,7 +147,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     public string ServiceName { get; private set; }
     public string ExePath { get; private set; }
     public string ExeName => COMUtilities.GetFileName(ExePath);
-    public SecurityDescriptor Permissions { get; private set; }
+    public COMSecurityDescriptor Permissions { get; private set; }
     public bool HasPermission => Permissions != null;
     public IdentityType IdentityType { get; private set; }
     public ServerType ServerType { get; private set; }

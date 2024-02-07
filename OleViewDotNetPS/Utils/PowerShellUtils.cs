@@ -170,10 +170,12 @@ public static class PowerShellUtils
         }
     }
 
-    public static string FormatSecurityDescriptor(SecurityDescriptor sd, bool sdk_name = false)
+    public static string FormatSecurityDescriptor(COMSecurityDescriptor desc, bool sdk_name = false)
     {
-        if (sd == null)
+        if (desc == null)
             return string.Empty;
+
+        var sd = desc.SecurityDescriptor;
 
         StringBuilder builder = new();
 

@@ -14,6 +14,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using OleViewDotNet.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -208,7 +209,7 @@ internal static class XmlUtils
         writer.WriteAttributeString(name, value.ToString());
     }
 
-    internal static void WriteSecurityDescriptor(this XmlWriter writer, string name, SecurityDescriptor sd)
+    internal static void WriteSecurityDescriptor(this XmlWriter writer, string name, COMSecurityDescriptor sd)
     {
         if (sd == null)
             return;
@@ -226,17 +227,17 @@ internal static class XmlUtils
         return (T)Enum.Parse(typeof(T), value);
     }
 
-    internal static SecurityDescriptor ReadSecurityDescriptor(this XmlReader reader, string name)
+    internal static COMSecurityDescriptor ReadSecurityDescriptor(this XmlReader reader, string name)
     {
         string value = reader.ReadString(name);
         if (string.IsNullOrEmpty(value))
             return null;
         var sd = SecurityDescriptor.ParseBase64(value, false);
         if (sd.IsSuccess)
-            return sd.Result;
+            return new(sd.Result);
         sd = SecurityDescriptor.Parse(value, false);
         if (sd.IsSuccess)
-            return sd.Result;
+            return new(sd.Result);
         return null;
     }
 

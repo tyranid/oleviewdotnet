@@ -34,8 +34,8 @@ public class COMProcessEntry : ICOMAccessSecurity
     public IEnumerable<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning);
     public bool Is64Bit { get; }
     public Guid AppId { get; }
-    public SecurityDescriptor AccessPermissions { get; }
-    public SecurityDescriptor LRpcPermissions { get; }
+    public COMSecurityDescriptor AccessPermissions { get; }
+    public COMSecurityDescriptor LRpcPermissions { get; }
     public string User => Token.User;
     public COMSid UserSid => Token.UserSid;
     public string RpcEndpoint { get; private set; }
@@ -83,12 +83,13 @@ public class COMProcessEntry : ICOMAccessSecurity
         get;
     }
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => null;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => null;
 
-    SecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => null;
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => null;
 
     internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids,
-        bool is64bit, Guid appid, SecurityDescriptor access_perm, SecurityDescriptor lrpc_perm, string rpc_endpoint, EOLE_AUTHENTICATION_CAPABILITIES capabilities,
+        bool is64bit, Guid appid, COMSecurityDescriptor access_perm, COMSecurityDescriptor lrpc_perm, string rpc_endpoint, 
+        EOLE_AUTHENTICATION_CAPABILITIES capabilities,
         RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
         IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,
         string activation_filter_vtable, List<COMIPIDEntry> clients, List<COMRuntimeActivableClassEntry> activatable_classes,

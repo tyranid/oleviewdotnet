@@ -19,6 +19,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -1611,11 +1612,11 @@ public static class COMProcessParser
         return process.ReadStruct<Guid>(appid.ToInt64());
     }
 
-    private static SecurityDescriptor ReadSecurityDescriptorFromAddress(NtProcess process, IntPtr address)
+    private static COMSecurityDescriptor ReadSecurityDescriptorFromAddress(NtProcess process, IntPtr address)
     {
         try
         {
-            return new SecurityDescriptor(process, address);
+            return new(new SecurityDescriptor(process, address));
         }
         catch (NtException)
         {
@@ -1623,7 +1624,7 @@ public static class COMProcessParser
         }
     }
 
-    private static SecurityDescriptor ReadSecurityDescriptor(NtProcess process, ISymbolResolver resolver, string symbol)
+    private static COMSecurityDescriptor ReadSecurityDescriptor(NtProcess process, ISymbolResolver resolver, string symbol)
     {
         IntPtr sd = resolver.GetAddressOfSymbol(GetSymbolName(symbol));
         if (sd == IntPtr.Zero)
@@ -1642,18 +1643,18 @@ public static class COMProcessParser
 
         if (sd_ptr == IntPtr.Zero)
         {
-            return new SecurityDescriptor() { Dacl = new Acl() { NullAcl = true } };
+            return new(new SecurityDescriptor() { Dacl = new Acl() { NullAcl = true } });
         }
 
         return ReadSecurityDescriptorFromAddress(process, sd_ptr);
     }
 
-    private static SecurityDescriptor GetProcessAccessSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
+    private static COMSecurityDescriptor GetProcessAccessSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
     {
         return ReadSecurityDescriptor(process, resolver, "gSecDesc");
     }
 
-    private static SecurityDescriptor GetLrpcSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
+    private static COMSecurityDescriptor GetLrpcSecurityDescriptor(NtProcess process, ISymbolResolver resolver)
     {
         return ReadSecurityDescriptor(process, resolver, "gLrpcSecurityDescriptor");
     }

@@ -16,6 +16,7 @@
 
 using Microsoft.Win32;
 using NtApiDotNet;
+using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
 
@@ -32,7 +33,7 @@ internal class COMPackagedServerEntry
     public string CommandLine { get; }
     public string ExecutionPackageFamily { get; }
     public bool IsSystemExecutable { get; }
-    public SecurityDescriptor LaunchAndActivationPermission { get; }
+    public COMSecurityDescriptor LaunchAndActivationPermission { get; }
     public Guid SurrogateAppId { get; }
     public string SystemExecutableArchitecture { get; }
 

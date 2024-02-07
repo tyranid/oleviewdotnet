@@ -25,6 +25,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Security;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;
@@ -175,14 +176,14 @@ public static class COMUtilities
         return Guid.Empty;
     }
 
-    public static SecurityDescriptor ReadSecurityDescriptor(this RegistryKey rootKey, string valueName = null, string keyName = null)
+    public static COMSecurityDescriptor ReadSecurityDescriptor(this RegistryKey rootKey, string valueName = null, string keyName = null)
     {
         if (rootKey.ReadObject(keyName, valueName) is not byte[] ba)
             return null;
         var sd = SecurityDescriptor.Parse(ba, false);
         if (!sd.IsSuccess)
             return null;
-        return sd.Result;
+        return new COMSecurityDescriptor(sd.Result);
     }
 
     public static IEnumerable<RegistryValue> ReadValues(this RegistryKey rootKey, string keyName = null)
