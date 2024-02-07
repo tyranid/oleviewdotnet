@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Security;
 
 namespace OleViewDotNet.Database;
 
@@ -47,7 +48,7 @@ public interface ICOMClassEntry
     /// <param name="token">Token to use when querying for the interfaces.</param>
     /// <returns>Returns true if supported interfaces were refreshed.</returns>
     /// <exception cref="Win32Exception">Thrown on error.</exception>
-    Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token);
+    Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token);
 
     /// <summary>
     /// Get list of supported Interface IIDs Synchronously
@@ -56,7 +57,7 @@ public interface ICOMClassEntry
     /// <param name="token">Token to use when querying for the interfaces.</param>
     /// <returns>Returns true if supported interfaces were refreshed.</returns>
     /// <exception cref="Win32Exception">Thrown on error.</exception>
-    bool LoadSupportedInterfaces(bool refresh, NtToken token);
+    bool LoadSupportedInterfaces(bool refresh, COMAccessToken token);
 
     /// <summary>
     /// Indicates that the class' interface list has been loaded.

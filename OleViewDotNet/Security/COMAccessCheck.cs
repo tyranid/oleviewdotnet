@@ -68,7 +68,7 @@ public sealed class COMAccessCheck : IDisposable
         return mask.ToSpecificAccess<COMAccessRights>();
     }
 
-    public COMAccessCheck(NtToken token,
+    public COMAccessCheck(COMAccessToken token,
         COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
@@ -76,7 +76,7 @@ public sealed class COMAccessCheck : IDisposable
     {
         m_access_cache = new Dictionary<string, COMAccessRights>();
         m_launch_cache = new Dictionary<string, COMAccessRights>();
-        m_access_token = token.DuplicateToken(SecurityImpersonationLevel.Identification);
+        m_access_token = token.Token.DuplicateToken(SecurityImpersonationLevel.Identification);
         m_principal = principal;
         m_access_rights = access_rights;
         m_launch_rights = launch_rights;

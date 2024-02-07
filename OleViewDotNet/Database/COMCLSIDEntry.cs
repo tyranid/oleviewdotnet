@@ -400,7 +400,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
     }
 
-    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
+    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(COMAccessToken token)
     {
         try
         {
@@ -445,7 +445,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     /// <param name="token">Token to use when checking for the interfaces.</param>
     /// <returns>Returns true if supported interfaces were refreshed.</returns>
     /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
+    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
     {
         if (Clsid == Guid.Empty)
         {
@@ -470,7 +470,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     /// <param name="token">Token to use when querying for the interfaces.</param>
     /// <returns>Returns true if supported interfaces were refreshed.</returns>
     /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public bool LoadSupportedInterfaces(bool refresh, NtToken token)
+    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
     {
         Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
         try

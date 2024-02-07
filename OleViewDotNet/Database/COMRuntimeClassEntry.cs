@@ -214,7 +214,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         return Server.CompareTo(other.Server);
     }
 
-    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(NtToken token)
+    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(COMAccessToken token)
     {
         try
         {
@@ -226,7 +226,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         }
     }
 
-    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, NtToken token)
+    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
     {
         if (refresh || !InterfacesLoaded)
         {
@@ -245,7 +245,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
     /// <param name="refresh">Force the supported interface list to refresh</param>
     /// <returns>Returns true if supported interfaces were refreshed.</returns>
     /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public bool LoadSupportedInterfaces(bool refresh, NtToken token)
+    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
     {
         Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
         result.Wait();

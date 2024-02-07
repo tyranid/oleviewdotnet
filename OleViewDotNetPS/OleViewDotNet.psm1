@@ -999,7 +999,7 @@ function Get-ComClassInterface {
         [switch]$Factory,
         [switch]$NoQuery,
         [switch]$NoProgress,
-        [NtApiDotNet.NtToken]$Token
+        [OleViewDotNet.Security.COMAccessToken]$Token
         )
     PROCESS {
         $i = 0
@@ -1311,9 +1311,7 @@ function Select-ComAccess {
         [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
         [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
         [Parameter(Mandatory, ParameterSetName = "FromToken")]
-        [NtApiDotNet.NtToken]$Token,
-        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
-        [NtApiDotNet.NtProcess]$Process,
+        [OleViewDotNet.Security.COMAccessToken]$Token,
         [Parameter(ParameterSetName = "FromProcessId")]
         [alias("pid")]
         [int]$ProcessId = $pid,
@@ -1326,10 +1324,6 @@ function Select-ComAccess {
         switch($PSCmdlet.ParameterSetName) {
             "FromProcessId" {
                 $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
-                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
-            }
-            "FromProcess" {
-                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
                     $Principal, $Access, $LaunchAccess, $IgnoreDefault)
             }
             "FromToken" {
@@ -1390,9 +1384,7 @@ function Test-ComAccess {
         [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
         [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
         [Parameter(Mandatory, ParameterSetName = "FromToken")]
-        [NtApiDotNet.NtToken]$Token,
-        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
-        [NtApiDotNet.NtProcess]$Process,
+        [OleViewDotNet.Security.COMAccessToken]$Token,
         [Parameter(ParameterSetName = "FromProcessId")]
         [alias("pid")]
         [int]$ProcessId = $pid,
@@ -1403,10 +1395,6 @@ function Test-ComAccess {
     $access_check = switch($PSCmdlet.ParameterSetName) {
         "FromProcessId" {
             [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
-                $Principal, $Access, $LaunchAccess, $IgnoreDefault)
-        }
-        "FromProcess" {
-            [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
                 $Principal, $Access, $LaunchAccess, $IgnoreDefault)
         }
         "FromToken" {
@@ -1457,9 +1445,7 @@ function Get-ComAccess {
         [OleViewDotNet.Security.COMAccessRights]$Access = "ExecuteLocal",
         [OleViewDotNet.Security.COMAccessRights]$LaunchAccess = "ActivateLocal, ExecuteLocal",
         [Parameter(Mandatory, ParameterSetName = "FromToken")]
-        [NtApiDotNet.NtToken]$Token,
-        [Parameter(Mandatory, ParameterSetName = "FromProcess")]
-        [NtApiDotNet.NtProcess]$Process,
+        [OleViewDotNet.Security.COMAccessToken]$Token,
         [Parameter(ParameterSetName = "FromProcessId")]
         [alias("pid")]
         [int]$ProcessId = $pid,
@@ -1471,10 +1457,6 @@ function Get-ComAccess {
         switch($PSCmdlet.ParameterSetName) {
             "FromProcessId" {
                 $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($ProcessId, `
-                    $Principal, $Access, $LaunchAccess, $IgnoreDefault)
-            }
-            "FromProcess" {
-                $access_check = [OleViewDotNetPS.Utils.PowerShellUtils]::GetAccessCheck($Process, `
                     $Principal, $Access, $LaunchAccess, $IgnoreDefault)
             }
             "FromToken" {
@@ -3353,4 +3335,61 @@ function Export-ComInterfaceNameCache {
     $writer = [System.IO.StringWriter]::new()
     $Database.ExportIidNameCache($writer)
     $writer.ToString() | Set-Content -Path $Path
+}
+
+<#
+.SYNOPSIS
+Gets an access token for COM access checking.
+.DESCRIPTION
+This cmdlet gets an access token from various sources.
+.PARAMETER ProcessId
+Get the token from a process.
+.PARAMETER Anonymous
+Get the anonymous token.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.Security.COMAccessToken
+#>
+function Get-ComAccessToken {
+    [CmdletBinding(DefaultParameterSetName="FromProcessId")]
+    Param(
+        [parameter(ParameterSetName = "FromProcessId", Position = 0)]
+        [int]$ProcessId = $pid,
+        [parameter(Mandatory, ParameterSetName = "FromAnonymous")]
+        [switch]$Anonymous,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [OleViewDotNet.Security.COMAccessToken]$BaseToken,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [OleViewDotNet.Security.COMSid[]]$SidsToDisable,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [OleViewDotNet.Security.COMSid[]]$RestrictedSids,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [switch]$LuaToken,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [switch]$DisableMaxPrivileges,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [switch]$WriteRestricted,
+        [parameter(ParameterSetName = "FromFiltered")]
+        [switch]$LowIntegrityLevel
+    )
+
+    PROCESS {
+        switch($PSCmdlet.ParameterSetName) {
+            "FromProcessId" {
+                [OleViewDotNet.Security.COMAccessToken]::FromProcess($ProcessId)
+            }
+            "FromAnonymous" {
+                [OleViewDotNet.Security.COMAccessToken]::GetAnonymous()
+            }
+            "FromFiltered" {
+                $token = [OleViewDotNet.Security.COMAccessToken]::GetFiltered($BaseToken, $LuaToken, `
+                    $DisableMaxPrivileges, $WriteRestricted, $SidsToDisable, $RestrictedSids)
+                if ($LowIntegrityLevel) {
+                    $token.SetLowIntegrityLevel();
+                }
+                $token
+            }
+        }
+    }
 }

@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using NtApiDotNet;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -338,13 +339,13 @@ public class COMEnumerateInterfaces
         public List<COMInterfaceInstance> FactoryInterfaces { get; set; }
     }
 
-    private async static Task<InterfaceLists> GetInterfacesOOP(string class_name, bool mta, COMRegistry registry, NtToken token, CLSCTX clsctx)
+    private async static Task<InterfaceLists> GetInterfacesOOP(string class_name, bool mta, COMRegistry registry, COMAccessToken token, CLSCTX clsctx)
     {
         using AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null);
         Win32ProcessConfig config = new();
         config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
-        using var imp_token = token?.DuplicateToken(SecurityImpersonationLevel.Impersonation);
+        using var imp_token = token?.Token?.DuplicateToken(SecurityImpersonationLevel.Impersonation);
         if (imp_token != null)
         {
             imp_token.Inherit = true;
@@ -479,7 +480,7 @@ public class COMEnumerateInterfaces
     #endregion
 
     #region Static Methods
-    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, NtToken token)
+    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMRuntimeClassEntry ent, COMRegistry registry, COMAccessToken token)
     {
         bool mta = ent.Threading == ThreadingType.Both || ent.Threading == ThreadingType.Mta;
         CLSCTX clsctx = ent.ActivationType == ActivationType.InProcess ? CLSCTX.INPROC_SERVER : CLSCTX.LOCAL_SERVER;
@@ -487,7 +488,7 @@ public class COMEnumerateInterfaces
         return new COMEnumerateInterfaces(Guid.Empty, 0, ent.Name, interfaces.Interfaces, interfaces.FactoryInterfaces);
     }
 
-    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, NtToken token)
+    public async static Task<COMEnumerateInterfaces> GetInterfacesOOP(COMCLSIDEntry ent, COMRegistry registry, COMAccessToken token)
     {
         bool mta = ent.DefaultThreadingModel == COMThreadingModel.Both || ent.DefaultThreadingModel == COMThreadingModel.Free;
 

@@ -49,7 +49,8 @@ public static class PowerShellUtils
         }
     }
 
-    public static COMAccessCheck GetAccessCheck(NtToken token,
+    public static COMAccessCheck GetAccessCheck(
+        COMAccessToken token,
         COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
@@ -63,28 +64,19 @@ public static class PowerShellUtils
             ignore_default);
     }
 
-    public static COMAccessCheck GetAccessCheck(NtProcess process,
-        COMSid principal,
-        COMAccessRights access_rights,
-        COMAccessRights launch_rights,
-        bool ignore_default)
-    {
-        return new COMAccessCheck(
-            process.OpenToken(),
-            principal,
-            access_rights,
-            launch_rights,
-            ignore_default);
-    }
-
     public static COMAccessCheck GetAccessCheck(int process_id,
         COMSid principal,
         COMAccessRights access_rights,
         COMAccessRights launch_rights,
         bool ignore_default)
     {
-        using var process = NtProcess.Open(process_id, ProcessAccessRights.QueryLimitedInformation);
-        return GetAccessCheck(process, principal, access_rights, launch_rights, ignore_default);
+        using var token = COMAccessToken.FromProcess(process_id);
+        return new COMAccessCheck(
+                token,
+                principal,
+                access_rights,
+                launch_rights,
+                ignore_default);
     }
 
     public static Type GetFactoryType(ICOMClassEntry cls)

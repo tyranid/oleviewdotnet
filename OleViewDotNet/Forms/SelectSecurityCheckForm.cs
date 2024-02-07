@@ -57,7 +57,7 @@ internal partial class SelectSecurityCheckForm : Form
     }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-    internal NtToken Token { get; private set; }
+    internal COMAccessToken Token { get; private set; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
     internal COMSid Principal { get; private set; }
@@ -88,22 +88,22 @@ internal partial class SelectSecurityCheckForm : Form
         {
             if (radioCurrentProcess.Checked)
             {
-                Token = OpenImpersonationToken();
+                Token = new COMAccessToken();
             }
             else if (radioSpecificProcess.Checked)
             {
                 NtProcess process = selectProcessControl.SelectedProcess ?? throw new InvalidOperationException("Please select a process from the list");
                 using var token = NtToken.OpenProcessToken(process, false, TokenAccessRights.Duplicate);
-                Token = token.DuplicateToken(TokenType.Impersonation, SecurityImpersonationLevel.Impersonation, TokenAccessRights.GenericAll);
+                Token = COMAccessToken.FromToken(token);
             }
             else if (radioAnonymous.Checked)
             {
-                Token = TokenUtils.GetAnonymousToken();
+                Token = COMAccessToken.GetAnonymous();
             }
 
             if (checkBoxSetIL.Checked)
             {
-                Token.SetIntegrityLevel((TokenIntegrityLevel)comboBoxIL.SelectedItem);
+                Token.Token.SetIntegrityLevel((TokenIntegrityLevel)comboBoxIL.SelectedItem);
             }
 
             if (checkBoxLocalAccess.Checked)
