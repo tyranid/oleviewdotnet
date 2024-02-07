@@ -1544,35 +1544,30 @@ public static class COMUtilities
 
     private static string DemangleGenericType(string name)
     {
-        name = name.Replace("__F", "~").Replace("__C", "::");
+        name = name.Replace("__F", "~").Replace("__C", "::").TrimStart('_');
         return ReadType(ref name);
     }
 
-    internal static string DemangleWinRTName(string name)
-    {
-        return DemangleWinRTName(name, null);
-    }
-
     // TODO: This isn't exactly correct, but can't find any good documentation.
-    internal static string DemangleWinRTName(string name, Guid? iid)
+    public static string DemangleWinRTName(string name, Guid? iid = null, bool ignore_cache = false)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             return iid?.ToString() ?? "IInvalidName";
         }
         name = name.Trim();
-        if (_demangled_names.TryGetValue(name, out string result))
+        if (!ignore_cache && _demangled_names.TryGetValue(name, out string result))
         {
             return result;
         }
 
         result = name;
 
-        if (name.StartsWith("__x_") || name.StartsWith("___x_"))
+        if (name.StartsWith("__x_") || name.StartsWith("___x_") || name.StartsWith("____x_"))
         {
-            result = name.Substring(4).Replace("_C", "::");
+            result = name.TrimStart('_').Substring(2).Replace("_C", "::");
         }
-        else if (name.StartsWith("__F"))
+        else if (name.StartsWith("__F") || name.StartsWith("___F"))
         {
             try
             {
@@ -1606,7 +1601,14 @@ public static class COMUtilities
         {
             throw new ArgumentException("Can't load a diff registry");
         }
-        return LoadRegistry(window, (progress, token) => COMRegistry.Load(mode, null, progress));
+
+        string interface_cache_path = Path.Combine(Path.GetDirectoryName(typeof(COMUtilities).Assembly.Location), "interfaces.txt");
+        if (!File.Exists(interface_cache_path))
+        {
+            interface_cache_path = null;
+        }
+
+        return LoadRegistry(window, (progress, token) => COMRegistry.Load(mode, null, progress, interface_cache_path));
     }
 
     internal static COMRegistry LoadRegistry(IWin32Window window, string database_file)
@@ -2212,7 +2214,7 @@ public static class COMUtilities
     {
         bool remove_comments = (flags & ProxyFormatterFlags.RemoveComments) != 0;
         INdrFormatter formatter = DefaultNdrFormatter.Create(registry.InterfacesToNames,
-                DemangleWinRTName,
+                s => DemangleWinRTName(s),
                 remove_comments ? DefaultNdrFormatterFlags.RemoveComments : DefaultNdrFormatterFlags.None);
         StringBuilder builder = new();
 
