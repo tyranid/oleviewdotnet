@@ -408,7 +408,10 @@ public class COMRegistry
                 }
                 else
                 {
-                    interfaces[pair.Key].RuntimeInterface = true;
+                    COMInterfaceEntry entry = interfaces[pair.Key];
+                    entry.InternalName = pair.Value.FullName;
+                    m_iid_name_cache[pair.Key] = pair.Value.FullName;
+                    entry.RuntimeInterface = true;
                 }
             }
         }

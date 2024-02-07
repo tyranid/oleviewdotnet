@@ -30,7 +30,6 @@ namespace OleViewDotNet.Database;
 public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
 {
     private readonly COMRegistry m_registry;
-    private string m_name;
 
     public int CompareTo(COMInterfaceEntry right)
     {
@@ -42,12 +41,12 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         string name = key.GetValue(null) as string;
         if (!string.IsNullOrWhiteSpace(name?.Trim()) || m_registry.IidNameCache.TryGetValue(Iid, out name))
         {
-            m_name = name;
-            m_registry.IidNameCache.TryAdd(Iid, m_name);
+            InternalName = name;
+            m_registry.IidNameCache.TryAdd(Iid, InternalName);
         }
         else
         {
-            m_name = string.Empty;
+            InternalName = string.Empty;
         }
 
         ProxyClsid = COMUtilities.ReadGuid(key, "ProxyStubCLSID32", null);
@@ -80,7 +79,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         ProxyClsid = proxyclsid;
         NumMethods = nummethods;
         Base = baseName;
-        m_name = name;
+        InternalName = name;
         TypeLibVersion = string.Empty;
     }
 
@@ -95,7 +94,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     internal COMInterfaceEntry(COMRegistry registry, Type type) 
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
-        m_registry.IidNameCache.TryAdd(Iid, m_name);
+        m_registry.IidNameCache.TryAdd(Iid, InternalName);
         RuntimeInterface = true;
         Source = COMRegistryEntrySource.Metadata;
     }
@@ -111,7 +110,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     {
         if (m_registry.IidNameCache.TryGetValue(iid, out string name))
         {
-            m_name = name;
+            InternalName = name;
         }
     }
 
@@ -161,6 +160,8 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     public bool IsClassFactory => Iid == typeof(IClassFactory).GUID;
 
+    internal string InternalName { get; set; }
+
     private static COMInterfaceEntry CreateBuiltinEntry(COMRegistry registry, Guid iid, string name, int num_methods)
     {
         return new COMInterfaceEntry(registry)
@@ -169,7 +170,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             Iid = iid,
             ProxyClsid = Guid.Empty,
             NumMethods = num_methods,
-            m_name = name,
+            InternalName = name,
             TypeLibVersion = string.Empty,
             Source = COMRegistryEntrySource.Builtin
         };
@@ -189,7 +190,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         };
     }
 
-    public string Name => string.IsNullOrWhiteSpace(m_name) ? Iid.FormatGuid() : COMUtilities.DemangleWinRTName(m_name);
+    public string Name => string.IsNullOrWhiteSpace(InternalName) ? Iid.FormatGuid() : COMUtilities.DemangleWinRTName(InternalName);
 
     public Guid Iid
     {
@@ -268,7 +269,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             return false;
         }
 
-        return m_name == right.m_name && Iid == right.Iid && ProxyClsid == right.ProxyClsid
+        return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
             && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
             && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
             && Source == right.Source;
@@ -276,7 +277,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     public override int GetHashCode()
     {
-        return m_name.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
+        return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
             ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
             ^ Source.GetHashCode();
     }
@@ -319,7 +320,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     void IXmlSerializable.ReadXml(XmlReader reader)
     {
-        m_name = reader.ReadString("name");
+        InternalName = reader.ReadString("name");
         Iid = reader.ReadGuid("iid");
         ProxyClsid = reader.ReadGuid("proxy");
         NumMethods = reader.ReadInt("num");
@@ -329,15 +330,15 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         RuntimeInterface = reader.ReadBool("rt");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
-        if (!string.IsNullOrWhiteSpace(m_name))
+        if (!string.IsNullOrWhiteSpace(InternalName))
         {
-            m_registry.IidNameCache.TryAdd(Iid, m_name);
+            m_registry.IidNameCache.TryAdd(Iid, InternalName);
         }
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
     {
-        writer.WriteOptionalAttributeString("name", m_name);
+        writer.WriteOptionalAttributeString("name", InternalName);
         writer.WriteGuid("iid", Iid);
         writer.WriteGuid("proxy", ProxyClsid);
         writer.WriteInt("num", NumMethods);

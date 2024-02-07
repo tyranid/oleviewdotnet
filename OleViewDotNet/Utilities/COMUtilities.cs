@@ -1545,7 +1545,7 @@ public static class COMUtilities
 
     private static string DemangleGenericType(string name)
     {
-        name = name.Replace("__F", "~").Replace("__C", "::").TrimStart('_');
+        name = name.Replace("__F", "~").Replace("__C", ".").TrimStart('_');
         return ReadType(ref name);
     }
 
@@ -1566,7 +1566,7 @@ public static class COMUtilities
 
         if (name.StartsWith("__x_") || name.StartsWith("___x_") || name.StartsWith("____x_"))
         {
-            result = name.TrimStart('_').Substring(2).Replace("_C", "::");
+            result = name.TrimStart('_').Substring(2).Replace("_C", ".");
         }
         else if (name.StartsWith("__F") || name.StartsWith("___F"))
         {
