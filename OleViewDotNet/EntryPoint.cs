@@ -160,6 +160,7 @@ internal static class EntryPoint
         int enum_timeout = 10000;
         string enum_pipe = null;
         CLSCTX enum_clsctx = CLSCTX.SERVER;
+        ProgramArchitecture arch = COMUtilities.CurrentArchitecture;
 
         OptionSet opts = new() {
             { "i|in=",  "Open a database file.", v => database_file = v },
@@ -182,6 +183,7 @@ internal static class EntryPoint
             { "timeout=", "Specify the timeout for interface enumeration. Default is 10000ms.", v => enum_timeout = int.Parse(v) },
             { "pipe=", "Specify the pipe to send interface enumeration output.", v => enum_pipe = v },
             { "clsctx=", "Specify the CLSCTX to create the object for interface enumeration.", v => enum_clsctx = (CLSCTX)Enum.Parse(typeof(CLSCTX), v, true) },
+            { "arch=", "Specify the architecture to run. Used only for admin elevation.", v => arch = (ProgramArchitecture)Enum.Parse(typeof(ProgramArchitecture), v, true) },
             { "h|help",  "Show this message and exit.", v => show_help = v != null },
         };
 
@@ -205,6 +207,12 @@ internal static class EntryPoint
             opts.WriteOptionDescriptions(writer);
             MessageBox.Show(writer.ToString(), "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Environment.Exit(1);
+        }
+
+        if (arch != COMUtilities.CurrentArchitecture)
+        {
+            COMUtilities.StartArchProcess(arch, "");
+            Environment.Exit(0);
         }
 
         if (!string.IsNullOrWhiteSpace(enum_class))

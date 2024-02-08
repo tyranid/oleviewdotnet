@@ -804,7 +804,8 @@ public partial class MainForm : Form
     {
         try
         {
-            ProcessStartInfo start_info = new(COMUtilities.GetExePath());
+            ProcessStartInfo start_info = new(Assembly.GetEntryAssembly().Location, 
+                $"--arch={COMUtilities.CurrentArchitecture}");
             start_info.UseShellExecute = true;
             start_info.Verb = "runas";
 
