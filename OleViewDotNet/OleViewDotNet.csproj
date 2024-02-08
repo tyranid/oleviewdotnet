@@ -39,8 +39,20 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Update="Properties\Settings.Designer.cs">
+        <DesignTimeSharedInput>True</DesignTimeSharedInput>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Settings.settings</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
       <None Update="OleViewDotNet.psd1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Properties\Settings.settings">
+        <Generator>SettingsSingleFileGenerator</Generator>
+        <LastGenOutput>Settings.Designer.cs</LastGenOutput>
       </None>
       <None Update="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -26,20 +26,7 @@ public partial class SettingsForm : Form
     public SettingsForm()
     {
         InitializeComponent();
-        if (Environment.Is64BitProcess)
-        {
-            textBoxDbgHelp.Text = Properties.Settings.Default.DbgHelpPath64;
-            textBoxDatabasePath.Text = Properties.Settings.Default.DatabasePath64;
-            checkBoxEnableSaveOnExit.Checked = Properties.Settings.Default.EnableSaveOnExit64;
-            checkBoxEnableLoadOnStart.Checked = Properties.Settings.Default.EnableLoadOnStart64;
-        }
-        else
-        {
-            textBoxDbgHelp.Text = Properties.Settings.Default.DbgHelpPath32;
-            textBoxDatabasePath.Text = Properties.Settings.Default.DatabasePath32;
-            checkBoxEnableSaveOnExit.Checked = Properties.Settings.Default.EnableSaveOnExit32;
-            checkBoxEnableLoadOnStart.Checked = Properties.Settings.Default.EnableLoadOnStart32;
-        }
+        textBoxDbgHelp.Text = ProgramSettings.DbgHelpPath;
         textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
         checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
         checkBoxResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
@@ -80,20 +67,7 @@ public partial class SettingsForm : Form
             return;
         }
 
-        if (Environment.Is64BitProcess)
-        {
-            Properties.Settings.Default.DbgHelpPath64 = textBoxDbgHelp.Text;
-            Properties.Settings.Default.DatabasePath64 = textBoxDatabasePath.Text;
-            Properties.Settings.Default.EnableLoadOnStart64 = checkBoxEnableLoadOnStart.Checked;
-            Properties.Settings.Default.EnableSaveOnExit64 = checkBoxEnableSaveOnExit.Checked;
-        }
-        else
-        {
-            Properties.Settings.Default.DbgHelpPath32 = textBoxDbgHelp.Text;
-            Properties.Settings.Default.DatabasePath32 = textBoxDatabasePath.Text;
-            Properties.Settings.Default.EnableLoadOnStart32 = checkBoxEnableLoadOnStart.Checked;
-            Properties.Settings.Default.EnableSaveOnExit32 = checkBoxEnableSaveOnExit.Checked;
-        }
+        ProgramSettings.DbgHelpPath = textBoxDbgHelp.Text;
         Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
         Properties.Settings.Default.SymbolsConfigured = true;
         Properties.Settings.Default.ParseStubMethods = checkBoxParseStubMethods.Checked;
@@ -101,14 +75,7 @@ public partial class SettingsForm : Form
         Properties.Settings.Default.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
         Properties.Settings.Default.ParseRegisteredClasses = checkBoxParseRegisteredClasses.Checked;
         Properties.Settings.Default.ParseActivationContext = checkBoxParseActCtx.Checked;
-        try
-        {
-            Properties.Settings.Default.Save();
-        }
-        catch (Exception ex)
-        {
-            EntryPoint.ShowError(this, ex);
-        }
+        ProgramSettings.Save(this);
         DialogResult = DialogResult.OK;
         Close();
     }

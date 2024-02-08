@@ -127,33 +127,6 @@ internal static class EntryPoint
         }
     }
 
-    private class AutoSaveLoadConfiguration
-    {
-        public bool AutoLoad { get; }
-        public bool AutoSave { get; }
-        public string DatabasePath { get; }
-
-        public AutoSaveLoadConfiguration()
-        {
-            if (Environment.Is64BitProcess)
-            {
-                AutoLoad = Properties.Settings.Default.EnableLoadOnStart64;
-                AutoSave = Properties.Settings.Default.EnableSaveOnExit64;
-                DatabasePath = Properties.Settings.Default.DatabasePath64;
-            }
-            else
-            {
-                AutoLoad = Properties.Settings.Default.EnableLoadOnStart32;
-                AutoSave = Properties.Settings.Default.EnableSaveOnExit32;
-                DatabasePath = Properties.Settings.Default.DatabasePath32;
-            }
-            if (string.IsNullOrWhiteSpace(DatabasePath))
-            {
-                DatabasePath = COMUtilities.GetAutoSaveLoadPath();
-            }
-        }
-    }
-
     private static IEnumerable<COMServerType> ParseServerTypes(string servers)
     {
         string[] ss = servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -250,7 +223,7 @@ internal static class EntryPoint
             try
             {
                 COMUtilities.GenerateSymbolFile(symbol_dir,
-                    Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32, Properties.Settings.Default.SymbolPath);
+                    ProgramSettings.DbgHelpPath, Properties.Settings.Default.SymbolPath);
                 Environment.Exit(0);
             }
             catch (Exception)
@@ -260,7 +233,6 @@ internal static class EntryPoint
         }
         else
         {
-            AutoSaveLoadConfiguration autoload_config = new();
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -309,16 +281,17 @@ internal static class EntryPoint
                 }
 
                 COMRegistry registry = null;
-
-                if (database_file == null && autoload_config.AutoLoad && File.Exists(autoload_config.DatabasePath))
+                string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+                if (database_file == null && File.Exists(default_db))
                 {
                     try
                     {
-                        registry = COMUtilities.LoadRegistry(null, autoload_config.DatabasePath);
+                        registry = COMUtilities.LoadRegistry(null, default_db);
+                        registry.FilePath = null;
                     }
                     catch
                     {
-                        MessageBox.Show($"Error loading database {autoload_config.DatabasePath}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Error loading database {default_db}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 
@@ -352,10 +325,9 @@ internal static class EntryPoint
                 }
                 Application.Run(_appContext);
 
-                autoload_config = new AutoSaveLoadConfiguration();
-                if (autoload_config.AutoSave)
+                if (ProgramSettings.EnableSaveOnExit)
                 {
-                    registry.Save(autoload_config.DatabasePath);
+                    registry.Save(COMUtilities.GetAutoSaveLoadPath(true));
                 }
             }
             catch (Exception ex)
@@ -385,7 +357,7 @@ internal static class EntryPoint
             return null;
         }
 
-        string dbghelp = Environment.Is64BitProcess ? Properties.Settings.Default.DbgHelpPath64 : Properties.Settings.Default.DbgHelpPath32;
+        string dbghelp = ProgramSettings.DbgHelpPath;
         if (string.IsNullOrWhiteSpace(dbghelp))
         {
             return null;

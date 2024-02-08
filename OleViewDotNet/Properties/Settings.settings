@@ -35,22 +35,16 @@
     <Setting Name="ParseActivationContext" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="DatabasePath32" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="DatabasePath64" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="EnableSaveOnExit32" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="EnableSaveOnExit64" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="EnableLoadOnStart32" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+    <Setting Name="DbgHelpPathArm64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">dbghelp.dll</Value>
     </Setting>
-    <Setting Name="EnableLoadOnStart64" Type="System.Boolean" Scope="User">
+    <Setting Name="EnableSaveOnExitArm64" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

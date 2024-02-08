@@ -298,7 +298,7 @@ function Get-ComDatabase {
                 [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
             }
             "FromDefault" {
-                $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+                $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($false)
                 if (Test-Path $Path) {
                     [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
                 } else {
@@ -369,7 +369,7 @@ function Set-ComDatabase {
         if ($PSCmdlet.ParameterSetName -eq "ToPath") {
             $Path = Resolve-LocalPath $Path
         } else {
-            $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+            $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($true)
         }
         $Database.Save($Path, $callback)
     } catch {
@@ -389,7 +389,7 @@ None
 #>
 function Clear-ComDatabase {
     try {
-        $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath()
+        $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($false)
         Remove-Item $Path
     } catch {
         Write-Error $_
@@ -926,7 +926,11 @@ function Show-ComDatabase {
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFile")]
         [string]$Path,
         [Parameter(ParameterSetName = "FromDb")]
-        [switch]$UseArchitecture
+        [switch]$UseArchitecture,
+        [Parameter(Mandatory, ParameterSetName = "FromDefault")]
+        [switch]$Default,
+        [Parameter(ParameterSetName = "FromDefault")]
+        [OleViewDotNet.Utilities.ProgramArchitecture]$Architecture = [OleViewDotNet.Utilities.COMUtilities]::CurrentArchitecture
     )
 
     $DeleteFile = $false
@@ -945,15 +949,22 @@ function Show-ComDatabase {
         "FromFile" {
             # Do nothing.
         }
+        "FromDefault" {
+            # Do nothing.
+        }
     }
 
-    $args = @("`"-i=$Path`"")
-    if ($DeleteFile) {
-        $args += @("-d")
+    if (!$Default) {
+        $args = @("`"-i=$Path`"")
+        if ($DeleteFile) {
+            $args += @("-d")
+        }
     }
-    
+
     if ($UseArchitecture) {
         [OleViewDotNet.Utilities.COMUtilities]::StartArchProcess($Database.Architecture, $args)
+    } elseif ($Default) {
+        [OleViewDotNet.Utilities.COMUtilities]::StartArchProcess($Architecture, "")
     } else {
         [OleViewDotNet.Utilities.COMUtilities]::StartProcess($args)
     }

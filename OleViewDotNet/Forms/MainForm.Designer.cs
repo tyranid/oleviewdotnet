@@ -46,6 +46,7 @@ partial class MainForm
             this.menuFileOpenUserOnly = new System.Windows.Forms.MenuItem();
             this.menuFileDiff = new System.Windows.Forms.MenuItem();
             this.menuFileQueryAllInterfaces = new System.Windows.Forms.MenuItem();
+            this.menuFileExportInterfaceList = new System.Windows.Forms.MenuItem();
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
@@ -110,7 +111,10 @@ partial class MainForm
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuFileExportInterfaceList = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveDefaultDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveDatabaseOnExit = new System.Windows.Forms.MenuItem();
+            this.menuFileDeleteDefaultDatabase = new System.Windows.Forms.MenuItem();
+            this.menuItem14 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -137,6 +141,10 @@ partial class MainForm
             this.menuFileOpenDatabase,
             this.menuFileSaveDatabase,
             this.menuFileSaveAsDatabase,
+            this.menuItem14,
+            this.menuFileSaveDefaultDatabase,
+            this.menuFileDeleteDefaultDatabase,
+            this.menuFileSaveDatabaseOnExit,
             this.menuItem7,
             this.menuFileOpenMachineOnly,
             this.menuFileOpenUserOnly,
@@ -151,6 +159,7 @@ partial class MainForm
             this.menuItem2,
             this.menuFileExit});
             this.menuFile.Text = "&File";
+            this.menuFile.Popup += new System.EventHandler(this.menuFile_Popup);
             // 
             // menuFileOpen32BitViewer
             // 
@@ -209,69 +218,75 @@ partial class MainForm
             // 
             // menuItem7
             // 
-            this.menuItem7.Index = 9;
+            this.menuItem7.Index = 13;
             this.menuItem7.Text = "-";
             // 
             // menuFileOpenMachineOnly
             // 
-            this.menuFileOpenMachineOnly.Index = 10;
+            this.menuFileOpenMachineOnly.Index = 14;
             this.menuFileOpenMachineOnly.Text = "Open &Machine Only";
             this.menuFileOpenMachineOnly.Click += new System.EventHandler(this.menuFileOpenMachineOnly_Click);
             // 
             // menuFileOpenUserOnly
             // 
-            this.menuFileOpenUserOnly.Index = 11;
+            this.menuFileOpenUserOnly.Index = 15;
             this.menuFileOpenUserOnly.Text = "Open &User Only";
             this.menuFileOpenUserOnly.Click += new System.EventHandler(this.menuFileOpenUserOnly_Click);
             // 
             // menuFileDiff
             // 
-            this.menuFileDiff.Index = 12;
+            this.menuFileDiff.Index = 16;
             this.menuFileDiff.Text = "&Diff Registries";
             this.menuFileDiff.Click += new System.EventHandler(this.menuFileDiff_Click);
             // 
             // menuFileQueryAllInterfaces
             // 
-            this.menuFileQueryAllInterfaces.Index = 13;
+            this.menuFileQueryAllInterfaces.Index = 17;
             this.menuFileQueryAllInterfaces.Text = "&Query All Interfaces";
             this.menuFileQueryAllInterfaces.Click += new System.EventHandler(this.menuFileQueryAllInterfaces_Click);
             // 
+            // menuFileExportInterfaceList
+            // 
+            this.menuFileExportInterfaceList.Index = 18;
+            this.menuFileExportInterfaceList.Text = "Export Interface List";
+            this.menuFileExportInterfaceList.Click += new System.EventHandler(this.menuFileExportInterfaceList_Click);
+            // 
             // menuItem8
             // 
-            this.menuItem8.Index = 15;
+            this.menuItem8.Index = 19;
             this.menuItem8.Text = "-";
             // 
             // menuFileOpenTypeLib
             // 
-            this.menuFileOpenTypeLib.Index = 16;
+            this.menuFileOpenTypeLib.Index = 20;
             this.menuFileOpenTypeLib.Text = "Open &TypeLib";
             this.menuFileOpenTypeLib.Click += new System.EventHandler(this.menuFileOpenTypeLib_Click);
             // 
             // menuFileOpenProxyDll
             // 
-            this.menuFileOpenProxyDll.Index = 17;
+            this.menuFileOpenProxyDll.Index = 21;
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
             // menuItem12
             // 
-            this.menuItem12.Index = 18;
+            this.menuItem12.Index = 22;
             this.menuItem12.Text = "-";
             // 
             // menuFileSettings
             // 
-            this.menuFileSettings.Index = 19;
+            this.menuFileSettings.Index = 23;
             this.menuFileSettings.Text = "Settings";
             this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 20;
+            this.menuItem2.Index = 24;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 21;
+            this.menuFileExit.Index = 25;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -662,11 +677,28 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuFileExportInterfaceList
+            // menuFileSaveDefaultDatabase
             // 
-            this.menuFileExportInterfaceList.Index = 14;
-            this.menuFileExportInterfaceList.Text = "Export Interface List";
-            this.menuFileExportInterfaceList.Click += new System.EventHandler(this.menuFileExportInterfaceList_Click);
+            this.menuFileSaveDefaultDatabase.Index = 10;
+            this.menuFileSaveDefaultDatabase.Text = "Save De&fault Database";
+            this.menuFileSaveDefaultDatabase.Click += new System.EventHandler(this.menuFileSaveDefaultDatabase_Click);
+            // 
+            // menuFileSaveDatabaseOnExit
+            // 
+            this.menuFileSaveDatabaseOnExit.Index = 12;
+            this.menuFileSaveDatabaseOnExit.Text = "Save Default Database on Exit";
+            this.menuFileSaveDatabaseOnExit.Click += new System.EventHandler(this.menuFileSaveDatabaseOnExit_Click);
+            // 
+            // menuFileDeleteDefaultDatabase
+            // 
+            this.menuFileDeleteDefaultDatabase.Index = 11;
+            this.menuFileDeleteDefaultDatabase.Text = "Delete Default Database";
+            this.menuFileDeleteDefaultDatabase.Click += new System.EventHandler(this.menuFileDeleteDefaultDatabase_Click);
+            // 
+            // menuItem14
+            // 
+            this.menuItem14.Index = 9;
+            this.menuItem14.Text = "-";
             // 
             // MainForm
             // 
@@ -770,5 +802,9 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuFileOpen64BitViewer;
     private System.Windows.Forms.MenuItem menuFileOpenARM64Viewer;
     private System.Windows.Forms.MenuItem menuFileExportInterfaceList;
+    private System.Windows.Forms.MenuItem menuFileSaveDefaultDatabase;
+    private System.Windows.Forms.MenuItem menuFileDeleteDefaultDatabase;
+    private System.Windows.Forms.MenuItem menuFileSaveDatabaseOnExit;
+    private System.Windows.Forms.MenuItem menuItem14;
 }
 

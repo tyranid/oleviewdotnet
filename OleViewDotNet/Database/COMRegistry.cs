@@ -220,7 +220,7 @@ public class COMRegistry
         CreatedDate = DateTime.Now.ToLongDateString();
         CreatedMachine = Environment.MachineName;
         SixtyFourBit = Environment.Is64BitProcess;
-        Architecture = RuntimeInformation.ProcessArchitecture.ToString();
+        Architecture = COMUtilities.CurrentArchitecture.ToString();
     }
 
     private COMSecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, COMSecurityDescriptor default_sd)

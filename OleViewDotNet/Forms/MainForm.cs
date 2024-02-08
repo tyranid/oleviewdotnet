@@ -58,7 +58,7 @@ public partial class MainForm : Form
             }
             else
             {
-                Text += $" - 64bit ({RuntimeInformation.ProcessArchitecture})";
+                Text += $" - 64bit ({COMUtilities.CurrentArchitecture})";
             }
         }
 
@@ -83,9 +83,9 @@ public partial class MainForm : Form
         if (Environment.Is64BitProcess)
         {
             bool is_arm64 = NtSystemInfo.EmulationProcessorInformation.ProcessorArchitecture == ProcessorAchitecture.ARM;
-            bool is_amd64 = RuntimeInformation.ProcessArchitecture == Architecture.X64;
+            bool is_amd64 = COMUtilities.CurrentArchitecture == ProgramArchitecture.X64;
             menuFileOpenARM64Viewer.Visible = is_arm64 && is_amd64;
-            menuFileOpen64BitViewer.Visible = RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+            menuFileOpen64BitViewer.Visible = COMUtilities.CurrentArchitecture == ProgramArchitecture.Arm64;
             menuFileOpen32BitViewer.Visible = true;
         }
         else
@@ -411,7 +411,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(Architecture.X86, string.Empty);
+            COMUtilities.StartArchProcess(ProgramArchitecture.X86, string.Empty);
         }
         catch(Exception ex)
         {
@@ -984,7 +984,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(Architecture.X64, string.Empty);
+            COMUtilities.StartArchProcess(ProgramArchitecture.X64, string.Empty);
         }
         catch (Exception ex)
         {
@@ -996,7 +996,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(Architecture.Arm64, string.Empty);
+            COMUtilities.StartArchProcess(ProgramArchitecture.Arm64, string.Empty);
         }
         catch (Exception ex)
         {
@@ -1020,5 +1020,47 @@ public partial class MainForm : Form
         {
             MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private void menuFileSaveDefaultDatabase_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            m_registry.Save(COMUtilities.GetAutoSaveLoadPath(true));
+            m_registry.FilePath = null;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void menuFileDeleteDefaultDatabase_Click(object sender, EventArgs e)
+    {
+        string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+        try
+        {
+            if (File.Exists(default_db))
+            {
+                File.Delete(default_db);
+            }
+        }
+        catch
+        {
+            MessageBox.Show(this, "Error deleting default database.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void menuFile_Popup(object sender, EventArgs e)
+    {
+        string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+        menuFileDeleteDefaultDatabase.Enabled = File.Exists(default_db);
+        menuFileSaveDatabaseOnExit.Checked = ProgramSettings.EnableSaveOnExit;
+    }
+
+    private void menuFileSaveDatabaseOnExit_Click(object sender, EventArgs e)
+    {
+        ProgramSettings.EnableSaveOnExit = !menuFileSaveDatabaseOnExit.Checked;
+        ProgramSettings.Save(this);
     }
 }

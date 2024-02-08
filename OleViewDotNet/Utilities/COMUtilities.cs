@@ -346,19 +346,18 @@ public static class COMUtilities
         return Get32bitExePath();
     }
 
-
-    public static void StartArchProcess(Architecture arch, string command_line)
+    public static void StartArchProcess(ProgramArchitecture arch, string command_line)
     {
         var machine_type = arch switch
         {
-            Architecture.Arm64 => DllMachineType.ARM64,
-            Architecture.X64 => DllMachineType.AMD64,
-            Architecture.X86 => DllMachineType.I386,
+            ProgramArchitecture.Arm64 => DllMachineType.ARM64,
+            ProgramArchitecture.X64 => DllMachineType.AMD64,
+            ProgramArchitecture.X86 => DllMachineType.I386,
             _ => throw new ArgumentException("Unsupported architecture."),
         };
         if (IsWindows1121H2OrLess)
         {
-            Process.Start(arch == Architecture.X86 ? Get32bitExePath() : GetExePath(), command_line).Close();
+            Process.Start(arch == ProgramArchitecture.X86 ? Get32bitExePath() : GetExePath(), command_line).Close();
             return;
         }
 
@@ -373,7 +372,7 @@ public static class COMUtilities
 
     public static void StartProcess(string command_line)
     {
-        StartArchProcess(RuntimeInformation.ProcessArchitecture, command_line);
+        StartArchProcess(CurrentArchitecture, command_line);
     }
 
     public static string GetAppDataDirectory()
@@ -391,11 +390,19 @@ public static class COMUtilities
         return Path.Combine(GetAppDirectory(), "plugin");
     }
 
-    public static string GetAutoSaveLoadPath()
+    public static string GetAutoSaveLoadPath(bool create_directory, ProgramArchitecture arch)
     {
         string autosave = Path.Combine(GetAppDataDirectory(), "autosave");
-        Directory.CreateDirectory(autosave);
-        return Path.Combine(autosave, $"com{RuntimeInformation.ProcessArchitecture}.db");
+        if (create_directory)
+        {
+            Directory.CreateDirectory(autosave);
+        }
+        return Path.Combine(autosave, $"com{arch}.db");
+    }
+
+    public static string GetAutoSaveLoadPath(bool create_directory)
+    {
+        return GetAutoSaveLoadPath(create_directory, CurrentArchitecture);
     }
 
     public static Dictionary<string, int> GetSymbolFile(bool native)
@@ -1656,9 +1663,7 @@ public static class COMUtilities
 
     internal static COMProcessParserConfig GetProcessParserConfig()
     {
-        string dbghelp = Environment.Is64BitProcess
-                ? Properties.Settings.Default.DbgHelpPath64
-                : Properties.Settings.Default.DbgHelpPath32;
+        string dbghelp = ProgramSettings.DbgHelpPath;
         string symbol_path = Properties.Settings.Default.SymbolPath;
         bool parse_stub_methods = Properties.Settings.Default.ParseStubMethods;
         bool resolve_method_names = Properties.Settings.Default.ResolveMethodNames;
@@ -2638,8 +2643,16 @@ public static class COMUtilities
 
     private static string GetNativeLibraryDirectory()
     {
-        return Path.Combine(GetAppDirectory(), RuntimeInformation.ProcessArchitecture.ToString());
+        return Path.Combine(GetAppDirectory(), CurrentArchitecture.ToString());
     }
+
+    public static ProgramArchitecture CurrentArchitecture => RuntimeInformation.ProcessArchitecture switch
+    {
+        Architecture.X86 => ProgramArchitecture.X86,
+        Architecture.X64 => ProgramArchitecture.X64,
+        Architecture.Arm64 => ProgramArchitecture.Arm64,
+        _ => ProgramArchitecture.X64,
+    };
 
     public static string GetDefaultDbgHelp()
     {
@@ -2649,7 +2662,7 @@ public static class COMUtilities
             return path;
         }
 
-        path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{RuntimeInformation.ProcessArchitecture}");
+        path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{CurrentArchitecture}");
         if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
         {
             return path;
