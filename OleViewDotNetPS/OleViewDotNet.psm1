@@ -1704,17 +1704,17 @@ function Show-ComSecurityDescriptor {
         }
 
         if ($null -ne $SecurityDescriptor) {
-            $exe = [OleViewDotNet.Utilities.COMUtilities]::GetExePathForCurrentBitness()
             if ($ShowAccess) {
                 $cmd = "-v"
             } else {
                 $cmd = "-l"
             }
-            $args = @("`"$cmd=$SecurityDescriptor`"")
+            $args = "$cmd=$SecurityDescriptor"
             if ("" -ne $name) {
-                $args += @("`"-n=$name`"")
+                $args += " `"-n=$name`""
             }
-            Start-Process $exe $args
+
+            [OleViewDotNet.Utilities.COMUtilities]::StartProcess($args)
         }
     }
 }

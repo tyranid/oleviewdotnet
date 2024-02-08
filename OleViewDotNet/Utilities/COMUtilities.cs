@@ -337,15 +337,6 @@ public static class COMUtilities
         return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
     }
 
-    public static string GetExePathForCurrentBitness()
-    {
-        if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
-        {
-            return GetExePath();
-        }
-        return Get32bitExePath();
-    }
-
     public static void StartArchProcess(ProgramArchitecture arch, string command_line)
     {
         var machine_type = arch switch
