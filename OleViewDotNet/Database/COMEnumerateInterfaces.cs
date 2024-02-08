@@ -343,29 +343,11 @@ public class COMEnumerateInterfaces
     {
         using AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null);
-        Win32ProcessConfig config = new();
-        config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
-        using var imp_token = token?.Token?.DuplicateToken(SecurityImpersonationLevel.Impersonation);
-        if (imp_token != null)
-        {
-            imp_token.Inherit = true;
-            config.AddInheritedHandle(imp_token);
-        }
-
-        string process = null;
-        if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
-        {
-            process = COMUtilities.GetExePath();
-        }
-        else
-        {
-            process = COMUtilities.Get32bitExePath();
-        }
-
-        Process proc = new();
+;
         List<string> args = new() { "-e", class_name };
         if (mta)
             args.Add("-mta");
+        using var imp_token = token?.Token.DuplicateToken(SecurityImpersonationLevel.Impersonation);
         if (imp_token != null)
         {
             args.Add("-t");
@@ -376,92 +358,88 @@ public class COMEnumerateInterfaces
         args.Add("-clsctx");
         args.Add(clsctx.ToString());
 
-        ProcessStartInfo info = new(process, string.Join(" ", args))
+        Win32ProcessConfig config = COMUtilities.GetConfigForArchitecture(registry.Architecture, string.Join(" ", args));
+        config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
+        if (imp_token != null)
         {
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-        proc.StartInfo = info;
-        proc.Start();
-        try
-        {
-            List<COMInterfaceInstance> interfaces = new();
-            List<COMInterfaceInstance> factory_interfaces = new();
-            server.DisposeLocalCopyOfClientHandle();
-
-            using StreamReader reader = new(server);
-            while (true)
-            {
-                string line = await reader.ReadLineAsync();
-                if (line == null)
-                {
-                    break;
-                }
-
-                if (line.StartsWith("ERROR:"))
-                {
-                    uint errorCode;
-                    try
-                    {
-                        errorCode = uint.Parse(line.Substring(6), System.Globalization.NumberStyles.AllowHexSpecifier);
-                    }
-                    catch (FormatException ex)
-                    {
-                        Debug.WriteLine(ex.ToString());
-                        errorCode = 0x80004005;
-                    }
-
-                    throw new Win32Exception((int)errorCode);
-                }
-                else
-                {
-                    bool factory = false;
-
-                    if (line.StartsWith("*"))
-                    {
-                        factory = true;
-                        line = line.Substring(1);
-                    }
-
-                    string[] parts = line.Split(new char[] { ',' }, 3);
-                    if (Guid.TryParse(parts[0], out Guid g))
-                    {
-                        string module_path = null;
-                        long vtable_offset = 0;
-                        if (parts.Length == 3)
-                        {
-                            module_path = parts[1];
-                            long.TryParse(parts[2], out vtable_offset);
-                        }
-
-                        if (factory)
-                        {
-                            factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
-                        }
-                        else
-                        {
-                            interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
-                        }
-                    }
-                }
-            }
-
-            if (!proc.WaitForExit(5000))
-            {
-                proc.Kill();
-            }
-            int exitCode = proc.ExitCode;
-            if (exitCode != 0)
-            {
-                interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
-                factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
-            }
-            return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
+            config.AddInheritedHandle(imp_token);
         }
-        finally
+        config.InheritHandles = true;
+
+        using var process = Win32Process.CreateProcess(config);
+
+        List<COMInterfaceInstance> interfaces = new();
+        List<COMInterfaceInstance> factory_interfaces = new();
+        server.DisposeLocalCopyOfClientHandle();
+
+        using StreamReader reader = new(server);
+        while (true)
         {
-            proc.Close();
+            string line = await reader.ReadLineAsync();
+            if (line == null)
+            {
+                break;
+            }
+
+            if (line.StartsWith("ERROR:"))
+            {
+                uint errorCode;
+                try
+                {
+                    errorCode = uint.Parse(line.Substring(6), System.Globalization.NumberStyles.AllowHexSpecifier);
+                }
+                catch (FormatException ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                    errorCode = 0x80004005;
+                }
+
+                throw new Win32Exception((int)errorCode);
+            }
+            else
+            {
+                bool factory = false;
+
+                if (line.StartsWith("*"))
+                {
+                    factory = true;
+                    line = line.Substring(1);
+                }
+
+                string[] parts = line.Split(new char[] { ',' }, 3);
+                if (Guid.TryParse(parts[0], out Guid g))
+                {
+                    string module_path = null;
+                    long vtable_offset = 0;
+                    if (parts.Length == 3)
+                    {
+                        module_path = parts[1];
+                        long.TryParse(parts[2], out vtable_offset);
+                    }
+
+                    if (factory)
+                    {
+                        factory_interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
+                    }
+                    else
+                    {
+                        interfaces.Add(new COMInterfaceInstance(g, module_path, vtable_offset, registry));
+                    }
+                }
+            }
         }
+
+        if (!await process.Process.WaitAsync(5))
+        {
+            process.Process.Terminate(0);
+        }
+        int exitCode = process.Process.ExitStatus;
+        if (exitCode != 0)
+        {
+            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
+            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
+        }
+        return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
     }
     #endregion
 
