@@ -178,7 +178,7 @@ public class COMRegistry
         CreatedDate = reader.GetAttribute("created");
         CreatedMachine = reader.GetAttribute("machine");
         SixtyFourBit = reader.ReadBool("sixfour");
-        Architecture = reader.ReadString("arch");
+        Architecture = reader.ReadEnum<ProgramArchitecture>("arch");
         LoadingMode = reader.ReadEnum<COMRegistryMode>("mode");
         CreatedUser = reader.GetAttribute("user");
         DefaultAccessPermission = reader.ReadSecurityDescriptor("access");
@@ -220,7 +220,7 @@ public class COMRegistry
         CreatedDate = DateTime.Now.ToLongDateString();
         CreatedMachine = Environment.MachineName;
         SixtyFourBit = Environment.Is64BitProcess;
-        Architecture = COMUtilities.CurrentArchitecture.ToString();
+        Architecture = COMUtilities.CurrentArchitecture;
     }
 
     private COMSecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, COMSecurityDescriptor default_sd)
@@ -860,7 +860,7 @@ public class COMRegistry
         get; set; 
     }
 
-    public string Architecture
+    public ProgramArchitecture Architecture
     {
         get; private set;
     }
@@ -929,7 +929,7 @@ public class COMRegistry
             writer.WriteOptionalAttributeString("created", CreatedDate);
             writer.WriteOptionalAttributeString("machine", CreatedMachine);
             writer.WriteBool("sixfour", SixtyFourBit);
-            writer.WriteOptionalAttributeString("arch", Architecture);
+            writer.WriteEnum("arch", Architecture);
             writer.WriteEnum("mode", LoadingMode);
             writer.WriteOptionalAttributeString("user", CreatedUser);
             writer.WriteSecurityDescriptor("access", DefaultAccessPermission);

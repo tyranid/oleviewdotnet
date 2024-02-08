@@ -216,7 +216,7 @@ internal static class XmlUtils
         writer.WriteOptionalAttributeString(name, sd.ToBase64());
     }
 
-    internal static T ReadEnum<T>(this XmlReader reader, string name)
+    internal static T ReadEnum<T>(this XmlReader reader, string name) where T : struct
     {
         string value = reader.GetAttribute(name);
         if (value == null)
@@ -224,7 +224,11 @@ internal static class XmlUtils
             return default;
         }
 
-        return (T)Enum.Parse(typeof(T), value);
+        if (!Enum.TryParse(value, true, out T ret))
+        {
+            return default;
+        }
+        return ret;
     }
 
     internal static COMSecurityDescriptor ReadSecurityDescriptor(this XmlReader reader, string name)
