@@ -18,7 +18,7 @@ namespace OleViewDotNet.Utilities;
 
 public enum ProgramArchitecture
 {
-    X86,
     X64,
+    X86,
     Arm64
 }

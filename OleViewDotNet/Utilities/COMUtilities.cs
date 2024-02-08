@@ -337,27 +337,37 @@ public static class COMUtilities
         return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
     }
 
-    public static void StartArchProcess(ProgramArchitecture arch, string command_line)
+    internal static Win32ProcessConfig GetConfigForArchitecture(ProgramArchitecture arch, string command_line)
     {
-        var machine_type = arch switch
-        {
-            ProgramArchitecture.Arm64 => DllMachineType.ARM64,
-            ProgramArchitecture.X64 => DllMachineType.AMD64,
-            ProgramArchitecture.X86 => DllMachineType.I386,
-            _ => throw new ArgumentException("Unsupported architecture."),
-        };
-        if (IsWindows1121H2OrLess)
-        {
-            Process.Start(arch == ProgramArchitecture.X86 ? Get32bitExePath() : GetExePath(), command_line).Close();
-            return;
-        }
-
         Win32ProcessConfig config = new()
         {
-            CommandLine = $"\"{GetExePath()}\" {command_line}",
-            ApplicationName = GetExePath(),
-            MachineType = machine_type
+            CommandLine = $"OleViewDotNet {command_line}",
+            ApplicationName = GetExePath()
         };
+
+        if (IsWindows1121H2OrLess)
+        {
+            if (arch == ProgramArchitecture.X86)
+            {
+                config.ApplicationName = Get32bitExePath();
+            }
+        }
+        else
+        {
+            config.MachineType = arch switch
+            {
+                ProgramArchitecture.Arm64 => DllMachineType.ARM64,
+                ProgramArchitecture.X64 => DllMachineType.AMD64,
+                ProgramArchitecture.X86 => DllMachineType.I386,
+                _ => throw new ArgumentException("Unsupported architecture."),
+            };
+        }
+        return config;
+    }
+
+    public static void StartArchProcess(ProgramArchitecture arch, string command_line)
+    {
+        Win32ProcessConfig config = GetConfigForArchitecture(arch, command_line);
         Win32Process.CreateProcess(config).Dispose();
     }
 
