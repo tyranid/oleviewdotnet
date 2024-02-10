@@ -46,6 +46,13 @@ public class COMProxyInstance : IProxyFormatter
         Entries = parser.ReadFromComProxyFile(path, clsid);
         ComplexTypes = parser.ComplexTypes;
         m_registry = registry;
+        foreach (var entry in Entries)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.Name))
+            {
+                m_registry.IidNameCache.TryAdd(entry.Iid, entry.Name);
+            }
+        }
     }
 
     private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) : this(path, Guid.Empty, resolver, registry)
