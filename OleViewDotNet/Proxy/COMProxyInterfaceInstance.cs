@@ -104,13 +104,8 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         return GetFromIID(intf.InterfaceEntry, resolver);
     }
 
-    public string FormatText(ProxyFormatterFlags flags)
+    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         return COMUtilities.FormatProxy(m_registry, ComplexTypes, new NdrComProxyDefinition[] { Entry }, flags);
-    }
-
-    public string FormatText()
-    {
-        return FormatText(ProxyFormatterFlags.None);
     }
 }

@@ -251,17 +251,12 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
         return $"IPID: {Ipid} {Name}";
     }
 
-    public string FormatText(ProxyFormatterFlags flags)
+    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         if (!Methods.Any())
         {
             return string.Empty;
         }
         return ToProxyInstance().FormatText(flags);
-    }
-
-    public string FormatText()
-    {
-        return FormatText(ProxyFormatterFlags.None);
     }
 }

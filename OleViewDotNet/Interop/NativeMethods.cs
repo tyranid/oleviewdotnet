@@ -26,8 +26,18 @@ namespace OleViewDotNet.Interop;
 internal static class NativeMethods
 {
     [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void LoadTypeLibEx(string strTypeLibName, RegKind regKind,
-        [MarshalAs(UnmanagedType.Interface)] out ITypeLib typeLib);
+    [return: MarshalAs(UnmanagedType.Interface)]
+    public static extern ITypeLib LoadTypeLibEx(string strTypeLibName, RegKind regKind);
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    [return: MarshalAs(UnmanagedType.Interface)]
+    public static extern ITypeLib LoadRegTypeLib(
+        in Guid rguid,
+        ushort wVerMajor,
+        ushort wVerMinor,
+        int lcid
+    );
+
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, in Guid riid, out IntPtr ppv);
     [DllImport("ole32.dll")]

@@ -90,13 +90,8 @@ public class COMProxyInstance : IProxyFormatter
         }
     }
 
-    public string FormatText(ProxyFormatterFlags flags)
+    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         return COMUtilities.FormatProxy(m_registry, ComplexTypes, Entries, flags);
-    }
-
-    public string FormatText()
-    {
-        return FormatText(ProxyFormatterFlags.None);
     }
 }

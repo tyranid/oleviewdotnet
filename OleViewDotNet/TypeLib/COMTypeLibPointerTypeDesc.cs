@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2018
+//    Copyright (C) James Forshaw 2014, 2016
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,9 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace OleViewDotNet.Proxy;
+using OleViewDotNet.Interop;
 
-public interface IProxyFormatter
+namespace OleViewDotNet.TypeLib;
+
+public class COMTypeLibPointerTypeDesc : COMTypeLibTypeDesc
 {
-    string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None);
+    public COMTypeLibTypeDesc Pointer { get; }
+
+    internal COMTypeLibPointerTypeDesc(COMTypeLibTypeDesc pointer) : base(VariantType.VT_PTR)
+    {
+        Pointer = pointer;
+    }
 }

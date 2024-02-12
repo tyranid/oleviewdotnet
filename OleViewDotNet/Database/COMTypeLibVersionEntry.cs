@@ -21,6 +21,7 @@ using System.Xml;
 using System.Xml.Schema;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.TypeLib;
 
 namespace OleViewDotNet.Database;
 
@@ -58,20 +59,13 @@ public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
         return Version.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Win32Path.GetSafeHashCode() ^ Win64Path.GetSafeHashCode() ^ Source.GetHashCode();
     }
 
-    public string NativePath
-    {
-        get
-        {
-            if ((Environment.Is64BitProcess && !string.IsNullOrWhiteSpace(Win64Path)) || string.IsNullOrWhiteSpace(Win32Path))
-            {
-                return Win64Path;
-            }
-            else
-            {
-                return Win32Path;
-            }
+    public string NativePath => (Environment.Is64BitProcess && !string.IsNullOrWhiteSpace(Win64Path)) || string.IsNullOrWhiteSpace(Win32Path)
+                ? Win64Path
+                : Win32Path;
 
-        }
+    public COMTypeLib Parse()
+    {
+        return COMTypeLib.Parse(this);
     }
 
     Guid IComGuid.ComGuid => TypelibId;

@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2018
+//    Copyright (C) James Forshaw 2014, 2016
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,9 +14,32 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace OleViewDotNet.Proxy;
+using System;
+using System.Runtime.InteropServices;
 
-public interface IProxyFormatter
+namespace OleViewDotNet.TypeLib;
+
+internal static class COMTypeLibUtils
 {
-    string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None);
+    public static T GetStructure<T>(this IntPtr ptr)
+    {
+        return Marshal.PtrToStructure<T>(ptr);
+    }
+
+    public static T[] ReadArray<T>(this IntPtr ptr, int count)
+    {
+        T[] ret = new T[count];
+        int size = Marshal.SizeOf<T>();
+        for (int i = 0; i < count; ++i)
+        {
+            ret[i] = ptr.GetStructure<T>();
+            ptr += size;
+        }
+        return ret;
+    }
+
+    public static void ReleaseComObject(this object obj)
+    {
+        Marshal.ReleaseComObject(obj);
+    }
 }

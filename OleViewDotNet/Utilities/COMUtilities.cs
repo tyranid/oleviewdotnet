@@ -631,7 +631,7 @@ public static class COMUtilities
 
         try
         {
-            NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default, out typeLib);
+            typeLib = NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default);
 
             return ConvertTypeLibToAssembly(typeLib, progress);
         }
