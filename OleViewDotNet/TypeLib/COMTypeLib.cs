@@ -37,8 +37,18 @@ public sealed class COMTypeLib
         _doc = doc;
         _attr = attr;
         Types = types.AsReadOnly();
-        Interfaces = Types.OfType<COMTypeLibInterface>().Where(i => !i.Dispatch).ToList().AsReadOnly();
-        Dispatch = Types.OfType<COMTypeLibInterface>().Where(i => i.Dispatch).ToList().AsReadOnly();
+        var interfaces = types.OfType<COMTypeLibInterface>().ToDictionary(i => i.Uuid);
+        var dispatch = Types.OfType<COMTypeLibDispatch>().ToList();
+        foreach (var disp in dispatch.Where(d => d.DualInterface != null))
+        {
+            if (!interfaces.ContainsKey(disp.DualInterface.Uuid))
+            {
+                interfaces.Add(disp.DualInterface.Uuid, disp.DualInterface);
+            }
+        }
+
+        Interfaces = interfaces.Values.ToList().AsReadOnly();
+        Dispatch = dispatch.AsReadOnly();
     }
     #endregion
 
@@ -58,7 +68,7 @@ public sealed class COMTypeLib
     public Guid TypeLibId => _attr.guid;
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
     public IReadOnlyList<COMTypeLibInterface> Interfaces { get; }
-    public IReadOnlyList<COMTypeLibInterface> Dispatch { get; }
+    public IReadOnlyList<COMTypeLibDispatch> Dispatch { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     #endregion
 }

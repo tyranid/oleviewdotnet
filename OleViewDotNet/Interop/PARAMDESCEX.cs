@@ -14,21 +14,14 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Interop;
+using System;
+using System.Runtime.InteropServices;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.Interop;
 
-public class COMTypeLibPointerTypeDesc : COMTypeLibTypeDesc
+[StructLayout(LayoutKind.Sequential)]
+struct PARAMDESCEX
 {
-    public COMTypeLibTypeDesc Pointer { get; }
-
-    internal COMTypeLibPointerTypeDesc(COMTypeLibTypeDesc pointer) : base(VariantType.VT_PTR)
-    {
-        Pointer = pointer;
-    }
-
-    internal override string FormatType()
-    {
-        return $"{Pointer.FormatType()}*";
-    }
+    public int cBytes;
+    public IntPtr varDefaultValue;
 }

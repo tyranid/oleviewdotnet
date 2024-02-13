@@ -23,11 +23,22 @@ namespace OleViewDotNet.TypeLib;
 public sealed class COMTypeLibMethod
 {
     #region Private Members
-    private readonly COMTypeLibInterface _intf;
     private readonly COMTypeLibDocumentation _doc;
     private readonly FUNCDESC _desc;
+    #endregion
 
-    private string FormatName()
+    #region Public Properties
+    public string Name => _doc.Name ?? string.Empty;
+    public string DocString => _doc.DocString ?? string.Empty;
+    public int HelpContext => _doc.HelpContext;
+    public string HelpFile => _doc.HelpFile ?? string.Empty;
+    public IReadOnlyList<COMTypeLibParameter> Parameters { get; }
+    public COMTypeLibTypeDesc ReturnValue { get; }
+    public int VTableOffset => _desc.oVft;
+    #endregion
+
+    #region Internal Members
+    internal string FormatName()
     {
         return _desc.invkind switch
         {
@@ -37,21 +48,9 @@ public sealed class COMTypeLibMethod
             _ => null,
         };
     }
-    #endregion
 
-    #region Public Properties
-    public string Name => FormatName() ?? string.Empty;
-    public string DocString => _doc.DocString ?? string.Empty;
-    public int HelpContext => _doc.HelpContext;
-    public string HelpFile => _doc.HelpFile ?? string.Empty;
-    public IReadOnlyList<COMTypeLibParameter> Parameters { get; }
-    public COMTypeLibTypeDesc ReturnValue { get; }
-    #endregion
-
-    #region Internal Members
-    internal COMTypeLibMethod(COMTypeLibInterface intf, COMTypeLibParser.TypeInfo type_info, int index)
+    internal COMTypeLibMethod(COMTypeLibParser.TypeInfo type_info, int index)
     {
-        _intf = intf;
         using COMFuncDesc desc = type_info.GetFuncDesc(index);
         _desc = desc.Descriptor;
         _doc = type_info.GetDocumentation(desc.Descriptor.memid);
@@ -59,6 +58,52 @@ public sealed class COMTypeLibMethod
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
             .Select((d, i) => new COMTypeLibParameter(names[i + 1], d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
+    }
+
+    private List<string> GetAttributes(bool is_dispatch)
+    {
+        List<string> attrs = new();
+        if (is_dispatch)
+        {
+            uint id = (uint)_desc.memid;
+            if (id < 256)
+            {
+                attrs.Add($"id({id})");
+            }
+            else
+            {
+                attrs.Add($"id(0x{id:X08})");
+            }
+        }
+
+        switch (_desc.invkind)
+        {
+            case INVOKEKIND.INVOKE_PROPERTYGET:
+                attrs.Add("propget");
+                break;
+            case INVOKEKIND.INVOKE_PROPERTYPUT:
+            case INVOKEKIND.INVOKE_PROPERTYPUTREF:
+                attrs.Add("propput");
+                break;
+        }
+
+        return attrs;
+    }
+
+    internal string FormatAttributes(bool is_dispatch)
+    {
+        return GetAttributes(is_dispatch).FormatAttrs();
+    }
+
+    internal string FormatMethod()
+    {
+        List<string> ps = new();
+        foreach (var p in Parameters)
+        {
+            ps.Add(p.FormatParameter());
+        }
+
+        return $"{ReturnValue.FormatType()} {Name}({string.Join(", ", ps)});";
     }
     #endregion
 }

@@ -25,7 +25,8 @@ internal sealed class COMTypeLibParser : IDisposable
 {
     #region Private Members
     private readonly ITypeLib _type_lib;
-    private readonly ConcurrentDictionary<Tuple<Guid, TYPEKIND>, COMTypeLibInterface> _parsed_intfs = new();
+    private readonly ConcurrentDictionary<Guid, COMTypeLibInterface> _parsed_intfs = new();
+    private readonly ConcurrentDictionary<Guid, COMTypeLibDispatch> _parsed_disp = new();
     private readonly ConcurrentDictionary<Tuple<string, TYPEKIND>, COMTypeLibTypeInfo> _named_types = new();
     private readonly TYPELIBATTR _attr;
     #endregion
@@ -72,9 +73,16 @@ internal sealed class COMTypeLibParser : IDisposable
 
         internal COMTypeLibInterface ParseInterface()
         {
-            var key = Tuple.Create(_attr.guid, _attr.typekind);
-            var ret = _type_lib._parsed_intfs.GetOrAdd(key,
+            var ret = _type_lib._parsed_intfs.GetOrAdd(_attr.guid,
                 new COMTypeLibInterface(new(_type_info), _attr));
+            ret.Parse(this);
+            return ret;
+        }
+
+        internal COMTypeLibDispatch ParseDispatch()
+        {
+            var ret = _type_lib._parsed_disp.GetOrAdd(_attr.guid,
+                new COMTypeLibDispatch(new(_type_info), _attr));
             ret.Parse(this);
             return ret;
         }
@@ -93,7 +101,7 @@ internal sealed class COMTypeLibParser : IDisposable
             return _attr.typekind switch
             {
                 TYPEKIND.TKIND_INTERFACE => ParseInterface(),
-                TYPEKIND.TKIND_DISPATCH => ParseInterface(),
+                TYPEKIND.TKIND_DISPATCH => ParseDispatch(),
                 TYPEKIND.TKIND_ALIAS => ParseAlias(),
                 _ => GetDefault(),
             };

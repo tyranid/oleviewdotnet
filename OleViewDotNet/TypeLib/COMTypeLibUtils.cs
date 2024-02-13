@@ -14,7 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.TypeLib;
@@ -41,5 +43,18 @@ internal static class COMTypeLibUtils
     public static void ReleaseComObject(this object obj)
     {
         Marshal.ReleaseComObject(obj);
+    }
+
+    public static string FormatAttrs(this ICollection<string> attrs)
+    {
+        return attrs.Count > 0 ? $"[{string.Join(", ", attrs)}]" : string.Empty;
+    }
+
+    public static object ReadDefaultValue(IntPtr base_ptr)
+    {
+        if (base_ptr == IntPtr.Zero)
+            return null;
+        int offset = Marshal.OffsetOf<PARAMDESCEX>("varDefaultValue").ToInt32();
+        return Marshal.GetObjectForNativeVariant(base_ptr + offset);
     }
 }

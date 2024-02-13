@@ -27,4 +27,9 @@ public class COMTypeLibUserDefinedTypeDesc : COMTypeLibTypeDesc
     {
         TypeInfo = type_info;
     }
+
+    internal override string FormatType()
+    {
+        return TypeInfo.Name;
+    }
 }

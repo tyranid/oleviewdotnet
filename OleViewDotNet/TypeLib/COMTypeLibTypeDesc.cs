@@ -45,4 +45,30 @@ public class COMTypeLibTypeDesc
     {
         Type = type;
     }
+
+    internal virtual string FormatType()
+    {
+        return Type switch
+        {
+            VariantType.VT_VOID => "void",
+            VariantType.VT_DISPATCH => "IDispatch*",
+            VariantType.VT_BSTR => "BSTR",
+            VariantType.VT_I1 => "char",
+            VariantType.VT_I2 => "short",
+            VariantType.VT_I4 or VariantType.VT_INT => "int",
+            VariantType.VT_I8 => "long long",
+            VariantType.VT_UINT or VariantType.VT_UI4 => "unsigned int",
+            VariantType.VT_UI1 => "unsigned char",
+            VariantType.VT_UI2 => "unsigned short",
+            VariantType.VT_UI8 => "unsigned long long",
+            VariantType.VT_UNKNOWN => "IUnknown*",
+            VariantType.VT_VARIANT => "VARIANT",
+            VariantType.VT_HRESULT => "HRESULT",
+            VariantType.VT_LPSTR => "LPSTR",
+            VariantType.VT_LPWSTR => "LPWSTR",
+            VariantType.VT_R4 => "float",
+            VariantType.VT_R8 => "double",
+            _ => Type.ToString(),
+        };
+    }
 }

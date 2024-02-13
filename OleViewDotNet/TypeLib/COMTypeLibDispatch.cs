@@ -15,16 +15,30 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
-using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatter
+public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase, IProxyFormatter
 {
+    #region Private Members
+    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    {
+        base.OnParse(type_info, attr);
+        if (attr.wTypeFlags.HasFlag(TYPEFLAGS.TYPEFLAG_FDUAL))
+        {
+            DualInterface = type_info.ParseRefInterface(-1);
+        }
+    }
+    #endregion
+
+    #region Public Properties
+    public COMTypeLibInterface DualInterface { get; private set; }
+    #endregion
+
     #region Internal Members
-    internal COMTypeLibInterface(COMTypeLibDocumentation doc, TYPEATTR attr) 
+    internal COMTypeLibDispatch(COMTypeLibDocumentation doc, TYPEATTR attr)
         : base(doc, attr)
     {
     }
@@ -34,21 +48,13 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatt
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         StringBuilder builder = new();
-        bool is_dispatch = HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDUAL);
-        var base_interface = ImplementedInterfaces.FirstOrDefault();
         builder.AppendLine(GetTypeAttributes(true).FormatAttrs());
-        int last_offset = base_interface?.Methods.LastOrDefault()?.VTableOffset ?? -1;
-        if (base_interface == null)
+        builder.AppendLine($"dispinterface {Name} {{");
+        builder.AppendLine("    properties:");
+        builder.AppendLine("    methods:");
+        foreach (var method in Methods)
         {
-            builder.AppendLine($"interface {Name} {{");
-        }
-        else
-        {
-            builder.AppendLine($"interface {Name} : {base_interface.Name} {{");
-        }
-        foreach (var method in Methods.SkipWhile(m => m.VTableOffset <= last_offset))
-        {
-            string attrs = method.FormatAttributes(is_dispatch);
+            string attrs = method.FormatAttributes(true);
             if (!string.IsNullOrEmpty(attrs))
             {
                 builder.Append("    ").AppendLine(attrs);

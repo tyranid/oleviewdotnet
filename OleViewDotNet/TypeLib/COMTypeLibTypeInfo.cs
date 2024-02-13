@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -31,6 +32,39 @@ public class COMTypeLibTypeInfo
 
     private protected virtual void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
     {
+    }
+
+    private protected bool HasTypeFlag(TYPEFLAGS flag)
+    {
+        return _attr.wTypeFlags.HasFlag(flag);
+    }
+
+    private protected ICollection<string> GetTypeAttributes(bool odl)
+    {
+        List<string> attrs = new();
+        if (odl)
+            attrs.Add("odl");
+        if (Uuid != Guid.Empty)
+            attrs.Add($"uuid({Uuid.ToString().ToUpper()})");
+        if (_attr.wMajorVerNum != 0 || _attr.wMinorVerNum != 0)
+            attrs.Add($"version({_attr.wMajorVerNum}.{_attr.wMinorVerNum})");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDUAL))
+            attrs.Add("dual");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FOLEAUTOMATION))
+            attrs.Add("oleautomation");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FHIDDEN))
+            attrs.Add("hidden");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FAGGREGATABLE))
+            attrs.Add("aggregatable");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FAPPOBJECT))
+            attrs.Add("appobject");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FCONTROL))
+            attrs.Add("control");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FNONEXTENSIBLE))
+            attrs.Add("nonextensible");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FRESTRICTED))
+            attrs.Add("restricted");
+        return attrs;
     }
     #endregion
 
@@ -60,5 +94,6 @@ public class COMTypeLibTypeInfo
     public string HelpFile => _doc.HelpFile ?? string.Empty;
     public Guid Uuid => _attr.guid;
     public TYPEKIND Kind => _attr.typekind;
+    public TYPEFLAGS Flags => _attr.wTypeFlags;
     #endregion
 }
