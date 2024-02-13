@@ -14,21 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Interop;
+using NtApiDotNet;
+using System.Runtime.InteropServices;
+using TYPEDESC = System.Runtime.InteropServices.ComTypes.TYPEDESC;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.Interop;
 
-public class COMTypeLibPointerTypeDesc : COMTypeLibTypeDesc
+[StructLayout(LayoutKind.Sequential), DataStart("rgbounds")]
+internal struct ARRAYDESC
 {
-    public COMTypeLibTypeDesc Pointer { get; }
-
-    internal COMTypeLibPointerTypeDesc(COMTypeLibTypeDesc pointer) : base(VariantType.VT_PTR)
-    {
-        Pointer = pointer;
-    }
-
-    internal override string FormatType()
-    {
-        return $"{Pointer.FormatType()}{Pointer.FormatPostName()}*";
-    }
+    public TYPEDESC tdescElem;
+    public ushort cDims;
+    public SAFEARRAYBOUND rgbounds;
 }

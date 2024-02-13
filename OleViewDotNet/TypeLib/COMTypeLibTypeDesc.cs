@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using OleViewDotNet.Interop;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -29,7 +30,12 @@ public class COMTypeLibTypeDesc
         if (type == VariantType.VT_PTR)
         {
             return new COMTypeLibPointerTypeDesc(
-                Parse(type_info, 
+                Parse(type_info,
+                desc.lpValue.GetStructure<TYPEDESC>()));
+        }
+        else if (type == VariantType.VT_SAFEARRAY)
+        {
+            return new COMTypeLibSafeArrayTypeDesc(Parse(type_info,
                 desc.lpValue.GetStructure<TYPEDESC>()));
         }
         else if (type == VariantType.VT_USERDEFINED)
@@ -37,6 +43,15 @@ public class COMTypeLibTypeDesc
             int refid = (int)desc.lpValue.ToInt64();
             var ref_type_info = type_info.GetRefTypeInfo(refid);
             return new COMTypeLibUserDefinedTypeDesc(ref_type_info.Parse());
+        }
+        else if (type == VariantType.VT_CARRAY)
+        {
+            var buffer = new SafeStructureInOutBuffer<ARRAYDESC>(desc.lpValue, 0, true, false);
+            var res = buffer.Result;
+            int additional_size = res.cDims * COMTypeLibUtils.GetTypeSize<SAFEARRAYBOUND>();
+            buffer = new SafeStructureInOutBuffer<ARRAYDESC>(desc.lpValue, additional_size, true, false);
+            var bounds = buffer.Data.ReadArray<SAFEARRAYBOUND>(0, res.cDims);
+            return new COMTypeLibCArrayTypeDesc(Parse(type_info, res.tdescElem), bounds);
         }
         return new COMTypeLibTypeDesc(type);
     }
@@ -72,7 +87,13 @@ public class COMTypeLibTypeDesc
             VariantType.VT_BOOL => "VARIANT_BOOL",
             VariantType.VT_DATE => "DATE",
             VariantType.VT_SAFEARRAY => "SAFEARRAY",
+            VariantType.VT_DECIMAL => "DECIMAL",
             _ => Type.ToString(),
         };
+    }
+
+    internal virtual string FormatPostName()
+    {
+        return string.Empty;
     }
 }

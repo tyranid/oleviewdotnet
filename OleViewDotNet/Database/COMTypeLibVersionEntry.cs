@@ -65,7 +65,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
 
     public COMTypeLib Parse()
     {
-        var type_lib = COMTypeLib.Parse(this);
+        var type_lib = COMTypeLib.FromFile(NativePath);
         foreach (var intf in type_lib.Interfaces)
         {
             if (intf.Name != string.Empty)

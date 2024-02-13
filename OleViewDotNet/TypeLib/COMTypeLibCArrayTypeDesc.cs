@@ -15,20 +15,29 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OleViewDotNet.TypeLib;
 
-public class COMTypeLibPointerTypeDesc : COMTypeLibTypeDesc
+public class COMTypeLibCArrayTypeDesc : COMTypeLibTypeDesc
 {
-    public COMTypeLibTypeDesc Pointer { get; }
+    public COMTypeLibTypeDesc ElementType { get; }
+    public IReadOnlyList<int> Dimensions { get; }
 
-    internal COMTypeLibPointerTypeDesc(COMTypeLibTypeDesc pointer) : base(VariantType.VT_PTR)
+    internal COMTypeLibCArrayTypeDesc(COMTypeLibTypeDesc element_type, SAFEARRAYBOUND[] bounds) : base(VariantType.VT_CARRAY)
     {
-        Pointer = pointer;
+        ElementType = element_type;
+        Dimensions = bounds.Select(b => b.cElements).ToList().AsReadOnly();
     }
 
     internal override string FormatType()
     {
-        return $"{Pointer.FormatType()}{Pointer.FormatPostName()}*";
+        return $"{ElementType.FormatType()}";
+    }
+
+    internal override string FormatPostName()
+    {
+        return string.Join("", Dimensions.Select(d => $"[{d}]"));
     }
 }

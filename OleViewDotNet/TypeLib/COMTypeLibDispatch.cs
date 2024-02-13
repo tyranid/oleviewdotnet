@@ -68,7 +68,7 @@ public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase, IProxyFormatte
                     {
                         builder.AppendLine(attrs);
                     }
-                    builder.AppendLine($"{prop.Type.FormatType()} {prop.Name};");
+                    builder.AppendLine($"{prop.Type.FormatType()} {prop.Name}{prop.Type.FormatPostName()};");
                 }
             }
             builder.AppendLine("methods:");

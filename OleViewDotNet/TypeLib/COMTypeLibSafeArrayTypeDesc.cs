@@ -18,17 +18,17 @@ using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.TypeLib;
 
-public class COMTypeLibPointerTypeDesc : COMTypeLibTypeDesc
+public class COMTypeLibSafeArrayTypeDesc : COMTypeLibTypeDesc
 {
-    public COMTypeLibTypeDesc Pointer { get; }
+    public COMTypeLibTypeDesc ElementType { get; }
 
-    internal COMTypeLibPointerTypeDesc(COMTypeLibTypeDesc pointer) : base(VariantType.VT_PTR)
+    internal COMTypeLibSafeArrayTypeDesc(COMTypeLibTypeDesc element_type) : base(VariantType.VT_SAFEARRAY)
     {
-        Pointer = pointer;
+        ElementType = element_type;
     }
 
     internal override string FormatType()
     {
-        return $"{Pointer.FormatType()}{Pointer.FormatPostName()}*";
+        return "SAFEARRAY";
     }
 }

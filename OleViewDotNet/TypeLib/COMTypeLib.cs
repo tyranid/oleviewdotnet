@@ -54,10 +54,17 @@ public sealed class COMTypeLib
         Dispatch = dispatch.AsReadOnly();
         Enums = types.OfType<COMTypeLibEnum>().ToList().AsReadOnly();
     }
+    #endregion
 
-    internal static COMTypeLib Parse(COMTypeLibVersionEntry type_lib_entry)
+    #region Public Static Methods
+    public static COMTypeLib FromFile(string path)
     {
-        using COMTypeLibParser parser = new(NativeMethods.LoadTypeLibEx(type_lib_entry.NativePath, RegKind.RegKind_Default));
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+        }
+
+        using COMTypeLibParser parser = new(NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default));
         return parser.Parse();
     }
     #endregion

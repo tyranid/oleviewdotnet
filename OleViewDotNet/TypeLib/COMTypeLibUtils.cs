@@ -86,4 +86,9 @@ internal static class COMTypeLibUtils
             builder.AppendLine();
         }
     }
+
+    public static int GetTypeSize<T>()
+    {
+        return Marshal.SizeOf<T>();
+    }
 }
