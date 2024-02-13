@@ -41,7 +41,7 @@ public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
 
     internal override void Format(SourceCodeBuilder builder)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes(false).FormatAttrs()} {{");
+        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()} {{");
         using (builder.PushIndent(4))
         {
             foreach (var v in Fields)

@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Utilities;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -30,5 +31,10 @@ public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
     {
         AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
+    }
+
+    internal override void Format(SourceCodeBuilder builder)
+    {
+        builder.AppendLine($"typedef {GetTypeAttributes("public").FormatAttrs()} {AliasType.FormatType()} {Name}{AliasType.FormatPostName()};");
     }
 }

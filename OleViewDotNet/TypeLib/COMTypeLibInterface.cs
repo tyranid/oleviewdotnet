@@ -33,7 +33,7 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatt
     {
         bool is_dispatch = HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDISPATCHABLE);
         var base_interface = ImplementedInterfaces.FirstOrDefault();
-        builder.AppendAttributes(GetTypeAttributes(true));
+        builder.AppendAttributes(GetTypeAttributes("odl"));
         int last_offset = base_interface?.Methods.LastOrDefault()?.VTableOffset ?? -1;
         if (base_interface == null)
         {

@@ -40,11 +40,9 @@ public class COMTypeLibTypeInfo
         return _attr.wTypeFlags.HasFlag(flag);
     }
 
-    private protected ICollection<string> GetTypeAttributes(bool odl)
+    private protected ICollection<string> GetTypeAttributes(params string[] additional_attrs)
     {
-        List<string> attrs = new();
-        if (odl)
-            attrs.Add("odl");
+        List<string> attrs = new(additional_attrs);
         if (Uuid != Guid.Empty)
             attrs.Add($"uuid({Uuid.ToString().ToUpper()})");
         if (_attr.wMajorVerNum != 0 || _attr.wMinorVerNum != 0)
