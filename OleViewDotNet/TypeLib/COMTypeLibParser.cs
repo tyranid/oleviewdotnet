@@ -105,6 +105,15 @@ internal sealed class COMTypeLibParser : IDisposable
             return ret;
         }
 
+        internal COMTypeLibRecord ParseRecord()
+        {
+            var doc = GetDocumentation();
+            var key = Tuple.Create(doc.Name, _attr.typekind);
+            var ret = _type_lib._named_types.GetOrAdd(key, new COMTypeLibRecord(doc, _attr)) as COMTypeLibRecord;
+            ret.Parse(this);
+            return ret;
+        }
+
         internal COMTypeLibTypeInfo Parse()
         {
             return _attr.typekind switch
@@ -113,6 +122,7 @@ internal sealed class COMTypeLibParser : IDisposable
                 TYPEKIND.TKIND_DISPATCH => ParseDispatch(),
                 TYPEKIND.TKIND_ALIAS => ParseAlias(),
                 TYPEKIND.TKIND_ENUM => ParseEnum(),
+                TYPEKIND.TKIND_RECORD => ParseRecord(),
                 _ => GetDefault(),
             };
         }

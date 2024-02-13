@@ -15,53 +15,39 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibEnum : COMTypeLibTypeInfo
+public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
 {
-    internal COMTypeLibEnum(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibRecord(COMTypeLibDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }
 
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
     {
-        List<COMTypeLibEnumValue> values = new();
+        List<COMTypeLibVariable> fields = new();
         for (int i = 0; i < attr.cVars; ++i)
         {
-            var v = new COMTypeLibVariable(type_info, i);
-            long l = 0;
-            try
-            {
-                if (v.ConstValue is IConvertible conv)
-                {
-                    l = conv.ToInt64(null);
-                }
-            }
-            catch
-            {
-            }
-
-            values.Add(new(v.Name, l));
-            
+            fields.Add(new COMTypeLibVariable(type_info, i));
         }
-        Values = values.AsReadOnly();
+        Fields = fields.AsReadOnly();
     }
 
-    public IReadOnlyList<COMTypeLibEnumValue> Values { get; private set; }
+    public IReadOnlyList<COMTypeLibVariable> Fields { get; private set; }
 
     internal override void Format(SourceCodeBuilder builder)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes(false).FormatAttrs()}");
-        builder.AppendLine("enum {");
+        builder.AppendLine($"typedef {GetTypeAttributes(false).FormatAttrs()} {{");
         using (builder.PushIndent(4))
         {
-            builder.AppendList(Values.Select(v => $"{v.Name} = {v.Value}"));
+            foreach (var v in Fields)
+            {
+                builder.AppendLine($"{v.Type.FormatType()} {v.Name}{v.Type.FormatPostName()};");
+            }
         }
         builder.AppendLine($"}} {Name};");
     }

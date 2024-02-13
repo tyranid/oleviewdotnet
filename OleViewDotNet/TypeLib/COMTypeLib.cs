@@ -53,6 +53,7 @@ public sealed class COMTypeLib
         Interfaces = interfaces.Values.ToList().AsReadOnly();
         Dispatch = dispatch.AsReadOnly();
         Enums = types.OfType<COMTypeLibEnum>().ToList().AsReadOnly();
+        Records = types.OfType<COMTypeLibRecord>().ToList().AsReadOnly();
     }
     #endregion
 
@@ -79,6 +80,7 @@ public sealed class COMTypeLib
     public IReadOnlyList<COMTypeLibInterface> Interfaces { get; }
     public IReadOnlyList<COMTypeLibDispatch> Dispatch { get; }
     public IReadOnlyList<COMTypeLibEnum> Enums { get; }
+    public IReadOnlyList<COMTypeLibRecord> Records { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     #endregion
 
@@ -99,6 +101,7 @@ public sealed class COMTypeLib
             builder.FormatTypes(Enums);
             builder.FormatTypes(Interfaces);
             builder.FormatTypes(Dispatch);
+            builder.FormatTypes(Records);
         }
         builder.AppendLine("};");
         return builder.ToString();
