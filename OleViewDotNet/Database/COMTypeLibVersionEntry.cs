@@ -65,7 +65,15 @@ public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
 
     public COMTypeLib Parse()
     {
-        return COMTypeLib.Parse(this);
+        var type_lib = COMTypeLib.Parse(this);
+        foreach (var intf in type_lib.Interfaces)
+        {
+            if (intf.Name != string.Empty)
+            {
+                m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
+            }
+        }
+        return type_lib;
     }
 
     Guid IComGuid.ComGuid => TypelibId;

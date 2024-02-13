@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -55,6 +56,34 @@ internal static class COMTypeLibUtils
         if (base_ptr == IntPtr.Zero)
             return null;
         int offset = Marshal.OffsetOf<PARAMDESCEX>("varDefaultValue").ToInt32();
-        return Marshal.GetObjectForNativeVariant(base_ptr + offset);
+        return GetVariant(base_ptr + offset);
+    }
+
+    public static object GetVariant(IntPtr ptr)
+    {
+        if (ptr == IntPtr.Zero)
+            return null;
+        return Marshal.GetObjectForNativeVariant(ptr);
+    }
+
+    public static string FormatAttr(string name, object value)
+    {
+        if (value is string s)
+        {
+            return $"{name}(\"{s.Replace("\"", "\\\"")})";
+        }
+        else
+        {
+            return $"{name}({value})";
+        }
+    }
+
+    public static void FormatTypes(this SourceCodeBuilder builder, IEnumerable<COMTypeLibTypeInfo> types)
+    {
+        foreach (var type in types)
+        {
+            type.Format(builder);
+            builder.AppendLine();
+        }
     }
 }

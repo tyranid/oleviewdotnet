@@ -15,8 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 
 namespace OleViewDotNet.TypeLib;
 
@@ -30,11 +32,18 @@ public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase, IProxyFormatte
         {
             DualInterface = type_info.ParseRefInterface(-1);
         }
+        List<COMTypeLibVariable> props = new();
+        for (int i = 0; i < attr.cVars; ++i)
+        {
+            props.Add(new COMTypeLibVariable(type_info, i));
+        }
+        Properties = props.AsReadOnly();
     }
     #endregion
 
     #region Public Properties
     public COMTypeLibInterface DualInterface { get; private set; }
+    public IReadOnlyList<COMTypeLibVariable> Properties { get; private set; }
     #endregion
 
     #region Internal Members
@@ -42,28 +51,41 @@ public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase, IProxyFormatte
         : base(doc, attr)
     {
     }
-    #endregion
 
-    #region IProxyFormatter Implementation
-    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
+    internal override void Format(SourceCodeBuilder builder)
     {
-        StringBuilder builder = new();
-        builder.AppendLine(GetTypeAttributes(true).FormatAttrs());
+        builder.AppendAttributes(GetTypeAttributes(true));
         builder.AppendLine($"dispinterface {Name} {{");
-        builder.AppendLine("    properties:");
-        builder.AppendLine("    methods:");
-        foreach (var method in Methods)
+        using (builder.PushIndent(4))
         {
-            string attrs = method.FormatAttributes(true);
-            if (!string.IsNullOrEmpty(attrs))
+            builder.AppendLine("properties:");
+            using (builder.PushIndent(4))
             {
-                builder.Append("    ").AppendLine(attrs);
+                foreach (var prop in Properties)
+                {
+                    string attrs = prop.FormatAttributes();
+                    if (!string.IsNullOrEmpty(attrs))
+                    {
+                        builder.AppendLine(attrs);
+                    }
+                    builder.AppendLine($"{prop.Type.FormatType()} {prop.Name};");
+                }
             }
-            builder.Append("    ").AppendLine(method.FormatMethod());
+            builder.AppendLine("methods:");
+            using (builder.PushIndent(4))
+            {
+                foreach (var method in Methods.Skip(HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDUAL) ? 7 : 0))
+                {
+                    string attrs = method.FormatAttributes(true);
+                    if (!string.IsNullOrEmpty(attrs))
+                    {
+                        builder.AppendLine(attrs);
+                    }
+                    builder.AppendLine(method.FormatMethod());
+                }
+            }
         }
         builder.AppendLine("};");
-
-        return builder.ToString();
     }
     #endregion
 }

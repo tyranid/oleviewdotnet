@@ -25,6 +25,7 @@ public sealed class COMTypeLibMethod
     #region Private Members
     private readonly COMTypeLibDocumentation _doc;
     private readonly FUNCDESC _desc;
+    private readonly FUNCFLAGS _flags;
     #endregion
 
     #region Public Properties
@@ -58,6 +59,7 @@ public sealed class COMTypeLibMethod
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
             .Select((d, i) => new COMTypeLibParameter(names[i + 1], d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
+        _flags = (FUNCFLAGS)_desc.wFuncFlags;
     }
 
     private List<string> GetAttributes(bool is_dispatch)
@@ -87,6 +89,32 @@ public sealed class COMTypeLibMethod
                 break;
         }
 
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FBINDABLE))
+            attrs.Add("bindable");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FDEFAULTBIND))
+            attrs.Add("defaultbind");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FDEFAULTCOLLELEM))
+            attrs.Add("defaultcollelem");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FDISPLAYBIND))
+            attrs.Add("displaybind");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FHIDDEN))
+            attrs.Add("hidden");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FIMMEDIATEBIND))
+            attrs.Add("immediatebind");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FNONBROWSABLE))
+            attrs.Add("nonbrowsable");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FREQUESTEDIT))
+            attrs.Add("requestedit");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FRESTRICTED))
+            attrs.Add("restricted");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FSOURCE))
+            attrs.Add("source");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FUIDEFAULT))
+            attrs.Add("uidefault");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FUSESGETLASTERROR))
+            attrs.Add("usesgetlasterror");
+        if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FREPLACEABLE))
+            attrs.Add("replaceable");
         return attrs;
     }
 

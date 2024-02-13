@@ -15,9 +15,9 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Utilities;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 
 namespace OleViewDotNet.TypeLib;
 
@@ -28,15 +28,12 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatt
         : base(doc, attr)
     {
     }
-    #endregion
 
-    #region IProxyFormatter Implementation
-    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
+    internal override void Format(SourceCodeBuilder builder)
     {
-        StringBuilder builder = new();
-        bool is_dispatch = HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDUAL);
+        bool is_dispatch = HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDISPATCHABLE);
         var base_interface = ImplementedInterfaces.FirstOrDefault();
-        builder.AppendLine(GetTypeAttributes(true).FormatAttrs());
+        builder.AppendAttributes(GetTypeAttributes(true));
         int last_offset = base_interface?.Methods.LastOrDefault()?.VTableOffset ?? -1;
         if (base_interface == null)
         {
@@ -46,18 +43,19 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatt
         {
             builder.AppendLine($"interface {Name} : {base_interface.Name} {{");
         }
-        foreach (var method in Methods.SkipWhile(m => m.VTableOffset <= last_offset))
+        using (builder.PushIndent(4))
         {
-            string attrs = method.FormatAttributes(is_dispatch);
-            if (!string.IsNullOrEmpty(attrs))
+            foreach (var method in Methods.SkipWhile(m => m.VTableOffset <= last_offset))
             {
-                builder.Append("    ").AppendLine(attrs);
+                string attrs = method.FormatAttributes(is_dispatch);
+                if (!string.IsNullOrEmpty(attrs))
+                {
+                    builder.AppendLine(attrs);
+                }
+                builder.AppendLine(method.FormatMethod());
             }
-            builder.Append("    ").AppendLine(method.FormatMethod());
         }
         builder.AppendLine("};");
-
-        return builder.ToString();
     }
     #endregion
 }

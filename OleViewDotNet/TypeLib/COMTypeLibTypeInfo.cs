@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
@@ -64,6 +65,11 @@ public class COMTypeLibTypeInfo
             attrs.Add("nonextensible");
         if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FRESTRICTED))
             attrs.Add("restricted");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FAPPOBJECT))
+            attrs.Add("appobject");
+        if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FPROXY))
+            attrs.Add("proxy");
+
         return attrs;
     }
     #endregion
@@ -85,6 +91,10 @@ public class COMTypeLibTypeInfo
         _parsed = true;
         OnParse(type_info, _attr);
     }
+
+    internal virtual void Format(SourceCodeBuilder builder)
+    {
+    }
     #endregion
 
     #region Public Properties
@@ -95,5 +105,14 @@ public class COMTypeLibTypeInfo
     public Guid Uuid => _attr.guid;
     public TYPEKIND Kind => _attr.typekind;
     public TYPEFLAGS Flags => _attr.wTypeFlags;
+    #endregion
+
+    #region Public Methods
+    public string Format()
+    {
+        SourceCodeBuilder builder = new();
+        Format(builder);
+        return builder.ToString();
+    }
     #endregion
 }

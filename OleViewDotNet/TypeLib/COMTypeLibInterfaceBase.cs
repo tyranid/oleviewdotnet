@@ -14,12 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Proxy;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo
+public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo, IProxyFormatter
 {
     #region Private Members
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
@@ -48,6 +49,14 @@ public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo
     internal COMTypeLibInterfaceBase(COMTypeLibDocumentation doc, TYPEATTR attr)
         : base(doc, attr)
     {
+    }
+    #endregion
+
+
+    #region IProxyFormatter Implementation
+    public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
+    {
+        return Format();
     }
     #endregion
 }

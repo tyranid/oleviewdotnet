@@ -68,6 +68,10 @@ public class COMTypeLibTypeDesc
             VariantType.VT_LPWSTR => "LPWSTR",
             VariantType.VT_R4 => "float",
             VariantType.VT_R8 => "double",
+            VariantType.VT_CY => "CURRENCY",
+            VariantType.VT_BOOL => "VARIANT_BOOL",
+            VariantType.VT_DATE => "DATE",
+            VariantType.VT_SAFEARRAY => "SAFEARRAY",
             _ => Type.ToString(),
         };
     }

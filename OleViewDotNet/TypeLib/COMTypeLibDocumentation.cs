@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -36,5 +37,17 @@ internal readonly struct COMTypeLibDocumentation
     public COMTypeLibDocumentation(ITypeInfo type_info, int index = -1)
     {
         type_info.GetDocumentation(index, out Name, out DocString, out HelpContext, out HelpFile);
+    }
+
+    public IEnumerable<string> GetAttrs()
+    {
+        List<string> attrs = new();
+        if (!string.IsNullOrEmpty(DocString))
+            attrs.Add(COMTypeLibUtils.FormatAttr("helpstring", DocString));
+        if (HelpContext != 0)
+            attrs.Add(COMTypeLibUtils.FormatAttr("helpcontext", HelpContext));
+        if (!string.IsNullOrEmpty(HelpFile))
+            attrs.Add(COMTypeLibUtils.FormatAttr("helpfile", HelpFile));
+        return attrs;
     }
 }

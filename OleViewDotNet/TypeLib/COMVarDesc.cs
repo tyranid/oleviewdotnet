@@ -14,21 +14,27 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using System;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
+internal sealed class COMVarDesc : IDisposable
 {
-    public COMTypeLibTypeDesc AliasType { get; private set; }
+    private readonly ITypeInfo _type_info;
+    private readonly IntPtr _ptr;
 
-    internal COMTypeLibAlias(COMTypeLibDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    public VARDESC Descriptor { get; }
+
+    public COMVarDesc(ITypeInfo type_info, IntPtr ptr)
     {
+        _type_info = type_info;
+        _ptr = ptr;
+        Descriptor = ptr.GetStructure<VARDESC>();
     }
 
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    void IDisposable.Dispose()
     {
-        AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
+        _type_info.ReleaseVarDesc(_ptr);
     }
 }

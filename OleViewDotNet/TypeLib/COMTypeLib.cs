@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,9 @@ public sealed class COMTypeLib
     #region Private Members
     private readonly COMTypeLibDocumentation _doc;
     private readonly TYPELIBATTR _attr;
+    #endregion
 
+    #region Internal Members
     internal COMTypeLib(COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types)
     {
         _doc = doc;
@@ -49,11 +52,10 @@ public sealed class COMTypeLib
 
         Interfaces = interfaces.Values.ToList().AsReadOnly();
         Dispatch = dispatch.AsReadOnly();
+        Enums = types.OfType<COMTypeLibEnum>().ToList().AsReadOnly();
     }
-    #endregion
 
-    #region Public Static Members
-    public static COMTypeLib Parse(COMTypeLibVersionEntry type_lib_entry)
+    internal static COMTypeLib Parse(COMTypeLibVersionEntry type_lib_entry)
     {
         using COMTypeLibParser parser = new(NativeMethods.LoadTypeLibEx(type_lib_entry.NativePath, RegKind.RegKind_Default));
         return parser.Parse();
@@ -69,6 +71,30 @@ public sealed class COMTypeLib
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
     public IReadOnlyList<COMTypeLibInterface> Interfaces { get; }
     public IReadOnlyList<COMTypeLibDispatch> Dispatch { get; }
+    public IReadOnlyList<COMTypeLibEnum> Enums { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
+    #endregion
+
+    #region Public Methods
+    public string Format()
+    {
+        SourceCodeBuilder builder = new();
+        List<string> attrs = new()
+        {
+            $"uuid({TypeLibId.ToString().ToUpper()})",
+            $"version({Version})"
+        };
+        attrs.AddRange(_doc.GetAttrs());
+        builder.AppendAttributes(attrs);
+        builder.AppendLine($"library {Name} {{");
+        using (builder.PushIndent(4))
+        {
+            builder.FormatTypes(Enums);
+            builder.FormatTypes(Interfaces);
+            builder.FormatTypes(Dispatch);
+        }
+        builder.AppendLine("};");
+        return builder.ToString();
+    }
     #endregion
 }
