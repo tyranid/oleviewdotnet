@@ -2223,10 +2223,15 @@ The database to use to lookup information.
 Get type library from an IID if that interface has a type library.
 .PARAMETER Source
 Specify a source where the typelib came from.
+.PARAMETER TypeLibId
+Specify the type library ID.
+.PARAMETER Parse
+Specify to parse the libraries to inspect the type information.
 .INPUTS
 None
 .OUTPUTS
-OleViewDotNet.COMTypeLibVersionEntry[]
+OleViewDotNet.Database.COMTypeLibVersionEntry[]
+OleViewDotNet.TypeLib.COMTypeLib
 .EXAMPLE
 Get-ComTypeLib
 Get all COM registered type libraries.
@@ -2242,7 +2247,10 @@ function Get-ComTypeLib {
         [OleViewDotNet.Database.COMInterfaceInstance]$InterfaceInstance,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
         [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
-        [OleViewDotNet.Database.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database,
+        [parameter(Mandatory, ParameterSetName = "FromTypeLibId")]
+        [Guid]$TypeLibId,
+        [switch]$Parse
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -2250,25 +2258,35 @@ function Get-ComTypeLib {
         Write-Error "No database specified and current database isn't set"
         return
     }
-    switch($PSCmdlet.ParameterSetName) {
+    $tlbs = switch($PSCmdlet.ParameterSetName) {
         "All" {
-            $Database.Typelibs.Values.Versions | Write-Output
+            $Database.Typelibs.Values.Versions
         }
         "FromIid" {
             $intf = Get-ComInterface -Database $Database -Iid $Iid
             if ($null -ne $intf) {
-                $intf.TypeLibVersionEntry | Write-Output
+                $intf.TypeLibVersionEntry
             }
         }
         "FromInterface" {
-            Get-ComTypeLib $Interface.Iid -Database $Database | Write-Output
+            Get-ComTypeLib -Iid $Interface.Iid -Database $Database
         }
         "FromInterfaceInstance" {
-            Get-ComTypeLib $InterfaceInstance.Iid -Database $Database | Write-Output
+            Get-ComTypeLib -Iid $InterfaceInstance.Iid -Database $Database
         }
         "FromSource" {
-            Get-ComTypeLib -Database $Database | Where-Object Source -eq $Source | Write-Output
+            Get-ComTypeLib -Database $Database | Where-Object Source -eq $Source
         }
+        "FromTypeLibId" {
+            if ($Database.Typelibs.ContainsKey($TypeLibId)) {
+                $Database.Typelibs[$TypeLibId].Versions
+            }
+        }
+    }
+    if ($Parse) {
+        $tlbs | % { $_.Parse() }
+    } else {
+        $tlbs | Write-Output
     }
 }
 

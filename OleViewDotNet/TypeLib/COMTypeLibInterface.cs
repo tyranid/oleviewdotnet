@@ -21,7 +21,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase, IProxyFormatter
+public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase
 {
     #region Internal Members
     internal COMTypeLibInterface(COMTypeLibDocumentation doc, TYPEATTR attr) 

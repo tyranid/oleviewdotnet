@@ -22,7 +22,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase, IProxyFormatter
+public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase
 {
     #region Private Members
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
