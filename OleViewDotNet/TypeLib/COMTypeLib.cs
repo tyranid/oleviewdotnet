@@ -32,6 +32,7 @@ public sealed class COMTypeLib : COMTypeLibReference
     internal COMTypeLib(string path, COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
         : base(doc, attr)
     {
+        Path = path ?? string.Empty;
         Types = types.AsReadOnly();
         var interfaces = types.OfType<COMTypeLibInterface>().ToDictionary(i => i.Uuid);
         var dispatch = Types.OfType<COMTypeLibDispatch>().ToList();
@@ -60,7 +61,7 @@ public sealed class COMTypeLib : COMTypeLibReference
             throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
         }
 
-        using COMTypeLibParser parser = new(NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default));
+        using COMTypeLibParser parser = new(path);
         return parser.Parse();
     }
     #endregion

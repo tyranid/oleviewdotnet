@@ -70,7 +70,7 @@ internal sealed class COMTypeLibParser : IDisposable
             types.Add(type_info.Parse());
         }
 
-        return new COMTypeLib(_path ?? string.Empty, new(_type_lib), _attr, types);
+        return new COMTypeLib(_path, new(_type_lib), _attr, types);
     }
 
     internal sealed class TypeInfo : IDisposable
