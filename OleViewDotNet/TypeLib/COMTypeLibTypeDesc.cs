@@ -88,6 +88,7 @@ public class COMTypeLibTypeDesc
             VariantType.VT_DATE => "DATE",
             VariantType.VT_SAFEARRAY => "SAFEARRAY",
             VariantType.VT_DECIMAL => "DECIMAL",
+            VariantType.VT_ERROR => "HRESULT",
             _ => Type.ToString(),
         };
     }

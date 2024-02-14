@@ -20,9 +20,9 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
+public sealed class COMTypeLibUnion : COMTypeLibTypeInfo
 {
-    internal COMTypeLibRecord(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibUnion(COMTypeLibDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }
@@ -41,7 +41,7 @@ public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
 
     internal override void Format(SourceCodeBuilder builder)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}struct {{");
+        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}union {{");
         using (builder.PushIndent(4))
         {
             foreach (var v in Fields)

@@ -99,7 +99,7 @@ public sealed class COMTypeLibVariable
 
     internal string FormatAttributes()
     {
-        return GetAttributes().FormatAttrs();
+        return GetAttributes().FormatAttrs().TrimEnd();
     }
     #endregion
 }

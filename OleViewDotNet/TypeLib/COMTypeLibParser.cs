@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ internal sealed class COMTypeLibParser : IDisposable
     private readonly ConcurrentDictionary<Guid, COMTypeLibDispatch> _parsed_disp = new();
     private readonly ConcurrentDictionary<Tuple<string, TYPEKIND>, COMTypeLibTypeInfo> _named_types = new();
     private readonly TYPELIBATTR _attr;
+    private readonly string _path;
     #endregion
 
     #region Internal Members
@@ -44,6 +46,12 @@ internal sealed class COMTypeLibParser : IDisposable
         {
             type_lib.ReleaseTLibAttr(ptr);
         }
+    }
+
+    internal COMTypeLibParser(string path) 
+        : this(NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default))
+    {
+        _path = path;
     }
 
     internal TypeInfo GetTypeInfo(int index)
@@ -62,7 +70,7 @@ internal sealed class COMTypeLibParser : IDisposable
             types.Add(type_info.Parse());
         }
 
-        return new COMTypeLib(new(_type_lib), _attr, types);
+        return new COMTypeLib(_path ?? string.Empty, new(_type_lib), _attr, types);
     }
 
     internal sealed class TypeInfo : IDisposable
@@ -87,42 +95,26 @@ internal sealed class COMTypeLibParser : IDisposable
             return ret;
         }
 
-        internal COMTypeLibAlias ParseAlias()
+        internal COMTypeLibTypeInfo ParseType(COMTypeLibTypeInfo type) 
         {
-            var doc = GetDocumentation();
-            var key = Tuple.Create(doc.Name, _attr.typekind);
-            var ret = _type_lib._named_types.GetOrAdd(key, new COMTypeLibAlias(doc, _attr)) as COMTypeLibAlias;
-            ret.Parse(this);
-            return ret;
-        }
-
-        internal COMTypeLibEnum ParseEnum()
-        {
-            var doc = GetDocumentation();
-            var key = Tuple.Create(doc.Name, _attr.typekind);
-            var ret = _type_lib._named_types.GetOrAdd(key, new COMTypeLibEnum(doc, _attr)) as COMTypeLibEnum;
-            ret.Parse(this);
-            return ret;
-        }
-
-        internal COMTypeLibRecord ParseRecord()
-        {
-            var doc = GetDocumentation();
-            var key = Tuple.Create(doc.Name, _attr.typekind);
-            var ret = _type_lib._named_types.GetOrAdd(key, new COMTypeLibRecord(doc, _attr)) as COMTypeLibRecord;
+            var key = Tuple.Create(type.Name, type.Kind);
+            var ret = _type_lib._named_types.GetOrAdd(key, type);
             ret.Parse(this);
             return ret;
         }
 
         internal COMTypeLibTypeInfo Parse()
         {
+            var doc = GetDocumentation();
             return _attr.typekind switch
             {
                 TYPEKIND.TKIND_INTERFACE => ParseInterface(),
                 TYPEKIND.TKIND_DISPATCH => ParseDispatch(),
-                TYPEKIND.TKIND_ALIAS => ParseAlias(),
-                TYPEKIND.TKIND_ENUM => ParseEnum(),
-                TYPEKIND.TKIND_RECORD => ParseRecord(),
+                TYPEKIND.TKIND_ALIAS => ParseType(new COMTypeLibAlias(doc, _attr)),
+                TYPEKIND.TKIND_ENUM => ParseType(new COMTypeLibEnum(doc, _attr)),
+                TYPEKIND.TKIND_RECORD => ParseType(new COMTypeLibRecord(doc, _attr)),
+                TYPEKIND.TKIND_COCLASS => ParseType(new COMTypeLibCoClass(doc, _attr)),
+                TYPEKIND.TKIND_UNION => ParseType(new COMTypeLibUnion(doc, _attr)),
                 _ => GetDefault(),
             };
         }
@@ -179,6 +171,15 @@ internal sealed class COMTypeLibParser : IDisposable
         {
             using var type_info = GetRefTypeInfoOfImplType(index);
             return type_info.ParseInterface();
+        }
+
+        public COMTypeLibCoClassInterface ParseCoClassInterface(int index)
+        {
+            using var type_info = GetRefTypeInfoOfImplType(index);
+            COMTypeLibInterfaceBase intf = type_info._attr.typekind == TYPEKIND.TKIND_DISPATCH
+                ? type_info.ParseDispatch() : type_info.ParseInterface();
+            _type_info.GetImplTypeFlags(index, out IMPLTYPEFLAGS flags);
+            return new(flags, intf);
         }
 
         public COMTypeLibDocumentation GetDocumentation(int index = -1)

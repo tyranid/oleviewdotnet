@@ -120,7 +120,7 @@ public sealed class COMTypeLibMethod
 
     internal string FormatAttributes(bool is_dispatch)
     {
-        return GetAttributes(is_dispatch).FormatAttrs();
+        return GetAttributes(is_dispatch).FormatAttrs().TrimEnd();
     }
 
     internal string FormatMethod()

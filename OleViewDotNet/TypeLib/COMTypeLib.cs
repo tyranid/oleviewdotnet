@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
 using System;
@@ -27,18 +26,12 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Class to represent information in a COM type library.
 /// </summary>
-public sealed class COMTypeLib
+public sealed class COMTypeLib : COMTypeLibReference
 {
-    #region Private Members
-    private readonly COMTypeLibDocumentation _doc;
-    private readonly TYPELIBATTR _attr;
-    #endregion
-
     #region Internal Members
-    internal COMTypeLib(COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types)
+    internal COMTypeLib(string path, COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
+        : base(doc, attr)
     {
-        _doc = doc;
-        _attr = attr;
         Types = types.AsReadOnly();
         var interfaces = types.OfType<COMTypeLibInterface>().ToDictionary(i => i.Uuid);
         var dispatch = Types.OfType<COMTypeLibDispatch>().ToList();
@@ -55,6 +48,7 @@ public sealed class COMTypeLib
         Enums = types.OfType<COMTypeLibEnum>().ToList().AsReadOnly();
         Records = types.OfType<COMTypeLibRecord>().ToList().AsReadOnly();
         Aliases = types.OfType<COMTypeLibAlias>().ToList().AsReadOnly();
+        Unions = types.OfType<COMTypeLibUnion>().ToList().AsReadOnly();
     }
     #endregion
 
@@ -72,17 +66,13 @@ public sealed class COMTypeLib
     #endregion
 
     #region Public Properties
-    public string Name => _doc.Name ?? string.Empty;
-    public string DocString => _doc.DocString ?? string.Empty;
-    public int HelpContext => _doc.HelpContext;
-    public string HelpFile => _doc.HelpFile ?? string.Empty;
-    public Guid TypeLibId => _attr.guid;
-    public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
+    public string Path { get; }
     public IReadOnlyList<COMTypeLibInterface> Interfaces { get; }
     public IReadOnlyList<COMTypeLibDispatch> Dispatch { get; }
     public IReadOnlyList<COMTypeLibEnum> Enums { get; }
     public IReadOnlyList<COMTypeLibRecord> Records { get; }
     public IReadOnlyList<COMTypeLibAlias> Aliases { get; }
+    public IReadOnlyList<COMTypeLibUnion> Unions { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     #endregion
 
@@ -102,9 +92,10 @@ public sealed class COMTypeLib
         {
             builder.FormatTypes(Aliases);
             builder.FormatTypes(Enums);
+            builder.FormatTypes(Records);
+            builder.FormatTypes(Unions);
             builder.FormatTypes(Interfaces);
             builder.FormatTypes(Dispatch);
-            builder.FormatTypes(Records);
         }
         builder.AppendLine("};");
         return builder.ToString();

@@ -63,10 +63,7 @@ public class COMTypeLibParameter
             }
         }
 
-        string attr_str = attrs.FormatAttrs();
-        if (attr_str != string.Empty)
-            attr_str += " ";
-        return $"{attr_str}{Type.FormatType()} {Name}{Type.FormatPostName()}";
+        return $"{attrs.FormatAttrs()}{Type.FormatType()} {Name}{Type.FormatPostName()}";
     }
 
     internal COMTypeLibParameter(string name, ELEMDESC desc, COMTypeLibTypeDesc type, int index)

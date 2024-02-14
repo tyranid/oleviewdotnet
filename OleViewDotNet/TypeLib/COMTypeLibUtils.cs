@@ -48,7 +48,7 @@ internal static class COMTypeLibUtils
 
     public static string FormatAttrs(this ICollection<string> attrs)
     {
-        return attrs.Count > 0 ? $"[{string.Join(", ", attrs)}]" : string.Empty;
+        return attrs.Count > 0 ? $"[{string.Join(", ", attrs)}] " : string.Empty;
     }
 
     public static object ReadDefaultValue(IntPtr base_ptr)

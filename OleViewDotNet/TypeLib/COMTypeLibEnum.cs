@@ -57,7 +57,7 @@ public sealed class COMTypeLibEnum : COMTypeLibTypeInfo
 
     internal override void Format(SourceCodeBuilder builder)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}");
+        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs().TrimEnd()}");
         builder.AppendLine("enum {");
         using (builder.PushIndent(4))
         {
