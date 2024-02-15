@@ -19,6 +19,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -518,11 +519,14 @@ public partial class PropertiesControl : UserControl
     {
         if (m_typelib != null)
         {
-            Assembly typelib = COMUtilities.LoadTypeLib(this, m_typelib.NativePath);
-            if (typelib != null)
+            try
             {
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name, 
-                    typelib, m_interface != null ? m_interface.Iid : Guid.Empty, false));
+                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name,
+                    COMTypeLib.FromFile(m_typelib.NativePath), m_interface != null ? m_interface.Iid : Guid.Empty));
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
             }
         }
     }

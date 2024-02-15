@@ -20,6 +20,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -649,10 +650,13 @@ public partial class MainForm : Form
         dlg.Filter = "TLB Files (*.tlb)|*.tlb|Executable Files (*.exe;*.dll;*.ocx)|*.exe;*.dll;*.ocx|All Files (*.*)|*.*";
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            Assembly typelib = COMUtilities.LoadTypeLib(this, dlg.FileName);
-            if (typelib != null)
+            try
             {
-                HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), typelib, Guid.Empty, false));
+                HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), COMTypeLib.FromFile(dlg.FileName), Guid.Empty));
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
             }
         }
     }

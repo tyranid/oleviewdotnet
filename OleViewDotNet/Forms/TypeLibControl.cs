@@ -18,6 +18,7 @@ using NtApiDotNet.Ndr;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -32,10 +33,10 @@ namespace OleViewDotNet.Forms;
 public partial class TypeLibControl : UserControl
 {
     private readonly IDictionary<Guid, string> m_iids_to_names;
-    private readonly IEnumerable<ListViewItemWithGuid> interfaces;
-    private Guid guid_to_view;
-    private readonly string comClassIdName;
-    private Guid? comClassId;
+    private readonly IEnumerable<ListViewItemWithGuid> m_interfaces;
+    private Guid m_guid_to_view;
+    private readonly string m_com_class_id_name;
+    private Guid? m_com_class_id;
 
     private const string filterDefaultString = "filter interfaces";
 
@@ -46,6 +47,44 @@ public partial class TypeLibControl : UserControl
         {
             Guid = iid;
         }
+    }
+
+    private static ListViewItemWithGuid MapTypeInfoToItem(COMTypeLibTypeInfo type)
+    {
+        ListViewItemWithGuid item = new(type.Name, type.Uuid);
+        item.SubItems.Add(type.Uuid.FormatGuid());
+        item.Tag = type;
+        return item;
+    }
+
+    private static ListViewItemWithGuid MapTypeInfoToItemNoSubItem(COMTypeLibTypeInfo type)
+    {
+        return new(type.Name, type.Uuid)
+        {
+            Tag = type
+        };
+    }
+
+    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(COMTypeLib typelib)
+    {
+        IEnumerable<COMTypeLibInterfaceBase> intfs = typelib.Interfaces;
+        intfs = intfs.Concat(typelib.Dispatch);
+        return intfs.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
+    }
+
+    private static IEnumerable<ListViewItemWithGuid> FormatClasses(COMTypeLib typelib)
+    {
+        return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
+    }
+
+    private static IEnumerable<ListViewItem> FormatStructs(COMTypeLib typelib)
+    {
+        return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
+    }
+
+    private static IEnumerable<ListViewItem> FormatEnums(COMTypeLib typelib)
+    {
+        return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
     }
 
     private static ListViewItemWithGuid MapTypeToItem(Type type)
@@ -164,9 +203,9 @@ public partial class TypeLibControl : UserControl
         textEditor.IsReadOnly = true;
         Text = name;
 
-        this.textBoxFilter.Text = filterDefaultString;
-        this.guid_to_view = guid_to_view;
-        this.interfaces = interfaces;
+        textBoxFilter.Text = filterDefaultString;
+        m_guid_to_view = guid_to_view;
+        m_interfaces = interfaces;
 
         AddGuidItems(listViewClasses, classes, tabPageClasses, guid_to_view);
 
@@ -196,10 +235,10 @@ public partial class TypeLibControl : UserControl
     private void RefreshInterfaces()
     {
         bool showAll = textBoxFilter.Text.Length <= 0 || textBoxFilter.Text.Equals(filterDefaultString);
-        var filteredInterfaces = interfaces;
+        var filteredInterfaces = m_interfaces;
         if(!showAll)
         {
-            filteredInterfaces = interfaces.Where(item =>
+            filteredInterfaces = m_interfaces.Where(item =>
             {
                 if (item.Text.IndexOf(textBoxFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1)
                     return true;
@@ -208,7 +247,7 @@ public partial class TypeLibControl : UserControl
                 return interfaceDescription.IndexOf(textBoxFilter.Text, 0, StringComparison.OrdinalIgnoreCase) > -1;
             });
         }
-        AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, guid_to_view, false);
+        AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, m_guid_to_view, false);
     }
 
     public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
@@ -217,18 +256,31 @@ public partial class TypeLibControl : UserControl
               FormatAssemblyStructs(typelib, dotnet_assembly),
               FormatAssemblyEnums(typelib, dotnet_assembly))
     {
+        btnDqs.Visible = false;
+        cbProxyRenderStyle.Visible = false;
+        checkBoxHideComments.Visible = false;
+        lblRendering.Visible = false;
     }
 
-    public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view, string comClassIdName = null, Guid? comClassId = null)
+    public TypeLibControl(string name, COMTypeLib typelib, Guid guid_to_view)
+            : this(null, name, guid_to_view, FormatInterfaces(typelib),
+          FormatClasses(typelib),
+          FormatStructs(typelib),
+          FormatEnums(typelib))
+    {
+        btnDqs.Visible = false;
+        cbProxyRenderStyle.Visible = false;
+        checkBoxHideComments.Visible = false;
+        lblRendering.Visible = false;
+    }
+
+    public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
         : this(registry.InterfacesToNames, name, guid_to_view,
               FormatProxyInstance(proxy, registry.InterfacesToNames),
               new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
     {
-        // controls on this panel are not enabled by default, activating them in the proxy view only
-        btnDqs.Enabled = true;
-        cbProxyRenderStyle.Enabled = true;
-        this.comClassId = comClassId;
-        this.comClassIdName = comClassIdName;
+        m_com_class_id = com_class_id;
+        m_com_class_id_name = com_class_id_name;
     }
 
     private INdrFormatter GetNdrFormatter(NdrComProxyDefinition proxy = null)
@@ -245,11 +297,13 @@ public partial class TypeLibControl : UserControl
 
     private string GetTextFromTag(object tag)
     {
-        var type = tag as Type;
-
-        if (type != null)
+        if (tag is Type type)
         {
             return COMUtilities.FormatComType(type);
+        }
+        else if (tag is COMTypeLibTypeInfo type_info)
+        {
+            return type_info.Format();
         }
         else if (tag is NdrComProxyDefinition proxy)
         {
@@ -340,11 +394,11 @@ public partial class TypeLibControl : UserControl
     private void btnExportInterfaces_Click(object sender, EventArgs e)
     {
         StringBuilder sb = new();
-        if((cbProxyRenderStyle.SelectedIndex > 1) && (comClassIdName != null) && (comClassId != null))
+        if((cbProxyRenderStyle.SelectedIndex > 1) && (m_com_class_id_name != null) && (m_com_class_id != null))
         {
             // C++ style is requsted, let's add a line about the CLSID being rendered
 
-            sb.AppendLine(COMUtilities.FormatGuidAsCStruct(comClassIdName, comClassId.Value));
+            sb.AppendLine(COMUtilities.FormatGuidAsCStruct(m_com_class_id_name, m_com_class_id.Value));
             sb.AppendLine();
         }
         foreach(var listView in new ListView[] { listViewEnums, listViewStructures, listViewClasses, listViewInterfaces })
@@ -408,7 +462,8 @@ public partial class TypeLibControl : UserControl
 
     private void textBoxFilter_KeyUp(object sender, KeyEventArgs e)
     {
-        if (IsDisposed) return;
+        if (IsDisposed)
+            return;
         RefreshInterfaces();
     }
 

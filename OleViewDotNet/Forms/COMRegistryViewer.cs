@@ -20,6 +20,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -1767,10 +1768,14 @@ public partial class COMRegistryViewer : UserControl
             
             if(ent != null)
             {
-                Assembly typelib = COMUtilities.LoadTypeLib(this, ent.NativePath);
-                if (typelib != null)
+                try
                 {
-                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name, typelib, selected_guid, false));
+                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name,
+                        COMTypeLib.FromFile(ent.NativePath), selected_guid));
+                }
+                catch (Exception ex)
+                {
+                    EntryPoint.ShowError(this, ex);
                 }
             }
         }

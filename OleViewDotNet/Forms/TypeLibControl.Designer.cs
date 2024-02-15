@@ -56,11 +56,11 @@ partial class TypeLibControl
             this.btnExportInterfaces = new System.Windows.Forms.Button();
             this.textBoxFilter = new OleViewDotNet.Forms.InputTextBox();
             this.panelProxy = new System.Windows.Forms.Panel();
+            this.checkBoxHideComments = new System.Windows.Forms.CheckBox();
             this.lblRendering = new System.Windows.Forms.Label();
             this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();
             this.btnDqs = new System.Windows.Forms.Button();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
-            this.checkBoxHideComments = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -208,7 +208,7 @@ partial class TypeLibControl
             this.tabPageClasses.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPageClasses.Name = "tabPageClasses";
             this.tabPageClasses.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageClasses.Size = new System.Drawing.Size(432, 539);
+            this.tabPageClasses.Size = new System.Drawing.Size(431, 539);
             this.tabPageClasses.TabIndex = 3;
             this.tabPageClasses.Text = "Classes";
             this.tabPageClasses.UseVisualStyleBackColor = true;
@@ -226,7 +226,7 @@ partial class TypeLibControl
             this.listViewClasses.Location = new System.Drawing.Point(4, 5);
             this.listViewClasses.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listViewClasses.Name = "listViewClasses";
-            this.listViewClasses.Size = new System.Drawing.Size(424, 529);
+            this.listViewClasses.Size = new System.Drawing.Size(423, 529);
             this.listViewClasses.TabIndex = 1;
             this.listViewClasses.UseCompatibleStateImageBehavior = false;
             this.listViewClasses.View = System.Windows.Forms.View.Details;
@@ -248,7 +248,7 @@ partial class TypeLibControl
             this.tabPageStructures.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPageStructures.Name = "tabPageStructures";
             this.tabPageStructures.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageStructures.Size = new System.Drawing.Size(432, 539);
+            this.tabPageStructures.Size = new System.Drawing.Size(431, 539);
             this.tabPageStructures.TabIndex = 1;
             this.tabPageStructures.Text = "Structures";
             this.tabPageStructures.UseVisualStyleBackColor = true;
@@ -265,7 +265,7 @@ partial class TypeLibControl
             this.listViewStructures.Location = new System.Drawing.Point(4, 5);
             this.listViewStructures.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listViewStructures.Name = "listViewStructures";
-            this.listViewStructures.Size = new System.Drawing.Size(424, 529);
+            this.listViewStructures.Size = new System.Drawing.Size(423, 529);
             this.listViewStructures.TabIndex = 1;
             this.listViewStructures.UseCompatibleStateImageBehavior = false;
             this.listViewStructures.View = System.Windows.Forms.View.Details;
@@ -287,7 +287,7 @@ partial class TypeLibControl
             this.tabPageEnums.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPageEnums.Name = "tabPageEnums";
             this.tabPageEnums.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageEnums.Size = new System.Drawing.Size(432, 539);
+            this.tabPageEnums.Size = new System.Drawing.Size(431, 539);
             this.tabPageEnums.TabIndex = 2;
             this.tabPageEnums.Text = "Enums";
             this.tabPageEnums.UseVisualStyleBackColor = true;
@@ -304,7 +304,7 @@ partial class TypeLibControl
             this.listViewEnums.Location = new System.Drawing.Point(4, 5);
             this.listViewEnums.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listViewEnums.Name = "listViewEnums";
-            this.listViewEnums.Size = new System.Drawing.Size(424, 529);
+            this.listViewEnums.Size = new System.Drawing.Size(423, 529);
             this.listViewEnums.TabIndex = 1;
             this.listViewEnums.UseCompatibleStateImageBehavior = false;
             this.listViewEnums.View = System.Windows.Forms.View.Details;
@@ -362,6 +362,17 @@ partial class TypeLibControl
             this.panelProxy.Size = new System.Drawing.Size(594, 66);
             this.panelProxy.TabIndex = 2;
             // 
+            // checkBoxHideComments
+            // 
+            this.checkBoxHideComments.AutoSize = true;
+            this.checkBoxHideComments.Location = new System.Drawing.Point(442, 20);
+            this.checkBoxHideComments.Name = "checkBoxHideComments";
+            this.checkBoxHideComments.Size = new System.Drawing.Size(149, 24);
+            this.checkBoxHideComments.TabIndex = 4;
+            this.checkBoxHideComments.Text = "Hide Comments";
+            this.checkBoxHideComments.UseVisualStyleBackColor = true;
+            this.checkBoxHideComments.CheckedChanged += new System.EventHandler(this.checkBoxHideComments_CheckedChanged);
+            // 
             // lblRendering
             // 
             this.lblRendering.AutoSize = true;
@@ -375,7 +386,6 @@ partial class TypeLibControl
             // cbProxyRenderStyle
             // 
             this.cbProxyRenderStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProxyRenderStyle.Enabled = false;
             this.cbProxyRenderStyle.FormattingEnabled = true;
             this.cbProxyRenderStyle.Items.AddRange(new object[] {
             "IDL",
@@ -390,7 +400,6 @@ partial class TypeLibControl
             // 
             // btnDqs
             // 
-            this.btnDqs.Enabled = false;
             this.btnDqs.Location = new System.Drawing.Point(4, 14);
             this.btnDqs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnDqs.Name = "btnDqs";
@@ -409,19 +418,8 @@ partial class TypeLibControl
             this.textEditor.Location = new System.Drawing.Point(0, 105);
             this.textEditor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(603, 538);
+            this.textEditor.Size = new System.Drawing.Size(601, 538);
             this.textEditor.TabIndex = 0;
-            // 
-            // checkBoxHideComments
-            // 
-            this.checkBoxHideComments.AutoSize = true;
-            this.checkBoxHideComments.Location = new System.Drawing.Point(442, 20);
-            this.checkBoxHideComments.Name = "checkBoxHideComments";
-            this.checkBoxHideComments.Size = new System.Drawing.Size(149, 24);
-            this.checkBoxHideComments.TabIndex = 4;
-            this.checkBoxHideComments.Text = "Hide Comments";
-            this.checkBoxHideComments.UseVisualStyleBackColor = true;
-            this.checkBoxHideComments.CheckedChanged += new System.EventHandler(this.checkBoxHideComments_CheckedChanged);
             // 
             // TypeLibControl
             // 
