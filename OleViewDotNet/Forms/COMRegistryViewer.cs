@@ -1386,9 +1386,9 @@ public partial class COMRegistryViewer : UserControl
             {
                 contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
             }
-            else if (node.Tag is COMAppIDEntry)
+            else if (node.Tag is COMAppIDEntry appid_entry)
             {
-                EnableViewPermissions((COMAppIDEntry)node.Tag);
+                EnableViewPermissions(appid_entry);
             }
             else if (node.Tag is COMInterfaceEntry)
             {
@@ -1413,9 +1413,8 @@ public partial class COMRegistryViewer : UserControl
                 contextMenuStrip.Items.Add(refreshProcessToolStripMenuItem);
                 contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
             }
-            else if (node.Tag is COMIPIDEntry)
+            else if (node.Tag is COMIPIDEntry ipid)
             {
-                COMIPIDEntry ipid = (COMIPIDEntry)node.Tag;
                 COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
 
                 if (intf.HasTypeLib)
@@ -1430,17 +1429,15 @@ public partial class COMRegistryViewer : UserControl
 
                 contextMenuStrip.Items.Add(unmarshalToolStripMenuItem);
             }
-            else if (node.Tag is COMRuntimeClassEntry)
+            else if (node.Tag is COMRuntimeClassEntry runtime_class)
             {
-                COMRuntimeClassEntry runtime_class = (COMRuntimeClassEntry)node.Tag;
                 if (runtime_class.HasPermission)
                 {
                     contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
                 }
             }
-            else if (node.Tag is COMRuntimeServerEntry)
+            else if (node.Tag is COMRuntimeServerEntry runtime_server)
             {
-                COMRuntimeServerEntry runtime_server = (COMRuntimeServerEntry)node.Tag;
                 if (runtime_server.HasPermission)
                 {
                     contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
