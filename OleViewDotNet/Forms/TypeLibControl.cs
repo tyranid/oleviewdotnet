@@ -233,13 +233,14 @@ public partial class TypeLibControl : UserControl
 
     private INdrFormatter GetNdrFormatter(NdrComProxyDefinition proxy = null)
     {
-        DefaultNdrFormatterFlags flags = cbProxyRenderStyle.SelectedIndex % 2 == 0 ? DefaultNdrFormatterFlags.None : DefaultNdrFormatterFlags.RemoveComments;
+        DefaultNdrFormatterFlags flags = checkBoxHideComments.Checked ? DefaultNdrFormatterFlags.RemoveComments : 0;
         Func<string, string> demangler = proxy != null ? n => GetComProxyName(proxy, m_iids_to_names) : null;
-        bool useNtApiFormatter = cbProxyRenderStyle.SelectedIndex < 2;
-        return useNtApiFormatter ?
-            DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags) :
-            // cpp style requested
-            CppNdrFormatter.Create(m_iids_to_names, demangler, flags);
+        return cbProxyRenderStyle.SelectedIndex switch
+        {
+            1 => DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags),
+            2 => CppNdrFormatter.Create(m_iids_to_names, demangler, flags),
+            _ => IdlNdrFormatter.Create(m_iids_to_names, demangler, flags),
+        };
     }
 
     private string GetTextFromTag(object tag)
@@ -266,15 +267,13 @@ public partial class TypeLibControl : UserControl
 
     private void UpdateFromListView(ListView list)
     {
-        string text = string.Empty;
-
-        if (list.SelectedItems.Count > 0)
+        StringBuilder builder = new();
+        foreach (ListViewItem item in list.SelectedItems)
         {
-            ListViewItem item = list.SelectedItems[0];
-            text = GetTextFromTag(item.Tag);
+            builder.Append(GetTextFromTag(item.Tag));
         }
 
-        textEditor.Text = text;
+        textEditor.Text = builder.ToString();
         textEditor.Refresh();
     }
 
@@ -411,5 +410,13 @@ public partial class TypeLibControl : UserControl
     {
         if (IsDisposed) return;
         RefreshInterfaces();
+    }
+
+    private void checkBoxHideComments_CheckedChanged(object sender, EventArgs e)
+    {
+        if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
+        {
+            UpdateFromListView(view);
+        }
     }
 }
