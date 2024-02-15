@@ -267,13 +267,13 @@ public partial class TypeLibControl : UserControl
 
     private void UpdateFromListView(ListView list)
     {
-        StringBuilder builder = new();
-        foreach (ListViewItem item in list.SelectedItems)
+        string text = string.Empty;
+        if (list.SelectedItems.Count > 0)
         {
-            builder.Append(GetTextFromTag(item.Tag));
+            text = GetTextFromTag(list.SelectedItems[0].Tag);
         }
 
-        textEditor.Text = builder.ToString();
+        textEditor.Text = text;
         textEditor.Refresh();
     }
 
