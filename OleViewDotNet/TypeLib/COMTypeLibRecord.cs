@@ -15,29 +15,16 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Utilities;
-using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
+public sealed class COMTypeLibRecord : COMTypeLibComplexType
 {
     internal COMTypeLibRecord(COMTypeLibDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }
-
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
-    {
-        List<COMTypeLibVariable> fields = new();
-        for (int i = 0; i < attr.cVars; ++i)
-        {
-            fields.Add(new COMTypeLibVariable(type_info, i));
-        }
-        Fields = fields.AsReadOnly();
-    }
-
-    public IReadOnlyList<COMTypeLibVariable> Fields { get; private set; }
 
     internal override void Format(SourceCodeBuilder builder)
     {
@@ -52,4 +39,3 @@ public sealed class COMTypeLibRecord : COMTypeLibTypeInfo
         builder.AppendLine($"}} {Name};");
     }
 }
-

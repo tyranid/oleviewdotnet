@@ -14,29 +14,28 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Utilities;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public sealed class COMTypeLibUnion : COMTypeLibComplexType
+public abstract class COMTypeLibComplexType : COMTypeLibTypeInfo
 {
-    internal COMTypeLibUnion(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibComplexType(COMTypeLibDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }
 
-    internal override void Format(SourceCodeBuilder builder)
+    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}union {{");
-        using (builder.PushIndent(4))
+        List<COMTypeLibVariable> fields = new();
+        for (int i = 0; i < attr.cVars; ++i)
         {
-            foreach (var v in Fields)
-            {
-                builder.AppendLine($"{v.Type.FormatType()} {v.Name}{v.Type.FormatPostName()};");
-            }
+            fields.Add(new COMTypeLibVariable(type_info, i));
         }
-        builder.AppendLine($"}} {Name};");
+        Fields = fields.AsReadOnly();
     }
+
+    public IReadOnlyList<COMTypeLibVariable> Fields { get; private set; }
 }
 

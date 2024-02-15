@@ -51,6 +51,8 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
         Aliases = types.OfType<COMTypeLibAlias>().ToList().AsReadOnly();
         Unions = types.OfType<COMTypeLibUnion>().ToList().AsReadOnly();
         Modules = types.OfType<COMTypeLibModule>().ToList().AsReadOnly();
+        Classes = types.OfType<COMTypeLibCoClass>().ToList().AsReadOnly();
+        ComplexTypes = types.OfType<COMTypeLibComplexType>().ToList().AsReadOnly();
     }
     #endregion
 
@@ -77,6 +79,8 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
     public IReadOnlyList<COMTypeLibUnion> Unions { get; }
     public IReadOnlyList<COMTypeLibModule> Modules { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
+    public IReadOnlyList<COMTypeLibCoClass> Classes { get; }
+    public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
     #endregion
 
     #region Public Methods
@@ -100,6 +104,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
                 builder.FormatTypes(Records);
                 builder.FormatTypes(Unions);
                 builder.FormatTypes(Modules);
+                builder.FormatTypes(Classes);
             }
             builder.FormatTypes(Interfaces);
             builder.FormatTypes(Dispatch);
