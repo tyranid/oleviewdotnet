@@ -2220,7 +2220,7 @@ public static class COMUtilities
         IEnumerable<NdrComProxyDefinition> proxies, ProxyFormatterFlags flags)
     {
         bool remove_comments = (flags & ProxyFormatterFlags.RemoveComments) != 0;
-        INdrFormatter formatter = DefaultNdrFormatter.Create(registry.InterfacesToNames,
+        INdrFormatter formatter = IdlNdrFormatter.Create(registry.InterfacesToNames,
                 s => DemangleWinRTName(s),
                 remove_comments ? DefaultNdrFormatterFlags.RemoveComments : DefaultNdrFormatterFlags.None);
         StringBuilder builder = new();
