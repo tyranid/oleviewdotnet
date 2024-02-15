@@ -99,6 +99,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
                 builder.FormatTypes(Enums);
                 builder.FormatTypes(Records);
                 builder.FormatTypes(Unions);
+                builder.FormatTypes(Modules);
             }
             builder.FormatTypes(Interfaces);
             builder.FormatTypes(Dispatch);

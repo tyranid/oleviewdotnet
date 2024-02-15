@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
@@ -25,8 +24,8 @@ public class COMTypeLibMethod
 {
     #region Private Members
     private readonly COMTypeLibDocumentation _doc;
-    private readonly FUNCDESC _desc;
     private readonly FUNCFLAGS _flags;
+    private protected readonly FUNCDESC _desc;
     #endregion
 
     #region Public Properties
@@ -37,24 +36,10 @@ public class COMTypeLibMethod
     public IReadOnlyList<COMTypeLibParameter> Parameters { get; }
     public COMTypeLibTypeDesc ReturnValue { get; }
     public int VTableOffset => _desc.oVft;
-    public string DllName { get; private set; }
-    public int? Ordinal { get; private set; }
-    public string EntryPoint { get; private set; }
     #endregion
 
     #region Internal Members
-    internal string FormatName()
-    {
-        return _desc.invkind switch
-        {
-            INVOKEKIND.INVOKE_FUNC => _doc.Name,
-            INVOKEKIND.INVOKE_PROPERTYGET => $"get_{_doc.Name}",
-            INVOKEKIND.INVOKE_PROPERTYPUT or INVOKEKIND.INVOKE_PROPERTYPUTREF => $"put_{_doc.Name}",
-            _ => null,
-        };
-    }
-
-    internal COMTypeLibMethod(COMTypeLibParser.TypeInfo type_info, int index, bool module_method = false)
+    internal COMTypeLibMethod(COMTypeLibParser.TypeInfo type_info, int index)
     {
         using COMFuncDesc desc = type_info.GetFuncDesc(index);
         _desc = desc.Descriptor;
@@ -64,21 +49,9 @@ public class COMTypeLibMethod
             .Select((d, i) => new COMTypeLibParameter(names[i + 1], d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
         _flags = (FUNCFLAGS)_desc.wFuncFlags;
-        if (module_method)
-        {
-            var dll_entry = type_info.GetDllEntry(_desc.memid, _desc.invkind);
-            DllName = dll_entry?.Item1 ?? string.Empty;
-            EntryPoint = dll_entry?.Item2 ?? string.Empty;
-            Ordinal = dll_entry?.Item3;
-        }
-        else
-        {
-            DllName = string.Empty;
-            EntryPoint = string.Empty;
-        }
     }
 
-    private List<string> GetAttributes(bool is_dispatch)
+    private protected virtual List<string> GetAttributes(bool is_dispatch)
     {
         List<string> attrs = new();
         if (is_dispatch)
@@ -131,15 +104,6 @@ public class COMTypeLibMethod
             attrs.Add("usesgetlasterror");
         if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FREPLACEABLE))
             attrs.Add("replaceable");
-
-        if (!string.IsNullOrEmpty(EntryPoint))
-        {
-            attrs.Add($"entry(\"{EntryPoint.EscapeString()}\")");
-        }
-        else if (Ordinal.HasValue)
-        {
-            attrs.Add($"entry({Ordinal})");
-        }
 
         return attrs;
     }

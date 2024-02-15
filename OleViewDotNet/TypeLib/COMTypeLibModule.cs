@@ -23,7 +23,7 @@ namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibModule : COMTypeLibTypeInfo
 {
-    public IReadOnlyList<COMTypeLibMethod> Functions { get; private set; }
+    public IReadOnlyList<COMTypeLibModuleFunction> Functions { get; private set; }
     public IReadOnlyList<COMTypeLibVariable> Constants { get; private set; }
 
     internal COMTypeLibModule(COMTypeLibDocumentation doc, TYPEATTR attr)
@@ -33,10 +33,10 @@ public sealed class COMTypeLibModule : COMTypeLibTypeInfo
 
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
     {
-        List<COMTypeLibMethod> functions = new();
+        List<COMTypeLibModuleFunction> functions = new();
         for (int i = 0; i < attr.cFuncs; ++i)
         {
-            functions.Add(new(type_info, i, module_method: true));
+            functions.Add(new(type_info, i));
         }
         Functions = functions.AsReadOnly();
         List<COMTypeLibVariable> constants = new();
