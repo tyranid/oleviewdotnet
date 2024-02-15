@@ -2764,4 +2764,48 @@ public static class COMUtilities
             throw new Win32Exception(hr);
         }
     }
+
+    public static string EscapeString(this string s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return s;
+        StringBuilder builder = new();
+        foreach (char ch in s)
+        {
+            switch (ch)
+            {
+                case '\\':
+                    builder.Append(@"\\");
+                    break;
+                case '\r':
+                    builder.Append(@"\r");
+                    break;
+                case '\n':
+                    builder.Append(@"\n");
+                    break;
+                case '\t':
+                    builder.Append(@"\t");
+                    break;
+                case '\f':
+                    builder.Append(@"\f");
+                    break;
+                case '\v':
+                    builder.Append(@"\v");
+                    break;
+                case '\b':
+                    builder.Append(@"\b");
+                    break;
+                case '\0':
+                    builder.Append(@"\0");
+                    break;
+                case '"':
+                    builder.Append("\\\"");
+                    break;
+                default:
+                    builder.Append(ch);
+                    break;
+            }
+        }
+        return builder.ToString();
+    }
 }

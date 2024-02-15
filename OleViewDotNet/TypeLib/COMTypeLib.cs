@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using System;
@@ -51,6 +50,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
         Records = types.OfType<COMTypeLibRecord>().ToList().AsReadOnly();
         Aliases = types.OfType<COMTypeLibAlias>().ToList().AsReadOnly();
         Unions = types.OfType<COMTypeLibUnion>().ToList().AsReadOnly();
+        Modules = types.OfType<COMTypeLibModule>().ToList().AsReadOnly();
     }
     #endregion
 
@@ -75,6 +75,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
     public IReadOnlyList<COMTypeLibRecord> Records { get; }
     public IReadOnlyList<COMTypeLibAlias> Aliases { get; }
     public IReadOnlyList<COMTypeLibUnion> Unions { get; }
+    public IReadOnlyList<COMTypeLibModule> Modules { get; }
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     #endregion
 

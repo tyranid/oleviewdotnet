@@ -70,7 +70,7 @@ internal static class COMTypeLibUtils
     {
         if (value is string s)
         {
-            return $"{name}(\"{s.Replace("\"", "\\\"")})";
+            return $"{name}(\"{s.EscapeString()}\")";
         }
         else
         {
@@ -90,5 +90,19 @@ internal static class COMTypeLibUtils
     public static int GetTypeSize<T>()
     {
         return Marshal.SizeOf<T>();
+    }
+
+    public static string ReadBstr(IntPtr ptr)
+    {
+        if (ptr == IntPtr.Zero)
+            return null;
+        try
+        {
+            return Marshal.PtrToStringBSTR(ptr);
+        }
+        finally
+        {
+            Marshal.FreeBSTR(ptr);
+        }
     }
 }

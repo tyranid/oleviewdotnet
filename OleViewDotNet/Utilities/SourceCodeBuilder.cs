@@ -80,6 +80,8 @@ internal sealed class SourceCodeBuilder
 
     public void AppendAttributes(IEnumerable<string> lines, int indent = 4)
     {
+        if (!lines.Any())
+            return;
         AppendLine("[");
         using (PushIndent(indent))
         {

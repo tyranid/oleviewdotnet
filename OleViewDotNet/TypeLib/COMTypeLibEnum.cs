@@ -48,7 +48,6 @@ public sealed class COMTypeLibEnum : COMTypeLibTypeInfo
             }
 
             values.Add(new(v.Name, l));
-            
         }
         Values = values.AsReadOnly();
     }

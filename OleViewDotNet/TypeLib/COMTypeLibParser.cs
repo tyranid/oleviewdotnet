@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using OleViewDotNet.Interop;
 using System;
 using System.Collections.Concurrent;
@@ -115,6 +116,7 @@ internal sealed class COMTypeLibParser : IDisposable
                 TYPEKIND.TKIND_RECORD => ParseType(new COMTypeLibRecord(doc, _attr)),
                 TYPEKIND.TKIND_COCLASS => ParseType(new COMTypeLibCoClass(doc, _attr)),
                 TYPEKIND.TKIND_UNION => ParseType(new COMTypeLibUnion(doc, _attr)),
+                TYPEKIND.TKIND_MODULE => ParseType(new COMTypeLibModule(doc, _attr)),
                 _ => GetDefault(),
             };
         }
@@ -185,6 +187,24 @@ internal sealed class COMTypeLibParser : IDisposable
         public COMTypeLibDocumentation GetDocumentation(int index = -1)
         {
             return new COMTypeLibDocumentation(_type_info, index);
+        }
+
+        public Tuple<string, string, int> GetDllEntry(int memid, INVOKEKIND kind)
+        {
+            try
+            {
+                using var buffer = new SafeHGlobalBuffer(IntPtr.Size * 3);
+                _type_info.GetDllEntry(memid, kind, buffer.DangerousGetHandle(), 
+                    buffer.DangerousGetHandle() + IntPtr.Size, buffer.DangerousGetHandle() + IntPtr.Size * 2);
+                IntPtr dll_name = buffer.Read<IntPtr>(0);
+                IntPtr entry_point = buffer.Read<IntPtr>((ulong)IntPtr.Size);
+                int ordinal = buffer.Read<ushort>((ulong)(IntPtr.Size * 2));
+                return Tuple.Create(COMTypeLibUtils.ReadBstr(dll_name), COMTypeLibUtils.ReadBstr(entry_point), ordinal);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public TYPEATTR GetAttr()
