@@ -1199,6 +1199,14 @@ public static class COMUtilities
         return MarshalObjectToObjRef(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
     }
 
+    private static string RemoveGenericPart(string name)
+    {
+        int index = name.LastIndexOf('`');
+        if (index >= 0)
+            return name.Substring(0, index);
+        return name;
+    }
+
     private static string ConvertTypeToName(Type t)
     {
         if (t == typeof(string))
@@ -1249,6 +1257,15 @@ public static class COMUtilities
         {
             return "bool";
         }
+        else if (t.IsConstructedGenericType)
+        {
+            StringBuilder builder = new();
+            builder.Append(RemoveGenericPart(t.Name));
+            builder.Append('<');
+            builder.Append(string.Join(",", t.GenericTypeArguments.Select(g => ConvertTypeToName(g))));
+            builder.Append('>');
+            return builder.ToString();
+        }
 
         return t.Name;
     }
@@ -1279,11 +1296,11 @@ public static class COMUtilities
                 dirs.Add("Optional");
             }
 
-            string text = string.Format("{0} {1}", ConvertTypeToName(pi.ParameterType), pi.Name);
+            string text = $"{ConvertTypeToName(pi.ParameterType)} {pi.Name}";
 
             if (dirs.Count > 0)
             {
-                text = string.Format("[{0}] {1}", string.Join(",", dirs), text);
+                text = $"[{string.Join(",", dirs)}] {text}";
             }
             pars.Add(text);
         }
@@ -1294,9 +1311,7 @@ public static class COMUtilities
     {
         if (member is MethodInfo mi)
         {
-            return string.Format("{0} {1}({2});",
-                ConvertTypeToName(mi.ReturnType),
-                mi.Name, FormatParameters(mi.GetParameters()));
+            return $"{ConvertTypeToName(mi.ReturnType)} {mi.Name}({FormatParameters(mi.GetParameters())});";
         }
         else if (member is PropertyInfo prop)
         {
@@ -1315,18 +1330,18 @@ public static class COMUtilities
             string ps = string.Empty;
             if (index_params.Length > 0)
             {
-                ps = string.Format("({0})", FormatParameters(index_params));
+                ps = $"({FormatParameters(index_params)})";
             }
 
-            return string.Format("{0} {1}{2} {{ {3} }}", ConvertTypeToName(prop.PropertyType), prop.Name, ps, string.Join(" ", propdirs));
+            return $"{ConvertTypeToName(prop.PropertyType)} {prop.Name}{ps} {{ {string.Join(" ", propdirs)} }}";
         }
         else if (member is FieldInfo fi)
         {
-            return string.Format("{0} {1}", ConvertTypeToName(fi.FieldType), fi.Name);
+            return $"{ConvertTypeToName(fi.FieldType)} {fi.Name};";
         }
         else if (member is EventInfo ei)
         {
-            return string.Format("event {0} {1}", ei.EventHandlerType, ei.Name);
+            return $"event {ConvertTypeToName(ei.EventHandlerType)} {ei.Name};";
         }
         else
         {
@@ -1624,7 +1639,7 @@ public static class COMUtilities
     internal static Assembly LoadTypeLib(IWin32Window window, string path)
     {
         using WaitingDialog dlg = new((progress, token) => LoadTypeLib(path, progress), s => s);
-        dlg.Text = string.Format("Loading TypeLib {0}", path);
+        dlg.Text = $"Loading TypeLib {path}";
         dlg.CancelEnabled = false;
         if (dlg.ShowDialog(window) == DialogResult.OK)
         {
@@ -1712,7 +1727,7 @@ public static class COMUtilities
             int current = Interlocked.Increment(ref _current);
             if (current % MINIMUM_REPORT_SIZE == 1)
             {
-                _progress.Report(new Tuple<string, int>(string.Format("Querying Interfaces: {0} of {1}", current, _total_count),
+                _progress.Report(new Tuple<string, int>($"Querying Interfaces: {current} of {_total_count}",
                     100 * current / _total_count));
             }
         }
@@ -1819,7 +1834,7 @@ public static class COMUtilities
             case -1:
                 return "MTA";
             default:
-                return string.Format("STA (Thread ID {0})", appid);
+                return $"STA (Thread ID {appid})";
         }
     }
 
@@ -1870,7 +1885,7 @@ public static class COMUtilities
         }
         else
         {
-            string full_path = Path.Combine(base_path, string.Format("{0}.winmd", name));
+            string full_path = Path.Combine(base_path, $"{name}.winmd");
             if (File.Exists(full_path))
             {
                 asm = Assembly.ReflectionOnlyLoadFrom(full_path);
@@ -2257,7 +2272,7 @@ public static class COMUtilities
             string name = mi.Name;
             while (!matched_names.Add(name))
             {
-                name = string.Format("{0}_{1}", mi.Name, count++);
+                name = $"{mi.Name}_{count++}";
             }
             ret.Add(mi, name);
         }
