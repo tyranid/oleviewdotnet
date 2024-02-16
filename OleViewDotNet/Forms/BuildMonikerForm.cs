@@ -79,10 +79,7 @@ public partial class BuildMonikerForm : Form
                 foreach (string m in textBoxMoniker.Text.Split('!'))
                 {
                     IMoniker moniker = ParseMoniker(bind_context, m);
-                    if (Moniker != null)
-                    {
-                        Moniker.ComposeWith(moniker, false, out moniker);
-                    }
+                    Moniker?.ComposeWith(moniker, false, out moniker);
                     Moniker = moniker;
                 }
             }

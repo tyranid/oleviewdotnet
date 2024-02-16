@@ -134,10 +134,7 @@ public class COMProxyInstanceConverter
 
     private void ReportProgress(string progress)
     {
-        if (m_progress != null)
-        {
-            m_progress.Report(Tuple.Create(progress, -1));
-        }
+        m_progress?.Report(Tuple.Create(progress, -1));
     }
 
     public COMProxyInstanceConverter(string output_path, IProgress<Tuple<string, int>> progress)

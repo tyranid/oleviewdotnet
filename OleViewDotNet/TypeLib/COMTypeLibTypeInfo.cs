@@ -103,6 +103,7 @@ public class COMTypeLibTypeInfo
     public Guid Uuid => _attr.guid;
     public TYPEKIND Kind => _attr.typekind;
     public TYPEFLAGS Flags => _attr.wTypeFlags;
+    public COMTypeLibReference TypeLib { get; internal set; }
     #endregion
 
     #region Public Methods

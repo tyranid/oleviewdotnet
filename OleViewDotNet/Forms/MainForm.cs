@@ -652,7 +652,9 @@ public partial class MainForm : Form
         {
             try
             {
-                HostControl(new TypeLibControl(Path.GetFileName(dlg.FileName), COMTypeLib.FromFile(dlg.FileName), Guid.Empty));
+                HostControl(new TypeLibControl(null, 
+                    Path.GetFileName(dlg.FileName), 
+                    COMTypeLib.FromFile(dlg.FileName), Guid.Empty));
             }
             catch (Exception ex)
             {

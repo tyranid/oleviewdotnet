@@ -521,7 +521,7 @@ public partial class PropertiesControl : UserControl
         {
             try
             {
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_typelib.Name,
+                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, m_typelib.Name,
                     COMTypeLib.FromFile(m_typelib.NativePath), m_interface != null ? m_interface.Iid : Guid.Empty));
             }
             catch (Exception ex)
@@ -613,8 +613,8 @@ public partial class PropertiesControl : UserControl
                     COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
                     using var resolver = EntryPoint.GetProxyParserSymbolResolver();
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                    COMUtilities.GetFileName(clsid.DefaultServerName),
-                    COMProxyInstance.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
+                        COMUtilities.GetFileName(clsid.DefaultServerName),
+                        COMUtilities.GetProxyFromClsid(clsid, resolver), intf.Item1.Iid));
                 }
             }
         }

@@ -663,10 +663,7 @@ public static class COMUtilities
     {
         if (m_typelibs == null)
         {
-            if (progress != null)
-            {
-                progress.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
-            }
+            progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
         }
 
@@ -700,10 +697,7 @@ public static class COMUtilities
     {
         if (m_typelibs == null)
         {
-            if (progress != null)
-            {
-                progress.Report(Tuple.Create("Initializing Global Libraries", -1));
-            }
+            progress?.Report(Tuple.Create("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
         }
 
@@ -731,10 +725,7 @@ public static class COMUtilities
     {
         if (m_typelibs == null)
         {
-            if (progress != null)
-            {
-                progress.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
-            }
+            progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
         }
 
@@ -2157,10 +2148,7 @@ public static class COMUtilities
             foreach (string m in moniker_string.Split('!'))
             {
                 IMoniker moniker = ParseMoniker(bind_context, m);
-                if (ret_moniker != null)
-                {
-                    ret_moniker.ComposeWith(moniker, false, out moniker);
-                }
+                ret_moniker?.ComposeWith(moniker, false, out moniker);
                 ret_moniker = moniker;
             }
             return ret_moniker;
@@ -2807,5 +2795,49 @@ public static class COMUtilities
             }
         }
         return builder.ToString();
+    }
+
+    public static IProxyFormatter GetProxyFromClsid(COMCLSIDEntry clsid, ISymbolResolver resolver = null)
+    {
+        try
+        {
+            return COMProxyInstance.GetFromCLSID(clsid, resolver);
+        }
+        catch
+        {
+            if (!clsid.HasTypeLib || !clsid.TypeLibEntry.Versions.Any())
+            {
+                throw;
+            }
+            return clsid.TypeLibEntry.Versions.First().Parse();
+        }
+    }
+
+    public static IProxyFormatter GetProxyFromIID(COMInterfaceEntry intf, ISymbolResolver resolver = null)
+    {
+        if (intf == null || !intf.HasProxy)
+        {
+            throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
+        }
+
+        try
+        {
+            return COMProxyInterfaceInstance.GetFromIID(intf, resolver);
+        }
+        catch
+        {
+            if (intf.TypeLibVersionEntry == null)
+            {
+                throw;
+            }
+            var tlb = intf.TypeLibVersionEntry.Parse();
+            return tlb.Interfaces.FirstOrDefault(i => i.Uuid == intf.Iid)
+                ?? throw new ArgumentException("Can't find proxy for interface.");
+        }
+    }
+
+    public static IProxyFormatter GetProxyFromIID(COMInterfaceInstance intf, ISymbolResolver resolver = null)
+    {
+        return GetProxyFromIID(intf.InterfaceEntry, resolver);
     }
 }

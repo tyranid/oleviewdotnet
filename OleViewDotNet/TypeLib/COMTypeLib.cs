@@ -33,6 +33,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
         : base(doc, attr)
     {
         Path = path ?? string.Empty;
+        types.ForEach(t => t.TypeLib = this);
         Types = types.AsReadOnly();
         var interfaces = types.OfType<COMTypeLibInterface>().ToDictionary(i => i.Uuid);
         var dispatch = Types.OfType<COMTypeLibDispatch>().ToList();
@@ -40,6 +41,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
         {
             if (!interfaces.ContainsKey(disp.DualInterface.Uuid))
             {
+                disp.DualInterface.TypeLib = this;
                 interfaces.Add(disp.DualInterface.Uuid, disp.DualInterface);
             }
         }

@@ -65,26 +65,58 @@ public partial class TypeLibControl : UserControl
         };
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(COMTypeLib typelib)
+    private static IEnumerable<ListViewItemWithGuid> FormatTypeLibInterfaces(COMTypeLib typelib)
     {
         IEnumerable<COMTypeLibInterfaceBase> intfs = typelib.Interfaces;
         intfs = intfs.Concat(typelib.Dispatch);
         return intfs.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatClasses(COMTypeLib typelib)
+    private static IEnumerable<ListViewItemWithGuid> FormatTypeLibClasses(COMTypeLib typelib)
     {
         return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
     }
 
-    private static IEnumerable<ListViewItem> FormatStructs(COMTypeLib typelib)
+    private static IEnumerable<ListViewItem> FormatTypeLibStructs(COMTypeLib typelib)
     {
         return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
     }
 
-    private static IEnumerable<ListViewItem> FormatEnums(COMTypeLib typelib)
+    private static IEnumerable<ListViewItem> FormatTypeLibEnums(COMTypeLib typelib)
     {
         return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
+    }
+
+    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(IProxyFormatter formatter, IDictionary<Guid, string> iids_to_names)
+    {
+        if (formatter is COMTypeLib type_lib)
+            return FormatTypeLibInterfaces(type_lib);
+        if (formatter is COMProxyInstance proxy)
+            return FormatProxyInstance(proxy, iids_to_names);
+        return Array.Empty<ListViewItemWithGuid>();
+    }
+
+    private static IEnumerable<ListViewItemWithGuid> FormatClasses(IProxyFormatter formatter)
+    {
+        if(formatter is COMTypeLib type_lib)
+            return FormatTypeLibClasses(type_lib);
+        return Array.Empty<ListViewItemWithGuid>();
+    }
+
+    private static IEnumerable<ListViewItem> FormatStructs(IProxyFormatter formatter)
+    {
+        if (formatter is COMTypeLib type_lib)
+            return FormatTypeLibStructs(type_lib);
+        if (formatter is COMProxyInstance proxy)
+            return FormatProxyInstanceComplexTypes(proxy);
+        return Array.Empty<ListViewItemWithGuid>();
+    }
+
+    private static IEnumerable<ListViewItem> FormatEnums(IProxyFormatter formatter)
+    {
+        if (formatter is COMTypeLib type_lib)
+            return FormatTypeLibEnums(type_lib);
+        return Array.Empty<ListViewItemWithGuid>();
     }
 
     private static ListViewItemWithGuid MapTypeToItem(Type type)
@@ -186,7 +218,8 @@ public partial class TypeLibControl : UserControl
         }
     }
 
-    private TypeLibControl(IDictionary<Guid, string> iids_to_names,
+    private TypeLibControl(
+        IDictionary<Guid, string> iids_to_names,
         string name,
         Guid guid_to_view,
         IEnumerable<ListViewItemWithGuid> interfaces,
@@ -262,23 +295,41 @@ public partial class TypeLibControl : UserControl
         lblRendering.Visible = false;
     }
 
-    public TypeLibControl(string name, COMTypeLib typelib, Guid guid_to_view)
-            : this(null, name, guid_to_view, FormatInterfaces(typelib),
-          FormatClasses(typelib),
-          FormatStructs(typelib),
-          FormatEnums(typelib))
-    {
-        btnDqs.Visible = false;
-        cbProxyRenderStyle.Visible = false;
-        checkBoxHideComments.Visible = false;
-        lblRendering.Visible = false;
-    }
+    //public TypeLibControl(string name, COMTypeLib typelib, Guid guid_to_view)
+    //        : this(null, name, guid_to_view, 
+    //      FormatTypeLibInterfaces(typelib),
+    //      FormatTypeLibClasses(typelib),
+    //      FormatTypeLibStructs(typelib),
+    //      FormatTypeLibEnums(typelib))
+    //{
+    //    btnDqs.Visible = false;
+    //    cbProxyRenderStyle.Visible = false;
+    //    checkBoxHideComments.Visible = false;
+    //    lblRendering.Visible = false;
+    //}
 
-    public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
-        : this(registry.InterfacesToNames, name, guid_to_view,
-              FormatProxyInstance(proxy, registry.InterfacesToNames),
-              new ListViewItemWithGuid[0], FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
+    //public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, 
+    //    Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
+    //    : this(registry.InterfacesToNames, name, guid_to_view,
+    //          FormatProxyInstance(proxy, registry.InterfacesToNames),
+    //          new ListViewItemWithGuid[0], 
+    //          FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
+    //{
+    //    m_com_class_id = com_class_id;
+    //    m_com_class_id_name = com_class_id_name;
+    //}
+
+    public TypeLibControl(COMRegistry registry, string name, IProxyFormatter formatter,
+        Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
+        : this(registry?.InterfacesToNames, name, guid_to_view,
+              FormatInterfaces(formatter, registry?.InterfacesToNames),
+              FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
     {
+        bool is_proxy = formatter is COMProxyInstance;
+        btnDqs.Visible = is_proxy;
+        cbProxyRenderStyle.Visible = is_proxy;
+        checkBoxHideComments.Visible = is_proxy;
+        lblRendering.Visible = is_proxy;
         m_com_class_id = com_class_id;
         m_com_class_id_name = com_class_id_name;
     }

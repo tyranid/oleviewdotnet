@@ -1993,24 +1993,24 @@ function Get-ComProxy {
     PROCESS {
         $proxy = switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
-                [OleViewDotNet.Proxy.COMProxyInstance]::GetFromCLSID($Class, $null)
+                [OleViewDotNet.Utilities.COMUtilities]::GetProxyFromCLSID($Class)
             }
             "FromInterface" {
-                [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($Interface, $null)
+                [OleViewDotNet.Utilities.COMUtilities]::GetProxyFromIID($Interface)
             }
             "FromInterfaceInstance" {
-                [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($InterfaceInstance, $null)
+                [OleViewDotNet.Utilities.COMUtilities]::GetProxyFromIID($InterfaceInstance)
             }
             "FromIid" {
                 $intf = Get-ComInterface -Database $Database -Iid $Iid
                 if ($null -ne $intf) {
-                    [OleViewDotNet.Proxy.COMProxyInterfaceInstance]::GetFromIID($intf, $null)
+                    [OleViewDotNet.Utilities.COMUtilities]::GetProxyFromIID($intf)
                 }
             }
             "FromClsid" {
                 $class = Get-ComClass -Database $Database -Clsid $Clsid
                 if ($null -ne $class) {
-                    [OleViewDotNet.Proxy.COMProxyInstance]::GetFromCLSID($class, $null)
+                    [OleViewDotNet.Utilities.COMUtilities]::GetProxyFromCLSID($class)
                 }
             }
         }

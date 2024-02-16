@@ -2128,11 +2128,8 @@ public static class COMProcessParser
         {
             try
             {
-                if (progress != null)
-                {
-                    progress.Report(new Tuple<string, int>(string.Format("Parsing process {0}", p.ProcessName),
+                progress?.Report(new Tuple<string, int>(string.Format("Parsing process {0}", p.ProcessName),
                         100 * current_count++ / total_count));
-                }
                 COMProcessEntry proc = ParseProcess(p.Id,
                     config, registry, ipids);
                 if (proc != null)

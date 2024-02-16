@@ -1708,10 +1708,7 @@ public partial class COMRegistryViewer : UserControl
         }
         finally
         {
-            if (token != null)
-            {
-                token.Close();
-            }
+            token?.Close();
         }
     }
 
@@ -1770,7 +1767,8 @@ public partial class COMRegistryViewer : UserControl
             {
                 try
                 {
-                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(ent.Name,
+                    EntryPoint.GetMainForm(m_registry).HostControl(
+                        new TypeLibControl(m_registry, ent.Name,
                         COMTypeLib.FromFile(ent.NativePath), selected_guid));
                 }
                 catch (Exception ex)
@@ -1922,7 +1920,7 @@ public partial class COMRegistryViewer : UserControl
                 {
                     string comClassIdName = null;
                     Guid? comClassId = null;
-                    if(this.Text == "Local Services")
+                    if(Text == "Local Services")
                     {
                         comClassIdName = node.Parent.Text;
                         COMCLSIDEntry comClassClsId = node.Parent.Tag as COMCLSIDEntry;
@@ -1930,11 +1928,12 @@ public partial class COMRegistryViewer : UserControl
                     }
 
                     using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                    IProxyFormatter proxy = COMUtilities.GetProxyFromClsid(clsid, resolver);
                     EntryPoint.GetMainForm(m_registry).HostControl(
                         new TypeLibControl(
                             m_registry,
                             COMUtilities.GetFileName(clsid.DefaultServer),
-                            COMProxyInstance.GetFromCLSID(clsid, resolver),
+                            COMUtilities.GetProxyFromClsid(clsid, resolver),
                             selected_iid,
                             comClassIdName,
                             comClassId
