@@ -41,6 +41,10 @@ partial class TypeLibControl
             this.copyGUIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGUIDCStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyGIUDHexStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPageDispatch = new System.Windows.Forms.TabPage();
+            this.listViewDispatch = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPageClasses = new System.Windows.Forms.TabPage();
             this.listViewClasses = new System.Windows.Forms.ListView();
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -69,6 +73,7 @@ partial class TypeLibControl
             this.tabControl.SuspendLayout();
             this.tabPageInterfaces.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
+            this.tabPageDispatch.SuspendLayout();
             this.tabPageClasses.SuspendLayout();
             this.tabPageStructures.SuspendLayout();
             this.tabPageEnums.SuspendLayout();
@@ -110,6 +115,7 @@ partial class TypeLibControl
             // tabControl
             // 
             this.tabControl.Controls.Add(this.tabPageInterfaces);
+            this.tabControl.Controls.Add(this.tabPageDispatch);
             this.tabControl.Controls.Add(this.tabPageClasses);
             this.tabControl.Controls.Add(this.tabPageStructures);
             this.tabControl.Controls.Add(this.tabPageEnums);
@@ -200,6 +206,45 @@ partial class TypeLibControl
             this.copyGIUDHexStringToolStripMenuItem.Size = new System.Drawing.Size(264, 32);
             this.copyGIUDHexStringToolStripMenuItem.Text = "Copy GIUD Hex String";
             this.copyGIUDHexStringToolStripMenuItem.Click += new System.EventHandler(this.copyGIUDHexStringToolStripMenuItem_Click);
+            // 
+            // tabPageDispatch
+            // 
+            this.tabPageDispatch.Controls.Add(this.listViewDispatch);
+            this.tabPageDispatch.Location = new System.Drawing.Point(4, 29);
+            this.tabPageDispatch.Name = "tabPageDispatch";
+            this.tabPageDispatch.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageDispatch.Size = new System.Drawing.Size(431, 539);
+            this.tabPageDispatch.TabIndex = 4;
+            this.tabPageDispatch.Text = "Dispatch";
+            this.tabPageDispatch.UseVisualStyleBackColor = true;
+            // 
+            // listViewDispatch
+            // 
+            this.listViewDispatch.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader5});
+            this.listViewDispatch.ContextMenuStrip = this.contextMenuStrip;
+            this.listViewDispatch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewDispatch.FullRowSelect = true;
+            this.listViewDispatch.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewDispatch.HideSelection = false;
+            this.listViewDispatch.Location = new System.Drawing.Point(3, 3);
+            this.listViewDispatch.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.listViewDispatch.Name = "listViewDispatch";
+            this.listViewDispatch.Size = new System.Drawing.Size(425, 533);
+            this.listViewDispatch.TabIndex = 1;
+            this.listViewDispatch.UseCompatibleStateImageBehavior = false;
+            this.listViewDispatch.View = System.Windows.Forms.View.Details;
+            this.listViewDispatch.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            this.columnHeader1.Width = 278;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "IID";
             // 
             // tabPageClasses
             // 
@@ -365,6 +410,8 @@ partial class TypeLibControl
             // checkBoxHideComments
             // 
             this.checkBoxHideComments.AutoSize = true;
+            this.checkBoxHideComments.Checked = true;
+            this.checkBoxHideComments.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxHideComments.Location = new System.Drawing.Point(442, 20);
             this.checkBoxHideComments.Name = "checkBoxHideComments";
             this.checkBoxHideComments.Size = new System.Drawing.Size(149, 24);
@@ -418,7 +465,7 @@ partial class TypeLibControl
             this.textEditor.Location = new System.Drawing.Point(0, 105);
             this.textEditor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(601, 538);
+            this.textEditor.Size = new System.Drawing.Size(597, 538);
             this.textEditor.TabIndex = 0;
             // 
             // TypeLibControl
@@ -437,6 +484,7 @@ partial class TypeLibControl
             this.tabControl.ResumeLayout(false);
             this.tabPageInterfaces.ResumeLayout(false);
             this.contextMenuStrip.ResumeLayout(false);
+            this.tabPageDispatch.ResumeLayout(false);
             this.tabPageClasses.ResumeLayout(false);
             this.tabPageStructures.ResumeLayout(false);
             this.tabPageEnums.ResumeLayout(false);
@@ -482,4 +530,8 @@ partial class TypeLibControl
     private System.Windows.Forms.Label lblRendering;
     private System.Windows.Forms.ComboBox cbProxyRenderStyle;
     private System.Windows.Forms.CheckBox checkBoxHideComments;
+    private System.Windows.Forms.TabPage tabPageDispatch;
+    private System.Windows.Forms.ListView listViewDispatch;
+    private System.Windows.Forms.ColumnHeader columnHeader1;
+    private System.Windows.Forms.ColumnHeader columnHeader5;
 }

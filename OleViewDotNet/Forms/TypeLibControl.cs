@@ -65,48 +65,33 @@ public partial class TypeLibControl : UserControl
         };
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatTypeLibInterfaces(COMTypeLib typelib)
-    {
-        IEnumerable<COMTypeLibInterfaceBase> intfs = typelib.Interfaces;
-        intfs = intfs.Concat(typelib.Dispatch);
-        return intfs.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-    }
-
-    private static IEnumerable<ListViewItemWithGuid> FormatTypeLibClasses(COMTypeLib typelib)
-    {
-        return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-    }
-
-    private static IEnumerable<ListViewItem> FormatTypeLibStructs(COMTypeLib typelib)
-    {
-        return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
-    }
-
-    private static IEnumerable<ListViewItem> FormatTypeLibEnums(COMTypeLib typelib)
-    {
-        return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
-    }
-
     private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(IProxyFormatter formatter, IDictionary<Guid, string> iids_to_names)
     {
-        if (formatter is COMTypeLib type_lib)
-            return FormatTypeLibInterfaces(type_lib);
+        if (formatter is COMTypeLib typelib)
+            return typelib.Interfaces.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
         if (formatter is COMProxyInstance proxy)
             return FormatProxyInstance(proxy, iids_to_names);
         return Array.Empty<ListViewItemWithGuid>();
     }
 
+    private static IEnumerable<ListViewItemWithGuid> FormatDispatch(IProxyFormatter formatter)
+    {
+        if (formatter is COMTypeLib typelib)
+            return typelib.Dispatch.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
+        return Array.Empty<ListViewItemWithGuid>();
+    }
+
     private static IEnumerable<ListViewItemWithGuid> FormatClasses(IProxyFormatter formatter)
     {
-        if(formatter is COMTypeLib type_lib)
-            return FormatTypeLibClasses(type_lib);
+        if(formatter is COMTypeLib typelib)
+            return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
         return Array.Empty<ListViewItemWithGuid>();
     }
 
     private static IEnumerable<ListViewItem> FormatStructs(IProxyFormatter formatter)
     {
-        if (formatter is COMTypeLib type_lib)
-            return FormatTypeLibStructs(type_lib);
+        if (formatter is COMTypeLib typelib)
+            return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
         if (formatter is COMProxyInstance proxy)
             return FormatProxyInstanceComplexTypes(proxy);
         return Array.Empty<ListViewItemWithGuid>();
@@ -114,8 +99,8 @@ public partial class TypeLibControl : UserControl
 
     private static IEnumerable<ListViewItem> FormatEnums(IProxyFormatter formatter)
     {
-        if (formatter is COMTypeLib type_lib)
-            return FormatTypeLibEnums(type_lib);
+        if (formatter is COMTypeLib typelib)
+            return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
         return Array.Empty<ListViewItemWithGuid>();
     }
 
@@ -223,6 +208,7 @@ public partial class TypeLibControl : UserControl
         string name,
         Guid guid_to_view,
         IEnumerable<ListViewItemWithGuid> interfaces,
+        IEnumerable<ListViewItemWithGuid> dispatch,
         IEnumerable<ListViewItemWithGuid> classes,
         IEnumerable<ListViewItem> structs,
         IEnumerable<ListViewItem> enums)
@@ -241,6 +227,7 @@ public partial class TypeLibControl : UserControl
         m_interfaces = interfaces;
 
         AddGuidItems(listViewClasses, classes, tabPageClasses, guid_to_view);
+        AddGuidItems(listViewDispatch, dispatch, tabPageDispatch, guid_to_view);
 
         if (structs.Any())
         {
@@ -284,8 +271,8 @@ public partial class TypeLibControl : UserControl
     }
 
     public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
-        : this(null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly),
-              dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : new ListViewItemWithGuid[0],
+        : this(null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly), Array.Empty<ListViewItemWithGuid>(),
+              dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : Array.Empty<ListViewItemWithGuid>(),
               FormatAssemblyStructs(typelib, dotnet_assembly),
               FormatAssemblyEnums(typelib, dotnet_assembly))
     {
@@ -295,34 +282,10 @@ public partial class TypeLibControl : UserControl
         lblRendering.Visible = false;
     }
 
-    //public TypeLibControl(string name, COMTypeLib typelib, Guid guid_to_view)
-    //        : this(null, name, guid_to_view, 
-    //      FormatTypeLibInterfaces(typelib),
-    //      FormatTypeLibClasses(typelib),
-    //      FormatTypeLibStructs(typelib),
-    //      FormatTypeLibEnums(typelib))
-    //{
-    //    btnDqs.Visible = false;
-    //    cbProxyRenderStyle.Visible = false;
-    //    checkBoxHideComments.Visible = false;
-    //    lblRendering.Visible = false;
-    //}
-
-    //public TypeLibControl(COMRegistry registry, string name, COMProxyInstance proxy, 
-    //    Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
-    //    : this(registry.InterfacesToNames, name, guid_to_view,
-    //          FormatProxyInstance(proxy, registry.InterfacesToNames),
-    //          new ListViewItemWithGuid[0], 
-    //          FormatProxyInstanceComplexTypes(proxy), new ListViewItem[0])
-    //{
-    //    m_com_class_id = com_class_id;
-    //    m_com_class_id_name = com_class_id_name;
-    //}
-
     public TypeLibControl(COMRegistry registry, string name, IProxyFormatter formatter,
         Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
         : this(registry?.InterfacesToNames, name, guid_to_view,
-              FormatInterfaces(formatter, registry?.InterfacesToNames),
+              FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),
               FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
     {
         bool is_proxy = formatter is COMProxyInstance;
