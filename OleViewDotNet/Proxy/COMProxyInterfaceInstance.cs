@@ -87,6 +87,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         }
 
         COMCLSIDEntry clsid = intf.ProxyClassEntry;
+        COMProxyInstance.CheckForAutomation(clsid);
         if (m_proxies.ContainsKey(intf.Iid))
         {
             return m_proxies[intf.Iid];
