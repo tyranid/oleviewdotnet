@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Utilities.Format;
 
 internal sealed class SourceCodeBuilder
 {

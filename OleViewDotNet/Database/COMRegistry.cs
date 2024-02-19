@@ -19,6 +19,7 @@ using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Concurrent;
@@ -982,15 +983,12 @@ public class COMRegistry
 
     private static IEnumerable<T> DiffLists<T>(IEnumerable<T> left, IEnumerable<T> right, COMRegistryDiffMode mode)
     {
-        switch (mode)
+        return mode switch
         {
-            case COMRegistryDiffMode.LeftOnly:
-                return left.Except(right);
-            case COMRegistryDiffMode.RightOnly:
-                return right.Except(left);
-            default:
-                throw new ArgumentException(nameof(mode));
-        }
+            COMRegistryDiffMode.LeftOnly => left.Except(right),
+            COMRegistryDiffMode.RightOnly => right.Except(left),
+            _ => throw new ArgumentException(nameof(mode)),
+        };
     }
 
     private static IComparer<S> GetComparer<S, T>(IDictionary<S, T> dict)
@@ -1253,6 +1251,12 @@ public class COMRegistry
         {
             writer.WriteLine($"{pair.Key}\t{pair.Value}");
         }
+    }
+
+    public COMObjectFormatter Create(COMObjectFormatterFlags flags = 0,
+        COMObjectFormatterType type = COMObjectFormatterType.Idl)
+    {
+        return new COMObjectFormatterInternal(this) { Flags = flags, Type = type };
     }
 
     public override string ToString()

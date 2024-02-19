@@ -1793,9 +1793,8 @@ public partial class COMRegistryViewer : UserControl
         TreeNode node = treeComRegistry.SelectedNode;
         if (node != null)
         {
-            if (node.Tag is COMProcessEntry)
+            if (node.Tag is COMProcessEntry proc)
             {
-                COMProcessEntry proc = (COMProcessEntry)node.Tag;
                 COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", proc.Name), proc.AccessPermissions, true);
             }
             else if (node.Tag is COMRuntimeClassEntry || node.Tag is COMRuntimeServerEntry)
@@ -1807,7 +1806,7 @@ public partial class COMRegistryViewer : UserControl
                 {
                     runtime_server = m_registry.MapServerNameToEntry(runtime_class.Server);
                 }
-                
+
                 COMSecurityDescriptor perms = runtime_server?.Permissions ?? runtime_class.Permissions;
 
                 COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", name), perms, false);
@@ -1818,9 +1817,9 @@ public partial class COMRegistryViewer : UserControl
                 if (appid == null)
                 {
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                    if (clsid == null && node.Tag is COMProgIDEntry)
+                    if (clsid == null && node.Tag is COMProgIDEntry prog_id)
                     {
-                        clsid = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
+                        clsid = m_registry.MapClsidToEntry(prog_id.Clsid);
                     }
 
                     if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
@@ -1928,7 +1927,6 @@ public partial class COMRegistryViewer : UserControl
                     }
 
                     using var resolver = EntryPoint.GetProxyParserSymbolResolver();
-                    IProxyFormatter proxy = COMUtilities.GetProxyFromClsid(clsid, resolver);
                     EntryPoint.GetMainForm(m_registry).HostControl(
                         new TypeLibControl(
                             m_registry,

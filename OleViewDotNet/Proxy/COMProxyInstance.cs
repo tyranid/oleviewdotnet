@@ -52,6 +52,17 @@ public class COMProxyInstance : IProxyFormatter
             {
                 m_registry.IidNameCache.TryAdd(entry.Iid, entry.Name);
             }
+            else
+            {
+                if (m_registry.IidNameCache.TryGetValue(entry.Iid, out string name))
+                {
+                    entry.Name = name;
+                }
+                else
+                {
+                    entry.Name = $"intf_{entry.Iid.ToString().Replace('-', '_')}";
+                }
+            }
         }
     }
 
