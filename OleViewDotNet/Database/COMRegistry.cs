@@ -1253,12 +1253,6 @@ public class COMRegistry
         }
     }
 
-    public COMObjectFormatter Create(COMObjectFormatterFlags flags = 0,
-        COMObjectFormatterType type = COMObjectFormatterType.Idl)
-    {
-        return new COMObjectFormatterInternal(this) { Flags = flags, Type = type };
-    }
-
     public override string ToString()
     {
         StringBuilder builder = new();
