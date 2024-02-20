@@ -42,7 +42,6 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         RunAs = string.Empty;
         Name = server.DisplayName;
         LaunchPermission = server.LaunchAndActivationPermission;
-        AccessPermission = null;
         Source = COMRegistryEntrySource.Packaged;
         DllSurrogate = server.Executable;
         if (string.IsNullOrWhiteSpace(DllSurrogate))
@@ -54,6 +53,11 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
     private void LoadFromKey(RegistryKey key)
     {
         RunAs = key.GetValue("RunAs") as string;
+        if (string.IsNullOrWhiteSpace(RunAs))
+        {
+            RunAs = string.Empty;
+        }
+
         string name = key.GetValue(null) as string;
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -64,7 +68,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             Name = AppId.FormatGuidDefault();
         }
 
-        AccessPermission = key.ReadSecurityDescriptor("AccessPermission");
+        RegistryAccessPermission = key.ReadSecurityDescriptor("AccessPermission");
         LaunchPermission = key.ReadSecurityDescriptor("LaunchPermission");
 
         DllSurrogate = key.GetValue("DllSurrogate") as string;
@@ -106,11 +110,6 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             catch
             {
             }
-        }
-
-        if (string.IsNullOrWhiteSpace(RunAs))
-        {
-            RunAs = string.Empty;
         }
 
         object rotflags = key.GetValue("ROTFlags");
@@ -162,7 +161,9 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         get; private set;
     }
 
-    public COMSecurityDescriptor AccessPermission
+    public COMSecurityDescriptor AccessPermission => LocalService?.AccessPermissions ?? RegistryAccessPermission;
+
+    public COMSecurityDescriptor RegistryAccessPermission
     {
         get; private set;
     }
@@ -190,17 +191,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         get; private set;
     }
 
-    public IEnumerable<COMCLSIDEntry> ClassEntries
-    {
-        get
-        {
-            if (Database.ClsidsByAppId.ContainsKey(AppId))
-            {
-                return Database.ClsidsByAppId[AppId];
-            }
-            return new COMCLSIDEntry[0];
-        }
-    }
+    public IEnumerable<COMCLSIDEntry> ClassEntries => Database.ClsidsByAppId.ContainsKey(AppId) ? Database.ClsidsByAppId[AppId] : new COMCLSIDEntry[0];
 
     public PreferredServerBitness PreferredServerBitness
     {
@@ -279,7 +270,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         string flags = reader.ReadString("flags").Replace("Reserved2", "RequireSideLoadedPackage");
         Flags = (COMAppIDFlags)Enum.Parse(typeof(COMAppIDFlags), flags, true);
         LaunchPermission = reader.ReadSecurityDescriptor("launchperm");
-        AccessPermission = reader.ReadSecurityDescriptor("accessperm");
+        RegistryAccessPermission = reader.ReadSecurityDescriptor("accessperm");
         RotFlags = reader.ReadEnum<COMAppIDRotFlags>("rot");
         PreferredServerBitness = reader.ReadEnum<PreferredServerBitness>("bit");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
@@ -299,7 +290,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         writer.WriteOptionalAttributeString("name", Name);
         writer.WriteOptionalAttributeString("flags", Flags.ToString());
         writer.WriteSecurityDescriptor("launchperm", LaunchPermission);
-        writer.WriteSecurityDescriptor("accessperm", AccessPermission);
+        writer.WriteSecurityDescriptor("accessperm", RegistryAccessPermission);
         writer.WriteEnum("rot", RotFlags);
         writer.WriteEnum("bit", PreferredServerBitness);
         writer.WriteEnum("src", Source);

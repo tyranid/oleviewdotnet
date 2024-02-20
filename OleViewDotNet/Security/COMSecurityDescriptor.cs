@@ -56,4 +56,15 @@ public sealed class COMSecurityDescriptor
     {
         return SecurityDescriptor.ToString();
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is COMSecurityDescriptor descriptor &&
+               ToBase64() == descriptor.ToBase64();
+    }
+
+    public override int GetHashCode()
+    {
+        return -1748118390 + ToBase64().GetHashCode();
+    }
 }
