@@ -128,10 +128,7 @@ public sealed class COMAccessCheck : IDisposable
             {
                 if (appid.IsService)
                 {
-                    if (appid.LocalService.UserName == "LocalSystem")
-                        launch_principal = new COMSid(KnownSids.LocalSystem);
-                    else
-                        COMSid.TryParse(appid.LocalService.UserName, out launch_principal);
+                    COMSid.TryParse(appid.LocalService.UserName, out launch_principal);
                 }
                 else if (appid.HasRunAs && !appid.IsInteractiveUser)
                 {

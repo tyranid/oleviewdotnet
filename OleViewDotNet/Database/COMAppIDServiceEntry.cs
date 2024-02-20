@@ -55,11 +55,7 @@ public class COMAppIDServiceEntry : IXmlSerializable
     private COMSecurityDescriptor GetAccessPermissions(Win32Service service)
     {
         COMSid user;
-        if (service.UserName == "LocalSystem")
-        {
-            user = new COMSid(KnownSids.LocalSystem);
-        }
-        else if (!COMSid.TryParse(service.UserName, out user))
+        if (!COMSid.TryParse(service.UserName, out user))
         {
             user = new COMSid(KnownSids.Null);
         }

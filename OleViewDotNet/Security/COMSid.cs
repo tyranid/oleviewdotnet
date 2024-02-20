@@ -42,6 +42,12 @@ public sealed class COMSid : IEquatable<COMSid>
     public static bool TryParse(string name, out COMSid sid)
     {
         sid = null;
+        if (name.ToLower() == "localsystem")
+        {
+            sid = new(KnownSids.LocalSystem);
+            return true;
+        }
+
         var value = Sid.Parse(name, false);
         if (!value.IsSuccess)
             value = NtSecurity.LookupAccountName(null, name, false);
@@ -49,7 +55,7 @@ public sealed class COMSid : IEquatable<COMSid>
         if (!value.IsSuccess)
             return false;
 
-        sid = new COMSid(value.Result);
+        sid = new(value.Result);
         return true;
     }
 
@@ -60,7 +66,7 @@ public sealed class COMSid : IEquatable<COMSid>
         return sid;
     }
 
-    public static COMSid CurrentUser => new COMSid(NtToken.CurrentUser.Sid);
+    public static COMSid CurrentUser => new(NtToken.CurrentUser.Sid);
 
     public override bool Equals(object obj)
     {
