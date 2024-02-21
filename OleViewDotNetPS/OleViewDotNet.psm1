@@ -1842,6 +1842,8 @@ Specify the remote server the COM object factory will be created on.
 Specify the console session to create the factory in.
 .PARAMETER NoWrapper
 Don't wrap factory object in a callable wrapper.
+.PARAMETER Iid
+The IID to wrap for if not wanting to use a default type.
 #>
 function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1861,7 +1863,8 @@ function New-ComObjectFactory {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
-        [switch]$NoWrapper
+        [switch]$NoWrapper,
+        [guid]$Iid = [guid]::Empty
     )
 
     PROCESS {
@@ -1883,8 +1886,12 @@ function New-ComObjectFactory {
         }
 
         if ($null -ne $obj) {
-            $type = [OleViewDotNetPS.Utils.PowerShellUtils]::GetFactoryType($Class)
-            Wrap-ComObject $obj $type -NoWrapper:$NoWrapper | Write-Output
+            if ($Iid -eq [guid]::Empty) {
+                $type = [OleViewDotNetPS.Utils.PowerShellUtils]::GetFactoryType($Class)
+                Wrap-ComObject $obj $type -NoWrapper:$NoWrapper
+            } else {
+                Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper 
+            }
         }
     }
 }
