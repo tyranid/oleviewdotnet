@@ -29,7 +29,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter
     /// <summary>
     /// The name of the proxy interface.
     /// </summary>
-    public string Name => COMUtilities.DemangleWinRTName(Entry.Name, Iid);
+    public string Name { get; }
     /// <summary>
     /// Original name of the interface.
     /// </summary>
@@ -73,6 +73,11 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
         ComplexTypes = parser.ComplexTypes;
         OriginalName = intf.Name;
+        if (string.IsNullOrWhiteSpace(Entry.Name))
+        {
+            Entry.Name = intf.Name;
+        }
+        Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         ClassEntry = clsid;
         m_registry = registry;
     }

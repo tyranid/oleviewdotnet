@@ -18,7 +18,6 @@ using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
-using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
@@ -42,9 +41,6 @@ namespace OleViewDotNet.Forms;
 /// </summary>
 public partial class COMRegistryViewer : UserControl
 {
-    /// <summary>
-    /// Current registry
-    /// </summary>
     private readonly COMRegistry m_registry;
     private readonly HashSet<FilterType> m_filter_types;
     private readonly DisplayMode m_mode;
@@ -99,53 +95,31 @@ public partial class COMRegistryViewer : UserControl
 
     private static string GetDisplayName(DisplayMode mode)
     {
-        switch (mode)
+        return mode switch
         {
-            case DisplayMode.CLSIDsByName:
-                return "CLSIDs by Name";
-            case DisplayMode.CLSIDs:
-                return "CLSIDs";
-            case DisplayMode.ProgIDs:
-                return "ProgIDs";
-            case DisplayMode.CLSIDsByServer:
-                return "CLSIDs by Server";
-            case DisplayMode.CLSIDsByLocalServer:
-                return "CLSIDs by Local Server";
-            case DisplayMode.CLSIDsWithSurrogate:
-                return "CLSIDs with Surrogate";
-            case DisplayMode.Interfaces:
-                return "Interfaces";
-            case DisplayMode.InterfacesByName:
-                return "Interfaces by Name";
-            case DisplayMode.ImplementedCategories:
-                return "Implemented Categories";
-            case DisplayMode.PreApproved:
-                return "Explorer Pre-Approved";
-            case DisplayMode.IELowRights:
-                return "IE Low Rights Policy";
-            case DisplayMode.LocalServices:
-                return "Local Services";
-            case DisplayMode.AppIDs:
-                return "AppIDs";
-            case DisplayMode.AppIDsWithIL:
-                return "AppIDs with IL";
-            case DisplayMode.AppIDsWithAC:
-                return "AppIDs with AC";
-            case DisplayMode.Typelibs:
-                return "TypeLibs";
-            case DisplayMode.MimeTypes:
-                return "MIME Types";
-            case DisplayMode.ProxyCLSIDs:
-                return "Proxy CLSIDs";
-            case DisplayMode.Processes:
-                return "COM Processes";
-            case DisplayMode.RuntimeClasses:
-                return "Runtime Classes";
-            case DisplayMode.RuntimeServers:
-                return "Runtime Servers";
-            default:
-                throw new ArgumentException("Invalid mode value");
-        }
+            DisplayMode.CLSIDsByName => "CLSIDs by Name",
+            DisplayMode.CLSIDs => "CLSIDs",
+            DisplayMode.ProgIDs => "ProgIDs",
+            DisplayMode.CLSIDsByServer => "CLSIDs by Server",
+            DisplayMode.CLSIDsByLocalServer => "CLSIDs by Local Server",
+            DisplayMode.CLSIDsWithSurrogate => "CLSIDs with Surrogate",
+            DisplayMode.Interfaces => "Interfaces",
+            DisplayMode.InterfacesByName => "Interfaces by Name",
+            DisplayMode.ImplementedCategories => "Implemented Categories",
+            DisplayMode.PreApproved => "Explorer Pre-Approved",
+            DisplayMode.IELowRights => "IE Low Rights Policy",
+            DisplayMode.LocalServices => "Local Services",
+            DisplayMode.AppIDs => "AppIDs",
+            DisplayMode.AppIDsWithIL => "AppIDs with IL",
+            DisplayMode.AppIDsWithAC => "AppIDs with AC",
+            DisplayMode.Typelibs => "TypeLibs",
+            DisplayMode.MimeTypes => "MIME Types",
+            DisplayMode.ProxyCLSIDs => "Proxy CLSIDs",
+            DisplayMode.Processes => "COM Processes",
+            DisplayMode.RuntimeClasses => "Runtime Classes",
+            DisplayMode.RuntimeServers => "Runtime Servers",
+            _ => throw new ArgumentException("Invalid mode value"),
+        };
     }
 
     private static IEnumerable<FilterType> GetFilterTypes(DisplayMode mode)
@@ -408,7 +382,7 @@ public partial class COMRegistryViewer : UserControl
     }
 
     private static string BuildInterfaceToolTip(COMInterfaceEntry ent, COMInterfaceInstance instance)
-    {            
+    {
         StringBuilder builder = new();
 
         AppendFormatLine(builder, "Name: {0}", ent.Name);
@@ -1043,9 +1017,9 @@ public partial class COMRegistryViewer : UserControl
     {
         ICOMClassEntry clsid = node.Tag as ICOMClassEntry;
 
-        if (clsid == null && node.Tag is COMProgIDEntry)
+        if (clsid == null && node.Tag is COMProgIDEntry prog_id)
         {
-            clsid = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
+            clsid = m_registry.MapClsidToEntry(prog_id.Clsid);
         }
 
         if (clsid != null)
@@ -1090,7 +1064,7 @@ public partial class COMRegistryViewer : UserControl
     }
 
     private async void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
-    {            
+    {
         Cursor currCursor = Cursor.Current;
         Cursor.Current = Cursors.WaitCursor;
 
@@ -1098,7 +1072,6 @@ public partial class COMRegistryViewer : UserControl
 
         Cursor.Current = currCursor;
     }
-
 
     private static bool CanGetGuid(TreeNode node)
     {
@@ -1156,22 +1129,18 @@ public partial class COMRegistryViewer : UserControl
         TreeNode node = treeComRegistry.SelectedNode;
         Guid guid = Guid.Empty;
 
-        if (node != null)
+        if (node?.Tag is COMCLSIDEntry clsid)
         {
-            if (node.Tag is COMCLSIDEntry)
-            {
-                guid = ((COMCLSIDEntry)node.Tag).Clsid;
-            }
-            else if (node.Tag is COMProgIDEntry)
-            {
-                COMProgIDEntry ent = (COMProgIDEntry)node.Tag;
-                guid = ent.Clsid;
-            }
+            guid = clsid.Clsid;
+        }
+        else if (node?.Tag is COMProgIDEntry prog_id)
+        {
+            guid = prog_id.Clsid;
+        }
 
-            if (guid != Guid.Empty)
-            {
-                COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Object);
-            }
+        if (guid != Guid.Empty)
+        {
+            COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Object);
         }
     }
 
@@ -1182,59 +1151,53 @@ public partial class COMRegistryViewer : UserControl
 
     private ICOMClassEntry GetSelectedClassEntry()
     {
-        ICOMClassEntry ent = null;
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node?.Tag is ICOMClassEntry clsid)
         {
-            if (node.Tag is ICOMClassEntry)
-            {
-                ent = (ICOMClassEntry)node.Tag;
-            }
-            else if (node.Tag is COMProgIDEntry)
-            {
-                ent = m_registry.MapClsidToEntry(((COMProgIDEntry)node.Tag).Clsid);
-            }
+            return clsid;
         }
-        return ent;
+        else if (node?.Tag is COMProgIDEntry prog_id)
+        {
+            return m_registry.MapClsidToEntry(prog_id.Clsid);
+        }
+        return null;
     }
 
     private async Task CreateInstance(CLSCTX clsctx, string server)
     {
         ICOMClassEntry ent = GetSelectedClassEntry();
-        if (ent != null)
+        if (ent == null)
+            return;
+        try
         {
-            try
+            object comObj = ent.CreateInstanceAsObject(clsctx, server);
+            if (comObj != null)
             {
-                object comObj = ent.CreateInstanceAsObject(clsctx, server);
-                if (comObj != null)
-                {
-                    await SetupObjectView(ent, comObj, false);
-                }
+                await SetupObjectView(ent, comObj, false);
             }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
         }
     }
 
     private async Task CreateClassFactory(string server)
     {
         ICOMClassEntry ent = GetSelectedClassEntry();
-        if (ent != null)
+        if (ent == null)
+            return;
+        try
         {
-            try
+            object comObj = ent.CreateClassFactory(CLSCTX.ALL, server);
+            if (comObj != null)
             {
-                object comObj = ent.CreateClassFactory(CLSCTX.ALL, server);
-                if (comObj != null)
-                {
-                    await SetupObjectView(ent, comObj, true);
-                }
+                await SetupObjectView(ent, comObj, true);
             }
-            catch (Exception ex)
-            {
-                EntryPoint.ShowError(this, ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -1736,45 +1699,44 @@ public partial class COMRegistryViewer : UserControl
     private void viewTypeLibraryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
+        if (node == null)
+            return;
 
-        if (node != null)
+        COMTypeLibVersionEntry ent = node.Tag as COMTypeLibVersionEntry;
+        Guid selected_guid = Guid.Empty;
+
+        if (ent == null)
         {
-            COMTypeLibVersionEntry ent = node.Tag as COMTypeLibVersionEntry;
-            Guid selected_guid = Guid.Empty;
-
-            if (ent == null)
+            COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
+            if (node.Tag is COMProgIDEntry progid)
             {
-                COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                if (node.Tag is COMProgIDEntry progid)
-                {
-                    clsid = m_registry.MapClsidToEntry(progid.Clsid);
-                }
-
-                if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
-                {
-                    ent = m_registry.Typelibs[clsid.TypeLib].Versions.First();
-                    selected_guid = clsid.Clsid;
-                }
-
-                if (node.Tag is COMInterfaceEntry intf && m_registry.Typelibs.ContainsKey(intf.TypeLib))
-                {
-                    ent = m_registry.GetTypeLibVersionEntry(intf.TypeLib, intf.TypeLibVersion);
-                    selected_guid = intf.Iid;
-                }
+                clsid = m_registry.MapClsidToEntry(progid.Clsid);
             }
-            
-            if(ent != null)
+
+            if (clsid != null && m_registry.Typelibs.ContainsKey(clsid.TypeLib))
             {
-                try
-                {
-                    EntryPoint.GetMainForm(m_registry).HostControl(
-                        new TypeLibControl(m_registry, ent.Name,
-                        COMTypeLib.FromFile(ent.NativePath), selected_guid));
-                }
-                catch (Exception ex)
-                {
-                    EntryPoint.ShowError(this, ex);
-                }
+                ent = m_registry.Typelibs[clsid.TypeLib].Versions.First();
+                selected_guid = clsid.Clsid;
+            }
+
+            if (node.Tag is COMInterfaceEntry intf && m_registry.Typelibs.ContainsKey(intf.TypeLib))
+            {
+                ent = m_registry.GetTypeLibVersionEntry(intf.TypeLib, intf.TypeLibVersion);
+                selected_guid = intf.Iid;
+            }
+        }
+            
+        if(ent != null)
+        {
+            try
+            {
+                EntryPoint.GetMainForm(m_registry).HostControl(
+                    new TypeLibControl(m_registry, ent.Name,
+                    COMTypeLib.FromFile(ent.NativePath), selected_guid));
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -1955,9 +1917,9 @@ public partial class COMRegistryViewer : UserControl
     {
         foreach (TreeNode node in nodes)
         {
-            if (node.Tag is COMCLSIDEntry)
+            if (node.Tag is COMCLSIDEntry clsid)
             {
-                clsids.Add((COMCLSIDEntry)node.Tag);
+                clsids.Add(clsid);
             }
 
             if (node.Nodes.Count > 0)
