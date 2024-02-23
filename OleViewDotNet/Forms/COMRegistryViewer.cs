@@ -48,6 +48,20 @@ public partial class COMRegistryViewer : UserControl
     private RegistryViewerFilter m_filter;
     private TreeNode[] m_originalNodes;
 
+
+    private sealed class DynamicTreeNode : TreeNode
+    {
+        public bool IsGenerated { get; set; }
+
+        public DynamicTreeNode() : base()
+        {
+        }
+
+        public DynamicTreeNode(string text) : base(text)
+        {
+        }
+    }
+
     /// <summary>
     /// Enumeration to indicate what to display
     /// </summary>
@@ -230,11 +244,22 @@ public partial class COMRegistryViewer : UserControl
         UpdateStatusLabel();
     }
 
-    private static TreeNode CreateNode(string text, string image_key)
+    private static TreeNode CreateNode(string text, string image_key, object tag)
     {
-        TreeNode node = new(text);
+        bool dynamic = false;
+        if (tag is ICOMClassEntry)
+        {
+            dynamic = true;
+        }
+
+        TreeNode node = dynamic ? new DynamicTreeNode(text) : new TreeNode(text);
         node.ImageKey = image_key;
         node.SelectedImageKey = image_key;
+        node.Tag = tag;
+        if (dynamic)
+        {
+            node.Nodes.Add(new TreeNode("DUMMY"));
+        }
         return node;
     }
 
@@ -405,9 +430,8 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateCLSIDNode(COMRegistry registry, COMCLSIDEntry ent)
     {
-        TreeNode nodeRet = CreateNode(string.Format("{0} - {1}", ent.Clsid.ToString(), ent.Name), ClassKey);
+        TreeNode nodeRet = CreateNode($"{ent.Clsid.FormatGuid()} - {ent.Name}", ClassKey, ent);
         nodeRet.ToolTipText = BuildCLSIDToolTip(registry, ent);
-        nodeRet.Tag = ent;
         nodeRet.Nodes.Add("IUnknown");
 
         return nodeRet;
@@ -415,18 +439,16 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateInterfaceNode(COMRegistry registry, COMInterfaceEntry ent)
     {
-        TreeNode nodeRet = CreateNode(string.Format("{0} - {1}", ent.Iid.ToString(), ent.Name), InterfaceKey);
+        TreeNode nodeRet = CreateNode($"{ent.Iid.FormatGuid()} - {ent.Name}", InterfaceKey, ent);
         nodeRet.ToolTipText = BuildInterfaceToolTip(ent, null);
-        nodeRet.Tag = ent;
 
         return nodeRet;
     }
 
     private static TreeNode CreateInterfaceNameNode(COMRegistry registry, COMInterfaceEntry ent, COMInterfaceInstance instance)
     {
-        TreeNode nodeRet = CreateNode(ent.Name, InterfaceKey);
+        TreeNode nodeRet = CreateNode(ent.Name, InterfaceKey, ent);
         nodeRet.ToolTipText = BuildInterfaceToolTip(ent, instance);
-        nodeRet.Tag = ent;
 
         return nodeRet;
     }
@@ -445,9 +467,8 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateRuntimeClassNode(COMRuntimeClassEntry ent)
     {
-        TreeNode n = CreateNode(ent.Name, ClassKey);
+        TreeNode n = CreateNode(ent.Name, ClassKey, ent);
         n.Nodes.Add("IUnknown");
-        n.Tag = ent;
         return n;
     }
 
@@ -466,8 +487,7 @@ public partial class COMRegistryViewer : UserControl
             {
                 continue;
             }
-            TreeNode node = CreateNode(server.Name, FolderKey);
-            node.Tag = server;
+            TreeNode node = CreateNode(server.Name, FolderKey, server);
             node.Nodes.AddRange(group.Select(p => CreateRuntimeClassNode(p)).ToArray());
             serverNodes.Add(node);
         }
@@ -480,9 +500,8 @@ public partial class COMRegistryViewer : UserControl
         TreeNode[] progidNodes = new TreeNode[registry.Progids.Count];
         foreach (COMProgIDEntry ent in registry.Progids.Values)
         {
-            progidNodes[i] = CreateNode(ent.ProgID, ClassKey);
+            progidNodes[i] = CreateNode(ent.ProgID, ClassKey, ent);
             progidNodes[i].ToolTipText = BuildProgIDToolTip(registry, ent);
-            progidNodes[i].Tag = ent;
             if (registry.MapClsidToEntry(ent.Clsid) != null)
             {
                 progidNodes[i].Nodes.Add("IUnknown");
@@ -497,9 +516,8 @@ public partial class COMRegistryViewer : UserControl
         List<TreeNode> nodes = new(registry.Clsids.Count);
         foreach (COMCLSIDEntry ent in registry.Clsids.Values)
         {
-            TreeNode node = CreateNode(ent.Name, ClassKey);
+            TreeNode node = CreateNode(ent.Name, ClassKey, ent);
             node.ToolTipText = BuildCLSIDToolTip(registry, ent);
-            node.Tag = ent;
             node.Nodes.Add("IUnknown");
             nodes.Add(node);
         }
@@ -556,7 +574,7 @@ public partial class COMRegistryViewer : UserControl
 
     private static string BuildCOMProcessName(COMProcessEntry proc)
     {
-        return string.Format("{0,-8} - {1} - {2}", proc.ProcessId, proc.Name, proc.User);
+        return $"{proc.ProcessId,-8} - {proc.Name} - {proc.User}";
     }
 
     private static void PopulatorIpids(COMRegistry registry, TreeNode node, COMProcessEntry proc)
@@ -564,22 +582,21 @@ public partial class COMRegistryViewer : UserControl
         foreach (COMIPIDEntry ipid in proc.Ipids.Where(i => i.IsRunning))
         {
             COMInterfaceEntry intf = registry.MapIidToInterface(ipid.Iid);
-            TreeNode ipid_node = CreateNode(string.Format("IPID: {0} - IID: {1}", ipid.Ipid.FormatGuid(), intf.Name), InterfaceKey);
+            TreeNode ipid_node = CreateNode($"IPID: {ipid.Ipid.FormatGuid()} - IID: {intf.Name}", InterfaceKey, ipid);
             ipid_node.ToolTipText = BuildCOMIpidTooltip(ipid);
-            ipid_node.Tag = ipid;
             node.Nodes.Add(ipid_node);
         }
     }
     
-    private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, IEnumerable<COMCLSIDEntry>> clsidsByAppId)
+    private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, 
+        IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, IEnumerable<COMCLSIDEntry>> clsidsByAppId)
     {
-        TreeNode node = CreateNode(BuildCOMProcessName(proc), ApplicationKey);
+        TreeNode node = CreateNode(BuildCOMProcessName(proc), ApplicationKey, proc);
         node.ToolTipText = BuildCOMProcessTooltip(proc);
-        node.Tag = proc;
 
         if (appIdsByPid.ContainsKey(proc.ProcessId) && appIdsByPid[proc.ProcessId].Count() > 0)
         {
-            TreeNode services_node = CreateNode("Services", FolderKey);
+            TreeNode services_node = CreateNode("Services", FolderKey, null);
             foreach (COMAppIDEntry appid in appIdsByPid[proc.ProcessId])
             {
                 if (clsidsByAppId.ContainsKey(appid.AppId))
@@ -594,7 +611,7 @@ public partial class COMRegistryViewer : UserControl
 
         if (server_classes.Any())
         {
-            TreeNode classes_node = CreateNode("Classes", FolderKey);
+            TreeNode classes_node = CreateNode("Classes", FolderKey, null);
             foreach (var c in server_classes)
             {
                 classes_node.Nodes.Add(CreateCLSIDNode(registry, registry.MapClsidToEntry(c.Clsid)));
@@ -692,9 +709,8 @@ public partial class COMRegistryViewer : UserControl
         List<TreeNode> serverNodes = new(registry.Clsids.Count);
         foreach (var pair in servers)
         {
-            TreeNode node = CreateNode(pair.Key.Server, FolderKey);
+            TreeNode node = CreateNode(pair.Key.Server, FolderKey, pair.Key);
             node.ToolTipText = pair.Key.Server;
-            node.Tag = pair.Key;
             node.Nodes.AddRange(pair.Value.OrderBy(c => c.Name).Select(c => CreateClsidNode(registry, c)).ToArray());
             serverNodes.Add(node);
         }
@@ -715,7 +731,7 @@ public partial class COMRegistryViewer : UserControl
         }
         return intfs;
     }
-    
+
     private static StringBuilder AppendFormatLine(StringBuilder builder, string format, params object[] ps)
     {
         return builder.AppendFormat(format, ps).AppendLine();
@@ -723,9 +739,8 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateClsidNode(COMRegistry registry, COMCLSIDEntry ent)
     {
-        TreeNode currNode = CreateNode(ent.Name, ClassKey);
+        TreeNode currNode = CreateNode(ent.Name, ClassKey, ent);
         currNode.ToolTipText = BuildCLSIDToolTip(registry, ent);
-        currNode.Tag = ent;
         currNode.Nodes.Add("IUnknown");
 
         return currNode;
@@ -739,9 +754,8 @@ public partial class COMRegistryViewer : UserControl
             name = appidEnt.LocalService.Name;
         }
 
-        TreeNode node = CreateNode(name, FolderKey);
+        TreeNode node = CreateNode(name, FolderKey, appidEnt);
         node.ToolTipText = BuildAppIdTooltip(appidEnt);
-        node.Tag = appidEnt;
         node.Nodes.AddRange(clsids.OrderBy(c => c.Name).Select(c => CreateClsidNode(registry, c)).ToArray());
         return node;
     }
@@ -852,8 +866,7 @@ public partial class COMRegistryViewer : UserControl
                 continue;
             }
 
-            TreeNode node = CreateNode(appidEnt.Name, FolderKey);
-            node.Tag = appidEnt;
+            TreeNode node = CreateNode(appidEnt.Name, FolderKey, appidEnt);
             node.ToolTipText = BuildAppIdTooltip(appidEnt);
 
             if (clsidsByAppId.ContainsKey(pair.Key))
@@ -873,14 +886,13 @@ public partial class COMRegistryViewer : UserControl
         int i = 0;
         SortedDictionary<string, TreeNode> sortedNodes = new();
 
-        foreach (var pair in registry.ImplementedCategories.Values)
+        foreach (var cat in registry.ImplementedCategories.Values)
         {
-            TreeNode currNode = CreateNode(pair.Name, FolderKey);
-            currNode.Tag = pair;
-            currNode.ToolTipText = string.Format("CATID: {0}", pair.CategoryID.FormatGuid());
+            TreeNode currNode = CreateNode(cat.Name, FolderKey, cat);
+            currNode.ToolTipText = string.Format("CATID: {0}", cat.CategoryID.FormatGuid());
             sortedNodes.Add(currNode.Text, currNode);
 
-            IEnumerable<COMCLSIDEntry> clsids = pair.ClassEntries.OrderBy(c => c.Name);
+            IEnumerable<COMCLSIDEntry> clsids = cat.ClassEntries.OrderBy(c => c.Name);
             IEnumerable<TreeNode> clsidNodes = clsids.Select(n => CreateClsidNode(registry, n));
             currNode.Nodes.AddRange(clsidNodes.ToArray());
         }
@@ -931,8 +943,7 @@ public partial class COMRegistryViewer : UserControl
                 continue;
             }
 
-            TreeNode currNode = CreateNode(ent.Name, FolderKey);
-            currNode.Tag = ent;
+            TreeNode currNode = CreateNode(ent.Name, FolderKey, ent);
             clsidNodes.Add(currNode);
 
             foreach (COMCLSIDEntry cls in clsids)
@@ -953,7 +964,7 @@ public partial class COMRegistryViewer : UserControl
         List<TreeNode> nodes = new(registry.MimeTypes.Count());
         foreach (COMMimeType ent in registry.MimeTypes)
         {
-            TreeNode node = CreateNode(ent.MimeType, FolderKey);
+            TreeNode node = CreateNode(ent.MimeType, FolderKey, ent);
             if (registry.Clsids.ContainsKey(ent.Clsid))
             {
                 node.Nodes.Add(CreateCLSIDNode(registry, registry.Clsids[ent.Clsid]));
@@ -961,9 +972,8 @@ public partial class COMRegistryViewer : UserControl
 
             if (!string.IsNullOrWhiteSpace(ent.Extension))
             {
-                node.ToolTipText = string.Format("Extension {0}", ent.Extension);
+                node.ToolTipText = $"Extension {ent.Extension}";
             }
-            node.Tag = ent;
             nodes.Add(node);
         }
 
@@ -972,10 +982,8 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
     {
-        TreeNode node = CreateNode(string.Format("{0} : Version {1}", entry.Name, entry.Version), 
-            ClassKey);
-
-        node.Tag = entry;
+        TreeNode node = CreateNode($"{entry.Name} : Version {entry.Version}", 
+            ClassKey, entry);
         List<string> entries = new();
         if(!string.IsNullOrWhiteSpace(entry.Win32Path))
         {
@@ -996,8 +1004,7 @@ public partial class COMRegistryViewer : UserControl
         TreeNode[] typelibNodes = new TreeNode[registry.Typelibs.Values.Count];
         foreach (COMTypeLibEntry ent in registry.Typelibs.Values)
         {
-            typelibNodes[i] = CreateNode(ent.Name, FolderKey);
-            typelibNodes[i].Tag = ent;
+            typelibNodes[i] = CreateNode(ent.Name, FolderKey, ent);
             foreach (COMTypeLibVersionEntry ver in ent.Versions)
             {
                 typelibNodes[i].Nodes.Add(CreateTypelibVersionNode(ver));
@@ -1013,53 +1020,43 @@ public partial class COMRegistryViewer : UserControl
         node.Nodes.AddRange(intfs.Select(i => CreateInterfaceNameNode(m_registry, m_registry.MapIidToInterface(i.Iid), i)).OrderBy(n => n.Text).ToArray());
     }
 
-    private async Task SetupCLSIDNodeTree(TreeNode node, bool bRefresh)
+    private async Task SetupCLSIDNodeTree(ICOMClassEntry clsid, TreeNode node, bool bRefresh)
     {
-        ICOMClassEntry clsid = node.Tag as ICOMClassEntry;
-
-        if (clsid == null && node.Tag is COMProgIDEntry prog_id)
+        node.Nodes.Clear();
+        TreeNode wait_node = CreateNode("Please Wait, Populating Interfaces", InterfaceKey, null);
+        node.Nodes.Add(wait_node);
+        try
         {
-            clsid = m_registry.MapClsidToEntry(prog_id.Clsid);
-        }
-
-        if (clsid != null)
-        {
-            node.Nodes.Clear();
-            TreeNode wait_node = CreateNode("Please Wait, Populating Interfaces", InterfaceKey);
-            node.Nodes.Add(wait_node);
-            try
+            await clsid.LoadSupportedInterfacesAsync(bRefresh, null);
+            int interface_count = clsid.Interfaces.Count();
+            int factory_count = clsid.FactoryInterfaces.Count();
+            if (interface_count == 0 && factory_count == 0)
             {
-                await clsid.LoadSupportedInterfacesAsync(bRefresh, null);
-                int interface_count = clsid.Interfaces.Count();
-                int factory_count = clsid.FactoryInterfaces.Count();
-                if (interface_count == 0 && factory_count == 0)
+                wait_node.Text = "Error querying COM interfaces - Timeout";
+            }
+            else
+            {
+                if (interface_count > 0)
                 {
-                    wait_node.Text = "Error querying COM interfaces - Timeout";
+                    node.Nodes.Remove(wait_node);
+                    AddInterfaceNodes(node, clsid.Interfaces);
                 }
                 else
                 {
-                    if (interface_count > 0)
-                    {
-                        node.Nodes.Remove(wait_node);
-                        AddInterfaceNodes(node, clsid.Interfaces);
-                    }
-                    else
-                    {
-                        wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
-                    }
+                    wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
+                }
 
-                    if (factory_count > 0)
-                    {
-                        TreeNode factory = CreateNode("Factory Interfaces", FolderKey);
-                        AddInterfaceNodes(factory, clsid.FactoryInterfaces);
-                        node.Nodes.Add(factory);
-                    }
+                if (factory_count > 0)
+                {
+                    TreeNode factory = CreateNode("Factory Interfaces", FolderKey, null);
+                    AddInterfaceNodes(factory, clsid.FactoryInterfaces);
+                    node.Nodes.Add(factory);
                 }
             }
-            catch (Win32Exception ex)
-            {
-                wait_node.Text = string.Format("Error querying COM interfaces - {0}", ex.Message);
-            }
+        }
+        catch (Win32Exception ex)
+        {
+            wait_node.Text = string.Format("Error querying COM interfaces - {0}", ex.Message);
         }
     }
 
@@ -1068,7 +1065,14 @@ public partial class COMRegistryViewer : UserControl
         Cursor currCursor = Cursor.Current;
         Cursor.Current = Cursors.WaitCursor;
 
-        await SetupCLSIDNodeTree(e.Node, false);
+        if (e.Node is DynamicTreeNode node && !node.IsGenerated)
+        {
+            node.IsGenerated = true;
+            if (e.Node.Tag is ICOMClassEntry class_entry)
+            {
+                await SetupCLSIDNodeTree(class_entry, e.Node, false);
+            }
+        }
 
         Cursor.Current = currCursor;
     }
@@ -1433,9 +1437,9 @@ public partial class COMRegistryViewer : UserControl
     private async void refreshInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if ((node != null) && (node.Tag != null))
+        if ((node != null) && node.Tag is ICOMClassEntry class_entry)
         {
-            await SetupCLSIDNodeTree(node, true);
+            await SetupCLSIDNodeTree(class_entry, node, true);
         }
     }
 

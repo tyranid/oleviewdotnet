@@ -264,51 +264,50 @@ public partial class PropertiesControl : UserControl
 
     private void SetupProperties(object obj)
     {
-        if (obj is COMCLSIDEntry)
+        if (obj is COMCLSIDEntry clsid)
         {
-            SetupClsidEntry((COMCLSIDEntry)obj);
+            SetupClsidEntry(clsid);
         }
 
-        if (obj is COMProgIDEntry)
+        if (obj is COMProgIDEntry prog_id)
         {
-            COMProgIDEntry entry = (COMProgIDEntry)obj;
-            COMCLSIDEntry clsid_entry = m_registry.MapClsidToEntry(entry.Clsid);
+            COMCLSIDEntry clsid_entry = m_registry.MapClsidToEntry(prog_id.Clsid);
             SetupClsidEntry(clsid_entry);
         }
 
-        if (obj is COMAppIDEntry)
+        if (obj is COMAppIDEntry appid)
         {
-            SetupAppIdEntry((COMAppIDEntry)obj);
+            SetupAppIdEntry(appid);
         }
 
-        if (obj is COMInterfaceEntry)
+        if (obj is COMInterfaceEntry intf)
         {
-            SetupInterfaceEntry((COMInterfaceEntry)obj);
+            SetupInterfaceEntry(intf);
         }
 
-        if (obj is COMTypeLibVersionEntry)
+        if (obj is COMTypeLibVersionEntry lib)
         {
-            SetupTypeLibVersionEntry((COMTypeLibVersionEntry)obj);
+            SetupTypeLibVersionEntry(lib);
         }
 
-        if (obj is COMProcessEntry)
+        if (obj is COMProcessEntry proc)
         {
-            SetupProcessEntry((COMProcessEntry)obj);
+            SetupProcessEntry(proc);
         }
 
-        if (obj is COMIPIDEntry)
+        if (obj is COMIPIDEntry ipid)
         {
-            SetupIPIDEntry((COMIPIDEntry)obj);
+            SetupIPIDEntry(ipid);
         }
 
-        if (obj is COMRuntimeClassEntry)
+        if (obj is COMRuntimeClassEntry rt_class)
         {
-            SetupRuntimeClassEntry((COMRuntimeClassEntry)obj);
+            SetupRuntimeClassEntry(rt_class);
         }
 
-        if (obj is COMRuntimeServerEntry)
+        if (obj is COMRuntimeServerEntry rt_server)
         {
-            SetupRuntimeServerEntry((COMRuntimeServerEntry)obj);
+            SetupRuntimeServerEntry(rt_server);
         }
     }
 

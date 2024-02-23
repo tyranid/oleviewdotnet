@@ -21,12 +21,17 @@ using System.Xml.Serialization;
 using System.Xml.Schema;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using OleViewDotNet.Security;
+using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Database;
 
-public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid
+public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid, ICOMClassEntry
 {
     private readonly COMRegistry m_registry;
+    private readonly Lazy<COMCLSIDEntry> m_clsid;
 
     public COMProgIDEntry(COMRegistry registry, 
         string progid, Guid clsid, RegistryKey rootKey) : this(registry)
@@ -38,7 +43,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
     }
 
     internal COMProgIDEntry(COMRegistry registry,
-        ActCtxComProgIdRedirection progid_redirection)
+        ActCtxComProgIdRedirection progid_redirection) : this(registry)
     {
         Clsid = progid_redirection.Clsid;
         ProgID = progid_redirection.ProgId;
@@ -58,6 +63,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
     internal COMProgIDEntry(COMRegistry registry)
     {
         m_registry = registry;
+        m_clsid = new(() => registry.MapClsidToEntry(Clsid));
     }
 
     public int CompareTo(COMProgIDEntry right)
@@ -76,6 +82,16 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
     public COMRegistryEntrySource Source { get; private set; }
 
     Guid IComGuid.ComGuid => Clsid;
+
+    string ICOMClassEntry.DefaultServer => m_clsid.Value.DefaultServer;
+
+    bool ICOMClassEntry.InterfacesLoaded => m_clsid.Value.InterfacesLoaded;
+
+    IEnumerable<COMInterfaceInstance> ICOMClassEntry.Interfaces => m_clsid.Value.Interfaces;
+
+    IEnumerable<COMInterfaceInstance> ICOMClassEntry.FactoryInterfaces => m_clsid.Value.FactoryInterfaces;
+
+    bool ICOMClassEntry.SupportsRemoteActivation => m_clsid.Value.SupportsRemoteActivation;
 
     public override string ToString()
     {
@@ -123,5 +139,25 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
         writer.WriteGuid("clsid", Clsid);
         writer.WriteOptionalAttributeString("name", Name);
         writer.WriteEnum("src", Source);
+    }
+
+    Task<bool> ICOMClassEntry.LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
+    {
+        return m_clsid.Value.LoadSupportedInterfacesAsync(refresh, token);
+    }
+
+    bool ICOMClassEntry.LoadSupportedInterfaces(bool refresh, COMAccessToken token)
+    {
+        return m_clsid.Value.LoadSupportedInterfaces(refresh, token);
+    }
+
+    object ICOMClassEntry.CreateInstanceAsObject(CLSCTX dwContext, string server)
+    {
+        return m_clsid.Value.CreateInstanceAsObject(dwContext, server);
+    }
+
+    object ICOMClassEntry.CreateClassFactory(CLSCTX dwContext, string server)
+    {
+        return m_clsid.Value.CreateClassFactory(dwContext, server);
     }
 }

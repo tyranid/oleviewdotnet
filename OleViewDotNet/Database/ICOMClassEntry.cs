@@ -14,13 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
+using OleViewDotNet.Security;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using NtApiDotNet;
-using OleViewDotNet.Interop;
-using OleViewDotNet.Security;
 
 namespace OleViewDotNet.Database;
 
