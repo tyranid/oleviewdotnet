@@ -1195,6 +1195,10 @@ public partial class COMRegistryViewer : UserControl
         {
             return m_registry.MapClsidToEntry(prog_id.Clsid);
         }
+        else if (node?.Tag is COMTypeLibCoClass typelib_class)
+        {
+            return m_registry.MapClsidToEntry(typelib_class.Uuid);
+        }
         return null;
     }
 
