@@ -15,21 +15,20 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
+using OleViewDotNet.Interop;
+using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.Security;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
-using System.Collections.ObjectModel;
-using NtApiDotNet;
-using OleViewDotNet.Interop;
-using OleViewDotNet.Utilities;
-using OleViewDotNet.Interop.SxS;
-using OleViewDotNet.Security;
+using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
