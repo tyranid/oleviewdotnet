@@ -30,7 +30,7 @@ using System.Text;
 
 namespace OleViewDotNet.Processes;
 
-public class COMIPIDEntry : IProxyFormatter, IComGuid
+public class COMIPIDEntry : IProxyFormatter, ICOMGuid
 {
     private readonly COMRegistry m_registry;
 
@@ -64,7 +64,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
     public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
     public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
 
-    Guid IComGuid.ComGuid => Ipid;
+    Guid ICOMGuid.ComGuid => Ipid;
 
     public byte[] ToObjref()
     {

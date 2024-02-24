@@ -25,7 +25,7 @@ using OleViewDotNet.TypeLib;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
+public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
 {
     private readonly COMRegistry m_registry;
     private Lazy<COMTypeLib> m_typelib;
@@ -83,7 +83,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
         return m_typelib.Value;
     }
 
-    Guid IComGuid.ComGuid => TypelibId;
+    Guid ICOMGuid.ComGuid => TypelibId;
 
     internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key) 
         : this(registry, typelibid)

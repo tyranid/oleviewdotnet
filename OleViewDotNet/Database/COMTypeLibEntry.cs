@@ -26,7 +26,7 @@ using OleViewDotNet.Interop.SxS;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, IComGuid
+public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, ICOMGuid
 {
     private readonly COMRegistry m_registry;
 
@@ -71,7 +71,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
     public string Name { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
 
-    Guid IComGuid.ComGuid => TypelibId;
+    Guid ICOMGuid.ComGuid => TypelibId;
 
     public override bool Equals(object obj)
     {

@@ -27,7 +27,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, IComGuid
+public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, ICOMGuid
 {
     private readonly COMRegistry m_registry;
 
@@ -255,7 +255,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         get; private set;
     }
 
-    Guid IComGuid.ComGuid => Iid;
+    Guid ICOMGuid.ComGuid => Iid;
 
     public override bool Equals(object obj)
     {

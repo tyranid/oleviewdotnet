@@ -33,7 +33,7 @@ using OleViewDotNet.Security;
 
 namespace OleViewDotNet.Database;
 
-public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, IComGuid
+public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid
 {
     private List<COMInterfaceInstance> m_interfaces;
     private List<COMInterfaceInstance> m_factory_interfaces;
@@ -616,7 +616,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
-    Guid IComGuid.ComGuid => Clsid;
+    Guid ICOMGuid.ComGuid => Clsid;
 
     public override string ToString()
     {

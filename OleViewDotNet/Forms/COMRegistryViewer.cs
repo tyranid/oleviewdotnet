@@ -1107,13 +1107,13 @@ public partial class COMRegistryViewer : UserControl
     private static bool CanGetGuid(TreeNode node)
     {
         object tag = node?.Tag;
-        return tag is IComGuid || tag is Guid;
+        return tag is ICOMGuid || tag is Guid;
     }
 
     private static Guid GetGuidFromType(TreeNode node)
     {
         object tag = node?.Tag;
-        if (tag is IComGuid com_guid)
+        if (tag is ICOMGuid com_guid)
         {
             return com_guid.ComGuid;
         }

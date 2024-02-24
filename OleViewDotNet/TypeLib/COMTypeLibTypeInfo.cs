@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Base class to represent a type library ITypeInfo definition.
 /// </summary>
-public class COMTypeLibTypeInfo
+public class COMTypeLibTypeInfo : ICOMGuid
 {
     #region Private Members
     private readonly COMTypeLibDocumentation _doc;
@@ -104,6 +105,7 @@ public class COMTypeLibTypeInfo
     public TYPEKIND Kind => _attr.typekind;
     public TYPEFLAGS Flags => _attr.wTypeFlags;
     public COMTypeLibReference TypeLib { get; internal set; }
+    Guid ICOMGuid.ComGuid => Uuid;
     #endregion
 
     #region Public Methods

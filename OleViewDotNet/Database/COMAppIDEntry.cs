@@ -28,7 +28,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity, IComGuid
+public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity, ICOMGuid
 {
     internal COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
     {
@@ -206,7 +206,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
 
-    Guid IComGuid.ComGuid => AppId;
+    Guid ICOMGuid.ComGuid => AppId;
 
     public override string ToString()
     {

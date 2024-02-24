@@ -3154,7 +3154,7 @@ function Get-ComGuid {
     [CmdletBinding(DefaultParameterSetName="FromComGuid")]
     Param(
         [parameter(Mandatory, ParameterSetName = "FromComGuid", Position = 0, ValueFromPipeline)]
-        [OleViewDotNet.IComGuid[]]$ComGuid,
+        [OleViewDotNet.Utilities.ICOMGuid[]]$ComGuid,
         [parameter(Mandatory, ParameterSetName = "FromBytes")]
         [byte[]]$Bytes,
         [parameter(Mandatory, ParameterSetName = "FromInts")]

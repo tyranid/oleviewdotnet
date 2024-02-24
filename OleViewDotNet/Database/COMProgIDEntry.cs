@@ -28,7 +28,7 @@ using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Database;
 
-public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, IComGuid, ICOMClassEntry
+public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICOMGuid, ICOMClassEntry
 {
     private readonly COMRegistry m_registry;
     private readonly Lazy<COMCLSIDEntry> m_clsid;
@@ -81,7 +81,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICo
 
     public COMRegistryEntrySource Source { get; private set; }
 
-    Guid IComGuid.ComGuid => Clsid;
+    Guid ICOMGuid.ComGuid => Clsid;
 
     string ICOMClassEntry.DefaultServer => m_clsid.Value.DefaultServer;
 

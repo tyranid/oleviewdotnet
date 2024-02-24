@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Class to represent information in a COM type library.
 /// </summary>
-public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
+public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid
 {
     #region Internal Members
     internal COMTypeLib(string path, COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
@@ -83,6 +84,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     public IReadOnlyList<COMTypeLibCoClass> Classes { get; }
     public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
+    Guid ICOMGuid.ComGuid => TypeLibId;
     #endregion
 
     #region Public Methods
