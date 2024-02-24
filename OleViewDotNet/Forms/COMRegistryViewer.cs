@@ -1042,6 +1042,47 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
+    private void AddTypeLibNodes(TreeNode node, IReadOnlyList<COMTypeLibTypeInfo> types, string category, string image_key)
+    {
+        if (types.Count > 0)
+        {
+            var sub_node = CreateNode(category, FolderKey, null);
+            node.Nodes.Add(sub_node);
+            foreach (var type in types)
+            {
+                sub_node.Nodes.Add(CreateNode(type.Name, image_key, type));
+            }
+        }
+    }
+
+    private async Task SetupTypeLibNodeTree(COMTypeLibVersionEntry typelib, TreeNode node)
+    {
+        treeComRegistry.SuspendLayout();
+        node.Nodes.Clear();
+        TreeNode wait_node = CreateNode("Please Wait, Parsing type library", FolderKey, null);
+        node.Nodes.Add(wait_node);
+        treeComRegistry.ResumeLayout();
+        try
+        {
+            var parsed_typelib = await Task.Run(() => typelib.Parse());
+            treeComRegistry.SuspendLayout();
+            node.Nodes.Remove(wait_node);
+            AddTypeLibNodes(node, parsed_typelib.Interfaces, "Interfaces", InterfaceKey);
+            AddTypeLibNodes(node, parsed_typelib.Dispatch, "Dispatch Interfaces", InterfaceKey);
+            AddTypeLibNodes(node, parsed_typelib.Classes, "Classes", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Records, "Records", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Unions, "Unions", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Enums, "Enums", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Aliases, "Aliases", ClassKey);
+            treeComRegistry.ResumeLayout();
+        }
+        catch (Exception ex)
+        {
+            wait_node.Text = $"Error parsing type library - {ex.Message}";
+        }
+    }
+
     private async void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
     {
         Cursor currCursor = Cursor.Current;
@@ -1053,6 +1094,10 @@ public partial class COMRegistryViewer : UserControl
             if (e.Node.Tag is ICOMClassEntry class_entry)
             {
                 await SetupCLSIDNodeTree(class_entry, e.Node, false);
+            }
+            else if (e.Node.Tag is COMTypeLibVersionEntry typelib_entry)
+            {
+                await SetupTypeLibNodeTree(typelib_entry, e.Node);
             }
         }
 

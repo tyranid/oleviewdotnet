@@ -50,7 +50,7 @@ internal partial class TypedObjectViewer : UserControl
         InitializeComponent();
 
         LoadDispatch();
-        Text = string.Format("{0} {1}", m_objName, m_dispType.Name);
+        Text = $"{m_objName} {m_dispType.Name}";
     }
 
     public TypedObjectViewer(COMRegistry registry, string strObjName, object pObject, Type dispType)

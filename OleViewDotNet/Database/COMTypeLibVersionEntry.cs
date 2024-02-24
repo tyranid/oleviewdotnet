@@ -28,6 +28,20 @@ namespace OleViewDotNet.Database;
 public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
 {
     private readonly COMRegistry m_registry;
+    private Lazy<COMTypeLib> m_typelib;
+
+    private COMTypeLib ParseInternal()
+    {
+        var type_lib = COMTypeLib.FromFile(NativePath);
+        foreach (var intf in type_lib.Interfaces)
+        {
+            if (intf.Name != string.Empty)
+            {
+                m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
+            }
+        }
+        return type_lib;
+    }
 
     public Guid TypelibId { get; private set; }
     public string Version { get; private set; }
@@ -65,15 +79,8 @@ public class COMTypeLibVersionEntry : IXmlSerializable, IComGuid
 
     public COMTypeLib Parse()
     {
-        var type_lib = COMTypeLib.FromFile(NativePath);
-        foreach (var intf in type_lib.Interfaces)
-        {
-            if (intf.Name != string.Empty)
-            {
-                m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
-            }
-        }
-        return type_lib;
+        m_typelib ??= new(ParseInternal);
+        return m_typelib.Value;
     }
 
     Guid IComGuid.ComGuid => TypelibId;
