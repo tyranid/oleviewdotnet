@@ -46,7 +46,7 @@ public static class COMProcessParser
         }
         catch (NtException)
         {
-            Debug.WriteLine(string.Format("Error reading address {0:X}", address));
+            Debug.WriteLine($"Error reading address {address:X}");
             return new T();
         }
     }
@@ -1579,7 +1579,7 @@ public static class COMProcessParser
 
     internal static string SymbolFromAddress(ISymbolResolver resolver, bool is64bit, IntPtr address)
     {
-        return string.Format("0x{0:X}", address.ToInt64());
+        return $"0x{address.ToInt64():X}";
     }
 
     private static List<COMIPIDEntry> ParseIPIDEntries(NtProcess process, ISymbolResolver resolver, COMProcessParserConfig config,
@@ -2128,7 +2128,7 @@ public static class COMProcessParser
         {
             try
             {
-                progress?.Report(new Tuple<string, int>(string.Format("Parsing process {0}", p.ProcessName),
+                progress?.Report(new Tuple<string, int>($"Parsing process {p.ProcessName}",
                         100 * current_count++ / total_count));
                 COMProcessEntry proc = ParseProcess(p.Id,
                     config, registry, ipids);

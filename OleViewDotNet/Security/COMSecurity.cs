@@ -49,7 +49,7 @@ public static class COMSecurity
 
     public static void ViewSecurity(COMRegistry registry, COMAppIDEntry appid, bool access)
     {
-        ViewSecurity(registry, string.Format("{0} {1}", appid.Name, access ? "Access" : "Launch"),
+        ViewSecurity(registry, $"{appid.Name} {(access ? "Access" : "Launch")}",
                 access ? appid.AccessPermission : appid.LaunchPermission, access);
     }
 

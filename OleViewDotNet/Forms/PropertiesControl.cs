@@ -55,8 +55,7 @@ public partial class PropertiesControl : UserControl
             item.SubItems.Add(entry.Item2.NumMethods.ToString());
             if (!string.IsNullOrWhiteSpace(entry.Item1.Module))
             {
-                item.SubItems.Add(string.Format("{0}+0x{1:X}",
-                    entry.Item1.Module, entry.Item1.VTableOffset));
+                item.SubItems.Add($"{entry.Item1.Module}+0x{entry.Item1.VTableOffset:X}");
             }
             item.Tag = entry;
         }
@@ -336,16 +335,15 @@ public partial class PropertiesControl : UserControl
         btnProcessViewAccessPermissions.Enabled = obj.AccessPermissions != null;
         textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions?.ToSddl());
         textBoxProcessUser.Text = GetStringValue(obj.User);
-        textBoxProcessSecurity.Text = string.Format("Capabilities: {0}, Authn Level: {1}, Imp Level: {2}, Unmarshal Policy: {3}",
-            obj.Capabilities, obj.AuthnLevel, obj.ImpLevel, obj.UnmarshalPolicy);
-        textBoxProcessStaHwnd.Text = string.Format("0x{0:X}", obj.STAMainHWnd.ToInt64());
+        textBoxProcessSecurity.Text = $"Capabilities: {obj.Capabilities}, Authn Level: {obj.AuthnLevel}, Imp Level: {obj.ImpLevel}, Unmarshal Policy: {obj.UnmarshalPolicy}";
+        textBoxProcessStaHwnd.Text = $"0x{obj.STAMainHWnd.ToInt64():X}";
         SetupIpidEntries(obj.Ipids, false);
         listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
         lblProcess64bit.Text = COMUtilities.FormatBitness(obj.Is64Bit);
         tabControlProperties.TabPages.Add(tabPageProcess);
         if (m_registry.AppIDs.ContainsKey(obj.AppId))
         {
-            SetupAppIdEntry((COMAppIDEntry)m_registry.AppIDs[obj.AppId]);
+            SetupAppIdEntry(m_registry.AppIDs[obj.AppId]);
         }
         if (obj.Classes.Any())
         {
@@ -373,17 +371,16 @@ public partial class PropertiesControl : UserControl
         textBoxIPIDIID.Text = obj.Iid.FormatGuid();
         textBoxIPIDIIDName.Text = m_registry.MapIidToInterface(obj.Iid).Name;
         textBoxIPIDFlags.Text = obj.Flags.ToString();
-        textBoxIPIDInterface.Text = string.Format("0x{0:X}", obj.Interface.ToInt64());
+        textBoxIPIDInterface.Text = $"0x{obj.Interface.ToInt64():X}";
         textBoxIPIDInterfaceVTable.Text = GetStringValue(obj.InterfaceVTable);
-        textBoxIPIDStub.Text = string.Format("0x{0:X}", obj.Stub.ToInt64());
+        textBoxIPIDStub.Text = $"0x{obj.Stub.ToInt64():X}";
         textBoxIPIDStubVTable.Text = GetStringValue(obj.StubVTable);
         textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
-        textBoxIPIDReferences.Text = string.Format("Strong: {0}, Weak: {1}, Private: {2}",
-            obj.StrongRefs, obj.WeakRefs, obj.PrivateRefs);
+        textBoxIPIDReferences.Text = $"Strong: {obj.StrongRefs}, Weak: {obj.WeakRefs}, Private: {obj.PrivateRefs}";
         
         textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
         textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
-        textBoxIPIDStaHwnd.Text = string.Format("0x{0:X}", obj.ServerSTAHwnd.ToInt64());
+        textBoxIPIDStaHwnd.Text = $"0x{obj.ServerSTAHwnd.ToInt64():X}";
         listViewIpidMethods.Items.AddRange(obj.Methods.Select((method, i) =>
         {
             ListViewItem item = new(i.ToString());
@@ -442,7 +439,7 @@ public partial class PropertiesControl : UserControl
         listViewFactoryInterfaces.Columns.Add("Methods", 100);
         listViewFactoryInterfaces.Columns.Add("VTable Offset", 100);
         m_obj = obj;
-        this.Text = string.Format("{0} Properties", name.Replace("&", "&&"));
+        this.Text = $"{name.Replace("&", "&&")} Properties";
     }
 
     private async void btnRefreshInterfaces_Click(object sender, EventArgs e)
@@ -625,7 +622,7 @@ public partial class PropertiesControl : UserControl
 
     private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
     {
-        COMSecurity.ViewSecurity(m_registry, string.Format("{0} Access", m_process.Name), 
+        COMSecurity.ViewSecurity(m_registry, $"{m_process.Name} Access", 
             m_process.AccessPermissions, true);
     }
 
@@ -643,7 +640,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard(string.Format("0x{0:X}", ipid.Interface.ToInt64()));
+            COMUtilities.CopyTextToClipboard($"0x{ipid.Interface.ToInt64():X}");
         }
     }
 
@@ -652,7 +649,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard(string.Format("0x{0:X}", ipid.Stub.ToInt64()));
+            COMUtilities.CopyTextToClipboard($"0x{ipid.Stub.ToInt64():X}");
         }
     }
 
@@ -695,7 +692,7 @@ public partial class PropertiesControl : UserControl
             {
                 await EntryPoint.GetMainForm(m_registry).OpenObjectInformation(
                     COMUtilities.UnmarshalObject(ipid.ToObjref()),
-                    string.Format("IPID {0}", ipid.Ipid));
+                    $"IPID {ipid.Ipid}");
             }
             catch (Exception ex)
             {
@@ -762,12 +759,12 @@ public partial class PropertiesControl : UserControl
 
     private void btnRuntimeClassViewPermissions_Click(object sender, EventArgs e)
     {
-        COMSecurity.ViewSecurity(m_registry, string.Format("{0} Permissions", m_runtime_class.Name), m_runtime_class.Permissions, false);
+        COMSecurity.ViewSecurity(m_registry, $"{m_runtime_class.Name} Permissions", m_runtime_class.Permissions, false);
     }
 
     private void btnRuntimeServerViewPermissions_Click(object sender, EventArgs e)
     {
-        COMSecurity.ViewSecurity(m_registry, string.Format("{0} Permissions", m_runtime_server.Name), m_runtime_server.Permissions, false);
+        COMSecurity.ViewSecurity(m_registry, $"{m_runtime_server.Name} Permissions", m_runtime_server.Permissions, false);
     }
 
     private void copyIPIDToolStripMenuItem_Click(object sender, EventArgs e)
@@ -794,7 +791,7 @@ public partial class PropertiesControl : UserControl
         if (ipid != null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
-                    string.Format("IPID: {0}", COMUtilities.FormatGuid(ipid.Ipid)), ipid));
+                    $"IPID: {ipid.Ipid.FormatGuid()}", ipid));
         }
     }
 

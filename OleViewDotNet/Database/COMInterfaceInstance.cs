@@ -63,7 +63,7 @@ public class COMInterfaceInstance : IXmlSerializable
     {
         if (!string.IsNullOrWhiteSpace(Module))
         {
-            return string.Format("{0},{1},{2}", Iid, Module, VTableOffset);
+            return $"{Iid},{Module},{VTableOffset}";
         }
         return Iid.ToString();
     }

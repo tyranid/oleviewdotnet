@@ -113,7 +113,7 @@ internal partial class TypedObjectViewer : UserControl
                             strDir += " optional";
                         }
 
-                        pars.Add(string.Format("[{0}] {1} {2}", strDir, pi.ParameterType.Name, pi.Name));
+                        pars.Add($"[{strDir}] {pi.ParameterType.Name} {pi.Name}");
                     }
 
                     item.SubItems.Add(string.Join(", ", pars));

@@ -123,7 +123,7 @@ internal static class EntryPoint
         public void HandleActivation(FILTER_ACTIVATIONTYPE dwActivationType, in Guid rclsid, out Guid pReplacementClsId)
         {
             pReplacementClsId = rclsid;
-            System.Diagnostics.Trace.WriteLine(string.Format("{0} {1}", dwActivationType, rclsid));
+            System.Diagnostics.Trace.WriteLine($"{dwActivationType} {rclsid}");
         }
     }
 

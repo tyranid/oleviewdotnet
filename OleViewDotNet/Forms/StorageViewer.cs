@@ -108,7 +108,7 @@ public partial class StorageViewer : UserControl
                         hexcode = string.Empty;
                         break;
                     default:
-                        throw new ArgumentException(string.Format("Invalid escape character {0}", ch));
+                        throw new ArgumentException($"Invalid escape character {ch}");
                 }
                 if (current_state == ParserState.InEscape)
                 {
@@ -218,7 +218,7 @@ public partial class StorageViewer : UserControl
         Disposed += StorageViewer_Disposed;
         InitializeComponent();
         PopulateTree();
-        Text = string.Format("{0}", filename);
+        Text = $"{filename}";
         hexEditorStream.ReadOnly = read_only;
     }
 

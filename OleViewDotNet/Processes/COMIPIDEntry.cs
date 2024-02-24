@@ -144,7 +144,7 @@ public class COMIPIDEntry : IProxyFormatter, IComGuid
                         name = "Release";
                         break;
                     default:
-                        name = string.Format("Method{0}", index);
+                        name = $"Method{index}";
                         break;
                 }
             }

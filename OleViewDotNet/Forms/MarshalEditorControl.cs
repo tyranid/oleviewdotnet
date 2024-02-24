@@ -52,6 +52,6 @@ public partial class MarshalEditorControl : UserControl
             ctl.Dock = DockStyle.Fill;
         }
 
-        Text = string.Format("Marshal Viewer - {0}", objref.Flags);
+        Text = $"Marshal Viewer - {objref.Flags}";
     }
 }

@@ -47,7 +47,7 @@ public partial class ObjectContainer : UserControl
             Controls.Add(m_axControl);
             ((System.ComponentModel.ISupportInitialize)m_axControl).EndInit();
             ResumeLayout(false);
-            Text = string.Format("{0} Container", m_objName);
+            Text = $"{m_objName} Container";
         }
         catch (Exception e)
         {

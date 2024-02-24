@@ -326,7 +326,7 @@ public partial class MainForm : Form
             {
                 byte[] data = File.ReadAllBytes(dlg.FileName);
                 object comObj = COMUtilities.UnmarshalObject(data);
-                await OpenObjectInformation(comObj, string.Format("Unmarshalled {0}", Path.GetFileName(dlg.FileName)));
+                await OpenObjectInformation(comObj, $"Unmarshalled {Path.GetFileName(dlg.FileName)}");
             }
             catch (Exception ex)
             {
@@ -754,7 +754,7 @@ public partial class MainForm : Form
                 COMIPIDEntry ipid_entry = proc.Ipids.Where(e => e.Ipid == ipid).FirstOrDefault();
                 if (ipid_entry != null)
                 {
-                    HostControl(new PropertiesControl(m_registry, string.Format("IPID: {0}", ipid.FormatGuid()), ipid_entry));
+                    HostControl(new PropertiesControl(m_registry, $"IPID: {ipid.FormatGuid()}", ipid_entry));
                 }
                 else
                 {
@@ -780,10 +780,10 @@ public partial class MainForm : Form
             var processes = COMUtilities.LoadProcesses(new int[] { pid }, this, m_registry);
             if (!processes.Any())
             {
-                throw new ArgumentException(string.Format("Process {0} has not initialized COM, or is inaccessible", pid));
+                throw new ArgumentException($"Process {pid} has not initialized COM, or is inaccessible");
             }
 
-            HostControl(new PropertiesControl(m_registry, string.Format("Process {0}", pid), processes.First()));
+            HostControl(new PropertiesControl(m_registry, $"Process {pid}", processes.First()));
         }
         catch (Exception ex)
         {

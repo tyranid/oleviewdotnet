@@ -114,7 +114,7 @@ public partial class ObjectInformation : UserControl
         {
             listViewProperties.Items.Add("Server PID").SubItems.Add(info.dwServerPid.ToString());
             listViewProperties.Items.Add("Server TID").SubItems.Add(info.dwServerTid.ToString());
-            listViewProperties.Items.Add("Server Address").SubItems.Add(string.Format("0x{0:X}", info.ui64ServerAddress));
+            listViewProperties.Items.Add("Server Address").SubItems.Add($"0x{info.ui64ServerAddress:X}");
         }
         listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
     }

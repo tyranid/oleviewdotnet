@@ -104,14 +104,14 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
         if (fake_name && inproc_server != null && inproc_server.HasDotNet)
         {
-            Name = string.Format("{0}, {1}", inproc_server.DotNet.ClassName, inproc_server.DotNet.AssemblyName);
+            Name = $"{inproc_server.DotNet.ClassName}, {inproc_server.DotNet.AssemblyName}";
         }
 
         AppID = COMUtilities.ReadGuid(key, null, "AppID");
         if (AppID == Guid.Empty)
         {
             AppID = COMUtilities.ReadGuid(Registry.ClassesRoot,
-                    string.Format(@"AppID\{0}", COMUtilities.GetFileName(DefaultServer)), "AppID");
+                    $@"AppID\{COMUtilities.GetFileName(DefaultServer)}", "AppID");
         }
 
         if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
