@@ -40,6 +40,8 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
                 m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
             }
         }
+
+        IsParsed = true;
         return type_lib;
     }
 
@@ -50,6 +52,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
     public string Win64Path { get; private set; }
     public int Locale { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
+    public bool IsParsed { get; private set; }
 
     public override bool Equals(object obj)
     {

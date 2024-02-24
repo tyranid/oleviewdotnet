@@ -1042,16 +1042,13 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void AddTypeLibNodes(TreeNode node, IReadOnlyList<COMTypeLibTypeInfo> types, string category, string image_key)
+    private void AddTypeLibNodes(TreeNode node, IEnumerable<COMTypeLibTypeInfo> types, string category, string image_key)
     {
-        if (types.Count > 0)
+        if (types.Any())
         {
-            var sub_node = CreateNode(category, FolderKey, null);
+            var sub_node = CreateNode(category, FolderKey, types);
             node.Nodes.Add(sub_node);
-            foreach (var type in types)
-            {
-                sub_node.Nodes.Add(CreateNode(type.Name, image_key, type));
-            }
+            sub_node.Nodes.AddRange(types.Select(type => CreateNode(type.Name, image_key, type)).ToArray());
         }
     }
 
@@ -1073,7 +1070,7 @@ public partial class COMRegistryViewer : UserControl
             AddTypeLibNodes(node, parsed_typelib.Records, "Records", ClassKey);
             AddTypeLibNodes(node, parsed_typelib.Unions, "Unions", ClassKey);
             AddTypeLibNodes(node, parsed_typelib.Enums, "Enums", ClassKey);
-            AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ClassKey);
+            AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ProcessKey);
             AddTypeLibNodes(node, parsed_typelib.Aliases, "Aliases", ClassKey);
             treeComRegistry.ResumeLayout();
         }
