@@ -1075,7 +1075,7 @@ public partial class COMRegistryViewer : UserControl
             AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ProcessKey);
             AddTypeLibNodes(node, parsed_typelib.Aliases, "Aliases", ClassKey);
             treeComRegistry.ResumeLayout();
-            EntryPoint.GetMainForm(m_registry).UpdateObjectFormatter(typelib);
+            formattedObjectControl.SelectedObject = typelib;
         }
         catch (Exception ex)
         {
@@ -1454,6 +1454,8 @@ public partial class COMRegistryViewer : UserControl
             {
                 contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
             }
+
+            contextMenuStrip.Items.Add(showObjectFormatterToolStripMenuItem);
         }
         else
         {
@@ -2167,7 +2169,7 @@ public partial class COMRegistryViewer : UserControl
         var main_form = EntryPoint.GetMainForm(m_registry);
         object obj = treeComRegistry.SelectedNode?.Tag;
         main_form.UpdatePropertyGrid(obj);
-        main_form.UpdateObjectFormatter(obj);
+        formattedObjectControl.SelectedObject = obj;
     }
 
     private void allChildrenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2261,5 +2263,11 @@ public partial class COMRegistryViewer : UserControl
     private void createFactoryInPerUserRuntimeBrokerToolStripMenuItem_Click(object sender, EventArgs e)
     {
         CreateInRuntimeBroker(false, true);
+    }
+
+    private void showObjectFormatterToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        splitContainer.Panel2Collapsed = !splitContainer.Panel2Collapsed;
+        showObjectFormatterToolStripMenuItem.Checked = !splitContainer.Panel2Collapsed;
     }
 }

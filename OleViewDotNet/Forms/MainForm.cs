@@ -82,7 +82,6 @@ public partial class MainForm : Form
         Controls.Add(m_dockPanel);
         m_dockPanel.BringToFront();
         CreatePropertyGrid(true);
-        CreateObjectFormatter(true);
 
         if (Environment.Is64BitProcess)
         {
@@ -849,27 +848,6 @@ public partial class MainForm : Form
         }
     }
 
-    public void UpdateObjectFormatter(object obj)
-    {
-        if (m_object_formatter != null && !m_object_formatter.IsDisposed)
-        {
-            m_object_formatter.SelectedObject = obj;
-        }
-    }
-
-    public void CreateObjectFormatter(bool autohide)
-    {
-        if (m_object_formatter == null || m_object_formatter.IsDisposed)
-        {
-            m_object_formatter = new();
-            DocumentForm frm = new(m_object_formatter);
-            frm.TabText = "Object Formatter";
-            frm.ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight;
-            frm.Show(m_dockPanel);
-        }
-    }
-
-
     private void menuObjectPropertiesViewer_Click(object sender, EventArgs e)
     {
         CreatePropertyGrid(false);
@@ -1093,10 +1071,5 @@ public partial class MainForm : Form
     {
         ProgramSettings.EnableSaveOnExit = !menuFileSaveDatabaseOnExit.Checked;
         ProgramSettings.Save(this);
-    }
-
-    private void menuObjectFormatter_Click(object sender, EventArgs e)
-    {
-        CreateObjectFormatter(false);
     }
 }

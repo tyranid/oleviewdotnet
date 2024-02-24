@@ -115,7 +115,6 @@ partial class MainForm
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuObjectFormatter = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -344,8 +343,7 @@ partial class MainForm
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
             this.menuRegistryProperties,
-            this.menuPropertiesViewer,
-            this.menuObjectFormatter});
+            this.menuPropertiesViewer});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -702,12 +700,6 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuObjectFormatter
-            // 
-            this.menuObjectFormatter.Index = 26;
-            this.menuObjectFormatter.Text = "Open Object Formatter";
-            this.menuObjectFormatter.Click += new System.EventHandler(this.menuObjectFormatter_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -814,6 +806,5 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuFileDeleteDefaultDatabase;
     private System.Windows.Forms.MenuItem menuFileSaveDatabaseOnExit;
     private System.Windows.Forms.MenuItem menuItem14;
-    private System.Windows.Forms.MenuItem menuObjectFormatter;
 }
 
