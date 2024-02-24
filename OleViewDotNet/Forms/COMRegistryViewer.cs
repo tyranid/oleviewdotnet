@@ -1018,6 +1018,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else
             {
+                treeComRegistry.SuspendLayout();
                 if (interface_count > 0)
                 {
                     node.Nodes.Remove(wait_node);
@@ -1034,6 +1035,7 @@ public partial class COMRegistryViewer : UserControl
                     AddInterfaceNodes(factory, clsid.FactoryInterfaces);
                     node.Nodes.Add(factory);
                 }
+                treeComRegistry.ResumeLayout();
             }
         }
         catch (Win32Exception ex)
@@ -1073,6 +1075,7 @@ public partial class COMRegistryViewer : UserControl
             AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ProcessKey);
             AddTypeLibNodes(node, parsed_typelib.Aliases, "Aliases", ClassKey);
             treeComRegistry.ResumeLayout();
+            EntryPoint.GetMainForm(m_registry).UpdateObjectFormatter(typelib);
         }
         catch (Exception ex)
         {
@@ -1352,7 +1355,7 @@ public partial class COMRegistryViewer : UserControl
                         contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                     }
 
-                    if (m_registry.GetProxiesForClsid(clsid).Length > 0)
+                    if (!clsid.IsAutomationProxy && m_registry.GetProxiesForClsid(clsid).Length > 0)
                     {
                         contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                     }
@@ -1390,7 +1393,7 @@ public partial class COMRegistryViewer : UserControl
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
                 }
 
-                if (intf.HasProxy && m_registry.Clsids.ContainsKey(intf.ProxyClsid))
+                if (intf.HasProxy && intf.ProxyClassEntry?.IsAutomationProxy == false)
                 {
                     contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
                 }

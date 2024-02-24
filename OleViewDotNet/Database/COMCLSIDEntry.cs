@@ -361,6 +361,11 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         get; private set;
     }
 
+    private static Guid CLSID_PSAutomation = new("00020424-0000-0000-C000-000000000046");
+    private static Guid CLSID_PSDispatch = new("00020420-0000-0000-C000-000000000046");
+
+    internal bool IsAutomationProxy => Clsid == CLSID_PSDispatch || Clsid == CLSID_PSAutomation;
+
     public override bool Equals(object obj)
     {
         if (base.Equals(obj))

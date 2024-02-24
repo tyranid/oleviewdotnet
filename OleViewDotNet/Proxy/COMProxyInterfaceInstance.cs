@@ -92,7 +92,10 @@ public class COMProxyInterfaceInstance : IProxyFormatter
         }
 
         COMCLSIDEntry clsid = intf.ProxyClassEntry;
-        COMProxyInstance.CheckForAutomation(clsid);
+        if (clsid.IsAutomationProxy)
+        {
+            throw new ArgumentException("Can't get proxy for automation interfaces.");
+        }
         if (m_proxies.ContainsKey(intf.Iid))
         {
             return m_proxies[intf.Iid];

@@ -73,20 +73,12 @@ public class COMProxyInstance : IProxyFormatter
     private static readonly Dictionary<Guid, COMProxyInstance> m_proxies = new();
     private static readonly Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
 
-    private static Guid CLSID_PSAutomation = new("00020424-0000-0000-C000-000000000046");
-    private static Guid CLSID_PSDispatch = new("00020420-0000-0000-C000-000000000046");
-
-    internal static void CheckForAutomation(COMCLSIDEntry clsid)
+    public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {
-        if (clsid.Clsid == CLSID_PSDispatch || clsid.Clsid == CLSID_PSAutomation)
+        if (clsid.IsAutomationProxy)
         {
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
-    }
-
-    public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
-    {
-        CheckForAutomation(clsid);
         if (m_proxies.ContainsKey(clsid.Clsid))
         {
             return m_proxies[clsid.Clsid];
