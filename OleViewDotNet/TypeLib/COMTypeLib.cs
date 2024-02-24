@@ -27,10 +27,10 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Class to represent information in a COM type library.
 /// </summary>
-public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid, ICOMFormattable
+public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
 {
     #region Private Members
-    private void FormatInternal(SourceCodeBuilder builder, bool remove_complex_types)
+    private void FormatInternal(COMSourceCodeBuilder builder)
     {
         List<string> attrs = new()
         {
@@ -42,17 +42,17 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
         builder.AppendLine($"library {Name} {{");
         using (builder.PushIndent(4))
         {
-            if (!remove_complex_types)
+            if (!builder.Flags.HasFlag(COMSourceCodeBuilderFlags.RemoveComplexTypes))
             {
-                builder.FormatTypes(Aliases);
-                builder.FormatTypes(Enums);
-                builder.FormatTypes(Records);
-                builder.FormatTypes(Unions);
-                builder.FormatTypes(Modules);
-                builder.FormatTypes(Classes);
+                builder.AppendObjects(Aliases);
+                builder.AppendObjects(Enums);
+                builder.AppendObjects(Records);
+                builder.AppendObjects(Unions);
+                builder.AppendObjects(Modules);
+                builder.AppendObjects(Classes);
             }
-            builder.FormatTypes(Interfaces);
-            builder.FormatTypes(Dispatch);
+            builder.AppendObjects(Interfaces);
+            builder.AppendObjects(Dispatch);
         }
         builder.AppendLine("};");
     }
@@ -87,9 +87,9 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
         ComplexTypes = types.OfType<COMTypeLibComplexType>().ToList().AsReadOnly();
     }
 
-    void ICOMFormattable.Format(SourceCodeBuilder builder)
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        FormatInternal(builder, false);
+        FormatInternal(builder);
     }
     #endregion
 
@@ -124,8 +124,12 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
     #region Public Methods
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
-        SourceCodeBuilder builder = new();
-        FormatInternal(builder, flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes));
+        COMSourceCodeBuilder builder = new();
+        if (flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes))
+        {
+            builder.Flags = COMSourceCodeBuilderFlags.RemoveComplexTypes;
+        }
+        FormatInternal(builder);
         return builder.ToString();
     }
     #endregion

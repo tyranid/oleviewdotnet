@@ -79,15 +79,6 @@ internal static class COMTypeLibUtils
         }
     }
 
-    public static void FormatTypes(this SourceCodeBuilder builder, IEnumerable<COMTypeLibTypeInfo> types)
-    {
-        foreach (var type in types)
-        {
-            type.FormatInternal(builder);
-            builder.AppendLine();
-        }
-    }
-
     public static int GetTypeSize<T>()
     {
         return Marshal.SizeOf<T>();

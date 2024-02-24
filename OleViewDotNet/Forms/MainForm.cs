@@ -41,7 +41,6 @@ public partial class MainForm : Form
     private readonly DockPanel   m_dockPanel;
     private readonly COMRegistry m_registry;
     private PropertyGrid m_property_grid;
-    private FormattedObjectControl m_object_formatter;
 
     private void UpdateTitle()
     {

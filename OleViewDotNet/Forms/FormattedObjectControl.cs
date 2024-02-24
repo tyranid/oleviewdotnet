@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Utilities.Format;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace OleViewDotNet.Forms;
 
 public partial class FormattedObjectControl : UserControl
 {
+    private COMRegistry m_registry;
     private object m_selected_obj;
 
     public FormattedObjectControl()
@@ -38,14 +40,9 @@ public partial class FormattedObjectControl : UserControl
         textEditor.Refresh();
     }
 
-    private void SetObjects(IEnumerable<ICOMFormattable> fs)
+    internal void SetRegistry(COMRegistry registry)
     {
-        SourceCodeBuilder builder = new();
-        foreach (var obj in fs)
-        {
-            obj.Format(builder);
-        }
-        SetText(builder.ToString());
+        m_registry = registry;
     }
 
     internal object SelectedObject
@@ -53,19 +50,24 @@ public partial class FormattedObjectControl : UserControl
         get => m_selected_obj;
         set
         {
+            COMSourceCodeBuilder builder = new(m_registry);
             m_selected_obj = value;
-            if (m_selected_obj is ICOMFormattable formattable)
+            if (m_selected_obj is ICOMSourceCodeFormattable formattable)
             {
-                SetObjects(new[] { formattable });
+                formattable.Format(builder);
             }
-            else if (m_selected_obj is IEnumerable<ICOMFormattable> list && list.Any())
+            else if (m_selected_obj is IEnumerable<ICOMSourceCodeFormattable> list && list.Any())
             {
-                SetObjects(list);
+                foreach (var entry in list)
+                {
+                    entry.Format(builder);
+                }
             }
             else
             {
-                SetText("<No Formattable Object Selected>");
+                builder.AppendLine("No Formattable Object Selected>");
             }
+            SetText(builder.ToString());
         }
     }
 }

@@ -25,7 +25,7 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Base class to represent a type library ITypeInfo definition.
 /// </summary>
-public class COMTypeLibTypeInfo : ICOMGuid, ICOMFormattable
+public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
 {
     #region Private Members
     private readonly COMTypeLibDocumentation _doc;
@@ -91,11 +91,11 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMFormattable
         OnParse(type_info, _attr);
     }
 
-    internal virtual void FormatInternal(SourceCodeBuilder builder)
+    internal virtual void FormatInternal(COMSourceCodeBuilder builder)
     {
     }
 
-    void ICOMFormattable.Format(SourceCodeBuilder builder)
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         FormatInternal(builder);
     }
@@ -116,7 +116,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMFormattable
     #region Public Methods
     public string Format()
     {
-        SourceCodeBuilder builder = new();
+        COMSourceCodeBuilder builder = new();
         FormatInternal(builder);
         return builder.ToString();
     }

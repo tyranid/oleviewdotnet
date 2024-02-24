@@ -14,11 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-
 namespace OleViewDotNet.Utilities.Format;
 
-internal interface ICOMFormattable
+public enum COMSourceCodeBuilderType
 {
-    void Format(SourceCodeBuilder builder);
+    Idl,
+    Generic,
+    Cpp
 }

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMFormattable
+public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
     private Lazy<COMTypeLib> m_typelib;
@@ -169,11 +169,11 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMFormattabl
         return string.IsNullOrWhiteSpace(Name) ? TypelibId.FormatGuid() : Name;
     }
 
-    void ICOMFormattable.Format(SourceCodeBuilder builder)
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         if (m_typelib?.IsValueCreated ?? false)
         {
-            ((ICOMFormattable)m_typelib.Value).Format(builder);
+            ((ICOMSourceCodeFormattable)m_typelib.Value).Format(builder);
         }
         else
         {

@@ -33,7 +33,7 @@ public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
         AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
     }
 
-    internal override void FormatInternal(SourceCodeBuilder builder)
+    internal override void FormatInternal(COMSourceCodeBuilder builder)
     {
         builder.AppendLine($"typedef {GetTypeAttributes("public").FormatAttrs()}{AliasType.FormatType()} {Name}{AliasType.FormatPostName()};");
     }

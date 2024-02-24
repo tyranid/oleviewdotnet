@@ -48,7 +48,6 @@ public partial class COMRegistryViewer : UserControl
     private RegistryViewerFilter m_filter;
     private TreeNode[] m_originalNodes;
 
-
     private sealed class DynamicTreeNode : TreeNode
     {
         public bool IsGenerated { get; set; }
@@ -228,6 +227,7 @@ public partial class COMRegistryViewer : UserControl
         m_mode = mode;
         m_processes = processes;
         treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
+        formattedObjectControl.SetRegistry(reg);
 
         foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
         {
@@ -578,7 +578,7 @@ public partial class COMRegistryViewer : UserControl
             node.Nodes.Add(ipid_node);
         }
     }
-    
+
     private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, 
         IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, IEnumerable<COMCLSIDEntry>> clsidsByAppId)
     {
