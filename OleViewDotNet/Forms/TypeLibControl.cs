@@ -20,6 +20,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,8 +33,8 @@ namespace OleViewDotNet.Forms;
 
 public partial class TypeLibControl : UserControl
 {
-    private readonly IDictionary<Guid, string> m_iids_to_names;
     private readonly IEnumerable<ListViewItemWithGuid> m_interfaces;
+    private readonly COMSourceCodeBuilder m_builder;
     private Guid m_guid_to_view;
     private readonly string m_com_class_id_name;
     private Guid? m_com_class_id;
@@ -46,6 +47,36 @@ public partial class TypeLibControl : UserControl
         public ListViewItemWithGuid(string name, Guid iid) : base(name)
         {
             Guid = iid;
+        }
+    }
+
+    private sealed class ProxyInterfaceFormattable : ICOMSourceCodeFormattable
+    {
+        private readonly NdrComProxyDefinition m_proxy;
+
+        public ProxyInterfaceFormattable(NdrComProxyDefinition proxy)
+        {
+            m_proxy = proxy;
+        }
+
+        void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+        {
+            builder.AppendLine(builder.GetNdrFormatter().FormatComProxy(m_proxy));
+        }
+    }
+
+    private sealed class ProxyComplexTypeFormattable : ICOMSourceCodeFormattable
+    {
+        private readonly NdrComplexTypeReference m_type;
+
+        public ProxyComplexTypeFormattable(NdrComplexTypeReference type)
+        {
+            m_type = type;
+        }
+
+        void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+        {
+            builder.AppendLine(builder.GetNdrFormatter().FormatComplexType(m_type));
         }
     }
 
@@ -108,7 +139,7 @@ public partial class TypeLibControl : UserControl
     {
         ListViewItemWithGuid item = new(type.Name, type.GUID);
         item.SubItems.Add(type.GUID.FormatGuid());
-        item.Tag = type;
+        item.Tag = new SourceCodeFormattableType(type);
         return item;
     }
 
@@ -116,7 +147,7 @@ public partial class TypeLibControl : UserControl
     {
         return new(type.Name, type.GUID)
         {
-            Tag = type
+            Tag = new SourceCodeFormattableType(type)
         };
     }
 
@@ -149,7 +180,7 @@ public partial class TypeLibControl : UserControl
         {
             ListViewItemWithGuid item = new(entry.Item1, entry.Item2.Iid);
             item.SubItems.Add(entry.Item2.Iid.FormatGuid());
-            item.Tag = entry.Item2;
+            item.Tag = new ProxyInterfaceFormattable(entry.Item2);
             yield return item;
         }
     }
@@ -160,7 +191,7 @@ public partial class TypeLibControl : UserControl
         {
             ListViewItem item = new(type.Name);
             item.SubItems.Add(type.GetSize().ToString());
-            item.Tag = type;
+            item.Tag = new ProxyComplexTypeFormattable(type);
             yield return item;
         }
     }
@@ -204,7 +235,7 @@ public partial class TypeLibControl : UserControl
     }
 
     private TypeLibControl(
-        IDictionary<Guid, string> iids_to_names,
+        COMRegistry registry,
         string name,
         Guid guid_to_view,
         IEnumerable<ListViewItemWithGuid> interfaces,
@@ -213,7 +244,8 @@ public partial class TypeLibControl : UserControl
         IEnumerable<ListViewItem> structs,
         IEnumerable<ListViewItem> enums)
     {
-        m_iids_to_names = iids_to_names;
+        m_builder = new(registry);
+        m_builder.RemoveComments = true;
         InitializeComponent();
 
         cbProxyRenderStyle.SelectedIndex = 0;
@@ -284,7 +316,7 @@ public partial class TypeLibControl : UserControl
 
     public TypeLibControl(COMRegistry registry, string name, IProxyFormatter formatter,
         Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
-        : this(registry?.InterfacesToNames, name, guid_to_view,
+        : this(registry, name, guid_to_view,
               FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),
               FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
     {
@@ -297,39 +329,14 @@ public partial class TypeLibControl : UserControl
         m_com_class_id_name = com_class_id_name;
     }
 
-    private INdrFormatter GetNdrFormatter(NdrComProxyDefinition proxy = null)
-    {
-        DefaultNdrFormatterFlags flags = checkBoxHideComments.Checked ? DefaultNdrFormatterFlags.RemoveComments : 0;
-        Func<string, string> demangler = proxy != null ? n => GetComProxyName(proxy, m_iids_to_names) : null;
-        return cbProxyRenderStyle.SelectedIndex switch
-        {
-            1 => DefaultNdrFormatter.Create(m_iids_to_names, demangler, flags),
-            2 => CppNdrFormatter.Create(m_iids_to_names, demangler, flags),
-            _ => IdlNdrFormatter.Create(m_iids_to_names, demangler, flags),
-        };
-    }
-
     private string GetTextFromTag(object tag)
     {
-        if (tag is Type type)
+        m_builder.Reset();
+        if (tag is ICOMSourceCodeFormattable formattable)
         {
-            return COMUtilities.FormatComType(type);
+            formattable.Format(m_builder);
+            return m_builder.ToString();
         }
-        else if (tag is COMTypeLibTypeInfo type_info)
-        {
-            return type_info.Format();
-        }
-        else if (tag is NdrComProxyDefinition proxy)
-        {
-            INdrFormatter formatter = GetNdrFormatter(proxy);
-            return formatter.FormatComProxy(proxy);
-        }
-        else if (tag is NdrComplexTypeReference str)
-        {
-            INdrFormatter formatter = GetNdrFormatter();
-            return formatter.FormatComplexType(str);
-        }
-
         return string.Empty;
     }
 
@@ -465,6 +472,13 @@ public partial class TypeLibControl : UserControl
     {
         if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
         {
+            m_builder.OutputType = cbProxyRenderStyle.SelectedIndex switch
+            {
+                1 => COMSourceCodeBuilderType.Generic,
+                2 => COMSourceCodeBuilderType.Cpp,
+                _ => COMSourceCodeBuilderType.Idl
+            };
+
             UpdateFromListView(view);
         }
     }
@@ -485,6 +499,7 @@ public partial class TypeLibControl : UserControl
     {
         if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
         {
+            m_builder.RemoveComments = checkBoxHideComments.Checked;
             UpdateFromListView(view);
         }
     }

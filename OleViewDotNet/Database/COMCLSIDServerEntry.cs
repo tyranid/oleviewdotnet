@@ -248,7 +248,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
         if (reader.ReadBool("dotnet"))
         {
             IEnumerable<COMCLSIDServerDotNetEntry> service = 
-                reader.ReadSerializableObjects<COMCLSIDServerDotNetEntry>("dotnet", () => new COMCLSIDServerDotNetEntry());
+                reader.ReadSerializableObjects("dotnet", () => new COMCLSIDServerDotNetEntry());
             DotNet = service.FirstOrDefault();
         }
     }
