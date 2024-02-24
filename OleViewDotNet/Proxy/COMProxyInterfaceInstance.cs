@@ -18,13 +18,14 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public class COMProxyInterfaceInstance : IProxyFormatter
+public class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
     /// <summary>
     /// The name of the proxy interface.
@@ -115,6 +116,25 @@ public class COMProxyInterfaceInstance : IProxyFormatter
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
-        return COMUtilities.FormatProxy(m_registry, ComplexTypes, new NdrComProxyDefinition[] { Entry }, flags);
+        COMSourceCodeBuilder builder = new(m_registry);
+        builder.RemoveComments = flags.HasFlag(ProxyFormatterFlags.RemoveComments);
+        builder.RemoveComplexTypes = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
+        ((ICOMSourceCodeFormattable)this).Format(builder);
+        return builder.ToString();
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        INdrFormatter formatter = builder.GetNdrFormatter();
+        if (!builder.RemoveComplexTypes)
+        {
+            foreach (var type in ComplexTypes)
+            {
+                builder.AppendLine(formatter.FormatComplexType(type));
+            }
+            builder.AppendLine();
+        }
+
+        builder.AppendLine(formatter.FormatComProxy(Entry));
     }
 }

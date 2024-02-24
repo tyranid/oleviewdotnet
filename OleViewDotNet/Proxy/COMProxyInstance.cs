@@ -18,12 +18,13 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 
 namespace OleViewDotNet.Proxy;
 
-public class COMProxyInstance : IProxyFormatter
+public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
 
@@ -107,6 +108,28 @@ public class COMProxyInstance : IProxyFormatter
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
-        return COMUtilities.FormatProxy(m_registry, ComplexTypes, Entries, flags);
+        COMSourceCodeBuilder builder = new(m_registry);
+        builder.RemoveComments = flags.HasFlag(ProxyFormatterFlags.RemoveComments);
+        builder.RemoveComplexTypes = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
+        ((ICOMSourceCodeFormattable)this).Format(builder);
+        return builder.ToString();
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        INdrFormatter formatter = builder.GetNdrFormatter();
+        if (!builder.RemoveComplexTypes)
+        {
+            foreach (var type in ComplexTypes)
+            {
+                builder.AppendLine(formatter.FormatComplexType(type));
+            }
+            builder.AppendLine();
+        }
+
+        foreach (var proxy in Entries)
+        {
+            builder.AppendLine(formatter.FormatComProxy(proxy));
+        }
     }
 }

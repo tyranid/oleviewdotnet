@@ -57,7 +57,8 @@ public sealed class COMSourceCodeBuilder
 
     #region Public Properties
     public COMSourceCodeBuilderType OutputType { get; set; }
-    public COMSourceCodeBuilderFlags Flags { get; set; }
+    public bool RemoveComments { get; set; }
+    public bool RemoveComplexTypes { get; set; }
     #endregion
 
     #region Constructors
@@ -73,7 +74,7 @@ public sealed class COMSourceCodeBuilder
     {
         DefaultNdrFormatterFlags flags = 0;
 
-        if (Flags.HasFlag(COMSourceCodeBuilderFlags.RemoveComments))
+        if (RemoveComments)
         {
             flags |= DefaultNdrFormatterFlags.RemoveComments;
         }

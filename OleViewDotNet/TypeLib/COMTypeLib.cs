@@ -42,7 +42,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
         builder.AppendLine($"library {Name} {{");
         using (builder.PushIndent(4))
         {
-            if (!builder.Flags.HasFlag(COMSourceCodeBuilderFlags.RemoveComplexTypes))
+            if (!builder.RemoveComplexTypes)
             {
                 builder.AppendObjects(Aliases);
                 builder.AppendObjects(Enums);
@@ -125,10 +125,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         COMSourceCodeBuilder builder = new();
-        if (flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes))
-        {
-            builder.Flags = COMSourceCodeBuilderFlags.RemoveComplexTypes;
-        }
+        builder.RemoveComplexTypes = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
         FormatInternal(builder);
         return builder.ToString();
     }
