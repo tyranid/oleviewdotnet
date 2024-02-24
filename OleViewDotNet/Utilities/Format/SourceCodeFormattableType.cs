@@ -23,7 +23,7 @@ using System.Text;
 
 namespace OleViewDotNet.Utilities.Format;
 
-public sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeFormattable
+internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeFormattable
 {
     private static string RemoveGenericPart(string name)
     {

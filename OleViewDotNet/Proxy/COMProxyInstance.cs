@@ -17,10 +17,10 @@
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
-using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
@@ -28,24 +28,35 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
 
-    public IEnumerable<NdrComProxyDefinition> Entries { get; private set; }
+    public IReadOnlyList<NdrComProxyDefinition> Entries { get; private set; }
 
-    public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; private set; }
+    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes { get; private set; }
+
+    public string Path { get; }
+
+    public Guid Clsid { get; }
+
+    public COMCLSIDEntry ClassEntry { get; }
 
     internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries,
                               IEnumerable<NdrComplexTypeReference> complex_types,
+                              COMCLSIDEntry clsid,
                               COMRegistry registry)
     {
         Entries = new List<NdrComProxyDefinition>(entries).AsReadOnly();
         ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
+        ClassEntry = clsid;
         m_registry = registry;
     }
 
-    private COMProxyInstance(string path, Guid clsid, ISymbolResolver resolver, COMRegistry registry)
+    private COMProxyInstance(string path, COMCLSIDEntry clsid, ISymbolResolver resolver, COMRegistry registry)
     {
         NdrParser parser = new(resolver);
-        Entries = parser.ReadFromComProxyFile(path, clsid);
-        ComplexTypes = parser.ComplexTypes;
+        Clsid = clsid?.Clsid ?? Guid.Empty;
+        Entries = parser.ReadFromComProxyFile(path, Clsid).ToList().AsReadOnly();
+        ComplexTypes = parser.ComplexTypes.ToList().AsReadOnly();
+        Path = clsid?.DefaultServer ?? path;
+        ClassEntry = clsid;
         m_registry = registry;
         foreach (var entry in Entries)
         {
@@ -67,7 +78,8 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         }
     }
 
-    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) : this(path, Guid.Empty, resolver, registry)
+    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) 
+        : this(path, null, resolver, registry)
     {
     }
 
@@ -86,7 +98,7 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         }
         else
         {
-            COMProxyInstance proxy = new(clsid.DefaultServer, clsid.Clsid, resolver, clsid.Database);
+            COMProxyInstance proxy = new(clsid.DefaultServer, clsid, resolver, clsid.Database);
             m_proxies[clsid.Clsid] = proxy;
             return proxy;
         }

@@ -143,12 +143,12 @@ public partial class TypeLibControl : UserControl
 
     private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(Assembly typelib, bool com_visible)
     {
-        return COMUtilities.GetComInterfaces(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
+        return typelib.GetComInterfaces(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
     private static IEnumerable<ListViewItemWithGuid> FormatClasses(Assembly typelib, bool com_visible)
     {
-        return COMUtilities.GetComClasses(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
+        return typelib.GetComClasses(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
     private static string GetComProxyName(NdrComProxyDefinition proxy, IDictionary<Guid, string> iids_to_names)
@@ -188,12 +188,12 @@ public partial class TypeLibControl : UserControl
 
     private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib, bool com_visible)
     {
-        return COMUtilities.GetComStructs(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
+        return typelib.GetComStructs(com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
     }
 
     private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
     {
-        return COMUtilities.GetComEnums(typelib, com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
+        return typelib.GetComEnums(com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
     }
 
     private void AddGuidItems(ListView list,

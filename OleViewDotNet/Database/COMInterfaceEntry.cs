@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
@@ -365,6 +366,10 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
             {
                 formattable = intf;
             }
+        }
+        else if (COMProxyInterfaceInstance.TryGetFromIID(this, out COMProxyInterfaceInstance proxy))
+        {
+            formattable = proxy;
         }
         formattable?.Format(builder);
     }

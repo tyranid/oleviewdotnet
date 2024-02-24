@@ -243,7 +243,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid
         }
         NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMInterfaceEntry.IID_IUnknown,
             Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
-        return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes, m_registry);
+        return new COMProxyInstance(new NdrComProxyDefinition[] { entry }, ComplexTypes, null, m_registry);
     }
 
     public override string ToString()

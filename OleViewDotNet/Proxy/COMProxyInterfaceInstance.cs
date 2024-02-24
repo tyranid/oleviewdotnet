@@ -58,7 +58,7 @@ public class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormatta
 
     public NdrComProxyDefinition Entry { get; }
 
-    public IEnumerable<NdrComplexTypeReference> ComplexTypes { get; }
+    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes { get; }
 
     public string Path => ClassEntry.DefaultServer;
 
@@ -68,11 +68,28 @@ public class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormatta
 
     private readonly COMRegistry m_registry;
 
+    internal COMProxyInterfaceInstance(COMCLSIDEntry clsid, NdrComProxyDefinition entry, 
+        IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry)
+    {
+        ClassEntry = clsid;
+        Entry = entry;
+        m_registry = registry;
+        if (string.IsNullOrWhiteSpace(Entry.Name))
+        {
+            Name = m_registry.MapIidToInterface(Iid).Name;
+        }
+        else
+        {
+            Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
+        }
+        ComplexTypes = complex_types.ToList().AsReadOnly();
+    }
+
     private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
     {
         NdrParser parser = new(resolver);
         Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
-        ComplexTypes = parser.ComplexTypes;
+        ComplexTypes = parser.ComplexTypes.ToList().AsReadOnly();
         OriginalName = intf.Name;
         if (string.IsNullOrWhiteSpace(Entry.Name))
         {
@@ -84,6 +101,11 @@ public class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormatta
     }
 
     private static readonly Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
+
+    public static bool TryGetFromIID(COMInterfaceEntry intf, out COMProxyInterfaceInstance proxy)
+    {
+        return m_proxies.TryGetValue(intf.Iid, out proxy);
+    }
 
     public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
     {

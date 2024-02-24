@@ -26,6 +26,7 @@ using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
+using OleViewDotNet.Utilities.Format;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;
@@ -1199,156 +1200,6 @@ public static class COMUtilities
         return MarshalObjectToObjRef(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
     }
 
-    private static string RemoveGenericPart(string name)
-    {
-        int index = name.LastIndexOf('`');
-        if (index >= 0)
-            return name.Substring(0, index);
-        return name;
-    }
-
-    private static string ConvertTypeToName(Type t)
-    {
-        if (t == typeof(string))
-        {
-            return "string";
-        }
-        else if (t == typeof(byte))
-        {
-            return "byte";
-        }
-        else if (t == typeof(sbyte))
-        {
-            return "sbyte";
-        }
-        else if (t == typeof(short))
-        {
-            return "short";
-        }
-        else if (t == typeof(ushort))
-        {
-            return "ushort";
-        }
-        else if (t == typeof(int))
-        {
-            return "int";
-        }
-        else if (t == typeof(uint))
-        {
-            return "uint";
-        }
-        else if (t == typeof(long))
-        {
-            return "long";
-        }
-        else if (t == typeof(ulong))
-        {
-            return "ulong";
-        }
-        else if (t == typeof(void))
-        {
-            return "void";
-        }
-        else if (t == typeof(object))
-        {
-            return "object";
-        }
-        else if (t == typeof(bool))
-        {
-            return "bool";
-        }
-        else if (t.IsConstructedGenericType)
-        {
-            StringBuilder builder = new();
-            builder.Append(RemoveGenericPart(t.Name));
-            builder.Append('<');
-            builder.Append(string.Join(",", t.GenericTypeArguments.Select(g => ConvertTypeToName(g))));
-            builder.Append('>');
-            return builder.ToString();
-        }
-
-        return t.Name;
-    }
-
-    private static string FormatParameters(IEnumerable<ParameterInfo> pis)
-    {
-        List<string> pars = new();
-        foreach (ParameterInfo pi in pis)
-        {
-            List<string> dirs = new();
-
-            if (pi.IsOut)
-            {
-                dirs.Add("Out");
-                if (pi.IsIn)
-                {
-                    dirs.Add("In");
-                }
-            }
-
-            if (pi.IsRetval)
-            {
-                dirs.Add("Retval");
-            }
-
-            if (pi.IsOptional)
-            {
-                dirs.Add("Optional");
-            }
-
-            string text = $"{ConvertTypeToName(pi.ParameterType)} {pi.Name}";
-
-            if (dirs.Count > 0)
-            {
-                text = $"[{string.Join(",", dirs)}] {text}";
-            }
-            pars.Add(text);
-        }
-        return string.Join(", ", pars);
-    }
-
-    public static string MemberInfoToString(MemberInfo member)
-    {
-        if (member is MethodInfo mi)
-        {
-            return $"{ConvertTypeToName(mi.ReturnType)} {mi.Name}({FormatParameters(mi.GetParameters())});";
-        }
-        else if (member is PropertyInfo prop)
-        {
-            List<string> propdirs = new();
-            if (prop.CanRead)
-            {
-                propdirs.Add("get;");
-            }
-
-            if (prop.CanWrite)
-            {
-                propdirs.Add("set;");
-            }
-
-            ParameterInfo[] index_params = prop.GetIndexParameters();
-            string ps = string.Empty;
-            if (index_params.Length > 0)
-            {
-                ps = $"({FormatParameters(index_params)})";
-            }
-
-            return $"{ConvertTypeToName(prop.PropertyType)} {prop.Name}{ps} {{ {string.Join(" ", propdirs)} }}";
-        }
-        else if (member is FieldInfo fi)
-        {
-            return $"{ConvertTypeToName(fi.FieldType)} {fi.Name};";
-        }
-        else if (member is EventInfo ei)
-        {
-            return $"event {ConvertTypeToName(ei.EventHandlerType)} {ei.Name};";
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public static bool HasSubkey(this RegistryKey key, string name)
     {
         using RegistryKey subkey = key.OpenSubKey(name);
@@ -2219,172 +2070,17 @@ public static class COMUtilities
         File.WriteAllLines(output_file, lines);
     }
 
-    private static void EmitMember(StringBuilder builder, MemberInfo mi)
-    {
-        string name = MemberInfoToString(mi);
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            builder.Append("   ");
-            if (mi is FieldInfo)
-            {
-                builder.AppendFormat("{0};", name).AppendLine();
-            }
-            else
-            {
-                builder.AppendLine(name);
-            }
-        }
-    }
-
-    private static Dictionary<MethodInfo, string> MapMethodNamesToCOM(IEnumerable<MethodInfo> mis)
-    {
-        HashSet<string> matched_names = new();
-        Dictionary<MethodInfo, string> ret = new();
-        foreach (MethodInfo mi in mis.Reverse())
-        {
-            int count = 2;
-            string name = mi.Name;
-            while (!matched_names.Add(name))
-            {
-                name = $"{mi.Name}_{count++}";
-            }
-            ret.Add(mi, name);
-        }
-        return ret;
-    }
-
-    private static Dictionary<string, object> GetEnumValues(Type enum_type)
-    {
-        return enum_type.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(e => e.Name, e => e.GetRawConstantValue());
-    }
-
-    public static void FormatComType(StringBuilder builder, Type t)
-    {
-        try
-        {
-            if (t.IsInterface)
-            {
-                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
-                builder.AppendFormat("interface {0}", t.Name).AppendLine();
-            }
-            else if (t.IsEnum)
-            {
-                builder.AppendFormat("enum {0}", t.Name).AppendLine();
-            }
-            else if (t.IsClass)
-            {
-                builder.AppendFormat("[Guid(\"{0}\")]", t.GUID).AppendLine();
-                ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
-                if (class_attr != null)
-                {
-                    builder.AppendFormat("[ClassInterface(ClassInterfaceType.{0})]", class_attr.Value).AppendLine();
-                }
-                builder.AppendFormat("class {0}", t.Name).AppendLine();
-            }
-            else
-            {
-                builder.AppendFormat("struct {0}", t.Name).AppendLine();
-            }
-            builder.AppendLine("{");
-
-            if (t.IsInterface || t.IsClass)
-            {
-                MethodInfo[] methods = t.GetMethods().Where(m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
-                if (methods.Length > 0)
-                {
-                    builder.AppendLine("   /* Methods */");
-
-                    Dictionary<MethodInfo, string> name_mapping = new();
-                    if (t.IsClass)
-                    {
-                        name_mapping = MapMethodNamesToCOM(methods);
-                    }
-
-                    foreach (MethodInfo mi in methods)
-                    {
-                        if (name_mapping.ContainsKey(mi) && name_mapping[mi] != mi.Name)
-                        {
-                            builder.AppendFormat("    /* Exposed as {0} */", name_mapping[mi]).AppendLine();
-                        }
-
-                        EmitMember(builder, mi);
-                    }
-                }
-
-                var props = t.GetProperties().Where(p => !(p.GetMethod?.IsStatic ?? false));
-                if (props.Any())
-                {
-                    builder.AppendLine("   /* Properties */");
-                    foreach (PropertyInfo pi in props)
-                    {
-                        EmitMember(builder, pi);
-                    }
-                }
-
-                var evs = t.GetEvents();
-                if (evs.Length > 0)
-                {
-                    builder.AppendLine("   /* Events */");
-                    foreach (EventInfo ei in evs)
-                    {
-                        EmitMember(builder, ei);
-                    }
-                }
-            }
-            else if (t.IsEnum)
-            {
-                foreach (var pair in GetEnumValues(t))
-                {
-                    builder.Append("   ");
-                    try
-                    {
-                        builder.AppendFormat("{0} = {1},", pair.Key, pair.Value);
-                    }
-                    catch
-                    {
-                        builder.AppendFormat("{0},");
-                    }
-                    builder.AppendLine();
-                }
-            }
-            else
-            {
-                FieldInfo[] fields = t.GetFields();
-                if (fields.Length > 0)
-                {
-                    builder.AppendLine("   /* Fields */");
-                    foreach (FieldInfo fi in fields)
-                    {
-                        EmitMember(builder, fi);
-                    }
-                }
-            }
-
-            builder.AppendLine("}");
-        }
-        catch (InvalidOperationException)
-        {
-        }
-    }
-
-    public static string FormatComType(Type t)
-    {
-        StringBuilder builder = new();
-        FormatComType(builder, t);
-        return builder.ToString();
-    }
-
-    public static IEnumerable<Type> GetComClasses(Assembly typelib, bool com_visible)
+    internal static IEnumerable<Type> GetComClasses(this Assembly typelib, bool com_visible)
     {
         return GetComTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
     }
 
-    public static IEnumerable<Type> GetComInterfaces(Assembly typelib, bool com_visible)
+    internal static IEnumerable<Type> GetComInterfaces(this Assembly typelib, bool com_visible)
     {
         return GetComTypes(typelib.GetTypes().Where(t => t.IsInterface), com_visible);
     }
 
-    private static IEnumerable<Type> GetComTypes(IEnumerable<Type> types, bool com_visible)
+    internal static IEnumerable<Type> GetComTypes(this IEnumerable<Type> types, bool com_visible)
     {
         if (com_visible)
         {
@@ -2396,7 +2092,7 @@ public static class COMUtilities
         }
     }
 
-    public static IEnumerable<Type> GetComStructs(Assembly typelib, bool com_visible)
+    internal static IEnumerable<Type> GetComStructs(this Assembly typelib, bool com_visible)
     {
         var types = typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum);
         if (com_visible)
@@ -2406,7 +2102,7 @@ public static class COMUtilities
         return types;
     }
 
-    public static IEnumerable<Type> GetComEnums(Assembly typelib, bool com_visible)
+    internal static IEnumerable<Type> GetComEnums(this Assembly typelib, bool com_visible)
     {
         var types = typelib.GetTypes().Where(t => t.IsEnum);
         if (com_visible)
@@ -2416,26 +2112,24 @@ public static class COMUtilities
         return types;
     }
 
-    private static void FormatComTypes(StringBuilder builder, IEnumerable<Type> types)
-    {
-        foreach (var type in types)
-        {
-            FormatComType(builder, type);
-            builder.AppendLine();
-        }
-        builder.AppendLine();
-    }
-
     public static string FormatComAssembly(Assembly assembly, bool interfaces_only)
     {
-        StringBuilder builder = new();
+        COMSourceCodeBuilder builder = new();
         if (!interfaces_only)
         {
-            FormatComTypes(builder, GetComStructs(assembly, false));
-            FormatComTypes(builder, GetComEnums(assembly, false));
-            FormatComTypes(builder, GetComClasses(assembly, false));
+            builder.AppendTypes(assembly.GetComStructs(false));
+            builder.AppendTypes(assembly.GetComEnums(false));
+            builder.AppendTypes(assembly.GetComClasses(false));
         }
-        FormatComTypes(builder, GetComInterfaces(assembly, false));
+        builder.AppendTypes(assembly.GetComInterfaces(false));
+        return builder.ToString();
+    }
+
+    public static string FormatComType(Type type)
+    {
+        COMSourceCodeBuilder builder = new();
+        ICOMSourceCodeFormattable formattable = new SourceCodeFormattableType(type);
+        formattable.Format(builder);
         return builder.ToString();
     }
 

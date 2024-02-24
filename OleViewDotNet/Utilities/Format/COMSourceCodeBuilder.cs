@@ -137,6 +137,19 @@ public sealed class COMSourceCodeBuilder
         }
     }
 
+    internal void AppendTypes(IEnumerable<Type> types)
+    {
+        foreach (var type in types)
+        {
+            if (type is not ICOMSourceCodeFormattable formattable)
+            {
+                formattable = new SourceCodeFormattableType(type);
+            }
+            formattable.Format(this);
+            m_builder.AppendLine();
+        }
+    }
+
     internal void AppendCommentLine(string comment)
     {
         if (RemoveComments)
