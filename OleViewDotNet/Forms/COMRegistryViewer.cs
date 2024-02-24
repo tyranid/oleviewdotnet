@@ -247,7 +247,7 @@ public partial class COMRegistryViewer : UserControl
     private static TreeNode CreateNode(string text, string image_key, object tag)
     {
         bool dynamic = false;
-        if (tag is ICOMClassEntry || tag is COMTypeLibVersionEntry)
+        if (tag is ICOMClassEntry || tag is COMTypeLibVersionEntry || tag is COMTypeLibCoClass)
         {
             dynamic = true;
         }
@@ -1099,6 +1099,10 @@ public partial class COMRegistryViewer : UserControl
             {
                 await SetupTypeLibNodeTree(typelib_entry, e.Node);
             }
+            else if (e.Node.Tag is COMTypeLibCoClass typelib_class)
+            {
+                await SetupCLSIDNodeTree(m_registry.MapClsidToEntry(typelib_class.Uuid), e.Node, false);
+            }
         }
 
         Cursor.Current = currCursor;
@@ -1294,7 +1298,7 @@ public partial class COMRegistryViewer : UserControl
                 contextMenuStrip.Items.Add(copyGUIDCStructureToolStripMenuItem);
             }
 
-            if ((node.Tag is ICOMClassEntry) || (node.Tag is COMProgIDEntry))
+            if ((node.Tag is ICOMClassEntry) || (node.Tag is COMProgIDEntry) || (node.Tag is COMTypeLibCoClass))
             {
                 contextMenuStrip.Items.Add(copyObjectTagToolStripMenuItem);
                 contextMenuStrip.Items.Add(createInstanceToolStripMenuItem);
@@ -1305,6 +1309,11 @@ public partial class COMRegistryViewer : UserControl
                 if (node.Tag is COMProgIDEntry progid)
                 {
                     clsid = m_registry.MapClsidToEntry(progid.Clsid);
+                    entry = clsid;
+                }
+                else if (node.Tag is COMTypeLibCoClass typelib_class)
+                {
+                    clsid = m_registry.MapClsidToEntry(typelib_class.Uuid);
                     entry = clsid;
                 }
 
@@ -1466,9 +1475,19 @@ public partial class COMRegistryViewer : UserControl
     private async void refreshInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if ((node != null) && node.Tag is ICOMClassEntry class_entry)
+        if (node != null)
         {
-            await SetupCLSIDNodeTree(class_entry, node, true);
+            ICOMClassEntry class_entry = node.Tag as ICOMClassEntry;
+
+            if (node.Tag is COMTypeLibCoClass typelib_class)
+            {
+                class_entry = m_registry.MapClsidToEntry(typelib_class.Uuid);
+            }
+
+            if (class_entry != null)
+            {
+                await SetupCLSIDNodeTree(class_entry, node, true);
+            }
         }
     }
 

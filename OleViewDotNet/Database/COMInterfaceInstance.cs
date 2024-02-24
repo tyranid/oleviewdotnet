@@ -19,10 +19,11 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceInstance : IXmlSerializable
+public class COMInterfaceInstance : IXmlSerializable, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
 
@@ -85,5 +86,10 @@ public class COMInterfaceInstance : IXmlSerializable
         writer.WriteGuid("iid", Iid);
         writer.WriteOptionalAttributeString("mod", Module);
         writer.WriteLong("ofs", VTableOffset);
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        ((ICOMSourceCodeFormattable)InterfaceEntry)?.Format(builder);
     }
 }

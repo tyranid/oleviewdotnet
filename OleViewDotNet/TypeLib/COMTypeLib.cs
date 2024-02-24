@@ -118,6 +118,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
     public IReadOnlyList<COMTypeLibTypeInfo> Types { get; }
     public IReadOnlyList<COMTypeLibCoClass> Classes { get; }
     public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
+    public IReadOnlyDictionary<Guid, COMTypeLibInterface> InterfacesByIid => Interfaces.ToDictionary(i => i.Uuid);
     Guid ICOMGuid.ComGuid => TypeLibId;
     #endregion
 

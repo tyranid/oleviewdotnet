@@ -19,7 +19,6 @@ using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
-using OleViewDotNet.Utilities.Format;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Concurrent;

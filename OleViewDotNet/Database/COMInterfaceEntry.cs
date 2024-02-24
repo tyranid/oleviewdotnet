@@ -17,7 +17,9 @@
 using Microsoft.Win32;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -27,7 +29,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, ICOMGuid
+public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
 
@@ -347,5 +349,23 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         writer.WriteGuid("tlib", TypeLib);
         writer.WriteBool("rt", RuntimeInterface);
         writer.WriteEnum("src", Source);
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        ICOMSourceCodeFormattable formattable = null;
+        if (RuntimeInterface && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(Iid))
+        {
+            formattable = new SourceCodeFormattableType(COMUtilities.RuntimeInterfaceMetadata[Iid]);
+        }
+        else if (TypeLibVersionEntry?.IsParsed ?? false)
+        {
+            var typelib = TypeLibVersionEntry.Parse();
+            if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
+            {
+                formattable = intf;
+            }
+        }
+        formattable?.Format(builder);
     }
 }

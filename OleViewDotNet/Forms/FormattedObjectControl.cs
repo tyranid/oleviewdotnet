@@ -32,10 +32,18 @@ public partial class FormattedObjectControl : UserControl
         InitializeComponent();
         textEditor.SetHighlighting("C#");
         textEditor.IsReadOnly = true;
+        SetText(string.Empty);
     }
 
     private void SetText(string text)
     {
+        if (string.IsNullOrEmpty(text))
+        {
+            text = m_selected_obj == null ? 
+                "<No formattable object selected>" : 
+                $"<'{m_selected_obj}' is not formattable.>";
+        }
+
         textEditor.Text = text;
         textEditor.Refresh();
     }
@@ -62,10 +70,6 @@ public partial class FormattedObjectControl : UserControl
                 {
                     entry.Format(builder);
                 }
-            }
-            else
-            {
-                builder.AppendLine("No Formattable Object Selected>");
             }
             SetText(builder.ToString());
         }

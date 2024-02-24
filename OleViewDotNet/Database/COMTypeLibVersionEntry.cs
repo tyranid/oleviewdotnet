@@ -52,6 +52,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     public string Win64Path { get; private set; }
     public int Locale { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
+    internal bool IsParsed => m_typelib?.IsValueCreated ?? false;
 
     public override bool Equals(object obj)
     {
@@ -171,7 +172,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        if (m_typelib?.IsValueCreated ?? false)
+        if (IsParsed)
         {
             ((ICOMSourceCodeFormattable)m_typelib.Value).Format(builder);
         }

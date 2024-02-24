@@ -136,6 +136,13 @@ public sealed class COMSourceCodeBuilder
             m_builder.AppendLine();
         }
     }
+
+    internal void AppendCommentLine(string comment)
+    {
+        if (RemoveComments)
+            return;
+        AppendLine(comment);
+    }
     #endregion
 
     #region Public Methods

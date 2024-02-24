@@ -2219,32 +2219,6 @@ public static class COMUtilities
         File.WriteAllLines(output_file, lines);
     }
 
-    public static string FormatProxy(COMRegistry registry, IEnumerable<NdrComplexTypeReference> complex_types,
-        IEnumerable<NdrComProxyDefinition> proxies, ProxyFormatterFlags flags)
-    {
-        bool remove_comments = (flags & ProxyFormatterFlags.RemoveComments) != 0;
-        INdrFormatter formatter = IdlNdrFormatter.Create(registry.InterfacesToNames,
-                s => DemangleWinRTName(s),
-                remove_comments ? DefaultNdrFormatterFlags.RemoveComments : DefaultNdrFormatterFlags.None);
-        StringBuilder builder = new();
-
-        if ((flags & ProxyFormatterFlags.RemoveComplexTypes) == 0)
-        {
-            foreach (var type in complex_types)
-            {
-                builder.AppendLine(formatter.FormatComplexType(type));
-            }
-            builder.AppendLine();
-        }
-
-        foreach (var proxy in proxies)
-        {
-            builder.AppendLine(formatter.FormatComProxy(proxy));
-        }
-
-        return builder.ToString();
-    }
-
     private static void EmitMember(StringBuilder builder, MemberInfo mi)
     {
         string name = MemberInfoToString(mi);
