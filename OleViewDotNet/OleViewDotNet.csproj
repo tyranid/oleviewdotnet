@@ -28,7 +28,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DockPanelSuite" Version="3.0.6" />
+        <PackageReference Include="DockPanelSuite" Version="3.1.0" />
+        <PackageReference Include="DockPanelSuite.ThemeVS2005" Version="3.1.0" />
         <PackageReference Include="ICSharpCode.TextEditor" Version="3.2.1.6466" />
         <PackageReference Include="NDesk.Options" Version="0.2.1" />
     </ItemGroup>

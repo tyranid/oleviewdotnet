@@ -78,6 +78,7 @@ public partial class MainForm : Form
         m_dockPanel.ActiveAutoHideContent = null;
         m_dockPanel.Dock = DockStyle.Fill;
         m_dockPanel.Name = "dockPanel";
+        m_dockPanel.Theme = new VS2005Theme();
         Controls.Add(m_dockPanel);
         m_dockPanel.BringToFront();
         CreatePropertyGrid(true);
