@@ -26,7 +26,7 @@ public sealed class COMTypeLibUnion : COMTypeLibComplexType
     {
     }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}union {{");
         using (builder.PushIndent(4))

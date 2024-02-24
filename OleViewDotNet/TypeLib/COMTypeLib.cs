@@ -27,8 +27,37 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Class to represent information in a COM type library.
 /// </summary>
-public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid
+public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid, ICOMFormattable
 {
+    #region Private Members
+    private void FormatInternal(SourceCodeBuilder builder, bool remove_complex_types)
+    {
+        List<string> attrs = new()
+        {
+            $"uuid({TypeLibId.ToString().ToUpper()})",
+            $"version({Version})"
+        };
+        attrs.AddRange(_doc.GetAttrs());
+        builder.AppendAttributes(attrs);
+        builder.AppendLine($"library {Name} {{");
+        using (builder.PushIndent(4))
+        {
+            if (!remove_complex_types)
+            {
+                builder.FormatTypes(Aliases);
+                builder.FormatTypes(Enums);
+                builder.FormatTypes(Records);
+                builder.FormatTypes(Unions);
+                builder.FormatTypes(Modules);
+                builder.FormatTypes(Classes);
+            }
+            builder.FormatTypes(Interfaces);
+            builder.FormatTypes(Dispatch);
+        }
+        builder.AppendLine("};");
+    }
+    #endregion
+
     #region Internal Members
     internal COMTypeLib(string path, COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
         : base(doc, attr)
@@ -56,6 +85,11 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid
         Modules = types.OfType<COMTypeLibModule>().ToList().AsReadOnly();
         Classes = types.OfType<COMTypeLibCoClass>().ToList().AsReadOnly();
         ComplexTypes = types.OfType<COMTypeLibComplexType>().ToList().AsReadOnly();
+    }
+
+    void ICOMFormattable.Format(SourceCodeBuilder builder)
+    {
+        FormatInternal(builder, false);
     }
     #endregion
 
@@ -91,29 +125,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         SourceCodeBuilder builder = new();
-        List<string> attrs = new()
-        {
-            $"uuid({TypeLibId.ToString().ToUpper()})",
-            $"version({Version})"
-        };
-        attrs.AddRange(_doc.GetAttrs());
-        builder.AppendAttributes(attrs);
-        builder.AppendLine($"library {Name} {{");
-        using (builder.PushIndent(4))
-        {
-            if (!flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes))
-            {
-                builder.FormatTypes(Aliases);
-                builder.FormatTypes(Enums);
-                builder.FormatTypes(Records);
-                builder.FormatTypes(Unions);
-                builder.FormatTypes(Modules);
-                builder.FormatTypes(Classes);
-            }
-            builder.FormatTypes(Interfaces);
-            builder.FormatTypes(Dispatch);
-        }
-        builder.AppendLine("};");
+        FormatInternal(builder, flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes));
         return builder.ToString();
     }
     #endregion

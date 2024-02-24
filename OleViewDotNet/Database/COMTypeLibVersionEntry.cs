@@ -22,10 +22,12 @@ using System.Xml.Schema;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
+public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMFormattable
 {
     private readonly COMRegistry m_registry;
     private Lazy<COMTypeLib> m_typelib;
@@ -40,8 +42,6 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
                 m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
             }
         }
-
-        IsParsed = true;
         return type_lib;
     }
 
@@ -52,7 +52,6 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
     public string Win64Path { get; private set; }
     public int Locale { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
-    public bool IsParsed { get; private set; }
 
     public override bool Equals(object obj)
     {
@@ -168,5 +167,28 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid
     public override string ToString()
     {
         return string.IsNullOrWhiteSpace(Name) ? TypelibId.FormatGuid() : Name;
+    }
+
+    void ICOMFormattable.Format(SourceCodeBuilder builder)
+    {
+        if (m_typelib?.IsValueCreated ?? false)
+        {
+            ((ICOMFormattable)m_typelib.Value).Format(builder);
+        }
+        else
+        {
+            List<string> attrs = new()
+            {
+                $"uuid({TypelibId})",
+                $"version({Version})"
+            };
+            builder.AppendAttributes(attrs);
+            builder.AppendLine($"library {Name} {{");
+            using (builder.PushIndent(4))
+            {
+                builder.AppendLine("// Type library not parsed.");
+            }
+            builder.AppendLine("};");
+        }
     }
 }

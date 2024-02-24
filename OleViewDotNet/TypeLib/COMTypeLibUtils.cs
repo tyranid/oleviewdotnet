@@ -83,7 +83,7 @@ internal static class COMTypeLibUtils
     {
         foreach (var type in types)
         {
-            type.Format(builder);
+            type.FormatInternal(builder);
             builder.AppendLine();
         }
     }

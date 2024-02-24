@@ -28,7 +28,7 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase
     {
     }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         bool is_dispatch = HasTypeFlag(TYPEFLAGS.TYPEFLAG_FDISPATCHABLE);
         var base_interface = ImplementedInterfaces.FirstOrDefault();

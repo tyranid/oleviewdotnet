@@ -41,6 +41,7 @@ public partial class MainForm : Form
     private readonly DockPanel   m_dockPanel;
     private readonly COMRegistry m_registry;
     private PropertyGrid m_property_grid;
+    private FormattedObjectControl m_object_formatter;
 
     private void UpdateTitle()
     {
@@ -80,6 +81,7 @@ public partial class MainForm : Form
         Controls.Add(m_dockPanel);
         m_dockPanel.BringToFront();
         CreatePropertyGrid(true);
+        CreateObjectFormatter(true);
 
         if (Environment.Is64BitProcess)
         {
@@ -835,7 +837,7 @@ public partial class MainForm : Form
     {
         if (m_property_grid == null || m_property_grid.IsDisposed)
         {
-            m_property_grid = new PropertyGrid();
+            m_property_grid = new();
             m_property_grid.ToolbarVisible = false;
             m_property_grid.PropertySort = PropertySort.Alphabetical;
             
@@ -845,6 +847,27 @@ public partial class MainForm : Form
             frm.Show(m_dockPanel);
         }
     }
+
+    public void UpdateObjectFormatter(object obj)
+    {
+        if (m_object_formatter != null && !m_object_formatter.IsDisposed)
+        {
+            m_object_formatter.SelectedObject = obj;
+        }
+    }
+
+    public void CreateObjectFormatter(bool autohide)
+    {
+        if (m_object_formatter == null || m_object_formatter.IsDisposed)
+        {
+            m_object_formatter = new();
+            DocumentForm frm = new(m_object_formatter);
+            frm.TabText = "Object Formatter";
+            frm.ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight;
+            frm.Show(m_dockPanel);
+        }
+    }
+
 
     private void menuObjectPropertiesViewer_Click(object sender, EventArgs e)
     {
@@ -1069,5 +1092,10 @@ public partial class MainForm : Form
     {
         ProgramSettings.EnableSaveOnExit = !menuFileSaveDatabaseOnExit.Checked;
         ProgramSettings.Save(this);
+    }
+
+    private void menuObjectFormatter_Click(object sender, EventArgs e)
+    {
+        CreateObjectFormatter(false);
     }
 }

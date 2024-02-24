@@ -2161,7 +2161,10 @@ public partial class COMRegistryViewer : UserControl
 
     private void treeComRegistry_AfterSelect(object sender, TreeViewEventArgs e)
     {
-        EntryPoint.GetMainForm(m_registry).UpdatePropertyGrid(treeComRegistry.SelectedNode?.Tag);
+        var main_form = EntryPoint.GetMainForm(m_registry);
+        object obj = treeComRegistry.SelectedNode?.Tag;
+        main_form.UpdatePropertyGrid(obj);
+        main_form.UpdateObjectFormatter(obj);
     }
 
     private void allChildrenToolStripMenuItem_Click(object sender, EventArgs e)

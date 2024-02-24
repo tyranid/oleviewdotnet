@@ -39,7 +39,7 @@ public sealed class COMTypeLibCoClass : COMTypeLibTypeInfo
 
     public IReadOnlyList<COMTypeLibCoClassInterface> ImplementedInterfaces { get; private set; }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         builder.AppendAttributes(GetTypeAttributes("odl"));
         builder.AppendLine($"coclass {Name} {{");

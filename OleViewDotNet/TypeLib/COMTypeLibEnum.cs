@@ -54,7 +54,7 @@ public sealed class COMTypeLibEnum : COMTypeLibTypeInfo
 
     public IReadOnlyList<COMTypeLibEnumValue> Values { get; private set; }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs().TrimEnd()}");
         builder.AppendLine("enum {");

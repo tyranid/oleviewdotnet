@@ -51,7 +51,7 @@ public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase
     {
     }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         builder.AppendAttributes(GetTypeAttributes("odl"));
         builder.AppendLine($"dispinterface {Name} {{");

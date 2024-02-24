@@ -48,7 +48,7 @@ public sealed class COMTypeLibModule : COMTypeLibTypeInfo
         Constants = constants.AsReadOnly();
     }
 
-    internal override void Format(SourceCodeBuilder builder)
+    internal override void FormatInternal(SourceCodeBuilder builder)
     {
         string dll_name = Functions.FirstOrDefault()?.DllName ?? "<no entry points>";
         builder.AppendAttributes(GetTypeAttributes($"dllname(\"{dll_name.EscapeString()}\")"));

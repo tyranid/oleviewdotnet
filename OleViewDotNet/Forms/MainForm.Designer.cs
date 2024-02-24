@@ -41,6 +41,10 @@ partial class MainForm
             this.menuFileOpenDatabase = new System.Windows.Forms.MenuItem();
             this.menuFileSaveDatabase = new System.Windows.Forms.MenuItem();
             this.menuFileSaveAsDatabase = new System.Windows.Forms.MenuItem();
+            this.menuItem14 = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveDefaultDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileDeleteDefaultDatabase = new System.Windows.Forms.MenuItem();
+            this.menuFileSaveDatabaseOnExit = new System.Windows.Forms.MenuItem();
             this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenMachineOnly = new System.Windows.Forms.MenuItem();
             this.menuFileOpenUserOnly = new System.Windows.Forms.MenuItem();
@@ -111,10 +115,7 @@ partial class MainForm
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuFileSaveDefaultDatabase = new System.Windows.Forms.MenuItem();
-            this.menuFileSaveDatabaseOnExit = new System.Windows.Forms.MenuItem();
-            this.menuFileDeleteDefaultDatabase = new System.Windows.Forms.MenuItem();
-            this.menuItem14 = new System.Windows.Forms.MenuItem();
+            this.menuObjectFormatter = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -215,6 +216,29 @@ partial class MainForm
             this.menuFileSaveAsDatabase.Index = 8;
             this.menuFileSaveAsDatabase.Text = "Save &as... Database";
             this.menuFileSaveAsDatabase.Click += new System.EventHandler(this.menuFileSaveAsDatabase_Click);
+            // 
+            // menuItem14
+            // 
+            this.menuItem14.Index = 9;
+            this.menuItem14.Text = "-";
+            // 
+            // menuFileSaveDefaultDatabase
+            // 
+            this.menuFileSaveDefaultDatabase.Index = 10;
+            this.menuFileSaveDefaultDatabase.Text = "Save De&fault Database";
+            this.menuFileSaveDefaultDatabase.Click += new System.EventHandler(this.menuFileSaveDefaultDatabase_Click);
+            // 
+            // menuFileDeleteDefaultDatabase
+            // 
+            this.menuFileDeleteDefaultDatabase.Index = 11;
+            this.menuFileDeleteDefaultDatabase.Text = "Delete Default Database";
+            this.menuFileDeleteDefaultDatabase.Click += new System.EventHandler(this.menuFileDeleteDefaultDatabase_Click);
+            // 
+            // menuFileSaveDatabaseOnExit
+            // 
+            this.menuFileSaveDatabaseOnExit.Index = 12;
+            this.menuFileSaveDatabaseOnExit.Text = "Save Default Database on Exit";
+            this.menuFileSaveDatabaseOnExit.Click += new System.EventHandler(this.menuFileSaveDatabaseOnExit_Click);
             // 
             // menuItem7
             // 
@@ -320,7 +344,8 @@ partial class MainForm
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
             this.menuRegistryProperties,
-            this.menuPropertiesViewer});
+            this.menuPropertiesViewer,
+            this.menuObjectFormatter});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -677,28 +702,11 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuFileSaveDefaultDatabase
+            // menuObjectFormatter
             // 
-            this.menuFileSaveDefaultDatabase.Index = 10;
-            this.menuFileSaveDefaultDatabase.Text = "Save De&fault Database";
-            this.menuFileSaveDefaultDatabase.Click += new System.EventHandler(this.menuFileSaveDefaultDatabase_Click);
-            // 
-            // menuFileSaveDatabaseOnExit
-            // 
-            this.menuFileSaveDatabaseOnExit.Index = 12;
-            this.menuFileSaveDatabaseOnExit.Text = "Save Default Database on Exit";
-            this.menuFileSaveDatabaseOnExit.Click += new System.EventHandler(this.menuFileSaveDatabaseOnExit_Click);
-            // 
-            // menuFileDeleteDefaultDatabase
-            // 
-            this.menuFileDeleteDefaultDatabase.Index = 11;
-            this.menuFileDeleteDefaultDatabase.Text = "Delete Default Database";
-            this.menuFileDeleteDefaultDatabase.Click += new System.EventHandler(this.menuFileDeleteDefaultDatabase_Click);
-            // 
-            // menuItem14
-            // 
-            this.menuItem14.Index = 9;
-            this.menuItem14.Text = "-";
+            this.menuObjectFormatter.Index = 26;
+            this.menuObjectFormatter.Text = "Open Object Formatter";
+            this.menuObjectFormatter.Click += new System.EventHandler(this.menuObjectFormatter_Click);
             // 
             // MainForm
             // 
@@ -806,5 +814,6 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuFileDeleteDefaultDatabase;
     private System.Windows.Forms.MenuItem menuFileSaveDatabaseOnExit;
     private System.Windows.Forms.MenuItem menuItem14;
+    private System.Windows.Forms.MenuItem menuObjectFormatter;
 }
 
