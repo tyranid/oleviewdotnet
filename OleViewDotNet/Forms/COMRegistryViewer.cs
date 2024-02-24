@@ -18,6 +18,7 @@ using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
+using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
@@ -1370,7 +1371,7 @@ public partial class COMRegistryViewer : UserControl
 
                     if (!clsid.IsAutomationProxy && m_registry.GetProxiesForClsid(clsid).Length > 0)
                     {
-                        contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                        contextMenuStrip.Items.Add(viewProxyLibraryToolStripMenuItem);
                     }
 
                     if (m_registry.AppIDs.ContainsKey(clsid.AppID))
@@ -1398,22 +1399,30 @@ public partial class COMRegistryViewer : UserControl
             {
                 EnableViewPermissions(appid_entry);
             }
-            else if (node.Tag is COMInterfaceEntry)
+            else if (node.Tag is COMInterfaceEntry intf)
             {
-                COMInterfaceEntry intf = (COMInterfaceEntry)node.Tag;
+                bool has_definition = false;
                 if (intf.HasTypeLib)
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
+                    has_definition = true;
                 }
 
                 if (intf.HasProxy && intf.ProxyClassEntry?.IsAutomationProxy == false)
                 {
-                    contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                    contextMenuStrip.Items.Add(viewProxyLibraryToolStripMenuItem);
+                    has_definition = true;
                 }
 
                 if (COMUtilities.RuntimeInterfaceMetadata.ContainsKey(intf.Iid))
                 {
                     contextMenuStrip.Items.Add(viewRuntimeInterfaceToolStripMenuItem);
+                    has_definition = true;
+                }
+
+                if (has_definition)
+                {
+                    contextMenuStrip.Items.Add(viewInterfaceDefinitionToolStripMenuItem);
                 }
             }
             else if (node.Tag is COMProcessEntry)
@@ -1423,7 +1432,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else if (node.Tag is COMIPIDEntry ipid)
             {
-                COMInterfaceEntry intf = m_registry.MapIidToInterface(ipid.Iid);
+                intf = m_registry.MapIidToInterface(ipid.Iid);
 
                 if (intf.HasTypeLib)
                 {
@@ -1432,7 +1441,7 @@ public partial class COMRegistryViewer : UserControl
 
                 if (intf.HasProxy && m_registry.Clsids.ContainsKey(intf.ProxyClsid))
                 {
-                    contextMenuStrip.Items.Add(viewProxyDefinitionToolStripMenuItem);
+                    contextMenuStrip.Items.Add(viewProxyLibraryToolStripMenuItem);
                 }
 
                 contextMenuStrip.Items.Add(unmarshalToolStripMenuItem);
@@ -1914,7 +1923,7 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void viewProxyDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
+    private void viewProxyLibraryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
         if (node != null)
@@ -2292,5 +2301,40 @@ public partial class COMRegistryViewer : UserControl
     {
         splitContainer.Panel2Collapsed = !splitContainer.Panel2Collapsed;
         showObjectFormatterToolStripMenuItem.Checked = !splitContainer.Panel2Collapsed;
+    }
+
+    private void viewInterfaceDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (treeComRegistry.SelectedNode?.Tag is not COMInterfaceEntry intf_entry)
+            {
+                intf_entry = (treeComRegistry.SelectedNode?.Tag as COMInterfaceInstance)?.InterfaceEntry;
+            }
+
+            if (intf_entry == null)
+                return;
+
+            if (intf_entry.RuntimeInterface && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(intf_entry.Iid))
+            {
+                return;
+            }
+
+            if (intf_entry.TypeLibVersionEntry != null)
+            {
+                intf_entry.TypeLibVersionEntry.Parse();
+            }
+            else if (intf_entry.HasProxy)
+            {
+                COMProxyInterfaceInstance.GetFromIID(intf_entry, null);
+            }
+            formattedObjectControl.SelectedObject = intf_entry;
+            showObjectFormatterToolStripMenuItem.Checked = true;
+            splitContainer.Panel2Collapsed = false;
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
     }
 }

@@ -53,25 +53,31 @@ public partial class FormattedObjectControl : UserControl
         m_registry = registry;
     }
 
+    internal void Format()
+    {
+        COMSourceCodeBuilder builder = new(m_registry);
+        builder.RemoveComplexTypes = true;
+        if (m_selected_obj is ICOMSourceCodeFormattable formattable)
+        {
+            formattable.Format(builder);
+        }
+        else if (m_selected_obj is IEnumerable<ICOMSourceCodeFormattable> list && list.Any())
+        {
+            foreach (var entry in list)
+            {
+                entry.Format(builder);
+            }
+        }
+        SetText(builder.ToString());
+    }
+
     internal object SelectedObject
     {
         get => m_selected_obj;
         set
         {
-            COMSourceCodeBuilder builder = new(m_registry);
             m_selected_obj = value;
-            if (m_selected_obj is ICOMSourceCodeFormattable formattable)
-            {
-                formattable.Format(builder);
-            }
-            else if (m_selected_obj is IEnumerable<ICOMSourceCodeFormattable> list && list.Any())
-            {
-                foreach (var entry in list)
-                {
-                    entry.Format(builder);
-                }
-            }
-            SetText(builder.ToString());
+            Format();
         }
     }
 }
