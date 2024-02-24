@@ -50,33 +50,23 @@ public partial class TypeLibControl : UserControl
         }
     }
 
-    private sealed class ProxyInterfaceFormattable : ICOMSourceCodeFormattable
+    private sealed class ProxyFormattable : ICOMSourceCodeFormattable
     {
-        private readonly NdrComProxyDefinition m_proxy;
+        private readonly Func<INdrFormatter, string> m_format;
 
-        public ProxyInterfaceFormattable(NdrComProxyDefinition proxy)
+        public ProxyFormattable(NdrComProxyDefinition proxy)
         {
-            m_proxy = proxy;
+            m_format = f => f.FormatComProxy(proxy);
+        }
+
+        public ProxyFormattable(NdrComplexTypeReference type)
+        {
+            m_format = f => f.FormatComplexType(type);
         }
 
         void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
         {
-            builder.AppendLine(builder.GetNdrFormatter().FormatComProxy(m_proxy));
-        }
-    }
-
-    private sealed class ProxyComplexTypeFormattable : ICOMSourceCodeFormattable
-    {
-        private readonly NdrComplexTypeReference m_type;
-
-        public ProxyComplexTypeFormattable(NdrComplexTypeReference type)
-        {
-            m_type = type;
-        }
-
-        void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
-        {
-            builder.AppendLine(builder.GetNdrFormatter().FormatComplexType(m_type));
+            builder.AppendLine(m_format(builder.GetNdrFormatter()));
         }
     }
 
@@ -180,7 +170,7 @@ public partial class TypeLibControl : UserControl
         {
             ListViewItemWithGuid item = new(entry.Item1, entry.Item2.Iid);
             item.SubItems.Add(entry.Item2.Iid.FormatGuid());
-            item.Tag = new ProxyInterfaceFormattable(entry.Item2);
+            item.Tag = new ProxyFormattable(entry.Item2);
             yield return item;
         }
     }
@@ -191,7 +181,7 @@ public partial class TypeLibControl : UserControl
         {
             ListViewItem item = new(type.Name);
             item.SubItems.Add(type.GetSize().ToString());
-            item.Tag = new ProxyComplexTypeFormattable(type);
+            item.Tag = new ProxyFormattable(type);
             yield return item;
         }
     }
