@@ -19,16 +19,29 @@ using OleViewDotNet.Utilities.Format;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyComplexTypeInstance : ICOMSourceCodeFormattable
+public sealed class COMProxyComplexType : ICOMSourceCodeFormattable
 {
-    public string Name { get; }
+    #region Public Properties
+    public string Name => Entry.Name;
 
     public NdrComplexTypeReference Entry { get; }
 
+    public int Size => Entry.GetSize();
+    #endregion
+
+    #region Internal Members
+    internal COMProxyComplexType(NdrComplexTypeReference entry)
+    {
+        Entry = entry;
+    }
+    #endregion
+
+    #region Public Methods
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
         builder.AppendLine(formatter.FormatComplexType(Entry));
         builder.AppendLine();
     }
+    #endregion
 }

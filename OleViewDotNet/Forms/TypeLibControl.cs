@@ -50,26 +50,6 @@ public partial class TypeLibControl : UserControl
         }
     }
 
-    private sealed class ProxyFormattable : ICOMSourceCodeFormattable
-    {
-        private readonly Func<INdrFormatter, string> m_format;
-
-        public ProxyFormattable(NdrComProxyDefinition proxy)
-        {
-            m_format = f => f.FormatComProxy(proxy);
-        }
-
-        public ProxyFormattable(NdrComplexTypeReference type)
-        {
-            m_format = f => f.FormatComplexType(type);
-        }
-
-        void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
-        {
-            builder.AppendLine(m_format(builder.GetNdrFormatter()));
-        }
-    }
-
     private static ListViewItemWithGuid MapTypeInfoToItem(COMTypeLibTypeInfo type)
     {
         ListViewItemWithGuid item = new(type.Name, type.Uuid);
@@ -151,7 +131,7 @@ public partial class TypeLibControl : UserControl
         return typelib.GetComClasses(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
-    private static string GetComProxyName(NdrComProxyDefinition proxy, IDictionary<Guid, string> iids_to_names)
+    private static string GetComProxyName(COMProxyInterfaceInstance proxy, IDictionary<Guid, string> iids_to_names)
     {
         if (!string.IsNullOrWhiteSpace(proxy.Name))
         {
@@ -170,7 +150,7 @@ public partial class TypeLibControl : UserControl
         {
             ListViewItemWithGuid item = new(entry.Item1, entry.Item2.Iid);
             item.SubItems.Add(entry.Item2.Iid.FormatGuid());
-            item.Tag = new ProxyFormattable(entry.Item2);
+            item.Tag = entry.Item2;
             yield return item;
         }
     }
@@ -180,8 +160,8 @@ public partial class TypeLibControl : UserControl
         foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
         {
             ListViewItem item = new(type.Name);
-            item.SubItems.Add(type.GetSize().ToString());
-            item.Tag = new ProxyFormattable(type);
+            item.SubItems.Add(type.Size.ToString());
+            item.Tag = type;
             yield return item;
         }
     }
@@ -234,8 +214,11 @@ public partial class TypeLibControl : UserControl
         IEnumerable<ListViewItem> structs,
         IEnumerable<ListViewItem> enums)
     {
-        m_builder = new(registry);
-        m_builder.RemoveComments = true;
+        m_builder = new(registry)
+        {
+            RemoveComments = true,
+            RemoveComplexTypes = true
+        };
         InitializeComponent();
 
         cbProxyRenderStyle.SelectedIndex = 0;
@@ -325,7 +308,7 @@ public partial class TypeLibControl : UserControl
         if (tag is ICOMSourceCodeFormattable formattable)
         {
             formattable.Format(m_builder);
-            return m_builder.ToString();
+            return m_builder.ToString().TrimEnd();
         }
         return string.Empty;
     }

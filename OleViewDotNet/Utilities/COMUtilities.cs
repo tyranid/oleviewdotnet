@@ -694,7 +694,7 @@ public static class COMUtilities
         }
     }
 
-    public static void ConvertProxyToAssembly(IEnumerable<NdrComProxyDefinition> entries, string output_path, IProgress<Tuple<string, int>> progress)
+    private static void ConvertProxyToAssembly(IEnumerable<COMProxyInterfaceInstance> entries, string output_path, IProgress<Tuple<string, int>> progress)
     {
         if (m_typelibs == null)
         {
@@ -714,7 +714,7 @@ public static class COMUtilities
 
     public static void ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, string output_path, IProgress<Tuple<string, int>> progress)
     {
-        ConvertProxyToAssembly(new[] { proxy.Entry }, output_path, progress);
+        ConvertProxyToAssembly(new[] { proxy }, output_path, progress);
     }
 
     public static void ConvertProxyToAssembly(COMIPIDEntry ipid, string output_path, IProgress<Tuple<string, int>> progress)
@@ -722,7 +722,7 @@ public static class COMUtilities
         ConvertProxyToAssembly(ipid.ToProxyInstance(), output_path, progress);
     }
 
-    public static Assembly ConvertProxyToAssembly(IEnumerable<NdrComProxyDefinition> entries, IProgress<Tuple<string, int>> progress)
+    public static Assembly ConvertProxyToAssembly(IEnumerable<COMProxyInterfaceInstance> entries, IProgress<Tuple<string, int>> progress)
     {
         if (m_typelibs == null)
         {
@@ -743,7 +743,7 @@ public static class COMUtilities
 
     public static Assembly ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, IProgress<Tuple<string, int>> progress)
     {
-        return ConvertProxyToAssembly(new[] { proxy.Entry }, progress);
+        return ConvertProxyToAssembly(new[] { proxy }, progress);
     }
 
     public static Assembly ConvertProxyToAssembly(COMIPIDEntry ipid, IProgress<Tuple<string, int>> progress)

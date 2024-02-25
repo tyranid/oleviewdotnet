@@ -26,38 +26,18 @@ namespace OleViewDotNet.Proxy;
 
 public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
+    #region Private Members
     private readonly COMRegistry m_registry;
-
-    public IReadOnlyList<NdrComProxyDefinition> Entries { get; private set; }
-
-    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes { get; private set; }
-
-    public string Path { get; }
-
-    public Guid Clsid { get; }
-
-    public COMCLSIDEntry ClassEntry { get; }
-
-    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries,
-                              IEnumerable<NdrComplexTypeReference> complex_types,
-                              COMCLSIDEntry clsid,
-                              COMRegistry registry)
-    {
-        Entries = new List<NdrComProxyDefinition>(entries).AsReadOnly();
-        ComplexTypes = new List<NdrComplexTypeReference>(complex_types).AsReadOnly();
-        ClassEntry = clsid;
-        m_registry = registry;
-    }
 
     private COMProxyInstance(string path, COMCLSIDEntry clsid, ISymbolResolver resolver, COMRegistry registry)
     {
-        NdrParser parser = new(resolver);
-        Clsid = clsid?.Clsid ?? Guid.Empty;
-        Entries = parser.ReadFromComProxyFile(path, Clsid).ToList().AsReadOnly();
-        ComplexTypes = parser.ComplexTypes.ToList().AsReadOnly();
-        Path = clsid?.DefaultServer ?? path;
-        ClassEntry = clsid;
+        ClassEntry = clsid ?? new COMCLSIDEntry(registry, Guid.Empty, COMServerType.UnknownServer);
         m_registry = registry;
+
+        NdrParser parser = new(resolver);
+        Entries = parser.ReadFromComProxyFile(path, Clsid).Select(GetInterfaceInstance).ToList().AsReadOnly();
+        ComplexTypes = parser.ComplexTypes.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
+        Path = clsid?.DefaultServer ?? path;
         foreach (var entry in Entries)
         {
             if (!string.IsNullOrWhiteSpace(entry.Name))
@@ -68,40 +48,114 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
             {
                 if (m_registry.IidNameCache.TryGetValue(entry.Iid, out string name))
                 {
-                    entry.Name = name;
+                    entry.Entry.Name = name;
                 }
                 else
                 {
-                    entry.Name = $"intf_{entry.Iid.ToString().Replace('-', '_')}";
+                    entry.Entry.Name = $"intf_{entry.Iid.ToString().Replace('-', '_')}";
                 }
             }
         }
     }
 
-    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry) 
+    private IEnumerable<NdrBaseTypeReference> GetStructTypes(NdrComplexTypeReference complex_type)
+    {
+        if (complex_type is NdrBaseStructureTypeReference struct_type)
+        {
+            return struct_type.MembersTypes;
+        }
+        else if (complex_type is NdrUnionTypeReference union_type)
+        {
+            return union_type.Arms.Arms.Select(a => a.ArmType);
+        }
+        return Array.Empty<NdrBaseTypeReference>();
+    }
+
+    private void GetComplexTypes(HashSet<NdrComplexTypeReference> complex_types, NdrBaseTypeReference type)
+    {
+        if (type is NdrComplexTypeReference complex_type)
+        {
+            if (complex_types.Add(complex_type))
+            {
+                foreach (var member_type in GetStructTypes(complex_type))
+                {
+                    GetComplexTypes(complex_types, member_type);
+                }
+            }
+        }
+        else if (type is NdrBaseArrayTypeReference array_type)
+        {
+            GetComplexTypes(complex_types, array_type.ElementType);
+        }
+        else if (type is NdrPointerTypeReference pointer_type)
+        {
+            GetComplexTypes(complex_types, pointer_type.Type);
+        }
+    }
+
+    private COMProxyInterfaceInstance GetInterfaceInstance(NdrComProxyDefinition proxy)
+    {
+        HashSet<NdrComplexTypeReference> complex_types = new();
+        foreach (var proc in proxy.Procedures)
+        {
+            GetComplexTypes(complex_types, proc.ReturnValue.Type);
+            foreach (var p in proc.Params)
+            {
+                GetComplexTypes(complex_types, p.Type);
+            }
+        }
+        return new COMProxyInterfaceInstance(ClassEntry, 
+            proxy, complex_types, m_registry, this);
+    }
+
+    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry)
         : this(path, null, resolver, registry)
     {
     }
 
     private static readonly Dictionary<Guid, COMProxyInstance> m_proxies = new();
     private static readonly Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
+    #endregion
 
+    #region Public Properties
+    public IReadOnlyList<COMProxyInterfaceInstance> Entries { get; private set; }
+
+    public IReadOnlyList<COMProxyComplexType> ComplexTypes { get; private set; }
+
+    public string Path { get; }
+
+    public Guid Clsid => ClassEntry.Clsid;
+
+    public COMCLSIDEntry ClassEntry { get; }
+    #endregion
+
+    #region Internal Members
+    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries,
+                              IEnumerable<NdrComplexTypeReference> complex_types,
+                              COMCLSIDEntry clsid,
+                              COMRegistry registry)
+    {
+        Entries = entries.Select(GetInterfaceInstance).ToList().AsReadOnly();
+        ComplexTypes = complex_types.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
+        ClassEntry = clsid;
+        m_registry = registry;
+    }
+    #endregion
+
+    #region Static Members
     public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {
         if (clsid.IsAutomationProxy)
         {
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
-        if (m_proxies.ContainsKey(clsid.Clsid))
+        if (m_proxies.TryGetValue(clsid.Clsid, out COMProxyInstance proxy))
         {
-            return m_proxies[clsid.Clsid];
-        }
-        else
-        {
-            COMProxyInstance proxy = new(clsid.DefaultServer, clsid, resolver, clsid.Database);
-            m_proxies[clsid.Clsid] = proxy;
             return proxy;
         }
+        proxy = new(clsid.DefaultServer, clsid, resolver, clsid.Database);
+        m_proxies[clsid.Clsid] = proxy;
+        return proxy;
     }
 
     public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
@@ -117,7 +171,9 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
             return proxy;
         }
     }
+    #endregion
 
+    #region Public Methods
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         COMSourceCodeBuilder builder = new(m_registry);
@@ -134,14 +190,15 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         {
             foreach (var type in ComplexTypes)
             {
-                builder.AppendLine(formatter.FormatComplexType(type));
+                builder.AppendLine(formatter.FormatComplexType(type.Entry));
             }
             builder.AppendLine();
         }
 
         foreach (var proxy in Entries)
         {
-            builder.AppendLine(formatter.FormatComProxy(proxy));
+            builder.AppendLine(formatter.FormatComProxy(proxy.Entry));
         }
     }
+    #endregion
 }

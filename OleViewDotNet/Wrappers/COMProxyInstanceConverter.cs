@@ -16,6 +16,7 @@
 
 using NtApiDotNet.Ndr;
 using OleViewDotNet.Database;
+using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -357,16 +358,16 @@ public class COMProxyInstanceConverter
         return m_structs[struct_type];
     }
 
-    public void AddProxy(IEnumerable<NdrComProxyDefinition> entries)
+    public void AddProxy(IEnumerable<COMProxyInterfaceInstance> entries)
     {
         foreach (var entry in entries)
         {
-            m_proxies.Add(entry.Iid, entry);
+            m_proxies.Add(entry.Iid, entry.Entry);
         }
 
         foreach (var entry in entries)
         {
-            CreateInterface(entry);
+            CreateInterface(entry.Entry);
         }
 
         while(m_fixup.Count > 0)

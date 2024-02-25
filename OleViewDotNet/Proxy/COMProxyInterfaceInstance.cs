@@ -27,6 +27,12 @@ namespace OleViewDotNet.Proxy;
 
 public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
+    #region Private Members
+    private static readonly Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
+    private readonly COMRegistry m_registry;
+    #endregion
+
+    #region Public Properties
     /// <summary>
     /// The name of the proxy interface.
     /// </summary>
@@ -66,13 +72,16 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
 
     public COMCLSIDEntry ClassEntry { get; }
 
-    private readonly COMRegistry m_registry;
+    public COMProxyInstance Proxy { get; }
+    #endregion
 
-    internal COMProxyInterfaceInstance(COMCLSIDEntry clsid, NdrComProxyDefinition entry, 
-        IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry)
+    #region Internal Members
+    internal COMProxyInterfaceInstance(COMCLSIDEntry clsid, NdrComProxyDefinition entry,
+            IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry, COMProxyInstance proxy)
     {
         ClassEntry = clsid;
         Entry = entry;
+        Proxy = proxy;
         m_registry = registry;
         if (string.IsNullOrWhiteSpace(Entry.Name))
         {
@@ -83,25 +92,14 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
             Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         }
         ComplexTypes = complex_types.ToList().AsReadOnly();
-    }
-
-    private COMProxyInterfaceInstance(COMCLSIDEntry clsid, ISymbolResolver resolver, COMInterfaceEntry intf, COMRegistry registry)
-    {
-        NdrParser parser = new(resolver);
-        Entry = parser.ReadFromComProxyFile(clsid.DefaultServer, clsid.Clsid, new Guid[] { intf.Iid }).FirstOrDefault();
-        ComplexTypes = parser.ComplexTypes.ToList().AsReadOnly();
-        OriginalName = intf.Name;
-        if (string.IsNullOrWhiteSpace(Entry.Name))
+        if (!m_proxies.ContainsKey(Iid))
         {
-            Entry.Name = intf.Name;
+            m_proxies.Add(Iid, this);
         }
-        Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
-        ClassEntry = clsid;
-        m_registry = registry;
     }
+    #endregion
 
-    private static readonly Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
-
+    #region Public Static Methods
     public static bool TryGetFromIID(COMInterfaceEntry intf, out COMProxyInterfaceInstance proxy)
     {
         return m_proxies.TryGetValue(intf.Iid, out proxy);
@@ -114,28 +112,33 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
             throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
         }
 
+        if (m_proxies.TryGetValue(intf.Iid, out COMProxyInterfaceInstance instance))
+        {
+            return instance;
+        }
+
         COMCLSIDEntry clsid = intf.ProxyClassEntry;
         if (clsid.IsAutomationProxy)
         {
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
-        if (m_proxies.ContainsKey(intf.Iid))
+
+        COMProxyInstance.GetFromCLSID(clsid, resolver);
+        if (!m_proxies.TryGetValue(intf.Iid, out instance))
         {
-            return m_proxies[intf.Iid];
+            throw new ArgumentException($"No Proxy Found for IID {intf.Iid}");
         }
-        else
-        {
-            var instance = new COMProxyInterfaceInstance(clsid, resolver, intf, clsid.Database);
-            m_proxies[intf.Iid] = instance;
-            return instance;
-        }
+
+        return instance;
     }
 
     public static COMProxyInterfaceInstance GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
     {
         return GetFromIID(intf.InterfaceEntry, resolver);
     }
+    #endregion
 
+    #region Public Methods
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         COMSourceCodeBuilder builder = new(m_registry);
@@ -148,7 +151,7 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
-        if (!builder.RemoveComplexTypes)
+        if (!builder.RemoveComplexTypes && ComplexTypes.Count > 0)
         {
             foreach (var type in ComplexTypes)
             {
@@ -159,4 +162,5 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
 
         builder.AppendLine(formatter.FormatComProxy(Entry));
     }
+    #endregion
 }
