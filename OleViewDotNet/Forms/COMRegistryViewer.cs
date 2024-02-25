@@ -239,9 +239,6 @@ public partial class COMRegistryViewer : UserControl
         Text = text;
 
         m_originalNodes = nodes.ToArray();
-        treeComRegistry.SuspendLayout();
-        treeComRegistry.Nodes.AddRange(m_originalNodes);
-        treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
     }
 
@@ -2336,5 +2333,12 @@ public partial class COMRegistryViewer : UserControl
         {
             EntryPoint.ShowError(this, ex);
         }
+    }
+
+    private void COMRegistryViewer_Load(object sender, EventArgs e)
+    {
+        treeComRegistry.SuspendLayout();
+        treeComRegistry.Nodes.AddRange(m_originalNodes);
+        treeComRegistry.ResumeLayout();
     }
 }

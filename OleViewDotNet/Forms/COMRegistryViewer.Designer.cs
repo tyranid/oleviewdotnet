@@ -59,6 +59,7 @@ partial class COMRegistryViewer
             this.createFactoryInPerUserRuntimeBrokerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewProxyLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewInterfaceDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewRuntimeInterfaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,7 +84,6 @@ partial class COMRegistryViewer
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
-            this.viewInterfaceDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.formattedObjectControl = new OleViewDotNet.Forms.FormattedObjectControl();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
@@ -161,7 +161,7 @@ partial class COMRegistryViewer
             this.cloneTreeToolStripMenuItem,
             this.showObjectFormatterToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(280, 677);
+            this.contextMenuStrip.Size = new System.Drawing.Size(280, 644);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -354,6 +354,13 @@ partial class COMRegistryViewer
             this.viewProxyLibraryToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
             this.viewProxyLibraryToolStripMenuItem.Text = "View Proxy Library";
             this.viewProxyLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewProxyLibraryToolStripMenuItem_Click);
+            // 
+            // viewInterfaceDefinitionToolStripMenuItem
+            // 
+            this.viewInterfaceDefinitionToolStripMenuItem.Name = "viewInterfaceDefinitionToolStripMenuItem";
+            this.viewInterfaceDefinitionToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
+            this.viewInterfaceDefinitionToolStripMenuItem.Text = "View Interface Definition";
+            this.viewInterfaceDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewInterfaceDefinitionToolStripMenuItem_Click);
             // 
             // viewRuntimeInterfaceToolStripMenuItem
             // 
@@ -577,13 +584,6 @@ partial class COMRegistryViewer
             this.splitContainer.SplitterDistance = 907;
             this.splitContainer.TabIndex = 7;
             // 
-            // viewInterfaceDefinitionToolStripMenuItem
-            // 
-            this.viewInterfaceDefinitionToolStripMenuItem.Name = "viewInterfaceDefinitionToolStripMenuItem";
-            this.viewInterfaceDefinitionToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
-            this.viewInterfaceDefinitionToolStripMenuItem.Text = "View Interface Definition";
-            this.viewInterfaceDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewInterfaceDefinitionToolStripMenuItem_Click);
-            // 
             // formattedObjectControl
             // 
             this.formattedObjectControl.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -598,6 +598,7 @@ partial class COMRegistryViewer
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "COMRegistryViewer";
             this.Size = new System.Drawing.Size(1400, 530);
+            this.Load += new System.EventHandler(this.COMRegistryViewer_Load);
             this.contextMenuStrip.ResumeLayout(false);
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel.PerformLayout();
