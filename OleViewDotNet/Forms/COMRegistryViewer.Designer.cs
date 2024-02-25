@@ -59,7 +59,6 @@ partial class COMRegistryViewer
             this.createFactoryInPerUserRuntimeBrokerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewProxyLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewInterfaceDefinitionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewRuntimeInterfaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLaunchPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewAccessPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -150,7 +149,6 @@ partial class COMRegistryViewer
             this.createSpecialToolStripMenuItem,
             this.viewTypeLibraryToolStripMenuItem,
             this.viewProxyLibraryToolStripMenuItem,
-            this.viewInterfaceDefinitionToolStripMenuItem,
             this.viewRuntimeInterfaceToolStripMenuItem,
             this.viewLaunchPermissionsToolStripMenuItem,
             this.viewAccessPermissionsToolStripMenuItem,
@@ -161,7 +159,7 @@ partial class COMRegistryViewer
             this.cloneTreeToolStripMenuItem,
             this.showSourceCodeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(280, 677);
+            this.contextMenuStrip.Size = new System.Drawing.Size(280, 645);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -354,13 +352,6 @@ partial class COMRegistryViewer
             this.viewProxyLibraryToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
             this.viewProxyLibraryToolStripMenuItem.Text = "View Proxy Library";
             this.viewProxyLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewProxyLibraryToolStripMenuItem_Click);
-            // 
-            // viewInterfaceDefinitionToolStripMenuItem
-            // 
-            this.viewInterfaceDefinitionToolStripMenuItem.Name = "viewInterfaceDefinitionToolStripMenuItem";
-            this.viewInterfaceDefinitionToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
-            this.viewInterfaceDefinitionToolStripMenuItem.Text = "View Interface Definition";
-            this.viewInterfaceDefinitionToolStripMenuItem.Click += new System.EventHandler(this.viewInterfaceDefinitionToolStripMenuItem_Click);
             // 
             // viewRuntimeInterfaceToolStripMenuItem
             // 
@@ -584,11 +575,11 @@ partial class COMRegistryViewer
             this.splitContainer.SplitterDistance = 907;
             this.splitContainer.TabIndex = 7;
             // 
-            // formattedObjectControl
+            // sourceCodeViewerControl
             // 
             this.sourceCodeViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sourceCodeViewerControl.Location = new System.Drawing.Point(0, 0);
-            this.sourceCodeViewerControl.Name = "formattedObjectControl";
+            this.sourceCodeViewerControl.Name = "sourceCodeViewerControl";
             this.sourceCodeViewerControl.Size = new System.Drawing.Size(96, 100);
             this.sourceCodeViewerControl.TabIndex = 0;
             // 
@@ -666,5 +657,4 @@ partial class COMRegistryViewer
     private System.Windows.Forms.SplitContainer splitContainer;
     private SourceCodeViewerControl sourceCodeViewerControl;
     private System.Windows.Forms.ToolStripMenuItem showSourceCodeToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem viewInterfaceDefinitionToolStripMenuItem;
 }

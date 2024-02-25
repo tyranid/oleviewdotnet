@@ -108,7 +108,7 @@ public partial class SourceCodeViewerControl : UserControl
             m_selected_obj = value;
             if (value is IEnumerable<ICOMSourceCodeFormattable> list)
             {
-                m_formattable_obj = new FormattableList(list);
+                m_formattable_obj = new SourceCodeFormattableList(list);
             }
             else if (value is ICOMSourceCodeFormattable formattable)
             {
@@ -124,43 +124,48 @@ public partial class SourceCodeViewerControl : UserControl
         }
     }
 
-    private void toolStripMenuItemIDLOutputType_Click(object sender, System.EventArgs e)
+    private void toolStripMenuItemIDLOutputType_Click(object sender, EventArgs e)
     {
         m_output_type = COMSourceCodeBuilderType.Idl;
         toolStripMenuItemIDLOutputType.Checked = true;
         toolStripMenuItemCppOutputType.Checked = false;
         toolStripMenuItemGenericOutputType.Checked = false;
+        Format();
     }
 
-    private void toolStripMenuItemCppOutputType_Click(object sender, System.EventArgs e)
+    private void toolStripMenuItemCppOutputType_Click(object sender, EventArgs e)
     {
         m_output_type = COMSourceCodeBuilderType.Cpp;
         toolStripMenuItemIDLOutputType.Checked = false;
         toolStripMenuItemCppOutputType.Checked = true;
         toolStripMenuItemGenericOutputType.Checked = false;
+        Format();
     }
 
-    private void toolStripMenuItemGenericOutputType_Click(object sender, System.EventArgs e)
+    private void toolStripMenuItemGenericOutputType_Click(object sender, EventArgs e)
     {
         m_output_type = COMSourceCodeBuilderType.Generic;
         toolStripMenuItemIDLOutputType.Checked = false;
         toolStripMenuItemCppOutputType.Checked = false;
         toolStripMenuItemGenericOutputType.Checked = true;
+        Format();
     }
 
-    private void toolStripMenuItemRemoveComments_Click(object sender, System.EventArgs e)
+    private void toolStripMenuItemRemoveComments_Click(object sender, EventArgs e)
     {
         m_remove_comments = !m_remove_comments;
         toolStripMenuItemRemoveComments.Checked = m_remove_comments;
+        Format();
     }
 
-    private void toolStripMenuItemRemoveComplexTypes_Click(object sender, System.EventArgs e)
+    private void toolStripMenuItemRemoveComplexTypes_Click(object sender, EventArgs e)
     {
         m_remove_complex_types = !m_remove_complex_types;
         toolStripMenuItemRemoveComplexTypes.Checked = m_remove_complex_types;
+        Format();
     }
 
-    private void exportToolStripMenuItem_Click(object sender, System.EventArgs e)
+    private void exportToolStripMenuItem_Click(object sender, EventArgs e)
     {
         using SaveFileDialog dlg = new();
         dlg.Filter = "All Files (*.*)|*.*";
@@ -190,7 +195,7 @@ public partial class SourceCodeViewerControl : UserControl
         }
         catch (Exception ex)
         {
-            m_formattable_obj = new SimpleTextFormattable($"ERROR: {ex.Message}");
+            m_formattable_obj = new SourceCodeFormattableText($"ERROR: {ex.Message}");
         }
     }
 }

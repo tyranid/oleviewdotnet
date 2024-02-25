@@ -714,7 +714,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
         catch (Exception ex)
         {
-            m_formattable = new SimpleTextFormattable($"ERROR: {ex.Message}");
+            m_formattable = new SourceCodeFormattableText($"ERROR: {ex.Message}");
         }
     }
 }

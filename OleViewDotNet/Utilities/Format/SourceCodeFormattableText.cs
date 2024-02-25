@@ -14,28 +14,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace OleViewDotNet.Utilities.Format;
 
-internal sealed class FormattableList : ICOMSourceCodeFormattable
+internal sealed class SourceCodeFormattableText : ICOMSourceCodeFormattable
 {
-    private readonly List<ICOMSourceCodeFormattable> m_objs;
-
-    public FormattableList(IEnumerable<ICOMSourceCodeFormattable> objs)
+    private readonly string m_text;
+    public SourceCodeFormattableText(string text)
     {
-        m_objs = objs.ToList();
+        m_text = text;
     }
 
-    public bool IsFormattable => m_objs.Count > 0;
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        foreach (var obj in m_objs)
-        {
-            obj.Format(builder);
-            builder.AppendLine();
-        }
+        builder.AppendLine(m_text);
     }
 }

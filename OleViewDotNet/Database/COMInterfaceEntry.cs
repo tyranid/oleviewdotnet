@@ -30,9 +30,11 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable
+public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, 
+    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
     private readonly COMRegistry m_registry;
+    private ICOMSourceCodeFormattable m_formattable;
 
     public int CompareTo(COMInterfaceEntry right)
     {
@@ -260,7 +262,29 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     Guid ICOMGuid.ComGuid => Iid;
 
-    bool ICOMSourceCodeFormattable.IsFormattable => true;
+    bool ICOMSourceCodeFormattable.IsFormattable => RuntimeInterface 
+                || TypeLibVersionEntry != null || ProxyClassEntry != null;
+
+    private bool CheckForParsed()
+    {
+        if (m_formattable != null)
+            return true;
+        if (RuntimeInterface && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(Iid))
+        {
+            m_formattable = new SourceCodeFormattableType(COMUtilities.RuntimeInterfaceMetadata[Iid]);
+        }
+        else if (TypeLibVersionEntry?.IsParsed == true)
+        {
+            m_formattable = TypeLibVersionEntry.Parse();
+        }
+        else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
+        {
+            m_formattable = proxy;
+        }
+        return m_formattable != null;
+    }
+
+    bool ICOMSourceCodeParsable.IsParsed => CheckForParsed();
 
     public override bool Equals(object obj)
     {
@@ -356,23 +380,33 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        ICOMSourceCodeFormattable formattable = null;
-        if (RuntimeInterface && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(Iid))
-        {
-            formattable = new SourceCodeFormattableType(COMUtilities.RuntimeInterfaceMetadata[Iid]);
-        }
-        else if (TypeLibVersionEntry?.IsParsed ?? false)
+        m_formattable?.Format(builder);
+    }
+
+    void ICOMSourceCodeParsable.ParseSourceCode()
+    {
+        if (CheckForParsed())
+            return;
+        // If the runtime interface exists, that's already populated in CheckForParsed.
+        if (TypeLibVersionEntry != null)
         {
             var typelib = TypeLibVersionEntry.Parse();
             if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
             {
-                formattable = intf;
+                m_formattable = intf;
+            }
+            else
+            {
+                m_formattable = new SourceCodeFormattableText("ERROR: Can't find type library for IID.");
             }
         }
-        else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
+        else if (HasProxy)
         {
-            formattable = proxy;
+            m_formattable = COMProxyInterface.GetFromIID(this, null);
         }
-        formattable?.Format(builder);
+        else
+        {
+            m_formattable = new SourceCodeFormattableText("ERROR: Can't parse the interface source.");
+        }
     }
 }

@@ -1398,28 +1398,19 @@ public partial class COMRegistryViewer : UserControl
             }
             else if (node.Tag is COMInterfaceEntry intf)
             {
-                bool has_definition = false;
                 if (intf.HasTypeLib)
                 {
                     contextMenuStrip.Items.Add(viewTypeLibraryToolStripMenuItem);
-                    has_definition = true;
                 }
 
                 if (intf.HasProxy && intf.ProxyClassEntry?.IsAutomationProxy == false)
                 {
                     contextMenuStrip.Items.Add(viewProxyLibraryToolStripMenuItem);
-                    has_definition = true;
                 }
 
                 if (COMUtilities.RuntimeInterfaceMetadata.ContainsKey(intf.Iid))
                 {
                     contextMenuStrip.Items.Add(viewRuntimeInterfaceToolStripMenuItem);
-                    has_definition = true;
-                }
-
-                if (has_definition)
-                {
-                    contextMenuStrip.Items.Add(viewInterfaceDefinitionToolStripMenuItem);
                 }
             }
             else if (node.Tag is COMProcessEntry)
@@ -2298,41 +2289,6 @@ public partial class COMRegistryViewer : UserControl
     {
         splitContainer.Panel2Collapsed = !splitContainer.Panel2Collapsed;
         showSourceCodeToolStripMenuItem.Checked = !splitContainer.Panel2Collapsed;
-    }
-
-    private void viewInterfaceDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            if (treeComRegistry.SelectedNode?.Tag is not COMInterfaceEntry intf_entry)
-            {
-                intf_entry = (treeComRegistry.SelectedNode?.Tag as COMInterfaceInstance)?.InterfaceEntry;
-            }
-
-            if (intf_entry == null)
-                return;
-
-            if (intf_entry.RuntimeInterface && COMUtilities.RuntimeInterfaceMetadata.ContainsKey(intf_entry.Iid))
-            {
-                return;
-            }
-
-            if (intf_entry.TypeLibVersionEntry != null)
-            {
-                intf_entry.TypeLibVersionEntry.Parse();
-            }
-            else if (intf_entry.HasProxy)
-            {
-                COMProxyInterface.GetFromIID(intf_entry, null);
-            }
-            sourceCodeViewerControl.SelectedObject = intf_entry;
-            showSourceCodeToolStripMenuItem.Checked = true;
-            splitContainer.Panel2Collapsed = false;
-        }
-        catch (Exception ex)
-        {
-            EntryPoint.ShowError(this, ex);
-        }
     }
 
     private void COMRegistryViewer_Load(object sender, EventArgs e)
