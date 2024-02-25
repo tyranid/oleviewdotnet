@@ -2153,28 +2153,17 @@ public static class COMUtilities
 
     public static string GuidToString(Guid guid, GuidFormat format_type)
     {
-        switch (format_type)
+        return format_type switch
         {
-            case GuidFormat.Object:
-                return $"<object id=\"obj\" classid=\"clsid:{guid}\">NO OBJECT</object>";
-            case GuidFormat.String:
-                return guid.FormatGuid();
-            case GuidFormat.Structure:
-                return $"GUID guidObject = {guid:X};";
-            case GuidFormat.HexString:
-                {
-                    byte[] data = guid.ToByteArray();
-                    return string.Join(" ", data.Select(b => $"{b:X02}"));
-                }
-            case GuidFormat.CSGuid:
-                return $"Guid guidObject = new Guid(\"{guid}\");";
-            case GuidFormat.CSGuidAttribute:
-                return $"[Guid(\"{guid}\")]";
-            case GuidFormat.RpcUuid:
-                return $"[uuid(\"{guid}\")]";
-            default:
-                throw new ArgumentException("Invalid guid string type", nameof(format_type));
-        }
+            GuidFormat.Object => $"<object id=\"obj\" classid=\"clsid:{guid}\">NO OBJECT</object>",
+            GuidFormat.String => guid.FormatGuid(),
+            GuidFormat.Structure => $"GUID guidObject = {guid:X};",
+            GuidFormat.HexString => string.Join(" ", guid.ToByteArray().Select(b => $"{b:X02}")),
+            GuidFormat.CSGuid => $"Guid guidObject = new Guid(\"{guid}\");",
+            GuidFormat.CSGuidAttribute => $"[Guid(\"{guid}\")]",
+            GuidFormat.RpcUuid => $"[uuid(\"{guid}\")]",
+            _ => throw new ArgumentException("Invalid guid string type", nameof(format_type)),
+        };
     }
 
     public static void CopyGuidToClipboard(Guid guid, GuidFormat guid_format)
