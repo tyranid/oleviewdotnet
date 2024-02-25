@@ -25,7 +25,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormattable
+public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormattable
 {
     /// <summary>
     /// The name of the proxy interface.
