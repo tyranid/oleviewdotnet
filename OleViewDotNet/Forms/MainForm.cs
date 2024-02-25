@@ -678,7 +678,7 @@ public partial class MainForm : Form
             try
             {
                 using var resolver = EntryPoint.GetProxyParserSymbolResolver();
-                COMProxyInstance proxy = COMProxyInstance.GetFromFile(dlg.FileName, resolver, m_registry);
+                COMProxyFile proxy = COMProxyFile.GetFromFile(dlg.FileName, resolver, m_registry);
                 HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
             }
             catch (Exception ex)

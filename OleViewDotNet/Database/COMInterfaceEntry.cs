@@ -367,7 +367,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
                 formattable = intf;
             }
         }
-        else if (COMProxyInterfaceInstance.TryGetFromIID(this, out COMProxyInterfaceInstance proxy))
+        else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
         {
             formattable = proxy;
         }

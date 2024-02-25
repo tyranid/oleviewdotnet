@@ -358,7 +358,7 @@ public class COMProxyInstanceConverter
         return m_structs[struct_type];
     }
 
-    public void AddProxy(IEnumerable<COMProxyInterfaceInstance> entries)
+    public void AddProxy(IEnumerable<COMProxyInterface> entries)
     {
         foreach (var entry in entries)
         {

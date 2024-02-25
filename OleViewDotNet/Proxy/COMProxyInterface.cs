@@ -25,10 +25,10 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeFormattable
+public sealed class COMProxyInterface : IProxyFormatter, ICOMSourceCodeFormattable
 {
     #region Private Members
-    private static readonly Dictionary<Guid, COMProxyInterfaceInstance> m_proxies = new();
+    private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
     private readonly COMRegistry m_registry;
     #endregion
 
@@ -72,16 +72,16 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
 
     public COMCLSIDEntry ClassEntry { get; }
 
-    public COMProxyInstance Proxy { get; }
+    public COMProxyFile ProxyFile { get; }
     #endregion
 
     #region Internal Members
-    internal COMProxyInterfaceInstance(COMCLSIDEntry clsid, NdrComProxyDefinition entry,
-            IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry, COMProxyInstance proxy)
+    internal COMProxyInterface(COMCLSIDEntry clsid, NdrComProxyDefinition entry,
+            IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry, COMProxyFile proxy)
     {
         ClassEntry = clsid;
         Entry = entry;
-        Proxy = proxy;
+        ProxyFile = proxy;
         m_registry = registry;
         if (string.IsNullOrWhiteSpace(Entry.Name))
         {
@@ -100,19 +100,19 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
     #endregion
 
     #region Public Static Methods
-    public static bool TryGetFromIID(COMInterfaceEntry intf, out COMProxyInterfaceInstance proxy)
+    public static bool TryGetFromIID(COMInterfaceEntry intf, out COMProxyInterface proxy)
     {
         return m_proxies.TryGetValue(intf.Iid, out proxy);
     }
 
-    public static COMProxyInterfaceInstance GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
+    public static COMProxyInterface GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
     {
         if (intf == null || !intf.HasProxy)
         {
             throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
         }
 
-        if (m_proxies.TryGetValue(intf.Iid, out COMProxyInterfaceInstance instance))
+        if (m_proxies.TryGetValue(intf.Iid, out COMProxyInterface instance))
         {
             return instance;
         }
@@ -123,7 +123,7 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
 
-        COMProxyInstance.GetFromCLSID(clsid, resolver);
+        COMProxyFile.GetFromCLSID(clsid, resolver);
         if (!m_proxies.TryGetValue(intf.Iid, out instance))
         {
             throw new ArgumentException($"No Proxy Found for IID {intf.Iid}");
@@ -132,7 +132,7 @@ public sealed class COMProxyInterfaceInstance : IProxyFormatter, ICOMSourceCodeF
         return instance;
     }
 
-    public static COMProxyInterfaceInstance GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
+    public static COMProxyInterface GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
     {
         return GetFromIID(intf.InterfaceEntry, resolver);
     }

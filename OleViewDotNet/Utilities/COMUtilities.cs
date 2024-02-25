@@ -541,7 +541,7 @@ public static class COMUtilities
             return null;
         }
 
-        ConvertProxyToAssembly(COMProxyInterfaceInstance.GetFromIID(intf, null), null);
+        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf, null), null);
         return GetInterfaceType(intf.Iid);
     }
 
@@ -558,7 +558,7 @@ public static class COMUtilities
             return type;
         }
 
-        COMProxyInstance proxy = ipid.ToProxyInstance();
+        COMProxyFile proxy = ipid.ToProxyInstance();
 
         if (proxy == null)
         {
@@ -694,7 +694,7 @@ public static class COMUtilities
         }
     }
 
-    private static void ConvertProxyToAssembly(IEnumerable<COMProxyInterfaceInstance> entries, string output_path, IProgress<Tuple<string, int>> progress)
+    private static void ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, string output_path, IProgress<Tuple<string, int>> progress)
     {
         if (m_typelibs == null)
         {
@@ -707,12 +707,12 @@ public static class COMUtilities
         converter.Save();
     }
 
-    public static void ConvertProxyToAssembly(COMProxyInstance proxy, string output_path, IProgress<Tuple<string, int>> progress)
+    public static void ConvertProxyToAssembly(COMProxyFile proxy, string output_path, IProgress<Tuple<string, int>> progress)
     {
         ConvertProxyToAssembly(proxy.Entries, output_path, progress);
     }
 
-    public static void ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, string output_path, IProgress<Tuple<string, int>> progress)
+    public static void ConvertProxyToAssembly(COMProxyInterface proxy, string output_path, IProgress<Tuple<string, int>> progress)
     {
         ConvertProxyToAssembly(new[] { proxy }, output_path, progress);
     }
@@ -722,7 +722,7 @@ public static class COMUtilities
         ConvertProxyToAssembly(ipid.ToProxyInstance(), output_path, progress);
     }
 
-    public static Assembly ConvertProxyToAssembly(IEnumerable<COMProxyInterfaceInstance> entries, IProgress<Tuple<string, int>> progress)
+    public static Assembly ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, IProgress<Tuple<string, int>> progress)
     {
         if (m_typelibs == null)
         {
@@ -736,12 +736,12 @@ public static class COMUtilities
         return converter.BuiltAssembly;
     }
 
-    public static Assembly ConvertProxyToAssembly(COMProxyInstance proxy, IProgress<Tuple<string, int>> progress)
+    public static Assembly ConvertProxyToAssembly(COMProxyFile proxy, IProgress<Tuple<string, int>> progress)
     {
         return ConvertProxyToAssembly(proxy.Entries, progress);
     }
 
-    public static Assembly ConvertProxyToAssembly(COMProxyInterfaceInstance proxy, IProgress<Tuple<string, int>> progress)
+    public static Assembly ConvertProxyToAssembly(COMProxyInterface proxy, IProgress<Tuple<string, int>> progress)
     {
         return ConvertProxyToAssembly(new[] { proxy }, progress);
     }
@@ -2484,7 +2484,7 @@ public static class COMUtilities
     {
         try
         {
-            return COMProxyInstance.GetFromCLSID(clsid, resolver);
+            return COMProxyFile.GetFromCLSID(clsid, resolver);
         }
         catch
         {
@@ -2505,7 +2505,7 @@ public static class COMUtilities
 
         try
         {
-            return COMProxyInterfaceInstance.GetFromIID(intf, resolver);
+            return COMProxyInterface.GetFromIID(intf, resolver);
         }
         catch
         {

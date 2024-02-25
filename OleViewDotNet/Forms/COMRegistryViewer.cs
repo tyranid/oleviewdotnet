@@ -2323,7 +2323,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else if (intf_entry.HasProxy)
             {
-                COMProxyInterfaceInstance.GetFromIID(intf_entry, null);
+                COMProxyInterface.GetFromIID(intf_entry, null);
             }
             formattedObjectControl.SelectedObject = intf_entry;
             showObjectFormatterToolStripMenuItem.Checked = true;

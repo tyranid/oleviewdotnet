@@ -69,7 +69,7 @@ public partial class TypeLibControl : UserControl
     {
         if (formatter is COMTypeLib typelib)
             return typelib.Interfaces.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-        if (formatter is COMProxyInstance proxy)
+        if (formatter is COMProxyFile proxy)
             return FormatProxyInstance(proxy, iids_to_names);
         return Array.Empty<ListViewItemWithGuid>();
     }
@@ -92,7 +92,7 @@ public partial class TypeLibControl : UserControl
     {
         if (formatter is COMTypeLib typelib)
             return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
-        if (formatter is COMProxyInstance proxy)
+        if (formatter is COMProxyFile proxy)
             return FormatProxyInstanceComplexTypes(proxy);
         return Array.Empty<ListViewItemWithGuid>();
     }
@@ -130,7 +130,7 @@ public partial class TypeLibControl : UserControl
         return typelib.GetComClasses(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
-    private static string GetComProxyName(COMProxyInterfaceInstance proxy, IDictionary<Guid, string> iids_to_names)
+    private static string GetComProxyName(COMProxyInterface proxy, IDictionary<Guid, string> iids_to_names)
     {
         if (!string.IsNullOrWhiteSpace(proxy.Name))
         {
@@ -143,7 +143,7 @@ public partial class TypeLibControl : UserControl
         return $"intf_{proxy.Iid.ToString().Replace('-', '_')}";
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyInstance proxy, IDictionary<Guid, string> iids_to_names)
+    private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyFile proxy, IDictionary<Guid, string> iids_to_names)
     {
         foreach (var entry in proxy.Entries.Select(t => Tuple.Create(GetComProxyName(t, iids_to_names), t)).OrderBy(t => t.Item1))
         {
@@ -154,7 +154,7 @@ public partial class TypeLibControl : UserControl
         }
     }
 
-    private static IEnumerable<ListViewItem> FormatProxyInstanceComplexTypes(COMProxyInstance proxy)
+    private static IEnumerable<ListViewItem> FormatProxyInstanceComplexTypes(COMProxyFile proxy)
     {
         foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
         {
@@ -292,7 +292,7 @@ public partial class TypeLibControl : UserControl
               FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),
               FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
     {
-        bool is_proxy = formatter is COMProxyInstance;
+        bool is_proxy = formatter is COMProxyFile;
         btnDqs.Visible = is_proxy;
         cbProxyRenderStyle.Visible = is_proxy;
         checkBoxHideComments.Visible = is_proxy;

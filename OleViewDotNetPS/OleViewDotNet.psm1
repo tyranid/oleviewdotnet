@@ -3104,9 +3104,9 @@ function ConvertTo-ComAssembly {
         [parameter(Mandatory, ParameterSetName = "FromPath", Position = 0)]
         [string]$Path,
         [parameter(Mandatory, ParameterSetName = "FromProxy", Position = 0)]
-        [OleViewDotNet.Proxy.COMProxyInstance]$Proxy,
+        [OleViewDotNet.Proxy.COMProxyFile]$Proxy,
         [parameter(Mandatory, ParameterSetName = "FromProxyInterface", Position = 0)]
-        [OleViewDotNet.Proxy.COMProxyInterfaceInstance]$ProxyInterface,
+        [OleViewDotNet.Proxy.COMProxyInterface]$ProxyInterface,
         [parameter(Mandatory, ParameterSetName = "FromIpid", Position = 0)]
         [OleViewDotNet.Processes.COMIPIDEntry]$Ipid,
         [switch]$NoProgress
@@ -3427,5 +3427,61 @@ function Get-ComAccessToken {
                 $token
             }
         }
+    }
+}
+
+<#
+.SYNOPSIS
+Converts a database or related object into source code.
+.DESCRIPTION
+This cmdlet converts database or related object into source code.
+.PARAMETER InputObject
+The input object to convert.
+.PARAMETER RemoveComment
+Specify to remove comments from the output.
+.PARAMETER RemoveComplexTypes
+Specify to remove complex types from the output.
+.PARAMETER OutputType
+Specify the output source code format. Only applies to formatting proxy objects.
+.INPUTS
+OleViewDotNet.Utilities.Format.ICOMSourceCodeFormattable
+.OUTPUTS
+string
+.EXAMPLE
+ConvertTo-ComSourceCode $obj
+Convert a COM object to source code.
+.EXAMPLE
+ConvertTo-ComSourceCode $obj -RemoveComments
+Convert a COM object to source code removing comments.
+#>
+function ConvertTo-ComSourceCode {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position=0, ValueFromPipeline)]
+        [OleViewDotNet.Utilities.Format.ICOMSourceCodeFormattable]$InputObject,
+        [switch]$RemoveComments,
+        [switch]$RemoveComplexTypes,
+        [OleViewDotNet.Utilities.Format.COMSourceCodeBuilderType]$OutputType = "Idl",
+        [OleViewDotNet.Database.COMRegistry]$Database
+    )
+
+    BEGIN {
+        $Database = Get-CurrentComDatabase $Database
+        if ($null -eq $Database) {
+            throw "No database specified and current database isn't set"
+        }
+
+        $builder = [OleViewDotNet.Utilities.Format.COMSourceCodeBuilder]::new($Database)
+        $builder.RemoveComments = $RemoveComments
+        $builder.RemoveComplexTypes = $RemoveComplexTypes
+        $builder.OutputType = $OutputType
+    }
+
+    PROCESS {
+        $InputObject.Format($builder)
+    }
+
+    END {
+        $builder.ToString()
     }
 }

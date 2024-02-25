@@ -24,12 +24,12 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
+public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
 {
     #region Private Members
     private readonly COMRegistry m_registry;
 
-    private COMProxyInstance(string path, COMCLSIDEntry clsid, ISymbolResolver resolver, COMRegistry registry)
+    private COMProxyFile(string path, COMCLSIDEntry clsid, ISymbolResolver resolver, COMRegistry registry)
     {
         ClassEntry = clsid ?? new COMCLSIDEntry(registry, Guid.Empty, COMServerType.UnknownServer);
         m_registry = registry;
@@ -93,7 +93,7 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         }
     }
 
-    private COMProxyInterfaceInstance GetInterfaceInstance(NdrComProxyDefinition proxy)
+    private COMProxyInterface GetInterfaceInstance(NdrComProxyDefinition proxy)
     {
         HashSet<NdrComplexTypeReference> complex_types = new();
         foreach (var proc in proxy.Procedures)
@@ -104,21 +104,21 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
                 GetComplexTypes(complex_types, p.Type);
             }
         }
-        return new COMProxyInterfaceInstance(ClassEntry, 
+        return new COMProxyInterface(ClassEntry, 
             proxy, complex_types, m_registry, this);
     }
 
-    private COMProxyInstance(string path, ISymbolResolver resolver, COMRegistry registry)
+    private COMProxyFile(string path, ISymbolResolver resolver, COMRegistry registry)
         : this(path, null, resolver, registry)
     {
     }
 
-    private static readonly Dictionary<Guid, COMProxyInstance> m_proxies = new();
-    private static readonly Dictionary<string, COMProxyInstance> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<Guid, COMProxyFile> m_proxies = new();
+    private static readonly Dictionary<string, COMProxyFile> m_proxies_by_file = new(StringComparer.OrdinalIgnoreCase);
     #endregion
 
     #region Public Properties
-    public IReadOnlyList<COMProxyInterfaceInstance> Entries { get; private set; }
+    public IReadOnlyList<COMProxyInterface> Entries { get; private set; }
 
     public IReadOnlyList<COMProxyComplexType> ComplexTypes { get; private set; }
 
@@ -130,7 +130,7 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
     #endregion
 
     #region Internal Members
-    internal COMProxyInstance(IEnumerable<NdrComProxyDefinition> entries,
+    internal COMProxyFile(IEnumerable<NdrComProxyDefinition> entries,
                               IEnumerable<NdrComplexTypeReference> complex_types,
                               COMCLSIDEntry clsid,
                               COMRegistry registry)
@@ -143,13 +143,13 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
     #endregion
 
     #region Static Members
-    public static COMProxyInstance GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
+    public static COMProxyFile GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {
         if (clsid.IsAutomationProxy)
         {
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
-        if (m_proxies.TryGetValue(clsid.Clsid, out COMProxyInstance proxy))
+        if (m_proxies.TryGetValue(clsid.Clsid, out COMProxyFile proxy))
         {
             return proxy;
         }
@@ -158,7 +158,7 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         return proxy;
     }
 
-    public static COMProxyInstance GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
+    public static COMProxyFile GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
     {
         if (m_proxies_by_file.ContainsKey(path))
         {
@@ -166,7 +166,7 @@ public class COMProxyInstance : IProxyFormatter, ICOMSourceCodeFormattable
         }
         else
         {
-            COMProxyInstance proxy = new(path, resolver, registry);
+            COMProxyFile proxy = new(path, resolver, registry);
             m_proxies_by_file[path] = proxy;
             return proxy;
         }
