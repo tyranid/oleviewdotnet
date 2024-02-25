@@ -29,6 +29,8 @@ public sealed class COMSourceCodeBuilder
     private readonly Stack<string> m_indent = new();
     private readonly StringBuilder m_builder = new();
     private readonly COMRegistry m_registry;
+    private Tuple<COMSourceCodeBuilderType, bool> m_current_ndr_config = default;
+    private INdrFormatter m_formatter;
 
     private class StackPopper : IDisposable
     {
@@ -72,6 +74,13 @@ public sealed class COMSourceCodeBuilder
     #region Internal Methods
     internal INdrFormatter GetNdrFormatter()
     {
+        Tuple<COMSourceCodeBuilderType, bool> config = Tuple.Create(OutputType, RemoveComments);
+        if (config == m_current_ndr_config && m_formatter != null)
+        {
+            return m_formatter;
+        }
+        m_current_ndr_config = config;
+
         DefaultNdrFormatterFlags flags = 0;
 
         if (RemoveComments)
@@ -79,13 +88,14 @@ public sealed class COMSourceCodeBuilder
             flags |= DefaultNdrFormatterFlags.RemoveComments;
         }
 
-        return OutputType switch
+        m_formatter = OutputType switch
         {
             COMSourceCodeBuilderType.Idl => IdlNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
             COMSourceCodeBuilderType.Generic => DefaultNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
             COMSourceCodeBuilderType.Cpp => CppNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
             _ => throw new ArgumentException("Invalid output type."),
         };
+        return m_formatter;
     }
 
     internal IDisposable PushIndent(int count)
