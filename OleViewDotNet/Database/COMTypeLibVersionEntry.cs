@@ -27,7 +27,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable
+public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
     private readonly COMRegistry m_registry;
     private Lazy<COMTypeLib> m_typelib;
@@ -87,6 +87,10 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     }
 
     Guid ICOMGuid.ComGuid => TypelibId;
+
+    bool ICOMSourceCodeParsable.IsParsed => IsParsed;
+
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
 
     internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key) 
         : this(registry, typelibid)
@@ -176,20 +180,10 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
         {
             ((ICOMSourceCodeFormattable)m_typelib.Value).Format(builder);
         }
-        else
-        {
-            List<string> attrs = new()
-            {
-                $"uuid({TypelibId})",
-                $"version({Version})"
-            };
-            builder.AppendAttributes(attrs);
-            builder.AppendLine($"library {Name} {{");
-            using (builder.PushIndent(4))
-            {
-                builder.AppendLine("// Type library not parsed.");
-            }
-            builder.AppendLine("};");
-        }
+    }
+
+    void ICOMSourceCodeParsable.ParseSourceCode()
+    {
+        Parse();
     }
 }

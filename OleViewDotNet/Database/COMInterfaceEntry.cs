@@ -260,6 +260,8 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     Guid ICOMGuid.ComGuid => Iid;
 
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
+
     public override bool Equals(object obj)
     {
         if (base.Equals(obj))

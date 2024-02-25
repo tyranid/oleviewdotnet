@@ -19,6 +19,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,10 +33,11 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid
+public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
     private List<COMInterfaceInstance> m_interfaces;
     private List<COMInterfaceInstance> m_factory_interfaces;
+    private ICOMSourceCodeFormattable m_formattable;
 
     private static HashSet<Guid> LoadAppActivatableClsids()
     {
@@ -622,6 +624,10 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     Guid ICOMGuid.ComGuid => Clsid;
 
+    bool ICOMSourceCodeParsable.IsParsed => m_formattable != null;
+
+    bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() != null;
+
     public override string ToString()
     {
         return Name;
@@ -685,6 +691,30 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         if (Elevation != null)
         {
             writer.WriteSerializableObjects("elevation", new COMCLSIDElevationEntry[] { Elevation });
+        }
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        m_formattable?.Format(builder);
+    }
+
+    void ICOMSourceCodeParsable.ParseSourceCode()
+    {
+        try
+        {
+            var type_lib_version = TypeLibEntry?.Versions.FirstOrDefault();
+            if (type_lib_version != null)
+            {
+                var typelib = type_lib_version.Parse()
+                    ?? throw new ArgumentException("Can't find a type library.");
+                m_formattable = typelib.Classes.FirstOrDefault(c => c.Uuid == Clsid)
+                    ?? throw new ArgumentException("No class entry in type library for current CLSID.");
+            }
+        }
+        catch (Exception ex)
+        {
+            m_formattable = new SimpleTextFormattable($"ERROR: {ex.Message}");
         }
     }
 }

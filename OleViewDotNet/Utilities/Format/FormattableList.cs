@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2018
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,36 +14,28 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr;
-using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace OleViewDotNet.Proxy;
+namespace OleViewDotNet.Utilities.Format;
 
-public sealed class COMProxyComplexType : ICOMSourceCodeFormattable
+internal sealed class FormattableList : ICOMSourceCodeFormattable
 {
-    #region Public Properties
-    public string Name => Entry.Name;
+    private readonly List<ICOMSourceCodeFormattable> m_objs;
 
-    public NdrComplexTypeReference Entry { get; }
-
-    public int Size => Entry.GetSize();
-
-    bool ICOMSourceCodeFormattable.IsFormattable => true;
-    #endregion
-
-    #region Internal Members
-    internal COMProxyComplexType(NdrComplexTypeReference entry)
+    public FormattableList(IEnumerable<ICOMSourceCodeFormattable> objs)
     {
-        Entry = entry;
+        m_objs = objs.ToList();
     }
-    #endregion
 
-    #region Public Methods
+    public bool IsFormattable => m_objs.Count > 0;
+
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        INdrFormatter formatter = builder.GetNdrFormatter();
-        builder.AppendLine(formatter.FormatComplexType(Entry));
-        builder.AppendLine();
+        foreach (var obj in m_objs)
+        {
+            obj.Format(builder);
+            builder.AppendLine();
+        }
     }
-    #endregion
 }

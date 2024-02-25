@@ -120,6 +120,7 @@ public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid,
     public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
     public IReadOnlyDictionary<Guid, COMTypeLibInterface> InterfacesByIid => Interfaces.ToDictionary(i => i.Uuid);
     Guid ICOMGuid.ComGuid => TypeLibId;
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
 
     #region Public Methods

@@ -16,8 +16,8 @@
 
 namespace OleViewDotNet.Utilities.Format;
 
-public interface ICOMSourceCodeFormattable
+public interface ICOMSourceCodeParsable : ICOMSourceCodeFormattable
 {
-    bool IsFormattable { get; }
-    void Format(COMSourceCodeBuilder builder);
+    bool IsParsed { get; }
+    void ParseSourceCode();
 }

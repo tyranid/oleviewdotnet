@@ -73,6 +73,8 @@ public sealed class COMProxyInterface : IProxyFormatter, ICOMSourceCodeFormattab
     public COMCLSIDEntry ClassEntry { get; }
 
     public COMProxyFile ProxyFile { get; }
+
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
 
     #region Internal Members

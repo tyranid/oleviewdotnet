@@ -44,6 +44,8 @@ public class COMInterfaceInstance : IXmlSerializable, ICOMSourceCodeFormattable
     }
     public COMInterfaceEntry InterfaceEntry => m_registry?.Interfaces.GetGuidEntry(Iid);
 
+    bool ICOMSourceCodeFormattable.IsFormattable => ((ICOMSourceCodeFormattable)InterfaceEntry)?.IsFormattable ?? false;
+
     public COMInterfaceInstance(Guid iid, string module, long vtable_offset, COMRegistry registry) : this(registry)
     {
         Iid = iid;

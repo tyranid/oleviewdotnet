@@ -25,6 +25,8 @@ namespace OleViewDotNet.Utilities.Format;
 
 internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeFormattable
 {
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
+
     private static string RemoveGenericPart(string name)
     {
         int index = name.LastIndexOf('`');

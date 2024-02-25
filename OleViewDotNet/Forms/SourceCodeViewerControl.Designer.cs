@@ -31,13 +31,15 @@
             this.components = new System.ComponentModel.Container();
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.removeCommentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeComplexTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectOutputTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.iDLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.genericToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseSourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.formatOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemRemoveComments = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemRemoveComplexTypes = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemOutputType = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemIDLOutputType = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemCppOutputType = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemGenericOutputType = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,71 +57,87 @@
             // 
             this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.removeCommentsToolStripMenuItem,
-            this.removeComplexTypesToolStripMenuItem,
-            this.selectOutputTypeToolStripMenuItem,
-            this.exportToolStripMenuItem});
+            this.parseSourceCodeToolStripMenuItem,
+            this.exportToolStripMenuItem,
+            this.formatOptionsToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(274, 165);
-            // 
-            // removeCommentsToolStripMenuItem
-            // 
-            this.removeCommentsToolStripMenuItem.Name = "removeCommentsToolStripMenuItem";
-            this.removeCommentsToolStripMenuItem.Size = new System.Drawing.Size(273, 32);
-            this.removeCommentsToolStripMenuItem.Text = "Remove Comments";
-            this.removeCommentsToolStripMenuItem.Click += new System.EventHandler(this.removeCommentsToolStripMenuItem_Click);
-            // 
-            // removeComplexTypesToolStripMenuItem
-            // 
-            this.removeComplexTypesToolStripMenuItem.Name = "removeComplexTypesToolStripMenuItem";
-            this.removeComplexTypesToolStripMenuItem.Size = new System.Drawing.Size(273, 32);
-            this.removeComplexTypesToolStripMenuItem.Text = "Remove Complex Types";
-            this.removeComplexTypesToolStripMenuItem.Click += new System.EventHandler(this.removeComplexTypesToolStripMenuItem_Click);
-            // 
-            // selectOutputTypeToolStripMenuItem
-            // 
-            this.selectOutputTypeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.iDLToolStripMenuItem,
-            this.cToolStripMenuItem,
-            this.genericToolStripMenuItem});
-            this.selectOutputTypeToolStripMenuItem.Name = "selectOutputTypeToolStripMenuItem";
-            this.selectOutputTypeToolStripMenuItem.Size = new System.Drawing.Size(273, 32);
-            this.selectOutputTypeToolStripMenuItem.Text = "Select Output Type";
-            // 
-            // iDLToolStripMenuItem
-            // 
-            this.iDLToolStripMenuItem.Name = "iDLToolStripMenuItem";
-            this.iDLToolStripMenuItem.Size = new System.Drawing.Size(172, 34);
-            this.iDLToolStripMenuItem.Text = "IDL";
-            this.iDLToolStripMenuItem.Click += new System.EventHandler(this.iDLToolStripMenuItem_Click);
-            // 
-            // cToolStripMenuItem
-            // 
-            this.cToolStripMenuItem.Name = "cToolStripMenuItem";
-            this.cToolStripMenuItem.Size = new System.Drawing.Size(172, 34);
-            this.cToolStripMenuItem.Text = "C++";
-            this.cToolStripMenuItem.Click += new System.EventHandler(this.cToolStripMenuItem_Click);
-            // 
-            // genericToolStripMenuItem
-            // 
-            this.genericToolStripMenuItem.Name = "genericToolStripMenuItem";
-            this.genericToolStripMenuItem.Size = new System.Drawing.Size(172, 34);
-            this.genericToolStripMenuItem.Text = "Generic";
-            this.genericToolStripMenuItem.Click += new System.EventHandler(this.genericToolStripMenuItem_Click);
+            this.contextMenuStrip.Size = new System.Drawing.Size(241, 133);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(273, 32);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(240, 32);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
-            // FormattedObjectControl
+            // parseSourceCodeToolStripMenuItem
+            // 
+            this.parseSourceCodeToolStripMenuItem.Name = "parseSourceCodeToolStripMenuItem";
+            this.parseSourceCodeToolStripMenuItem.Size = new System.Drawing.Size(240, 32);
+            this.parseSourceCodeToolStripMenuItem.Text = "Parse Source Code";
+            this.parseSourceCodeToolStripMenuItem.Click += new System.EventHandler(this.parseSourceCodeToolStripMenuItem_Click);
+            // 
+            // formatOptionsToolStripMenuItem
+            // 
+            this.formatOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemRemoveComments,
+            this.toolStripMenuItemRemoveComplexTypes,
+            this.toolStripMenuItemOutputType});
+            this.formatOptionsToolStripMenuItem.Name = "formatOptionsToolStripMenuItem";
+            this.formatOptionsToolStripMenuItem.Size = new System.Drawing.Size(231, 32);
+            this.formatOptionsToolStripMenuItem.Text = "Format Options";
+            // 
+            // toolStripMenuItemRemoveComments
+            // 
+            this.toolStripMenuItemRemoveComments.Name = "toolStripMenuItemRemoveComments";
+            this.toolStripMenuItemRemoveComments.Size = new System.Drawing.Size(303, 34);
+            this.toolStripMenuItemRemoveComments.Text = "Remove Comments";
+            this.toolStripMenuItemRemoveComments.Click += new System.EventHandler(this.toolStripMenuItemRemoveComments_Click);
+            // 
+            // toolStripMenuItemRemoveComplexTypes
+            // 
+            this.toolStripMenuItemRemoveComplexTypes.Name = "toolStripMenuItemRemoveComplexTypes";
+            this.toolStripMenuItemRemoveComplexTypes.Size = new System.Drawing.Size(303, 34);
+            this.toolStripMenuItemRemoveComplexTypes.Text = "Remove Complex Types";
+            this.toolStripMenuItemRemoveComplexTypes.Click += new System.EventHandler(this.toolStripMenuItemRemoveComplexTypes_Click);
+            // 
+            // toolStripMenuItemOutputType
+            // 
+            this.toolStripMenuItemOutputType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemIDLOutputType,
+            this.toolStripMenuItemCppOutputType,
+            this.toolStripMenuItemGenericOutputType});
+            this.toolStripMenuItemOutputType.Name = "toolStripMenuItemOutputType";
+            this.toolStripMenuItemOutputType.Size = new System.Drawing.Size(303, 34);
+            this.toolStripMenuItemOutputType.Text = "Output Type";
+            // 
+            // toolStripMenuItemIDLOutputType
+            // 
+            this.toolStripMenuItemIDLOutputType.Name = "toolStripMenuItemIDLOutputType";
+            this.toolStripMenuItemIDLOutputType.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemIDLOutputType.Text = "IDL";
+            this.toolStripMenuItemIDLOutputType.Click += new System.EventHandler(this.toolStripMenuItemIDLOutputType_Click);
+            // 
+            // toolStripMenuItemCppOutputType
+            // 
+            this.toolStripMenuItemCppOutputType.Name = "toolStripMenuItemCppOutputType";
+            this.toolStripMenuItemCppOutputType.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemCppOutputType.Text = "C++";
+            this.toolStripMenuItemCppOutputType.Click += new System.EventHandler(this.toolStripMenuItemCppOutputType_Click);
+            // 
+            // toolStripMenuItemGenericOutputType
+            // 
+            this.toolStripMenuItemGenericOutputType.Name = "toolStripMenuItemGenericOutputType";
+            this.toolStripMenuItemGenericOutputType.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemGenericOutputType.Text = "Generic";
+            this.toolStripMenuItemGenericOutputType.Click += new System.EventHandler(this.toolStripMenuItemGenericOutputType_Click);
+            // 
+            // SourceCodeViewerControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.textEditor);
-            this.Name = "FormattedObjectControl";
+            this.Name = "SourceCodeViewerControl";
             this.Size = new System.Drawing.Size(867, 489);
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -130,12 +148,14 @@
 
         private ICSharpCode.TextEditor.TextEditorControl textEditor;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
-        private System.Windows.Forms.ToolStripMenuItem removeCommentsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem removeComplexTypesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem selectOutputTypeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem iDLToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem genericToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parseSourceCodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem formatOptionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveComments;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveComplexTypes;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemOutputType;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemIDLOutputType;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCppOutputType;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemGenericOutputType;
     }
 }

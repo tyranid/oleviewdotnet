@@ -111,6 +111,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
     public TYPEFLAGS Flags => _attr.wTypeFlags;
     public COMTypeLibReference TypeLib { get; internal set; }
     Guid ICOMGuid.ComGuid => Uuid;
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
 
     #region Public Methods

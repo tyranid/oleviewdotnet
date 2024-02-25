@@ -127,6 +127,8 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
     public Guid Clsid => ClassEntry.Clsid;
 
     public COMCLSIDEntry ClassEntry { get; }
+
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
 
     #region Internal Members
@@ -143,6 +145,11 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
     #endregion
 
     #region Static Members
+    public static bool TryGetFromCLSID(COMCLSIDEntry clsid, out COMProxyFile proxy)
+    {
+        return m_proxies.TryGetValue(clsid.Clsid, out proxy);
+    }
+
     public static COMProxyFile GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
     {
         if (clsid.IsAutomationProxy)
