@@ -228,7 +228,7 @@ public partial class COMRegistryViewer : UserControl
         m_mode = mode;
         m_processes = processes;
         treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
-        formattedObjectControl.SetRegistry(reg);
+        sourceCodeViewerControl.SetRegistry(reg);
 
         foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
         {
@@ -1073,7 +1073,7 @@ public partial class COMRegistryViewer : UserControl
             AddTypeLibNodes(node, parsed_typelib.Modules, "Modules", ProcessKey);
             AddTypeLibNodes(node, parsed_typelib.Aliases, "Aliases", ClassKey);
             treeComRegistry.ResumeLayout();
-            formattedObjectControl.SelectedObject = typelib;
+            sourceCodeViewerControl.SelectedObject = typelib;
         }
         catch (Exception ex)
         {
@@ -2198,7 +2198,7 @@ public partial class COMRegistryViewer : UserControl
         var main_form = EntryPoint.GetMainForm(m_registry);
         object obj = treeComRegistry.SelectedNode?.Tag;
         main_form.UpdatePropertyGrid(obj);
-        formattedObjectControl.SelectedObject = obj;
+        sourceCodeViewerControl.SelectedObject = obj;
     }
 
     private void allChildrenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2325,7 +2325,7 @@ public partial class COMRegistryViewer : UserControl
             {
                 COMProxyInterface.GetFromIID(intf_entry, null);
             }
-            formattedObjectControl.SelectedObject = intf_entry;
+            sourceCodeViewerControl.SelectedObject = intf_entry;
             showSourceCodeToolStripMenuItem.Checked = true;
             splitContainer.Panel2Collapsed = false;
         }

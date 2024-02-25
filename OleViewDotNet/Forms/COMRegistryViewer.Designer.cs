@@ -84,7 +84,7 @@ partial class COMRegistryViewer
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
-            this.formattedObjectControl = new OleViewDotNet.Forms.FormattedObjectControl();
+            this.sourceCodeViewerControl = new OleViewDotNet.Forms.SourceCodeViewerControl();
             labelFilter = new System.Windows.Forms.Label();
             labelMode = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
@@ -578,7 +578,7 @@ partial class COMRegistryViewer
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.formattedObjectControl);
+            this.splitContainer.Panel2.Controls.Add(this.sourceCodeViewerControl);
             this.splitContainer.Panel2Collapsed = true;
             this.splitContainer.Size = new System.Drawing.Size(1400, 530);
             this.splitContainer.SplitterDistance = 907;
@@ -586,11 +586,11 @@ partial class COMRegistryViewer
             // 
             // formattedObjectControl
             // 
-            this.formattedObjectControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formattedObjectControl.Location = new System.Drawing.Point(0, 0);
-            this.formattedObjectControl.Name = "formattedObjectControl";
-            this.formattedObjectControl.Size = new System.Drawing.Size(96, 100);
-            this.formattedObjectControl.TabIndex = 0;
+            this.sourceCodeViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sourceCodeViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.sourceCodeViewerControl.Name = "formattedObjectControl";
+            this.sourceCodeViewerControl.Size = new System.Drawing.Size(96, 100);
+            this.sourceCodeViewerControl.TabIndex = 0;
             // 
             // COMRegistryViewer
             // 
@@ -664,7 +664,7 @@ partial class COMRegistryViewer
     private System.Windows.Forms.ToolStripMenuItem createFactoryInRuntimeBrokerToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem createFactoryInPerUserRuntimeBrokerToolStripMenuItem;
     private System.Windows.Forms.SplitContainer splitContainer;
-    private FormattedObjectControl formattedObjectControl;
+    private SourceCodeViewerControl sourceCodeViewerControl;
     private System.Windows.Forms.ToolStripMenuItem showSourceCodeToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem viewInterfaceDefinitionToolStripMenuItem;
 }

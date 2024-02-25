@@ -1,6 +1,6 @@
 ﻿namespace OleViewDotNet.Forms
 {
-    partial class FormattedObjectControl
+    partial class SourceCodeViewerControl
     {
         /// <summary> 
         /// Required designer variable.

@@ -24,7 +24,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class FormattedObjectControl : UserControl
+public partial class SourceCodeViewerControl : UserControl
 {
     private COMRegistry m_registry;
     private object m_selected_obj;
@@ -32,7 +32,7 @@ public partial class FormattedObjectControl : UserControl
     private bool m_remove_comments;
     private bool m_remove_complex_types;
 
-    public FormattedObjectControl()
+    public SourceCodeViewerControl()
     {
         InitializeComponent();
         textEditor.SetHighlighting("C#");
