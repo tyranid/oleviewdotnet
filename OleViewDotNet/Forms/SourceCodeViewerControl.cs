@@ -61,7 +61,7 @@ public partial class SourceCodeViewerControl : UserControl
     {
         if (obj is ICOMSourceCodeParsable parsable)
         {
-            return parsable.IsParsed;
+            return parsable.IsSourceCodeParsed;
         }
         return true;
     }
@@ -186,7 +186,7 @@ public partial class SourceCodeViewerControl : UserControl
     {
         try
         {
-            if (m_formattable_obj is ICOMSourceCodeParsable parsable && !parsable.IsParsed)
+            if (m_formattable_obj is ICOMSourceCodeParsable parsable && !parsable.IsSourceCodeParsed)
             {
                 parsable.ParseSourceCode();
                 parseSourceCodeToolStripMenuItem.Enabled = false;

@@ -624,7 +624,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     Guid ICOMGuid.ComGuid => Clsid;
 
-    bool ICOMSourceCodeParsable.IsParsed => m_formattable != null;
+    bool ICOMSourceCodeParsable.IsSourceCodeParsed => m_formattable != null;
 
     bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() != null;
 

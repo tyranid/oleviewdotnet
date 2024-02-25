@@ -284,7 +284,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         return m_formattable != null;
     }
 
-    bool ICOMSourceCodeParsable.IsParsed => CheckForParsed();
+    bool ICOMSourceCodeParsable.IsSourceCodeParsed => CheckForParsed();
 
     public override bool Equals(object obj)
     {

@@ -88,7 +88,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
 
     Guid ICOMGuid.ComGuid => TypelibId;
 
-    bool ICOMSourceCodeParsable.IsParsed => IsParsed;
+    bool ICOMSourceCodeParsable.IsSourceCodeParsed => IsParsed;
 
     bool ICOMSourceCodeFormattable.IsFormattable => true;
 

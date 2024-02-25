@@ -3443,6 +3443,8 @@ Specify to remove comments from the output.
 Specify to remove complex types from the output.
 .PARAMETER OutputType
 Specify the output source code format. Only applies to formatting proxy objects.
+.PARAMETER Parse
+Specify to try and parse the object's source code before formatting.
 .INPUTS
 OleViewDotNet.Utilities.Format.ICOMSourceCodeFormattable
 .OUTPUTS
@@ -3462,7 +3464,8 @@ function ConvertTo-ComSourceCode {
         [switch]$RemoveComments,
         [switch]$RemoveComplexTypes,
         [OleViewDotNet.Utilities.Format.COMSourceCodeBuilderType]$OutputType = "Idl",
-        [OleViewDotNet.Database.COMRegistry]$Database
+        [OleViewDotNet.Database.COMRegistry]$Database,
+        [switch]$Parse
     )
 
     BEGIN {
@@ -3478,7 +3481,21 @@ function ConvertTo-ComSourceCode {
     }
 
     PROCESS {
-        $InputObject.Format($builder)
+        try {
+            if ($InputObject.IsFormattable) {
+                if ($Parse -and $InputObject -is [OleViewDotNet.Utilities.Format.ICOMSourceCodeParsable]) {
+                    if (!$InputObject.IsSourceCodeParsed) {
+                        $InputObject.ParseSourceCode()
+                    }
+                }
+
+                if ($InputObject.IsFormattable) {
+                    $InputObject.Format($builder)
+                }
+            }
+        } catch {
+            Write-Error $_
+        }
     }
 
     END {
