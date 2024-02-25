@@ -3437,10 +3437,10 @@ Converts a database or related object into source code.
 This cmdlet converts database or related object into source code.
 .PARAMETER InputObject
 The input object to convert.
-.PARAMETER RemoveComment
-Specify to remove comments from the output.
-.PARAMETER RemoveComplexTypes
-Specify to remove complex types from the output.
+.PARAMETER HideComments
+Specify to hide comments from the output.
+.PARAMETER InterfacesOnly
+Specify to only output interfaces and class definitions, not other types.
 .PARAMETER OutputType
 Specify the output source code format. Only applies to formatting proxy objects.
 .PARAMETER Parse
@@ -3453,21 +3453,20 @@ string
 ConvertTo-ComSourceCode $obj
 Convert a COM object to source code.
 .EXAMPLE
-ConvertTo-ComSourceCode $obj -RemoveComments
-Convert a COM object to source code removing comments.
+ConvertTo-ComSourceCode $obj -HideComments
+Convert a COM object to source code hiding comments.
 #>
 function ConvertTo-ComSourceCode {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory, Position=0, ValueFromPipeline)]
-        [OleViewDotNet.Utilities.Format.ICOMSourceCodeFormattable]$InputObject,
-        [switch]$RemoveComments,
-        [switch]$RemoveComplexTypes,
+        $InputObject,
+        [switch]$HideComments,
+        [switch]$InterfacesOnly,
         [OleViewDotNet.Utilities.Format.COMSourceCodeBuilderType]$OutputType = "Idl",
         [OleViewDotNet.Database.COMRegistry]$Database,
         [switch]$Parse
     )
-
     BEGIN {
         $Database = Get-CurrentComDatabase $Database
         if ($null -eq $Database) {
@@ -3475,24 +3474,14 @@ function ConvertTo-ComSourceCode {
         }
 
         $builder = [OleViewDotNet.Utilities.Format.COMSourceCodeBuilder]::new($Database)
-        $builder.RemoveComments = $RemoveComments
-        $builder.RemoveComplexTypes = $RemoveComplexTypes
+        $builder.HideComments = $HideComments
+        $builder.InterfacesOnly = $InterfacesOnly
         $builder.OutputType = $OutputType
     }
 
     PROCESS {
         try {
-            if ($InputObject.IsFormattable) {
-                if ($Parse -and $InputObject -is [OleViewDotNet.Utilities.Format.ICOMSourceCodeParsable]) {
-                    if (!$InputObject.IsSourceCodeParsed) {
-                        $InputObject.ParseSourceCode()
-                    }
-                }
-
-                if ($InputObject.IsFormattable) {
-                    $InputObject.Format($builder)
-                }
-            }
+            $builder.AppendObject($InputObject, $Parse)
         } catch {
             Write-Error $_
         }

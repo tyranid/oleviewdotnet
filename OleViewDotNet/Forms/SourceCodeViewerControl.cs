@@ -29,18 +29,18 @@ public partial class SourceCodeViewerControl : UserControl
     private object m_selected_obj;
     private ICOMSourceCodeFormattable m_formattable_obj;
     private COMSourceCodeBuilderType m_output_type;
-    private bool m_remove_comments;
-    private bool m_remove_complex_types;
+    private bool m_hide_comments;
+    private bool m_interfaces_only;
 
     public SourceCodeViewerControl()
     {
         InitializeComponent();
         textEditor.SetHighlighting("C#");
         textEditor.IsReadOnly = true;
-        m_remove_comments = true;
-        toolStripMenuItemRemoveComments.Checked = true;
-        m_remove_complex_types = true;
-        toolStripMenuItemRemoveComplexTypes.Checked = true;
+        m_hide_comments = true;
+        toolStripMenuItemHideComments.Checked = true;
+        m_interfaces_only = true;
+        toolStripMenuItemInterfacesOnly.Checked = true;
         toolStripMenuItemIDLOutputType.Checked = true;
         m_output_type = COMSourceCodeBuilderType.Idl;
         SetText(string.Empty);
@@ -82,8 +82,8 @@ public partial class SourceCodeViewerControl : UserControl
     {
         COMSourceCodeBuilder builder = new(m_registry)
         {
-            RemoveComplexTypes = m_remove_complex_types,
-            RemoveComments = m_remove_comments,
+            InterfacesOnly = m_interfaces_only,
+            HideComments = m_hide_comments,
             OutputType = m_output_type
         };
 
@@ -151,17 +151,17 @@ public partial class SourceCodeViewerControl : UserControl
         Format();
     }
 
-    private void toolStripMenuItemRemoveComments_Click(object sender, EventArgs e)
+    private void toolStripMenuItemHideComments_Click(object sender, EventArgs e)
     {
-        m_remove_comments = !m_remove_comments;
-        toolStripMenuItemRemoveComments.Checked = m_remove_comments;
+        m_hide_comments = !m_hide_comments;
+        toolStripMenuItemHideComments.Checked = m_hide_comments;
         Format();
     }
 
-    private void toolStripMenuItemRemoveComplexTypes_Click(object sender, EventArgs e)
+    private void toolStripMenuItemInterfacesOnly_Click(object sender, EventArgs e)
     {
-        m_remove_complex_types = !m_remove_complex_types;
-        toolStripMenuItemRemoveComplexTypes.Checked = m_remove_complex_types;
+        m_interfaces_only = !m_interfaces_only;
+        toolStripMenuItemInterfacesOnly.Checked = m_interfaces_only;
         Format();
     }
 

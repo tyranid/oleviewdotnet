@@ -59,8 +59,8 @@ public sealed class COMSourceCodeBuilder
 
     #region Public Properties
     public COMSourceCodeBuilderType OutputType { get; set; }
-    public bool RemoveComments { get; set; }
-    public bool RemoveComplexTypes { get; set; }
+    public bool HideComments { get; set; }
+    public bool InterfacesOnly { get; set; }
     #endregion
 
     #region Constructors
@@ -74,7 +74,7 @@ public sealed class COMSourceCodeBuilder
     #region Internal Methods
     internal INdrFormatter GetNdrFormatter()
     {
-        Tuple<COMSourceCodeBuilderType, bool> config = Tuple.Create(OutputType, RemoveComments);
+        Tuple<COMSourceCodeBuilderType, bool> config = Tuple.Create(OutputType, HideComments);
         if (config == m_current_ndr_config && m_formatter != null)
         {
             return m_formatter;
@@ -83,7 +83,7 @@ public sealed class COMSourceCodeBuilder
 
         DefaultNdrFormatterFlags flags = 0;
 
-        if (RemoveComments)
+        if (HideComments)
         {
             flags |= DefaultNdrFormatterFlags.RemoveComments;
         }
@@ -162,13 +162,47 @@ public sealed class COMSourceCodeBuilder
 
     internal void AppendCommentLine(string comment)
     {
-        if (RemoveComments)
+        if (HideComments)
             return;
         AppendLine(comment);
     }
     #endregion
 
     #region Public Methods
+    public void AppendObject(object obj, bool parse = false)
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        ICOMSourceCodeFormattable formattable = obj as ICOMSourceCodeFormattable;
+        if (formattable is null)
+        {
+            if (obj is Type type)
+            {
+                formattable = new SourceCodeFormattableType(type);
+            }
+        }
+
+        if (formattable is null || !formattable.IsFormattable)
+        {
+            throw new ArgumentException($"Object {obj} is not formattable.");
+        }
+
+        if (formattable is ICOMSourceCodeParsable parsable && !parsable.IsSourceCodeParsed)
+        {
+            if (!parse)
+            {
+                throw new ArgumentException($"Object {obj} must be parsed before formatting.");
+            }
+        
+            parsable.ParseSourceCode();
+        }
+
+        formattable.Format(this);
+    }
+
     public void Reset()
     {
         m_builder.Clear();

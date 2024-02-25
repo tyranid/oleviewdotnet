@@ -184,8 +184,8 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         COMSourceCodeBuilder builder = new(m_registry);
-        builder.RemoveComments = flags.HasFlag(ProxyFormatterFlags.RemoveComments);
-        builder.RemoveComplexTypes = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
+        builder.HideComments = flags.HasFlag(ProxyFormatterFlags.RemoveComments);
+        builder.InterfacesOnly = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
         ((ICOMSourceCodeFormattable)this).Format(builder);
         return builder.ToString();
     }
@@ -193,7 +193,7 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
-        if (!builder.RemoveComplexTypes)
+        if (!builder.InterfacesOnly)
         {
             foreach (var type in ComplexTypes)
             {

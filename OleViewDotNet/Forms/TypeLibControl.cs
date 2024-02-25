@@ -215,8 +215,8 @@ public partial class TypeLibControl : UserControl
     {
         m_builder = new(registry)
         {
-            RemoveComments = true,
-            RemoveComplexTypes = true
+            HideComments = true,
+            InterfacesOnly = true
         };
         InitializeComponent();
 
@@ -471,7 +471,7 @@ public partial class TypeLibControl : UserControl
     {
         if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
         {
-            m_builder.RemoveComments = checkBoxHideComments.Checked;
+            m_builder.HideComments = checkBoxHideComments.Checked;
             UpdateFromListView(view);
         }
     }
