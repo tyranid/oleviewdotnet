@@ -75,7 +75,7 @@ partial class COMRegistryViewer
             this.selectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filteredToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.allChildrenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showObjectFormatterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showSourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeImageList = new System.Windows.Forms.ImageList(this.components);
             this.comboBoxMode = new System.Windows.Forms.ComboBox();
             this.textBoxFilter = new System.Windows.Forms.TextBox();
@@ -159,9 +159,9 @@ partial class COMRegistryViewer
             this.propertiesToolStripMenuItem,
             this.unmarshalToolStripMenuItem,
             this.cloneTreeToolStripMenuItem,
-            this.showObjectFormatterToolStripMenuItem});
+            this.showSourceCodeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(280, 644);
+            this.contextMenuStrip.Size = new System.Drawing.Size(280, 677);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -474,12 +474,12 @@ partial class COMRegistryViewer
             this.allChildrenToolStripMenuItem.Text = "All Children";
             this.allChildrenToolStripMenuItem.Click += new System.EventHandler(this.allChildrenToolStripMenuItem_Click);
             // 
-            // showObjectFormatterToolStripMenuItem
+            // showSourceCodeToolStripMenuItem
             // 
-            this.showObjectFormatterToolStripMenuItem.Name = "showObjectFormatterToolStripMenuItem";
-            this.showObjectFormatterToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
-            this.showObjectFormatterToolStripMenuItem.Text = "Show Object Formatter";
-            this.showObjectFormatterToolStripMenuItem.Click += new System.EventHandler(this.showObjectFormatterToolStripMenuItem_Click);
+            this.showSourceCodeToolStripMenuItem.Name = "showSourceCodeToolStripMenuItem";
+            this.showSourceCodeToolStripMenuItem.Size = new System.Drawing.Size(279, 32);
+            this.showSourceCodeToolStripMenuItem.Text = "Show Source Code";
+            this.showSourceCodeToolStripMenuItem.Click += new System.EventHandler(this.showSourceCodeToolStripMenuItem_Click);
             // 
             // treeImageList
             // 
@@ -665,6 +665,6 @@ partial class COMRegistryViewer
     private System.Windows.Forms.ToolStripMenuItem createFactoryInPerUserRuntimeBrokerToolStripMenuItem;
     private System.Windows.Forms.SplitContainer splitContainer;
     private FormattedObjectControl formattedObjectControl;
-    private System.Windows.Forms.ToolStripMenuItem showObjectFormatterToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem showSourceCodeToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem viewInterfaceDefinitionToolStripMenuItem;
 }

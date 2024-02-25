@@ -1474,7 +1474,7 @@ public partial class COMRegistryViewer : UserControl
                 contextMenuStrip.Items.Add(propertiesToolStripMenuItem);
             }
 
-            contextMenuStrip.Items.Add(showObjectFormatterToolStripMenuItem);
+            contextMenuStrip.Items.Add(showSourceCodeToolStripMenuItem);
         }
         else
         {
@@ -2294,10 +2294,10 @@ public partial class COMRegistryViewer : UserControl
         CreateInRuntimeBroker(false, true);
     }
 
-    private void showObjectFormatterToolStripMenuItem_Click(object sender, EventArgs e)
+    private void showSourceCodeToolStripMenuItem_Click(object sender, EventArgs e)
     {
         splitContainer.Panel2Collapsed = !splitContainer.Panel2Collapsed;
-        showObjectFormatterToolStripMenuItem.Checked = !splitContainer.Panel2Collapsed;
+        showSourceCodeToolStripMenuItem.Checked = !splitContainer.Panel2Collapsed;
     }
 
     private void viewInterfaceDefinitionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2326,7 +2326,7 @@ public partial class COMRegistryViewer : UserControl
                 COMProxyInterface.GetFromIID(intf_entry, null);
             }
             formattedObjectControl.SelectedObject = intf_entry;
-            showObjectFormatterToolStripMenuItem.Checked = true;
+            showSourceCodeToolStripMenuItem.Checked = true;
             splitContainer.Panel2Collapsed = false;
         }
         catch (Exception ex)

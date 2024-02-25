@@ -16,7 +16,9 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities.Format;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -26,12 +28,21 @@ public partial class FormattedObjectControl : UserControl
 {
     private COMRegistry m_registry;
     private object m_selected_obj;
+    private COMSourceCodeBuilderType m_output_type;
+    private bool m_remove_comments;
+    private bool m_remove_complex_types;
 
     public FormattedObjectControl()
     {
         InitializeComponent();
         textEditor.SetHighlighting("C#");
         textEditor.IsReadOnly = true;
+        m_remove_comments = true;
+        removeCommentsToolStripMenuItem.Checked = true;
+        m_remove_complex_types = true;
+        removeComplexTypesToolStripMenuItem.Checked = true;
+        iDLToolStripMenuItem.Checked = true;
+        m_output_type = COMSourceCodeBuilderType.Idl;
         SetText(string.Empty);
     }
 
@@ -55,20 +66,21 @@ public partial class FormattedObjectControl : UserControl
 
     internal void Format()
     {
-        COMSourceCodeBuilder builder = new(m_registry);
-        builder.RemoveComplexTypes = true;
+        COMSourceCodeBuilder builder = new(m_registry)
+        {
+            RemoveComplexTypes = m_remove_complex_types,
+            RemoveComments = m_remove_comments,
+            OutputType = m_output_type
+        };
         if (m_selected_obj is ICOMSourceCodeFormattable formattable)
         {
             formattable.Format(builder);
         }
         else if (m_selected_obj is IEnumerable<ICOMSourceCodeFormattable> list && list.Any())
         {
-            foreach (var entry in list)
-            {
-                entry.Format(builder);
-            }
+            builder.AppendObjects(list);
         }
-        SetText(builder.ToString());
+        SetText(builder.ToString().TrimEnd());
     }
 
     internal object SelectedObject
@@ -78,6 +90,59 @@ public partial class FormattedObjectControl : UserControl
         {
             m_selected_obj = value;
             Format();
+        }
+    }
+
+    private void iDLToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        m_output_type = COMSourceCodeBuilderType.Idl;
+        iDLToolStripMenuItem.Checked = true;
+        cToolStripMenuItem.Checked = false;
+        genericToolStripMenuItem.Checked = false;
+    }
+
+    private void cToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        m_output_type = COMSourceCodeBuilderType.Cpp;
+        iDLToolStripMenuItem.Checked = false;
+        cToolStripMenuItem.Checked = true;
+        genericToolStripMenuItem.Checked = false;
+    }
+
+    private void genericToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        m_output_type = COMSourceCodeBuilderType.Generic;
+        iDLToolStripMenuItem.Checked = false;
+        cToolStripMenuItem.Checked = false;
+        genericToolStripMenuItem.Checked = true;
+    }
+
+    private void removeCommentsToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        m_remove_comments = !m_remove_comments;
+        removeCommentsToolStripMenuItem.Checked = m_remove_comments;
+    }
+
+    private void removeComplexTypesToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        m_remove_complex_types = !m_remove_complex_types;
+        removeComplexTypesToolStripMenuItem.Checked = m_remove_complex_types;
+    }
+
+    private void exportToolStripMenuItem_Click(object sender, System.EventArgs e)
+    {
+        using SaveFileDialog dlg = new();
+        dlg.Filter = "All Files (*.*)|*.*";
+        if (dlg.ShowDialog(this) == DialogResult.OK)
+        {
+            try
+            {
+                File.WriteAllText(dlg.FileName, textEditor.Text);
+            }
+            catch (Exception ex)
+            {
+                EntryPoint.ShowError(this, ex);
+            }
         }
     }
 }
