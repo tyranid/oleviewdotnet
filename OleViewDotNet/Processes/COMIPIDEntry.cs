@@ -21,6 +21,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,7 +31,7 @@ using System.Text;
 
 namespace OleViewDotNet.Processes;
 
-public class COMIPIDEntry : IProxyFormatter, ICOMGuid
+public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
 
@@ -65,6 +66,8 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid
     public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
 
     Guid ICOMGuid.ComGuid => Ipid;
+
+    bool ICOMSourceCodeFormattable.IsFormattable => Methods.Any();
 
     public byte[] ToObjref()
     {
@@ -132,21 +135,13 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid
             string name = index > 2 ? GetSymbolName(symbol) : string.Empty;
             if (string.IsNullOrWhiteSpace(name))
             {
-                switch (index)
+                name = index switch
                 {
-                    case 0:
-                        name = "QueryInterface";
-                        break;
-                    case 1:
-                        name = "AddRef";
-                        break;
-                    case 2:
-                        name = "Release";
-                        break;
-                    default:
-                        name = $"Method{index}";
-                        break;
-                }
+                    0 => "QueryInterface",
+                    1 => "AddRef",
+                    2 => "Release",
+                    _ => $"Method{index}",
+                };
             }
             _method_cache[method_ptr] = new COMMethodEntry(name, address, symbol);
         }
@@ -258,5 +253,11 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid
             return string.Empty;
         }
         return ToProxyInstance().FormatText(flags);
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        ICOMSourceCodeFormattable formattable = ToProxyInstance();
+        formattable?.Format(builder);
     }
 }
