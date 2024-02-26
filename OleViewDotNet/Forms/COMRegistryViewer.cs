@@ -1123,7 +1123,7 @@ public partial class COMRegistryViewer : UserControl
         }
         catch (Exception ex)
         {
-            wait_node.Text = $"Error parsing type library - {ex.Message}";
+            wait_node.Text = $"Error parsing proxy file - {ex.Message}";
         }
     }
 
