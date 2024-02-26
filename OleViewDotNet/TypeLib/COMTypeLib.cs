@@ -27,7 +27,7 @@ namespace OleViewDotNet.TypeLib;
 /// <summary>
 /// Class to represent information in a COM type library.
 /// </summary>
-public sealed class COMTypeLib : COMTypeLibReference, IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
+public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFormattable
 {
     #region Private Members
     private void FormatInternal(COMSourceCodeBuilder builder)

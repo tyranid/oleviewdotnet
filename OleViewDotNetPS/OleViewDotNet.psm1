@@ -2023,7 +2023,7 @@ function Get-ComProxy {
         }
         if ($null -ne $proxy) {
             if ($AsText) {
-                Write-Output $proxy.FormatText()
+                $proxy | ConvertTo-ComSourceCode
             } else {
                 Write-Output $proxy
             }

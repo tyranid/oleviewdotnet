@@ -610,7 +610,7 @@ public partial class PropertiesControl : UserControl
                     using var resolver = EntryPoint.GetProxyParserSymbolResolver();
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
                         COMUtilities.GetFileName(clsid.DefaultServerName),
-                        COMUtilities.GetProxyFromClsid(clsid, resolver), intf.Item1.Iid));
+                        COMProxyFile.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
                 }
             }
         }

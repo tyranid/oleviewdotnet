@@ -65,7 +65,7 @@ public partial class TypeLibControl : UserControl
         };
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(IProxyFormatter formatter, IDictionary<Guid, string> iids_to_names)
+    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(ICOMSourceCodeFormattable formatter, IDictionary<Guid, string> iids_to_names)
     {
         if (formatter is COMTypeLib typelib)
             return typelib.Interfaces.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
@@ -74,21 +74,21 @@ public partial class TypeLibControl : UserControl
         return Array.Empty<ListViewItemWithGuid>();
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatDispatch(IProxyFormatter formatter)
+    private static IEnumerable<ListViewItemWithGuid> FormatDispatch(ICOMSourceCodeFormattable formatter)
     {
         if (formatter is COMTypeLib typelib)
             return typelib.Dispatch.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
         return Array.Empty<ListViewItemWithGuid>();
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatClasses(IProxyFormatter formatter)
+    private static IEnumerable<ListViewItemWithGuid> FormatClasses(ICOMSourceCodeFormattable formatter)
     {
         if(formatter is COMTypeLib typelib)
             return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
         return Array.Empty<ListViewItemWithGuid>();
     }
 
-    private static IEnumerable<ListViewItem> FormatStructs(IProxyFormatter formatter)
+    private static IEnumerable<ListViewItem> FormatStructs(ICOMSourceCodeFormattable formatter)
     {
         if (formatter is COMTypeLib typelib)
             return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
@@ -97,7 +97,7 @@ public partial class TypeLibControl : UserControl
         return Array.Empty<ListViewItemWithGuid>();
     }
 
-    private static IEnumerable<ListViewItem> FormatEnums(IProxyFormatter formatter)
+    private static IEnumerable<ListViewItem> FormatEnums(ICOMSourceCodeFormattable formatter)
     {
         if (formatter is COMTypeLib typelib)
             return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
@@ -286,7 +286,7 @@ public partial class TypeLibControl : UserControl
         lblRendering.Visible = false;
     }
 
-    public TypeLibControl(COMRegistry registry, string name, IProxyFormatter formatter,
+    public TypeLibControl(COMRegistry registry, string name, ICOMSourceCodeFormattable formatter,
         Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
         : this(registry, name, guid_to_view,
               FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),

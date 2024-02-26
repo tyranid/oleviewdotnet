@@ -471,7 +471,7 @@ public static class COMUtilities
 
         foreach (Type t in types)
         {
-            if (t.IsInterface && t.IsPublic)
+            if (t.IsInterface && t.IsPublic && t.GetMethods().Length > 0)
             {
                 InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
                 if (!m_iidtypes.ContainsKey(t.GUID))
@@ -2468,46 +2468,22 @@ public static class COMUtilities
         return builder.ToString();
     }
 
-    public static IProxyFormatter GetProxyFromClsid(COMCLSIDEntry clsid, ISymbolResolver resolver = null)
+    public static COMProxyFile GetProxyFromClsid(COMCLSIDEntry clsid, ISymbolResolver resolver = null)
     {
-        try
-        {
-            return COMProxyFile.GetFromCLSID(clsid, resolver);
-        }
-        catch
-        {
-            if (!clsid.HasTypeLib || !clsid.TypeLibEntry.Versions.Any())
-            {
-                throw;
-            }
-            return clsid.TypeLibEntry.Versions.First().Parse();
-        }
+        return COMProxyFile.GetFromCLSID(clsid, resolver);
     }
 
-    public static IProxyFormatter GetProxyFromIID(COMInterfaceEntry intf, ISymbolResolver resolver = null)
+    public static COMProxyInterface GetProxyFromIID(COMInterfaceEntry intf, ISymbolResolver resolver = null)
     {
         if (intf == null || !intf.HasProxy)
         {
             throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
         }
 
-        try
-        {
-            return COMProxyInterface.GetFromIID(intf, resolver);
-        }
-        catch
-        {
-            if (intf.TypeLibVersionEntry == null)
-            {
-                throw;
-            }
-            var tlb = intf.TypeLibVersionEntry.Parse();
-            return tlb.Interfaces.FirstOrDefault(i => i.Uuid == intf.Iid)
-                ?? throw new ArgumentException("Can't find proxy for interface.");
-        }
+        return COMProxyInterface.GetFromIID(intf, resolver);
     }
 
-    public static IProxyFormatter GetProxyFromIID(COMInterfaceInstance intf, ISymbolResolver resolver = null)
+    public static COMProxyInterface GetProxyFromIID(COMInterfaceInstance intf, ISymbolResolver resolver = null)
     {
         return GetProxyFromIID(intf.InterfaceEntry, resolver);
     }

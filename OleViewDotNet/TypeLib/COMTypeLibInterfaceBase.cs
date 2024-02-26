@@ -20,7 +20,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
-public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo, IProxyFormatter
+public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo
 {
     #region Private Members
     private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)

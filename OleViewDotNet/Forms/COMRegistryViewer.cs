@@ -1995,7 +1995,7 @@ public partial class COMRegistryViewer : UserControl
                         new TypeLibControl(
                             m_registry,
                             COMUtilities.GetFileName(clsid.DefaultServer),
-                            COMUtilities.GetProxyFromClsid(clsid, resolver),
+                            COMProxyFile.GetFromCLSID(clsid, resolver),
                             selected_iid,
                             comClassIdName,
                             comClassId
