@@ -16,144 +16,150 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Win32;
-using OleViewDotNet.Properties;
 using OleViewDotNet.Utilities;
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace OleViewDotNet;
 
 public static class ProgramSettings
 {
-    public static bool IsX86 => COMUtilities.CurrentArchitecture == ProgramArchitecture.X86;
+    private static readonly Lazy<ConfigFile> _config = new(ConfigFile.Load);
 
-    public static bool IsAmd64 => COMUtilities.CurrentArchitecture == ProgramArchitecture.X64;
+    [DataContract]
+    private sealed class ConfigFile
+    {
+        public ConfigFile()
+        {
+            DbgHelpPath = "dbghelp.dll";
+            SymbolPath = "srv*https://msdl.microsoft.com/download/symbols";
+        }
 
-    public static bool IsArm64 => COMUtilities.CurrentArchitecture == ProgramArchitecture.Arm64;
+        [DataMember]
+        public string DbgHelpPath { get; set; }
+        [DataMember]
+        public bool EnableSaveOnExit { get; set; }
+        [DataMember]
+        public string SymbolPath { get; set; }
+        [DataMember]
+        public bool ProxyParserResolveSymbols { get; set; }
+        [DataMember]
+        public bool SymbolsConfigured { get; set; }
+        [DataMember]
+        public string GuidFormat { get; set; }
+        [DataMember]
+        public bool ParseStubMethods { get; set; }
+        [DataMember]
+        public bool ResolveMethodNames { get; set; }
+        [DataMember]
+        public bool ParseRegisteredClasses { get; set; }
+        [DataMember]
+        public bool ParseClients { get; set; }
+        [DataMember]
+        public bool ParseActivationContext { get; set; }
+
+        public static ConfigFile Load()
+        {
+            try
+            {
+                using var reader = XmlReader.Create(Path.Combine(GetAppDataDirectory(), "config.xml"));
+                DataContractSerializer serializer = new(typeof(ConfigFile));
+                return (ConfigFile)serializer.ReadObject(reader);
+            }
+            catch
+            {
+                return new ConfigFile();
+            }
+        }
+
+        public void Save()
+        {
+            try
+            {
+                string data_path = Path.Combine(GetAppDataDirectory());
+                Directory.CreateDirectory(data_path);
+                XmlWriterSettings settings = new()
+                {
+                    Indent = true
+                };
+
+                using XmlWriter writer = XmlWriter.Create(Path.Combine(data_path, "config.xml"), settings);
+                DataContractSerializer serializer = new(typeof(ConfigFile));
+                serializer.WriteObject(writer, this);
+            }
+            catch
+            {
+            }
+        }
+    }
 
     public static string DbgHelpPath
     {
-        get
-        {
-            if (IsX86)
-            {
-                return Settings.Default.DbgHelpPath32;
-            }
-            else if (IsAmd64)
-            {
-                return Settings.Default.DbgHelpPath64;
-            }
-            else if (IsArm64)
-            {
-                return Settings.Default.DbgHelpPathArm64;
-            }
-            return "dbghelp.dll";
-        }
-        set
-        {
-            if (IsX86)
-            {
-                Settings.Default.DbgHelpPath32 = value;
-            }
-            else if (IsAmd64)
-            {
-                Settings.Default.DbgHelpPath64 = value;
-            }
-            else if (IsArm64)
-            {
-                Settings.Default.DbgHelpPathArm64 = value;
-            }
-        }
+        get => _config.Value.DbgHelpPath;
+        set => _config.Value.DbgHelpPath = value;
     }
 
     public static bool EnableSaveOnExit
     {
-        get
-        {
-            if (IsX86)
-            {
-                return Settings.Default.EnableSaveOnExit32;
-            }
-            else if (IsAmd64)
-            {
-                return Settings.Default.EnableSaveOnExit64;
-            }
-            else if (IsArm64)
-            {
-                return Settings.Default.EnableSaveOnExitArm64;
-            }
-            return false;
-        }
-        set
-        {
-            if (IsX86)
-            {
-                Settings.Default.EnableSaveOnExit32 = value;
-            }
-            else if (IsAmd64)
-            {
-                Settings.Default.EnableSaveOnExit64 = value;
-            }
-            else if (IsArm64)
-            {
-                Settings.Default.EnableSaveOnExitArm64 = value;
-            }
-        }
+        get => _config.Value.EnableSaveOnExit;
+        set => _config.Value.EnableSaveOnExit = value;
     }
 
     public static string SymbolPath
     {
-        get => Settings.Default.SymbolPath;
-        set => Settings.Default.SymbolPath = value;
+        get => _config.Value.SymbolPath;
+        set => _config.Value.SymbolPath = value;
     }
 
     public static bool ProxyParserResolveSymbols
     {
-        get => Settings.Default.ProxyParserResolveSymbols;
-        set => Settings.Default.ProxyParserResolveSymbols = value;
+        get => _config.Value.ProxyParserResolveSymbols;
+        set => _config.Value.ProxyParserResolveSymbols = value;
     }
 
     public static bool SymbolsConfigured
     {
-        get => Settings.Default.SymbolsConfigured;
-        set => Settings.Default.SymbolsConfigured = value;
+        get => _config.Value.SymbolsConfigured;
+        set => _config.Value.SymbolsConfigured = value;
     }
 
     public static string GuidFormat
     {
-        get => Settings.Default.GuidFormat;
-        set => Settings.Default.GuidFormat = value;
+        get => _config.Value.GuidFormat;
+        set => _config.Value.GuidFormat = value;
     }
 
     public static bool ParseStubMethods
     {
-        get => Settings.Default.ParseStubMethods;
-        set => Settings.Default.ParseStubMethods = value;
+        get => _config.Value.ParseStubMethods;
+        set => _config.Value.ParseStubMethods = value;
     }
 
     public static bool ResolveMethodNames
     {
-        get => Settings.Default.ResolveMethodNames;
-        set => Settings.Default.ResolveMethodNames = value;
+        get => _config.Value.ResolveMethodNames;
+        set => _config.Value.ResolveMethodNames = value;
     }
 
     public static bool ParseRegisteredClasses 
     {
-        get => Settings.Default.ParseRegisteredClasses;
-        set => Settings.Default.ParseRegisteredClasses = value;
+        get => _config.Value.ParseRegisteredClasses;
+        set => _config.Value.ParseRegisteredClasses = value;
     }
 
     public static bool ParseClients
     {
-        get => Settings.Default.ParseClients;
-        set => Settings.Default.ParseClients = value;
+        get => _config.Value.ParseClients;
+        set => _config.Value.ParseClients = value;
     }
 
     public static bool ParseActivationContext
     {
-        get => Settings.Default.ParseActivationContext;
-        set => Settings.Default.ParseActivationContext = value;
+        get => _config.Value.ParseActivationContext;
+        set => _config.Value.ParseActivationContext = value;
     }
 
     internal static void Save(IWin32Window window)
@@ -170,7 +176,7 @@ public static class ProgramSettings
 
     public static void Save()
     {
-        Settings.Default.Save();
+        _config.Value.Save();
     }
 
     public static ISymbolResolver GetProxyParserSymbolResolver()
