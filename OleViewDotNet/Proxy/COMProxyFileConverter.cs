@@ -16,7 +16,6 @@
 
 using NtApiDotNet.Ndr;
 using OleViewDotNet.Database;
-using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -27,9 +26,9 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNet.Proxy;
 
-public class COMProxyInstanceConverter
+public sealed class COMProxyFileConverter
 {
     private readonly AssemblyName m_name;
     private readonly AssemblyBuilder m_builder;
@@ -138,7 +137,7 @@ public class COMProxyInstanceConverter
         m_progress?.Report(Tuple.Create(progress, -1));
     }
 
-    public COMProxyInstanceConverter(string output_path, IProgress<Tuple<string, int>> progress)
+    public COMProxyFileConverter(string output_path, IProgress<Tuple<string, int>> progress)
     {
         m_output_path = Path.GetFullPath(output_path);
         m_name = new AssemblyName(Path.GetFileNameWithoutExtension(output_path));
@@ -370,7 +369,7 @@ public class COMProxyInstanceConverter
             CreateInterface(entry.Entry);
         }
 
-        while(m_fixup.Count > 0)
+        while (m_fixup.Count > 0)
         {
             m_fixup.Dequeue().CreateType();
         }

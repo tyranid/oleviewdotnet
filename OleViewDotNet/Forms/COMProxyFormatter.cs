@@ -45,7 +45,6 @@ internal sealed class COMProxyFormatter : ICOMSourceCodeParsable
 
     public void ParseSourceCode()
     {
-        using var resolver = ProgramSettings.GetProxyParserSymbolResolver();
-        ProxyFile = COMProxyFile.GetFromCLSID(ClassEntry, resolver);
+        ProxyFile = COMProxyFile.GetFromCLSID(ClassEntry);
     }
 }

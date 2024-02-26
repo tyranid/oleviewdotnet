@@ -109,7 +109,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return m_proxies.TryGetValue(intf.Iid, out proxy);
     }
 
-    public static COMProxyInterface GetFromIID(COMInterfaceEntry intf, ISymbolResolver resolver)
+    public static COMProxyInterface GetFromIID(COMInterfaceEntry intf)
     {
         if (intf == null || !intf.HasProxy)
         {
@@ -127,7 +127,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             throw new ArgumentException("Can't get proxy for automation interfaces.");
         }
 
-        COMProxyFile.GetFromCLSID(clsid, resolver);
+        COMProxyFile.GetFromCLSID(clsid);
         if (!m_proxies.TryGetValue(intf.Iid, out instance))
         {
             throw new ArgumentException($"No Proxy Found for IID {intf.Iid}");
@@ -136,9 +136,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return instance;
     }
 
-    public static COMProxyInterface GetFromIID(COMInterfaceInstance intf, ISymbolResolver resolver)
+    public static COMProxyInterface GetFromIID(COMInterfaceInstance intf)
     {
-        return GetFromIID(intf.InterfaceEntry, resolver);
+        return GetFromIID(intf.InterfaceEntry);
     }
     #endregion
 

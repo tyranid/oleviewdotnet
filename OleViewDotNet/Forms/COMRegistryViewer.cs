@@ -1990,12 +1990,11 @@ public partial class COMRegistryViewer : UserControl
                         comClassId = comClassClsId?.Clsid;
                     }
 
-                    using var resolver = ProgramSettings.GetProxyParserSymbolResolver();
                     EntryPoint.GetMainForm(m_registry).HostControl(
                         new TypeLibControl(
                             m_registry,
                             COMUtilities.GetFileName(clsid.DefaultServer),
-                            COMProxyFile.GetFromCLSID(clsid, resolver),
+                            COMProxyFile.GetFromCLSID(clsid),
                             selected_iid,
                             comClassIdName,
                             comClassId

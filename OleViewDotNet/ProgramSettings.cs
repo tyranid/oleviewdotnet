@@ -14,13 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
-using NtApiDotNet.Win32;
 using OleViewDotNet.Utilities;
 using System;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Windows.Forms;
 using System.Xml;
 
 namespace OleViewDotNet;
@@ -165,22 +162,6 @@ public static class ProgramSettings
     public static void Save()
     {
         _config.Value.Save();
-    }
-
-    public static ISymbolResolver GetProxyParserSymbolResolver()
-    {
-        if (!ProxyParserResolveSymbols)
-        {
-            return null;
-        }
-
-        string dbghelp = DbgHelpPath;
-        if (string.IsNullOrWhiteSpace(dbghelp))
-        {
-            return null;
-        }
-
-        return SymbolResolver.Create(NtProcess.Current, dbghelp, SymbolPath);
     }
 
     public static string GetAppDataDirectory()

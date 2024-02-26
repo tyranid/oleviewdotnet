@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
@@ -29,11 +30,28 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
     #region Private Members
     private readonly COMRegistry m_registry;
 
-    private COMProxyFile(string path, COMCLSIDEntry clsid, ISymbolResolver resolver, COMRegistry registry)
+    private static ISymbolResolver GetProxyParserSymbolResolver()
+    {
+        if (!ProgramSettings.ProxyParserResolveSymbols)
+        {
+            return null;
+        }
+
+        string dbghelp = ProgramSettings.DbgHelpPath;
+        if (string.IsNullOrWhiteSpace(dbghelp))
+        {
+            return null;
+        }
+
+        return SymbolResolver.Create(NtProcess.Current, dbghelp, ProgramSettings.SymbolPath);
+    }
+
+    private COMProxyFile(string path, COMCLSIDEntry clsid, COMRegistry registry)
     {
         ClassEntry = clsid ?? new COMCLSIDEntry(registry, Guid.Empty, COMServerType.UnknownServer);
         m_registry = registry;
 
+        using var resolver = GetProxyParserSymbolResolver();
         NdrParser parser = new(resolver);
         Entries = parser.ReadFromComProxyFile(path, Clsid).Select(GetInterfaceInstance).ToList().AsReadOnly();
         ComplexTypes = parser.ComplexTypes.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
@@ -108,8 +126,8 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
             proxy, complex_types, m_registry, this);
     }
 
-    private COMProxyFile(string path, ISymbolResolver resolver, COMRegistry registry)
-        : this(path, null, resolver, registry)
+    private COMProxyFile(string path, COMRegistry registry)
+        : this(path, null, registry)
     {
     }
 
@@ -150,7 +168,7 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         return m_proxies.TryGetValue(clsid.Clsid, out proxy);
     }
 
-    public static COMProxyFile GetFromCLSID(COMCLSIDEntry clsid, ISymbolResolver resolver)
+    public static COMProxyFile GetFromCLSID(COMCLSIDEntry clsid)
     {
         if (clsid.IsAutomationProxy)
         {
@@ -160,20 +178,30 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         {
             return proxy;
         }
-        proxy = new(clsid.DefaultServer, clsid, resolver, clsid.Database);
+        proxy = new(clsid.DefaultServer, clsid, clsid.Database);
         m_proxies[clsid.Clsid] = proxy;
         return proxy;
     }
 
-    public static COMProxyFile GetFromFile(string path, ISymbolResolver resolver, COMRegistry registry)
+    public static COMProxyFile GetFromFile(string path, COMRegistry registry)
     {
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+        }
+
+        if (registry is null)
+        {
+            throw new ArgumentNullException(nameof(registry));
+        }
+
         if (m_proxies_by_file.ContainsKey(path))
         {
             return m_proxies_by_file[path];
         }
         else
         {
-            COMProxyFile proxy = new(path, resolver, registry);
+            COMProxyFile proxy = new(path, registry);
             m_proxies_by_file[path] = proxy;
             return proxy;
         }

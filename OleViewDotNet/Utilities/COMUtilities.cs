@@ -514,8 +514,7 @@ public static class COMUtilities
             return null;
         }
 
-        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf, 
-            ProgramSettings.GetProxyParserSymbolResolver()), null);
+        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf), null);
         return GetInterfaceType(intf.Iid);
     }
 
@@ -676,7 +675,7 @@ public static class COMUtilities
             LoadTypeLibAssemblies();
         }
 
-        COMProxyInstanceConverter converter = new(output_path, progress);
+        COMProxyFileConverter converter = new(output_path, progress);
         converter.AddProxy(entries);
         converter.Save();
     }
@@ -704,7 +703,7 @@ public static class COMUtilities
             LoadTypeLibAssemblies();
         }
 
-        COMProxyInstanceConverter converter = new($"{Guid.NewGuid()}.dll", progress);
+        COMProxyFileConverter converter = new($"{Guid.NewGuid()}.dll", progress);
         converter.AddProxy(entries);
         RegisterTypeInterfaces(converter.BuiltAssembly);
         return converter.BuiltAssembly;
@@ -2415,25 +2414,5 @@ public static class COMUtilities
             }
         }
         return builder.ToString();
-    }
-
-    public static COMProxyFile GetProxyFromClsid(COMCLSIDEntry clsid, ISymbolResolver resolver = null)
-    {
-        return COMProxyFile.GetFromCLSID(clsid, resolver);
-    }
-
-    public static COMProxyInterface GetProxyFromIID(COMInterfaceEntry intf, ISymbolResolver resolver = null)
-    {
-        if (intf == null || !intf.HasProxy)
-        {
-            throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
-        }
-
-        return COMProxyInterface.GetFromIID(intf, resolver);
-    }
-
-    public static COMProxyInterface GetProxyFromIID(COMInterfaceInstance intf, ISymbolResolver resolver = null)
-    {
-        return GetProxyFromIID(intf.InterfaceEntry, resolver);
     }
 }

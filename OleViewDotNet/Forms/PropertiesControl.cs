@@ -607,10 +607,9 @@ public partial class PropertiesControl : UserControl
                 if (m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid))
                 {
                     COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
-                    using var resolver = ProgramSettings.GetProxyParserSymbolResolver();
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
                         COMUtilities.GetFileName(clsid.DefaultServerName),
-                        COMProxyFile.GetFromCLSID(clsid, resolver), intf.Item1.Iid));
+                        COMProxyFile.GetFromCLSID(clsid), intf.Item1.Iid));
                 }
             }
         }
