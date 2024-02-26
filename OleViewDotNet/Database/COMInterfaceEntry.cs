@@ -402,7 +402,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         }
         else if (HasProxy)
         {
-            m_formattable = COMProxyInterface.GetFromIID(this, null);
+            m_formattable = COMProxyInterface.GetFromIID(this, EntryPoint.GetProxyParserSymbolResolver());
         }
         else
         {

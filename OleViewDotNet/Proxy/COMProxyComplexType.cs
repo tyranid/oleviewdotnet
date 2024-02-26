@@ -19,14 +19,16 @@ using OleViewDotNet.Utilities.Format;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyComplexType : ICOMSourceCodeFormattable
+public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable
 {
     #region Public Properties
-    public string Name => Entry.Name;
+    public override string Name => Entry.Name;
 
     public NdrComplexTypeReference Entry { get; }
 
     public int Size => Entry.GetSize();
+
+    public bool IsUnion => Entry is NdrUnionTypeReference;
 
     bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion

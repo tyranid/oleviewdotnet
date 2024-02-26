@@ -25,7 +25,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyInterface : IProxyFormatter, ICOMSourceCodeFormattable
+public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMSourceCodeFormattable
 {
     #region Private Members
     private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
@@ -36,7 +36,7 @@ public sealed class COMProxyInterface : IProxyFormatter, ICOMSourceCodeFormattab
     /// <summary>
     /// The name of the proxy interface.
     /// </summary>
-    public string Name { get; }
+    public override string Name { get; }
     /// <summary>
     /// Original name of the interface.
     /// </summary>

@@ -245,7 +245,7 @@ public partial class COMRegistryViewer : UserControl
     private static TreeNode CreateNode(string text, string image_key, object tag)
     {
         bool dynamic = false;
-        if (tag is ICOMClassEntry || tag is COMTypeLibVersionEntry || tag is COMTypeLibCoClass)
+        if (tag is ICOMClassEntry || tag is COMTypeLibVersionEntry || tag is COMTypeLibCoClass || tag is COMProxyFormatter)
         {
             dynamic = true;
         }
@@ -980,19 +980,14 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadTypeLibs(COMRegistry registry)
     {
-        int i = 0;
-        TreeNode[] typelibNodes = new TreeNode[registry.Typelibs.Values.Count];
+        List<TreeNode> typeLibNodes = new();
         foreach (COMTypeLibEntry ent in registry.Typelibs.Values)
         {
-            typelibNodes[i] = CreateNode(ent.Name, FolderKey, ent);
-            foreach (COMTypeLibVersionEntry ver in ent.Versions)
-            {
-                typelibNodes[i].Nodes.Add(CreateTypelibVersionNode(ver));
-            }
-            i++;
+            var root = CreateNode(ent.Name, FolderKey, ent);
+            root.Nodes.AddRange(ent.Versions.Select(v => CreateTypelibVersionNode(v)).ToArray());
+            typeLibNodes.Add(root);
         }
-
-        return typelibNodes.OrderBy(n => n.Text);
+        return typeLibNodes.OrderBy(n => n.Text);
     }
 
     private void AddInterfaceNodes(TreeNode node, IEnumerable<COMInterfaceInstance> intfs)
@@ -1032,7 +1027,24 @@ public partial class COMRegistryViewer : UserControl
                     TreeNode factory = CreateNode("Factory Interfaces", FolderKey, null);
                     AddInterfaceNodes(factory, clsid.FactoryInterfaces);
                     node.Nodes.Add(factory);
+
+                    if (clsid is COMCLSIDEntry clsid_entry && 
+                        (clsid.FactoryInterfaces.Any(i => i.Iid == COMInterfaceEntry.IID_IPSFactoryBuffer)
+                        || m_registry.ProxiesByClsid.ContainsKey(clsid_entry.Clsid)))
+                    {
+                        TreeNode proxy = CreateNode("Proxy", ProcessKey, new COMProxyFormatter(clsid_entry));
+                        node.Nodes.Add(proxy);
+                    }
                 }
+
+                var typelib = m_registry.MapClsidToEntry(clsid.Clsid)?.TypeLibEntry;
+                if (typelib != null)
+                {
+                    TreeNode typelib_node = CreateNode("Typelib", ProcessKey, typelib);
+                    typelib_node.Nodes.AddRange(typelib.Versions.Select(v => CreateTypelibVersionNode(v)).ToArray());
+                    node.Nodes.Add(typelib_node);
+                }
+
                 treeComRegistry.ResumeLayout();
             }
         }
@@ -1081,6 +1093,40 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
+    private void AddProxyNodes(TreeNode node, IEnumerable<COMProxyTypeInfo> types, string category, string image_key)
+    {
+        if (types.Any())
+        {
+            var sub_node = CreateNode(category, FolderKey, types);
+            node.Nodes.Add(sub_node);
+            sub_node.Nodes.AddRange(types.Select(type => CreateNode(type.Name, image_key, type)).ToArray());
+        }
+    }
+
+    private async Task SetupCOMProxyNodeTree(COMProxyFormatter proxy, TreeNode node)
+    {
+        treeComRegistry.SuspendLayout();
+        node.Nodes.Clear();
+        TreeNode wait_node = CreateNode("Please Wait, Parsing proxy file.", FolderKey, null);
+        node.Nodes.Add(wait_node);
+        treeComRegistry.ResumeLayout();
+        try
+        {
+            await Task.Run(() => proxy.ParseSourceCode());
+            treeComRegistry.SuspendLayout();
+            node.Nodes.Remove(wait_node);
+            AddProxyNodes(node, proxy.ProxyFile.Entries, "Interfaces", InterfaceKey);
+            AddProxyNodes(node, proxy.ProxyFile.ComplexTypes.Where(t => !t.IsUnion), "Structs", ClassKey);
+            AddProxyNodes(node, proxy.ProxyFile.ComplexTypes.Where(t => t.IsUnion), "Unions", ClassKey);
+            treeComRegistry.ResumeLayout();
+            sourceCodeViewerControl.SelectedObject = proxy;
+        }
+        catch (Exception ex)
+        {
+            wait_node.Text = $"Error parsing type library - {ex.Message}";
+        }
+    }
+
     private async void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
     {
         Cursor currCursor = Cursor.Current;
@@ -1100,6 +1146,10 @@ public partial class COMRegistryViewer : UserControl
             else if (e.Node.Tag is COMTypeLibCoClass typelib_class)
             {
                 await SetupCLSIDNodeTree(m_registry.MapClsidToEntry(typelib_class.Uuid), e.Node, false);
+            }
+            else if (e.Node.Tag is COMProxyFormatter proxy)
+            {
+                await SetupCOMProxyNodeTree(proxy, e.Node);
             }
         }
 
