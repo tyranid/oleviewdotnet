@@ -162,18 +162,6 @@ public static class ProgramSettings
         set => _config.Value.ParseActivationContext = value;
     }
 
-    internal static void Save(IWin32Window window)
-    {
-        try
-        {
-            Save();
-        }
-        catch (Exception ex)
-        {
-            EntryPoint.ShowError(window, ex);
-        }
-    }
-
     public static void Save()
     {
         _config.Value.Save();

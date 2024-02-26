@@ -67,7 +67,6 @@ public partial class SettingsForm : Form
         ProgramSettings.SymbolPath = textBoxSymbolPath.Text;
         ProgramSettings.SymbolsConfigured = true;
         ProgramSettings.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
-        ProgramSettings.Save(this);
         DialogResult = DialogResult.OK;
         Close();
     }

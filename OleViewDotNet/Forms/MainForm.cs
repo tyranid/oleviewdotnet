@@ -721,7 +721,7 @@ public partial class MainForm : Form
 
         _configured_symbols = true;
 
-        if (!Properties.Settings.Default.SymbolsConfigured)
+        if (!ProgramSettings.SymbolsConfigured)
         {
             if (MessageBox.Show(this, "Symbol support has not been configured, would you like to do that now?",
                 "Configure Symbols", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
@@ -1069,31 +1069,26 @@ public partial class MainForm : Form
     private void menuFileSaveDatabaseOnExit_Click(object sender, EventArgs e)
     {
         ProgramSettings.EnableSaveOnExit = !menuFileSaveDatabaseOnExit.Checked;
-        ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptionsResolveMethodNames_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ResolveMethodNames = !Properties.Settings.Default.ResolveMethodNames;
-        ProgramSettings.Save(this);
+        ProgramSettings.ResolveMethodNames = !ProgramSettings.ResolveMethodNames;
     }
 
     private void menuProcessesOptionsParseStubs_Click(object sender, EventArgs e)
     {
         ProgramSettings.ParseStubMethods = !ProgramSettings.ParseStubMethods;
-        ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptionsParseRegisteredClasses_Click(object sender, EventArgs e)
     {
         ProgramSettings.ParseRegisteredClasses = !ProgramSettings.ParseRegisteredClasses;
-        ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptionsParseActCtx_Click(object sender, EventArgs e)
     {
         ProgramSettings.ParseActivationContext = !ProgramSettings.ParseActivationContext;
-        ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptions_Popup(object sender, EventArgs e)

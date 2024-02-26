@@ -2272,11 +2272,6 @@ public static class COMUtilities
         return path.Substring(index + 1);
     }
 
-    private static string GetNativeLibraryDirectory()
-    {
-        return Path.Combine(GetAppDirectory(), CurrentArchitecture.ToString());
-    }
-
     public static ProgramArchitecture CurrentArchitecture => RuntimeInformation.ProcessArchitecture switch
     {
         Architecture.X86 => ProgramArchitecture.X86,
@@ -2284,23 +2279,6 @@ public static class COMUtilities
         Architecture.Arm64 => ProgramArchitecture.Arm64,
         _ => ProgramArchitecture.X64,
     };
-
-    public static string GetDefaultDbgHelp()
-    {
-        string path = Path.Combine(GetNativeLibraryDirectory(), "dbghelp.dll");
-        if (File.Exists(path))
-        {
-            return path;
-        }
-
-        path = Environment.GetEnvironmentVariable($"_DBGHELP_PATH_{CurrentArchitecture}");
-        if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-        {
-            return path;
-        }
-
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dbghelp.dll");
-    }
 
     internal static bool EqualsDictionary<K, V>(IReadOnlyDictionary<K, V> left, IReadOnlyDictionary<K, V> right)
     {

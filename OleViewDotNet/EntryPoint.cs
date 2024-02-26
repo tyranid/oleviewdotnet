@@ -337,6 +337,8 @@ internal static class EntryPoint
                 {
                     registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
                 }
+
+                ProgramSettings.Save();
             }
             catch (Exception ex)
             {
