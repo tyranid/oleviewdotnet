@@ -16,8 +16,8 @@
 
 Set-StrictMode -Version Latest
 
-$Script:GlobalDbgHelpPath = [OleViewDotNet.Utilities.COMUtilities]::GetDefaultDbgHelp()
-$Script:GlobalSymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
+$Script:GlobalDbgHelpPath = [OleViewDotNet.ProgramSettings]::DbgHelpPath
+$Script:GlobalSymbolPath = [OleViewDotNet.ProgramSettings]::SymbolPath
 $Script:CurrentComDatabase = $null
 
 [OleViewDotNet.Utilities.COMUtilities]::SetupCachedSymbols()
@@ -2041,6 +2041,8 @@ Specify path to a dbghelp DLL to use for symbol resolving. This should be ideall
 which will allow symbol servers however you can use the system version if you just want to pull symbols locally.
 .PARAMETER SymbolPath
 Specify path for the symbols.
+.PARAMETER Save
+Specify to save the resolver information permanently.
 .INPUTS
 None
 .OUTPUTS
@@ -2058,12 +2060,20 @@ function Set-ComSymbolResolver {
         [parameter(Mandatory, Position=0)]
         [string]$DbgHelpPath,
         [parameter(Position=1)]
-        [string]$SymbolPath
+        [string]$SymbolPath,
+        [switch]$Save
     )
 
     $Script:GlobalDbgHelpPath = $DbgHelpPath
     if ("" -ne $SymbolPath) {
         $Script:GlobalSymbolPath = $SymbolPath
+        if ($Save) {
+            [OleViewDotNet.ProgramSettings]::SymbolPath = $SymbolPath
+        }
+    }
+    if ($Save) {
+        [OleViewDotNet.ProgramSettings]::DbgHelpPath = $DbgHelpPath
+        [OleViewDotNet.ProgramSettings]::Save()
     }
 }
 

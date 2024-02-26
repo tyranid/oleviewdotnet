@@ -167,8 +167,7 @@ public static class COMUtilities
     public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
     {
         string guid = rootKey.ReadString(keyName, valueName);
-        Guid ret;
-        if (guid != null && Guid.TryParse(guid, out ret))
+        if (guid != null && Guid.TryParse(guid, out Guid ret))
         {
             return ret;
         }
@@ -540,7 +539,8 @@ public static class COMUtilities
             return null;
         }
 
-        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf, null), null);
+        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf, 
+            ProgramSettings.GetProxyParserSymbolResolver()), null);
         return GetInterfaceType(intf.Iid);
     }
 
@@ -713,7 +713,7 @@ public static class COMUtilities
 
     public static void ConvertProxyToAssembly(COMProxyInterface proxy, string output_path, IProgress<Tuple<string, int>> progress)
     {
-        ConvertProxyToAssembly(new[] { proxy }, output_path, progress);
+        ConvertProxyToAssembly(proxy.ProxyFile, output_path, progress);
     }
 
     public static void ConvertProxyToAssembly(COMIPIDEntry ipid, string output_path, IProgress<Tuple<string, int>> progress)
@@ -742,7 +742,7 @@ public static class COMUtilities
 
     public static Assembly ConvertProxyToAssembly(COMProxyInterface proxy, IProgress<Tuple<string, int>> progress)
     {
-        return ConvertProxyToAssembly(new[] { proxy }, progress);
+        return ConvertProxyToAssembly(proxy.ProxyFile, progress);
     }
 
     public static Assembly ConvertProxyToAssembly(COMIPIDEntry ipid, IProgress<Tuple<string, int>> progress)
