@@ -408,3 +408,8 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
         return new IEnumMonikerWrapper(ppenumMoniker2);
     }
 }
+
+public sealed class TypeLibInstanceConverter
+{
+
+}

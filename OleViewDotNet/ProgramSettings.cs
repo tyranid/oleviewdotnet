@@ -19,6 +19,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Properties;
 using OleViewDotNet.Utilities;
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace OleViewDotNet;
@@ -186,5 +187,26 @@ public static class ProgramSettings
         }
 
         return SymbolResolver.Create(NtProcess.Current, dbghelp, SymbolPath);
+    }
+
+    public static string GetAppDataDirectory()
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+            "OleViewDotNet", COMUtilities.CurrentArchitecture.ToString());
+    }
+
+    public static string GetTypeLibDirectory()
+    {
+        return Path.Combine(GetAppDataDirectory(), "typelib");
+    }
+
+    public static string GetDefaultDatabasePath(bool create_directory)
+    {
+        string app_data = GetAppDataDirectory();
+        if (create_directory)
+        {
+            Directory.CreateDirectory(app_data);
+        }
+        return Path.Combine(app_data, $"default.db");
     }
 }

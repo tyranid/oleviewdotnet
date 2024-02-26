@@ -289,7 +289,7 @@ internal static class EntryPoint
                 }
 
                 COMRegistry registry = null;
-                string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+                string default_db = ProgramSettings.GetDefaultDatabasePath(false);
                 if (database_file == null && File.Exists(default_db))
                 {
                     try
@@ -335,7 +335,7 @@ internal static class EntryPoint
 
                 if (ProgramSettings.EnableSaveOnExit)
                 {
-                    registry.Save(COMUtilities.GetAutoSaveLoadPath(true));
+                    registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
                 }
             }
             catch (Exception ex)

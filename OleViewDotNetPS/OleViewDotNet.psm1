@@ -298,7 +298,7 @@ function Get-ComDatabase {
                 [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
             }
             "FromDefault" {
-                $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($false)
+                $Path = [OleViewDotNet.ProgramSettings]::GetDefaultDatabasePath($false)
                 if (Test-Path $Path) {
                     [OleViewDotNet.Database.COMRegistry]::Load($Path, $callback)
                 } else {
@@ -369,7 +369,7 @@ function Set-ComDatabase {
         if ($PSCmdlet.ParameterSetName -eq "ToPath") {
             $Path = Resolve-LocalPath $Path
         } else {
-            $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($true)
+            $Path = [OleViewDotNet.ProgramSettings]::GetDefaultDatabasePath($true)
         }
         $Database.Save($Path, $callback)
     } catch {
@@ -389,7 +389,7 @@ None
 #>
 function Clear-ComDatabase {
     try {
-        $Path = [OleViewDotNet.Utilities.COMUtilities]::GetAutoSaveLoadPath($false)
+        $Path = [OleViewDotNet.ProgramSettings]::GetDefaultDatabasePath($false)
         Remove-Item $Path
     } catch {
         Write-Error $_

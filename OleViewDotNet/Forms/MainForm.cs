@@ -1034,7 +1034,7 @@ public partial class MainForm : Form
     {
         try
         {
-            m_registry.Save(COMUtilities.GetAutoSaveLoadPath(true));
+            m_registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
             m_registry.FilePath = null;
         }
         catch (Exception ex)
@@ -1045,7 +1045,7 @@ public partial class MainForm : Form
 
     private void menuFileDeleteDefaultDatabase_Click(object sender, EventArgs e)
     {
-        string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+        string default_db = ProgramSettings.GetDefaultDatabasePath(false);
         try
         {
             if (File.Exists(default_db))
@@ -1061,7 +1061,7 @@ public partial class MainForm : Form
 
     private void menuFile_Popup(object sender, EventArgs e)
     {
-        string default_db = COMUtilities.GetAutoSaveLoadPath(false);
+        string default_db = ProgramSettings.GetDefaultDatabasePath(false);
         menuFileDeleteDefaultDatabase.Enabled = File.Exists(default_db);
         menuFileSaveDatabaseOnExit.Checked = ProgramSettings.EnableSaveOnExit;
     }

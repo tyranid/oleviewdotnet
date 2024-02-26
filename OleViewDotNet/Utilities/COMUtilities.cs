@@ -375,34 +375,9 @@ public static class COMUtilities
         StartArchProcess(CurrentArchitecture, command_line);
     }
 
-    public static string GetAppDataDirectory()
-    {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OleViewDotNet");
-    }
-
-    public static string GetTypeLibDirectory()
-    {
-        return Path.Combine(GetAppDataDirectory(), "typelib");
-    }
-
     public static string GetPluginDirectory()
     {
-        return Path.Combine(GetAppDirectory(), "plugin");
-    }
-
-    public static string GetAutoSaveLoadPath(bool create_directory, ProgramArchitecture arch)
-    {
-        string autosave = Path.Combine(GetAppDataDirectory(), "autosave");
-        if (create_directory)
-        {
-            Directory.CreateDirectory(autosave);
-        }
-        return Path.Combine(autosave, $"com{arch}.db");
-    }
-
-    public static string GetAutoSaveLoadPath(bool create_directory)
-    {
-        return GetAutoSaveLoadPath(create_directory, CurrentArchitecture);
+        return Path.Combine(GetAppDirectory(), "plugin", CurrentArchitecture.ToString());
     }
 
     public static Dictionary<string, int> GetSymbolFile(bool native)
@@ -584,7 +559,7 @@ public static class COMUtilities
         {
             try
             {
-                string strTypeLibDir = GetTypeLibDirectory();
+                string strTypeLibDir = ProgramSettings.GetTypeLibDirectory();
                 Directory.CreateDirectory(strTypeLibDir);
                 string[] files = Directory.GetFiles(strTypeLibDir, "*.dll");
 
@@ -673,7 +648,7 @@ public static class COMUtilities
         }
         else
         {
-            string strAssemblyPath = GetTypeLibDirectory();
+            string strAssemblyPath = ProgramSettings.GetTypeLibDirectory();
             strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibGuid(typeLib).ToString() + ".dll");
 
             TypeLibConverter conv = new();
