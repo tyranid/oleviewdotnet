@@ -231,7 +231,7 @@ internal static class EntryPoint
             try
             {
                 COMUtilities.GenerateSymbolFile(symbol_dir,
-                    ProgramSettings.DbgHelpPath, Properties.Settings.Default.SymbolPath);
+                    ProgramSettings.DbgHelpPath, ProgramSettings.SymbolPath);
                 Environment.Exit(0);
             }
             catch (Exception)
@@ -356,21 +356,5 @@ internal static class EntryPoint
     public static void ShowError(IWin32Window window, Exception ex, bool stack_trace)
     {
         MessageBox.Show(window, stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
-
-    public static ISymbolResolver GetProxyParserSymbolResolver()
-    {
-        if (!Properties.Settings.Default.ProxyParserResolveSymbols)
-        {
-            return null;
-        }
-
-        string dbghelp = ProgramSettings.DbgHelpPath;
-        if (string.IsNullOrWhiteSpace(dbghelp))
-        {
-            return null;
-        }
-
-        return SymbolResolver.Create(NtProcess.Current, dbghelp, Properties.Settings.Default.SymbolPath);
     }
 }

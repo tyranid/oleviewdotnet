@@ -1990,7 +1990,7 @@ public partial class COMRegistryViewer : UserControl
                         comClassId = comClassClsId?.Clsid;
                     }
 
-                    using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                    using var resolver = ProgramSettings.GetProxyParserSymbolResolver();
                     EntryPoint.GetMainForm(m_registry).HostControl(
                         new TypeLibControl(
                             m_registry,

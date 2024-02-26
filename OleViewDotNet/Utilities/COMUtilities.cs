@@ -1521,12 +1521,12 @@ public static class COMUtilities
     internal static COMProcessParserConfig GetProcessParserConfig()
     {
         string dbghelp = ProgramSettings.DbgHelpPath;
-        string symbol_path = Properties.Settings.Default.SymbolPath;
-        bool parse_stub_methods = Properties.Settings.Default.ParseStubMethods;
-        bool resolve_method_names = Properties.Settings.Default.ResolveMethodNames;
-        bool parse_registered_classes = Properties.Settings.Default.ParseRegisteredClasses;
-        bool parse_clients = Properties.Settings.Default.ParseClients;
-        bool parse_activation_context = Properties.Settings.Default.ParseActivationContext;
+        string symbol_path = ProgramSettings.SymbolPath;
+        bool parse_stub_methods = ProgramSettings.ParseStubMethods;
+        bool resolve_method_names = ProgramSettings.ResolveMethodNames;
+        bool parse_registered_classes = ProgramSettings.ParseRegisteredClasses;
+        bool parse_clients = ProgramSettings.ParseClients;
+        bool parse_activation_context = ProgramSettings.ParseActivationContext;
 
         return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods,
             resolve_method_names, parse_registered_classes, parse_clients, parse_activation_context);
@@ -1619,7 +1619,7 @@ public static class COMUtilities
 
     internal static string FormatGuid(this Guid guid)
     {
-        return guid.ToString(Properties.Settings.Default.GuidFormat).ToUpper();
+        return guid.ToString(ProgramSettings.GuidFormat).ToUpper();
     }
 
     internal static string FormatComClassNameAsCIdentifier(string comClassName)
@@ -1677,15 +1677,12 @@ public static class COMUtilities
     internal static string GetApartmentIdStringFromIPid(Guid ipid)
     {
         int appid = GetApartmentIdFromIPid(ipid);
-        switch (appid)
+        return appid switch
         {
-            case 0:
-                return "NTA";
-            case -1:
-                return "MTA";
-            default:
-                return $"STA (Thread ID {appid})";
-        }
+            0 => "NTA",
+            -1 => "MTA",
+            _ => $"STA (Thread ID {appid})",
+        };
     }
 
     public static ServerInformation GetServerInformation(object obj)
@@ -1950,7 +1947,6 @@ public static class COMUtilities
 
     public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server)
     {
-
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
 
         int hr = NativeMethods.CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER

@@ -677,7 +677,7 @@ public partial class MainForm : Form
         {
             try
             {
-                using var resolver = EntryPoint.GetProxyParserSymbolResolver();
+                using var resolver = ProgramSettings.GetProxyParserSymbolResolver();
                 COMProxyFile proxy = COMProxyFile.GetFromFile(dlg.FileName, resolver, m_registry);
                 HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
             }
@@ -1080,27 +1080,27 @@ public partial class MainForm : Form
 
     private void menuProcessesOptionsParseStubs_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ParseStubMethods = !Properties.Settings.Default.ParseStubMethods;
+        ProgramSettings.ParseStubMethods = !ProgramSettings.ParseStubMethods;
         ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptionsParseRegisteredClasses_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ParseRegisteredClasses = !Properties.Settings.Default.ParseRegisteredClasses;
+        ProgramSettings.ParseRegisteredClasses = !ProgramSettings.ParseRegisteredClasses;
         ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptionsParseActCtx_Click(object sender, EventArgs e)
     {
-        Properties.Settings.Default.ParseActivationContext = !Properties.Settings.Default.ParseActivationContext;
+        ProgramSettings.ParseActivationContext = !ProgramSettings.ParseActivationContext;
         ProgramSettings.Save(this);
     }
 
     private void menuProcessesOptions_Popup(object sender, EventArgs e)
     {
-        menuProcessesOptionsResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
-        menuProcessesOptionsParseStubs.Checked = Properties.Settings.Default.ParseStubMethods;
-        menuProcessesOptionsParseRegisteredClasses.Checked = Properties.Settings.Default.ParseRegisteredClasses;
-        menuProcessesOptionsParseActCtx.Checked = Properties.Settings.Default.ParseActivationContext;
+        menuProcessesOptionsResolveMethodNames.Checked = ProgramSettings.ResolveMethodNames;
+        menuProcessesOptionsParseStubs.Checked = ProgramSettings.ParseStubMethods;
+        menuProcessesOptionsParseRegisteredClasses.Checked = ProgramSettings.ParseRegisteredClasses;
+        menuProcessesOptionsParseActCtx.Checked = ProgramSettings.ParseActivationContext;
     }
 }

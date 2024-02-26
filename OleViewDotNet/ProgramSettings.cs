@@ -14,15 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
+using NtApiDotNet.Win32;
 using OleViewDotNet.Properties;
 using OleViewDotNet.Utilities;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace OleViewDotNet;
 
-internal static class ProgramSettings
+public static class ProgramSettings
 {
     public static bool IsX86 => COMUtilities.CurrentArchitecture == ProgramArchitecture.X86;
 
@@ -100,15 +101,90 @@ internal static class ProgramSettings
         }
     }
 
-    public static void Save(IWin32Window window)
+    public static string SymbolPath
+    {
+        get => Settings.Default.SymbolPath;
+        set => Settings.Default.SymbolPath = value;
+    }
+
+    public static bool ProxyParserResolveSymbols
+    {
+        get => Settings.Default.ProxyParserResolveSymbols;
+        set => Settings.Default.ProxyParserResolveSymbols = value;
+    }
+
+    public static bool SymbolsConfigured
+    {
+        get => Settings.Default.SymbolsConfigured;
+        set => Settings.Default.SymbolsConfigured = value;
+    }
+
+    public static string GuidFormat
+    {
+        get => Settings.Default.GuidFormat;
+        set => Settings.Default.GuidFormat = value;
+    }
+
+    public static bool ParseStubMethods
+    {
+        get => Settings.Default.ParseStubMethods;
+        set => Settings.Default.ParseStubMethods = value;
+    }
+
+    public static bool ResolveMethodNames
+    {
+        get => Settings.Default.ResolveMethodNames;
+        set => Settings.Default.ResolveMethodNames = value;
+    }
+
+    public static bool ParseRegisteredClasses 
+    {
+        get => Settings.Default.ParseRegisteredClasses;
+        set => Settings.Default.ParseRegisteredClasses = value;
+    }
+
+    public static bool ParseClients
+    {
+        get => Settings.Default.ParseClients;
+        set => Settings.Default.ParseClients = value;
+    }
+
+    public static bool ParseActivationContext
+    {
+        get => Settings.Default.ParseActivationContext;
+        set => Settings.Default.ParseActivationContext = value;
+    }
+
+    internal static void Save(IWin32Window window)
     {
         try
         {
-            Settings.Default.Save();
+            Save();
         }
         catch (Exception ex)
         {
             EntryPoint.ShowError(window, ex);
         }
+    }
+
+    public static void Save()
+    {
+        Settings.Default.Save();
+    }
+
+    public static ISymbolResolver GetProxyParserSymbolResolver()
+    {
+        if (!ProxyParserResolveSymbols)
+        {
+            return null;
+        }
+
+        string dbghelp = DbgHelpPath;
+        if (string.IsNullOrWhiteSpace(dbghelp))
+        {
+            return null;
+        }
+
+        return SymbolResolver.Create(NtProcess.Current, dbghelp, SymbolPath);
     }
 }

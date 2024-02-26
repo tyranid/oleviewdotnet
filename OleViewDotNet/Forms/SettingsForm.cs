@@ -27,8 +27,8 @@ public partial class SettingsForm : Form
     {
         InitializeComponent();
         textBoxDbgHelp.Text = ProgramSettings.DbgHelpPath;
-        textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
-        checkBoxProxyParserResolveSymbols.Checked = Properties.Settings.Default.ProxyParserResolveSymbols;
+        textBoxSymbolPath.Text = ProgramSettings.SymbolPath;
+        checkBoxProxyParserResolveSymbols.Checked = ProgramSettings.ProxyParserResolveSymbols;
     }
 
     private void btnBrowseDbgHelpPath_Click(object sender, EventArgs e)
@@ -64,9 +64,9 @@ public partial class SettingsForm : Form
         }
 
         ProgramSettings.DbgHelpPath = textBoxDbgHelp.Text;
-        Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
-        Properties.Settings.Default.SymbolsConfigured = true;
-        Properties.Settings.Default.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
+        ProgramSettings.SymbolPath = textBoxSymbolPath.Text;
+        ProgramSettings.SymbolsConfigured = true;
+        ProgramSettings.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
         ProgramSettings.Save(this);
         DialogResult = DialogResult.OK;
         Close();
