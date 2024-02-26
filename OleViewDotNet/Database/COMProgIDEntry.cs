@@ -25,10 +25,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using OleViewDotNet.Security;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities.Format;
 
 namespace OleViewDotNet.Database;
 
-public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICOMGuid, ICOMClassEntry
+public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICOMGuid, ICOMClassEntry, ICOMSourceCodeFormattable
 {
     private readonly COMRegistry m_registry;
     private readonly Lazy<COMCLSIDEntry> m_clsid;
@@ -92,6 +93,8 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICO
     IEnumerable<COMInterfaceInstance> ICOMClassEntry.FactoryInterfaces => m_clsid.Value.FactoryInterfaces;
 
     bool ICOMClassEntry.SupportsRemoteActivation => m_clsid.Value.SupportsRemoteActivation;
+
+    bool ICOMSourceCodeFormattable.IsFormattable => ((ICOMSourceCodeFormattable)ClassEntry)?.IsFormattable ?? false;
 
     public override string ToString()
     {
@@ -159,5 +162,10 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICO
     object ICOMClassEntry.CreateClassFactory(CLSCTX dwContext, string server)
     {
         return m_clsid.Value.CreateClassFactory(dwContext, server);
+    }
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        ((ICOMSourceCodeFormattable)ClassEntry).Format(builder);
     }
 }
