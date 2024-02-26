@@ -110,6 +110,12 @@ partial class MainForm
             this.menuProcessesAllProcessesByPid = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByName = new System.Windows.Forms.MenuItem();
             this.menuProcessesAllProcessesByUser = new System.Windows.Forms.MenuItem();
+            this.menuItem16 = new System.Windows.Forms.MenuItem();
+            this.menuProcessesOptions = new System.Windows.Forms.MenuItem();
+            this.menuProcessesOptionsResolveMethodNames = new System.Windows.Forms.MenuItem();
+            this.menuProcessesOptionsParseStubs = new System.Windows.Forms.MenuItem();
+            this.menuProcessesOptionsParseRegisteredClasses = new System.Windows.Forms.MenuItem();
+            this.menuProcessesOptionsParseActCtx = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
@@ -631,7 +637,9 @@ partial class MainForm
             this.menuProcesses.Index = 4;
             this.menuProcesses.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuProcessesSelectProcess,
-            this.menuItemProcessesAllProcesses});
+            this.menuItemProcessesAllProcesses,
+            this.menuItem16,
+            this.menuProcessesOptions});
             this.menuProcesses.Text = "Processes";
             // 
             // menuProcessesSelectProcess
@@ -666,6 +674,46 @@ partial class MainForm
             this.menuProcessesAllProcessesByUser.Index = 2;
             this.menuProcessesAllProcessesByUser.Text = "By User";
             this.menuProcessesAllProcessesByUser.Click += new System.EventHandler(this.menuProcessesAllProcessesByUser_Click);
+            // 
+            // menuItem16
+            // 
+            this.menuItem16.Index = 2;
+            this.menuItem16.Text = "-";
+            // 
+            // menuProcessesOptions
+            // 
+            this.menuProcessesOptions.Index = 3;
+            this.menuProcessesOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuProcessesOptionsResolveMethodNames,
+            this.menuProcessesOptionsParseStubs,
+            this.menuProcessesOptionsParseRegisteredClasses,
+            this.menuProcessesOptionsParseActCtx});
+            this.menuProcessesOptions.Text = "Options";
+            this.menuProcessesOptions.Popup += new System.EventHandler(this.menuProcessesOptions_Popup);
+            // 
+            // menuProcessesOptionsResolveMethodNames
+            // 
+            this.menuProcessesOptionsResolveMethodNames.Index = 0;
+            this.menuProcessesOptionsResolveMethodNames.Text = "Resolve Method Names";
+            this.menuProcessesOptionsResolveMethodNames.Click += new System.EventHandler(this.menuProcessesOptionsResolveMethodNames_Click);
+            // 
+            // menuProcessesOptionsParseStubs
+            // 
+            this.menuProcessesOptionsParseStubs.Index = 1;
+            this.menuProcessesOptionsParseStubs.Text = "Parse Stubs";
+            this.menuProcessesOptionsParseStubs.Click += new System.EventHandler(this.menuProcessesOptionsParseStubs_Click);
+            // 
+            // menuProcessesOptionsParseRegisteredClasses
+            // 
+            this.menuProcessesOptionsParseRegisteredClasses.Index = 2;
+            this.menuProcessesOptionsParseRegisteredClasses.Text = "Parse Registered Classes";
+            this.menuProcessesOptionsParseRegisteredClasses.Click += new System.EventHandler(this.menuProcessesOptionsParseRegisteredClasses_Click);
+            // 
+            // menuProcessesOptionsParseActCtx
+            // 
+            this.menuProcessesOptionsParseActCtx.Index = 3;
+            this.menuProcessesOptionsParseActCtx.Text = "Parse Activation Context";
+            this.menuProcessesOptionsParseActCtx.Click += new System.EventHandler(this.menuProcessesOptionsParseActCtx_Click);
             // 
             // menuItem11
             // 
@@ -806,5 +854,11 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuFileDeleteDefaultDatabase;
     private System.Windows.Forms.MenuItem menuFileSaveDatabaseOnExit;
     private System.Windows.Forms.MenuItem menuItem14;
+    private System.Windows.Forms.MenuItem menuItem16;
+    private System.Windows.Forms.MenuItem menuProcessesOptions;
+    private System.Windows.Forms.MenuItem menuProcessesOptionsResolveMethodNames;
+    private System.Windows.Forms.MenuItem menuProcessesOptionsParseStubs;
+    private System.Windows.Forms.MenuItem menuProcessesOptionsParseRegisteredClasses;
+    private System.Windows.Forms.MenuItem menuProcessesOptionsParseActCtx;
 }
 

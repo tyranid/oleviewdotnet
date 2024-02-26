@@ -1071,4 +1071,36 @@ public partial class MainForm : Form
         ProgramSettings.EnableSaveOnExit = !menuFileSaveDatabaseOnExit.Checked;
         ProgramSettings.Save(this);
     }
+
+    private void menuProcessesOptionsResolveMethodNames_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ResolveMethodNames = !Properties.Settings.Default.ResolveMethodNames;
+        ProgramSettings.Save(this);
+    }
+
+    private void menuProcessesOptionsParseStubs_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ParseStubMethods = !Properties.Settings.Default.ParseStubMethods;
+        ProgramSettings.Save(this);
+    }
+
+    private void menuProcessesOptionsParseRegisteredClasses_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ParseRegisteredClasses = !Properties.Settings.Default.ParseRegisteredClasses;
+        ProgramSettings.Save(this);
+    }
+
+    private void menuProcessesOptionsParseActCtx_Click(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.ParseActivationContext = !Properties.Settings.Default.ParseActivationContext;
+        ProgramSettings.Save(this);
+    }
+
+    private void menuProcessesOptions_Popup(object sender, EventArgs e)
+    {
+        menuProcessesOptionsResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
+        menuProcessesOptionsParseStubs.Checked = Properties.Settings.Default.ParseStubMethods;
+        menuProcessesOptionsParseRegisteredClasses.Checked = Properties.Settings.Default.ParseRegisteredClasses;
+        menuProcessesOptionsParseActCtx.Checked = Properties.Settings.Default.ParseActivationContext;
+    }
 }

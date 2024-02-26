@@ -28,11 +28,7 @@ public partial class SettingsForm : Form
         InitializeComponent();
         textBoxDbgHelp.Text = ProgramSettings.DbgHelpPath;
         textBoxSymbolPath.Text = Properties.Settings.Default.SymbolPath;
-        checkBoxParseStubMethods.Checked = Properties.Settings.Default.ParseStubMethods;
-        checkBoxResolveMethodNames.Checked = Properties.Settings.Default.ResolveMethodNames;
         checkBoxProxyParserResolveSymbols.Checked = Properties.Settings.Default.ProxyParserResolveSymbols;
-        checkBoxParseRegisteredClasses.Checked = Properties.Settings.Default.ParseRegisteredClasses;
-        checkBoxParseActCtx.Checked = Properties.Settings.Default.ParseActivationContext;
     }
 
     private void btnBrowseDbgHelpPath_Click(object sender, EventArgs e)
@@ -70,11 +66,7 @@ public partial class SettingsForm : Form
         ProgramSettings.DbgHelpPath = textBoxDbgHelp.Text;
         Properties.Settings.Default.SymbolPath = textBoxSymbolPath.Text;
         Properties.Settings.Default.SymbolsConfigured = true;
-        Properties.Settings.Default.ParseStubMethods = checkBoxParseStubMethods.Checked;
-        Properties.Settings.Default.ResolveMethodNames = checkBoxResolveMethodNames.Checked;
         Properties.Settings.Default.ProxyParserResolveSymbols = checkBoxProxyParserResolveSymbols.Checked;
-        Properties.Settings.Default.ParseRegisteredClasses = checkBoxParseRegisteredClasses.Checked;
-        Properties.Settings.Default.ParseActivationContext = checkBoxParseActCtx.Checked;
         ProgramSettings.Save(this);
         DialogResult = DialogResult.OK;
         Close();
