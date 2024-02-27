@@ -28,8 +28,9 @@ public sealed class COSERVERINFO
     private readonly IntPtr pAuthInfo;
     private readonly int dwReserved2;
 
-    public COSERVERINFO(string name)
+    public COSERVERINFO(string name, SafeBuffer auth_info)
     {
         pwszName = name;
+        pAuthInfo = auth_info?.DangerousGetHandle() ?? IntPtr.Zero;
     }
 }

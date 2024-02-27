@@ -19,7 +19,6 @@ using OleViewDotNet.Interop;
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 
 namespace OleViewDotNet.Security;
 
@@ -32,14 +31,12 @@ public sealed class COMCredentials
     private class DisposableString : IDisposable
     {
         public readonly IntPtr Pointer;
-        public readonly int Length;
 
         public DisposableString(SecureString s)
         {
             if (s != null)
             {
                 Pointer = Marshal.SecureStringToCoTaskMemUnicode(s);
-                Length = s.Length * 2;
             }
         }
 
@@ -51,18 +48,16 @@ public sealed class COMCredentials
 
     internal SafeStructureInOutBuffer<COAUTHIDENTITY> ToBuffer(DisposableList list)
     {
-        var user_buffer = list.AddResource(UserName != null ? Encoding.Unicode.GetBytes(UserName).ToBuffer() : SafeHGlobalBuffer.Null);
-        var domain_buffer = list.AddResource(Domain != null ? Encoding.Unicode.GetBytes(Domain).ToBuffer() : SafeHGlobalBuffer.Null);
         var password_buffer = list.AddResource(new DisposableString(Password));
 
         return new COAUTHIDENTITY()
         {
-            User = user_buffer.DangerousGetHandle(),
-            UserLength = user_buffer.Length,
-            Domain = domain_buffer.DangerousGetHandle(),
-            DomainLength = domain_buffer.Length,
+            User = UserName,
+            UserLength = UserName.Length,
+            Domain = Domain,
+            DomainLength = Domain.Length,
             Password = password_buffer.Pointer,
-            PasswordLength = password_buffer.Length,
+            PasswordLength = Password?.Length ?? 0,
             Flags = COAUTHIDENTITY.SEC_WINNT_AUTH_IDENTITY_UNICODE
         }.ToBuffer();
     }

@@ -564,7 +564,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
     }
 
-    public IntPtr CreateInstance(CLSCTX dwContext, string server)
+    public IntPtr CreateInstance(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
         if (dwContext == CLSCTX.ALL)
         {
@@ -587,12 +587,12 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
         
         Guid iid = COMInterfaceEntry.CreateKnownInterface(Database, COMKnownInterfaces.IUnknown).Iid;
-        return COMUtilities.CreateInstance(Clsid, iid, dwContext, server);
+        return COMUtilities.CreateInstance(Clsid, iid, dwContext, server, auth_info);
     }
 
-    public object CreateInstanceAsObject(CLSCTX dwContext, string server)
+    public object CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
-        IntPtr pObject = CreateInstance(dwContext, server);
+        IntPtr pObject = CreateInstance(dwContext, server, auth_info);
         object ret = null;
 
         if (pObject != IntPtr.Zero)
@@ -609,9 +609,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         return CreateClassFactory(CreateContext, null);
     }
 
-    public object CreateClassFactory(CLSCTX dwContext, string server)
+    public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
-        return COMUtilities.CreateClassFactory(Clsid, COMInterfaceEntry.IID_IUnknown, dwContext, server);
+        return COMUtilities.CreateClassFactory(Clsid, COMInterfaceEntry.IID_IUnknown, dwContext, server, auth_info);
     }
 
     public bool SupportsRemoteActivation => true;

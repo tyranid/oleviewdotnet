@@ -1845,7 +1845,7 @@ public static class COMUtilities
         return default;
     }
 
-    public static IntPtr CreateInstance(Guid clsid, Guid iid, CLSCTX context, string server)
+    public static IntPtr CreateInstance(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)
     {
         IntPtr pInterface = IntPtr.Zero;
         int hr = 0;
@@ -1853,7 +1853,9 @@ public static class COMUtilities
         {
             MULTI_QI[] qis = new MULTI_QI[1];
             qis[0] = new MULTI_QI(iid);
-            COSERVERINFO server_info = new(server);
+            using var list = new DisposableList();
+            using var auth_info_buffer = auth_info?.ToBuffer(list);
+            COSERVERINFO server_info = new(server, auth_info_buffer);
             try
             {
                 hr = NativeMethods.CoCreateInstanceEx(clsid, IntPtr.Zero, CLSCTX.REMOTE_SERVER, server_info, 1, qis);
@@ -1884,9 +1886,9 @@ public static class COMUtilities
         return pInterface;
     }
 
-    public static object CreateInstanceAsObject(Guid clsid, Guid iid, CLSCTX context, string server)
+    public static object CreateInstanceAsObject(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)
     {
-        IntPtr pObject = CreateInstance(clsid, iid, context, server);
+        IntPtr pObject = CreateInstance(clsid, iid, context, server, auth_info);
         object ret = null;
 
         if (pObject != IntPtr.Zero)
@@ -1904,9 +1906,11 @@ public static class COMUtilities
         return ret;
     }
 
-    public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server)
+    public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)
     {
-        COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server) : null;
+        using var list = new DisposableList();
+        using var auth_info_buffer = auth_info?.ToBuffer(list);
+        COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server, auth_info_buffer) : null;
 
         int hr = NativeMethods.CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER
             : context, server_info, iid, out IntPtr obj);

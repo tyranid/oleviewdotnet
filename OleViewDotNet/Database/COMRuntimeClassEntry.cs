@@ -292,12 +292,12 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         }
     }
 
-    public object CreateInstanceAsObject(CLSCTX dwContext, string server)
+    public object CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
         return CreateInstance(server, false);
     }
 
-    public object CreateClassFactory(CLSCTX dwContext, string server)
+    public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
         return CreateInstance(server, true);
     }

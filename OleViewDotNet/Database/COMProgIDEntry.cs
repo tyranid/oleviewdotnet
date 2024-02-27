@@ -154,14 +154,14 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICO
         return m_clsid.Value.LoadSupportedInterfaces(refresh, token);
     }
 
-    object ICOMClassEntry.CreateInstanceAsObject(CLSCTX dwContext, string server)
+    object ICOMClassEntry.CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info)
     {
-        return m_clsid.Value.CreateInstanceAsObject(dwContext, server);
+        return m_clsid.Value.CreateInstanceAsObject(dwContext, server, auth_info);
     }
 
-    object ICOMClassEntry.CreateClassFactory(CLSCTX dwContext, string server)
+    object ICOMClassEntry.CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info)
     {
-        return m_clsid.Value.CreateClassFactory(dwContext, server);
+        return m_clsid.Value.CreateClassFactory(dwContext, server, auth_info);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)

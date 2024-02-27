@@ -19,14 +19,16 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 internal struct COAUTHIDENTITY
 {
     public const int SEC_WINNT_AUTH_IDENTITY_UNICODE = 0x2;
 
-    public IntPtr User;
+    [MarshalAs(UnmanagedType.LPWStr)]
+    public string User;
     public int UserLength;
-    public IntPtr Domain;
+    [MarshalAs(UnmanagedType.LPWStr)]
+    public string Domain;
     public int DomainLength;
     public IntPtr Password;
     public int PasswordLength;

@@ -47,7 +47,7 @@ public sealed class COMAuthInfo
         {
             dwAuthnSvc = AuthnSvc,
             dwAuthzSvc = 0,
-            pwszServerPrincName = ServerPrincName,
+            pwszServerPrincName = string.IsNullOrEmpty(ServerPrincName) ? null : ServerPrincName,
             dwAuthnLevel = AuthnLevel,
             dwImpersonationLevel = ImpersonationLevel,
             pAuthIdentityData = auth_id?.DangerousGetHandle() ?? IntPtr.Zero,

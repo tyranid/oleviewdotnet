@@ -80,16 +80,18 @@ public interface ICOMClassEntry
     /// </summary>
     /// <param name="dwContext">The class context.</param>
     /// <param name="server">The remote server address.</param>
+    /// <param name="auth_info">Authentication information for the remote connection.</param>
     /// <returns>The instance of the object.</returns>
-    object CreateInstanceAsObject(CLSCTX dwContext, string server);
+    object CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info = null);
 
     /// <summary>
     /// Create an instance of this object's class factory.
     /// </summary>
     /// <param name="dwContext">The class context.</param>
     /// <param name="server">The remote server address.</param>
+    /// <param name="auth_info">Authentication information for the remote connection.</param>
     /// <returns>The instance of the object.</returns>
-    object CreateClassFactory(CLSCTX dwContext, string server);
+    object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null);
 
     /// <summary>
     /// True if this class supports remote activation.

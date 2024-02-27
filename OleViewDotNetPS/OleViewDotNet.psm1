@@ -1719,6 +1719,8 @@ Specify a CLSID to use for the new COM object.
 Specify the context the new object will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object will be created on.
+.PARAMETER AuthInfo
+Specify authentication information for the remote server connection.
 .PARAMETER SessionId
 Specify the console session to create the object in.
 .PARAMETER NoWrapper
@@ -1751,6 +1753,9 @@ function New-ComObject {
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
+        [OleViewDotNet.Security.COMAuthInfo]$AuthInfo,
         [Parameter(ParameterSetName = "FromObjRef")]
         [OleViewDotNet.Marshaling.COMObjRef]$ObjRef,
         [Parameter(ParameterSetName = "FromIpid")]
@@ -1774,11 +1779,11 @@ function New-ComObject {
 
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
-                $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer)
+                $obj = $Class.CreateInstanceAsObject($ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromClsid" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateInstanceAsObject($Clsid, `
-                    $Iid, $ClassContext, $RemoteServer)
+                    $Iid, $ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromFactory" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
@@ -1823,6 +1828,8 @@ Specify a CLSID to use for the new COM object factory.
 Specify the context the new factory will be created from.
 .PARAMETER RemoteServer
 Specify the remote server the COM object factory will be created on.
+.PARAMETER AuthInfo
+Specify authentication information for the remote server connection.
 .PARAMETER SessionId
 Specify the console session to create the factory in.
 .PARAMETER NoWrapper
@@ -1845,6 +1852,9 @@ function New-ComObjectFactory {
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
         [string]$RemoteServer,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [Parameter(ParameterSetName = "FromClass")]
+        [OleViewDotNet.Security.COMAuthInfo]$AuthInfo,
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
@@ -1856,11 +1866,11 @@ function New-ComObjectFactory {
         $obj = $null
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
-                $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer)
+                $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromClsid" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateClassFactory($Clsid, `
-                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer)
+                    "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromSessionIdClass" {
                 $obj = Get-ComMoniker "session:$SessionId!clsid:$($Class.Clsid)" -Bind -NoWrapper
@@ -3529,3 +3539,35 @@ function ConvertTo-ComSourceCode {
     }
 }
 
+<#
+.SYNOPSIS
+Gets a COM authentication info structure.
+.DESCRIPTION
+This cmdlet gets a COM authentication info structure to connect to a remote server.
+.PARAMETER InputObject
+The input object to convert.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.Security.COMAuthInfo
+#>
+function Get-ComAuthInfo {
+    [CmdletBinding()]
+    Param(
+        [OleViewDotNet.Marshaling.RpcAuthnService]$AuthnSvc = "WinNT",
+        [string]$ServerPrincName,
+        [OleViewDotNet.Interop.RPC_AUTHN_LEVEL]$AuthnLevel = "PKT_PRIVACY",
+        [OleViewDotNet.Interop.RPC_IMP_LEVEL]$ImpLevel = "IMPERSONATE",
+        [OleViewDotNet.Interop.RPC_C_QOS_CAPABILITIES]$Capabilities = 0,
+        [OleViewDotNet.Security.COMCredentials]$AuthIdentityData
+    )
+
+    $auth_info = [OleViewDotNet.Security.COMAuthInfo]::new()
+    $auth_info.AuthnSvc = $AuthnSvc
+    $auth_info.ServerPrincName = $ServerPrincName
+    $auth_info.AuthnLevel = $AuthnLevel
+    $auth_info.ImpersonationLevel = $ImpLevel
+    $auth_info.Capabilities = $Capabilities
+    $auth_info.AuthIdentityData = $AuthIdentityData
+    $auth_info
+}
