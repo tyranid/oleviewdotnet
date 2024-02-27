@@ -16,8 +16,6 @@
 
 Set-StrictMode -Version Latest
 
-$Script:GlobalDbgHelpPath = [OleViewDotNet.ProgramSettings]::DbgHelpPath
-$Script:GlobalSymbolPath = [OleViewDotNet.ProgramSettings]::SymbolPath
 $Script:CurrentComDatabase = $null
 
 [OleViewDotNet.Utilities.COMUtilities]::SetupCachedSymbols()
@@ -167,25 +165,6 @@ function Get-ComObjectInterface {
             }
         }
     }
-}
-
-function Get-ComSymbolResolver {
-    Param (
-        [parameter( Position=0)]
-        [string]$DbgHelpPath = "",
-        [parameter(Position=1)]
-        [string]$SymbolPath = "srv*https://msdl.microsoft.com/download/symbols"
-    )
-    if ($DbgHelpPath -eq "") {
-        $DbgHelpPath = $Script:GlobalDbgHelpPath
-    }
-    if ($SymbolPath -eq "") {
-        $SymbolPath = $env:_NT_SYMBOL_PATH
-        if ($SymbolPath -eq "") {
-            $SymbolPath = $Script:GlobalSymbolPath
-        }
-    }
-    @{DbgHelpPath=$DbgHelpPath; SymbolPath=$SymbolPath}
 }
 
 <#
@@ -2064,12 +2043,49 @@ function Set-ComSymbolResolver {
         throw "Must specify at least one parameter."
     }
 
-    $Script:GlobalDbgHelpPath = $DbgHelpPath
-    [OleViewDotNet.ProgramSettings]::DbgHelpPath = $DbgHelpPath
+    if ("" -ne $DbgHelpPath) {
+        [OleViewDotNet.ProgramSettings]::DbgHelpPath = $DbgHelpPath
+    }
     if ("" -ne $SymbolPath) {
-        $Script:GlobalSymbolPath = $SymbolPath
         [OleViewDotNet.ProgramSettings]::SymbolPath = $SymbolPath
     }
+    if ($Save) {
+        [OleViewDotNet.ProgramSettings]::Save()
+    }
+}
+
+<#
+.SYNOPSIS
+Gets the COM symbol resolver paths.
+.DESCRIPTION
+This cmdlet gets the COM symbol resolver paths.
+#>
+function Get-ComSymbolResolver {
+    [PSCustomObject]@{
+        DbgHelpPath=[OleViewDotNet.ProgramSettings]::DbgHelpPath; 
+        SymbolPath=[OleViewDotNet.ProgramSettings]::SymbolPath
+    }
+}
+
+<#
+.SYNOPSIS
+Resets the COM symbol resolver paths to the defaults.
+.DESCRIPTION
+This cmdlet resets the COM symbol resolver paths.
+.PARAMETER Save
+Specify to save the resolver information permanently.
+.INPUTS
+None
+.OUTPUTS
+None
+#>
+function Reset-ComSymbolResolver {
+    Param(
+        [switch]$Save
+    )
+
+    [OleViewDotNet.ProgramSettings]::DbgHelpPath = ""
+    [OleViewDotNet.ProgramSettings]::SymbolPath = ""
     if ($Save) {
         [OleViewDotNet.ProgramSettings]::Save()
     }
