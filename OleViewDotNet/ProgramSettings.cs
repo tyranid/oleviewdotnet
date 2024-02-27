@@ -87,10 +87,29 @@ public static class ProgramSettings
         }
     }
 
+    private static string GetDbgHelpPath()
+    {
+        if (!string.IsNullOrEmpty(_config.Value.DbgHelpPath))
+            return _config.Value.DbgHelpPath;
+        string path = Path.Combine(COMUtilities.GetNativeAppDirectory(), "dbghelp.dll");
+        if (File.Exists(path))
+            return path;
+        return "dbghelp.dll";
+    }
+
+    private static string GetSymbolPath()
+    {
+        if (!string.IsNullOrEmpty(_config.Value.SymbolPath))
+            return _config.Value.SymbolPath;
+        string symbol_path = Environment.GetEnvironmentVariable("_NT_SYMBOL_PATH");
+        if (!string.IsNullOrWhiteSpace(symbol_path))
+            return symbol_path;
+        return "srv*https://msdl.microsoft.com/download/symbols";
+    }
+
     public static string DbgHelpPath
     {
-        get => string.IsNullOrEmpty(_config.Value.DbgHelpPath) 
-            ? "dbghelp.dll" : _config.Value.DbgHelpPath;
+        get => GetDbgHelpPath();
         set => _config.Value.DbgHelpPath = value;
     }
 
@@ -102,8 +121,7 @@ public static class ProgramSettings
 
     public static string SymbolPath
     {
-        get => string.IsNullOrEmpty(_config.Value.SymbolPath) 
-            ? "srv*https://msdl.microsoft.com/download/symbols" : _config.Value.SymbolPath;
+        get => GetSymbolPath();
         set => _config.Value.SymbolPath = value;
     }
 

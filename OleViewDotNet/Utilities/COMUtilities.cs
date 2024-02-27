@@ -321,6 +321,11 @@ public static class COMUtilities
         return Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
     }
 
+    public static string GetNativeAppDirectory()
+    {
+        return Path.Combine(GetAppDirectory(), CurrentArchitecture.ToString());
+    }
+
     public static string Get32bitExePath()
     {
         string path = Path.Combine(GetAppDirectory(), "OleViewDotNet32.exe");
