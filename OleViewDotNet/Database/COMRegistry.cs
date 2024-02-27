@@ -236,9 +236,9 @@ public class COMRegistry
     {
         using RegistryKey key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Ole");
         DefaultAccessPermission = GetSecurityDescriptor(key, "DefaultAccessPermission", COMSecurity.GetDefaultAccessPermissions());
-        DefaultAccessRestriction = GetSecurityDescriptor(key, "DefaultAccessRestriction", COMSecurity.GetDefaultAccessRestrictions());
+        DefaultAccessRestriction = GetSecurityDescriptor(key, "MachineAccessRestriction", COMSecurity.GetDefaultAccessRestrictions());
         DefaultLaunchPermission = GetSecurityDescriptor(key, "DefaultLaunchPermission", COMSecurity.GetDefaultLaunchPermissions());
-        DefaultLaunchRestriction = GetSecurityDescriptor(key, "DefaultLaunchRestriction", COMSecurity.GetDefaultLaunchRestrictions());
+        DefaultLaunchRestriction = GetSecurityDescriptor(key, "MachineLaunchRestriction", COMSecurity.GetDefaultLaunchRestrictions());
     }
 
     private void LoadCLSIDs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
