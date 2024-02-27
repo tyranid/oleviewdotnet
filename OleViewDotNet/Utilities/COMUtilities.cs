@@ -1446,13 +1446,7 @@ public static class COMUtilities
             throw new ArgumentException("Can't load a diff registry");
         }
 
-        string interface_cache_path = Path.Combine(Path.GetDirectoryName(typeof(COMUtilities).Assembly.Location), "interfaces.txt");
-        if (!File.Exists(interface_cache_path))
-        {
-            interface_cache_path = null;
-        }
-
-        return LoadRegistry(window, (progress, token) => COMRegistry.Load(mode, null, progress, interface_cache_path));
+        return LoadRegistry(window, (progress, token) => COMRegistry.Load(mode, null, progress));
     }
 
     internal static COMRegistry LoadRegistry(IWin32Window window, string database_file)

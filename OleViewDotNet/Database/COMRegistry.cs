@@ -116,7 +116,12 @@ public class COMRegistry
     private COMRegistry(COMRegistryMode mode, COMSid user, IProgress<Tuple<string, int>> progress, string iid_to_name_cache_path)
         : this(mode)
     {
-        if (!string.IsNullOrEmpty(iid_to_name_cache_path))
+        if (string.IsNullOrEmpty(iid_to_name_cache_path))
+        {
+            iid_to_name_cache_path = Path.Combine(COMUtilities.GetAppDirectory(), "interfaces.txt");
+        }
+
+        if (File.Exists(iid_to_name_cache_path))
         {
             m_iid_name_cache = LoadIidToNameCache(iid_to_name_cache_path);
         }

@@ -343,7 +343,7 @@ function Set-ComDatabase {
         return
     }
 
-    if ($Default -and $Database.LoadMode -ne "Merged") {
+    if ($Default -and $Database.LoadingMode -ne "Merged") {
         Write-Error "Can't save a non-merged database as the default."
         return
     }
