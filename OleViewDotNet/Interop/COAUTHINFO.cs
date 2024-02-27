@@ -14,22 +14,21 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Marshaling;
 using System;
 using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential)]
-public sealed class COSERVERINFO
+[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+internal struct COAUTHINFO
 {
-    private readonly int dwReserved1;
+    public RpcAuthnService dwAuthnSvc;
+    public int dwAuthzSvc;
     [MarshalAs(UnmanagedType.LPWStr)]
-    private readonly string pwszName;
-    private readonly IntPtr pAuthInfo;
-    private readonly int dwReserved2;
-
-    public COSERVERINFO(string name)
-    {
-        pwszName = name;
-    }
+    public string pwszServerPrincName;
+    public RPC_AUTHN_LEVEL dwAuthnLevel;
+    public RPC_IMP_LEVEL dwImpersonationLevel;
+    public IntPtr pAuthIdentityData;
+    public RPC_C_QOS_CAPABILITIES dwCapabilities;
 }

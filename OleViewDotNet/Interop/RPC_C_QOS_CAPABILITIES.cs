@@ -15,21 +15,12 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential)]
-public sealed class COSERVERINFO
+[Flags]
+public enum RPC_C_QOS_CAPABILITIES
 {
-    private readonly int dwReserved1;
-    [MarshalAs(UnmanagedType.LPWStr)]
-    private readonly string pwszName;
-    private readonly IntPtr pAuthInfo;
-    private readonly int dwReserved2;
-
-    public COSERVERINFO(string name)
-    {
-        pwszName = name;
-    }
+    None = 0,
+    MutualAuth = 1,
 }

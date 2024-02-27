@@ -20,16 +20,15 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
-public sealed class COSERVERINFO
+internal struct COAUTHIDENTITY
 {
-    private readonly int dwReserved1;
-    [MarshalAs(UnmanagedType.LPWStr)]
-    private readonly string pwszName;
-    private readonly IntPtr pAuthInfo;
-    private readonly int dwReserved2;
+    public const int SEC_WINNT_AUTH_IDENTITY_UNICODE = 0x2;
 
-    public COSERVERINFO(string name)
-    {
-        pwszName = name;
-    }
+    public IntPtr User;
+    public int UserLength;
+    public IntPtr Domain;
+    public int DomainLength;
+    public IntPtr Password;
+    public int PasswordLength;
+    public int Flags;
 }
