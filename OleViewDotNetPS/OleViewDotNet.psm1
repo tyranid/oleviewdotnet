@@ -565,7 +565,9 @@ function Get-ComClass {
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
         [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
         [Parameter(Mandatory, ParameterSetName = "FromTrustedMarshaller")]
-        [switch]$TrustedMarshaller
+        [switch]$TrustedMarshaller,
+        [Parameter(Mandatory, ParameterSetName = "FromProxy")]
+        [switch]$Proxy
     )
 
     $Database = Get-CurrentComDatabase $Database
@@ -627,6 +629,9 @@ function Get-ComClass {
         }
         "FromTrustedMarshaller" {
             Get-ComClass -Database $Database | Where-Object TrustedMarshaller
+        }
+        "FromProxy" {
+            Get-ComClass -Database $Database | Where-Object Proxy
         }
     }
 }

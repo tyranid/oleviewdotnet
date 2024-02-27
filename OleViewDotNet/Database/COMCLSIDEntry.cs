@@ -616,6 +616,8 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public bool SupportsRemoteActivation => true;
 
+    public bool Proxy => Database.GetProxiesForClsid(this).Length > 0;
+
     internal COMRegistry Database { get; }
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
