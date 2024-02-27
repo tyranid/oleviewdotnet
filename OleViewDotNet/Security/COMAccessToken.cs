@@ -16,6 +16,8 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Win32;
+using NtApiDotNet.Win32.Security;
+using NtApiDotNet.Win32.Security.Native;
 using System;
 using System.Linq;
 
@@ -79,6 +81,19 @@ public sealed class COMAccessToken : IDisposable
         return new COMAccessToken(token.Filter(flags,
             sids_to_disable?.Select(s => s.Sid), Array.Empty<Luid>(), 
             restricted_sids?.Select(s => s.Sid)));
+    }
+
+    public static COMAccessToken Logon(COMCredentials credentials, TokenLogonType logon_type)
+    {
+        return new COMAccessToken(Win32Security.LsaLogonUser(credentials.UserName,
+            credentials.Domain, credentials.Password,
+            (SecurityLogonType)logon_type, Logon32Provider.Default));
+    }
+
+    public static COMAccessToken LogonS4U(COMCredentials credentials, TokenLogonType logon_type)
+    {
+        return new COMAccessToken(LogonUtils.LsaLogonS4U(credentials.UserName,
+            credentials.Domain, (SecurityLogonType)logon_type));
     }
 
     public void SetLowIntegrityLevel()

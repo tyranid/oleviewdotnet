@@ -3414,27 +3414,57 @@ function Get-ComAccessToken {
         [parameter(ParameterSetName = "FromFiltered")]
         [switch]$WriteRestricted,
         [parameter(ParameterSetName = "FromFiltered")]
-        [switch]$LowIntegrityLevel
+        [switch]$LowIntegrityLevel,
+        [parameter(Mandatory, ParameterSetName = "FromLogon")]
+        [parameter(Mandatory, ParameterSetName = "FromS4U")]
+        [OleViewDotNet.Security.COMCredentials]$Credentials,
+        [parameter(ParameterSetName = "FromLogon")]
+        [parameter(ParameterSetName = "FromS4U")]
+        [OleViewDotNet.Security.TokenLogonType]$LogonType = "Network",
+        [parameter(Mandatory, ParameterSetName = "FromS4U")]
+        [switch]$S4U
     )
 
-    PROCESS {
-        switch($PSCmdlet.ParameterSetName) {
-            "FromProcessId" {
-                [OleViewDotNet.Security.COMAccessToken]::FromProcess($ProcessId)
+    switch($PSCmdlet.ParameterSetName) {
+        "FromProcessId" {
+            [OleViewDotNet.Security.COMAccessToken]::FromProcess($ProcessId)
+        }
+        "FromAnonymous" {
+            [OleViewDotNet.Security.COMAccessToken]::GetAnonymous()
+        }
+        "FromFiltered" {
+            $token = [OleViewDotNet.Security.COMAccessToken]::GetFiltered($BaseToken, $LuaToken, `
+                $DisableMaxPrivileges, $WriteRestricted, $SidsToDisable, $RestrictedSids)
+            if ($LowIntegrityLevel) {
+                $token.SetLowIntegrityLevel();
             }
-            "FromAnonymous" {
-                [OleViewDotNet.Security.COMAccessToken]::GetAnonymous()
-            }
-            "FromFiltered" {
-                $token = [OleViewDotNet.Security.COMAccessToken]::GetFiltered($BaseToken, $LuaToken, `
-                    $DisableMaxPrivileges, $WriteRestricted, $SidsToDisable, $RestrictedSids)
-                if ($LowIntegrityLevel) {
-                    $token.SetLowIntegrityLevel();
-                }
-                $token
-            }
+            $token
+        }
+        "FromLogon" {
+            [OleViewDotNet.Security.COMAccessToken]::Logon($Credentials, $LogonType)
+        }
+        "FromS4U" {
+            [OleViewDotNet.Security.COMAccessToken]::LogonS4U($Credentials, $LogonType)
         }
     }
+}
+
+<#
+.SYNOPSIS
+Gets credentials.
+.DESCRIPTION
+This cmdlet gets a set of user credentials from the console.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.Security.COMCredentials
+#>
+function Get-ComCredential {
+    $creds = [OleViewDotNet.Security.COMCredentials]::new()
+    $creds.UserName = Read-Host -Prompt "UserName"
+    $creds.Domain = Read-Host -Prompt "Domain"
+    $creds.Password = Read-Host -AsSecureString -Prompt "Password"
+    $creds
 }
 
 <#
@@ -3498,3 +3528,4 @@ function ConvertTo-ComSourceCode {
         $builder.ToString()
     }
 }
+
