@@ -40,6 +40,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="interfaces.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="OleViewDotNet.psd1">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
