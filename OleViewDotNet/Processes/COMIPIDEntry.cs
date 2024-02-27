@@ -120,7 +120,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
         last_index = symbol.LastIndexOf("`");
         if (last_index >= 0)
         {
-            symbol = symbol.Substring(last_index + 1);
+            symbol = symbol.Substring(0, last_index);
         }
         return symbol;
     }
