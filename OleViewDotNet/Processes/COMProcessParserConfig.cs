@@ -16,27 +16,26 @@
 
 namespace OleViewDotNet.Processes;
 
-public class COMProcessParserConfig
+public struct COMProcessParserConfig
 {
-    public string DbgHelpPath { get; }
-    public string SymbolPath { get; }
-    public bool ParseStubMethods { get; }
-    public bool ResolveMethodNames { get; }
-    public bool ParseRegisteredClasses { get; }
-    public bool ParseClients { get; }
-    public bool ParseActivationContext { get; }
+    public bool ParseStubMethods;
+    public bool ResolveMethodNames;
+    public bool ParseRegisteredClasses;
+    public bool ParseClients;
+    public bool ParseActivationContext;
 
-    public COMProcessParserConfig(string dbghelp_path, string symbol_path,
-        bool parse_stubs_methods, bool resolve_method_names,
-        bool parse_registered_classes, bool parse_clients,
-        bool parse_activation_context)
+    public static COMProcessParserConfig Default
     {
-        DbgHelpPath = dbghelp_path;
-        SymbolPath = symbol_path;
-        ParseStubMethods = parse_stubs_methods;
-        ResolveMethodNames = resolve_method_names;
-        ParseRegisteredClasses = parse_registered_classes;
-        ParseClients = parse_clients;
-        ParseActivationContext = parse_activation_context;
+        get
+        {
+            return new()
+            {
+                ParseStubMethods = ProgramSettings.ParseStubMethods,
+                ResolveMethodNames = ProgramSettings.ResolveMethodNames,
+                ParseRegisteredClasses = ProgramSettings.ParseRegisteredClasses,
+                ParseClients = ProgramSettings.ParseClients,
+                ParseActivationContext = ProgramSettings.ParseActivationContext,
+            };
+        }
     }
 }

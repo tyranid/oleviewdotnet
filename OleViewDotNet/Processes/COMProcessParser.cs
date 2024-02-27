@@ -2057,7 +2057,7 @@ public static class COMProcessParser
             }
 
             using ISymbolResolver resolver = new SymbolResolverWrapper(process.Is64Bit,
-                SymbolResolver.Create(process, config.DbgHelpPath, config.SymbolPath));
+                SymbolResolver.Create(process, ProgramSettings.DbgHelpPath, ProgramSettings.SymbolPath));
             Sid user = process.User;
 
             return new COMProcessEntry(

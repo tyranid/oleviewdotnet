@@ -1492,23 +1492,9 @@ public static class COMUtilities
         return null;
     }
 
-    internal static COMProcessParserConfig GetProcessParserConfig()
-    {
-        string dbghelp = ProgramSettings.DbgHelpPath;
-        string symbol_path = ProgramSettings.SymbolPath;
-        bool parse_stub_methods = ProgramSettings.ParseStubMethods;
-        bool resolve_method_names = ProgramSettings.ResolveMethodNames;
-        bool parse_registered_classes = ProgramSettings.ParseRegisteredClasses;
-        bool parse_clients = ProgramSettings.ParseClients;
-        bool parse_activation_context = ProgramSettings.ParseActivationContext;
-
-        return new COMProcessParserConfig(dbghelp, symbol_path, parse_stub_methods,
-            resolve_method_names, parse_registered_classes, parse_clients, parse_activation_context);
-    }
-
     internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
     {
-        using WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, GetProcessParserConfig(), progress, registry), s => s);
+        using WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, COMProcessParserConfig.Default, progress, registry), s => s);
         dlg.Text = "Loading Processes";
         if (dlg.ShowDialog(window) == DialogResult.OK)
         {
@@ -2009,9 +1995,17 @@ public static class COMUtilities
         return comObj;
     }
 
-    public static void GenerateSymbolFile(string symbol_dir, string dbghelp_path, string symbol_path)
+    public static void GenerateSymbolFile(string symbol_dir)
     {
-        COMProcessParserConfig config = new(dbghelp_path, symbol_path, true, true, true, true, false);
+        COMProcessParserConfig config = new()
+        {
+            ParseStubMethods = true,
+            ResolveMethodNames = true,
+            ParseRegisteredClasses = true,
+            ParseClients = true,
+            ParseActivationContext = false,
+        };
+
         var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
         Dictionary<string, int> entries;
         if (Environment.Is64BitProcess)

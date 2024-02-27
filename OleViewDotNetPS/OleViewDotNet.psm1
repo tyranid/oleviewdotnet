@@ -656,10 +656,6 @@ This cmdlet opens a specified set of processes and extracts the COM information 
 The database to use to lookup information.
 .PARAMETER Process
 Specify a list of process objects to parse. You can get these from Get-Process cmdlet.
-.PARAMETER DbgHelpPath
-Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
-.PARAMETER SymbolPath
-Specify the location of symbols for the resolver.
 .PARAMETER ParseStubMethods
 Specify to parse the method parameter information on a process stub.
 .PARAMETER ResolveMethodNames
@@ -692,9 +688,6 @@ function Get-ComProcess {
     [CmdletBinding(DefaultParameterSetName = "All")]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [alias("dbghelp")]
-        [string]$DbgHelpPath = "",
-        [string]$SymbolPath = "",
         [switch]$ParseStubMethods,
         [switch]$ResolveMethodNames,
         [switch]$ParseRegisteredClasses,
@@ -715,7 +708,6 @@ function Get-ComProcess {
     )
 
     BEGIN {
-        $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
         $procs = @()
         $objrefs = @()
     }
@@ -747,8 +739,12 @@ function Get-ComProcess {
             return
         }
         $callback = New-CallbackProgress -Activity "Parsing COM Processes" -NoProgress:$NoProgress
-        $config = [OleViewDotNet.Processes.COMProcessParserConfig]::new($resolver.DbgHelpPath, $resolver.SymbolPath, `
-                    $ParseStubMethods, $ResolveMethodNames, $ParseRegisteredClasses, $ParseClients, $ParseActivationContext)
+        $config = [OleViewDotNet.Processes.COMProcessParserConfig]::new()
+        $config.ParseStubMethods = $ParseStubMethods
+        $config.ResolveMethodNames = $ResolveMethodNames
+        $config.ParseRegisteredClasses = $ParseRegisteredClasses
+        $config.ParseClients = $ParseClients
+        $config.ParseActivationContext = $ParseActivationContext
 
         switch($PSCmdlet.ParameterSetName) {
             "FromObjRef" {
@@ -2057,22 +2053,24 @@ Specify the global dbghelp path using c:\symbols to source the symbol files.
 function Set-ComSymbolResolver {
     Param(
         [alias("dbghelp")]
-        [parameter(Mandatory, Position=0)]
+        [parameter(Position=0)]
         [string]$DbgHelpPath,
         [parameter(Position=1)]
         [string]$SymbolPath,
         [switch]$Save
     )
 
+    if ($DbgHelpPath -eq "" -and $SymbolPath -eq "") {
+        throw "Must specify at least one parameter."
+    }
+
     $Script:GlobalDbgHelpPath = $DbgHelpPath
+    [OleViewDotNet.ProgramSettings]::DbgHelpPath = $DbgHelpPath
     if ("" -ne $SymbolPath) {
         $Script:GlobalSymbolPath = $SymbolPath
-        if ($Save) {
-            [OleViewDotNet.ProgramSettings]::SymbolPath = $SymbolPath
-        }
+        [OleViewDotNet.ProgramSettings]::SymbolPath = $SymbolPath
     }
     if ($Save) {
-        [OleViewDotNet.ProgramSettings]::DbgHelpPath = $DbgHelpPath
         [OleViewDotNet.ProgramSettings]::Save()
     }
 }
@@ -2087,11 +2085,6 @@ then parse the containing process. If the containing process cannot be opend the
 The COM database to extract information from.
 .PARAMETER object
 The object to query.
-.PARAMETER DbgHelpPath
-Specify path to a dbghelp DLL to use for symbol resolving. This should be ideally the dbghelp from debugging tool for Windows
-which will allow symbol servers however you can use the system version if you just want to pull symbols locally.
-.PARAMETER SymbolPath
-Specify path for the symbols.
 .PARAMETER ResolveMethodNames
 Specify to try and resolve method names for interfaces.
 .INPUTS
@@ -2100,10 +2093,7 @@ None
 OleViewDotNet.Processes.COMIPIDEntry[]
 .EXAMPLE
 Get-ComObjectIpid $comdb $obj
-Get all
-.EXAMPLE
-Set-ComSymbolResolver -DbgHelpPath dbghelp.dll -SymbolPath "c:\symbols"
-Specify the global dbghelp path using c:\symbols to source the symbol files.
+Get all IPIDs
 #>
 function Get-ComObjectIpid {
     [CmdletBinding()]
@@ -2111,9 +2101,6 @@ function Get-ComObjectIpid {
         [parameter(Mandatory, Position=0)]
         [object]$Object,
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [alias("dbghelp")]
-        [string]$DbgHelpPath = "",
-        [string]$SymbolPath = "",
         [switch]$ResolveMethodNames
     )
 
@@ -2123,9 +2110,8 @@ function Get-ComObjectIpid {
         return
     }
 
-    $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
     $ps = Get-ComInterface -Database $Database -Object $Object | Get-ComObjRef $Object | Get-ComProcess -Database $Database `
-        -DbgHelpPath $resolver.DbgHelpPath -ParseStubMethods -SymbolPath $resolver.SymbolPath -ResolveMethodNames:$ResolveMethodNames
+        -ParseStubMethods -ResolveMethodNames:$ResolveMethodNames
     $ps.Ipids | Write-Output
 }
 
@@ -2136,10 +2122,6 @@ Get registered class information from COM processes.
 This cmdlet parses all accessible processes for registered COM clsses.
 .PARAMETER Database
 The database to use to lookup information.
-.PARAMETER DbgHelpPath
-Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
-.PARAMETER SymbolPath
-Specify the location of symbols for the resolver.
 .PARAMETER NoProgress
 Don't show progress for process parsing.
 .INPUTS
@@ -2154,9 +2136,6 @@ function Get-ComRegisteredClass {
     [CmdletBinding()]
     Param(
         [OleViewDotNet.Database.COMRegistry]$Database,
-        [alias("dbghelp")]
-        [string]$DbgHelpPath = "",
-        [string]$SymbolPath = "",
         [switch]$NoProgress
     )
 
@@ -2165,7 +2144,7 @@ function Get-ComRegisteredClass {
         Write-Error "No database specified and current database isn't set"
         return
     }
-    Get-ComProcess -DbgHelpPath $DbgHelpPath -SymbolPath $SymbolPath -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
+    Get-ComProcess -Database $Database -ParseRegisteredClasses -NoProgress:$NoProgress `
         | select -ExpandProperty Classes | Where-Object {$_.Context -eq 0 -or $_.Context -match "LOCAL_SERVER"} | Write-Output
 }
 
@@ -2457,10 +2436,6 @@ in the installation to allow you to parse processes without symbols. You need to
 process to get support for both symbols.
 .PARAMETER Path
 The directory where the cached symbol file will be created.
-.PARAMETER DbgHelpPath
-Specify location of DBGHELP.DLL file. For remote symbol support use one from Debugging Tools for Windows.
-.PARAMETER SymbolPath
-Specify the location of symbols for the resolver.
 .INPUTS
 None
 .OUTPUTS
@@ -2473,17 +2448,13 @@ function Set-ComSymbolCache {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory, Position = 0)]
-        [string]$Path,
-        [alias("dbghelp")]
-        [string]$DbgHelpPath = "",
-        [string]$SymbolPath = ""
+        [string]$Path
     )
 
-    $resolver = Get-ComSymbolResolver $DbgHelpPath $SymbolPath
     $Path = Resolve-Path $Path
     if ($null -ne $Path) {
         [OleViewDotNet.Utilities.COMUtilities]::ClearCachedSymbols()
-        [OleViewDotNet.Utilities.COMUtilities]::GenerateSymbolFile($Path, $resolver.DbgHelpPath, $resolver.SymbolPath)
+        [OleViewDotNet.Utilities.COMUtilities]::GenerateSymbolFile($Path)
         [OleViewDotNet.Utilities.COMUtilities]::SetupCachedSymbols()
     }
 }

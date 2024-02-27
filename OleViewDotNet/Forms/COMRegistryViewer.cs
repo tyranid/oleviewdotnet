@@ -2122,7 +2122,7 @@ public partial class COMRegistryViewer : UserControl
         if (node != null && node.Tag is COMProcessEntry)
         {
             COMProcessEntry process = (COMProcessEntry)node.Tag;
-            process = COMProcessParser.ParseProcess(process.ProcessId, COMUtilities.GetProcessParserConfig(), m_registry);
+            process = COMProcessParser.ParseProcess(process.ProcessId, COMProcessParserConfig.Default, m_registry);
             if (process == null)
             {
                 treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);

@@ -29,12 +29,6 @@ public static class ProgramSettings
     [DataContract]
     private sealed class ConfigFile
     {
-        public ConfigFile()
-        {
-            DbgHelpPath = "dbghelp.dll";
-            SymbolPath = "srv*https://msdl.microsoft.com/download/symbols";
-        }
-
         [DataMember]
         public string DbgHelpPath { get; set; }
         [DataMember]
@@ -95,7 +89,8 @@ public static class ProgramSettings
 
     public static string DbgHelpPath
     {
-        get => _config.Value.DbgHelpPath;
+        get => string.IsNullOrEmpty(_config.Value.DbgHelpPath) 
+            ? "dbghelp.dll" : _config.Value.DbgHelpPath;
         set => _config.Value.DbgHelpPath = value;
     }
 
@@ -107,7 +102,8 @@ public static class ProgramSettings
 
     public static string SymbolPath
     {
-        get => _config.Value.SymbolPath;
+        get => string.IsNullOrEmpty(_config.Value.SymbolPath) 
+            ? "srv*https://msdl.microsoft.com/download/symbols" : _config.Value.SymbolPath;
         set => _config.Value.SymbolPath = value;
     }
 
