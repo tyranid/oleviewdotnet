@@ -332,7 +332,7 @@ internal static class EntryPoint
                 }
                 Application.Run(_appContext);
 
-                if (ProgramSettings.EnableSaveOnExit)
+                if (ProgramSettings.EnableSaveOnExit && registry.LoadingMode == COMRegistryMode.Merged)
                 {
                     registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
                 }

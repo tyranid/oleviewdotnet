@@ -284,7 +284,7 @@ function Get-ComDatabase {
                     $result = $Host.UI.PromptForChoice("Load COM Database?", `
                         "No default database available, do you want to load from the registry?", @("&Yes", "&No"), 0)
                     if ($result -eq 0) {
-                        [OleViewDotNet.Database.COMRegistry]::Load("Merged", $null, $callback)
+                        [OleViewDotNet.Database.COMRegistry]::Load($LoadMode, $null, $callback)
                     } else {
                         return
                     }
@@ -340,6 +340,11 @@ function Set-ComDatabase {
     $Database = Get-CurrentComDatabase $Database
     if ($null -eq $Database) {
         Write-Error "No database specified and current database isn't set"
+        return
+    }
+
+    if ($Default -and $Database.LoadMode -ne "Merged") {
+        Write-Error "Can't save a non-merged database as the default."
         return
     }
 

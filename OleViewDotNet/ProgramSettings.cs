@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using System;
 using System.IO;
@@ -196,6 +197,7 @@ public static class ProgramSettings
         {
             Directory.CreateDirectory(app_data);
         }
-        return Path.Combine(app_data, $"default.db");
+
+        return Path.Combine(app_data, "default.db");
     }
 }

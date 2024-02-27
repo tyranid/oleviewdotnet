@@ -1033,6 +1033,8 @@ public partial class MainForm : Form
     {
         try
         {
+            if (m_registry.LoadingMode != COMRegistryMode.Merged)
+                return;
             m_registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
             m_registry.FilePath = null;
         }
@@ -1044,6 +1046,8 @@ public partial class MainForm : Form
 
     private void menuFileDeleteDefaultDatabase_Click(object sender, EventArgs e)
     {
+        if (m_registry.LoadingMode != COMRegistryMode.Merged)
+            return;
         string default_db = ProgramSettings.GetDefaultDatabasePath(false);
         try
         {
@@ -1061,8 +1065,11 @@ public partial class MainForm : Form
     private void menuFile_Popup(object sender, EventArgs e)
     {
         string default_db = ProgramSettings.GetDefaultDatabasePath(false);
-        menuFileDeleteDefaultDatabase.Enabled = File.Exists(default_db);
+        bool merged = m_registry.LoadingMode == COMRegistryMode.Merged;
+        menuFileDeleteDefaultDatabase.Enabled = merged && File.Exists(default_db);
         menuFileSaveDatabaseOnExit.Checked = ProgramSettings.EnableSaveOnExit;
+        menuFileSaveDatabaseOnExit.Enabled = merged;
+        menuFileSaveDefaultDatabase.Enabled = merged;
     }
 
     private void menuFileSaveDatabaseOnExit_Click(object sender, EventArgs e)
