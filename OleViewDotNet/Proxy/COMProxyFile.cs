@@ -18,10 +18,13 @@ using NtApiDotNet;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Proxy;
 
@@ -52,27 +55,37 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         m_registry = registry;
 
         using var resolver = GetProxyParserSymbolResolver();
-        NdrParser parser = new(resolver);
-        Entries = parser.ReadFromComProxyFile(path, Clsid).Select(GetInterfaceInstance).ToList().AsReadOnly();
-        ComplexTypes = parser.ComplexTypes.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
-        Path = clsid?.DefaultServer ?? path;
-        foreach (var entry in Entries)
+        int hr = NativeMethods.CoGetClassObject(clsid.Clsid, CLSCTX.INPROC_SERVER, 
+            null, typeof(IPSFactoryBuffer).GUID, out IntPtr pUnk);
+        try
         {
-            if (!string.IsNullOrWhiteSpace(entry.Name))
+            NdrParser parser = new(resolver);
+            Entries = parser.ReadFromComProxyFile(path, Clsid).Select(GetInterfaceInstance).ToList().AsReadOnly();
+            ComplexTypes = parser.ComplexTypes.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
+            Path = clsid?.DefaultServer ?? path;
+            foreach (var entry in Entries)
             {
-                m_registry.IidNameCache.TryAdd(entry.Iid, entry.Name);
-            }
-            else
-            {
-                if (m_registry.IidNameCache.TryGetValue(entry.Iid, out string name))
+                if (!string.IsNullOrWhiteSpace(entry.Name))
                 {
-                    entry.Entry.Name = name;
+                    m_registry.IidNameCache.TryAdd(entry.Iid, entry.Name);
                 }
                 else
                 {
-                    entry.Entry.Name = $"intf_{entry.Iid.ToString().Replace('-', '_')}";
+                    if (m_registry.IidNameCache.TryGetValue(entry.Iid, out string name))
+                    {
+                        entry.Entry.Name = name;
+                    }
+                    else
+                    {
+                        entry.Entry.Name = $"intf_{entry.Iid.ToString().Replace('-', '_')}";
+                    }
                 }
             }
+        }
+        finally
+        {
+            if (hr != 0)
+                Marshal.Release(pUnk);
         }
     }
 
