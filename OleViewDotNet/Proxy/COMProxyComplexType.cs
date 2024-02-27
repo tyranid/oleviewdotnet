@@ -44,7 +44,7 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
-        builder.AppendLine(formatter.FormatComplexType(Entry));
+        builder.AppendLine(formatter.FormatComplexType(Entry).TrimEnd());
         builder.AppendLine();
     }
     #endregion

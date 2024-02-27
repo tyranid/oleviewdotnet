@@ -159,12 +159,13 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             foreach (var type in ComplexTypes)
             {
-                builder.AppendLine(formatter.FormatComplexType(type));
+                builder.AppendLine(formatter.FormatComplexType(type).TrimEnd());
             }
             builder.AppendLine();
         }
 
-        builder.AppendLine(formatter.FormatComProxy(Entry));
+        builder.AppendLine(formatter.FormatComProxy(Entry).TrimEnd());
+        builder.AppendLine();
     }
     #endregion
 }
