@@ -152,7 +152,7 @@ public partial class MainForm : Form
         HostControl(view);
     }
 
-    private void OpenView(COMRegistryViewer.DisplayMode mode, IEnumerable<COMProcessEntry> processes)
+    private void OpenView(COMRegistryDisplayMode mode, IEnumerable<COMProcessEntry> processes)
     {
         Cursor currCursor = Cursor.Current;
         Cursor.Current = Cursors.WaitCursor;
@@ -160,39 +160,39 @@ public partial class MainForm : Form
         Cursor.Current = currCursor;
     }
 
-    private void OpenView(COMRegistryViewer.DisplayMode mode)
+    private void OpenView(COMRegistryDisplayMode mode)
     {
         OpenView(mode, null);
     }
 
     private void menuViewCLSIDs_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.CLSIDs);
+        OpenView(COMRegistryDisplayMode.CLSIDs);
     }
 
     private void menuViewCLSIDsByName_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.CLSIDsByName);
+        OpenView(COMRegistryDisplayMode.CLSIDsByName);
     }
 
     private void menuViewProgIDs_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.ProgIDs);
+        OpenView(COMRegistryDisplayMode.ProgIDs);
     }
 
     private void menuViewCLSIDsByServer_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.CLSIDsByServer);
+        OpenView(COMRegistryDisplayMode.CLSIDsByServer);
     }
 
     private void menuViewInterfaces_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.Interfaces);
+        OpenView(COMRegistryDisplayMode.Interfaces);
     }
 
     private void menuViewInterfacesByName_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.InterfacesByName);
+        OpenView(COMRegistryDisplayMode.InterfacesByName);
     }
 
     private void menuViewROT_Click(object sender, EventArgs e)
@@ -202,12 +202,12 @@ public partial class MainForm : Form
 
     private void menuViewImplementedCategories_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.ImplementedCategories);
+        OpenView(COMRegistryDisplayMode.ImplementedCategories);
     }
 
     private void menuViewPreApproved_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.PreApproved);
+        OpenView(COMRegistryDisplayMode.PreApproved);
     }
 
     public async Task CreateInstanceFromCLSID(Guid clsid, CLSCTX clsctx, bool class_factory)
@@ -298,22 +298,22 @@ public partial class MainForm : Form
 
     private void menuViewCLSIDsByLocalServer_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.CLSIDsByLocalServer);
+        OpenView(COMRegistryDisplayMode.CLSIDsByLocalServer);
     }
 
     private void menuViewIELowRights_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.IELowRights);
+        OpenView(COMRegistryDisplayMode.IELowRights);
     }
 
     private void menuViewLocalServices_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.LocalServices);
+        OpenView(COMRegistryDisplayMode.LocalServices);
     }
 
     private void menuViewAppIDs_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.AppIDs);
+        OpenView(COMRegistryDisplayMode.AppIDs);
     }
 
     private async void menuObjectFromMarshalledStream_Click(object sender, EventArgs e)
@@ -396,17 +396,17 @@ public partial class MainForm : Form
 
     private void menuRegistryTypeLibs_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.Typelibs);
+        OpenView(COMRegistryDisplayMode.Typelibs);
     }
 
     private void menuRegistryAppIDsIL_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.AppIDsWithIL);
+        OpenView(COMRegistryDisplayMode.AppIDsWithIL);
     }
 
     private void menuViewCLSIDsWithSurrogate_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.CLSIDsWithSurrogate);
+        OpenView(COMRegistryDisplayMode.CLSIDsWithSurrogate);
     }
 
     private void menuFileOpen32BitViewer_Click(object sender, EventArgs e)
@@ -515,12 +515,12 @@ public partial class MainForm : Form
 
     private void menuRegistryMimeTypes_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.MimeTypes);
+        OpenView(COMRegistryDisplayMode.MimeTypes);
     }
 
     private void menuRegistryAppIDsWithAC_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.AppIDsWithAC);
+        OpenView(COMRegistryDisplayMode.AppIDsWithAC);
     }
 
     private void menuSecurityDefaultAccess_Click(object sender, EventArgs e)
@@ -666,7 +666,7 @@ public partial class MainForm : Form
 
     private void menuRegistryInterfaceProxies_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.ProxyCLSIDs);
+        OpenView(COMRegistryDisplayMode.ProxyCLSIDs);
     }
 
     private void menuFileOpenProxyDll_Click(object sender, EventArgs e)
@@ -739,7 +739,7 @@ public partial class MainForm : Form
         IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this, m_registry);
         if (processes != null && processes.Any())
         {
-            OpenView(COMRegistryViewer.DisplayMode.Processes, processes.OrderBy(orderby_selector));
+            OpenView(COMRegistryDisplayMode.Processes, processes.OrderBy(orderby_selector));
         }
     }
 
@@ -908,7 +908,7 @@ public partial class MainForm : Form
 
     private void menuRegistryRuntimeClasses_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.RuntimeClasses);
+        OpenView(COMRegistryDisplayMode.RuntimeClasses);
     }
 
     private void menuProcessesSelectProcess_Click(object sender, EventArgs e)
@@ -922,7 +922,7 @@ public partial class MainForm : Form
 
     private void menuRegistryRuntimeServers_Click(object sender, EventArgs e)
     {
-        OpenView(COMRegistryViewer.DisplayMode.RuntimeServers);
+        OpenView(COMRegistryDisplayMode.RuntimeServers);
     }
 
     private void menuFileOpenPowershell_Click(object sender, EventArgs e)

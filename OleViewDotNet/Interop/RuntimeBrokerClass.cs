@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2014, 2016
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,15 +19,8 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[Guid("6040ec14-6557-41f9-a3f7-b1cab7b42120")]
-[InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
-public interface IRuntimeBroker
+[Guid("D63B10C5-BB46-4990-A94F-E40B9D520160")]
+[ComImport]
+internal class RuntimeBrokerClass
 {
-    [return: MarshalAs(UnmanagedType.IInspectable)] object ActivateInstance([MarshalAs(UnmanagedType.LPWStr)] string instanceName);
-    [return: MarshalAs(UnmanagedType.IUnknown)] object GetActivationFactory([MarshalAs(UnmanagedType.LPWStr)] string instanceName, in Guid uuid);
-    void SetErrorFlags(uint error_flags);
-    uint GetErrorFlags();
-    void DebuggerAddRef();
-    void DebuggerRelease();
-    [return: MarshalAs(UnmanagedType.IUnknown)] object GetClipboardBroker();
 }

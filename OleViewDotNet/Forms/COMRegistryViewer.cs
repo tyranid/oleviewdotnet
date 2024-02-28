@@ -29,7 +29,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -42,12 +41,20 @@ namespace OleViewDotNet.Forms;
 /// </summary>
 public partial class COMRegistryViewer : UserControl
 {
+    #region Private Members
     private readonly COMRegistry m_registry;
     private readonly HashSet<FilterType> m_filter_types;
-    private readonly DisplayMode m_mode;
+    private readonly COMRegistryDisplayMode m_mode;
     private readonly IEnumerable<COMProcessEntry> m_processes;
     private RegistryViewerFilter m_filter;
     private TreeNode[] m_originalNodes;
+
+    private const string FolderKey = "folder.ico";
+    private const string InterfaceKey = "interface.ico";
+    private const string ClassKey = "class.ico";
+    private const string FolderOpenKey = "folderopen.ico";
+    private const string ProcessKey = "process.ico";
+    private const string ApplicationKey = "application.ico";
 
     private sealed class DynamicTreeNode : TreeNode
     {
@@ -62,145 +69,100 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    /// <summary>
-    /// Enumeration to indicate what to display
-    /// </summary>
-    public enum DisplayMode
-    {
-        CLSIDs,
-        ProgIDs,
-        CLSIDsByName,
-        CLSIDsByServer,
-        CLSIDsByLocalServer,
-        CLSIDsWithSurrogate,
-        Interfaces,
-        InterfacesByName,
-        ImplementedCategories,
-        PreApproved,
-        IELowRights,
-        LocalServices,
-        AppIDs,
-        Typelibs,
-        AppIDsWithIL,
-        MimeTypes,
-        AppIDsWithAC,
-        ProxyCLSIDs,
-        Processes,
-        RuntimeClasses,
-        RuntimeServers,
-    }
-
-    private const string FolderKey = "folder.ico";
-    private const string InterfaceKey = "interface.ico";
-    private const string ClassKey = "class.ico";
-    private const string FolderOpenKey = "folderopen.ico";
-    private const string ProcessKey = "process.ico";
-    private const string ApplicationKey = "application.ico";
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="reg">The COM registry</param>
-    /// <param name="mode">The display mode</param>
-    public COMRegistryViewer(COMRegistry reg, DisplayMode mode, IEnumerable<COMProcessEntry> processes) 
-        : this(reg, mode, processes, SetupTree(reg, mode, processes), GetFilterTypes(mode), GetDisplayName(mode))
-    {
-    }
-
-    private static string GetDisplayName(DisplayMode mode)
+    private static string GetDisplayName(COMRegistryDisplayMode mode)
     {
         return mode switch
         {
-            DisplayMode.CLSIDsByName => "CLSIDs by Name",
-            DisplayMode.CLSIDs => "CLSIDs",
-            DisplayMode.ProgIDs => "ProgIDs",
-            DisplayMode.CLSIDsByServer => "CLSIDs by Server",
-            DisplayMode.CLSIDsByLocalServer => "CLSIDs by Local Server",
-            DisplayMode.CLSIDsWithSurrogate => "CLSIDs with Surrogate",
-            DisplayMode.Interfaces => "Interfaces",
-            DisplayMode.InterfacesByName => "Interfaces by Name",
-            DisplayMode.ImplementedCategories => "Implemented Categories",
-            DisplayMode.PreApproved => "Explorer Pre-Approved",
-            DisplayMode.IELowRights => "IE Low Rights Policy",
-            DisplayMode.LocalServices => "Local Services",
-            DisplayMode.AppIDs => "AppIDs",
-            DisplayMode.AppIDsWithIL => "AppIDs with IL",
-            DisplayMode.AppIDsWithAC => "AppIDs with AC",
-            DisplayMode.Typelibs => "TypeLibs",
-            DisplayMode.MimeTypes => "MIME Types",
-            DisplayMode.ProxyCLSIDs => "Proxy CLSIDs",
-            DisplayMode.Processes => "COM Processes",
-            DisplayMode.RuntimeClasses => "Runtime Classes",
-            DisplayMode.RuntimeServers => "Runtime Servers",
+            COMRegistryDisplayMode.CLSIDsByName => "CLSIDs by Name",
+            COMRegistryDisplayMode.CLSIDs => "CLSIDs",
+            COMRegistryDisplayMode.ProgIDs => "ProgIDs",
+            COMRegistryDisplayMode.CLSIDsByServer => "CLSIDs by Server",
+            COMRegistryDisplayMode.CLSIDsByLocalServer => "CLSIDs by Local Server",
+            COMRegistryDisplayMode.CLSIDsWithSurrogate => "CLSIDs with Surrogate",
+            COMRegistryDisplayMode.Interfaces => "Interfaces",
+            COMRegistryDisplayMode.InterfacesByName => "Interfaces by Name",
+            COMRegistryDisplayMode.ImplementedCategories => "Implemented Categories",
+            COMRegistryDisplayMode.PreApproved => "Explorer Pre-Approved",
+            COMRegistryDisplayMode.IELowRights => "IE Low Rights Policy",
+            COMRegistryDisplayMode.LocalServices => "Local Services",
+            COMRegistryDisplayMode.AppIDs => "AppIDs",
+            COMRegistryDisplayMode.AppIDsWithIL => "AppIDs with IL",
+            COMRegistryDisplayMode.AppIDsWithAC => "AppIDs with AC",
+            COMRegistryDisplayMode.Typelibs => "TypeLibs",
+            COMRegistryDisplayMode.MimeTypes => "MIME Types",
+            COMRegistryDisplayMode.ProxyCLSIDs => "Proxy CLSIDs",
+            COMRegistryDisplayMode.Processes => "COM Processes",
+            COMRegistryDisplayMode.RuntimeClasses => "Runtime Classes",
+            COMRegistryDisplayMode.RuntimeServers => "Runtime Servers",
             _ => throw new ArgumentException("Invalid mode value"),
         };
     }
 
-    private static IEnumerable<FilterType> GetFilterTypes(DisplayMode mode)
+    private static IEnumerable<FilterType> GetFilterTypes(COMRegistryDisplayMode mode)
     {
         HashSet<FilterType> filter_types = new();
         switch (mode)
         {
-            case DisplayMode.CLSIDsByName:
-            case DisplayMode.CLSIDs:
+            case COMRegistryDisplayMode.CLSIDsByName:
+            case COMRegistryDisplayMode.CLSIDs:
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.ProgIDs:
+            case COMRegistryDisplayMode.ProgIDs:
                 filter_types.Add(FilterType.ProgID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.CLSIDsByServer:
-            case DisplayMode.CLSIDsByLocalServer:
-            case DisplayMode.CLSIDsWithSurrogate:
-            case DisplayMode.ProxyCLSIDs:
+            case COMRegistryDisplayMode.CLSIDsByServer:
+            case COMRegistryDisplayMode.CLSIDsByLocalServer:
+            case COMRegistryDisplayMode.CLSIDsWithSurrogate:
+            case COMRegistryDisplayMode.ProxyCLSIDs:
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Server);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.Interfaces:
-            case DisplayMode.InterfacesByName:
+            case COMRegistryDisplayMode.Interfaces:
+            case COMRegistryDisplayMode.InterfacesByName:
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.ImplementedCategories:
+            case COMRegistryDisplayMode.ImplementedCategories:
                 filter_types.Add(FilterType.Category);
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.PreApproved:
+            case COMRegistryDisplayMode.PreApproved:
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.IELowRights:
+            case COMRegistryDisplayMode.IELowRights:
                 filter_types.Add(FilterType.LowRights);
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.AppIDs:
-            case DisplayMode.AppIDsWithIL:
-            case DisplayMode.AppIDsWithAC:
-            case DisplayMode.LocalServices:
+            case COMRegistryDisplayMode.AppIDs:
+            case COMRegistryDisplayMode.AppIDsWithIL:
+            case COMRegistryDisplayMode.AppIDsWithAC:
+            case COMRegistryDisplayMode.LocalServices:
                 filter_types.Add(FilterType.AppID);
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.Typelibs:
+            case COMRegistryDisplayMode.Typelibs:
                 filter_types.Add(FilterType.TypeLib);
                 break;
-            case DisplayMode.MimeTypes:
+            case COMRegistryDisplayMode.MimeTypes:
                 filter_types.Add(FilterType.MimeType);
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Interface);
                 break;
-            case DisplayMode.Processes:
+            case COMRegistryDisplayMode.Processes:
                 filter_types.Add(FilterType.Process);
                 filter_types.Add(FilterType.Ipid);
                 filter_types.Add(FilterType.AppID);
                 break;
-            case DisplayMode.RuntimeClasses:
+            case COMRegistryDisplayMode.RuntimeClasses:
                 filter_types.Add(FilterType.RuntimeClass);
                 break;
-            case DisplayMode.RuntimeServers:
+            case COMRegistryDisplayMode.RuntimeServers:
                 filter_types.Add(FilterType.RuntimeServer);
                 break;
             default:
@@ -214,35 +176,7 @@ public partial class COMRegistryViewer : UserControl
         toolStripStatusLabelCount.Text = $"Showing {treeComRegistry.Nodes.Count} of {m_originalNodes.Length} entries";
     }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="reg">The COM registry</param>
-    /// <param name="mode">The display mode</param>
-    public COMRegistryViewer(COMRegistry reg, DisplayMode mode, IEnumerable<COMProcessEntry> processes, IEnumerable<TreeNode> nodes, IEnumerable<FilterType> filter_types, string text)
-    {
-        InitializeComponent();
-        m_registry = reg;
-        m_filter_types = new HashSet<FilterType>(filter_types);
-        m_filter = new RegistryViewerFilter();
-        m_mode = mode;
-        m_processes = processes;
-        treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
-        sourceCodeViewerControl.SetRegistry(reg);
-
-        foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
-        {
-            comboBoxMode.Items.Add(filter);
-        }
-        comboBoxMode.SelectedIndex = 0;
-
-        Text = text;
-
-        m_originalNodes = nodes.ToArray();
-        UpdateStatusLabel();
-    }
-
-    private static TreeNode CreateNode(string text, string image_key, object tag)
+    private static TreeNode CreateNode(string text, string image_key, object tag, string tooltip = null)
     {
         bool dynamic = false;
         if (tag is ICOMClassEntry || tag is COMTypeLibVersionEntry || tag is COMTypeLibCoClass || tag is COMProxyFormatter)
@@ -254,6 +188,10 @@ public partial class COMRegistryViewer : UserControl
         node.ImageKey = image_key;
         node.SelectedImageKey = image_key;
         node.Tag = tag;
+        if (tooltip != null)
+        {
+            node.ToolTipText = tooltip;
+        }
         if (dynamic)
         {
             node.Nodes.Add(new TreeNode("DUMMY"));
@@ -261,53 +199,53 @@ public partial class COMRegistryViewer : UserControl
         return node;
     }
 
-    private static IEnumerable<TreeNode> SetupTree(COMRegistry registry, DisplayMode mode, IEnumerable<COMProcessEntry> processes)
-    {   
+    private static IEnumerable<TreeNode> SetupTree(COMRegistry registry, COMRegistryDisplayMode mode, IEnumerable<COMProcessEntry> processes)
+    {
         try
         {
             switch (mode)
             {
-                case DisplayMode.CLSIDsByName:
+                case COMRegistryDisplayMode.CLSIDsByName:
                     return LoadCLSIDsByNames(registry);
-                case DisplayMode.CLSIDs:
+                case COMRegistryDisplayMode.CLSIDs:
                     return LoadCLSIDs(registry);
-                case DisplayMode.ProgIDs:
+                case COMRegistryDisplayMode.ProgIDs:
                     return LoadProgIDs(registry);
-                case DisplayMode.CLSIDsByServer:
+                case COMRegistryDisplayMode.CLSIDsByServer:
                     return LoadCLSIDByServer(registry, ServerType.None);
-                case DisplayMode.CLSIDsByLocalServer:
+                case COMRegistryDisplayMode.CLSIDsByLocalServer:
                     return LoadCLSIDByServer(registry, ServerType.Local);
-                case DisplayMode.CLSIDsWithSurrogate:
+                case COMRegistryDisplayMode.CLSIDsWithSurrogate:
                     return LoadCLSIDByServer(registry, ServerType.Surrogate);
-                case DisplayMode.Interfaces:
+                case COMRegistryDisplayMode.Interfaces:
                     return LoadInterfaces(registry, false);
-                case DisplayMode.InterfacesByName:
+                case COMRegistryDisplayMode.InterfacesByName:
                     return LoadInterfaces(registry, true);
-                case DisplayMode.ImplementedCategories:
+                case COMRegistryDisplayMode.ImplementedCategories:
                     return LoadImplementedCategories(registry);
-                case DisplayMode.PreApproved:
+                case COMRegistryDisplayMode.PreApproved:
                     return LoadPreApproved(registry);
-                case DisplayMode.IELowRights:
+                case COMRegistryDisplayMode.IELowRights:
                     return LoadIELowRights(registry);
-                case DisplayMode.LocalServices:
+                case COMRegistryDisplayMode.LocalServices:
                     return LoadLocalServices(registry);
-                case DisplayMode.AppIDs:
+                case COMRegistryDisplayMode.AppIDs:
                     return LoadAppIDs(registry, false, false);
-                case DisplayMode.AppIDsWithIL:
+                case COMRegistryDisplayMode.AppIDsWithIL:
                     return LoadAppIDs(registry, true, false);
-                case DisplayMode.AppIDsWithAC:
+                case COMRegistryDisplayMode.AppIDsWithAC:
                     return LoadAppIDs(registry, false, true);
-                case DisplayMode.Typelibs:
+                case COMRegistryDisplayMode.Typelibs:
                     return LoadTypeLibs(registry);
-                case DisplayMode.MimeTypes:
+                case COMRegistryDisplayMode.MimeTypes:
                     return LoadMimeTypes(registry);
-                case DisplayMode.ProxyCLSIDs:
+                case COMRegistryDisplayMode.ProxyCLSIDs:
                     return LoadCLSIDByServer(registry, ServerType.Proxies);
-                case DisplayMode.Processes:
+                case COMRegistryDisplayMode.Processes:
                     return LoadProcesses(registry, processes);
-                case DisplayMode.RuntimeClasses:
+                case COMRegistryDisplayMode.RuntimeClasses:
                     return LoadRuntimeClasses(registry);
-                case DisplayMode.RuntimeServers:
+                case COMRegistryDisplayMode.RuntimeServers:
                     return LoadRuntimeServers(registry);
                 default:
                     break;
@@ -321,11 +259,6 @@ public partial class COMRegistryViewer : UserControl
         return new TreeNode[0];
     }
 
-    /// <summary>
-    /// Build a tooltip for a CLSID entry
-    /// </summary>
-    /// <param name="ent">The CLSID entry to build the tool tip from</param>
-    /// <returns>A string tooltip</returns>
     private static string BuildCLSIDToolTip(COMRegistry registry, COMCLSIDEntry ent)
     {
         StringBuilder strRet = new();
@@ -428,37 +361,23 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateCLSIDNode(COMRegistry registry, COMCLSIDEntry ent)
     {
-        TreeNode nodeRet = CreateNode($"{ent.Clsid.FormatGuid()} - {ent.Name}", ClassKey, ent);
-        nodeRet.ToolTipText = BuildCLSIDToolTip(registry, ent);
-        return nodeRet;
+        return CreateNode($"{ent.Clsid.FormatGuid()} - {ent.Name}", ClassKey, ent, BuildCLSIDToolTip(registry, ent));
     }
 
     private static TreeNode CreateInterfaceNode(COMRegistry registry, COMInterfaceEntry ent)
     {
-        TreeNode nodeRet = CreateNode($"{ent.Iid.FormatGuid()} - {ent.Name}", InterfaceKey, ent);
-        nodeRet.ToolTipText = BuildInterfaceToolTip(ent, null);
-
-        return nodeRet;
+        return CreateNode($"{ent.Iid.FormatGuid()} - {ent.Name}", 
+            InterfaceKey, ent, BuildInterfaceToolTip(ent, null));
     }
 
     private static TreeNode CreateInterfaceNameNode(COMRegistry registry, COMInterfaceEntry ent, COMInterfaceInstance instance)
     {
-        TreeNode nodeRet = CreateNode(ent.Name, InterfaceKey, ent);
-        nodeRet.ToolTipText = BuildInterfaceToolTip(ent, instance);
-
-        return nodeRet;
+        return CreateNode(ent.Name, InterfaceKey, ent, BuildInterfaceToolTip(ent, instance));
     }
 
     private static IEnumerable<TreeNode> LoadCLSIDs(COMRegistry registry)
     {
-        int i = 0;
-        TreeNode[] clsidNodes = new TreeNode[registry.Clsids.Count];
-        foreach (COMCLSIDEntry ent in registry.Clsids.Values)
-        {
-            clsidNodes[i] = CreateCLSIDNode(registry, ent);
-            i++;
-        }
-        return clsidNodes;
+        return registry.Clsids.Values.Select(ent => CreateCLSIDNode(registry, ent));
     }
 
     private static TreeNode CreateRuntimeClassNode(COMRuntimeClassEntry ent)
@@ -490,28 +409,15 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadProgIDs(COMRegistry registry)
     {
-        int i = 0;
-        TreeNode[] progidNodes = new TreeNode[registry.Progids.Count];
-        foreach (COMProgIDEntry ent in registry.Progids.Values)
-        {
-            progidNodes[i] = CreateNode(ent.ProgID, ClassKey, ent);
-            progidNodes[i].ToolTipText = BuildProgIDToolTip(registry, ent);
-            i++;
-        }
-        return progidNodes;
+        return registry.Progids.Values.Select(p => 
+        CreateNode(p.ProgID, ClassKey, p, BuildProgIDToolTip(registry, p)));
     }
 
     private static IEnumerable<TreeNode> LoadCLSIDsByNames(COMRegistry registry)
     {
-        List<TreeNode> nodes = new(registry.Clsids.Count);
-        foreach (COMCLSIDEntry ent in registry.Clsids.Values)
-        {
-            TreeNode node = CreateNode(ent.Name, ClassKey, ent);
-            node.ToolTipText = BuildCLSIDToolTip(registry, ent);
-            nodes.Add(node);
-        }
-        
-        return nodes.OrderBy(n => n.Text);
+        return registry.Clsids.Values.Select(ent 
+            => CreateNode(ent.Name, ClassKey, 
+            ent, BuildCLSIDToolTip(registry, ent))).OrderBy(n => n.Text);
     }
 
     private static string BuildCOMProcessTooltip(COMProcessEntry proc)
@@ -557,7 +463,7 @@ public partial class COMRegistryViewer : UserControl
         builder.AppendLine($"Strong Refs: {ipid.StrongRefs}");
         builder.AppendLine($"Weak Refs: {ipid.WeakRefs}");
         builder.AppendLine($"Private Refs: {ipid.PrivateRefs}");
-        
+
         return builder.ToString();
     }
 
@@ -577,7 +483,7 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc, 
+    private static TreeNode CreateCOMProcessNode(COMRegistry registry, COMProcessEntry proc,
         IDictionary<int, IEnumerable<COMAppIDEntry>> appIdsByPid, IDictionary<Guid, IEnumerable<COMCLSIDEntry>> clsidsByAppId)
     {
         TreeNode node = CreateNode(BuildCOMProcessName(proc), ApplicationKey, proc);
@@ -667,7 +573,7 @@ public partial class COMRegistryViewer : UserControl
         }
         else
         {
-            Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>> dict = 
+            Dictionary<COMCLSIDServerEntry, List<COMCLSIDEntry>> dict =
                 new(new COMCLSIDServerEqualityComparer());
             IEnumerable<COMCLSIDEntry> clsids = registry.Clsids.Values.Where(e => e.Servers.Count > 0);
             if (serverType == ServerType.Proxies)
@@ -749,8 +655,8 @@ public partial class COMRegistryViewer : UserControl
 
         List<TreeNode> serverNodes = new();
         foreach (var pair in clsidsByAppId)
-        {   
-            if(appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
+        {
+            if (appids.ContainsKey(pair.Key) && appids[pair.Key].IsService)
             {
                 serverNodes.Add(CreateLocalServiceNode(registry, appids[pair.Key], pair.Value));
             }
@@ -836,7 +742,7 @@ public partial class COMRegistryViewer : UserControl
         foreach (var pair in appids)
         {
             COMAppIDEntry appidEnt = appids[pair.Key];
-                
+
             if (filterIL && COMSecurity.GetILForSD(appidEnt.AccessPermission) == TokenIntegrityLevel.Medium &&
                 COMSecurity.GetILForSD(appidEnt.LaunchPermission) == TokenIntegrityLevel.Medium)
             {
@@ -879,14 +785,7 @@ public partial class COMRegistryViewer : UserControl
             currNode.Nodes.AddRange(clsidNodes.ToArray());
         }
 
-        TreeNode[] catNodes = new TreeNode[sortedNodes.Count];
-        i = 0;
-        foreach (KeyValuePair<string, TreeNode> pair in sortedNodes)
-        {
-            catNodes[i++] = pair.Value;
-        }
-
-        return catNodes;
+        return sortedNodes.Values;
     }
 
     private static IEnumerable<TreeNode> LoadPreApproved(COMRegistry registry)
@@ -962,14 +861,14 @@ public partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateTypelibVersionNode(COMTypeLibVersionEntry entry)
     {
-        TreeNode node = CreateNode($"{entry.Name} : Version {entry.Version}", 
+        TreeNode node = CreateNode($"{entry.Name} : Version {entry.Version}",
             ClassKey, entry);
         List<string> entries = new();
-        if(!string.IsNullOrWhiteSpace(entry.Win32Path))
+        if (!string.IsNullOrWhiteSpace(entry.Win32Path))
         {
             entries.Add($"Win32: {entry.Win32Path}");
         }
-        if(!string.IsNullOrWhiteSpace(entry.Win64Path))
+        if (!string.IsNullOrWhiteSpace(entry.Win64Path))
         {
             entries.Add($"Win64: {entry.Win64Path}");
         }
@@ -1028,7 +927,7 @@ public partial class COMRegistryViewer : UserControl
                     AddInterfaceNodes(factory, clsid.FactoryInterfaces);
                     node.Nodes.Add(factory);
 
-                    if (clsid is COMCLSIDEntry clsid_entry && 
+                    if (clsid is COMCLSIDEntry clsid_entry &&
                         (clsid.FactoryInterfaces.Any(i => i.Iid == COMInterfaceEntry.IID_IPSFactoryBuffer)
                         || m_registry.ProxiesByClsid.ContainsKey(clsid_entry.Clsid)))
                     {
@@ -1429,8 +1328,8 @@ public partial class COMRegistryViewer : UserControl
 
                 if (runtime_class != null)
                 {
-                    COMRuntimeServerEntry server = 
-                        runtime_class.HasServer 
+                    COMRuntimeServerEntry server =
+                        runtime_class.HasServer
                             ? m_registry.MapServerNameToEntry(runtime_class.Server) : null;
                     if (runtime_class.HasPermission || (server != null && server.HasPermission))
                     {
@@ -1632,7 +1531,7 @@ public partial class COMRegistryViewer : UserControl
             return null;
         }
 
-        if(caseSensitive)
+        if (caseSensitive)
         {
             comp = StringComparison.CurrentCulture;
         }
@@ -1724,7 +1623,7 @@ public partial class COMRegistryViewer : UserControl
             }
             else if (mode == FilterMode.Accessible || mode == FilterMode.NotAccessible)
             {
-                using SelectSecurityCheckForm form = new(m_mode == DisplayMode.Processes);
+                using SelectSecurityCheckForm form = new(m_mode == COMRegistryDisplayMode.Processes);
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     COMAccessCheck access_check = new(form.Token, form.Principal, form.AccessRights, form.LaunchRights, form.IgnoreDefault);
@@ -1828,8 +1727,8 @@ public partial class COMRegistryViewer : UserControl
                 selected_guid = intf.Iid;
             }
         }
-            
-        if(ent != null)
+
+        if (ent != null)
         {
             try
             {
@@ -1983,7 +1882,7 @@ public partial class COMRegistryViewer : UserControl
                 {
                     string comClassIdName = null;
                     Guid? comClassId = null;
-                    if(Text == "Local Services")
+                    if (Text == "Local Services")
                     {
                         comClassIdName = node.Parent.Text;
                         COMCLSIDEntry comClassClsId = node.Parent.Tag as COMCLSIDEntry;
@@ -2151,7 +2050,7 @@ public partial class COMRegistryViewer : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, 
+            EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry,
                 ipid.Ipid.ToString(),
                 ipid.ToObjref()));
         }
@@ -2264,37 +2163,13 @@ public partial class COMRegistryViewer : UserControl
         }
     }
 
-    [Guid("D63B10C5-BB46-4990-A94F-E40B9D520160")]
-    [ComImport]
-    private class RuntimeBroker
-    {
-    }
-
-    [Guid("2593F8B9-4EAF-457C-B68A-50F6B8EA6B54")]
-    [ComImport]
-    private class PerUserRuntimeBroker
-    {
-    }
-
-    private IRuntimeBroker CreateBroker(bool per_user)
-    {
-        if (per_user)
-        {
-            return (IRuntimeBroker)new PerUserRuntimeBroker();
-        }
-        else
-        {
-            return (IRuntimeBroker)new RuntimeBroker();
-        }
-    }
-
     private async void CreateInRuntimeBroker(bool per_user, bool factory)
     {
         try
         {
             if (GetSelectedClassEntry() is COMRuntimeClassEntry runtime_class)
             {
-                IRuntimeBroker broker = CreateBroker(per_user);
+                IRuntimeBroker broker = COMUtilities.CreateBroker(per_user);
                 object comObj;
                 if (factory)
                 {
@@ -2346,4 +2221,42 @@ public partial class COMRegistryViewer : UserControl
         treeComRegistry.Nodes.AddRange(m_originalNodes);
         treeComRegistry.ResumeLayout();
     }
+
+    private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
+        IEnumerable<COMProcessEntry> processes, IEnumerable<TreeNode> nodes, 
+        IEnumerable<FilterType> filter_types, string text)
+    {
+        InitializeComponent();
+        m_registry = reg;
+        m_filter_types = new HashSet<FilterType>(filter_types);
+        m_filter = new RegistryViewerFilter();
+        m_mode = mode;
+        m_processes = processes;
+        treeImageList.Images.Add(ApplicationKey, SystemIcons.Application);
+        sourceCodeViewerControl.SetRegistry(reg);
+
+        foreach (FilterMode filter in Enum.GetValues(typeof(FilterMode)))
+        {
+            comboBoxMode.Items.Add(filter);
+        }
+        comboBoxMode.SelectedIndex = 0;
+
+        Text = text;
+
+        m_originalNodes = nodes.ToArray();
+        UpdateStatusLabel();
+    }
+    #endregion
+
+    #region Constructors
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="reg">The COM registry</param>
+    /// <param name="mode">The display mode</param>
+    public COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode, IEnumerable<COMProcessEntry> processes)
+        : this(reg, mode, processes, SetupTree(reg, mode, processes), GetFilterTypes(mode), GetDisplayName(mode))
+    {
+    }
+    #endregion
 }

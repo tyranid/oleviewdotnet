@@ -2412,4 +2412,16 @@ public static class COMUtilities
         }
         return builder.ToString();
     }
+
+    public static IRuntimeBroker CreateBroker(bool per_user)
+    {
+        if (per_user)
+        {
+            return (IRuntimeBroker)new PerUserRuntimeBrokerClass();
+        }
+        else
+        {
+            return (IRuntimeBroker)new RuntimeBrokerClass();
+        }
+    }
 }
