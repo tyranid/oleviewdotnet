@@ -216,4 +216,10 @@ internal static class RegistryUtilities
             return null;
         }
     }
+
+    public static bool HasSubkey(this RegistryKey key, string name)
+    {
+        using RegistryKey subkey = key.OpenSubKey(name);
+        return subkey != null;
+    }
 }

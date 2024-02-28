@@ -149,7 +149,7 @@ internal class InterfaceViewers
 
             try
             {
-                string[] plugins = Directory.GetFiles(COMUtilities.GetPluginDirectory(), "*.dll");
+                string[] plugins = Directory.GetFiles(AppUtilities.GetPluginDirectory(), "*.dll");
 
                 foreach (string p in plugins)
                 {

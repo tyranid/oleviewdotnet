@@ -913,7 +913,7 @@ function Show-ComDatabase {
         [Parameter(Mandatory, ParameterSetName = "FromDefault")]
         [switch]$Default,
         [Parameter(ParameterSetName = "FromDefault")]
-        [OleViewDotNet.Utilities.ProgramArchitecture]$Architecture = [OleViewDotNet.Utilities.COMUtilities]::CurrentArchitecture
+        [OleViewDotNet.Utilities.ProgramArchitecture]$Architecture = [OleViewDotNet.Utilities.AppUtilities]::CurrentArchitecture
     )
 
     $DeleteFile = $false
@@ -945,11 +945,11 @@ function Show-ComDatabase {
     }
 
     if ($UseArchitecture) {
-        [OleViewDotNet.Utilities.COMUtilities]::StartArchProcess($Database.Architecture, $args)
+        [OleViewDotNet.Utilities.AppUtilities]::StartArchProcess($Database.Architecture, $args)
     } elseif ($Default) {
-        [OleViewDotNet.Utilities.COMUtilities]::StartArchProcess($Architecture, "")
+        [OleViewDotNet.Utilities.AppUtilities]::StartArchProcess($Architecture, "")
     } else {
-        [OleViewDotNet.Utilities.COMUtilities]::StartProcess($args)
+        [OleViewDotNet.Utilities.AppUtilities]::StartProcess($args)
     }
 }
 
@@ -1697,7 +1697,7 @@ function Show-ComSecurityDescriptor {
                 $args += " `"-n=$name`""
             }
 
-            [OleViewDotNet.Utilities.COMUtilities]::StartProcess($args)
+            [OleViewDotNet.Utilities.AppUtilities]::StartProcess($args)
         }
     }
 }

@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.CSharp;
-using Microsoft.Win32;
 using NtApiDotNet;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
@@ -116,74 +115,6 @@ public static class COMUtilities
         return strDesc;
     }
 
-    public static string GetAppDirectory()
-    {
-        return Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-    }
-
-    public static string GetNativeAppDirectory()
-    {
-        return Path.Combine(GetAppDirectory(), CurrentArchitecture.ToString());
-    }
-
-    public static string Get32bitExePath()
-    {
-        string path = Path.Combine(GetAppDirectory(), "OleViewDotNet32.exe");
-        if (!File.Exists(path))
-        {
-            path = GetExePath();
-        }
-        return path;
-    }
-
-    public static string GetExePath()
-    {
-        return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
-    }
-
-    internal static Win32ProcessConfig GetConfigForArchitecture(ProgramArchitecture arch, string command_line)
-    {
-        Win32ProcessConfig config = new()
-        {
-            CommandLine = $"OleViewDotNet {command_line}",
-            ApplicationName = GetExePath()
-        };
-
-        if (IsWindows1121H2OrLess)
-        {
-            if (arch == ProgramArchitecture.X86)
-            {
-                config.ApplicationName = Get32bitExePath();
-            }
-        }
-        else
-        {
-            config.MachineType = arch switch
-            {
-                ProgramArchitecture.Arm64 => DllMachineType.ARM64,
-                ProgramArchitecture.X64 => DllMachineType.AMD64,
-                ProgramArchitecture.X86 => DllMachineType.I386,
-                _ => throw new ArgumentException("Unsupported architecture."),
-            };
-        }
-        return config;
-    }
-
-    public static void StartArchProcess(ProgramArchitecture arch, string command_line)
-    {
-        Win32ProcessConfig config = GetConfigForArchitecture(arch, command_line);
-        Win32Process.CreateProcess(config).Dispose();
-    }
-
-    public static void StartProcess(string command_line)
-    {
-        StartArchProcess(CurrentArchitecture, command_line);
-    }
-
-    public static string GetPluginDirectory()
-    {
-        return Path.Combine(GetAppDirectory(), "plugin", CurrentArchitecture.ToString());
-    }
 
     private static void RegisterTypeInterfaces(Assembly a)
     {
@@ -917,142 +848,6 @@ public static class COMUtilities
     public static COMObjRef MarshalObjectToObjRef(object obj)
     {
         return MarshalObjectToObjRef(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
-    }
-
-    public static bool HasSubkey(this RegistryKey key, string name)
-    {
-        using RegistryKey subkey = key.OpenSubKey(name);
-        return subkey != null;
-    }
-
-    internal static int GetSafeHashCode<T>(this T obj) where T : class
-    {
-        if (obj == null)
-        {
-            return 0;
-        }
-        return obj.GetHashCode();
-    }
-
-    internal static int GetEnumHashCode<T>(this IEnumerable<T> e)
-    {
-        return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
-    }
-
-    internal static T[] EnumeratePointerList<T>(IntPtr p, Func<IntPtr, T> load_type)
-    {
-        List<T> ret = new();
-
-        if (p == IntPtr.Zero)
-        {
-            return new T[0];
-        }
-
-        IntPtr curr = p;
-        IntPtr value;
-        while ((value = Marshal.ReadIntPtr(curr)) != IntPtr.Zero)
-        {
-            ret.Add(load_type(value));
-            curr += IntPtr.Size;
-        }
-        return ret.ToArray();
-    }
-
-    internal static T[] EnumeratePointerList<T>(IntPtr p) where T : struct
-    {
-        return EnumeratePointerList(p, i => Marshal.PtrToStructure<T>(i));
-    }
-
-    internal static T[] ReadPointerArray<T>(IntPtr p, int count, Func<IntPtr, T> load_type)
-    {
-        T[] ret = new T[count];
-        if (p == IntPtr.Zero)
-        {
-            return ret;
-        }
-
-        for (int i = 0; i < count; ++i)
-        {
-            IntPtr curr = Marshal.ReadIntPtr(p, i * IntPtr.Size);
-            if (curr == IntPtr.Zero)
-            {
-                ret[i] = default;
-            }
-            else
-            {
-                ret[i] = load_type(curr);
-            }
-        }
-        return ret;
-    }
-
-    internal static T[] ReadPointerArray<T>(IntPtr p, int count) where T : struct
-    {
-        return ReadPointerArray(p, count, i => Marshal.PtrToStructure<T>(i));
-    }
-
-    internal static Guid ReadGuid(IntPtr p)
-    {
-        if (p == IntPtr.Zero)
-        {
-            return COMInterfaceEntry.IID_IUnknown;
-        }
-        byte[] guid = new byte[16];
-        Marshal.Copy(p, guid, 0, 16);
-        return new Guid(guid);
-    }
-
-    internal static Guid ReadGuidFromArray(IntPtr p, int index)
-    {
-        if (p == IntPtr.Zero)
-        {
-            return Guid.Empty;
-        }
-
-        IntPtr guid_ptr = Marshal.ReadIntPtr(p, index * IntPtr.Size);
-        return ReadGuid(guid_ptr);
-    }
-
-    internal static byte[] ReadAll(this BinaryReader reader, int length)
-    {
-        byte[] ret = reader.ReadBytes(length);
-        if (ret.Length != length)
-        {
-            throw new EndOfStreamException();
-        }
-        return ret;
-    }
-
-    internal static Guid ReadGuid(this BinaryReader reader)
-    {
-        return new Guid(reader.ReadAll(16));
-    }
-
-    internal static char ReadUnicodeChar(this BinaryReader reader)
-    {
-        return BitConverter.ToChar(reader.ReadAll(2), 0);
-    }
-
-    internal static void Write(this BinaryWriter writer, Guid guid)
-    {
-        writer.Write(guid.ToByteArray());
-    }
-
-    internal static string ReadZString(this BinaryReader reader)
-    {
-        StringBuilder builder = new();
-        char ch = reader.ReadUnicodeChar();
-        while (ch != 0)
-        {
-            builder.Append(ch);
-            ch = reader.ReadUnicodeChar();
-        }
-        return builder.ToString();
-    }
-
-    internal static void WriteZString(this BinaryWriter writer, string str)
-    {
-        writer.Write(Encoding.Unicode.GetBytes(str + "\0"));
     }
 
     private static string GetNextToken(string name, out string token)
@@ -1869,49 +1664,6 @@ public static class COMUtilities
     public static StorageWrapper OpenReadOnlyStorage(string name)
     {
         return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
-    }
-
-    public static ProgramArchitecture CurrentArchitecture => RuntimeInformation.ProcessArchitecture switch
-    {
-        Architecture.X86 => ProgramArchitecture.X86,
-        Architecture.X64 => ProgramArchitecture.X64,
-        Architecture.Arm64 => ProgramArchitecture.Arm64,
-        _ => ProgramArchitecture.X64,
-    };
-
-    internal static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
-    internal static readonly bool IsWindows10RS2OrLess = Environment.OSVersion.Version < new Version(10, 0, 16299);
-    internal static readonly bool IsWindows10RS3OrLess = Environment.OSVersion.Version < new Version(10, 0, 17134);
-    internal static readonly bool IsWindows10RS4OrLess = Environment.OSVersion.Version < new Version(10, 0, 17763);
-    internal static readonly bool IsWindows101909OrLess = Environment.OSVersion.Version < new Version(10, 0, 19041);
-    internal static readonly bool IsWindows1121H2OrLess = Environment.OSVersion.Version < new Version(10, 0, 22000);
-
-    public static string GetPackagePath(string packageId)
-    {
-        int length = 0;
-        Win32Error result = NativeMethods.PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
-        if (result != Win32Error.ERROR_INSUFFICIENT_BUFFER)
-        {
-            return string.Empty;
-        }
-
-        using var buffer = new SafeHGlobalBuffer(length);
-        result = NativeMethods.PackageIdFromFullName(packageId,
-        0, ref length, buffer);
-        if (result != 0)
-        {
-            return string.Empty;
-        }
-
-        StringBuilder builder = new(260);
-        length = builder.Capacity;
-        result = NativeMethods.GetPackagePath(buffer, 0, ref length, builder);
-        if (result != Win32Error.SUCCESS)
-        {
-            return string.Empty;
-        }
-
-        return builder.ToString();
     }
 
     public static void RegisterActivationFilter(IActivationFilter filter)

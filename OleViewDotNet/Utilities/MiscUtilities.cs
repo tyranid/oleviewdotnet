@@ -14,7 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
+using NtApiDotNet.Win32;
+using OleViewDotNet.Interop;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace OleViewDotNet.Utilities;
@@ -126,5 +130,53 @@ internal static class MiscUtilities
             return path;
         }
         return path.Substring(index + 1);
+    }
+
+    public static string GetProcessNameById(int pid)
+    {
+        return NtSystemInfo.GetProcessIdImagePath(pid, false)
+            .Map(s => GetFileName(s)).GetResultOrDefault(string.Empty);
+    }
+
+    public static string GetPackagePath(string packageId)
+    {
+        int length = 0;
+        Win32Error result = NativeMethods.PackageIdFromFullName(packageId, 0, ref length, SafeHGlobalBuffer.Null);
+        if (result != Win32Error.ERROR_INSUFFICIENT_BUFFER)
+        {
+            return string.Empty;
+        }
+
+        using var buffer = new SafeHGlobalBuffer(length);
+        result = NativeMethods.PackageIdFromFullName(packageId,
+        0, ref length, buffer);
+        if (result != 0)
+        {
+            return string.Empty;
+        }
+
+        StringBuilder builder = new(260);
+        length = builder.Capacity;
+        result = NativeMethods.GetPackagePath(buffer, 0, ref length, builder);
+        if (result != Win32Error.SUCCESS)
+        {
+            return string.Empty;
+        }
+
+        return builder.ToString();
+    }
+
+    internal static int GetSafeHashCode<T>(this T obj) where T : class
+    {
+        if (obj == null)
+        {
+            return 0;
+        }
+        return obj.GetHashCode();
+    }
+
+    internal static int GetEnumHashCode<T>(this IEnumerable<T> e)
+    {
+        return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
     }
 }

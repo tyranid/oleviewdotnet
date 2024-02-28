@@ -122,7 +122,7 @@ internal class COMPackagedEntry
     internal COMPackagedEntry(string packageId, RegistryKey rootKey)
     {
         PackageId = packageId;
-        PackagePath = COMUtilities.GetPackagePath(packageId);
+        PackagePath = MiscUtilities.GetPackagePath(packageId);
         Servers = ReadServers(PackagePath, rootKey);
         Classes = ReadClasses(PackagePath, rootKey);
         TreatAs = ReadTreatAs(rootKey);

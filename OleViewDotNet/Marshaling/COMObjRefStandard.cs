@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Processes.Types;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ public class COMObjRefStandard : COMObjRef
     public List<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings;
 
     public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
-    public string ProcessName => ProcessUtilities.GetProcessNameById(ProcessId);
+    public string ProcessName => MiscUtilities.GetProcessNameById(ProcessId);
     public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
     public string ApartmentName => COMUtilities.GetApartmentIdStringFromIPid(Ipid);
 

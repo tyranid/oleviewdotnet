@@ -68,7 +68,7 @@ internal struct CIDObject32 : IIDObject
             return null;
         }
 
-        if (COMUtilities.IsWindows10RS3OrLess)
+        if (AppUtilities.IsWindows10RS3OrLess)
         {
             return process.ReadStruct<CStdIdentity32>(_pStdID);
         }

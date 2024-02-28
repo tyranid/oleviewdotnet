@@ -118,7 +118,7 @@ public class COMRegistry
     {
         if (string.IsNullOrEmpty(iid_to_name_cache_path))
         {
-            iid_to_name_cache_path = Path.Combine(COMUtilities.GetAppDirectory(), "interfaces.txt");
+            iid_to_name_cache_path = Path.Combine(AppUtilities.GetAppDirectory(), "interfaces.txt");
         }
 
         if (File.Exists(iid_to_name_cache_path))
@@ -225,7 +225,7 @@ public class COMRegistry
         CreatedDate = DateTime.Now.ToLongDateString();
         CreatedMachine = Environment.MachineName;
         SixtyFourBit = Environment.Is64BitProcess;
-        Architecture = COMUtilities.CurrentArchitecture;
+        Architecture = AppUtilities.CurrentArchitecture;
     }
 
     private COMSecurityDescriptor GetSecurityDescriptor(RegistryKey key, string name, COMSecurityDescriptor default_sd)

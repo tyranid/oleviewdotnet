@@ -64,7 +64,7 @@ internal struct IPIDEntryNative : IPIDEntryNativeInterface
 
     IOXIDEntry IPIDEntryNativeInterface.GetOxidEntry(NtProcess process)
     {
-        if (COMUtilities.IsWindows101909OrLess)
+        if (AppUtilities.IsWindows101909OrLess)
             return process.ReadStruct<OXIDEntryNative>(pOXIDEntry.ToInt64());
         return process.ReadStruct<OXIDEntryNative2004>(pOXIDEntry.ToInt64());
     }

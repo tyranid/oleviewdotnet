@@ -114,7 +114,7 @@ public class RuntimeExtensionActivator
 
     public RuntimeExtensionActivator(string contractId, string packageId, string activatableClassId)
     {
-        if (COMUtilities.IsWindows10RS2OrLess)
+        if (AppUtilities.IsWindows10RS2OrLess)
         {
             throw new ArgumentException("Only supports runtime extension activation on Windows 10 RS3 and above");
         }

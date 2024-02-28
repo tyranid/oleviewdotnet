@@ -92,7 +92,7 @@ public static class ProgramSettings
     {
         if (!string.IsNullOrEmpty(_config.Value.DbgHelpPath))
             return _config.Value.DbgHelpPath;
-        string path = Path.Combine(COMUtilities.GetNativeAppDirectory(), "dbghelp.dll");
+        string path = Path.Combine(AppUtilities.GetNativeAppDirectory(), "dbghelp.dll");
         if (File.Exists(path))
             return path;
         return "dbghelp.dll";
@@ -182,7 +182,7 @@ public static class ProgramSettings
     public static string GetAppDataDirectory()
     {
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
-            "OleViewDotNet", COMUtilities.CurrentArchitecture.ToString());
+            "OleViewDotNet", AppUtilities.CurrentArchitecture.ToString());
     }
 
     public static string GetTypeLibDirectory()

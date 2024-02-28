@@ -59,7 +59,7 @@ public partial class MainForm : Form
             }
             else
             {
-                Text += $" - 64bit ({COMUtilities.CurrentArchitecture})";
+                Text += $" - 64bit ({AppUtilities.CurrentArchitecture})";
             }
         }
 
@@ -85,9 +85,9 @@ public partial class MainForm : Form
         if (Environment.Is64BitProcess)
         {
             bool is_arm64 = NtSystemInfo.EmulationProcessorInformation.ProcessorArchitecture == ProcessorAchitecture.ARM;
-            bool is_amd64 = COMUtilities.CurrentArchitecture == ProgramArchitecture.X64;
+            bool is_amd64 = AppUtilities.CurrentArchitecture == ProgramArchitecture.X64;
             menuFileOpenARM64Viewer.Visible = is_arm64 && is_amd64;
-            menuFileOpen64BitViewer.Visible = COMUtilities.CurrentArchitecture == ProgramArchitecture.Arm64;
+            menuFileOpen64BitViewer.Visible = AppUtilities.CurrentArchitecture == ProgramArchitecture.Arm64;
             menuFileOpen32BitViewer.Visible = true;
         }
         else
@@ -413,7 +413,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(ProgramArchitecture.X86, string.Empty);
+            AppUtilities.StartArchProcess(ProgramArchitecture.X86, string.Empty);
         }
         catch(Exception ex)
         {
@@ -809,7 +809,7 @@ public partial class MainForm : Form
         try
         {
             ProcessStartInfo start_info = new(Assembly.GetEntryAssembly().Location, 
-                $"--arch={COMUtilities.CurrentArchitecture}");
+                $"--arch={AppUtilities.CurrentArchitecture}");
             start_info.UseShellExecute = true;
             start_info.Verb = "runas";
 
@@ -930,7 +930,7 @@ public partial class MainForm : Form
             string temp_file = Path.GetTempFileName();
             m_registry.Save(temp_file);
 
-            string startup_script = Path.Combine(COMUtilities.GetAppDirectory(), "Startup-Module.ps1");
+            string startup_script = Path.Combine(AppUtilities.GetAppDirectory(), "Startup-Module.ps1");
             if (!File.Exists(startup_script))
             {
                 throw new ArgumentException("PowerShell startup script is missing");
@@ -989,7 +989,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(ProgramArchitecture.X64, string.Empty);
+            AppUtilities.StartArchProcess(ProgramArchitecture.X64, string.Empty);
         }
         catch (Exception ex)
         {
@@ -1001,7 +1001,7 @@ public partial class MainForm : Form
     {
         try
         {
-            COMUtilities.StartArchProcess(ProgramArchitecture.Arm64, string.Empty);
+            AppUtilities.StartArchProcess(ProgramArchitecture.Arm64, string.Empty);
         }
         catch (Exception ex)
         {

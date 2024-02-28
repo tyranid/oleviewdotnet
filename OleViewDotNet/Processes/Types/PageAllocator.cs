@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
-using OleViewDotNet.Utilities;
 using System;
 
 namespace OleViewDotNet.Processes.Types;

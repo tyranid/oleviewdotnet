@@ -358,7 +358,7 @@ public class COMEnumerateInterfaces
         args.Add("-clsctx");
         args.Add(clsctx.ToString());
 
-        Win32ProcessConfig config = COMUtilities.GetConfigForArchitecture(registry.Architecture, string.Join(" ", args));
+        Win32ProcessConfig config = AppUtilities.GetConfigForArchitecture(registry.Architecture, string.Join(" ", args));
         config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
         if (imp_token != null)
         {

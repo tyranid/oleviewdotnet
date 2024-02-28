@@ -16,21 +16,16 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Processes.Types;
 
 internal static class ProcessUtilities
 {
-    public static string GetProcessNameById(int pid)
-    {
-        return NtSystemInfo.GetProcessIdImagePath(pid, false)
-            .Map(s => MiscUtilities.GetFileName(s)).GetResultOrDefault(string.Empty);
-    }
-
     public static string ReadHStringFull(this NtProcess process, long address)
     {
         uint callback(IntPtr c, long r, int l, IntPtr ba)
@@ -47,7 +42,7 @@ internal static class ProcessUtilities
             }
         }
 
-        var machine = COMUtilities.CurrentArchitecture switch
+        var machine = AppUtilities.CurrentArchitecture switch
         {
             ProgramArchitecture.X64 => DllMachineType.AMD64,
             ProgramArchitecture.X86 => DllMachineType.I386,
@@ -79,7 +74,7 @@ internal static class ProcessUtilities
             }
         }
 
-        var machine = COMUtilities.CurrentArchitecture switch
+        var machine = AppUtilities.CurrentArchitecture switch
         {
             ProgramArchitecture.X64 => DllMachineType.AMD64,
             ProgramArchitecture.X86 => DllMachineType.I386,

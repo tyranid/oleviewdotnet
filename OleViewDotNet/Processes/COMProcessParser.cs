@@ -81,7 +81,7 @@ public static class COMProcessParser
         {
             string system_path = native ? Environment.SystemDirectory : Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
             string dll_path = Path.Combine(system_path, $"{COMUtilities.GetCOMDllName()}.dll");
-            string symbol_path = Path.Combine(COMUtilities.GetAppDirectory(), "symbol_cache", $"{GetFileMD5(dll_path)}.sym");
+            string symbol_path = Path.Combine(AppUtilities.GetAppDirectory(), "symbol_cache", $"{GetFileMD5(dll_path)}.sym");
             foreach (var line in File.ReadAllLines(symbol_path).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith("#")))
             {
                 string[] parts = line.Split(new char[] { ' ' }, 2);
@@ -344,11 +344,11 @@ public static class COMProcessParser
 
         if (process.Is64Bit)
         {
-            if (COMUtilities.IsWindows81OrLess)
+            if (AppUtilities.IsWindows81OrLess)
             {
                 return ReadHashTable<CWinRTLocalSvrClassEntryWin8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
-            else if (COMUtilities.IsWindows10RS4OrLess)
+            else if (AppUtilities.IsWindows10RS4OrLess)
             {
                 return ReadHashTable<CWinRTLocalSvrClassEntry, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
@@ -356,11 +356,11 @@ public static class COMProcessParser
         }
         else
         {
-            if (COMUtilities.IsWindows81OrLess)
+            if (AppUtilities.IsWindows81OrLess)
             {
                 return ReadHashTable<CWinRTLocalSvrClassEntry32Win8, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
-            else if (COMUtilities.IsWindows10RS4OrLess)
+            else if (AppUtilities.IsWindows10RS4OrLess)
             {
                 return ReadHashTable<CWinRTLocalSvrClassEntry32, COMRuntimeActivableClassEntry, IWinRTLocalSvrClassEntry>(process, bucket_symbol, GetRuntimeServer, resolver, config, registry);
             }
@@ -433,7 +433,7 @@ public static class COMProcessParser
     // combase!tagSOleTlsData::pSTALSvrsFront
     private static int GetSTALSvrsOffset(NtProcess process)
     {
-        if (COMUtilities.IsWindows10RS4OrLess)
+        if (AppUtilities.IsWindows10RS4OrLess)
         {
             return process.Is64Bit ? 0x118 : 0xa8;
         }
@@ -469,7 +469,7 @@ public static class COMProcessParser
             reservedForOleOffset = 0xF80;
             if (Environment.Is64BitProcess)
             {
-                if (COMUtilities.IsWindows81OrLess)
+                if (AppUtilities.IsWindows81OrLess)
                 {
                     teb += 0x2000;  // teb32. Magic constant is taken from
                                     // https://github.com/DarthTon/Blackbone/blob/607e9a3be9ca01133de2b190f2efb17b3d51db40/src/BlackBone/Subsystem/NativeSubsystem.cpp#L378

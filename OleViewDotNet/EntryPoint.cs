@@ -161,7 +161,7 @@ internal static class EntryPoint
         int enum_timeout = 10000;
         string enum_pipe = null;
         CLSCTX enum_clsctx = CLSCTX.SERVER;
-        ProgramArchitecture arch = COMUtilities.CurrentArchitecture;
+        ProgramArchitecture arch = AppUtilities.CurrentArchitecture;
 
         OptionSet opts = new() {
             { "i|in=",  "Open a database file.", v => database_file = v },
@@ -210,9 +210,9 @@ internal static class EntryPoint
             Environment.Exit(1);
         }
 
-        if (arch != COMUtilities.CurrentArchitecture)
+        if (arch != AppUtilities.CurrentArchitecture)
         {
-            COMUtilities.StartArchProcess(arch, "");
+            AppUtilities.StartArchProcess(arch, "");
             Environment.Exit(0);
         }
 
