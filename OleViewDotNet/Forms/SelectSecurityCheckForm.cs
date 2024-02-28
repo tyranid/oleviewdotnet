@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
-using NtApiDotNet.Win32;
 using OleViewDotNet.Security;
 using System;
 using System.ComponentModel;
@@ -34,6 +33,7 @@ internal partial class SelectSecurityCheckForm : Form
         Disposed += SelectSecurityCheckForm_Disposed;
         string username = $@"{Environment.UserDomainName}\{Environment.UserName}";
         textBoxPrincipal.Text = username;
+        textBoxUsername.Text = username;
         selectProcessControl.UpdateProcessList(ProcessAccessRights.None, true, false);
         foreach (object value in Enum.GetValues(typeof(TokenIntegrityLevel)))
         {
@@ -53,6 +53,7 @@ internal partial class SelectSecurityCheckForm : Form
 
     private void SelectSecurityCheckForm_Disposed(object sender, EventArgs e)
     {
+        Token?.Dispose();
         selectProcessControl.Dispose();
     }
 
@@ -76,12 +77,6 @@ internal partial class SelectSecurityCheckForm : Form
         selectProcessControl.Enabled = radioSpecificProcess.Checked;
     }
 
-    private NtToken OpenImpersonationToken()
-    {
-        using NtToken token = NtToken.OpenProcessToken();
-        return token.DuplicateToken(SecurityImpersonationLevel.Identification);
-    }
-
     private void btnOK_Click(object sender, EventArgs e)
     {
         try
@@ -99,6 +94,29 @@ internal partial class SelectSecurityCheckForm : Form
             else if (radioAnonymous.Checked)
             {
                 Token = COMAccessToken.GetAnonymous();
+            }
+            else if (radioLogonUser.Checked)
+            {
+                if (string.IsNullOrEmpty(textBoxUsername.Text))
+                    throw new ArgumentException("No username specified.");
+
+                using COMCredentials creds = new();
+                creds.UserName = textBoxUsername.Text;
+                int slash_index = creds.UserName.IndexOf('\\');
+                if (slash_index >= 0)
+                {
+                    creds.Domain = creds.UserName.Substring(0, slash_index);
+                    creds.UserName = creds.UserName.Substring(slash_index + 1);
+                }
+                if (checkBoxS4U.Checked)
+                {
+                    Token = COMAccessToken.LogonS4U(creds, TokenLogonType.Network);
+                }
+                else
+                {
+                    creds.SetPassword(textBoxPassword.Text);
+                    Token = COMAccessToken.Logon(creds, TokenLogonType.Network);
+                }
             }
 
             if (checkBoxSetIL.Checked)
@@ -157,5 +175,23 @@ internal partial class SelectSecurityCheckForm : Form
     private void listViewProcesses_ColumnClick(object sender, ColumnClickEventArgs e)
     {
         ListItemComparer.UpdateListComparer(sender as ListView, e.Column);
+    }
+
+    private void radioLogonUser_CheckedChanged(object sender, EventArgs e)
+    {
+        bool enabled = radioLogonUser.Checked;
+        checkBoxS4U.Enabled = enabled;
+        lblUserName.Enabled = enabled;
+        textBoxUsername.Enabled = enabled;
+
+        enabled = enabled && !checkBoxS4U.Checked;
+        lblPassword.Enabled = enabled;
+        textBoxPassword.Enabled = enabled;
+    }
+
+    private void checkBoxS4U_CheckedChanged(object sender, EventArgs e)
+    {
+        lblPassword.Enabled = !checkBoxS4U.Checked;
+        textBoxPassword.Enabled = !checkBoxS4U.Checked;
     }
 }

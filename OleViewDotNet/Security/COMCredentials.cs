@@ -22,11 +22,21 @@ using System.Security;
 
 namespace OleViewDotNet.Security;
 
-public sealed class COMCredentials
+public sealed class COMCredentials : IDisposable
 {
     public string UserName { get; set; }
     public string Domain { get; set; }
     public SecureString Password { get; set; }
+
+    public void SetPassword(string password)
+    {
+        Password?.Dispose();
+        Password = new SecureString();
+        foreach (char ch in password)
+        {
+            Password.AppendChar(ch);
+        }
+    }
 
     private class DisposableString : IDisposable
     {
@@ -60,5 +70,10 @@ public sealed class COMCredentials
             PasswordLength = Password?.Length ?? 0,
             Flags = COAUTHIDENTITY.SEC_WINNT_AUTH_IDENTITY_UNICODE
         }.ToBuffer();
+    }
+
+    void IDisposable.Dispose()
+    {
+        Password?.Dispose();
     }
 }

@@ -31,10 +31,17 @@ partial class SelectSecurityCheckForm
             System.Windows.Forms.GroupBox groupBoxAccessToken;
             System.Windows.Forms.GroupBox groupBoxOptions;
             System.Windows.Forms.Label label1;
+            this.checkBoxS4U = new System.Windows.Forms.CheckBox();
+            this.textBoxPassword = new System.Windows.Forms.TextBox();
+            this.lblPassword = new System.Windows.Forms.Label();
+            this.textBoxUsername = new System.Windows.Forms.TextBox();
+            this.lblUserName = new System.Windows.Forms.Label();
+            this.radioLogonUser = new System.Windows.Forms.RadioButton();
             this.selectProcessControl = new OleViewDotNet.Forms.SelectProcessControl();
             this.radioAnonymous = new System.Windows.Forms.RadioButton();
             this.radioSpecificProcess = new System.Windows.Forms.RadioButton();
             this.radioCurrentProcess = new System.Windows.Forms.RadioButton();
+            this.checkBoxIgnoreDefault = new System.Windows.Forms.CheckBox();
             this.checkBoxRemoteActivate = new System.Windows.Forms.CheckBox();
             this.checkBoxLocalActivate = new System.Windows.Forms.CheckBox();
             this.checkBoxRemoteLaunch = new System.Windows.Forms.CheckBox();
@@ -46,7 +53,6 @@ partial class SelectSecurityCheckForm
             this.checkBoxSetIL = new System.Windows.Forms.CheckBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.checkBoxIgnoreDefault = new System.Windows.Forms.CheckBox();
             groupBoxAccessToken = new System.Windows.Forms.GroupBox();
             groupBoxOptions = new System.Windows.Forms.GroupBox();
             label1 = new System.Windows.Forms.Label();
@@ -56,6 +62,12 @@ partial class SelectSecurityCheckForm
             // 
             // groupBoxAccessToken
             // 
+            groupBoxAccessToken.Controls.Add(this.checkBoxS4U);
+            groupBoxAccessToken.Controls.Add(this.textBoxPassword);
+            groupBoxAccessToken.Controls.Add(this.lblPassword);
+            groupBoxAccessToken.Controls.Add(this.textBoxUsername);
+            groupBoxAccessToken.Controls.Add(this.lblUserName);
+            groupBoxAccessToken.Controls.Add(this.radioLogonUser);
             groupBoxAccessToken.Controls.Add(this.selectProcessControl);
             groupBoxAccessToken.Controls.Add(this.radioAnonymous);
             groupBoxAccessToken.Controls.Add(this.radioSpecificProcess);
@@ -64,10 +76,71 @@ partial class SelectSecurityCheckForm
             groupBoxAccessToken.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             groupBoxAccessToken.Name = "groupBoxAccessToken";
             groupBoxAccessToken.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            groupBoxAccessToken.Size = new System.Drawing.Size(951, 334);
+            groupBoxAccessToken.Size = new System.Drawing.Size(951, 367);
             groupBoxAccessToken.TabIndex = 4;
             groupBoxAccessToken.TabStop = false;
             groupBoxAccessToken.Text = "Access Token";
+            // 
+            // checkBoxS4U
+            // 
+            this.checkBoxS4U.AutoSize = true;
+            this.checkBoxS4U.Enabled = false;
+            this.checkBoxS4U.Location = new System.Drawing.Point(857, 297);
+            this.checkBoxS4U.Name = "checkBoxS4U";
+            this.checkBoxS4U.Size = new System.Drawing.Size(67, 24);
+            this.checkBoxS4U.TabIndex = 12;
+            this.checkBoxS4U.Text = "S4U";
+            this.checkBoxS4U.UseVisualStyleBackColor = true;
+            this.checkBoxS4U.CheckedChanged += new System.EventHandler(this.checkBoxS4U_CheckedChanged);
+            // 
+            // textBoxPassword
+            // 
+            this.textBoxPassword.Enabled = false;
+            this.textBoxPassword.Location = new System.Drawing.Point(599, 296);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.Size = new System.Drawing.Size(243, 26);
+            this.textBoxPassword.TabIndex = 11;
+            this.textBoxPassword.UseSystemPasswordChar = true;
+            // 
+            // lblPassword
+            // 
+            this.lblPassword.AutoSize = true;
+            this.lblPassword.Enabled = false;
+            this.lblPassword.Location = new System.Drawing.Point(511, 298);
+            this.lblPassword.Name = "lblPassword";
+            this.lblPassword.Size = new System.Drawing.Size(82, 20);
+            this.lblPassword.TabIndex = 10;
+            this.lblPassword.Text = "Password:";
+            // 
+            // textBoxUsername
+            // 
+            this.textBoxUsername.Enabled = false;
+            this.textBoxUsername.Location = new System.Drawing.Point(262, 296);
+            this.textBoxUsername.Name = "textBoxUsername";
+            this.textBoxUsername.Size = new System.Drawing.Size(243, 26);
+            this.textBoxUsername.TabIndex = 9;
+            // 
+            // lblUserName
+            // 
+            this.lblUserName.AutoSize = true;
+            this.lblUserName.Enabled = false;
+            this.lblUserName.Location = new System.Drawing.Point(173, 298);
+            this.lblUserName.Name = "lblUserName";
+            this.lblUserName.Size = new System.Drawing.Size(87, 20);
+            this.lblUserName.TabIndex = 8;
+            this.lblUserName.Text = "Username:";
+            // 
+            // radioLogonUser
+            // 
+            this.radioLogonUser.AutoSize = true;
+            this.radioLogonUser.Location = new System.Drawing.Point(9, 296);
+            this.radioLogonUser.Name = "radioLogonUser";
+            this.radioLogonUser.Size = new System.Drawing.Size(117, 24);
+            this.radioLogonUser.TabIndex = 7;
+            this.radioLogonUser.TabStop = true;
+            this.radioLogonUser.Text = "Logon User";
+            this.radioLogonUser.UseVisualStyleBackColor = true;
+            this.radioLogonUser.CheckedChanged += new System.EventHandler(this.radioLogonUser_CheckedChanged);
             // 
             // selectProcessControl
             // 
@@ -78,13 +151,13 @@ partial class SelectSecurityCheckForm
             this.selectProcessControl.Location = new System.Drawing.Point(8, 100);
             this.selectProcessControl.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.selectProcessControl.Name = "selectProcessControl";
-            this.selectProcessControl.Size = new System.Drawing.Size(935, 190);
+            this.selectProcessControl.Size = new System.Drawing.Size(935, 188);
             this.selectProcessControl.TabIndex = 6;
             // 
             // radioAnonymous
             // 
             this.radioAnonymous.AutoSize = true;
-            this.radioAnonymous.Location = new System.Drawing.Point(9, 299);
+            this.radioAnonymous.Location = new System.Drawing.Point(9, 330);
             this.radioAnonymous.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.radioAnonymous.Name = "radioAnonymous";
             this.radioAnonymous.Size = new System.Drawing.Size(166, 24);
@@ -131,7 +204,7 @@ partial class SelectSecurityCheckForm
             groupBoxOptions.Controls.Add(this.checkBoxLocalAccess);
             groupBoxOptions.Controls.Add(this.comboBoxIL);
             groupBoxOptions.Controls.Add(this.checkBoxSetIL);
-            groupBoxOptions.Location = new System.Drawing.Point(14, 361);
+            groupBoxOptions.Location = new System.Drawing.Point(14, 396);
             groupBoxOptions.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             groupBoxOptions.Name = "groupBoxOptions";
             groupBoxOptions.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -139,6 +212,17 @@ partial class SelectSecurityCheckForm
             groupBoxOptions.TabIndex = 5;
             groupBoxOptions.TabStop = false;
             groupBoxOptions.Text = "Options";
+            // 
+            // checkBoxIgnoreDefault
+            // 
+            this.checkBoxIgnoreDefault.AutoSize = true;
+            this.checkBoxIgnoreDefault.Location = new System.Drawing.Point(771, 29);
+            this.checkBoxIgnoreDefault.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBoxIgnoreDefault.Name = "checkBoxIgnoreDefault";
+            this.checkBoxIgnoreDefault.Size = new System.Drawing.Size(137, 24);
+            this.checkBoxIgnoreDefault.TabIndex = 10;
+            this.checkBoxIgnoreDefault.Text = "Ignore Default";
+            this.checkBoxIgnoreDefault.UseVisualStyleBackColor = true;
             // 
             // checkBoxRemoteActivate
             // 
@@ -255,7 +339,7 @@ partial class SelectSecurityCheckForm
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(346, 492);
+            this.btnOK.Location = new System.Drawing.Point(346, 527);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(112, 35);
@@ -267,7 +351,7 @@ partial class SelectSecurityCheckForm
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(513, 492);
+            this.btnCancel.Location = new System.Drawing.Point(513, 527);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(112, 35);
@@ -275,24 +359,13 @@ partial class SelectSecurityCheckForm
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // checkBoxIgnoreDefault
-            // 
-            this.checkBoxIgnoreDefault.AutoSize = true;
-            this.checkBoxIgnoreDefault.Location = new System.Drawing.Point(771, 29);
-            this.checkBoxIgnoreDefault.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.checkBoxIgnoreDefault.Name = "checkBoxIgnoreDefault";
-            this.checkBoxIgnoreDefault.Size = new System.Drawing.Size(137, 24);
-            this.checkBoxIgnoreDefault.TabIndex = 10;
-            this.checkBoxIgnoreDefault.Text = "Ignore Default";
-            this.checkBoxIgnoreDefault.UseVisualStyleBackColor = true;
-            // 
             // SelectSecurityCheckForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(972, 546);
+            this.ClientSize = new System.Drawing.Size(972, 572);
             this.Controls.Add(groupBoxOptions);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -329,4 +402,10 @@ partial class SelectSecurityCheckForm
     private System.Windows.Forms.RadioButton radioAnonymous;
     private SelectProcessControl selectProcessControl;
     private System.Windows.Forms.CheckBox checkBoxIgnoreDefault;
+    private System.Windows.Forms.RadioButton radioLogonUser;
+    private System.Windows.Forms.CheckBox checkBoxS4U;
+    private System.Windows.Forms.TextBox textBoxPassword;
+    private System.Windows.Forms.TextBox textBoxUsername;
+    private System.Windows.Forms.Label lblPassword;
+    private System.Windows.Forms.Label lblUserName;
 }
