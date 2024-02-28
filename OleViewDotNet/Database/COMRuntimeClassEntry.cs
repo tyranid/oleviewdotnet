@@ -50,7 +50,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
             {
                 return string.Empty;
             }
-            return COMUtilities.GetFileName(DllPath);
+            return MiscUtilities.GetFileName(DllPath);
         }
     }
     public string PackageId { get; private set; }
@@ -99,14 +99,14 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
 
     private void LoadFromKey(RegistryKey key)
     {
-        Clsid = COMUtilities.ReadGuid(key, null, "CLSID");
-        ActivationType = (ActivationType)COMUtilities.ReadInt(key, null, "ActivationType");
-        TrustLevel = (TrustLevel)COMUtilities.ReadInt(key, null, "TrustLevel");
-        Threading = (ThreadingType)COMUtilities.ReadInt(key, null, "Threading");
-        DllPath = COMUtilities.ReadString(key, null, "DllPath");
-        Server = COMUtilities.ReadString(key, null, "Server");
+        Clsid = key.ReadGuid(null, "CLSID");
+        ActivationType = (ActivationType)key.ReadInt(null, "ActivationType");
+        TrustLevel = (TrustLevel)key.ReadInt(null, "TrustLevel");
+        Threading = (ThreadingType)key.ReadInt(null, "Threading");
+        DllPath = key.ReadString(null, "DllPath");
+        Server = key.ReadString(null, "Server");
         Permissions = key.ReadSecurityDescriptor(valueName: "Permissions");
-        ActivateInSharedBroker = COMUtilities.ReadInt(key, null, "ActivateInSharedBroker") != 0;
+        ActivateInSharedBroker = key.ReadInt(null, "ActivateInSharedBroker") != 0;
     }
 
     internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 

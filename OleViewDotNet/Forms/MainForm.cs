@@ -730,7 +730,7 @@ public partial class MainForm : Form
             }
         }
 
-        COMUtilities.SetupCachedSymbols();
+        SymbolUtilities.SetupCachedSymbols();
     }
 
     private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)

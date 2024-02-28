@@ -2489,9 +2489,9 @@ function Set-ComSymbolCache {
 
     $Path = Resolve-Path $Path
     if ($null -ne $Path) {
-        [OleViewDotNet.Utilities.COMUtilities]::ClearCachedSymbols()
-        [OleViewDotNet.Utilities.COMUtilities]::GenerateSymbolFile($Path)
-        [OleViewDotNet.Utilities.COMUtilities]::SetupCachedSymbols()
+        [OleViewDotNet.Utilities.SymbolUtilities]::ClearCachedSymbols()
+        [OleViewDotNet.Utilities.SymbolUtilities]::GenerateSymbolFile($Path)
+        [OleViewDotNet.Utilities.SymbolUtilities]::SetupCachedSymbols()
     }
 }
 

@@ -35,12 +35,12 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
 
     private void LoadFromKey(RegistryKey key)
     {
-        IdentityType = (IdentityType)COMUtilities.ReadInt(key, null, "IdentityType");
-        ServerType = (ServerType)COMUtilities.ReadInt(key, null, "ServerType");
-        InstancingType = (InstancingType)COMUtilities.ReadInt(key, null, "InstancingType");
-        Identity = COMUtilities.ReadString(key, null, "Identity");
-        ServiceName = COMUtilities.ReadString(key, null, "ServiceName");
-        ExePath = COMUtilities.ReadString(key, null, "ExePath");
+        IdentityType = (IdentityType)key.ReadInt(null, "IdentityType");
+        ServerType = (ServerType)key.ReadInt(null, "ServerType");
+        InstancingType = (InstancingType)key.ReadInt(null, "InstancingType");
+        Identity = key.ReadString(null, "Identity");
+        ServiceName = key.ReadString(null, "ServiceName");
+        ExePath = key.ReadString(null, "ExePath");
         Permissions = key.ReadSecurityDescriptor(valueName: "Permissions");
     }
     #endregion
@@ -146,7 +146,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     public string Name { get; private set; }
     public string ServiceName { get; private set; }
     public string ExePath { get; private set; }
-    public string ExeName => COMUtilities.GetFileName(ExePath);
+    public string ExeName => MiscUtilities.GetFileName(ExePath);
     public COMSecurityDescriptor Permissions { get; private set; }
     public bool HasPermission => Permissions != null;
     public IdentityType IdentityType { get; private set; }

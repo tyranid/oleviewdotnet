@@ -204,14 +204,14 @@ internal static class NativeMethods
     public delegate uint InspectHStringCallback2(IntPtr context, long readAddress, int length, IntPtr buffer);
 
     [DllImport("combase.dll")]
-    public static extern int WindowsInspectString2(long targetHString, int machine, InspectHStringCallback2 callback,
+    public static extern int WindowsInspectString2(long targetHString, DllMachineType machine, InspectHStringCallback2 callback,
         IntPtr context, out int length, out long targetStringAddress);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate uint InspectHStringCallback(IntPtr context, IntPtr readAddress, int length, IntPtr buffer);
 
     [DllImport("combase.dll")]
-    public static extern int WindowsInspectString(IntPtr targetHString, int machine, InspectHStringCallback callback,
+    public static extern int WindowsInspectString(IntPtr targetHString, DllMachineType machine, InspectHStringCallback callback,
         IntPtr context, out int length, out IntPtr targetStringAddress);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall, PreserveSig = true)]

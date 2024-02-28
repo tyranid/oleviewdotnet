@@ -43,10 +43,10 @@ public class COMRuntimeExtensionEntry : IXmlSerializable
             }
         }
         CustomProperties = custom_properties;
-        Description = COMUtilities.ReadString(key, null, "Description");
-        DisplayName = COMUtilities.ReadString(key, null, "DisplayName");
-        Icon = COMUtilities.ReadString(key, null, "Icon");
-        Vendor = COMUtilities.ReadString(key, null, "Vendor");
+        Description = key.ReadString(null, "Description");
+        DisplayName = key.ReadString(null, "DisplayName");
+        Icon = key.ReadString(null, "Icon");
+        Vendor = key.ReadString(null, "Vendor");
     }
 
     #endregion
@@ -116,14 +116,14 @@ public class COMRuntimeExtensionEntry : IXmlSerializable
         }
 
         return AppId == right.AppId && PackageId == right.PackageId && ContractId == right.ContractId && Description == right.Description
-            && DisplayName == right.DisplayName && Icon == right.Icon && Vendor == right.Vendor && COMUtilities.EqualsDictionary(CustomProperties, right.CustomProperties)
+            && DisplayName == right.DisplayName && Icon == right.Icon && Vendor == right.Vendor && MiscUtilities.EqualsDictionary(CustomProperties, right.CustomProperties)
             && Source == right.Source;
     }
 
     public override int GetHashCode()
     {
         return AppId.GetHashCode() ^ PackageId.GetHashCode() ^ ContractId.GetHashCode() ^ Description.GetHashCode()
-            ^ DisplayName.GetHashCode() ^ Icon.GetHashCode() ^ Vendor.GetHashCode() ^ COMUtilities.GetHashCodeDictionary(CustomProperties)
+            ^ DisplayName.GetHashCode() ^ Icon.GetHashCode() ^ Vendor.GetHashCode() ^ MiscUtilities.GetHashCodeDictionary(CustomProperties)
             ^ Source.GetHashCode();
     }
 

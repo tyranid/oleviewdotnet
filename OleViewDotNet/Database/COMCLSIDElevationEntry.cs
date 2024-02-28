@@ -34,8 +34,8 @@ public class COMCLSIDElevationEntry : IXmlSerializable
 
     internal COMCLSIDElevationEntry(RegistryKey key, RegistryKey vso_key, bool auto_approval)
     {
-        Enabled = COMUtilities.ReadInt(key, null, "Enabled") != 0;
-        IconReference = COMUtilities.ReadString(key, null, "IconReference");
+        Enabled = key.ReadInt(null, "Enabled") != 0;
+        IconReference = key.ReadString(null, "IconReference");
         HashSet<Guid> vsos = new();
         if (vso_key != null)
         {

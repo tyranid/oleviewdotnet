@@ -47,6 +47,15 @@ internal class COMPackagedClassEntry
     public List<Tuple<string, string>> Verbs { get; }
     public string VersionIndependentProgId { get; }
 
+    private static Guid? ReadOptionalGuid(string value)
+    {
+        if (Guid.TryParse(value, out Guid result))
+        {
+            return result;
+        }
+        return null;
+    }
+
     internal COMPackagedClassEntry(Guid clsid, string packagePath, RegistryKey rootKey)
     {
         Clsid = clsid;
@@ -61,7 +70,7 @@ internal class COMPackagedClassEntry
         DllPath = rootKey.ReadStringPath(packagePath, valueName: "DllPath");
         EnableOleDefaultHandler = rootKey.ReadBool("EnableOleDefaultHandler");
         ImplementedCategories = rootKey.ReadValueNames("ImplementedCategories")
-            .Select(n => COMUtilities.ReadOptionalGuid(n)).Where(g => g.HasValue)
+            .Select(n => ReadOptionalGuid(n)).Where(g => g.HasValue)
             .Select(g => g.Value).ToList();
         InsertableObject = rootKey.ReadBool(valueName: "InsertableObject");
         MiscStatusAspects = rootKey.ReadString(valueName: "MiscStatusAspects");

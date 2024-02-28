@@ -608,7 +608,7 @@ public partial class PropertiesControl : UserControl
                 {
                     COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                        COMUtilities.GetFileName(clsid.DefaultServerName),
+                        MiscUtilities.GetFileName(clsid.DefaultServerName),
                         COMProxyFile.GetFromCLSID(clsid), intf.Item1.Iid));
                 }
             }

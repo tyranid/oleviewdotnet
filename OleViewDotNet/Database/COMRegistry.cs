@@ -332,7 +332,7 @@ public class COMRegistry
             try
             {
                 using RegistryKey regKey = rootKey.OpenSubKey(key);
-                Guid clsid = COMUtilities.ReadGuid(regKey, "CLSID", null);
+                Guid clsid = regKey.ReadGuid("CLSID", null);
                 if (clsid != Guid.Empty)
                 {
                     COMProgIDEntry entry = new(this, key, clsid, regKey);

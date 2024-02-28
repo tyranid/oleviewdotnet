@@ -41,8 +41,6 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security;
-using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -77,204 +75,6 @@ public static class COMUtilities
         }
 
         return null;
-    }
-
-    public static object ReadObject(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
-    {
-        RegistryKey key = rootKey;
-
-        try
-        {
-            if (keyName != null)
-            {
-                key = rootKey.OpenSubKey(keyName);
-            }
-
-            if (key != null)
-            {
-                return key.GetValue(valueName, null, options);
-            }
-        }
-        finally
-        {
-            if (key != null && key != rootKey)
-            {
-                key.Close();
-            }
-        }
-        return null;
-    }
-
-    public static string ReadString(this RegistryKey rootKey, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
-    {
-        object valueObject = rootKey.ReadObject(keyName, valueName, options);
-        string valueString = string.Empty;
-        if (valueObject != null)
-        {
-            valueString = valueObject.ToString();
-        }
-
-        int first_nul = valueString.IndexOf('\0');
-        if (first_nul >= 0)
-        {
-            valueString = valueString.Substring(0, first_nul);
-        }
-
-        return valueString;
-    }
-
-    public static string ReadStringPath(this RegistryKey rootKey, string basePath, string keyName = null, string valueName = null, RegistryValueOptions options = RegistryValueOptions.None)
-    {
-        string filePath = rootKey.ReadString(keyName, valueName, options);
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            return string.Empty;
-        }
-        return Path.Combine(basePath, filePath);
-    }
-
-    public static int ReadInt(this RegistryKey rootKey, string keyName, string valueName)
-    {
-        object obj = rootKey.ReadObject(keyName, valueName, RegistryValueOptions.None);
-        if (obj == null)
-        {
-            return 0;
-        }
-
-        if (obj is int i)
-        {
-            return i;
-        }
-
-        if (obj is uint u)
-        {
-            return (int)u;
-        }
-
-        if (int.TryParse(obj.ToString(), out int ret))
-        {
-            return ret;
-        }
-
-        return 0;
-    }
-
-    public static bool ReadBool(this RegistryKey rootKey, string valueName = null, string keyName = null)
-    {
-        return rootKey.ReadInt(keyName, valueName) != 0;
-    }
-
-    public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
-    {
-        string guid = rootKey.ReadString(keyName, valueName);
-        if (guid != null && Guid.TryParse(guid, out Guid ret))
-        {
-            return ret;
-        }
-
-        return Guid.Empty;
-    }
-
-    public static COMSecurityDescriptor ReadSecurityDescriptor(this RegistryKey rootKey, string valueName = null, string keyName = null)
-    {
-        if (rootKey.ReadObject(keyName, valueName) is not byte[] ba)
-            return null;
-        var sd = SecurityDescriptor.Parse(ba, false);
-        if (!sd.IsSuccess)
-            return null;
-        return new COMSecurityDescriptor(sd.Result);
-    }
-
-    public static IEnumerable<RegistryValue> ReadValues(this RegistryKey rootKey, string keyName = null)
-    {
-        RegistryKey key = rootKey;
-
-        try
-        {
-            if (keyName != null)
-            {
-                key = rootKey.OpenSubKey(keyName);
-            }
-
-            if (key != null)
-            {
-                yield return new RegistryValue("", key.GetValue(null));
-                foreach (var valueName in key.GetValueNames())
-                {
-                    yield return new RegistryValue(valueName, key.GetValue(valueName));
-                }
-            }
-        }
-        finally
-        {
-            if (key != null && key != rootKey)
-            {
-                key.Close();
-            }
-        }
-    }
-
-    public static IEnumerable<string> ReadValueNames(this RegistryKey rootKey, string keyName = null)
-    {
-        RegistryKey key = rootKey;
-
-        try
-        {
-            if (keyName != null)
-            {
-                key = rootKey.OpenSubKey(keyName);
-            }
-
-            if (key != null)
-            {
-                return key.GetValueNames();
-            }
-        }
-        finally
-        {
-            if (key != null && key != rootKey)
-            {
-                key.Close();
-            }
-        }
-
-        return new string[0];
-    }
-
-    public static Guid? ReadOptionalGuid(string value)
-    {
-        if (Guid.TryParse(value, out Guid result))
-        {
-            return result;
-        }
-        return null;
-    }
-
-    public static COMRegistryEntrySource GetSource(this RegistryKey key)
-    {
-        using NtKey native_key = NtKey.FromHandle(key.Handle.DangerousGetHandle(), false);
-        string full_path = native_key.FullPath;
-        if (full_path.StartsWith(@"\Registry\Machine\", StringComparison.OrdinalIgnoreCase))
-        {
-            return COMRegistryEntrySource.LocalMachine;
-        }
-        else if (full_path.StartsWith(@"\Registry\User\", StringComparison.OrdinalIgnoreCase))
-        {
-            return COMRegistryEntrySource.User;
-        }
-        return COMRegistryEntrySource.Unknown;
-    }
-
-    public static RegistryKey OpenSubKeySafe(this RegistryKey rootKey, string keyName)
-    {
-        try
-        {
-            return rootKey.OpenSubKey(keyName);
-        }
-        catch (SecurityException)
-        {
-            return null;
-        }
     }
 
     public static string GetCategoryName(Guid catid)
@@ -383,65 +183,6 @@ public static class COMUtilities
     public static string GetPluginDirectory()
     {
         return Path.Combine(GetAppDirectory(), "plugin", CurrentArchitecture.ToString());
-    }
-
-    public static Dictionary<string, int> GetSymbolFile(bool native)
-    {
-        var ret = new Dictionary<string, int>();
-        try
-        {
-            string system_path = native ? Environment.SystemDirectory : Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
-            string dll_path = Path.Combine(system_path, $"{GetCOMDllName()}.dll");
-            string symbol_path = Path.Combine(GetAppDirectory(), "symbol_cache", $"{GetFileMD5(dll_path)}.sym");
-            foreach (var line in File.ReadAllLines(symbol_path).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith("#")))
-            {
-                string[] parts = line.Split(new char[] { ' ' }, 2);
-                if (parts.Length != 2)
-                {
-                    continue;
-                }
-                if (!int.TryParse(parts[0], out int address))
-                {
-                    continue;
-                }
-                ret[parts[1]] = address;
-            }
-        }
-        catch
-        {
-        }
-        return ret;
-    }
-
-    private static void AddToDictionary(Dictionary<string, int> base_dict, Dictionary<string, int> add_dict)
-    {
-        foreach (var pair in add_dict)
-        {
-            base_dict[pair.Key] = pair.Value;
-        }
-    }
-
-    private static bool _cached_symbols_configured;
-
-    public static void SetupCachedSymbols()
-    {
-        if (!_cached_symbols_configured)
-        {
-            _cached_symbols_configured = true;
-            // Load any supported symbol files.
-            AddToDictionary(SymbolResolverWrapper.GetResolvedNative(), GetSymbolFile(true));
-            if (Environment.Is64BitProcess)
-            {
-                AddToDictionary(SymbolResolverWrapper.GetResolved32Bit(), GetSymbolFile(false));
-            }
-        }
-    }
-
-    public static void ClearCachedSymbols()
-    {
-        _cached_symbols_configured = false;
-        SymbolResolverWrapper.GetResolvedNative().Clear();
-        SymbolResolverWrapper.GetResolved32Bit().Clear();
     }
 
     private static void RegisterTypeInterfaces(Assembly a)
@@ -1830,12 +1571,6 @@ public static class COMUtilities
         return is64bit ? "64 bit" : "32 bit";
     }
 
-    public static string GetFileMD5(string file)
-    {
-        using var stm = File.OpenRead(file);
-        return BitConverter.ToString(MD5.Create().ComputeHash(stm)).Replace("-", string.Empty);
-    }
-
     public static T GetGuidEntry<T>(this IDictionary<Guid, T> dict, Guid guid)
     {
         if (dict.ContainsKey(guid))
@@ -1998,44 +1733,6 @@ public static class COMUtilities
         return comObj;
     }
 
-    public static void GenerateSymbolFile(string symbol_dir)
-    {
-        COMProcessParserConfig config = new()
-        {
-            ParseStubMethods = true,
-            ResolveMethodNames = true,
-            ParseRegisteredClasses = true,
-            ParseClients = true,
-            ParseActivationContext = false,
-        };
-
-        var proc = COMProcessParser.ParseProcess(Process.GetCurrentProcess().Id, config, COMRegistry.Load(COMRegistryMode.UserOnly));
-        Dictionary<string, int> entries;
-        if (Environment.Is64BitProcess)
-        {
-            entries = SymbolResolverWrapper.GetResolvedNative();
-        }
-        else
-        {
-            entries = SymbolResolverWrapper.GetResolved32Bit();
-        }
-
-        string dll_name = GetCOMDllName();
-        var symbols = entries.Where(p => p.Key.StartsWith(dll_name));
-
-        if (!symbols.Any())
-        {
-            throw new ArgumentException("Couldn't parse the process information. Incorrect symbols?");
-        }
-
-        var module = SafeLoadLibraryHandle.GetModuleHandle(dll_name);
-        string output_file = Path.Combine(symbol_dir, $"{GetFileMD5(module.FullPath)}.sym");
-        List<string> lines = new();
-        lines.Add($"# {Environment.OSVersion.VersionString} {module.FullPath} {FileVersionInfo.GetVersionInfo(module.FullPath).FileVersion}");
-        lines.AddRange(symbols.Select(p => $"{p.Value} {p.Key}"));
-        File.WriteAllLines(output_file, lines);
-    }
-
     internal static IEnumerable<Type> GetComClasses(this Assembly typelib, bool com_visible)
     {
         return GetComTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
@@ -2174,100 +1871,6 @@ public static class COMUtilities
         return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
     }
 
-    public static string GetProcessNameById(int pid)
-    {
-        try
-        {
-            return Process.GetProcessById(pid).ProcessName;
-        }
-        catch
-        {
-            return string.Empty;
-        }
-    }
-
-    public static string ReadHStringFull(this NtProcess process, long address)
-    {
-        uint callback(IntPtr c, long r, int l, IntPtr ba)
-        {
-            try
-            {
-                byte[] data = process.ReadMemory(r, l, true);
-                Marshal.Copy(data, 0, ba, l);
-                return 0;
-            }
-            catch (NtException)
-            {
-                return 0x8000FFFF;
-            }
-        }
-
-        int machine = process.Is64Bit ? 0x8664 : 0x14C;
-
-        if (NativeMethods.WindowsInspectString2(address, machine, callback, IntPtr.Zero, out int length, out long target_addr) == 0)
-        {
-            return Encoding.Unicode.GetString(process.ReadMemory(target_addr, length * 2));
-        }
-
-        return string.Empty;
-    }
-
-    public static string ReadHString(this NtProcess process, IntPtr address)
-    {
-        uint callback(IntPtr c, IntPtr r, int l, IntPtr ba)
-        {
-            try
-            {
-                byte[] data = process.ReadMemory(r.ToInt64(), l, true);
-                Marshal.Copy(data, 0, ba, l);
-                return 0;
-            }
-            catch (NtException)
-            {
-                return 0x8000FFFF;
-            }
-        }
-
-        int machine = process.Is64Bit ? 0x8664 : 0x14C;
-
-        if (NativeMethods.WindowsInspectString(address, machine, callback, IntPtr.Zero, out int length, out IntPtr target_addr) == 0)
-        {
-            return Encoding.Unicode.GetString(process.ReadMemory(target_addr.ToInt64(), length * 2));
-        }
-
-        return string.Empty;
-    }
-
-    public static string ReadZString(this NtProcess process, long address)
-    {
-        if (address == 0)
-            return string.Empty;
-
-        StringBuilder builder = new();
-        char c = process.ReadMemory<char>(address);
-        while (c != 0)
-        {
-            builder.Append(c);
-            address += 2;
-            c = process.ReadMemory<char>(address);
-        }
-        return builder.ToString();
-    }
-
-    public static string GetFileName(string path)
-    {
-        int index = path.LastIndexOf('\\');
-        if (index < 0)
-        {
-            index = path.LastIndexOf('/');
-        }
-        if (index < 0)
-        {
-            return path;
-        }
-        return path.Substring(index + 1);
-    }
-
     public static ProgramArchitecture CurrentArchitecture => RuntimeInformation.ProcessArchitecture switch
     {
         Architecture.X86 => ProgramArchitecture.X86,
@@ -2275,39 +1878,6 @@ public static class COMUtilities
         Architecture.Arm64 => ProgramArchitecture.Arm64,
         _ => ProgramArchitecture.X64,
     };
-
-    internal static bool EqualsDictionary<K, V>(IReadOnlyDictionary<K, V> left, IReadOnlyDictionary<K, V> right)
-    {
-        if (left.Count != right.Count)
-        {
-            return false;
-        }
-
-        foreach (var pair in left)
-        {
-            if (!right.ContainsKey(pair.Key))
-            {
-                return false;
-            }
-
-            if (!right[pair.Key].Equals(pair.Value))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    internal static int GetHashCodeDictionary<K, V>(IReadOnlyDictionary<K, V> dict)
-    {
-        int hash_code = 0;
-        foreach (var pair in dict)
-        {
-            hash_code ^= pair.Key.GetHashCode() ^ pair.Value.GetHashCode();
-        }
-        return hash_code;
-    }
 
     internal static readonly bool IsWindows81OrLess = Environment.OSVersion.Version < new Version(6, 4);
     internal static readonly bool IsWindows10RS2OrLess = Environment.OSVersion.Version < new Version(10, 0, 16299);
@@ -2344,22 +1914,6 @@ public static class COMUtilities
         return builder.ToString();
     }
 
-    public static IEnumerable<T[]> Partition<T>(this IEnumerable<T> values, int partition_size)
-    {
-        List<T> list = new();
-        foreach (var value in values)
-        {
-            list.Add(value);
-            if (list.Count > partition_size)
-            {
-                yield return list.ToArray();
-                list.Clear();
-            }
-        }
-        if (list.Count > 0)
-            yield return list.ToArray();
-    }
-
     public static void RegisterActivationFilter(IActivationFilter filter)
     {
         int hr = NativeMethods.CoRegisterActivationFilter(filter);
@@ -2367,50 +1921,6 @@ public static class COMUtilities
         {
             throw new Win32Exception(hr);
         }
-    }
-
-    public static string EscapeString(this string s)
-    {
-        if (string.IsNullOrEmpty(s))
-            return s;
-        StringBuilder builder = new();
-        foreach (char ch in s)
-        {
-            switch (ch)
-            {
-                case '\\':
-                    builder.Append(@"\\");
-                    break;
-                case '\r':
-                    builder.Append(@"\r");
-                    break;
-                case '\n':
-                    builder.Append(@"\n");
-                    break;
-                case '\t':
-                    builder.Append(@"\t");
-                    break;
-                case '\f':
-                    builder.Append(@"\f");
-                    break;
-                case '\v':
-                    builder.Append(@"\v");
-                    break;
-                case '\b':
-                    builder.Append(@"\b");
-                    break;
-                case '\0':
-                    builder.Append(@"\0");
-                    break;
-                case '"':
-                    builder.Append("\\\"");
-                    break;
-                default:
-                    builder.Append(ch);
-                    break;
-            }
-        }
-        return builder.ToString();
     }
 
     public static IRuntimeBroker CreateBroker(bool per_user)

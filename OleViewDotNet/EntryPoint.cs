@@ -230,7 +230,7 @@ internal static class EntryPoint
         {
             try
             {
-                COMUtilities.GenerateSymbolFile(symbol_dir);
+                SymbolUtilities.GenerateSymbolFile(symbol_dir);
                 Environment.Exit(0);
             }
             catch (Exception)

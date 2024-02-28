@@ -35,10 +35,10 @@ public class COMCLSIDServerDotNetEntry : IXmlSerializable
 
     internal COMCLSIDServerDotNetEntry(RegistryKey key)
     {
-        AssemblyName = COMUtilities.ReadString(key, null, "Assembly");
-        ClassName = COMUtilities.ReadString(key, null, "Class");
-        CodeBase = COMUtilities.ReadString(key, null, "CodeBase");
-        RuntimeVersion = COMUtilities.ReadString(key, null, "RuntimeVersion");
+        AssemblyName = key.ReadString(null, "Assembly");
+        ClassName = key.ReadString(null, "Class");
+        CodeBase = key.ReadString(null, "CodeBase");
+        RuntimeVersion = key.ReadString(null, "RuntimeVersion");
     }
 
     XmlSchema IXmlSerializable.GetSchema()

@@ -63,7 +63,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
     public IEnumerable<COMStringBinding> StringBindings => _stringarray.StringBindings.AsReadOnly();
     public IEnumerable<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings.AsReadOnly();
     public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
-    public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
+    public string ProcessName => ProcessUtilities.GetProcessNameById(ProcessId);
 
     Guid ICOMGuid.ComGuid => Ipid;
 

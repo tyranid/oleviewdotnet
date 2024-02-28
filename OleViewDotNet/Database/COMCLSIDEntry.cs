@@ -108,11 +108,11 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             Name = $"{inproc_server.DotNet.ClassName}, {inproc_server.DotNet.AssemblyName}";
         }
 
-        AppID = COMUtilities.ReadGuid(key, null, "AppID");
+        AppID = key.ReadGuid(null, "AppID");
         if (AppID == Guid.Empty)
         {
-            AppID = COMUtilities.ReadGuid(Registry.ClassesRoot,
-                    $@"AppID\{COMUtilities.GetFileName(DefaultServer)}", "AppID");
+            AppID = Registry.ClassesRoot.ReadGuid(
+                    $@"AppID\{MiscUtilities.GetFileName(DefaultServer)}", "AppID");
         }
 
         if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
@@ -120,7 +120,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, "<APPID HOSTED>"));
         }
 
-        TypeLib = COMUtilities.ReadGuid(key, "TypeLib", null);
+        TypeLib = key.ReadGuid("TypeLib", null);
         if (key.HasSubkey("Control"))
         {
             categories.Add(COMCategory.CATID_Control);
@@ -152,7 +152,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
 
         Categories = categories.ToList().AsReadOnly();
-        TreatAs = COMUtilities.ReadGuid(key, "TreatAs", null);
+        TreatAs = key.ReadGuid("TreatAs", null);
 
         using (RegistryKey elev_key = key.OpenSubKey("Elevation"),
             vso_key = key.OpenSubKey("VirtualServerObjects"))
@@ -161,7 +161,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             {
                 using var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,
                     Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default);
-                int auto_approval = COMUtilities.ReadInt(base_key,
+                int auto_approval = base_key.ReadInt(
                     @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList", Clsid.ToString("B"));
                 Elevation = new COMCLSIDElevationEntry(elev_key, vso_key, auto_approval != 0);
             }
@@ -170,7 +170,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         ActivatableFromApp = _app_activatable.Contains(Clsid);
         using (RegistryKey trustkey = Registry.LocalMachine.OpenSubKey(@"Software\Classes\Unmarshalers\System\" + Clsid.ToString("B")))
         {
-            TrustedMarshaller = trustkey != null ? true : categories.Contains(COMCategory.CATID_TrustedMarshaler);
+            TrustedMarshaller = trustkey != null || categories.Contains(COMCategory.CATID_TrustedMarshaler);
         }
 
         Source = key.GetSource();
@@ -270,7 +270,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public string DefaultServer => GetDefaultServer().Server;
 
-    public string DefaultServerName => COMUtilities.GetFileName(DefaultServer);
+    public string DefaultServerName => MiscUtilities.GetFileName(DefaultServer);
 
     public string DefaultCmdLine => GetDefaultServer().CommandLine;
 

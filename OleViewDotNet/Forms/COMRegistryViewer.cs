@@ -771,7 +771,6 @@ public partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadImplementedCategories(COMRegistry registry)
     {
-        int i = 0;
         SortedDictionary<string, TreeNode> sortedNodes = new();
 
         foreach (var cat in registry.ImplementedCategories.Values)
@@ -1892,7 +1891,7 @@ public partial class COMRegistryViewer : UserControl
                     EntryPoint.GetMainForm(m_registry).HostControl(
                         new TypeLibControl(
                             m_registry,
-                            COMUtilities.GetFileName(clsid.DefaultServer),
+                            MiscUtilities.GetFileName(clsid.DefaultServer),
                             COMProxyFile.GetFromCLSID(clsid),
                             selected_iid,
                             comClassIdName,

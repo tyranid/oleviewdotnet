@@ -36,7 +36,7 @@ public class COMObjRefStandard : COMObjRef
     public List<COMSecurityBinding> SecurityBindings => _stringarray.SecurityBindings;
 
     public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
-    public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
+    public string ProcessName => ProcessUtilities.GetProcessNameById(ProcessId);
     public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
     public string ApartmentName => COMUtilities.GetApartmentIdStringFromIPid(Ipid);
 
