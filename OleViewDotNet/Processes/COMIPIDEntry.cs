@@ -19,6 +19,7 @@ using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Processes.Types;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
@@ -148,7 +149,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
         return _method_cache[method_ptr];
     }
 
-    internal COMIPIDEntry(COMProcessParser.IPIDEntryNativeInterface ipid, Guid oid, NtProcess process,
+    internal COMIPIDEntry(IPIDEntryNativeInterface ipid, Guid oid, NtProcess process,
         ISymbolResolver resolver, COMProcessParserConfig config, COMRegistry registry)
     {
         Ipid = ipid.Ipid;

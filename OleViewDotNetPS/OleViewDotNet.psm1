@@ -18,8 +18,6 @@ Set-StrictMode -Version Latest
 
 $Script:CurrentComDatabase = $null
 
-[OleViewDotNet.Utilities.COMUtilities]::SetupCachedSymbols()
-
 function New-CallbackProgress {
     Param(
         [parameter(Mandatory)]
@@ -2489,9 +2487,7 @@ function Set-ComSymbolCache {
 
     $Path = Resolve-Path $Path
     if ($null -ne $Path) {
-        [OleViewDotNet.Utilities.SymbolUtilities]::ClearCachedSymbols()
-        [OleViewDotNet.Utilities.SymbolUtilities]::GenerateSymbolFile($Path)
-        [OleViewDotNet.Utilities.SymbolUtilities]::SetupCachedSymbols()
+        [OleViewDotNet.Processes.COMProcessParser]::GenerateSymbolFile($Path)
     }
 }
 

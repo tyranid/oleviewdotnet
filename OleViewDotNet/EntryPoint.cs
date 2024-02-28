@@ -21,6 +21,7 @@ using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Processes;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
 using System;
@@ -230,7 +231,7 @@ internal static class EntryPoint
         {
             try
             {
-                SymbolUtilities.GenerateSymbolFile(symbol_dir);
+                COMProcessParser.GenerateSymbolFile(symbol_dir);
                 Environment.Exit(0);
             }
             catch (Exception)

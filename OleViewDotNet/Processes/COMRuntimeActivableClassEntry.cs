@@ -17,6 +17,7 @@
 using NtApiDotNet;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Processes.Types;
 using System;
 
 namespace OleViewDotNet.Processes;
@@ -42,7 +43,7 @@ public class COMRuntimeActivableClassEntry
         }
     }
 
-    internal COMRuntimeActivableClassEntry(COMProcessParser.IWinRTLocalSvrClassEntry entry, NtProcess process, ISymbolResolver resolver, COMRegistry registry)
+    internal COMRuntimeActivableClassEntry(IWinRTLocalSvrClassEntry entry, NtProcess process, ISymbolResolver resolver, COMRegistry registry)
     {
         Clsid = entry.GetClsid();
         ActivatableClassId = entry.GetActivatableClassId(process);

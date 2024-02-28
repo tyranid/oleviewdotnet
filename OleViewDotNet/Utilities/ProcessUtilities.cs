@@ -110,4 +110,22 @@ internal static class ProcessUtilities
         }
         return builder.ToString();
     }
+
+    internal static T ReadStruct<T>(this NtProcess process, long address) where T : new()
+    {
+        if (address <= 0)
+        {
+            return new T();
+        }
+        try
+        {
+            return process.ReadMemory<T>(address);
+        }
+        catch (NtException)
+        {
+            Debug.WriteLine($"Error reading address {address:X}");
+            return new T();
+        }
+    }
+
 }

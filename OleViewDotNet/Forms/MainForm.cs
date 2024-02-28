@@ -729,8 +729,6 @@ public partial class MainForm : Form
                 frm.ShowDialog(this);
             }
         }
-
-        SymbolUtilities.SetupCachedSymbols();
     }
 
     private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)

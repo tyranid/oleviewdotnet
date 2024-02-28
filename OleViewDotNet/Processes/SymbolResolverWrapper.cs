@@ -26,12 +26,10 @@ internal class SymbolResolverWrapper : ISymbolResolver
     private readonly ISymbolResolver _resolver;
     private readonly SymbolLoadedModule _base_module;
     private readonly Dictionary<string, int> _resolved;
-    private static readonly Dictionary<string, int> _resolved_32bit = new();
-    private static readonly Dictionary<string, int> _resolved_64bit = new();
     private static readonly string _dllname = COMUtilities.GetCOMDllName();
     private static readonly string _dllprefix = $"{_dllname}!";
 
-    public SymbolResolverWrapper(bool is64bit, ISymbolResolver resolver)
+    public SymbolResolverWrapper(ISymbolResolver resolver, Dictionary<string, int> resolved)
     {
         _resolver = resolver;
         foreach (var module in _resolver.GetLoadedModules())
@@ -43,24 +41,7 @@ internal class SymbolResolverWrapper : ISymbolResolver
             }
         }
 
-        _resolved = is64bit ? _resolved_64bit : _resolved_32bit;
-    }
-
-    internal static Dictionary<string, int> GetResolved32Bit()
-    {
-        return _resolved_32bit;
-    }
-
-    internal static Dictionary<string, int> GetResolvedNative()
-    {
-        if (Environment.Is64BitProcess)
-        {
-            return _resolved_64bit;
-        }
-        else
-        {
-            return _resolved_32bit;
-        }
+        _resolved = resolved;
     }
 
     public IEnumerable<SymbolLoadedModule> GetLoadedModules()
