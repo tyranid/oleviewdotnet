@@ -374,4 +374,9 @@ public sealed class COMProxyFileConverter
             m_fixup.Dequeue().CreateType();
         }
     }
+
+    public void AddProxy(COMProxyFile proxy)
+    {
+        AddProxy(proxy.Entries);
+    }
 }
