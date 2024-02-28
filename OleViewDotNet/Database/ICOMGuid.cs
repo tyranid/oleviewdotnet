@@ -16,7 +16,7 @@
 
 using System;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.Database;
 
 public interface ICOMGuid
 {
