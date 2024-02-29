@@ -42,7 +42,6 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Principal;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -248,9 +247,10 @@ public static class COMUtilities
                     try
                     {
                         Assembly a = Assembly.LoadFrom(f);
-                        if (!m_typelibs.ContainsKey(Marshal.GetTypeLibGuidForAssembly(a)))
+                        Guid typelib_guid = Marshal.GetTypeLibGuidForAssembly(a);
+                        if (!m_typelibs.ContainsKey(typelib_guid))
                         {
-                            m_typelibs.Add(Marshal.GetTypeLibGuidForAssembly(a), a);
+                            m_typelibs.Add(typelib_guid, a);
 
                             lock (m_typelibsname)
                             {
@@ -413,15 +413,11 @@ public static class COMUtilities
             }
             else
             {
-                IntPtr typeInfo = IntPtr.Zero;
-
                 try
                 {
                     IDispatch disp = (IDispatch)comObj;
 
-                    disp.GetTypeInfo(0, 0x409, out typeInfo);
-
-                    ITypeInfo ti = (ITypeInfo)Marshal.GetObjectForIUnknown(typeInfo);
+                    disp.GetTypeInfo(0, 0x409, out ITypeInfo ti);
                     ti.GetContainingTypeLib(out ITypeLib tl, out int iIndex);
                     Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
                     Assembly asm = LoadTypeLib(parent, tl);
@@ -434,13 +430,6 @@ public static class COMUtilities
                 }
                 catch (Exception)
                 {
-                }
-                finally
-                {
-                    if (typeInfo != IntPtr.Zero)
-                    {
-                        Marshal.Release(typeInfo);
-                    }
                 }
             }
         }
@@ -1112,29 +1101,6 @@ public static class COMUtilities
         return dlg.ShowDialog(parent) == DialogResult.OK;
     }
 
-    internal static string FormatGuid(this Guid guid)
-    {
-        return guid.ToString(ProgramSettings.GuidFormat).ToUpper();
-    }
-
-    internal static string FormatComClassNameAsCIdentifier(string comClassName)
-    {
-        string re = "CLSID_" + Regex.Replace(comClassName, @"[^a-zA-Z0-9]", "_");
-        re = Regex.Replace(re, "__+", "_");
-        return re;
-    }
-    internal static string FormatGuidAsCStruct(string comClassName, Guid guidToFormat)
-    {
-        string id = FormatComClassNameAsCIdentifier(comClassName);
-        string re = GuidToString(guidToFormat, GuidFormat.Structure);
-        return re.Replace("guidObject", id);
-    }
-
-    internal static string FormatGuidDefault(this Guid guid)
-    {
-        return guid.ToString().ToUpper();
-    }
-
     internal static Dictionary<int, HashSet<string>> GetServicePids()
     {
         var group = ServiceUtils.GetRunningServicesWithProcessIds().GroupBy(s => s.ProcessId);
@@ -1589,44 +1555,6 @@ public static class COMUtilities
         ICOMSourceCodeFormattable formattable = new SourceCodeFormattableType(type);
         formattable.Format(builder);
         return builder.ToString();
-    }
-
-    public static void CopyTextToClipboard(string text)
-    {
-        int tries = 10;
-        while (tries > 0)
-        {
-            try
-            {
-                Clipboard.SetText(text);
-                break;
-            }
-            catch (ExternalException)
-            {
-            }
-            Thread.Sleep(100);
-            tries--;
-        }
-    }
-
-    public static string GuidToString(Guid guid, GuidFormat format_type)
-    {
-        return format_type switch
-        {
-            GuidFormat.Object => $"<object id=\"obj\" classid=\"clsid:{guid}\">NO OBJECT</object>",
-            GuidFormat.String => guid.FormatGuid(),
-            GuidFormat.Structure => $"GUID guidObject = {guid:X};",
-            GuidFormat.HexString => string.Join(" ", guid.ToByteArray().Select(b => $"{b:X02}")),
-            GuidFormat.CSGuid => $"Guid guidObject = new Guid(\"{guid}\");",
-            GuidFormat.CSGuidAttribute => $"[Guid(\"{guid}\")]",
-            GuidFormat.RpcUuid => $"[uuid(\"{guid}\")]",
-            _ => throw new ArgumentException("Invalid guid string type", nameof(format_type)),
-        };
-    }
-
-    public static void CopyGuidToClipboard(Guid guid, GuidFormat guid_format)
-    {
-        CopyTextToClipboard(GuidToString(guid, guid_format));
     }
 
     public static bool IsProxy(object obj)

@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Utilities.Format;
 using System;
@@ -102,6 +103,16 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         }
 
         using COMTypeLibParser parser = new(path);
+        return parser.Parse();
+    }
+
+    public static COMTypeLib FromObject(object obj)
+    {
+        IDispatch disp = (IDispatch)obj;
+
+        disp.GetTypeInfo(0, 0x409, out ITypeInfo type_info);
+        type_info.GetContainingTypeLib(out ITypeLib type_lib, out int iIndex);
+        using COMTypeLibParser parser = new(type_lib);
         return parser.Parse();
     }
     #endregion

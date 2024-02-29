@@ -16,6 +16,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Interop;
 
@@ -23,7 +24,7 @@ namespace OleViewDotNet.Interop;
 public interface IDispatch
 {
     void GetTypeInfoCount(out uint pctinfo);
-    void GetTypeInfo(uint iTypeInfo, uint lcid, out IntPtr pTypeInfo);
+    void GetTypeInfo(uint iTypeInfo, uint lcid, out ITypeInfo type_info);
     void GetIDsOfNames(in Guid riid, string[] rszNames, uint cNames, uint lcid, ref int[] dispIDs);
     void Invoke(int dispIdMember, in Guid riid, uint lcid, ushort wFlags, System.Runtime.InteropServices.ComTypes.DISPPARAMS[] pDispParams,
                 out VariantWrapper pVarResult, ref System.Runtime.InteropServices.ComTypes.EXCEPINFO pExcepInfo, out uint puArgErr);

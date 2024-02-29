@@ -21,7 +21,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Utilities;
 
-public class IStreamImpl : IStream, IDisposable
+internal class IStreamImpl : IStream, IDisposable
 {
     private readonly Stream m_stream;
 

@@ -17,9 +17,14 @@
 using NtApiDotNet;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Interop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace OleViewDotNet.Utilities;
 
@@ -178,5 +183,67 @@ internal static class MiscUtilities
     internal static int GetEnumHashCode<T>(this IEnumerable<T> e)
     {
         return e.Aggregate(0, (s, o) => s ^ o.GetHashCode());
+    }
+
+    public static void CopyTextToClipboard(string text)
+    {
+        int tries = 10;
+        while (tries > 0)
+        {
+            try
+            {
+                Clipboard.SetText(text);
+                break;
+            }
+            catch (ExternalException)
+            {
+            }
+            Thread.Sleep(100);
+            tries--;
+        }
+    }
+
+    public static string GuidToString(Guid guid, GuidFormat format_type)
+    {
+        return format_type switch
+        {
+            GuidFormat.Object => $"<object id=\"obj\" classid=\"clsid:{guid}\">NO OBJECT</object>",
+            GuidFormat.String => guid.FormatGuid(),
+            GuidFormat.Structure => $"GUID guidObject = {guid:X};",
+            GuidFormat.HexString => string.Join(" ", guid.ToByteArray().Select(b => $"{b:X02}")),
+            GuidFormat.CSGuid => $"Guid guidObject = new Guid(\"{guid}\");",
+            GuidFormat.CSGuidAttribute => $"[Guid(\"{guid}\")]",
+            GuidFormat.RpcUuid => $"[uuid(\"{guid}\")]",
+            _ => throw new ArgumentException("Invalid guid string type", nameof(format_type)),
+        };
+    }
+
+    public static void CopyGuidToClipboard(Guid guid, GuidFormat guid_format)
+    {
+        CopyTextToClipboard(GuidToString(guid, guid_format));
+    }
+
+    internal static string FormatGuid(this Guid guid)
+    {
+        return guid.ToString(ProgramSettings.GuidFormat).ToUpper();
+    }
+
+    internal static string FormatComClassNameAsCIdentifier(string comClassName)
+    {
+        string re = "CLSID_" + Regex.Replace(comClassName, @"[^a-zA-Z0-9]", "_");
+        re = Regex.Replace(re, "__+", "_");
+        return re;
+    }
+
+    internal static string FormatGuidAsCStruct(string comClassName, Guid guidToFormat)
+    {
+        string id = FormatComClassNameAsCIdentifier(comClassName);
+        string re = GuidToString(guidToFormat, GuidFormat.Structure);
+        return re.Replace("guidObject", id);
+    }
+
+    internal static string FormatGuidDefault(this Guid guid)
+    {
+        return guid.ToString().ToUpper();
     }
 }

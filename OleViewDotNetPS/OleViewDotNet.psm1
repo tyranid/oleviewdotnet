@@ -2457,7 +2457,7 @@ function Format-ComGuid {
     )
 
     PROCESS {
-        [OleViewDotNet.Utilities.COMUtilities]::GuidToString($Guid, $Format)
+        [OleViewDotNet.Utilities.MiscUtilities]::GuidToString($Guid, $Format)
     }
 }
 

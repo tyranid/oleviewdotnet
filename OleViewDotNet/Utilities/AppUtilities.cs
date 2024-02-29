@@ -65,6 +65,10 @@ public static class AppUtilities
         return Path.Combine(GetAppDirectory(), "OleViewDotNet.exe");
     }
 
+    public static string GetPluginDirectory()
+    {
+        return Path.Combine(GetAppDirectory(), "plugin", CurrentArchitecture.ToString());
+    }
 
     internal static Win32ProcessConfig GetConfigForArchitecture(ProgramArchitecture arch, string command_line)
     {
@@ -103,10 +107,5 @@ public static class AppUtilities
     public static void StartProcess(string command_line)
     {
         StartArchProcess(CurrentArchitecture, command_line);
-    }
-
-    public static string GetPluginDirectory()
-    {
-        return Path.Combine(GetAppDirectory(), "plugin", CurrentArchitecture.ToString());
     }
 }
