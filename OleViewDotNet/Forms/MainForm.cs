@@ -73,11 +73,13 @@ internal partial class MainForm : Form
     {
         m_registry = registry;
         InitializeComponent();
-        m_dockPanel = new DockPanel();
-        m_dockPanel.ActiveAutoHideContent = null;
-        m_dockPanel.Dock = DockStyle.Fill;
-        m_dockPanel.Name = "dockPanel";
-        m_dockPanel.Theme = new VS2005Theme();
+        m_dockPanel = new()
+        {
+            ActiveAutoHideContent = null,
+            Dock = DockStyle.Fill,
+            Name = "dockPanel",
+            Theme = new VS2005Theme()
+        };
         Controls.Add(m_dockPanel);
         m_dockPanel.BringToFront();
         CreatePropertyGrid(true);
@@ -1035,6 +1037,7 @@ internal partial class MainForm : Form
                 return;
             m_registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
             m_registry.FilePath = null;
+            UpdateTitle();
         }
         catch (Exception ex)
         {
@@ -1101,5 +1104,19 @@ internal partial class MainForm : Form
         menuProcessesOptionsParseStubs.Checked = ProgramSettings.ParseStubMethods;
         menuProcessesOptionsParseRegisteredClasses.Checked = ProgramSettings.ParseRegisteredClasses;
         menuProcessesOptionsParseActCtx.Checked = ProgramSettings.ParseActivationContext;
+    }
+
+    private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+    {
+        if (ProgramSettings.EnableSaveOnExit && m_registry.FilePath == null && m_registry.LoadingMode == COMRegistryMode.Merged)
+        {
+            try
+            {
+                m_registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
+            }
+            catch
+            {
+            }
+        }
     }
 }

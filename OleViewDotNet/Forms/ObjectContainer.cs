@@ -15,58 +15,58 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
 internal partial class ObjectContainer : UserControl
 {
+    private sealed class GenericAxHost : AxHost
+    {
+        private readonly object m_pObject;
+
+        public GenericAxHost(object pObject) : base(Guid.Empty.ToString())
+        {
+            m_pObject = pObject;
+        }
+
+        protected override object CreateInstanceCore(Guid clsid)
+        {
+            return m_pObject;
+        }
+    }
+
     private readonly string m_objName;
-    private readonly object m_pObject;
     private readonly GenericAxHost m_axControl;
 
     public ObjectContainer(string strObjName, object pObject)
     {
         m_objName = strObjName;
-        m_pObject = pObject;
         InitializeComponent();
 
         try
         {
-            System.ComponentModel.ComponentResourceManager resources = new(typeof(ObjectContainer));
+            ComponentResourceManager resources = new(typeof(ObjectContainer));
             m_axControl = new GenericAxHost(pObject);
-            ((System.ComponentModel.ISupportInitialize)m_axControl).BeginInit();
+            m_axControl.BeginInit();
             SuspendLayout();
 
             m_axControl.Enabled = true;
-            m_axControl.Location = new System.Drawing.Point(50, 39);
+            m_axControl.Location = new Point(50, 39);
             m_axControl.Name = "axControl";
-            m_axControl.OcxState = (System.Windows.Forms.AxHost.State)resources.GetObject("axControl.OcxState");
+            m_axControl.OcxState = (AxHost.State)resources.GetObject("axControl.OcxState");
             m_axControl.Dock = DockStyle.Fill;
             m_axControl.TabIndex = 0;
             Controls.Add(m_axControl);
-            ((System.ComponentModel.ISupportInitialize)m_axControl).EndInit();
+            m_axControl.EndInit();
             ResumeLayout(false);
             Text = $"{m_objName} Container";
         }
         catch (Exception e)
         {
-            MessageBox.Show(e.ToString());                
+            MessageBox.Show(e.ToString());
         }
-    }
-}
-
-internal class GenericAxHost : AxHost
-{
-    private readonly object m_pObject;
-
-    public GenericAxHost(object pObject) : base(Guid.Empty.ToString())
-    {
-        m_pObject = pObject;
-    }
-
-    protected override object CreateInstanceCore(Guid clsid)
-    {
-        return m_pObject;
     }
 }

@@ -106,9 +106,11 @@ internal partial class ROTViewer : UserControl
         {
             MonikerInfo info = (MonikerInfo)listViewROT.SelectedItems[0].Tag;
 
-            Dictionary<string, string> props = new();
-            props.Add("Display Name", info.strDisplayName);
-            props.Add("CLSID", info.clsid.FormatGuid());
+            Dictionary<string, string> props = new()
+            {
+                { "Display Name", info.strDisplayName },
+                { "CLSID", info.clsid.FormatGuid() }
+            };
 
             try
             {
