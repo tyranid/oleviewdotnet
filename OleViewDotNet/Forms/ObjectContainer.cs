@@ -19,7 +19,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ObjectContainer : UserControl
+internal partial class ObjectContainer : UserControl
 {
     private readonly string m_objName;
     private readonly object m_pObject;

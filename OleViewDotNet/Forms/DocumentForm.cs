@@ -19,7 +19,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet.Forms;
 
-public partial class DocumentForm : DockContent
+internal partial class DocumentForm : DockContent
 {
     private readonly Control _control;
 

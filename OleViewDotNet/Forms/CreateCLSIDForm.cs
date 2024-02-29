@@ -20,7 +20,7 @@ using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Forms;
 
-public partial class CreateCLSIDForm : Form
+internal partial class CreateCLSIDForm : Form
 {
     public Guid Clsid { get; private set; }
     public CLSCTX ClsCtx { get; private set; }

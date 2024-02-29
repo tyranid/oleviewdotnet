@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ClassFactoryTypeViewer : UserControl
+internal partial class ClassFactoryTypeViewer : UserControl
 {
     private readonly object _obj;
     private readonly string _name;

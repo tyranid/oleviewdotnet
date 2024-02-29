@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class SourceCodeViewerControl : UserControl
+internal partial class SourceCodeViewerControl : UserControl
 {
     private COMRegistry m_registry;
     private object m_selected_obj;

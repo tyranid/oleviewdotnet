@@ -20,8 +20,8 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Forms;
 
-public partial class CreateIStreamForm : Form
-{      
+internal partial class CreateIStreamForm : Form
+{
     public CreateIStreamForm()
     {
         InitializeComponent();

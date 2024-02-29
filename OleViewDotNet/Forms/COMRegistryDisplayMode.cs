@@ -19,7 +19,7 @@ namespace OleViewDotNet.Forms;
 /// <summary>
 /// Enumeration to indicate what to display
 /// </summary>
-public enum COMRegistryDisplayMode
+internal enum COMRegistryDisplayMode
 {
     CLSIDs,
     ProgIDs,

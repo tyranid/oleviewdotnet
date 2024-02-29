@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class GetTypeForm : Form
+internal partial class GetTypeForm : Form
 {
     /// <summary>
     /// Dictionary of previous entries to the type field

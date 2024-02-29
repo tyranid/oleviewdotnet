@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class QueryInterfacesOptionsForm : Form
+internal partial class QueryInterfacesOptionsForm : Form
 {
     public QueryInterfacesOptionsForm()
     {

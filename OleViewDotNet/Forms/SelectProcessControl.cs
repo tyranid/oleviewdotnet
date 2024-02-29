@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class SelectProcessControl : UserControl
+internal partial class SelectProcessControl : UserControl
 {
     private DisposableList<NtProcess> _processes;
 

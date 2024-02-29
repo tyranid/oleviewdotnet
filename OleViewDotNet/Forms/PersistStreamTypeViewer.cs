@@ -22,7 +22,7 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Forms;
 
-public partial class PersistStreamTypeViewer : UserControl
+internal partial class PersistStreamTypeViewer : UserControl
 {
     private readonly object _obj;
 

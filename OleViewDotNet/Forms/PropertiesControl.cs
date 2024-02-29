@@ -31,7 +31,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class PropertiesControl : UserControl
+internal partial class PropertiesControl : UserControl
 {
     private readonly COMRegistry m_registry;
     private COMAppIDEntry m_appid;
@@ -472,7 +472,7 @@ public partial class PropertiesControl : UserControl
         if (listViewProgIDs.SelectedItems.Count > 0)
         {
             ListViewItem item = listViewProgIDs.SelectedItems[0];
-            COMUtilities.CopyTextToClipboard(item.Text);
+            MiscUtilities.CopyTextToClipboard(item.Text);
         }
     }
 
@@ -532,7 +532,7 @@ public partial class PropertiesControl : UserControl
         if (sender is ListView view && view.SelectedIndices.Count > 0)
         {
             ListViewItem item = view.SelectedItems[0];
-            COMUtilities.CopyTextToClipboard(item.Text);
+            MiscUtilities.CopyTextToClipboard(item.Text);
         }
     }
 
@@ -542,7 +542,7 @@ public partial class PropertiesControl : UserControl
         {
             ListViewItem item = view.SelectedItems[0];
             Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
-            COMUtilities.CopyGuidToClipboard(intf.Item1.Iid, type);
+            MiscUtilities.CopyGuidToClipboard(intf.Item1.Iid, type);
         }
     }
 
@@ -639,7 +639,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard($"0x{ipid.Interface.ToInt64():X}");
+            MiscUtilities.CopyTextToClipboard($"0x{ipid.Interface.ToInt64():X}");
         }
     }
 
@@ -648,7 +648,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyTextToClipboard($"0x{ipid.Stub.ToInt64():X}");
+            MiscUtilities.CopyTextToClipboard($"0x{ipid.Stub.ToInt64():X}");
         }
     }
 
@@ -771,7 +771,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyGuidToClipboard(ipid.Ipid, GuidFormat.String);
+            MiscUtilities.CopyGuidToClipboard(ipid.Ipid, GuidFormat.String);
         }
     }
 
@@ -780,7 +780,7 @@ public partial class PropertiesControl : UserControl
         COMIPIDEntry ipid = GetSelectedIpid();
         if (ipid != null)
         {
-            COMUtilities.CopyGuidToClipboard(ipid.Iid, GuidFormat.String);
+            MiscUtilities.CopyGuidToClipboard(ipid.Iid, GuidFormat.String);
         }
     }
 
@@ -838,7 +838,7 @@ public partial class PropertiesControl : UserControl
         COMProcessClassRegistration c = GetRegisteredClass();
         if (c != null)
         {
-            COMUtilities.CopyGuidToClipboard(c.Clsid, GuidFormat.String);
+            MiscUtilities.CopyGuidToClipboard(c.Clsid, GuidFormat.String);
         }
     }
 
@@ -864,7 +864,7 @@ public partial class PropertiesControl : UserControl
         if (ipid != null)
         {
             var objref = $"objref:{Convert.ToBase64String(ipid.ToObjref())}:";
-            COMUtilities.CopyTextToClipboard(objref);
+            MiscUtilities.CopyTextToClipboard(objref);
         }
     }
 

@@ -30,7 +30,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class TypeLibControl : UserControl
+internal partial class TypeLibControl : UserControl
 {
     private readonly IEnumerable<ListViewItemWithGuid> m_interfaces;
     private readonly COMSourceCodeBuilder m_builder;
@@ -334,7 +334,7 @@ public partial class TypeLibControl : UserControl
         if (sender is ListView list && list.SelectedItems.Count > 0)
         {
             ListViewItem item = listViewInterfaces.SelectedItems[0];
-            COMUtilities.CopyTextToClipboard(item.Text);
+            MiscUtilities.CopyTextToClipboard(item.Text);
         }
     }
 
@@ -344,7 +344,7 @@ public partial class TypeLibControl : UserControl
         {
             if (list.SelectedItems[0] is ListViewItemWithGuid item)
             {
-                COMUtilities.CopyGuidToClipboard(item.Guid, copy_type);
+                MiscUtilities.CopyGuidToClipboard(item.Guid, copy_type);
             }
         }
     }
@@ -391,7 +391,7 @@ public partial class TypeLibControl : UserControl
         {
             // C++ style is requsted, let's add a line about the CLSID being rendered
 
-            sb.AppendLine(COMUtilities.FormatGuidAsCStruct(m_com_class_id_name, m_com_class_id.Value));
+            sb.AppendLine(MiscUtilities.FormatGuidAsCStruct(m_com_class_id_name, m_com_class_id.Value));
             sb.AppendLine();
         }
         foreach(var listView in new ListView[] { listViewEnums, listViewStructures, listViewClasses, listViewInterfaces })

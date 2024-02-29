@@ -22,7 +22,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class HexEditorControl : UserControl
+internal partial class HexEditorControl : UserControl
 {
     private DynamicByteProvider _bytes;
 
@@ -169,7 +169,7 @@ public partial class HexEditorControl : UserControl
         if (hexBox.CanCopy() && hexBox.SelectionLength == 16)
         {
             byte[] bytes = GetSelectedBytes();
-            COMUtilities.CopyTextToClipboard(new Guid(bytes).FormatGuid());
+            MiscUtilities.CopyTextToClipboard(new Guid(bytes).FormatGuid());
         }
     }
 

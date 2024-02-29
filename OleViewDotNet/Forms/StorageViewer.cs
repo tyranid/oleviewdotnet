@@ -24,7 +24,7 @@ using IS = System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Forms;
 
-public partial class StorageViewer : UserControl
+internal partial class StorageViewer : UserControl
 {
     private static string EscapeStorageName(string name)
     {

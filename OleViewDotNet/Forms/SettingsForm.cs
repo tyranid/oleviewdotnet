@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class SettingsForm : Form
+internal partial class SettingsForm : Form
 {
     public SettingsForm()
     {

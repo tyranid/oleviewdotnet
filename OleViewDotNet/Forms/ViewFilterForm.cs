@@ -20,7 +20,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ViewFilterForm : Form
+internal partial class ViewFilterForm : Form
 {
     public ViewFilterForm(RegistryViewerFilter filter, IEnumerable<FilterType> types)
     {

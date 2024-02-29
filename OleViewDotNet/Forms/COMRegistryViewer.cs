@@ -39,7 +39,7 @@ namespace OleViewDotNet.Forms;
 /// <summary>
 /// Form to view the COM registration information
 /// </summary>
-public partial class COMRegistryViewer : UserControl
+internal partial class COMRegistryViewer : UserControl
 {
     #region Private Members
     private readonly COMRegistry m_registry;
@@ -1081,7 +1081,7 @@ public partial class COMRegistryViewer : UserControl
         Guid guid = GetGuidFromType(treeComRegistry.SelectedNode);
         if (guid != Guid.Empty)
         {
-            COMUtilities.CopyGuidToClipboard(guid, GuidFormat.String);
+            MiscUtilities.CopyGuidToClipboard(guid, GuidFormat.String);
         }
     }
 
@@ -1091,7 +1091,7 @@ public partial class COMRegistryViewer : UserControl
 
         if (guid != Guid.Empty)
         {
-            COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Structure);
+            MiscUtilities.CopyGuidToClipboard(guid, GuidFormat.Structure);
         }
     }
 
@@ -1101,7 +1101,7 @@ public partial class COMRegistryViewer : UserControl
 
         if (guid != Guid.Empty)
         {
-            COMUtilities.CopyGuidToClipboard(guid, GuidFormat.HexString);
+            MiscUtilities.CopyGuidToClipboard(guid, GuidFormat.HexString);
         }
     }
 
@@ -1121,7 +1121,7 @@ public partial class COMRegistryViewer : UserControl
 
         if (guid != Guid.Empty)
         {
-            COMUtilities.CopyGuidToClipboard(guid, GuidFormat.Object);
+            MiscUtilities.CopyGuidToClipboard(guid, GuidFormat.Object);
         }
     }
 
@@ -1855,7 +1855,7 @@ public partial class COMRegistryViewer : UserControl
         TreeNode node = treeComRegistry.SelectedNode;
         if (node != null)
         {
-            COMUtilities.CopyTextToClipboard(node.Text);
+            MiscUtilities.CopyTextToClipboard(node.Text);
         }
     }
 

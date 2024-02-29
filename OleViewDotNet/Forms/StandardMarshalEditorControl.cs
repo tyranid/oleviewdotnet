@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class StandardMarshalEditorControl : UserControl
+internal partial class StandardMarshalEditorControl : UserControl
 {
     private readonly COMRegistry m_registry;
     private readonly COMObjRefStandard m_objref;

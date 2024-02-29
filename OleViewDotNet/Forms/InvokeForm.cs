@@ -25,7 +25,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class InvokeForm : Form
+internal partial class InvokeForm : Form
 {
     private readonly MethodInfo m_mi;
     private readonly object m_pObject;

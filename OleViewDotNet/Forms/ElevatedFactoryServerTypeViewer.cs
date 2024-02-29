@@ -24,7 +24,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ElevatedFactoryServerTypeViewer : UserControl
+internal partial class ElevatedFactoryServerTypeViewer : UserControl
 {
     private readonly object _obj;
     private readonly string _name;

@@ -21,7 +21,7 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Forms;
 
-public partial class AboutForm : Form
+internal partial class AboutForm : Form
 {
     public AboutForm()
     {

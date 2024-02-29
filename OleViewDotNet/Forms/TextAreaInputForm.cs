@@ -26,7 +26,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class TextAreaInputForm : Form
+internal partial class TextAreaInputForm : Form
 {
     public TextAreaInputForm()
     {

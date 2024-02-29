@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class SelectProcessForm : Form
+internal partial class SelectProcessForm : Form
 {
     public SelectProcessForm(ProcessAccessRights desired_access, bool require_token, bool filter_native)
     {

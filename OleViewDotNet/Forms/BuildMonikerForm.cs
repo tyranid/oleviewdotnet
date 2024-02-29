@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class BuildMonikerForm : Form
+internal partial class BuildMonikerForm : Form
 {
     private static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
     public BuildMonikerForm(string last_moniker)

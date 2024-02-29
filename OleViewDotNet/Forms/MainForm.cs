@@ -36,7 +36,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace OleViewDotNet.Forms;
 
-public partial class MainForm : Form
+internal partial class MainForm : Form
 {
     private readonly DockPanel   m_dockPanel;
     private readonly COMRegistry m_registry;

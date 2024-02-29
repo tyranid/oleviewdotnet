@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class MarshalEditorControl : UserControl
+internal partial class MarshalEditorControl : UserControl
 {
     private readonly COMRegistry m_registry;
     private readonly COMObjRef m_objref;

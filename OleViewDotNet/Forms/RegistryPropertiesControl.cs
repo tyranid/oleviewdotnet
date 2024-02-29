@@ -20,7 +20,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class RegistryPropertiesControl : UserControl
+internal partial class RegistryPropertiesControl : UserControl
 {
     private void AddListItem(string name, object value)
     {

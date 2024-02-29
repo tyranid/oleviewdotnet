@@ -24,7 +24,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ViewFilterControl : UserControl
+internal partial class ViewFilterControl : UserControl
 {
     private class FilterSorter : IComparer
     {

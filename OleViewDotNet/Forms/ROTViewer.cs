@@ -25,7 +25,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class ROTViewer : UserControl
+internal partial class ROTViewer : UserControl
 {
     private readonly COMRegistry m_registry;
 

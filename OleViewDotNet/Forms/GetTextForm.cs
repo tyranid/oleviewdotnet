@@ -19,7 +19,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class GetTextForm : Form
+internal partial class GetTextForm : Form
 {
     public string Data
     {

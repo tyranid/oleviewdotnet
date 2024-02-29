@@ -29,7 +29,7 @@ namespace OleViewDotNet.Forms;
 /// <summary>
 /// Form to display basic information about an object
 /// </summary>
-public partial class ObjectInformation : UserControl
+internal partial class ObjectInformation : UserControl
 {
     private readonly ObjectEntry m_pEntry;
     private readonly object m_pObject;

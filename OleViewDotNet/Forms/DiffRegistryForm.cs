@@ -22,7 +22,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
 
-public partial class DiffRegistryForm : Form
+internal partial class DiffRegistryForm : Form
 {
     public DiffRegistryForm(COMRegistry current_registry)
     {
