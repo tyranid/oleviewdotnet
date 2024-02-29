@@ -120,7 +120,7 @@ public static class COMUtilities
 
         foreach (Type t in types)
         {
-            if (t.IsInterface && t.IsPublic && t.GetMethods().Length > 0)
+            if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() == null)
             {
                 InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
                 if (!m_iidtypes.ContainsKey(t.GUID))
