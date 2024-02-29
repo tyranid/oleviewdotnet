@@ -104,30 +104,30 @@ internal partial class TypeLibControl : UserControl
         return Array.Empty<ListViewItemWithGuid>();
     }
 
-    private static ListViewItemWithGuid MapTypeToItem(Type type)
+    private static ListViewItemWithGuid MapTypeToItem(SourceCodeFormattableType type)
     {
         ListViewItemWithGuid item = new(type.Name, type.GUID);
         item.SubItems.Add(type.GUID.FormatGuid());
-        item.Tag = new SourceCodeFormattableType(type);
+        item.Tag = type;
         return item;
     }
 
-    private static ListViewItemWithGuid MapTypeToItemNoSubItem(Type type)
+    private static ListViewItemWithGuid MapTypeToItemNoSubItem(SourceCodeFormattableType type)
     {
         return new(type.Name, type.GUID)
         {
-            Tag = new SourceCodeFormattableType(type)
+            Tag = type
         };
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(Assembly typelib, bool com_visible)
+    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(SourceCodeFormattableAssembly typelib)
     {
-        return typelib.GetComInterfaces(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
+        return typelib.GetComInterfaces().OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
-    private static IEnumerable<ListViewItemWithGuid> FormatClasses(Assembly typelib, bool com_visible)
+    private static IEnumerable<ListViewItemWithGuid> FormatClasses(SourceCodeFormattableAssembly typelib)
     {
-        return typelib.GetComClasses(com_visible).OrderBy(t => t.Name).Select(MapTypeToItem);
+        return typelib.GetComClasses().OrderBy(t => t.Name).Select(MapTypeToItem);
     }
 
     private static string GetComProxyName(COMProxyInterface proxy, IDictionary<Guid, string> iids_to_names)
@@ -165,14 +165,14 @@ internal partial class TypeLibControl : UserControl
         }
     }
 
-    private static IEnumerable<ListViewItem> FormatAssemblyStructs(Assembly typelib, bool com_visible)
+    private static IEnumerable<ListViewItem> FormatAssemblyStructs(SourceCodeFormattableAssembly typelib)
     {
-        return typelib.GetComStructs(com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
+        return typelib.GetComStructs().OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
     }
 
-    private static IEnumerable<ListViewItem> FormatAssemblyEnums(Assembly typelib, bool com_visible)
+    private static IEnumerable<ListViewItem> FormatAssemblyEnums(SourceCodeFormattableAssembly typelib)
     {
-        return typelib.GetComEnums(com_visible).OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
+        return typelib.GetComEnums().OrderBy(t => t.Name).Select(MapTypeToItemNoSubItem);
     }
 
     private void AddGuidItems(ListView list,
@@ -274,16 +274,21 @@ internal partial class TypeLibControl : UserControl
         AddGuidItems(listViewInterfaces, filteredInterfaces, tabPageInterfaces, m_guid_to_view, false);
     }
 
-    public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
-        : this(null, name, guid_to_view, FormatInterfaces(typelib, dotnet_assembly), Array.Empty<ListViewItemWithGuid>(),
-              dotnet_assembly ? FormatClasses(typelib, dotnet_assembly) : Array.Empty<ListViewItemWithGuid>(),
-              FormatAssemblyStructs(typelib, dotnet_assembly),
-              FormatAssemblyEnums(typelib, dotnet_assembly))
+    private TypeLibControl(string name, SourceCodeFormattableAssembly typelib, Guid guid_to_view)
+        : this(null, name, guid_to_view, FormatInterfaces(typelib), Array.Empty<ListViewItemWithGuid>(),
+              typelib.ComVisible ? FormatClasses(typelib) : Array.Empty<ListViewItemWithGuid>(),
+              FormatAssemblyStructs(typelib),
+              FormatAssemblyEnums(typelib))
     {
         btnDqs.Visible = false;
         cbProxyRenderStyle.Visible = false;
         checkBoxHideComments.Visible = false;
         lblRendering.Visible = false;
+    }
+
+    public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
+        : this(name, new SourceCodeFormattableAssembly(typelib, dotnet_assembly), guid_to_view)
+    {
     }
 
     public TypeLibControl(COMRegistry registry, string name, ICOMSourceCodeFormattable formatter,
