@@ -405,7 +405,7 @@ public class COMRegistry
 
         if (load_runtime_intfs)
         {
-            foreach (var pair in COMUtilities.RuntimeInterfaceMetadata)
+            foreach (var pair in RuntimeMetadata.Interfaces)
             {
                 if (!interfaces.ContainsKey(pair.Key))
                 {

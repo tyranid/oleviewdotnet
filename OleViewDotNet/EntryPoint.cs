@@ -303,7 +303,7 @@ public static class EntryPoint
                     catch
                     {
                         MessageBox.Show($"Error loading database {default_db}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Environment.Exit(1);
+                        // Fall through and load the database manually.
                     }
                 }
 
@@ -336,12 +336,6 @@ public static class EntryPoint
                     NativeMethods.CoRegisterActivationFilter(new ActivationFilter());
                 }
                 Application.Run(_appContext);
-
-                if (ProgramSettings.EnableSaveOnExit && registry.LoadingMode == COMRegistryMode.Merged)
-                {
-                    registry.Save(ProgramSettings.GetDefaultDatabasePath(true));
-                }
-
                 ProgramSettings.Save();
             }
             catch (Exception ex)

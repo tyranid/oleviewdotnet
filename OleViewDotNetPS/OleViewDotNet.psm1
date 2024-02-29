@@ -2607,7 +2607,7 @@ function Get-ComRuntimeInterface {
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
             "All" {
-                [OleViewDotNet.Utilities.COMUtilities]::RuntimeInterfaceMetadata.Values | Write-Output 
+                [OleViewDotNet.Utilities.RuntimeMetadata]::Interfaces.Values | Write-Output 
             }
             "FromName" {
                 Get-ComRuntimeInterface | Where-Object Name -eq $Name | Write-Output
@@ -2616,7 +2616,7 @@ function Get-ComRuntimeInterface {
                 Get-ComRuntimeInterface | Where-Object FullName -eq $FullName | Write-Output
             }
             "FromIid" {
-                [OleViewDotNet.Utilities.COMUtilities]::RuntimeInterfaceMetadata[$Iid] | Write-Output
+                [OleViewDotNet.Utilities.RuntimeMetadata]::Interfaces[$Iid] | Write-Output
             }
         }
     }
