@@ -1687,12 +1687,11 @@ function Show-ComSecurityDescriptor {
         }
 
         if ($null -ne $SecurityDescriptor) {
+            $args = "-v=$($SecurityDescriptor.ToBase64())"
             if ($ShowAccess) {
-                $cmd = "-v"
-            } else {
-                $cmd = "-l"
+                $args += " --access"
             }
-            $args = "$cmd=$SecurityDescriptor"
+            
             if ("" -ne $name) {
                 $args += " `"-n=$name`""
             }

@@ -17,7 +17,6 @@
 using NDesk.Options;
 using NtApiDotNet;
 using NtApiDotNet.Forms;
-using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Forms;
 using OleViewDotNet.Interop;
@@ -134,6 +133,45 @@ public static class EntryPoint
         return ss.Select(s => (COMServerType)Enum.Parse(typeof(COMServerType), s, true)).ToArray();
     }
 
+    private static void ShowSecurityDescriptor(string view_sd, bool access, string view_name)
+    {
+        SecurityDescriptor sd = SecurityDescriptor.ParseBase64(view_sd);
+        bool has_container = false;
+        if (sd.DaclPresent)
+        {
+            foreach (var ace in sd.Dacl)
+            {
+                if (ace.Mask.IsAccessGranted(COMAccessRights.ActivateContainer | COMAccessRights.ExecuteContainer))
+                {
+                    has_container = true;
+                    break;
+                }
+            }
+        }
+        AccessMask valid_access = access ? 0x7 : 0x1F;
+        if (has_container)
+        {
+            valid_access |= access ? 0x20 : 0x60;
+        }
+
+        SecurityDescriptorViewerControl control = new();
+        DocumentForm frm = new(control);
+        string title = $"{(access ? "Access Security" : "Launch Security")}";
+        if (!string.IsNullOrWhiteSpace(view_name))
+        {
+            title = $"{view_name} {title}";
+        }
+        frm.Text = title;
+        control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
+        {
+            GenericExecute = valid_access,
+            GenericRead = valid_access,
+            GenericWrite = valid_access,
+            GenericAll = valid_access
+        }, valid_access);
+        Application.Run(frm);
+    }
+
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
@@ -149,9 +187,9 @@ public static class EntryPoint
         bool enable_activation_filter = false;
         string symbol_dir = null;
         bool delete_database = false;
-        string view_access_sd = null;
-        string view_launch_sd = null;
+        string view_sd = null;
         string view_name = null;
+        bool access_sd = false;
         COMRegistryMode mode = COMRegistryMode.Merged;
         IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, 
             COMServerType.InProcServer32, COMServerType.LocalServer32 };
@@ -176,8 +214,8 @@ public static class EntryPoint
             { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
             { "g=", "Generate a symbol file in the specified directory.", v => symbol_dir = v },
             { "d", "Delete the input database once loaded", v => delete_database = v != null },
-            { "v=", "View a COM access security descriptor (specify the SDDL)", v => view_access_sd = v },
-            { "l=", "View a COM launch security descriptor (specify the SDDL)", v => view_launch_sd = v },
+            { "v=", "View a COM security descriptor (specify as Base64)", v => view_sd = v },
+            { "access", "View a COM launch security descriptor (specify the SDDL)", v => access_sd = v != null },
             { "n=", "Name any simple form display such as security descriptor", v => view_name = v },
             { "t=", "Specify a token to use when enumerating interfaces", v => enum_token = NtToken.FromHandle(new IntPtr(int.Parse(v))) },
             { "mta", "Specify to use MTA for interface enumeration. Default is STA.", v => enum_mta = v != null },
@@ -247,44 +285,9 @@ public static class EntryPoint
 
             try
             {
-                if (view_access_sd != null || view_launch_sd != null)
+                if (view_sd != null)
                 {
-                    bool access = view_access_sd != null;
-                    SecurityDescriptor sd = new(view_access_sd ?? view_launch_sd);
-                    bool has_container = false;
-                    if (sd.DaclPresent)
-                    {
-                        foreach (var ace in sd.Dacl)
-                        {
-                            if (ace.Mask.IsAccessGranted(COMAccessRights.ActivateContainer | COMAccessRights.ExecuteContainer))
-                            {
-                                has_container = true;
-                                break;
-                            }
-                        }
-                    }
-                    AccessMask valid_access = access ? 0x7 : 0x1F;
-                    if (has_container)
-                    {
-                        valid_access |= access ? 0x20 : 0x60;
-                    }
-
-                    SecurityDescriptorViewerControl control = new();
-                    DocumentForm frm = new(control);
-                    string title = $"{(access ? "Access Security" : "Launch Security")}";
-                    if (!string.IsNullOrWhiteSpace(view_name))
-                    {
-                        title = $"{view_name} {title}";
-                    }
-                    frm.Text = title;
-                    control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
-                    {
-                        GenericExecute = valid_access,
-                        GenericRead = valid_access,
-                        GenericWrite = valid_access,
-                        GenericAll = valid_access
-                    }, valid_access);
-                    Application.Run(frm);
+                    ShowSecurityDescriptor(view_sd, access_sd, view_name);
                     return;
                 }
 
