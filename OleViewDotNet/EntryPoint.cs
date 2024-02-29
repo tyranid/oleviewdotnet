@@ -303,6 +303,7 @@ public static class EntryPoint
                     catch
                     {
                         MessageBox.Show($"Error loading database {default_db}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Environment.Exit(1);
                     }
                 }
 
