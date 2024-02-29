@@ -273,9 +273,10 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         {
             m_formattable = new SourceCodeFormattableType(COMUtilities.RuntimeInterfaceMetadata[Iid]);
         }
-        else if (TypeLibVersionEntry?.IsParsed == true)
+        else if (TypeLibVersionEntry?.IsParsed == true 
+            && TypeLibVersionEntry.Parse().InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
         {
-            m_formattable = TypeLibVersionEntry.Parse();
+            m_formattable = intf;
         }
         else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
         {
