@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>OleViewDotNet32</AssemblyName>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net481</TargetFramework>
+        <UseWindowsForms>true</UseWindowsForms>
+        <LangVersion>10.0</LangVersion>
+        <ApplicationIcon>oleview.ico</ApplicationIcon>
+        <PlatformTarget>x86</PlatformTarget>
+        <Authors>James Forshaw</Authors>
+        <Company>None</Company>
+        <Product>OleViewDotNet</Product>
+        <FileVersion>1.0.0.0</FileVersion>
+        <Version>1.14</Version>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <BaseOutputPath>..\bin</BaseOutputPath>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="oleview.ico" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\OleViewDotNet\OleViewDotNet.csproj" />
+    </ItemGroup>
+</Project>

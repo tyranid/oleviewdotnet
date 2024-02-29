@@ -33,7 +33,7 @@ using System.Windows.Forms;
 
 namespace OleViewDotNet;
 
-internal static class EntryPoint
+public static class EntryPoint
 {
     /// <summary>
     /// Unhandled exception event handler
@@ -49,7 +49,7 @@ internal static class EntryPoint
 
     private static ApplicationContext _appContext;
 
-    public static MainForm GetMainForm(COMRegistry registry)
+    internal static MainForm GetMainForm(COMRegistry registry)
     {
         foreach (MainForm form in Application.OpenForms.OfType<MainForm>())
         {
