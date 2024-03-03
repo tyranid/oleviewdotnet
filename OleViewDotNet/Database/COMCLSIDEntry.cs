@@ -117,7 +117,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
         if (AppID != Guid.Empty && !servers.ContainsKey(COMServerType.LocalServer32))
         {
-            servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, "<APPID HOSTED>"));
+            servers.Add(COMServerType.LocalServer32, new COMCLSIDServerEntry(COMServerType.LocalServer32, COMCLSIDServerEntry.APPID_HOSTED));
         }
 
         TypeLib = key.ReadGuid("TypeLib", null);
@@ -193,7 +193,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         {
             COMPackagedServerEntry server = packageEntry.Servers[classEntry.ServerId];
             AppID = server.SurrogateAppId;
-            string serverPath = "<APPID HOSTED>";
+            string serverPath = COMCLSIDServerEntry.APPID_HOSTED;
             string commandLine = string.Empty;
             if (AppID == Guid.Empty)
             {

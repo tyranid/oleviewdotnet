@@ -585,11 +585,27 @@ internal partial class COMRegistryViewer : UserControl
             {
                 foreach (COMCLSIDServerEntry server in entry.Servers.Values)
                 {
-                    if (!dict.ContainsKey(server))
+                    var curr_server = server;
+                    if (curr_server.AppIdHosted)
                     {
-                        dict[server] = new List<COMCLSIDEntry>();
+                        var local_service = entry.AppIDEntry?.LocalService;
+                        if (local_service == null)
+                            continue;
+                        if (!string.IsNullOrEmpty(local_service.ServiceDll))
+                        {
+                            curr_server = new COMCLSIDServerEntry(COMServerType.LocalServer32, local_service.ServiceDll);
+                        }
+                        else
+                        {
+                            curr_server = new COMCLSIDServerEntry(COMServerType.LocalServer32, local_service.ImagePath);
+                        }
                     }
-                    dict[server].Add(entry);
+
+                    if (!dict.ContainsKey(curr_server))
+                    {
+                        dict[curr_server] = new List<COMCLSIDEntry>();
+                    }
+                    dict[curr_server].Add(entry);
                 }
             }
 
@@ -598,6 +614,10 @@ internal partial class COMRegistryViewer : UserControl
             if (serverType == ServerType.Local)
             {
                 servers = servers.Where(p => p.Key.ServerType == COMServerType.LocalServer32);
+            }
+            else if (serverType == ServerType.Proxies)
+            {
+                servers = servers.Where(p => p.Key.ServerType == COMServerType.InProcServer32);
             }
         }
 

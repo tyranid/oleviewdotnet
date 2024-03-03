@@ -29,6 +29,9 @@ namespace OleViewDotNet.Database;
 
 public class COMCLSIDServerEntry : IXmlSerializable
 {
+    internal const string APPID_HOSTED = "<APPID HOSTED>";
+    internal bool AppIdHosted => ServerType == COMServerType.LocalServer32 && Server == APPID_HOSTED;
+
     /// <summary>
     /// The absolute path to the server.
     /// </summary>
@@ -145,19 +148,14 @@ public class COMCLSIDServerEntry : IXmlSerializable
     private static COMThreadingModel ReadThreadingModel(RegistryKey key)
     {
         string threading_model = key.ReadString(valueName: "ThreadingModel");
-        switch (threading_model.ToLower())
+        return threading_model.ToLower() switch
         {
-            case "both":
-                return COMThreadingModel.Both;
-            case "free":
-                return COMThreadingModel.Free;
-            case "neutral":
-                return COMThreadingModel.Neutral;
-            case "apartment":
-                return COMThreadingModel.Apartment;
-            default:
-                return COMThreadingModel.None;
-        }
+            "both" => COMThreadingModel.Both,
+            "free" => COMThreadingModel.Free,
+            "neutral" => COMThreadingModel.Neutral,
+            "apartment" => COMThreadingModel.Apartment,
+            _ => COMThreadingModel.None,
+        };
     }
 
     internal COMCLSIDServerEntry(COMServerType server_type, string server, COMThreadingModel threading_model)
