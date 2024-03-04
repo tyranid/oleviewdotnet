@@ -56,17 +56,16 @@ internal partial class COMRegistryViewer : UserControl
     private const string ProcessKey = "process.ico";
     private const string ApplicationKey = "application.ico";
 
-    private sealed class DynamicTreeNode : TreeNode
+    private sealed class DynamicPlaceholderTreeNode : TreeNode
     {
-        public bool IsGenerated { get; set; }
-
-        public DynamicTreeNode() : base()
+        public DynamicPlaceholderTreeNode() : base("DUMMY")
         {
         }
+    }
 
-        public DynamicTreeNode(string text) : base(text)
-        {
-        }
+    private static bool IsDynamicNode(TreeNode node)
+    {
+        return node.Nodes.Count == 1 && node.Nodes[0] is DynamicPlaceholderTreeNode;
     }
 
     private static string GetDisplayName(COMRegistryDisplayMode mode)
@@ -187,7 +186,7 @@ internal partial class COMRegistryViewer : UserControl
             dynamic = true;
         }
 
-        TreeNode node = dynamic ? new DynamicTreeNode(text) : new TreeNode(text);
+        TreeNode node = new TreeNode(text);
         node.ImageKey = image_key;
         node.SelectedImageKey = image_key;
         node.Tag = tag;
@@ -197,7 +196,7 @@ internal partial class COMRegistryViewer : UserControl
         }
         if (dynamic)
         {
-            node.Nodes.Add(new TreeNode("DUMMY"));
+            node.Nodes.Add(new DynamicPlaceholderTreeNode());
         }
         return node;
     }
@@ -1109,9 +1108,8 @@ internal partial class COMRegistryViewer : UserControl
         Cursor currCursor = Cursor.Current;
         Cursor.Current = Cursors.WaitCursor;
 
-        if (e.Node is DynamicTreeNode node && !node.IsGenerated)
+        if (IsDynamicNode(e.Node))
         {
-            node.IsGenerated = true;
             if (e.Node.Tag is ICOMClassEntry class_entry)
             {
                 await SetupCLSIDNodeTree(class_entry, e.Node, false);
@@ -1127,6 +1125,10 @@ internal partial class COMRegistryViewer : UserControl
             else if (e.Node.Tag is COMProxyFormatter proxy)
             {
                 await SetupCOMProxyNodeTree(proxy, e.Node);
+            }
+            else
+            {
+                e.Node.Nodes.Clear();
             }
         }
 
@@ -1660,7 +1662,7 @@ internal partial class COMRegistryViewer : UserControl
 
         if (result == FilterResult.None)
         {
-            if (n is DynamicTreeNode dynamic_node && dynamic_node.IsGenerated)
+            if (IsDynamicNode(n))
             {
                 return result;
             }
