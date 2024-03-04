@@ -1560,40 +1560,6 @@ internal partial class COMRegistryViewer : UserControl
         return new Regex(builder.ToString(), ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
     }
 
-    private FilterResult RunComplexFilter(TreeNode node, RegistryViewerFilter filter)
-    {
-        try
-        {
-            FilterResult result = filter.Filter(node.Tag);
-            if (result == FilterResult.None && node.Tag is COMCLSIDEntry clsid && clsid.InterfacesLoaded)
-            {
-                foreach (COMInterfaceEntry intf in clsid.Interfaces.Concat(clsid.FactoryInterfaces).Select(i => m_registry.MapIidToInterface(i.Iid)))
-                {
-                    result = filter.Filter(intf);
-                    if (result != FilterResult.None)
-                    {
-                        break;
-                    }
-                }
-            }
-            return result;
-        }
-        catch
-        {
-            return FilterResult.None;
-        }
-    }
-
-    private FilterResult RunAccessibleFilter(TreeNode node, COMAccessCheck access_check)
-    {
-        if (node.Tag is not ICOMAccessSecurity obj)
-        {
-            return FilterResult.Exclude;
-        }
-
-        return access_check.AccessCheck(obj) ? FilterResult.Include : FilterResult.Exclude;
-    }
-
     private enum FilterMode
     {
         Contains,
@@ -1607,80 +1573,84 @@ internal partial class COMRegistryViewer : UserControl
         Complex,
     }
 
-    private static Func<TreeNode, bool> CreateFilter(string filter, FilterMode mode, bool caseSensitive)
+    private static Func<string, bool> CreateFilter(string filter, FilterMode mode, bool caseSensitive)
     {
-        StringComparison comp;
-
         filter = filter.Trim();
         if (string.IsNullOrEmpty(filter))
         {
             return null;
         }
 
-        if (caseSensitive)
-        {
-            comp = StringComparison.CurrentCulture;
-        }
-        else
-        {
-            comp = StringComparison.CurrentCultureIgnoreCase;
-        }
+        StringComparison comp = caseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
 
         switch (mode)
         {
             case FilterMode.Contains:
-                if (caseSensitive)
-                {
-                    return n => n.Text.Contains(filter);
-                }
-                else
-                {
-                    filter = filter.ToLower();
-                    return n => n.Text.ToLower().Contains(filter.ToLower());
-                }
+                return caseSensitive ? (n => n.Contains(filter)) : (n => n.ToLower().Contains(filter.ToLower()));
             case FilterMode.BeginsWith:
-                return n => n.Text.StartsWith(filter, comp);
+                return n => n.StartsWith(filter, comp);
             case FilterMode.EndsWith:
-                return n => n.Text.EndsWith(filter, comp);
+                return n => n.EndsWith(filter, comp);
             case FilterMode.Equals:
-                return n => n.Text.Equals(filter, comp);
+                return n => n.Equals(filter, comp);
             case FilterMode.Glob:
                 {
                     Regex r = GlobToRegex(filter, caseSensitive);
 
-                    return n => r.IsMatch(n.Text);
+                    return n => r.IsMatch(n);
                 }
             case FilterMode.Regex:
                 {
                     Regex r = new(filter, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
-                    return n => r.IsMatch(n.Text);
+                    return n => r.IsMatch(n);
                 }
             default:
                 throw new ArgumentException("Invalid mode value");
         }
     }
 
-    // Check if top node or one of its subnodes matches the filter
-    private static FilterResult FilterNode(TreeNode n, Func<TreeNode, FilterResult> filterFunc, bool filter_children)
+    private FilterResult FilterLeafNode(TreeNode n, IRegistryViewerFilter filter)
     {
-        FilterResult result = filterFunc(n);
+        FilterResult result = FilterResult.None;
+        if (n.Tag is ICOMClassEntry class_entry && class_entry.InterfacesLoaded)
+        {
+            foreach (COMInterfaceEntry intf in class_entry.Interfaces.Concat(class_entry.FactoryInterfaces)
+                .Select(i => m_registry.MapIidToInterface(i.Iid)))
+            {
+                var curr_result = filter.Filter(intf.Name, intf);
+                if (curr_result == FilterResult.Exclude)
+                {
+                    return FilterResult.Exclude;
+                }
+                else if (curr_result != FilterResult.None)
+                {
+                    result = FilterResult.Include;
+                }
+            }
+        }
+        return result;
+    }
+
+    // Check if top node or one of its subnodes matches the filter
+    private FilterResult FilterNode(TreeNode n, IRegistryViewerFilter filter)
+    {
+        FilterResult result = filter.Filter(n.Text, n.Tag);
 
         if (result == FilterResult.None)
         {
-            if (IsDynamicNode(n) || n.Nodes.Count == 0)
+            if (IsLeafNode(n))
             {
-                return result;
+                result = FilterLeafNode(n, filter);
             }
-
-            if (filter_children)
+            else if (!IsDynamicNode(n) && n.Nodes.Count > 0)
             {
                 var nodes = n.Nodes.OfType<TreeNode>().ToArray();
                 n.Nodes.Clear();
                 bool has_children = false;
                 foreach (TreeNode node in nodes)
                 {
-                    result = FilterNode(node, filterFunc, !IsLeafNode(node));
+                    result = FilterNode(node, filter);
                     if (result == FilterResult.Include)
                     {
                         n.Nodes.Add(node);
@@ -1690,17 +1660,6 @@ internal partial class COMRegistryViewer : UserControl
                 if (has_children)
                 {
                     result = FilterResult.Include;
-                }
-            }
-            else
-            {
-                foreach (TreeNode node in n.Nodes)
-                {
-                    result = FilterNode(node, filterFunc, false);
-                    if (result == FilterResult.Include)
-                    {
-                        break;
-                    }
                 }
             }
         }
@@ -1714,8 +1673,7 @@ internal partial class COMRegistryViewer : UserControl
         try
         {
             TreeNode[] nodes = null;
-            Func<TreeNode, FilterResult> filterFunc = null;
-            IDisposable filter_object = null;
+            IRegistryViewerFilter filter = null;
             FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
 
             if (mode == FilterMode.Complex)
@@ -1726,7 +1684,7 @@ internal partial class COMRegistryViewer : UserControl
                     m_filter = form.Filter;
                     if (m_filter.Filters.Count > 0)
                     {
-                        filterFunc = n => RunComplexFilter(n, m_filter);
+                        filter = m_filter;
                     }
                 }
                 else
@@ -1740,13 +1698,7 @@ internal partial class COMRegistryViewer : UserControl
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     COMAccessCheck access_check = new(form.Token, form.Principal, form.AccessRights, form.LaunchRights, form.IgnoreDefault);
-                    filter_object = access_check;
-                    filterFunc = n => RunAccessibleFilter(n, access_check);
-                    if (mode == FilterMode.NotAccessible)
-                    {
-                        Func<TreeNode, FilterResult> last_filter = filterFunc;
-                        filterFunc = n => last_filter(n) == FilterResult.Exclude ? FilterResult.Include : FilterResult.Exclude;
-                    }
+                    filter = new RegistryViewerAccessibleFilter(access_check, mode == FilterMode.NotAccessible);
                 }
                 else
                 {
@@ -1755,19 +1707,19 @@ internal partial class COMRegistryViewer : UserControl
             }
             else
             {
-                Func<TreeNode, bool> filter = CreateFilter(textBoxFilter.Text, mode, false);
-                if (filter != null)
+                Func<string, bool> filterFunc = CreateFilter(textBoxFilter.Text, mode, false);
+                if (filterFunc != null)
                 {
-                    filterFunc = n => filter(n) ? FilterResult.Include : FilterResult.None;
+                    filter = new RegistryViewerDisplayFilter(filterFunc);
                 }
             }
 
-            if (filterFunc != null)
+            if (filter != null)
             {
-                using (filter_object)
+                using (filter)
                 {
                     nodes = await Task.Run(() => m_originalNodes.Select(n => (TreeNode)n.Clone()).
-                        Where(n => FilterNode(n, filterFunc, !IsLeafNode(n)) == FilterResult.Include).ToArray());
+                        Where(n => FilterNode(n, filter) == FilterResult.Include).ToArray());
                 }
             }
             else
@@ -2245,7 +2197,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             IEnumerable<TreeNode> nodes =
                 await Task.Run(() => m_originalNodes.Select(n => (TreeNode)n.Clone()).Where(n =>
-                FilterNode(n, x => RunComplexFilter(x, form.Filter), !IsLeafNode(n)) == FilterResult.Include).ToArray());
+                FilterNode(n, form.Filter) == FilterResult.Include).ToArray());
             CreateClonedTree(nodes, true);
         }
     }

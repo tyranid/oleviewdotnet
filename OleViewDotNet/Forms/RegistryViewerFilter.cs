@@ -20,16 +20,17 @@ using System.Reflection;
 using System;
 using OleViewDotNet.Database;
 using OleViewDotNet.Processes;
+using OleViewDotNet.Security;
 
 namespace OleViewDotNet.Forms;
 
-public enum FilterDecision
+internal enum FilterDecision
 {
     Include,
     Exclude
 }
 
-public enum FilterType
+internal enum FilterType
 {
     CLSID,
     AppID,
@@ -46,7 +47,7 @@ public enum FilterType
     RuntimeServer,
 }
 
-public enum FilterComparison
+internal enum FilterComparison
 {
     Contains,
     Excludes,
@@ -56,14 +57,69 @@ public enum FilterComparison
     EndsWith,
 }
 
-public enum FilterResult
+internal enum FilterResult
 {
     None,
     Include,
     Exclude,
 }
 
-public class RegistryViewerFilterEntry
+internal interface IRegistryViewerFilter : IDisposable
+{
+    FilterResult Filter(string text, object tag);
+}
+
+internal class RegistryViewerDisplayFilter : IRegistryViewerFilter
+{
+    private readonly Func<string, bool> m_filter;
+
+    public RegistryViewerDisplayFilter(Func<string, bool> filter)
+    {
+        m_filter = filter;
+    }
+
+    public void Dispose()
+    {
+    }
+
+    public FilterResult Filter(string text, object tag)
+    {
+        return m_filter(text) ? FilterResult.Include : FilterResult.None;
+    }
+}
+
+internal class RegistryViewerAccessibleFilter : IRegistryViewerFilter
+{
+    private readonly COMAccessCheck m_access_check;
+    private readonly bool m_not_accessible;
+
+    public RegistryViewerAccessibleFilter(COMAccessCheck access_check, bool not_accessible)
+    {
+        m_access_check = access_check;
+        m_not_accessible = not_accessible;
+    }
+
+    public void Dispose()
+    {
+        m_access_check?.Dispose();
+    }
+
+    public FilterResult Filter(string text, object tag)
+    {
+        if (tag is not ICOMAccessSecurity obj)
+        {
+            return FilterResult.Exclude;
+        }
+
+        bool result = m_access_check.AccessCheck(obj);
+        if (m_not_accessible)
+            result = !result;
+
+        return result ? FilterResult.Include : FilterResult.Exclude;
+    }
+}
+
+internal class RegistryViewerFilterEntry
 {
     public FilterDecision Decision { get; set; }
     public FilterType Type { get; set; }
@@ -121,7 +177,7 @@ public class RegistryViewerFilterEntry
     }
 }
 
-public class RegistryViewerFilter
+internal class RegistryViewerFilter : IRegistryViewerFilter
 {
     public List<RegistryViewerFilterEntry> Filters { get; private set; }
 
@@ -130,7 +186,7 @@ public class RegistryViewerFilter
         Filters = new List<RegistryViewerFilterEntry>();
     }
 
-    public FilterResult Filter(object entry)
+    private FilterResult Filter(object entry)
     {
         if (entry != null)
         {
@@ -162,37 +218,23 @@ public class RegistryViewerFilter
 
     public static Type GetTypeForFilter(FilterType type)
     {
-        switch (type)
+        return type switch
         {
-            case FilterType.AppID:
-                return typeof(COMAppIDEntry);
-            case FilterType.Category:
-                return typeof(COMCategory);
-            case FilterType.CLSID:
-                return typeof(COMCLSIDEntry);
-            case FilterType.Interface:
-                return typeof(COMInterfaceEntry);
-            case FilterType.LowRights:
-                return typeof(COMIELowRightsElevationPolicy);
-            case FilterType.MimeType:
-                return typeof(COMMimeType);
-            case FilterType.ProgID:
-                return typeof(COMProgIDEntry);
-            case FilterType.Server:
-                return typeof(COMCLSIDServerEntry);
-            case FilterType.TypeLib:
-                return typeof(COMTypeLibVersionEntry);
-            case FilterType.Process:
-                return typeof(COMProcessEntry);
-            case FilterType.Ipid:
-                return typeof(COMIPIDEntry);
-            case FilterType.RuntimeClass:
-                return typeof(COMRuntimeClassEntry);
-            case FilterType.RuntimeServer:
-                return typeof(COMRuntimeServerEntry);
-            default:
-                throw new ArgumentException("Invalid filter type", nameof(type));
-        }
+            FilterType.AppID => typeof(COMAppIDEntry),
+            FilterType.Category => typeof(COMCategory),
+            FilterType.CLSID => typeof(COMCLSIDEntry),
+            FilterType.Interface => typeof(COMInterfaceEntry),
+            FilterType.LowRights => typeof(COMIELowRightsElevationPolicy),
+            FilterType.MimeType => typeof(COMMimeType),
+            FilterType.ProgID => typeof(COMProgIDEntry),
+            FilterType.Server => typeof(COMCLSIDServerEntry),
+            FilterType.TypeLib => typeof(COMTypeLibVersionEntry),
+            FilterType.Process => typeof(COMProcessEntry),
+            FilterType.Ipid => typeof(COMIPIDEntry),
+            FilterType.RuntimeClass => typeof(COMRuntimeClassEntry),
+            FilterType.RuntimeServer => typeof(COMRuntimeServerEntry),
+            _ => throw new ArgumentException("Invalid filter type", nameof(type)),
+        };
     }
 
     private static bool IsFilterProperty(PropertyInfo pi)
@@ -214,5 +256,21 @@ public class RegistryViewerFilter
             throw new ArgumentException("Invalid field for filter", nameof(name));
         }
         return pi;
+    }
+
+    public FilterResult Filter(string text, object tag)
+    {
+        try
+        {
+            return Filter(tag);
+        }
+        catch
+        {
+            return FilterResult.None;
+        }
+    }
+
+    public void Dispose()
+    {
     }
 }
