@@ -42,4 +42,5 @@ internal enum COMRegistryDisplayMode
     Processes,
     RuntimeClasses,
     RuntimeServers,
+    RuntimeInterfaces,
 }

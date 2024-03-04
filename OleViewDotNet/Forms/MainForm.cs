@@ -1119,4 +1119,9 @@ internal partial class MainForm : Form
             }
         }
     }
+
+    private void menuViewRuntimeInterfaces_Click(object sender, EventArgs e)
+    {
+        OpenView(COMRegistryDisplayMode.RuntimeInterfaces);
+    }
 }

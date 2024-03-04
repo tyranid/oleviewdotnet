@@ -94,6 +94,7 @@ internal partial class COMRegistryViewer : UserControl
             COMRegistryDisplayMode.Processes => "COM Processes",
             COMRegistryDisplayMode.RuntimeClasses => "Runtime Classes",
             COMRegistryDisplayMode.RuntimeServers => "Runtime Servers",
+            COMRegistryDisplayMode.RuntimeInterfaces => "Runtime Interfaces",
             _ => throw new ArgumentException("Invalid mode value"),
         };
     }
@@ -122,6 +123,7 @@ internal partial class COMRegistryViewer : UserControl
                 break;
             case COMRegistryDisplayMode.Interfaces:
             case COMRegistryDisplayMode.InterfacesByName:
+            case COMRegistryDisplayMode.RuntimeInterfaces:
                 filter_types.Add(FilterType.Interface);
                 break;
             case COMRegistryDisplayMode.ImplementedCategories:
@@ -218,9 +220,11 @@ internal partial class COMRegistryViewer : UserControl
                 case COMRegistryDisplayMode.CLSIDsWithSurrogate:
                     return LoadCLSIDByServer(registry, ServerType.Surrogate);
                 case COMRegistryDisplayMode.Interfaces:
-                    return LoadInterfaces(registry, false);
+                    return LoadInterfaces(registry, false, false);
                 case COMRegistryDisplayMode.InterfacesByName:
-                    return LoadInterfaces(registry, true);
+                    return LoadInterfaces(registry, true, false);
+                case COMRegistryDisplayMode.RuntimeInterfaces:
+                    return LoadInterfaces(registry, true, true);
                 case COMRegistryDisplayMode.ImplementedCategories:
                     return LoadImplementedCategories(registry);
                 case COMRegistryDisplayMode.PreApproved:
@@ -633,18 +637,18 @@ internal partial class COMRegistryViewer : UserControl
         return serverNodes.OrderBy(n => n.Text);
     }
 
-    private static IEnumerable<TreeNode> LoadInterfaces(COMRegistry registry, bool by_name)
+    private static IEnumerable<TreeNode> LoadInterfaces(COMRegistry registry, bool by_name, bool runtime_interfaces)
     {
-        IEnumerable<TreeNode> intfs = null;
+        var total_intfs = registry.Interfaces.Values.AsEnumerable();
+        if (runtime_interfaces)
+            total_intfs = total_intfs.Where(i => i.RuntimeInterface);
+
         if (by_name)
         {
-            intfs = registry.Interfaces.Values.OrderBy(i => i.Name).Select(i => CreateInterfaceNameNode(registry, i, null));
+            return total_intfs.OrderBy(i => i.Name).Select(i => CreateInterfaceNameNode(registry, i, null));
         }
-        else
-        {
-            intfs = registry.Interfaces.Values.Select(i => CreateInterfaceNode(registry, i));
-        }
-        return intfs;
+        
+        return total_intfs.Select(i => CreateInterfaceNode(registry, i));
     }
 
     private static TreeNode CreateClsidNode(COMRegistry registry, COMCLSIDEntry ent)
@@ -2239,6 +2243,7 @@ internal partial class COMRegistryViewer : UserControl
         treeComRegistry.SuspendLayout();
         treeComRegistry.Nodes.AddRange(m_originalNodes);
         treeComRegistry.ResumeLayout();
+        UpdateStatusLabel();
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
@@ -2263,7 +2268,6 @@ internal partial class COMRegistryViewer : UserControl
         Text = text;
 
         m_originalNodes = nodes.ToArray();
-        UpdateStatusLabel();
     }
     #endregion
 
