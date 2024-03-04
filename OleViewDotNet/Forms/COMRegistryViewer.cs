@@ -68,6 +68,12 @@ internal partial class COMRegistryViewer : UserControl
         return node.Nodes.Count == 1 && node.Nodes[0] is DynamicPlaceholderTreeNode;
     }
 
+    private static bool IsLeafNode(TreeNode node)
+    {
+        var tag = node.Tag;
+        return tag is ICOMClassEntry || tag is COMTypeLibVersionEntry;
+    }
+
     private static string GetDisplayName(COMRegistryDisplayMode mode)
     {
         return mode switch
@@ -1656,23 +1662,45 @@ internal partial class COMRegistryViewer : UserControl
     }
 
     // Check if top node or one of its subnodes matches the filter
-    private static FilterResult FilterNode(TreeNode n, Func<TreeNode, FilterResult> filterFunc)
+    private static FilterResult FilterNode(TreeNode n, Func<TreeNode, FilterResult> filterFunc, bool filter_children)
     {
         FilterResult result = filterFunc(n);
 
         if (result == FilterResult.None)
         {
-            if (IsDynamicNode(n))
+            if (IsDynamicNode(n) || n.Nodes.Count == 0)
             {
                 return result;
             }
 
-            foreach (TreeNode node in n.Nodes)
+            if (filter_children)
             {
-                result = FilterNode(node, filterFunc);
-                if (result == FilterResult.Include)
+                var nodes = n.Nodes.OfType<TreeNode>().ToArray();
+                n.Nodes.Clear();
+                bool has_children = false;
+                foreach (TreeNode node in nodes)
                 {
-                    break;
+                    result = FilterNode(node, filterFunc, !IsLeafNode(node));
+                    if (result == FilterResult.Include)
+                    {
+                        n.Nodes.Add(node);
+                        has_children = true;
+                    }
+                }
+                if (has_children)
+                {
+                    result = FilterResult.Include;
+                }
+            }
+            else
+            {
+                foreach (TreeNode node in n.Nodes)
+                {
+                    result = FilterNode(node, filterFunc, false);
+                    if (result == FilterResult.Include)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -1738,7 +1766,8 @@ internal partial class COMRegistryViewer : UserControl
             {
                 using (filter_object)
                 {
-                    nodes = await Task.Run(() => m_originalNodes.Where(n => FilterNode(n, filterFunc) == FilterResult.Include).ToArray());
+                    nodes = await Task.Run(() => m_originalNodes.Select(n => (TreeNode)n.Clone()).
+                        Where(n => FilterNode(n, filterFunc, !IsLeafNode(n)) == FilterResult.Include).ToArray());
                 }
             }
             else
@@ -2180,14 +2209,18 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void CreateClonedTree(IEnumerable<TreeNode> nodes)
+    private void CreateClonedTree(IEnumerable<TreeNode> nodes, bool cloned = false)
     {
         string text = Text;
         if (!text.StartsWith("Clone of "))
         {
             text = "Clone of " + text;
         }
-        COMRegistryViewer viewer = new(m_registry, m_mode, m_processes, nodes.Select(n => (TreeNode)n.Clone()), m_filter_types, text);
+        if (!cloned)
+        {
+            nodes = nodes.Select(n => (TreeNode)n.Clone());
+        }
+        COMRegistryViewer viewer = new(m_registry, m_mode, m_processes, nodes, m_filter_types, text);
         EntryPoint.GetMainForm(m_registry).HostControl(viewer);
     }
 
@@ -2211,9 +2244,9 @@ internal partial class COMRegistryViewer : UserControl
         if (form.ShowDialog(this) == DialogResult.OK && form.Filter.Filters.Count > 0)
         {
             IEnumerable<TreeNode> nodes =
-                await Task.Run(() => m_originalNodes.Where(n =>
-                FilterNode(n, x => RunComplexFilter(x, form.Filter)) == FilterResult.Include).ToArray());
-            CreateClonedTree(nodes);
+                await Task.Run(() => m_originalNodes.Select(n => (TreeNode)n.Clone()).Where(n =>
+                FilterNode(n, x => RunComplexFilter(x, form.Filter), !IsLeafNode(n)) == FilterResult.Include).ToArray());
+            CreateClonedTree(nodes, true);
         }
     }
 
