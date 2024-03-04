@@ -79,7 +79,7 @@ internal partial class PropertiesControl : UserControl
     {
     }
 
-    private void SetupAppIdEntry(COMAppIDEntry entry)
+    private void SetupAppIdEntry(COMAppIDEntry entry, bool setup_security)
     {
         textBoxAppIdName.Text = entry.Name;
         textBoxAppIdGuid.Text = entry.AppId.FormatGuid();
@@ -103,7 +103,7 @@ internal partial class PropertiesControl : UserControl
             tabControlProperties.TabPages.Add(tabPageService);
         }
 
-        if (entry.HasAccessPermission)
+        if (entry.HasAccessPermission && setup_security)
         {
             tabControlProperties.TabPages.Add(tabPageAccessSecurity);
             COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerAccessSecurity, entry.AccessPermission, true);
@@ -155,7 +155,7 @@ internal partial class PropertiesControl : UserControl
         tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
         if (m_registry.AppIDs.ContainsKey(entry.AppID))
         {
-            SetupAppIdEntry(m_registry.AppIDs[entry.AppID]);
+            SetupAppIdEntry(m_registry.AppIDs[entry.AppID], true);
         }
 
         IEnumerable<COMInterfaceEntry> proxies = m_registry.GetProxiesForClsid(entry);
@@ -237,12 +237,11 @@ internal partial class PropertiesControl : UserControl
         m_interface = entry;
     }
 
-    private void SetupRuntimeServerEntry(COMRuntimeServerEntry entry)
+    private void SetupRuntimeServerEntry(COMRuntimeServerEntry entry, bool setup_security)
     {
         textBoxRuntimeServerName.Text = entry.Name;
         textBoxRuntimeServerExePath.Text = GetStringValue(entry.ExePath);
         textBoxRuntimeServerPermissions.Text = GetStringValue(entry.Permissions?.ToSddl());
-        btnRuntimeServerViewPermissions.Enabled = entry.HasPermission;
         textBoxRuntimeServerServiceName.Text = GetStringValue(entry.ServiceName);
         textBoxRuntimeServerType.Text = entry.ServerType.ToString();
         textBoxRuntimeServerIdentity.Text = GetStringValue(entry.Identity);
@@ -250,6 +249,11 @@ internal partial class PropertiesControl : UserControl
         textBoxRuntimeServerInstancing.Text = entry.InstancingType.ToString();
         m_runtime_server = entry;
         tabControlProperties.TabPages.Add(tabPageRuntimeServer);
+        if (entry.HasPermission && setup_security)
+        {
+            tabControlProperties.TabPages.Add(tabPageLaunchSecurity);
+            COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerLaunchSecurity, entry.Permissions, false);
+        }
     }
 
     private void SetupRuntimeClassEntry(COMRuntimeClassEntry entry)
@@ -264,15 +268,21 @@ internal partial class PropertiesControl : UserControl
         textBoxRuntimeClassThreading.Text = entry.Threading.ToString();
         LoadInterfaceList(entry.Interfaces, listViewInterfaces);
         LoadInterfaceList(entry.FactoryInterfaces, listViewFactoryInterfaces);
-        btnRuntimeClassViewPermissions.Enabled = entry.HasPermission;
         tabPageSupportedInterfaces.Tag = entry;
         m_runtime_class = entry;
         tabControlProperties.TabPages.Add(tabPageRuntimeClass);
         tabControlProperties.TabPages.Add(tabPageSupportedInterfaces);
+
+        if (entry.HasPermission)
+        {
+            tabControlProperties.TabPages.Add(tabPageLaunchSecurity);
+            COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerLaunchSecurity, entry.Permissions, false);
+        }
+
         COMRuntimeServerEntry server = m_registry.MapRuntimeClassToServerEntry(entry);
         if (server != null)
         {
-            SetupRuntimeServerEntry(server);
+            SetupRuntimeServerEntry(server, !entry.HasPermission);
         }
     }
 
@@ -291,7 +301,7 @@ internal partial class PropertiesControl : UserControl
 
         if (obj is COMAppIDEntry appid)
         {
-            SetupAppIdEntry(appid);
+            SetupAppIdEntry(appid, true);
         }
 
         if (obj is COMInterfaceEntry intf)
@@ -321,7 +331,7 @@ internal partial class PropertiesControl : UserControl
 
         if (obj is COMRuntimeServerEntry rt_server)
         {
-            SetupRuntimeServerEntry(rt_server);
+            SetupRuntimeServerEntry(rt_server, true);
         }
     }
 
@@ -347,7 +357,6 @@ internal partial class PropertiesControl : UserControl
         textBoxProcessProcessId.Text = obj.ProcessId.ToString();
         textBoxProcessAppId.Text = GetGuidValue(obj.AppId);
         textBoxProcessAccessPermissions.Text = GetStringValue(obj.AccessPermissions?.ToSddl());
-        btnProcessViewAccessPermissions.Enabled = obj.AccessPermissions != null;
         textBoxProcessLrpcPermissions.Text = GetStringValue(obj.LRpcPermissions?.ToSddl());
         textBoxProcessUser.Text = GetStringValue(obj.User);
         textBoxProcessSecurity.Text = $"Capabilities: {obj.Capabilities}, Authn Level: {obj.AuthnLevel}, Imp Level: {obj.ImpLevel}, Unmarshal Policy: {obj.UnmarshalPolicy}";
@@ -358,7 +367,7 @@ internal partial class PropertiesControl : UserControl
         tabControlProperties.TabPages.Add(tabPageProcess);
         if (m_registry.AppIDs.ContainsKey(obj.AppId))
         {
-            SetupAppIdEntry(m_registry.AppIDs[obj.AppId]);
+            SetupAppIdEntry(m_registry.AppIDs[obj.AppId], obj.AccessPermissions == null);
         }
         if (obj.Classes.Any())
         {
@@ -378,6 +387,11 @@ internal partial class PropertiesControl : UserControl
             listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
+        if (obj.AccessPermissions != null)
+        {
+            tabControlProperties.TabPages.Add(tabPageAccessSecurity);
+            COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerAccessSecurity, obj.AccessPermissions, true);
+        }
     }
 
     private void SetupIPIDEntry(COMIPIDEntry obj)
@@ -392,7 +406,7 @@ internal partial class PropertiesControl : UserControl
         textBoxIPIDStubVTable.Text = GetStringValue(obj.StubVTable);
         textBoxIPIDOXID.Text = obj.Oxid.FormatGuid();
         textBoxIPIDReferences.Text = $"Strong: {obj.StrongRefs}, Weak: {obj.WeakRefs}, Private: {obj.PrivateRefs}";
-        
+
         textBoxIPIDProcessId.Text = COMUtilities.GetProcessIdFromIPid(obj.Ipid).ToString();
         textBoxIPIDApartment.Text = COMUtilities.GetApartmentIdStringFromIPid(obj.Ipid);
         textBoxIPIDStaHwnd.Text = $"0x{obj.ServerSTAHwnd.ToInt64():X}";
@@ -485,7 +499,7 @@ internal partial class PropertiesControl : UserControl
     {
         if (m_registry.Clsids.ContainsKey(m_clsid.TreatAs))
         {
-            EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, 
+            EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
                 m_clsid.Name, m_registry.Clsids[m_clsid.TreatAs]));
         }
     }
@@ -552,7 +566,7 @@ internal partial class PropertiesControl : UserControl
     }
 
     private void asStringToolStripMenuItem_Click(object sender, EventArgs e)
-    {            
+    {
         CopyIID(GetListViewForMenu(sender), GuidFormat.String);
     }
 
@@ -588,7 +602,7 @@ internal partial class PropertiesControl : UserControl
         if (view != null && view.SelectedIndices.Count > 0)
         {
             ListViewItem item = view.SelectedItems[0];
-            Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = 
+            Tuple<COMInterfaceInstance, COMInterfaceEntry> intf =
                 item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
             viewProxyDefinitionToolStripMenuItem.Enabled = m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid);
         }
@@ -622,12 +636,6 @@ internal partial class PropertiesControl : UserControl
         {
             EntryPoint.ShowError(this, ex);
         }
-    }
-
-    private void btnProcessViewAccessPermissions_Click(object sender, EventArgs e)
-    {
-        COMSecurity.ViewSecurity(m_registry, $"{m_process.Name} Access", 
-            m_process.AccessPermissions, true);
     }
 
     private COMIPIDEntry GetSelectedIpid()
@@ -750,7 +758,7 @@ internal partial class PropertiesControl : UserControl
             EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
                     asm, m_clsid != null ? m_clsid.Clsid : Guid.Empty, true));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             EntryPoint.ShowError(this, ex);
         }
@@ -759,16 +767,6 @@ internal partial class PropertiesControl : UserControl
     private void checkBoxShowDisconnected_CheckedChanged(object sender, EventArgs e)
     {
         SetupIpidEntries(m_process.Ipids, checkBoxShowDisconnected.Checked);
-    }
-
-    private void btnRuntimeClassViewPermissions_Click(object sender, EventArgs e)
-    {
-        COMSecurity.ViewSecurity(m_registry, $"{m_runtime_class.Name} Permissions", m_runtime_class.Permissions, false);
-    }
-
-    private void btnRuntimeServerViewPermissions_Click(object sender, EventArgs e)
-    {
-        COMSecurity.ViewSecurity(m_registry, $"{m_runtime_server.Name} Permissions", m_runtime_server.Permissions, false);
     }
 
     private void copyIPIDToolStripMenuItem_Click(object sender, EventArgs e)

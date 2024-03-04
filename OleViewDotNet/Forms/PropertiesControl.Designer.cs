@@ -205,7 +205,6 @@ partial class PropertiesControl
             this.copyIPIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyIPIDIIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ipidPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnProcessViewAccessPermissions = new System.Windows.Forms.Button();
             this.textBoxProcessSecurity = new System.Windows.Forms.TextBox();
             this.textBoxProcessStaHwnd = new System.Windows.Forms.TextBox();
             this.checkBoxShowDisconnected = new System.Windows.Forms.CheckBox();
@@ -237,7 +236,6 @@ partial class PropertiesControl
             this.textBoxRuntimeClassActivationType = new System.Windows.Forms.TextBox();
             this.textBoxRuntimeClassTrustLevel = new System.Windows.Forms.TextBox();
             this.textBoxRuntimeClassThreading = new System.Windows.Forms.TextBox();
-            this.btnRuntimeClassViewPermissions = new System.Windows.Forms.Button();
             this.tabControlProperties = new System.Windows.Forms.TabControl();
             this.tabPageClsid = new System.Windows.Forms.TabPage();
             this.tabPageRuntimeClass = new System.Windows.Forms.TabPage();
@@ -259,7 +257,6 @@ partial class PropertiesControl
             this.textBoxRuntimeServerIdentity = new System.Windows.Forms.TextBox();
             this.textBoxRuntimeServerType = new System.Windows.Forms.TextBox();
             this.textBoxRuntimeServerInstancing = new System.Windows.Forms.TextBox();
-            this.btnRuntimeServerViewPermissions = new System.Windows.Forms.Button();
             this.tabPageService = new System.Windows.Forms.TabPage();
             this.tabPageTypeLib = new System.Windows.Forms.TabPage();
             this.tableLayoutPanelTypeLib = new System.Windows.Forms.TableLayoutPanel();
@@ -1545,7 +1542,6 @@ partial class PropertiesControl
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessUser, 1, 5);
             tableLayoutPanelProcess.Controls.Add(label41, 0, 8);
             tableLayoutPanelProcess.Controls.Add(this.listViewProcessIPids, 0, 9);
-            tableLayoutPanelProcess.Controls.Add(this.btnProcessViewAccessPermissions, 2, 3);
             tableLayoutPanelProcess.Controls.Add(label43, 0, 6);
             tableLayoutPanelProcess.Controls.Add(this.textBoxProcessSecurity, 1, 6);
             tableLayoutPanelProcess.Controls.Add(label61, 0, 7);
@@ -1670,12 +1666,13 @@ partial class PropertiesControl
             // 
             // textBoxProcessAccessPermissions
             // 
+            tableLayoutPanelProcess.SetColumnSpan(this.textBoxProcessAccessPermissions, 2);
             this.textBoxProcessAccessPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxProcessAccessPermissions.Location = new System.Drawing.Point(174, 92);
             this.textBoxProcessAccessPermissions.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxProcessAccessPermissions.Name = "textBoxProcessAccessPermissions";
             this.textBoxProcessAccessPermissions.ReadOnly = true;
-            this.textBoxProcessAccessPermissions.Size = new System.Drawing.Size(391, 26);
+            this.textBoxProcessAccessPermissions.Size = new System.Drawing.Size(459, 26);
             this.textBoxProcessAccessPermissions.TabIndex = 9;
             // 
             // label40
@@ -1832,18 +1829,6 @@ partial class PropertiesControl
             this.ipidPropertiesToolStripMenuItem.Size = new System.Drawing.Size(259, 32);
             this.ipidPropertiesToolStripMenuItem.Text = "Properties";
             this.ipidPropertiesToolStripMenuItem.Click += new System.EventHandler(this.listViewProcessIPids_DoubleClick);
-            // 
-            // btnProcessViewAccessPermissions
-            // 
-            this.btnProcessViewAccessPermissions.AutoSize = true;
-            this.btnProcessViewAccessPermissions.Location = new System.Drawing.Point(567, 90);
-            this.btnProcessViewAccessPermissions.Margin = new System.Windows.Forms.Padding(0);
-            this.btnProcessViewAccessPermissions.Name = "btnProcessViewAccessPermissions";
-            this.btnProcessViewAccessPermissions.Size = new System.Drawing.Size(65, 30);
-            this.btnProcessViewAccessPermissions.TabIndex = 14;
-            this.btnProcessViewAccessPermissions.Text = "View";
-            this.btnProcessViewAccessPermissions.UseVisualStyleBackColor = true;
-            this.btnProcessViewAccessPermissions.Click += new System.EventHandler(this.btnProcessViewAccessPermissions_Click);
             // 
             // label43
             // 
@@ -2490,7 +2475,6 @@ partial class PropertiesControl
             tableLayoutPanelRuntimeClass.Controls.Add(this.textBoxRuntimeClassTrustLevel, 1, 6);
             tableLayoutPanelRuntimeClass.Controls.Add(label71, 0, 7);
             tableLayoutPanelRuntimeClass.Controls.Add(this.textBoxRuntimeClassThreading, 1, 7);
-            tableLayoutPanelRuntimeClass.Controls.Add(this.btnRuntimeClassViewPermissions, 2, 4);
             tableLayoutPanelRuntimeClass.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanelRuntimeClass.Location = new System.Drawing.Point(3, 3);
             tableLayoutPanelRuntimeClass.Name = "tableLayoutPanelRuntimeClass";
@@ -2600,11 +2584,12 @@ partial class PropertiesControl
             // 
             // textBoxRuntimeClassPermissions
             // 
+            tableLayoutPanelRuntimeClass.SetColumnSpan(this.textBoxRuntimeClassPermissions, 2);
             this.textBoxRuntimeClassPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxRuntimeClassPermissions.Location = new System.Drawing.Point(116, 131);
             this.textBoxRuntimeClassPermissions.Name = "textBoxRuntimeClassPermissions";
             this.textBoxRuntimeClassPermissions.ReadOnly = true;
-            this.textBoxRuntimeClassPermissions.Size = new System.Drawing.Size(426, 26);
+            this.textBoxRuntimeClassPermissions.Size = new System.Drawing.Size(514, 26);
             this.textBoxRuntimeClassPermissions.TabIndex = 9;
             // 
             // label69
@@ -2667,18 +2652,6 @@ partial class PropertiesControl
             this.textBoxRuntimeClassThreading.Size = new System.Drawing.Size(514, 26);
             this.textBoxRuntimeClassThreading.TabIndex = 15;
             // 
-            // btnRuntimeClassViewPermissions
-            // 
-            this.btnRuntimeClassViewPermissions.AutoSize = true;
-            this.btnRuntimeClassViewPermissions.Location = new System.Drawing.Point(545, 128);
-            this.btnRuntimeClassViewPermissions.Margin = new System.Windows.Forms.Padding(0);
-            this.btnRuntimeClassViewPermissions.Name = "btnRuntimeClassViewPermissions";
-            this.btnRuntimeClassViewPermissions.Size = new System.Drawing.Size(82, 30);
-            this.btnRuntimeClassViewPermissions.TabIndex = 16;
-            this.btnRuntimeClassViewPermissions.Text = "View";
-            this.btnRuntimeClassViewPermissions.UseVisualStyleBackColor = true;
-            this.btnRuntimeClassViewPermissions.Click += new System.EventHandler(this.btnRuntimeClassViewPermissions_Click);
-            // 
             // label72
             // 
             label72.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -2713,7 +2686,7 @@ partial class PropertiesControl
             // 
             label75.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label75.AutoSize = true;
-            label75.Location = new System.Drawing.Point(3, 103);
+            label75.Location = new System.Drawing.Point(3, 102);
             label75.Name = "label75";
             label75.Size = new System.Drawing.Size(102, 20);
             label75.TabIndex = 5;
@@ -2723,7 +2696,7 @@ partial class PropertiesControl
             // 
             label76.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label76.AutoSize = true;
-            label76.Location = new System.Drawing.Point(3, 137);
+            label76.Location = new System.Drawing.Point(3, 134);
             label76.Name = "label76";
             label76.Size = new System.Drawing.Size(108, 20);
             label76.TabIndex = 6;
@@ -2733,7 +2706,7 @@ partial class PropertiesControl
             // 
             label77.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label77.AutoSize = true;
-            label77.Location = new System.Drawing.Point(3, 201);
+            label77.Location = new System.Drawing.Point(3, 198);
             label77.Name = "label77";
             label77.Size = new System.Drawing.Size(104, 20);
             label77.TabIndex = 7;
@@ -2743,7 +2716,7 @@ partial class PropertiesControl
             // 
             label78.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label78.AutoSize = true;
-            label78.Location = new System.Drawing.Point(3, 233);
+            label78.Location = new System.Drawing.Point(3, 230);
             label78.Name = "label78";
             label78.Size = new System.Drawing.Size(90, 20);
             label78.TabIndex = 8;
@@ -2753,7 +2726,7 @@ partial class PropertiesControl
             // 
             label79.Anchor = System.Windows.Forms.AnchorStyles.Left;
             label79.AutoSize = true;
-            label79.Location = new System.Drawing.Point(3, 169);
+            label79.Location = new System.Drawing.Point(3, 166);
             label79.Name = "label79";
             label79.Size = new System.Drawing.Size(67, 20);
             label79.TabIndex = 9;
@@ -2974,7 +2947,6 @@ partial class PropertiesControl
             this.tableLayoutPanelRuntimeServer.Controls.Add(this.textBoxRuntimeServerIdentity, 1, 5);
             this.tableLayoutPanelRuntimeServer.Controls.Add(this.textBoxRuntimeServerType, 1, 6);
             this.tableLayoutPanelRuntimeServer.Controls.Add(this.textBoxRuntimeServerInstancing, 1, 7);
-            this.tableLayoutPanelRuntimeServer.Controls.Add(this.btnRuntimeServerViewPermissions, 2, 3);
             this.tableLayoutPanelRuntimeServer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelRuntimeServer.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanelRuntimeServer.Name = "tableLayoutPanelRuntimeServer";
@@ -3023,18 +2995,19 @@ partial class PropertiesControl
             // 
             // textBoxRuntimeServerPermissions
             // 
+            this.tableLayoutPanelRuntimeServer.SetColumnSpan(this.textBoxRuntimeServerPermissions, 2);
             this.textBoxRuntimeServerPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxRuntimeServerPermissions.Location = new System.Drawing.Point(128, 99);
             this.textBoxRuntimeServerPermissions.Name = "textBoxRuntimeServerPermissions";
             this.textBoxRuntimeServerPermissions.ReadOnly = true;
-            this.textBoxRuntimeServerPermissions.Size = new System.Drawing.Size(421, 26);
+            this.textBoxRuntimeServerPermissions.Size = new System.Drawing.Size(502, 26);
             this.textBoxRuntimeServerPermissions.TabIndex = 11;
             // 
             // textBoxRuntimeServerIdentityType
             // 
             this.tableLayoutPanelRuntimeServer.SetColumnSpan(this.textBoxRuntimeServerIdentityType, 2);
             this.textBoxRuntimeServerIdentityType.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxRuntimeServerIdentityType.Location = new System.Drawing.Point(128, 134);
+            this.textBoxRuntimeServerIdentityType.Location = new System.Drawing.Point(128, 131);
             this.textBoxRuntimeServerIdentityType.Name = "textBoxRuntimeServerIdentityType";
             this.textBoxRuntimeServerIdentityType.ReadOnly = true;
             this.textBoxRuntimeServerIdentityType.Size = new System.Drawing.Size(502, 26);
@@ -3044,7 +3017,7 @@ partial class PropertiesControl
             // 
             this.tableLayoutPanelRuntimeServer.SetColumnSpan(this.textBoxRuntimeServerIdentity, 2);
             this.textBoxRuntimeServerIdentity.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxRuntimeServerIdentity.Location = new System.Drawing.Point(128, 166);
+            this.textBoxRuntimeServerIdentity.Location = new System.Drawing.Point(128, 163);
             this.textBoxRuntimeServerIdentity.Name = "textBoxRuntimeServerIdentity";
             this.textBoxRuntimeServerIdentity.ReadOnly = true;
             this.textBoxRuntimeServerIdentity.Size = new System.Drawing.Size(502, 26);
@@ -3054,7 +3027,7 @@ partial class PropertiesControl
             // 
             this.tableLayoutPanelRuntimeServer.SetColumnSpan(this.textBoxRuntimeServerType, 2);
             this.textBoxRuntimeServerType.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxRuntimeServerType.Location = new System.Drawing.Point(128, 198);
+            this.textBoxRuntimeServerType.Location = new System.Drawing.Point(128, 195);
             this.textBoxRuntimeServerType.Name = "textBoxRuntimeServerType";
             this.textBoxRuntimeServerType.ReadOnly = true;
             this.textBoxRuntimeServerType.Size = new System.Drawing.Size(502, 26);
@@ -3064,22 +3037,11 @@ partial class PropertiesControl
             // 
             this.tableLayoutPanelRuntimeServer.SetColumnSpan(this.textBoxRuntimeServerInstancing, 2);
             this.textBoxRuntimeServerInstancing.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxRuntimeServerInstancing.Location = new System.Drawing.Point(128, 230);
+            this.textBoxRuntimeServerInstancing.Location = new System.Drawing.Point(128, 227);
             this.textBoxRuntimeServerInstancing.Name = "textBoxRuntimeServerInstancing";
             this.textBoxRuntimeServerInstancing.ReadOnly = true;
             this.textBoxRuntimeServerInstancing.Size = new System.Drawing.Size(502, 26);
             this.textBoxRuntimeServerInstancing.TabIndex = 15;
-            // 
-            // btnRuntimeServerViewPermissions
-            // 
-            this.btnRuntimeServerViewPermissions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnRuntimeServerViewPermissions.Location = new System.Drawing.Point(555, 99);
-            this.btnRuntimeServerViewPermissions.Name = "btnRuntimeServerViewPermissions";
-            this.btnRuntimeServerViewPermissions.Size = new System.Drawing.Size(75, 29);
-            this.btnRuntimeServerViewPermissions.TabIndex = 16;
-            this.btnRuntimeServerViewPermissions.Text = "View";
-            this.btnRuntimeServerViewPermissions.UseVisualStyleBackColor = true;
-            this.btnRuntimeServerViewPermissions.Click += new System.EventHandler(this.btnRuntimeServerViewPermissions_Click);
             // 
             // tabPageService
             // 
@@ -3590,7 +3552,6 @@ partial class PropertiesControl
     private System.Windows.Forms.TextBox textBoxProcessAccessPermissions;
     private System.Windows.Forms.TextBox textBoxProcessUser;
     private System.Windows.Forms.ListView listViewProcessIPids;
-    private System.Windows.Forms.Button btnProcessViewAccessPermissions;
     private System.Windows.Forms.ContextMenuStrip contextMenuStripIpids;
     private System.Windows.Forms.ToolStripMenuItem marshalStreamToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem copyInterfacePointerToolStripMenuItem;
@@ -3639,7 +3600,6 @@ partial class PropertiesControl
     private System.Windows.Forms.TextBox textBoxRuntimeClassActivationType;
     private System.Windows.Forms.TextBox textBoxRuntimeClassTrustLevel;
     private System.Windows.Forms.TextBox textBoxRuntimeClassThreading;
-    private System.Windows.Forms.Button btnRuntimeClassViewPermissions;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanelRuntimeServer;
     private System.Windows.Forms.TextBox textBoxRuntimeServerName;
     private System.Windows.Forms.TextBox textBoxRuntimeServerExePath;
@@ -3649,7 +3609,6 @@ partial class PropertiesControl
     private System.Windows.Forms.TextBox textBoxRuntimeServerIdentity;
     private System.Windows.Forms.TextBox textBoxRuntimeServerType;
     private System.Windows.Forms.TextBox textBoxRuntimeServerInstancing;
-    private System.Windows.Forms.Button btnRuntimeServerViewPermissions;
     private System.Windows.Forms.ToolStripMenuItem copyIPIDToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem copyIPIDIIDToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem ipidPropertiesToolStripMenuItem;
