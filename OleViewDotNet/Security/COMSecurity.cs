@@ -29,15 +29,9 @@ namespace OleViewDotNet.Security;
 
 public static class COMSecurity
 {
-    public static void ViewSecurity(COMRegistry registry, string name, COMSecurityDescriptor sd, bool access)
+    public static void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, COMSecurityDescriptor sd, bool access)
     {
-        if (sd == null)
-            return;
-
         AccessMask valid_access = access ? 0x7 : 0x1F;
-
-        SecurityDescriptorViewerControl control = new();
-        EntryPoint.GetMainForm(registry).HostControl(control, name);
         control.SetSecurityDescriptor(sd.SecurityDescriptor, typeof(COMAccessRights), new GenericMapping()
         {
             GenericExecute = valid_access,
@@ -45,6 +39,16 @@ public static class COMSecurity
             GenericWrite = valid_access,
             GenericAll = valid_access
         }, valid_access);
+    }
+
+    public static void ViewSecurity(COMRegistry registry, string name, COMSecurityDescriptor sd, bool access)
+    {
+        if (sd == null)
+            return;
+
+        SecurityDescriptorViewerControl control = new();
+        EntryPoint.GetMainForm(registry).HostControl(control, name);
+        SetupSecurityDescriptorControl(control, sd, access);
     }
 
     public static void ViewSecurity(COMRegistry registry, COMAppIDEntry appid, bool access)

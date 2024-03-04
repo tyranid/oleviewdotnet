@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Forms;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
@@ -74,6 +75,10 @@ internal partial class PropertiesControl : UserControl
         return guid == Guid.Empty ? "N/A" : guid.FormatGuid();
     }
 
+    private void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, COMSecurityDescriptor sd, bool access)
+    {
+    }
+
     private void SetupAppIdEntry(COMAppIDEntry entry)
     {
         textBoxAppIdName.Text = entry.Name;
@@ -84,8 +89,6 @@ internal partial class PropertiesControl : UserControl
         textBoxAppIDService.Text = GetStringValue(entry.IsService ? entry.LocalService.Name : null);
         textBoxAppIDFlags.Text = entry.Flags.ToString();
         textBoxDllSurrogate.Text = GetStringValue(entry.DllSurrogate);
-        btnViewAccessPermissions.Enabled = entry.HasAccessPermission;
-        btnViewLaunchPermissions.Enabled = entry.HasLaunchPermission;
         tabControlProperties.TabPages.Add(tabPageAppID);
 
         if (entry.IsService)
@@ -98,6 +101,18 @@ internal partial class PropertiesControl : UserControl
             textBoxServiceUserName.Text = GetStringValue(entry.LocalService.UserName);
             textBoxServiceProtectionLevel.Text = entry.LocalService.ProtectionLevel.ToString();
             tabControlProperties.TabPages.Add(tabPageService);
+        }
+
+        if (entry.HasAccessPermission)
+        {
+            tabControlProperties.TabPages.Add(tabPageAccessSecurity);
+            COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerAccessSecurity, entry.AccessPermission, true);
+        }
+
+        if (entry.HasLaunchPermission)
+        {
+            tabControlProperties.TabPages.Add(tabPageLaunchSecurity);
+            COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerLaunchSecurity, entry.LaunchPermission, false);
         }
 
         m_appid = entry;
@@ -455,16 +470,6 @@ internal partial class PropertiesControl : UserControl
         {
             MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-    }
-
-    private void btnViewLaunchPermissions_Click(object sender, EventArgs e)
-    {
-        COMSecurity.ViewSecurity(m_registry, m_appid, false);
-    }
-
-    private void btnViewAccessPermissions_Click(object sender, EventArgs e)
-    {
-        COMSecurity.ViewSecurity(m_registry, m_appid, true);
     }
 
     private void copyProgIDToolStripMenuItem_Click(object sender, EventArgs e)
