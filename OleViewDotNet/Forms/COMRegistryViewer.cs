@@ -94,7 +94,7 @@ internal partial class COMRegistryViewer : UserControl
             COMRegistryDisplayMode.Processes => "COM Processes",
             COMRegistryDisplayMode.RuntimeClasses => "Runtime Classes",
             COMRegistryDisplayMode.RuntimeServers => "Runtime Servers",
-            COMRegistryDisplayMode.RuntimeInterfaces => "Runtime Interfaces",
+            COMRegistryDisplayMode.RuntimeInterfaces or COMRegistryDisplayMode.RuntimeInterfacesTree => "Runtime Interfaces",
             _ => throw new ArgumentException("Invalid mode value"),
         };
     }
@@ -124,6 +124,7 @@ internal partial class COMRegistryViewer : UserControl
             case COMRegistryDisplayMode.Interfaces:
             case COMRegistryDisplayMode.InterfacesByName:
             case COMRegistryDisplayMode.RuntimeInterfaces:
+            case COMRegistryDisplayMode.RuntimeInterfacesTree:
                 filter_types.Add(FilterType.Interface);
                 break;
             case COMRegistryDisplayMode.ImplementedCategories:
@@ -225,6 +226,8 @@ internal partial class COMRegistryViewer : UserControl
                     return LoadInterfaces(registry, true, false);
                 case COMRegistryDisplayMode.RuntimeInterfaces:
                     return LoadInterfaces(registry, true, true);
+                case COMRegistryDisplayMode.RuntimeInterfacesTree:
+                    return LoadRuntimeInterfacesTree(registry);
                 case COMRegistryDisplayMode.ImplementedCategories:
                     return LoadImplementedCategories(registry);
                 case COMRegistryDisplayMode.PreApproved:
@@ -910,6 +913,58 @@ internal partial class COMRegistryViewer : UserControl
             typeLibNodes.Add(root);
         }
         return typeLibNodes.OrderBy(n => n.Text);
+    }
+
+    private static TreeNode CreateNodes(List<TreeNode> base_nodes, Dictionary<string, TreeNode> tree, string name)
+    {
+        string base_name = string.Empty;
+        string node_name = name;
+        int index = name.LastIndexOf('.');
+
+        if (index >= 0)
+        {
+            base_name = name.Substring(0, index);
+            node_name = name.Substring(index + 1);
+        }
+
+        TreeNode node = new(node_name);
+        node.ImageKey = FolderKey;
+        node.SelectedImageKey = FolderOpenKey;
+
+        if (base_name == string.Empty)
+        {
+            if (!tree.ContainsKey(node_name))
+            {
+                tree[node_name] = node;
+                base_nodes.Add(node);
+            }
+        }
+        else
+        {
+            if (!tree.TryGetValue(base_name, out TreeNode root_node))
+            {
+                root_node = CreateNodes(base_nodes, tree, base_name);
+                tree[base_name] = root_node;
+            }
+            root_node.Nodes.Add(node);
+        }
+
+        return node;
+    }
+
+    private static IEnumerable<TreeNode> LoadRuntimeInterfacesTree(COMRegistry registry)
+    {
+        Dictionary<string, TreeNode> tree = new();
+        List<TreeNode> base_nodes = new();
+        foreach (var intf in registry.Interfaces.Values.Where(i => i.RuntimeInterface).OrderBy(i => i.Name))
+        {
+            var node = CreateNodes(base_nodes, tree, intf.Name);
+            node.ImageKey = InterfaceKey;
+            node.SelectedImageKey = InterfaceKey;
+            node.Tag = intf;
+        }
+
+        return base_nodes;
     }
 
     private void AddInterfaceNodes(TreeNode node, IEnumerable<COMInterfaceInstance> intfs)
@@ -1605,6 +1660,11 @@ internal partial class COMRegistryViewer : UserControl
 
         if (result == FilterResult.None)
         {
+            if (n is DynamicTreeNode dynamic_node && dynamic_node.IsGenerated)
+            {
+                return result;
+            }
+
             foreach (TreeNode node in n.Nodes)
             {
                 result = FilterNode(node, filterFunc);

@@ -1124,4 +1124,9 @@ internal partial class MainForm : Form
     {
         OpenView(COMRegistryDisplayMode.RuntimeInterfaces);
     }
+
+    private void menuViewRuntimeInterfacesTree_Click(object sender, EventArgs e)
+    {
+        OpenView(COMRegistryDisplayMode.RuntimeInterfacesTree);
+    }
 }

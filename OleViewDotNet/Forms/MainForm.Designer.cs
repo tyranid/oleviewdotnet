@@ -80,6 +80,7 @@ partial class MainForm
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
+            this.menuViewRuntimeInterfaces = new System.Windows.Forms.MenuItem();
             this.menuRegistryTypeLibraries = new System.Windows.Forms.MenuItem();
             this.menuRegistryInterfaceProxies = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
@@ -121,7 +122,7 @@ partial class MainForm
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuViewRuntimeInterfaces = new System.Windows.Forms.MenuItem();
+            this.menuViewRuntimeInterfacesTree = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -347,6 +348,7 @@ partial class MainForm
             this.menuViewInterfaces,
             this.menuViewInterfacesByName,
             this.menuViewRuntimeInterfaces,
+            this.menuViewRuntimeInterfacesTree,
             this.menuRegistryTypeLibraries,
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
@@ -477,32 +479,38 @@ partial class MainForm
             this.menuViewInterfacesByName.Text = "Interfaces By Name";
             this.menuViewInterfacesByName.Click += new System.EventHandler(this.menuViewInterfacesByName_Click);
             // 
+            // menuViewRuntimeInterfaces
+            // 
+            this.menuViewRuntimeInterfaces.Index = 21;
+            this.menuViewRuntimeInterfaces.Text = "Runtime Interfaces";
+            this.menuViewRuntimeInterfaces.Click += new System.EventHandler(this.menuViewRuntimeInterfaces_Click);
+            // 
             // menuRegistryTypeLibraries
             // 
-            this.menuRegistryTypeLibraries.Index = 22;
+            this.menuRegistryTypeLibraries.Index = 23;
             this.menuRegistryTypeLibraries.Text = "&Type Libraries";
             this.menuRegistryTypeLibraries.Click += new System.EventHandler(this.menuRegistryTypeLibs_Click);
             // 
             // menuRegistryInterfaceProxies
             // 
-            this.menuRegistryInterfaceProxies.Index = 23;
+            this.menuRegistryInterfaceProxies.Index = 24;
             this.menuRegistryInterfaceProxies.Text = "Interface Pro&xies";
             this.menuRegistryInterfaceProxies.Click += new System.EventHandler(this.menuRegistryInterfaceProxies_Click);
             // 
             // menuItem6
             // 
-            this.menuItem6.Index = 24;
+            this.menuItem6.Index = 25;
             this.menuItem6.Text = "-";
             // 
             // menuRegistryProperties
             // 
-            this.menuRegistryProperties.Index = 25;
+            this.menuRegistryProperties.Index = 26;
             this.menuRegistryProperties.Text = "Registry Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
             // 
             // menuPropertiesViewer
             // 
-            this.menuPropertiesViewer.Index = 26;
+            this.menuPropertiesViewer.Index = 27;
             this.menuPropertiesViewer.Text = "Open Properties Viewer";
             this.menuPropertiesViewer.Click += new System.EventHandler(this.menuObjectPropertiesViewer_Click);
             // 
@@ -750,11 +758,11 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuViewRuntimeInterfaces
+            // menuViewRuntimeInterfacesTree
             // 
-            this.menuViewRuntimeInterfaces.Index = 21;
-            this.menuViewRuntimeInterfaces.Text = "Runtime Interfaces";
-            this.menuViewRuntimeInterfaces.Click += new System.EventHandler(this.menuViewRuntimeInterfaces_Click);
+            this.menuViewRuntimeInterfacesTree.Index = 22;
+            this.menuViewRuntimeInterfacesTree.Text = "Runtime Interfaces Tree";
+            this.menuViewRuntimeInterfacesTree.Click += new System.EventHandler(this.menuViewRuntimeInterfacesTree_Click);
             // 
             // MainForm
             // 
@@ -870,5 +878,6 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuProcessesOptionsParseRegisteredClasses;
     private System.Windows.Forms.MenuItem menuProcessesOptionsParseActCtx;
     private System.Windows.Forms.MenuItem menuViewRuntimeInterfaces;
+    private System.Windows.Forms.MenuItem menuViewRuntimeInterfacesTree;
 }
 
