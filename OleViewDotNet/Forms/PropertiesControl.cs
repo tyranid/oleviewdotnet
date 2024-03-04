@@ -75,10 +75,6 @@ internal partial class PropertiesControl : UserControl
         return guid == Guid.Empty ? "N/A" : guid.FormatGuid();
     }
 
-    private void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, COMSecurityDescriptor sd, bool access)
-    {
-    }
-
     private void SetupAppIdEntry(COMAppIDEntry entry, bool setup_security)
     {
         textBoxAppIdName.Text = entry.Name;
