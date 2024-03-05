@@ -2314,6 +2314,7 @@ internal partial class COMRegistryViewer : UserControl
         if (ProgramSettings.AlwaysShowSourceCode)
         {
             splitContainer.Panel2Collapsed = false;
+            showSourceCodeToolStripMenuItem.Checked = true;
         }
         sourceCodeViewerControl.AutoParse = ProgramSettings.EnableAutoParsing;
     }

@@ -31,6 +31,7 @@ internal partial class SourceCodeViewerControl : UserControl
     private COMSourceCodeBuilderType m_output_type;
     private bool m_hide_comments;
     private bool m_interfaces_only;
+    private bool m_hide_parsing_options;
 
     public SourceCodeViewerControl()
     {
@@ -93,8 +94,8 @@ internal partial class SourceCodeViewerControl : UserControl
         }
         else
         {
-            builder.AppendLine(m_selected_obj == null ? 
-                "No formattable object selected" 
+            builder.AppendLine(m_selected_obj == null ?
+                "No formattable object selected"
                 : $"'{m_selected_obj}' is not formattable.");
         }
         SetText(builder.ToString());
@@ -129,10 +130,26 @@ internal partial class SourceCodeViewerControl : UserControl
         }
     }
 
+    private void OnHideParsingOptionsChanged()
+    {
+        parseSourceCodeToolStripMenuItem.Visible = !m_hide_parsing_options;
+        autoParseToolStripMenuItem.Visible = !m_hide_parsing_options;
+    }
+
     internal bool AutoParse
     {
         get => autoParseToolStripMenuItem.Checked;
         set => autoParseToolStripMenuItem.Checked = value;
+    }
+
+    internal bool HideParsingOptions
+    {
+        get => m_hide_parsing_options;
+        set
+        {
+            m_hide_parsing_options = value;
+            OnHideParsingOptionsChanged();
+        }
     }
 
     private void toolStripMenuItemIDLOutputType_Click(object sender, EventArgs e)
