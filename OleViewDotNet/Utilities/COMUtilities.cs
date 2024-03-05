@@ -748,9 +748,16 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, CLSCTX clsctx)
     {
-        BIND_OPTS3 bind_opts = new();
-        bind_opts.dwClassContext = clsctx;
+        BIND_OPTS3 bind_opts = new()
+        {
+            dwClassContext = clsctx
+        };
         return CreateFromMoniker(moniker, bind_opts);
+    }
+
+    public static object CreateFromSessionMoniker(Guid clsid, int session_id, bool factory)
+    {
+        return CreateFromMoniker($"session:{session_id}!{(factory ? "clsid" : "new")}:{clsid}", CLSCTX.LOCAL_SERVER);
     }
 
     public static object UnmarshalObject(Stream stm, Guid iid)
@@ -1353,69 +1360,6 @@ public static class COMUtilities
         moniker.BindToObject(bind_context, null, ref iid, out object comObj);
         return comObj;
     }
-
-    //internal static IEnumerable<Type> GetComClasses(this Assembly typelib, bool com_visible)
-    //{
-    //    return GetComTypes(typelib.GetTypes().Where(t => t.IsClass), com_visible);
-    //}
-
-    //internal static IEnumerable<Type> GetComInterfaces(this Assembly typelib, bool com_visible)
-    //{
-    //    return GetComTypes(typelib.GetTypes().Where(t => t.IsInterface), com_visible);
-    //}
-
-    //internal static IEnumerable<Type> GetComTypes(this IEnumerable<Type> types, bool com_visible)
-    //{
-    //    if (com_visible)
-    //    {
-    //        return types.Where(t => Marshal.IsTypeVisibleFromCom(t));
-    //    }
-    //    else
-    //    {
-    //        return types.Where(t => Attribute.IsDefined(t, typeof(ComImportAttribute)));
-    //    }
-    //}
-
-    //internal static IEnumerable<Type> GetComStructs(this Assembly typelib, bool com_visible)
-    //{
-    //    var types = typelib.GetTypes().Where(t => t.IsValueType && !t.IsEnum);
-    //    if (com_visible)
-    //    {
-    //        types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
-    //    }
-    //    return types;
-    //}
-
-    //internal static IEnumerable<Type> GetComEnums(this Assembly typelib, bool com_visible)
-    //{
-    //    var types = typelib.GetTypes().Where(t => t.IsEnum);
-    //    if (com_visible)
-    //    {
-    //        types = types.Where(t => Marshal.IsTypeVisibleFromCom(t));
-    //    }
-    //    return types;
-    //}
-
-    //public static string FormatComAssembly(Assembly assembly, bool interfaces_only)
-    //{
-    //    COMSourceCodeBuilder builder = new();
-    //    if (!interfaces_only)
-    //    {
-    //        builder.AppendTypes(assembly.GetComStructs(false));
-    //        builder.AppendTypes(assembly.GetComEnums(false));
-    //        builder.AppendTypes(assembly.GetComClasses(false));
-    //    }
-    //    builder.AppendTypes(assembly.GetComInterfaces(false));
-    //    return builder.ToString();
-    //}
-
-    //public static string FormatComType(Type type)
-    //{
-    //    COMSourceCodeBuilder builder = new();
-    //    ICOMSourceCodeFormattable formattable = new SourceCodeFormattableType(type);
-    //    formattable.Format(builder);
-    //    return builder.ToString();
-    //}
 
     public static bool IsProxy(object obj)
     {

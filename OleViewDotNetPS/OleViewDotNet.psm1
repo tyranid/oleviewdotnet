@@ -1795,10 +1795,10 @@ function New-ComObject {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::UnmarshalObject($Ipid.ToObjRef())
             }
             "FromSessionIdClass" {
-                $obj = Get-ComMoniker "session:$SessionId!new:$($Class.Clsid)" -Bind -NoWrapper
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Class.Clsid, $SessionId, $false)
             }
             "FromSessionIdClsid" {
-                $obj = Get-ComMoniker "session:$SessionId!new:$Clsid" -Bind -NoWrapper
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Clsid, $SessionId, $false)
             }
         }
 
@@ -1870,10 +1870,10 @@ function New-ComObjectFactory {
                     "00000000-0000-0000-C000-000000000046", $ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromSessionIdClass" {
-                $obj = Get-ComMoniker "session:$SessionId!clsid:$($Class.Clsid)" -Bind -NoWrapper
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Class.Clsid, $SessionId, $true)
             }
             "FromSessionIdClsid" {
-                $obj = Get-ComMoniker "session:$SessionId!clsid:$Clsid" -Bind -NoWrapper
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Clsid, $SessionId, $true)
             }
         }
 
