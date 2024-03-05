@@ -16,10 +16,12 @@
 
 using NtApiDotNet.Ndr;
 using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable
+public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable, ICOMSourceCodeEditable
 {
     #region Public Properties
     public override string Name => Entry.Name;
@@ -31,6 +33,25 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
     public bool IsUnion => Entry is NdrUnionTypeReference;
 
     bool ICOMSourceCodeFormattable.IsFormattable => true;
+
+    string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
+
+    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members
+    {
+        get
+        {
+            List<ICOMSourceCodeEditable> ret = new();
+            if (Entry is NdrBaseStructureTypeReference struct_type)
+            {
+                ret.AddRange(struct_type.Members.Select(m => new COMSourceCodeEditableObject(() => m.Name, n => m.Name = n)));
+            }
+            else if (Entry is NdrUnionTypeReference union_type)
+            {
+                ret.AddRange(union_type.Arms.Arms.Select(m => new COMSourceCodeEditableObject(() => m.Name, n => m.Name = n)));
+            }
+            return ret.AsReadOnly();
+        }
+    }
     #endregion
 
     #region Internal Members

@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr;
-using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
@@ -25,11 +24,27 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMSourceCodeFormattable, ICOMGuid
+public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMSourceCodeFormattable, ICOMGuid, ICOMSourceCodeEditable
 {
     #region Private Members
     private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
     private readonly COMRegistry m_registry;
+
+    private sealed class EditableParameter : COMSourceCodeEditableObject
+    {
+        public EditableParameter(NdrProcedureParameter p) 
+            : base(() => p.Name, n => p.Name = n)
+        {
+        }
+    }
+
+    private sealed class EditableProcedure : COMSourceCodeEditableObject
+    {
+        public EditableProcedure(NdrProcedureDefinition proc) 
+            : base(() => proc.Name, n => proc.Name = n, proc.Params.Select(p => new EditableParameter(p)))
+        {
+        }
+    }
     #endregion
 
     #region Public Properties
@@ -77,6 +92,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     bool ICOMSourceCodeFormattable.IsFormattable => true;
 
     Guid ICOMGuid.ComGuid => Iid;
+
+    string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
+
+    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members =>
+        Procedures.Select(p => new EditableProcedure(p)).ToList().AsReadOnly();
     #endregion
 
     #region Internal Members
