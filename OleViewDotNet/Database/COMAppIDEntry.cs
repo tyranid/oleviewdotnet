@@ -186,6 +186,10 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public bool HasRemoteLaunch => COMSecurity.SDHasRemoteAccess(LaunchPermission);
 
+    public bool HasContainerAccess => AccessPermission?.HasContainerAccess ?? false;
+
+    public bool HasContainerLaunch => LaunchPermission?.HasContainerAccess ?? false;
+
     public COMAppIDRotFlags RotFlags
     {
         get; private set;

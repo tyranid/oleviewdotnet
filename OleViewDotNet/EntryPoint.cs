@@ -136,23 +136,6 @@ public static class EntryPoint
     private static void ShowSecurityDescriptor(string view_sd, bool access, string view_name)
     {
         SecurityDescriptor sd = SecurityDescriptor.ParseBase64(view_sd);
-        bool has_container = false;
-        if (sd.DaclPresent)
-        {
-            foreach (var ace in sd.Dacl)
-            {
-                if (ace.Mask.IsAccessGranted(COMAccessRights.ActivateContainer | COMAccessRights.ExecuteContainer))
-                {
-                    has_container = true;
-                    break;
-                }
-            }
-        }
-        AccessMask valid_access = access ? 0x7 : 0x1F;
-        if (has_container)
-        {
-            valid_access |= access ? 0x20 : 0x60;
-        }
 
         SecurityDescriptorViewerControl control = new();
         DocumentForm frm = new(control);
@@ -162,13 +145,7 @@ public static class EntryPoint
             title = $"{view_name} {title}";
         }
         frm.Text = title;
-        control.SetSecurityDescriptor(sd, typeof(COMAccessRights), new GenericMapping()
-        {
-            GenericExecute = valid_access,
-            GenericRead = valid_access,
-            GenericWrite = valid_access,
-            GenericAll = valid_access
-        }, valid_access);
+        COMSecurity.SetupSecurityDescriptorControl(control, sd, access);
         Application.Run(frm);
     }
 

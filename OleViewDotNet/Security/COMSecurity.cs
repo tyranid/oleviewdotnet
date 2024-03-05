@@ -29,9 +29,19 @@ namespace OleViewDotNet.Security;
 
 public static class COMSecurity
 {
-    public static void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, COMSecurityDescriptor sd, bool access)
+    internal static void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, SecurityDescriptor sd, bool access)
+    {
+        SetupSecurityDescriptorControl(control, new COMSecurityDescriptor(sd), access);
+    }
+
+    internal static void SetupSecurityDescriptorControl(SecurityDescriptorViewerControl control, COMSecurityDescriptor sd, bool access)
     {
         AccessMask valid_access = access ? 0x7 : 0x1F;
+        if (sd.HasContainerAccess)
+        {
+            valid_access |= access ? 0x20 : 0x60;
+        }
+
         control.SetSecurityDescriptor(sd.SecurityDescriptor, typeof(COMAccessRights), new GenericMapping()
         {
             GenericExecute = valid_access,

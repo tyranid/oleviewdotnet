@@ -27,6 +27,24 @@ public sealed class COMSecurityDescriptor
 
     public COMSid Owner => new(SecurityDescriptor.Owner.Sid);
 
+    public bool HasContainerAccess
+    {
+        get
+        {
+            if (SecurityDescriptor.DaclPresent)
+            {
+                foreach (var ace in SecurityDescriptor.Dacl)
+                {
+                    if (ace.Mask.IsAccessGranted(COMAccessRights.ActivateContainer | COMAccessRights.ExecuteContainer))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
     public COMSecurityDescriptor(string sddl) 
         : this(new SecurityDescriptor(sddl))
     {

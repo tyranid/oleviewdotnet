@@ -110,15 +110,9 @@ internal partial class ViewFilterControl : UserControl
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public RegistryViewerFilter Filter
     {
-        get
-        {
-            return BuildFilter();
-        }
+        get => BuildFilter();
 
-        set
-        {
-            UpdateFilter(value);
-        }
+        set => UpdateFilter(value);
     }
 
     public event EventHandler FilterChanged;
@@ -237,7 +231,7 @@ internal partial class ViewFilterControl : UserControl
         {
             RegistryViewerFilterEntry entry = (RegistryViewerFilterEntry)listViewFilters.SelectedItems[0].Tag;
             listViewFilters.Items.RemoveAt(listViewFilters.SelectedIndices[0]);
-            UpdateInputForEntry(entry);                
+            UpdateInputForEntry(entry);
 
             OnFilterChanged();
         }

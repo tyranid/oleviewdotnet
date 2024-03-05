@@ -70,8 +70,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private static bool IsLeafNode(TreeNode node)
     {
-        var tag = node.Tag;
-        return tag is ICOMClassEntry || tag is COMTypeLibVersionEntry;
+        return node.Tag is ICOMClassEntry;
     }
 
     private static string GetDisplayName(COMRegistryDisplayMode mode)
