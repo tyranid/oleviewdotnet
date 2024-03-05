@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
@@ -220,10 +219,6 @@ internal partial class TypeLibControl : UserControl
         };
         InitializeComponent();
 
-        cbProxyRenderStyle.SelectedIndex = 0;
-
-        textEditor.SetHighlighting("C#");
-        textEditor.IsReadOnly = true;
         Text = name;
 
         textBoxFilter.Text = filterDefaultString;
@@ -253,6 +248,7 @@ internal partial class TypeLibControl : UserControl
             tabControl.TabPages.Remove(tabPageEnums);
         }
 
+        sourceCodeViewerControl.HideParsingOptions = true;
         RefreshInterfaces();
     }
 
@@ -280,10 +276,6 @@ internal partial class TypeLibControl : UserControl
               FormatAssemblyStructs(typelib),
               FormatAssemblyEnums(typelib))
     {
-        btnDqs.Visible = false;
-        cbProxyRenderStyle.Visible = false;
-        checkBoxHideComments.Visible = false;
-        lblRendering.Visible = false;
     }
 
     public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
@@ -297,11 +289,6 @@ internal partial class TypeLibControl : UserControl
               FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),
               FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
     {
-        bool is_proxy = formatter is COMProxyFile;
-        btnDqs.Visible = is_proxy;
-        cbProxyRenderStyle.Visible = is_proxy;
-        checkBoxHideComments.Visible = is_proxy;
-        lblRendering.Visible = is_proxy;
         m_com_class_id = com_class_id;
         m_com_class_id_name = com_class_id_name;
     }
@@ -322,11 +309,8 @@ internal partial class TypeLibControl : UserControl
         string text = string.Empty;
         if (list.SelectedItems.Count > 0)
         {
-            text = GetTextFromTag(list.SelectedItems[0].Tag);
+            sourceCodeViewerControl.SelectedObject = list.SelectedItems[0].Tag;
         }
-
-        textEditor.Text = text;
-        textEditor.Refresh();
     }
 
     private void listView_SelectedIndexChanged(object sender, EventArgs e)
@@ -392,13 +376,6 @@ internal partial class TypeLibControl : UserControl
     private void btnExportInterfaces_Click(object sender, EventArgs e)
     {
         StringBuilder sb = new();
-        if((cbProxyRenderStyle.SelectedIndex > 1) && (m_com_class_id_name != null) && (m_com_class_id != null))
-        {
-            // C++ style is requsted, let's add a line about the CLSID being rendered
-
-            sb.AppendLine(MiscUtilities.FormatGuidAsCStruct(m_com_class_id_name, m_com_class_id.Value));
-            sb.AppendLine();
-        }
         foreach(var listView in new ListView[] { listViewEnums, listViewStructures, listViewClasses, listViewInterfaces })
         {
             foreach (ListViewItem item in listView.Items)
@@ -414,52 +391,6 @@ internal partial class TypeLibControl : UserControl
         MessageBox.Show("View has been exported to the clipboard as text.");
     }
 
-    private void btnDqs_Click(object sender, EventArgs e)
-    {
-        using var formInput = new TextAreaInputForm();
-        formInput.Text = "Paste the DQS lines obtained from windbg";
-        if (DialogResult.OK != formInput.ShowDialog()) return;
-
-        CombineOVDNIdlAndDqs(textEditor.Text, formInput.textEditor.Text);
-    }
-
-    private static void CombineOVDNIdlAndDqs(string ovdnIdl, string dqs)
-    {
-        MessageBox.Show(CombineOVDNIdlAndDqsInt(ovdnIdl, dqs));
-    }
-
-    private static string CombineOVDNIdlAndDqsInt(string ovdnIdl, string dqs)
-    {
-        MatchCollection unknownMethodNames = Regex.Matches(ovdnIdl, @"\s+Proc\d+\(");
-        MatchCollection dqsSymbolNames = Regex.Matches(dqs, @"\s*[0-9a-f`]+\s+[0-9a-f`]+\s+\S+!(?:[^:]+::)?(\S+)");
-
-        if (unknownMethodNames.Count != dqsSymbolNames.Count)
-            return $"Different number of methods found in OVDN IDL ({unknownMethodNames.Count}) and in windbg dqs ({dqsSymbolNames.Count}). Don't forget to remove the methods of the parent interface from the DQS lines! (E.g. strip QueryInterface/AddRef/Release lines if the target is IUnknown based)";
-        for (var i = 0; i < unknownMethodNames.Count; i++)
-        {
-            ovdnIdl = ovdnIdl.Replace(unknownMethodNames[i].Groups[0].Value, " " + dqsSymbolNames[i].Groups[1].Value + "(");
-        }
-
-        // and saving the result to the clipboard
-        Clipboard.SetText(ovdnIdl);
-        return "Alrighty, the combined lines are now on your clipboard.";
-    }
-
-    private void cbProxyRenderStyle_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
-        {
-            m_builder.OutputType = cbProxyRenderStyle.SelectedIndex switch
-            {
-                1 => COMSourceCodeBuilderType.Generic,
-                2 => COMSourceCodeBuilderType.Cpp,
-                _ => COMSourceCodeBuilderType.Idl
-            };
-
-            UpdateFromListView(view);
-        }
-    }
-
     private void textBoxFilter_Enter(object sender, EventArgs e)
     {
         textBoxFilter.SelectAll();
@@ -470,14 +401,5 @@ internal partial class TypeLibControl : UserControl
         if (IsDisposed)
             return;
         RefreshInterfaces();
-    }
-
-    private void checkBoxHideComments_CheckedChanged(object sender, EventArgs e)
-    {
-        if ((tabControl.SelectedTab.Controls.Count > 0) && (tabControl.SelectedTab.Controls[0] is ListView view))
-        {
-            m_builder.HideComments = checkBoxHideComments.Checked;
-            UpdateFromListView(view);
-        }
     }
 }

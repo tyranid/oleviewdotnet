@@ -59,12 +59,7 @@ partial class TypeLibControl
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnExportInterfaces = new System.Windows.Forms.Button();
             this.textBoxFilter = new OleViewDotNet.Forms.InputTextBox();
-            this.panelProxy = new System.Windows.Forms.Panel();
-            this.checkBoxHideComments = new System.Windows.Forms.CheckBox();
-            this.lblRendering = new System.Windows.Forms.Label();
-            this.cbProxyRenderStyle = new System.Windows.Forms.ComboBox();
-            this.btnDqs = new System.Windows.Forms.Button();
-            this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
+            this.sourceCodeViewerControl = new OleViewDotNet.Forms.SourceCodeViewerControl();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -78,7 +73,6 @@ partial class TypeLibControl
             this.tabPageStructures.SuspendLayout();
             this.tabPageEnums.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panelProxy.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -95,8 +89,7 @@ partial class TypeLibControl
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.panelProxy);
-            this.splitContainer.Panel2.Controls.Add(this.textEditor);
+            this.splitContainer.Panel2.Controls.Add(this.sourceCodeViewerControl);
             this.splitContainer.Size = new System.Drawing.Size(1048, 643);
             this.splitContainer.SplitterDistance = 439;
             this.splitContainer.SplitterWidth = 6;
@@ -395,78 +388,13 @@ partial class TypeLibControl
             this.textBoxFilter.Enter += new System.EventHandler(this.textBoxFilter_Enter);
             this.textBoxFilter.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBoxFilter_KeyUp);
             // 
-            // panelProxy
+            // sourceCodeViewerControl
             // 
-            this.panelProxy.Controls.Add(this.checkBoxHideComments);
-            this.panelProxy.Controls.Add(this.lblRendering);
-            this.panelProxy.Controls.Add(this.cbProxyRenderStyle);
-            this.panelProxy.Controls.Add(this.btnDqs);
-            this.panelProxy.Location = new System.Drawing.Point(4, 5);
-            this.panelProxy.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.panelProxy.Name = "panelProxy";
-            this.panelProxy.Size = new System.Drawing.Size(594, 66);
-            this.panelProxy.TabIndex = 2;
-            // 
-            // checkBoxHideComments
-            // 
-            this.checkBoxHideComments.AutoSize = true;
-            this.checkBoxHideComments.Checked = true;
-            this.checkBoxHideComments.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxHideComments.Location = new System.Drawing.Point(442, 20);
-            this.checkBoxHideComments.Name = "checkBoxHideComments";
-            this.checkBoxHideComments.Size = new System.Drawing.Size(149, 24);
-            this.checkBoxHideComments.TabIndex = 4;
-            this.checkBoxHideComments.Text = "Hide Comments";
-            this.checkBoxHideComments.UseVisualStyleBackColor = true;
-            this.checkBoxHideComments.CheckedChanged += new System.EventHandler(this.checkBoxHideComments_CheckedChanged);
-            // 
-            // lblRendering
-            // 
-            this.lblRendering.AutoSize = true;
-            this.lblRendering.Location = new System.Drawing.Point(162, 22);
-            this.lblRendering.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblRendering.Name = "lblRendering";
-            this.lblRendering.Size = new System.Drawing.Size(123, 20);
-            this.lblRendering.TabIndex = 3;
-            this.lblRendering.Text = "Rendering style:";
-            // 
-            // cbProxyRenderStyle
-            // 
-            this.cbProxyRenderStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProxyRenderStyle.FormattingEnabled = true;
-            this.cbProxyRenderStyle.Items.AddRange(new object[] {
-            "IDL",
-            "Original",
-            "C++"});
-            this.cbProxyRenderStyle.Location = new System.Drawing.Point(293, 18);
-            this.cbProxyRenderStyle.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cbProxyRenderStyle.Name = "cbProxyRenderStyle";
-            this.cbProxyRenderStyle.Size = new System.Drawing.Size(131, 28);
-            this.cbProxyRenderStyle.TabIndex = 2;
-            this.cbProxyRenderStyle.SelectedIndexChanged += new System.EventHandler(this.cbProxyRenderStyle_SelectedIndexChanged);
-            // 
-            // btnDqs
-            // 
-            this.btnDqs.Location = new System.Drawing.Point(4, 14);
-            this.btnDqs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.btnDqs.Name = "btnDqs";
-            this.btnDqs.Size = new System.Drawing.Size(150, 35);
-            this.btnDqs.TabIndex = 1;
-            this.btnDqs.Text = "Combine with dqs";
-            this.btnDqs.UseVisualStyleBackColor = true;
-            this.btnDqs.Click += new System.EventHandler(this.btnDqs_Click);
-            // 
-            // textEditor
-            // 
-            this.textEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textEditor.IsReadOnly = false;
-            this.textEditor.Location = new System.Drawing.Point(0, 105);
-            this.textEditor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.textEditor.Name = "textEditor";
-            this.textEditor.Size = new System.Drawing.Size(597, 538);
-            this.textEditor.TabIndex = 0;
+            this.sourceCodeViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sourceCodeViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.sourceCodeViewerControl.Name = "sourceCodeViewerControl";
+            this.sourceCodeViewerControl.Size = new System.Drawing.Size(603, 643);
+            this.sourceCodeViewerControl.TabIndex = 0;
             // 
             // TypeLibControl
             // 
@@ -490,8 +418,6 @@ partial class TypeLibControl
             this.tabPageEnums.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            this.panelProxy.ResumeLayout(false);
-            this.panelProxy.PerformLayout();
             this.ResumeLayout(false);
 
     }
@@ -499,7 +425,6 @@ partial class TypeLibControl
     #endregion
 
     private System.Windows.Forms.SplitContainer splitContainer;
-    private ICSharpCode.TextEditor.TextEditorControl textEditor;
     private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
     private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem copyGUIDToolStripMenuItem;
@@ -525,13 +450,9 @@ partial class TypeLibControl
     private System.Windows.Forms.Panel panel1;
     private InputTextBox textBoxFilter;
     private System.Windows.Forms.Button btnExportInterfaces;
-    private System.Windows.Forms.Button btnDqs;
-    private System.Windows.Forms.Panel panelProxy;
-    private System.Windows.Forms.Label lblRendering;
-    private System.Windows.Forms.ComboBox cbProxyRenderStyle;
-    private System.Windows.Forms.CheckBox checkBoxHideComments;
     private System.Windows.Forms.TabPage tabPageDispatch;
     private System.Windows.Forms.ListView listViewDispatch;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader5;
+    private SourceCodeViewerControl sourceCodeViewerControl;
 }
