@@ -119,6 +119,11 @@ internal partial class SourceCodeViewerControl : UserControl
                 m_formattable_obj = null;
             }
 
+            if (!IsParsed(m_formattable_obj) && autoParseToolStripMenuItem.Checked)
+            {
+                ParseSourceCode();
+            }
+
             parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj != null && !IsParsed(m_formattable_obj);
             Format();
         }
@@ -184,18 +189,31 @@ internal partial class SourceCodeViewerControl : UserControl
 
     private void parseSourceCodeToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        ParseSourceCode();
+        Format();
+    }
+
+    private void ParseSourceCode()
+    {
         try
         {
             if (m_formattable_obj is ICOMSourceCodeParsable parsable && !parsable.IsSourceCodeParsed)
             {
                 parsable.ParseSourceCode();
                 parseSourceCodeToolStripMenuItem.Enabled = false;
-                Format();
             }
         }
         catch (Exception ex)
         {
             m_formattable_obj = new SourceCodeFormattableText($"ERROR: {ex.Message}");
+        }
+    }
+
+    private void autoParseToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (autoParseToolStripMenuItem.Checked)
+        {
+            SelectedObject = m_selected_obj;
         }
     }
 }

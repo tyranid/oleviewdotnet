@@ -32,6 +32,7 @@
             this.textEditor = new ICSharpCode.TextEditor.TextEditorControl();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.parseSourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoParseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.formatOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemHideComments = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,10 +59,11 @@
             this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.parseSourceCodeToolStripMenuItem,
+            this.autoParseToolStripMenuItem,
             this.exportToolStripMenuItem,
             this.formatOptionsToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(232, 100);
+            this.contextMenuStrip.Size = new System.Drawing.Size(232, 132);
             // 
             // parseSourceCodeToolStripMenuItem
             // 
@@ -69,6 +71,14 @@
             this.parseSourceCodeToolStripMenuItem.Size = new System.Drawing.Size(231, 32);
             this.parseSourceCodeToolStripMenuItem.Text = "Parse Source Code";
             this.parseSourceCodeToolStripMenuItem.Click += new System.EventHandler(this.parseSourceCodeToolStripMenuItem_Click);
+            // 
+            // autoParseToolStripMenuItem
+            // 
+            this.autoParseToolStripMenuItem.CheckOnClick = true;
+            this.autoParseToolStripMenuItem.Name = "autoParseToolStripMenuItem";
+            this.autoParseToolStripMenuItem.Size = new System.Drawing.Size(231, 32);
+            this.autoParseToolStripMenuItem.Text = "Auto Parse";
+            this.autoParseToolStripMenuItem.Click += new System.EventHandler(this.autoParseToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
@@ -90,14 +100,14 @@
             // toolStripMenuItemHideComments
             // 
             this.toolStripMenuItemHideComments.Name = "toolStripMenuItemHideComments";
-            this.toolStripMenuItemHideComments.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemHideComments.Size = new System.Drawing.Size(243, 34);
             this.toolStripMenuItemHideComments.Text = "Hide Comments";
             this.toolStripMenuItemHideComments.Click += new System.EventHandler(this.toolStripMenuItemHideComments_Click);
             // 
             // toolStripMenuItemInterfacesOnly
             // 
             this.toolStripMenuItemInterfacesOnly.Name = "toolStripMenuItemInterfacesOnly";
-            this.toolStripMenuItemInterfacesOnly.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemInterfacesOnly.Size = new System.Drawing.Size(243, 34);
             this.toolStripMenuItemInterfacesOnly.Text = "Interfaces Only";
             this.toolStripMenuItemInterfacesOnly.Click += new System.EventHandler(this.toolStripMenuItemInterfacesOnly_Click);
             // 
@@ -108,7 +118,7 @@
             this.toolStripMenuItemCppOutputType,
             this.toolStripMenuItemGenericOutputType});
             this.toolStripMenuItemOutputType.Name = "toolStripMenuItemOutputType";
-            this.toolStripMenuItemOutputType.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItemOutputType.Size = new System.Drawing.Size(243, 34);
             this.toolStripMenuItemOutputType.Text = "Output Type";
             // 
             // toolStripMenuItemIDLOutputType
@@ -157,5 +167,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemIDLOutputType;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCppOutputType;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemGenericOutputType;
+        private System.Windows.Forms.ToolStripMenuItem autoParseToolStripMenuItem;
     }
 }
