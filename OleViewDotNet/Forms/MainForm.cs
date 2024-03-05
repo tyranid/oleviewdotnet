@@ -835,18 +835,22 @@ internal partial class MainForm : Form
     {
         if (m_property_grid == null || m_property_grid.IsDisposed)
         {
-            m_property_grid = new();
-            m_property_grid.ToolbarVisible = false;
-            m_property_grid.PropertySort = PropertySort.Alphabetical;
-            
-            DocumentForm frm = new(m_property_grid);
-            frm.TabText = "Object Properties";
-            frm.ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight;
+            m_property_grid = new()
+            {
+                ToolbarVisible = false,
+                PropertySort = PropertySort.Alphabetical
+            };
+
+            DocumentForm frm = new(m_property_grid)
+            {
+                TabText = "Object Properties",
+                ShowHint = autohide ? DockState.DockRightAutoHide : DockState.DockRight
+            };
             frm.Show(m_dockPanel);
         }
     }
 
-    private void menuObjectPropertiesViewer_Click(object sender, EventArgs e)
+    private void menuViewOpenPropertiesViewer_Click(object sender, EventArgs e)
     {
         CreatePropertyGrid(false);
     }
@@ -1128,5 +1132,28 @@ internal partial class MainForm : Form
     private void menuViewRuntimeInterfacesTree_Click(object sender, EventArgs e)
     {
         OpenView(COMRegistryDisplayMode.RuntimeInterfacesTree);
+    }
+
+    private void menuItemView_Popup(object sender, EventArgs e)
+    {
+        menuViewOpenPropertiesViewer.Enabled = m_property_grid == null || m_property_grid.IsDisposed;
+    }
+
+    private void menuViewRegistryViewOptions_Popup(object sender, EventArgs e)
+    {
+        menuViewAlwaysShowSourceCode.Checked = ProgramSettings.AlwaysShowSourceCode;
+        menuViewEnableAutoParsing.Checked = ProgramSettings.EnableAutoParsing;
+    }
+
+    private void menuViewAlwaysShowSourceCode_Click(object sender, EventArgs e)
+    {
+        menuViewAlwaysShowSourceCode.Checked = !menuViewAlwaysShowSourceCode.Checked;
+        ProgramSettings.AlwaysShowSourceCode = menuViewAlwaysShowSourceCode.Checked;
+    }
+
+    private void menuViewEnableAutoParsing_Click(object sender, EventArgs e)
+    {
+        menuViewEnableAutoParsing.Checked = !menuViewEnableAutoParsing.Checked;
+        ProgramSettings.EnableAutoParsing = menuViewEnableAutoParsing.Checked;
     }
 }

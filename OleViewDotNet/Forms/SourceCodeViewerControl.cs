@@ -119,7 +119,7 @@ internal partial class SourceCodeViewerControl : UserControl
                 m_formattable_obj = null;
             }
 
-            if (!IsParsed(m_formattable_obj) && autoParseToolStripMenuItem.Checked)
+            if (!IsParsed(m_formattable_obj) && AutoParse)
             {
                 ParseSourceCode();
             }
@@ -127,6 +127,12 @@ internal partial class SourceCodeViewerControl : UserControl
             parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj != null && !IsParsed(m_formattable_obj);
             Format();
         }
+    }
+
+    internal bool AutoParse
+    {
+        get => autoParseToolStripMenuItem.Checked;
+        set => autoParseToolStripMenuItem.Checked = value;
     }
 
     private void toolStripMenuItemIDLOutputType_Click(object sender, EventArgs e)
@@ -211,7 +217,7 @@ internal partial class SourceCodeViewerControl : UserControl
 
     private void autoParseToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (autoParseToolStripMenuItem.Checked)
+        if (AutoParse)
         {
             SelectedObject = m_selected_obj;
         }

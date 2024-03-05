@@ -81,11 +81,11 @@ partial class MainForm
             this.menuViewInterfaces = new System.Windows.Forms.MenuItem();
             this.menuViewInterfacesByName = new System.Windows.Forms.MenuItem();
             this.menuViewRuntimeInterfaces = new System.Windows.Forms.MenuItem();
+            this.menuViewRuntimeInterfacesTree = new System.Windows.Forms.MenuItem();
             this.menuRegistryTypeLibraries = new System.Windows.Forms.MenuItem();
             this.menuRegistryInterfaceProxies = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.menuRegistryProperties = new System.Windows.Forms.MenuItem();
-            this.menuPropertiesViewer = new System.Windows.Forms.MenuItem();
             this.menuObject = new System.Windows.Forms.MenuItem();
             this.menuObjectROT = new System.Windows.Forms.MenuItem();
             this.menuItem13 = new System.Windows.Forms.MenuItem();
@@ -117,12 +117,16 @@ partial class MainForm
             this.menuProcessesOptionsParseStubs = new System.Windows.Forms.MenuItem();
             this.menuProcessesOptionsParseRegisteredClasses = new System.Windows.Forms.MenuItem();
             this.menuProcessesOptionsParseActCtx = new System.Windows.Forms.MenuItem();
-            this.menuItem11 = new System.Windows.Forms.MenuItem();
+            this.menuItemStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageNewStorage = new System.Windows.Forms.MenuItem();
             this.menuStorageOpenStorage = new System.Windows.Forms.MenuItem();
+            this.menuItemView = new System.Windows.Forms.MenuItem();
+            this.menuViewOpenPropertiesViewer = new System.Windows.Forms.MenuItem();
+            this.menuViewRegistryViewOptions = new System.Windows.Forms.MenuItem();
+            this.menuViewAlwaysShowSourceCode = new System.Windows.Forms.MenuItem();
+            this.menuViewEnableAutoParsing = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuViewRuntimeInterfacesTree = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -133,7 +137,8 @@ partial class MainForm
             this.menuObject,
             this.menuSecurity,
             this.menuProcesses,
-            this.menuItem11,
+            this.menuItemStorage,
+            this.menuItemView,
             this.menuHelp});
             // 
             // menuFile
@@ -307,7 +312,7 @@ partial class MainForm
             // menuFileSettings
             // 
             this.menuFileSettings.Index = 23;
-            this.menuFileSettings.Text = "Settings";
+            this.menuFileSettings.Text = "Settin&gs";
             this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
             // 
             // menuItem2
@@ -352,8 +357,7 @@ partial class MainForm
             this.menuRegistryTypeLibraries,
             this.menuRegistryInterfaceProxies,
             this.menuItem6,
-            this.menuRegistryProperties,
-            this.menuPropertiesViewer});
+            this.menuRegistryProperties});
             this.menuRegistry.Text = "&Registry";
             // 
             // menuViewCLSIDs
@@ -485,6 +489,12 @@ partial class MainForm
             this.menuViewRuntimeInterfaces.Text = "Runtime Interfaces";
             this.menuViewRuntimeInterfaces.Click += new System.EventHandler(this.menuViewRuntimeInterfaces_Click);
             // 
+            // menuViewRuntimeInterfacesTree
+            // 
+            this.menuViewRuntimeInterfacesTree.Index = 22;
+            this.menuViewRuntimeInterfacesTree.Text = "Runtime Interfaces Tree";
+            this.menuViewRuntimeInterfacesTree.Click += new System.EventHandler(this.menuViewRuntimeInterfacesTree_Click);
+            // 
             // menuRegistryTypeLibraries
             // 
             this.menuRegistryTypeLibraries.Index = 23;
@@ -507,12 +517,6 @@ partial class MainForm
             this.menuRegistryProperties.Index = 26;
             this.menuRegistryProperties.Text = "Registry Properties";
             this.menuRegistryProperties.Click += new System.EventHandler(this.menuRegistryProperties_Click);
-            // 
-            // menuPropertiesViewer
-            // 
-            this.menuPropertiesViewer.Index = 27;
-            this.menuPropertiesViewer.Text = "Open Properties Viewer";
-            this.menuPropertiesViewer.Click += new System.EventHandler(this.menuObjectPropertiesViewer_Click);
             // 
             // menuObject
             // 
@@ -650,12 +654,12 @@ partial class MainForm
             this.menuItemProcessesAllProcesses,
             this.menuItem16,
             this.menuProcessesOptions});
-            this.menuProcesses.Text = "Processes";
+            this.menuProcesses.Text = "&Processes";
             // 
             // menuProcessesSelectProcess
             // 
             this.menuProcessesSelectProcess.Index = 0;
-            this.menuProcessesSelectProcess.Text = "Select Process";
+            this.menuProcessesSelectProcess.Text = "&Select Process";
             this.menuProcessesSelectProcess.Click += new System.EventHandler(this.menuProcessesSelectProcess_Click);
             // 
             // menuItemProcessesAllProcesses
@@ -665,7 +669,7 @@ partial class MainForm
             this.menuProcessesAllProcessesByPid,
             this.menuProcessesAllProcessesByName,
             this.menuProcessesAllProcessesByUser});
-            this.menuItemProcessesAllProcesses.Text = "All Processes";
+            this.menuItemProcessesAllProcesses.Text = "&All Processes";
             // 
             // menuProcessesAllProcessesByPid
             // 
@@ -698,40 +702,40 @@ partial class MainForm
             this.menuProcessesOptionsParseStubs,
             this.menuProcessesOptionsParseRegisteredClasses,
             this.menuProcessesOptionsParseActCtx});
-            this.menuProcessesOptions.Text = "Options";
+            this.menuProcessesOptions.Text = "&Options";
             this.menuProcessesOptions.Popup += new System.EventHandler(this.menuProcessesOptions_Popup);
             // 
             // menuProcessesOptionsResolveMethodNames
             // 
             this.menuProcessesOptionsResolveMethodNames.Index = 0;
-            this.menuProcessesOptionsResolveMethodNames.Text = "Resolve Method Names";
+            this.menuProcessesOptionsResolveMethodNames.Text = "&Resolve Method Names";
             this.menuProcessesOptionsResolveMethodNames.Click += new System.EventHandler(this.menuProcessesOptionsResolveMethodNames_Click);
             // 
             // menuProcessesOptionsParseStubs
             // 
             this.menuProcessesOptionsParseStubs.Index = 1;
-            this.menuProcessesOptionsParseStubs.Text = "Parse Stubs";
+            this.menuProcessesOptionsParseStubs.Text = "&Parse Stubs";
             this.menuProcessesOptionsParseStubs.Click += new System.EventHandler(this.menuProcessesOptionsParseStubs_Click);
             // 
             // menuProcessesOptionsParseRegisteredClasses
             // 
             this.menuProcessesOptionsParseRegisteredClasses.Index = 2;
-            this.menuProcessesOptionsParseRegisteredClasses.Text = "Parse Registered Classes";
+            this.menuProcessesOptionsParseRegisteredClasses.Text = "Parse Registered &Classes";
             this.menuProcessesOptionsParseRegisteredClasses.Click += new System.EventHandler(this.menuProcessesOptionsParseRegisteredClasses_Click);
             // 
             // menuProcessesOptionsParseActCtx
             // 
             this.menuProcessesOptionsParseActCtx.Index = 3;
-            this.menuProcessesOptionsParseActCtx.Text = "Parse Activation Context";
+            this.menuProcessesOptionsParseActCtx.Text = "Parse &Activation Context";
             this.menuProcessesOptionsParseActCtx.Click += new System.EventHandler(this.menuProcessesOptionsParseActCtx_Click);
             // 
-            // menuItem11
+            // menuItemStorage
             // 
-            this.menuItem11.Index = 5;
-            this.menuItem11.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemStorage.Index = 5;
+            this.menuItemStorage.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuStorageNewStorage,
             this.menuStorageOpenStorage});
-            this.menuItem11.Text = "Storage";
+            this.menuItemStorage.Text = "S&torage";
             // 
             // menuStorageNewStorage
             // 
@@ -745,9 +749,45 @@ partial class MainForm
             this.menuStorageOpenStorage.Text = "Open";
             this.menuStorageOpenStorage.Click += new System.EventHandler(this.menuStorageOpenStorage_Click);
             // 
+            // menuItemView
+            // 
+            this.menuItemView.Index = 6;
+            this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuViewOpenPropertiesViewer,
+            this.menuViewRegistryViewOptions});
+            this.menuItemView.Text = "&View";
+            this.menuItemView.Popup += new System.EventHandler(this.menuItemView_Popup);
+            // 
+            // menuViewOpenPropertiesViewer
+            // 
+            this.menuViewOpenPropertiesViewer.Index = 0;
+            this.menuViewOpenPropertiesViewer.Text = "&Open Properties Viewer";
+            this.menuViewOpenPropertiesViewer.Click += new System.EventHandler(this.menuViewOpenPropertiesViewer_Click);
+            // 
+            // menuViewRegistryViewOptions
+            // 
+            this.menuViewRegistryViewOptions.Index = 1;
+            this.menuViewRegistryViewOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuViewAlwaysShowSourceCode,
+            this.menuViewEnableAutoParsing});
+            this.menuViewRegistryViewOptions.Text = "&Registry View Options";
+            this.menuViewRegistryViewOptions.Popup += new System.EventHandler(this.menuViewRegistryViewOptions_Popup);
+            // 
+            // menuViewAlwaysShowSourceCode
+            // 
+            this.menuViewAlwaysShowSourceCode.Index = 0;
+            this.menuViewAlwaysShowSourceCode.Text = "&Always Show Source Code";
+            this.menuViewAlwaysShowSourceCode.Click += new System.EventHandler(this.menuViewAlwaysShowSourceCode_Click);
+            // 
+            // menuViewEnableAutoParsing
+            // 
+            this.menuViewEnableAutoParsing.Index = 1;
+            this.menuViewEnableAutoParsing.Text = "&Enable Auto Parsing";
+            this.menuViewEnableAutoParsing.Click += new System.EventHandler(this.menuViewEnableAutoParsing_Click);
+            // 
             // menuHelp
             // 
-            this.menuHelp.Index = 6;
+            this.menuHelp.Index = 7;
             this.menuHelp.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuHelpAbout});
             this.menuHelp.Text = "&Help";
@@ -757,12 +797,6 @@ partial class MainForm
             this.menuHelpAbout.Index = 0;
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
-            // 
-            // menuViewRuntimeInterfacesTree
-            // 
-            this.menuViewRuntimeInterfacesTree.Index = 22;
-            this.menuViewRuntimeInterfacesTree.Text = "Runtime Interfaces Tree";
-            this.menuViewRuntimeInterfacesTree.Click += new System.EventHandler(this.menuViewRuntimeInterfacesTree_Click);
             // 
             // MainForm
             // 
@@ -854,12 +888,12 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuProcessesAllProcessesByName;
     private System.Windows.Forms.MenuItem menuProcessesAllProcessesByUser;
     private System.Windows.Forms.MenuItem menuFileOpenAsAdmin;
-    private System.Windows.Forms.MenuItem menuPropertiesViewer;
+    private System.Windows.Forms.MenuItem menuViewOpenPropertiesViewer;
     private System.Windows.Forms.MenuItem menuStorageOpenStorage;
     private System.Windows.Forms.MenuItem menuRegistryRuntimeClasses;
     private System.Windows.Forms.MenuItem menuProcessesSelectProcess;
     private System.Windows.Forms.MenuItem menuRegistryRuntimeServers;
-    private System.Windows.Forms.MenuItem menuItem11;
+    private System.Windows.Forms.MenuItem menuItemStorage;
     private System.Windows.Forms.MenuItem menuStorageNewStorage;
     private System.Windows.Forms.MenuItem menuItemProcessesAllProcesses;
     private System.Windows.Forms.MenuItem menuItem2;
@@ -879,5 +913,9 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuProcessesOptionsParseActCtx;
     private System.Windows.Forms.MenuItem menuViewRuntimeInterfaces;
     private System.Windows.Forms.MenuItem menuViewRuntimeInterfacesTree;
+    private System.Windows.Forms.MenuItem menuItemView;
+    private System.Windows.Forms.MenuItem menuViewRegistryViewOptions;
+    private System.Windows.Forms.MenuItem menuViewAlwaysShowSourceCode;
+    private System.Windows.Forms.MenuItem menuViewEnableAutoParsing;
 }
 

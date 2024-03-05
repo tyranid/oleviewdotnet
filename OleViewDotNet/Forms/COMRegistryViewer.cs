@@ -2290,6 +2290,11 @@ internal partial class COMRegistryViewer : UserControl
         treeComRegistry.Nodes.AddRange(m_originalNodes);
         treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
+        if (ProgramSettings.AlwaysShowSourceCode)
+        {
+            splitContainer.Panel2Collapsed = false;
+        }
+        sourceCodeViewerControl.AutoParse = ProgramSettings.EnableAutoParsing;
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
@@ -2318,11 +2323,6 @@ internal partial class COMRegistryViewer : UserControl
     #endregion
 
     #region Constructors
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="reg">The COM registry</param>
-    /// <param name="mode">The display mode</param>
     public COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode, IEnumerable<COMProcessEntry> processes)
         : this(reg, mode, processes, SetupTree(reg, mode, processes), GetFilterTypes(mode), GetDisplayName(mode))
     {

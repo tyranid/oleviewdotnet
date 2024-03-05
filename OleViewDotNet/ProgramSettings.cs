@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using System;
 using System.IO;
@@ -52,6 +51,10 @@ public static class ProgramSettings
         public bool ParseClients { get; set; }
         [DataMember]
         public bool ParseActivationContext { get; set; }
+        [DataMember]
+        public bool AlwaysShowSourceCode { get; set; }
+        [DataMember]
+        public bool EnableAutoParsing { get; set; }
 
         public static ConfigFile Load()
         {
@@ -156,7 +159,7 @@ public static class ProgramSettings
         set => _config.Value.ResolveMethodNames = value;
     }
 
-    public static bool ParseRegisteredClasses 
+    public static bool ParseRegisteredClasses
     {
         get => _config.Value.ParseRegisteredClasses;
         set => _config.Value.ParseRegisteredClasses = value;
@@ -172,6 +175,18 @@ public static class ProgramSettings
     {
         get => _config.Value.ParseActivationContext;
         set => _config.Value.ParseActivationContext = value;
+    }
+
+    public static bool AlwaysShowSourceCode
+    {
+        get => _config.Value.AlwaysShowSourceCode;
+        set => _config.Value.AlwaysShowSourceCode = value;
+    }
+
+    public static bool EnableAutoParsing
+    {
+        get => _config.Value.EnableAutoParsing;
+        set => _config.Value.EnableAutoParsing = value;
     }
 
     public static void Save()
