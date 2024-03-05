@@ -63,6 +63,20 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
+    private sealed class RuntimeNodeComparer : Comparer<TreeNode>
+    {
+        public override int Compare(TreeNode x, TreeNode y)
+        {
+            if ((x.Tag is null && y.Tag is null) || (x.Tag is not null && y.Tag is not null))
+            {
+                return string.Compare(x.Text, y.Text);
+            }
+            if (x.Tag == null)
+                return -1;
+            return 1;
+        }
+    }
+
     private static bool IsDynamicNode(TreeNode node)
     {
         return node.Nodes.Count == 1 && node.Nodes[0] is DynamicPlaceholderTreeNode;
@@ -191,10 +205,12 @@ internal partial class COMRegistryViewer : UserControl
             dynamic = true;
         }
 
-        TreeNode node = new TreeNode(text);
-        node.ImageKey = image_key;
-        node.SelectedImageKey = image_key;
-        node.Tag = tag;
+        TreeNode node = new(text)
+        {
+            ImageKey = image_key,
+            SelectedImageKey = image_key,
+            Tag = tag
+        };
         if (tooltip != null)
         {
             node.ToolTipText = tooltip;
@@ -2288,6 +2304,11 @@ internal partial class COMRegistryViewer : UserControl
     {
         treeComRegistry.SuspendLayout();
         treeComRegistry.Nodes.AddRange(m_originalNodes);
+        if (m_mode == COMRegistryDisplayMode.RuntimeInterfacesTree)
+        {
+            treeComRegistry.TreeViewNodeSorter = new RuntimeNodeComparer();
+            treeComRegistry.Sort();
+        }
         treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
         if (ProgramSettings.AlwaysShowSourceCode)
