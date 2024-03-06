@@ -126,6 +126,7 @@ internal partial class SourceCodeViewerControl : UserControl
             }
 
             parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj != null && !IsParsed(m_formattable_obj);
+            editNamesToolStripMenuItem.Enabled = m_formattable_obj is ICOMSourceCodeEditable;
             Format();
         }
     }
@@ -237,6 +238,18 @@ internal partial class SourceCodeViewerControl : UserControl
         if (AutoParse)
         {
             SelectedObject = m_selected_obj;
+        }
+    }
+
+    private void editNamesToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (m_formattable_obj is ICOMSourceCodeEditable editable)
+        {
+            using var form = new SourceCodeNameEditor(editable);
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                Format();
+            }
         }
     }
 }
