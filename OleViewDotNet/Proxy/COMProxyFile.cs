@@ -167,14 +167,14 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
 
     #region Internal Members
     internal COMProxyFile(IEnumerable<NdrComProxyDefinition> entries,
-                              IEnumerable<NdrComplexTypeReference> complex_types,
-                              COMCLSIDEntry clsid,
-                              COMRegistry registry)
+                         IEnumerable<NdrComplexTypeReference> complex_types,
+                         COMRegistry registry,
+                         string name)
     {
         Entries = entries.Select(GetInterfaceInstance).ToList().AsReadOnly();
         ComplexTypes = complex_types.Select(t => new COMProxyComplexType(t)).ToList().AsReadOnly();
-        ClassEntry = clsid;
         m_registry = registry;
+        Path = name;
     }
     #endregion
 

@@ -526,14 +526,18 @@ internal partial class PropertiesControl : UserControl
         }
     }
 
-    private void btnOpenTypeLib_Click(object sender, EventArgs e)
+    private async void btnOpenTypeLib_Click(object sender, EventArgs e)
     {
         if (m_typelib != null)
         {
             try
             {
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, m_typelib.Name,
-                    COMTypeLib.FromFile(m_typelib.NativePath), m_interface != null ? m_interface.Iid : Guid.Empty));
+                var parsed_typelib = await Task.Run(() => m_typelib.Parse());
+                COMTypeLibTypeInfo visible_type = parsed_typelib.Interfaces.FirstOrDefault(i => i.Uuid == m_interface?.Iid);
+                visible_type ??= parsed_typelib.Dispatch.FirstOrDefault(i => i.Uuid == m_interface?.Iid);
+
+                EntryPoint.GetMainForm(m_registry).HostControl(new COMRegistryViewer(m_registry, parsed_typelib,
+                    visible_type));
             }
             catch (Exception ex)
             {
@@ -619,12 +623,12 @@ internal partial class PropertiesControl : UserControl
                 Tuple<COMInterfaceInstance, COMInterfaceEntry> intf =
                     item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
 
-                if (m_registry.Clsids.ContainsKey(intf.Item2.ProxyClsid))
+                if (m_registry.Clsids.TryGetValue(intf.Item2.ProxyClsid, out COMCLSIDEntry clsid))
                 {
-                    COMCLSIDEntry clsid = m_registry.Clsids[intf.Item2.ProxyClsid];
-                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry,
-                        MiscUtilities.GetFileName(clsid.DefaultServerName),
-                        COMProxyFile.GetFromCLSID(clsid), intf.Item1.Iid));
+                    var proxy_file = COMProxyFile.GetFromCLSID(clsid);
+                    var visible_type = proxy_file.Entries.FirstOrDefault(e => e.Iid == intf.Item1.Iid);
+                    EntryPoint.GetMainForm(m_registry).HostControl(new COMRegistryViewer(m_registry,
+                        proxy_file, visible_type));
                 }
             }
         }
@@ -817,8 +821,10 @@ internal partial class PropertiesControl : UserControl
 
         if (has_ndr)
         {
-            string name = m_registry.MapIidToInterface(m_ipid.Iid).Name;
-            EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(m_registry, name, m_ipid.ToProxyInstance(), m_ipid.Iid));
+            var proxy = m_ipid.ToProxyInstance();
+            var visible_type = proxy.Entries.FirstOrDefault(e => e.Iid == m_ipid.Iid);
+
+            EntryPoint.GetMainForm(m_registry).HostControl(new COMRegistryViewer(m_registry, proxy, visible_type));
         }
     }
 

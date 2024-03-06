@@ -34,8 +34,6 @@ internal partial class TypeLibControl : UserControl
     private readonly IEnumerable<ListViewItemWithGuid> m_interfaces;
     private readonly COMSourceCodeBuilder m_builder;
     private Guid m_guid_to_view;
-    private readonly string m_com_class_id_name;
-    private Guid? m_com_class_id;
 
     private const string filterDefaultString = "filter interfaces";
 
@@ -46,61 +44,6 @@ internal partial class TypeLibControl : UserControl
         {
             Guid = iid;
         }
-    }
-
-    private static ListViewItemWithGuid MapTypeInfoToItem(COMTypeLibTypeInfo type)
-    {
-        ListViewItemWithGuid item = new(type.Name, type.Uuid);
-        item.SubItems.Add(type.Uuid.FormatGuid());
-        item.Tag = type;
-        return item;
-    }
-
-    private static ListViewItemWithGuid MapTypeInfoToItemNoSubItem(COMTypeLibTypeInfo type)
-    {
-        return new(type.Name, type.Uuid)
-        {
-            Tag = type
-        };
-    }
-
-    private static IEnumerable<ListViewItemWithGuid> FormatInterfaces(ICOMSourceCodeFormattable formatter, IDictionary<Guid, string> iids_to_names)
-    {
-        if (formatter is COMTypeLib typelib)
-            return typelib.Interfaces.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-        if (formatter is COMProxyFile proxy)
-            return FormatProxyInstance(proxy, iids_to_names);
-        return Array.Empty<ListViewItemWithGuid>();
-    }
-
-    private static IEnumerable<ListViewItemWithGuid> FormatDispatch(ICOMSourceCodeFormattable formatter)
-    {
-        if (formatter is COMTypeLib typelib)
-            return typelib.Dispatch.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-        return Array.Empty<ListViewItemWithGuid>();
-    }
-
-    private static IEnumerable<ListViewItemWithGuid> FormatClasses(ICOMSourceCodeFormattable formatter)
-    {
-        if(formatter is COMTypeLib typelib)
-            return typelib.Classes.OrderBy(t => t.Name).Select(MapTypeInfoToItem);
-        return Array.Empty<ListViewItemWithGuid>();
-    }
-
-    private static IEnumerable<ListViewItem> FormatStructs(ICOMSourceCodeFormattable formatter)
-    {
-        if (formatter is COMTypeLib typelib)
-            return typelib.ComplexTypes.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
-        if (formatter is COMProxyFile proxy)
-            return FormatProxyInstanceComplexTypes(proxy);
-        return Array.Empty<ListViewItemWithGuid>();
-    }
-
-    private static IEnumerable<ListViewItem> FormatEnums(ICOMSourceCodeFormattable formatter)
-    {
-        if (formatter is COMTypeLib typelib)
-            return typelib.Enums.OrderBy(t => t.Name).Select(MapTypeInfoToItemNoSubItem);
-        return Array.Empty<ListViewItemWithGuid>();
     }
 
     private static ListViewItemWithGuid MapTypeToItem(SourceCodeFormattableType type)
@@ -281,16 +224,6 @@ internal partial class TypeLibControl : UserControl
     public TypeLibControl(string name, Assembly typelib, Guid guid_to_view, bool dotnet_assembly)
         : this(name, new SourceCodeFormattableAssembly(typelib, dotnet_assembly), guid_to_view)
     {
-    }
-
-    public TypeLibControl(COMRegistry registry, string name, ICOMSourceCodeFormattable formatter,
-        Guid guid_to_view, string com_class_id_name = null, Guid? com_class_id = null)
-        : this(registry, name, guid_to_view,
-              FormatInterfaces(formatter, registry?.InterfacesToNames), FormatDispatch(formatter),
-              FormatClasses(formatter), FormatStructs(formatter), FormatEnums(formatter))
-    {
-        m_com_class_id = com_class_id;
-        m_com_class_id_name = com_class_id_name;
     }
 
     private string GetTextFromTag(object tag)

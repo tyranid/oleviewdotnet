@@ -1996,23 +1996,14 @@ internal partial class COMRegistryViewer : UserControl
             {
                 try
                 {
-                    string comClassIdName = null;
-                    Guid? comClassId = null;
-                    if (Text == "Local Services")
-                    {
-                        comClassIdName = node.Parent.Text;
-                        COMCLSIDEntry comClassClsId = node.Parent.Tag as COMCLSIDEntry;
-                        comClassId = comClassClsId?.Clsid;
-                    }
+                    COMProxyFile proxy_file = COMProxyFile.GetFromCLSID(clsid);
+                    COMProxyTypeInfo visible_interface = proxy_file.Entries.Where(e => e.Iid == selected_iid).FirstOrDefault();
 
                     EntryPoint.GetMainForm(m_registry).HostControl(
-                        new TypeLibControl(
+                        new COMRegistryViewer(
                             m_registry,
-                            MiscUtilities.GetFileName(clsid.DefaultServer),
-                            COMProxyFile.GetFromCLSID(clsid),
-                            selected_iid,
-                            comClassIdName,
-                            comClassId
+                            proxy_file,
+                            visible_interface
                         )
                     );
                 }
