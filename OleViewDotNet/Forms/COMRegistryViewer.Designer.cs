@@ -121,6 +121,7 @@ partial class COMRegistryViewer
             this.treeComRegistry.ContextMenuStrip = this.contextMenuStrip;
             this.treeComRegistry.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeComRegistry.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.treeComRegistry.HideSelection = false;
             this.treeComRegistry.ImageIndex = 0;
             this.treeComRegistry.ImageList = this.treeImageList;
             this.treeComRegistry.Location = new System.Drawing.Point(3, 39);
@@ -159,7 +160,7 @@ partial class COMRegistryViewer
             this.cloneTreeToolStripMenuItem,
             this.showSourceCodeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(280, 645);
+            this.contextMenuStrip.Size = new System.Drawing.Size(280, 612);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
             // 
             // copyToolStripMenuItem
@@ -572,7 +573,7 @@ partial class COMRegistryViewer
             this.splitContainer.Panel2.Controls.Add(this.sourceCodeViewerControl);
             this.splitContainer.Panel2Collapsed = true;
             this.splitContainer.Size = new System.Drawing.Size(1400, 530);
-            this.splitContainer.SplitterDistance = 907;
+            this.splitContainer.SplitterDistance = 591;
             this.splitContainer.TabIndex = 7;
             // 
             // sourceCodeViewerControl
@@ -580,7 +581,7 @@ partial class COMRegistryViewer
             this.sourceCodeViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sourceCodeViewerControl.Location = new System.Drawing.Point(0, 0);
             this.sourceCodeViewerControl.Name = "sourceCodeViewerControl";
-            this.sourceCodeViewerControl.Size = new System.Drawing.Size(96, 100);
+            this.sourceCodeViewerControl.Size = new System.Drawing.Size(805, 530);
             this.sourceCodeViewerControl.TabIndex = 0;
             // 
             // COMRegistryViewer
