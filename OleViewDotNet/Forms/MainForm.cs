@@ -655,9 +655,8 @@ internal partial class MainForm : Form
         {
             try
             {
-                HostControl(new TypeLibControl(m_registry, 
-                    Path.GetFileName(dlg.FileName), 
-                    COMTypeLib.FromFile(dlg.FileName), Guid.Empty));
+                HostControl(new COMRegistryViewer(m_registry,
+                    COMTypeLib.FromFile(dlg.FileName), null));
             }
             catch (Exception ex)
             {

@@ -46,9 +46,9 @@ internal partial class COMRegistryViewer : UserControl
     private readonly HashSet<FilterType> m_filter_types;
     private readonly COMRegistryDisplayMode m_mode;
     private readonly IEnumerable<COMProcessEntry> m_processes;
+    private readonly TreeNode m_visible_node;
     private RegistryViewerFilter m_filter;
     private TreeNode[] m_original_nodes;
-    private TreeNode m_visible_node;
 
     private const string FolderKey = "folder.ico";
     private const string InterfaceKey = "interface.ico";
@@ -1052,7 +1052,7 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void AddTypeLibNodes(TreeNode node, IEnumerable<COMTypeLibTypeInfo> types, string category, string image_key)
+    private static void AddTypeLibNodes(TreeNode node, IEnumerable<COMTypeLibTypeInfo> types, string category, string image_key)
     {
         if (types.Any())
         {
@@ -1062,7 +1062,7 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void SetupTypeLibNodeTree(COMTypeLib typelib, TreeNode node)
+    private static void SetupTypeLibNodeTree(COMTypeLib typelib, TreeNode node)
     {
         AddTypeLibNodes(node, typelib.Interfaces, "Interfaces", InterfaceKey);
         AddTypeLibNodes(node, typelib.Dispatch, "Dispatch Interfaces", InterfaceKey);
@@ -1789,6 +1789,14 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
+    private static TreeNode CreateTypeLibNodes(COMTypeLib typelib)
+    {
+        TreeNode root_node = CreateNode($"{typelib.Name} : Version {typelib.Version}",
+                ClassKey, typelib);
+        SetupTypeLibNodeTree(typelib, root_node);
+        return root_node;
+    }
+
     private async void viewTypeLibraryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
@@ -1816,26 +1824,21 @@ internal partial class COMRegistryViewer : UserControl
             }
 
             var parsed_typelib = await Task.Run(() => typelib.Parse());
-            TreeNode root_node = CreateTypelibVersionNode(typelib);
-            root_node.Nodes.Clear();
-            SetupTypeLibNodeTree(parsed_typelib, root_node);
-
-            COMTypeLibTypeInfo selected_type = null;
+            COMTypeLibTypeInfo visible_type = null;
             if (class_entry is not null)
             {
-                selected_type = parsed_typelib.Classes.FirstOrDefault(c => c.Uuid == class_entry.Clsid);
+                visible_type = parsed_typelib.Classes.FirstOrDefault(c => c.Uuid == class_entry.Clsid);
             }
             else
             {
-                selected_type = parsed_typelib.Interfaces.FirstOrDefault(i => i.Uuid == intf_entry.Iid);
-                if (selected_type is null)
+                visible_type = parsed_typelib.Interfaces.FirstOrDefault(i => i.Uuid == intf_entry.Iid);
+                if (visible_type is null)
                 {
-                    selected_type = parsed_typelib.Dispatch.FirstOrDefault(i => i.Uuid == intf_entry.Iid);
+                    visible_type = parsed_typelib.Dispatch.FirstOrDefault(i => i.Uuid == intf_entry.Iid);
                 }
             }
-            TreeNode visible_node = FindVisibleNode(root_node.Nodes.OfType<TreeNode>(), selected_type);
-            COMRegistryViewer viewer = new(m_registry, COMRegistryDisplayMode.Typelibs, 
-                root_node, new[] { FilterType.TypeLibInfo }, typelib.Name, visible_node);
+
+            COMRegistryViewer viewer = new(m_registry, parsed_typelib, visible_type);
             EntryPoint.GetMainForm(m_registry).HostControl(viewer);
         }
         catch (Exception ex)
@@ -2326,14 +2329,11 @@ internal partial class COMRegistryViewer : UserControl
         treeComRegistry.Nodes.AddRange(m_original_nodes);
         treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
-        if (m_visible_node != null)
-        {
-            m_visible_node.EnsureVisible();
-            treeComRegistry.SelectedNode = m_visible_node;
-        }
+        m_visible_node?.EnsureVisible();
+        treeComRegistry.SelectedNode = m_visible_node;
     }
 
-    private TreeNode FindVisibleNode(IEnumerable<TreeNode> nodes, object tag)
+    private static TreeNode FindVisibleNode(IEnumerable<TreeNode> nodes, object tag)
     {
         if (tag is null)
             return null;
@@ -2356,12 +2356,14 @@ internal partial class COMRegistryViewer : UserControl
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
         TreeNode root_node, IEnumerable<FilterType> filter_types, 
-        string text, TreeNode visible_node) 
+        string text, object visible_obj) 
         : this(reg, mode, Array.Empty<COMProcessEntry>(), new[] { root_node }, filter_types, text)
     {
-        m_visible_node = visible_node;
+        m_visible_node = FindVisibleNode(m_original_nodes, visible_obj);
         sourceCodeViewerControl.HideParsingOptions = true;
         splitContainer.Panel2Collapsed = false;
+        showSourceCodeToolStripMenuItem.Visible = false;
+        root_node.Expand();
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
@@ -2399,6 +2401,12 @@ internal partial class COMRegistryViewer : UserControl
         {
             treeComRegistry.TreeViewNodeSorter = new RuntimeNodeComparer();
         }
+    }
+
+    public COMRegistryViewer(COMRegistry reg, COMTypeLib typelib, COMTypeLibTypeInfo visible_type)
+        : this(reg, COMRegistryDisplayMode.Typelibs, CreateTypeLibNodes(typelib), 
+              new[] { FilterType.TypeLibInfo }, typelib.ToString(), visible_type)
+    {
     }
     #endregion
 }

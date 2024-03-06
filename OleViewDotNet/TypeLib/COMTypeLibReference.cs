@@ -46,4 +46,11 @@ public class COMTypeLibReference
     public Guid TypeLibId => _attr.guid;
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
     #endregion
+
+    #region Public Methods
+    public override string ToString()
+    {
+        return $"{Name} - {Version}";
+    }
+    #endregion
 }
