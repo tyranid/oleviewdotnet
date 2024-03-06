@@ -16,8 +16,6 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Proxy;
-using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
@@ -70,41 +68,6 @@ internal partial class TypeLibControl : UserControl
     private static IEnumerable<ListViewItemWithGuid> FormatClasses(SourceCodeFormattableAssembly typelib)
     {
         return typelib.GetComClasses().OrderBy(t => t.Name).Select(MapTypeToItem);
-    }
-
-    private static string GetComProxyName(COMProxyInterface proxy, IDictionary<Guid, string> iids_to_names)
-    {
-        if (!string.IsNullOrWhiteSpace(proxy.Name))
-        {
-            return COMUtilities.DemangleWinRTName(proxy.Name, proxy.Iid);
-        }
-        if (iids_to_names != null && iids_to_names.TryGetValue(proxy.Iid, out string name))
-        {
-            return name;
-        }
-        return $"intf_{proxy.Iid.ToString().Replace('-', '_')}";
-    }
-
-    private static IEnumerable<ListViewItemWithGuid> FormatProxyInstance(COMProxyFile proxy, IDictionary<Guid, string> iids_to_names)
-    {
-        foreach (var entry in proxy.Entries.Select(t => Tuple.Create(GetComProxyName(t, iids_to_names), t)).OrderBy(t => t.Item1))
-        {
-            ListViewItemWithGuid item = new(entry.Item1, entry.Item2.Iid);
-            item.SubItems.Add(entry.Item2.Iid.FormatGuid());
-            item.Tag = entry.Item2;
-            yield return item;
-        }
-    }
-
-    private static IEnumerable<ListViewItem> FormatProxyInstanceComplexTypes(COMProxyFile proxy)
-    {
-        foreach (var type in proxy.ComplexTypes.OrderBy(p => p.Name))
-        {
-            ListViewItem item = new(type.Name);
-            item.SubItems.Add(type.Size.ToString());
-            item.Tag = type;
-            yield return item;
-        }
     }
 
     private static IEnumerable<ListViewItem> FormatAssemblyStructs(SourceCodeFormattableAssembly typelib)
