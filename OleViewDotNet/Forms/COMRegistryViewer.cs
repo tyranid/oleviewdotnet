@@ -2363,7 +2363,6 @@ internal partial class COMRegistryViewer : UserControl
         : this(reg, mode, Array.Empty<COMProcessEntry>(), new[] { root_node }, filter_types, text)
     {
         m_visible_node = FindVisibleNode(m_original_nodes, visible_obj);
-        sourceCodeViewerControl.HideParsingOptions = true;
         splitContainer.Panel2Collapsed = false;
         showSourceCodeToolStripMenuItem.Visible = false;
         root_node.Expand();

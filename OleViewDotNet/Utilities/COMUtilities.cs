@@ -275,6 +275,11 @@ public static class COMUtilities
         }
     }
 
+    public static ITypeLib LoadTypeLib(string path)
+    {
+        return NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default);
+    }
+
     public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
     {
         ITypeLib typeLib = null;
