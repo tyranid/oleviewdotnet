@@ -2304,11 +2304,6 @@ internal partial class COMRegistryViewer : UserControl
     {
         treeComRegistry.SuspendLayout();
         treeComRegistry.Nodes.AddRange(m_originalNodes);
-        if (m_mode == COMRegistryDisplayMode.RuntimeInterfacesTree)
-        {
-            treeComRegistry.TreeViewNodeSorter = new RuntimeNodeComparer();
-            treeComRegistry.Sort();
-        }
         treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
         if (ProgramSettings.AlwaysShowSourceCode)
@@ -2348,6 +2343,10 @@ internal partial class COMRegistryViewer : UserControl
     public COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode, IEnumerable<COMProcessEntry> processes)
         : this(reg, mode, processes, SetupTree(reg, mode, processes), GetFilterTypes(mode), GetDisplayName(mode))
     {
+        if (m_mode == COMRegistryDisplayMode.RuntimeInterfacesTree)
+        {
+            treeComRegistry.TreeViewNodeSorter = new RuntimeNodeComparer();
+        }
     }
     #endregion
 }
