@@ -210,7 +210,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             ImageKey = image_key,
             SelectedImageKey = image_key,
-            Tag = tag
+            Tag = tag ?? new object()
         };
         if (tooltip != null)
         {
@@ -1745,8 +1745,16 @@ internal partial class COMRegistryViewer : UserControl
             }
 
             treeComRegistry.SuspendLayout();
+            bool node_expanded = treeComRegistry.SelectedNode?.IsExpanded ?? false;
+            TreeNode visible_node = FindVisibleNode(nodes, treeComRegistry.SelectedNode?.Tag);
             treeComRegistry.Nodes.Clear();
             treeComRegistry.Nodes.AddRange(nodes);
+            visible_node?.EnsureVisible();
+            if (node_expanded)
+            {
+                visible_node?.Expand();
+            }
+            treeComRegistry.SelectedNode = visible_node;
             treeComRegistry.ResumeLayout();
             UpdateStatusLabel();
         }
@@ -2327,6 +2335,8 @@ internal partial class COMRegistryViewer : UserControl
 
     private TreeNode FindVisibleNode(IEnumerable<TreeNode> nodes, object tag)
     {
+        if (tag is null)
+            return null;
         TreeNode curr_node = null;
         foreach (var node in nodes)
         {
