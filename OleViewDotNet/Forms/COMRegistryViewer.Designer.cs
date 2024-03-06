@@ -117,18 +117,17 @@ partial class COMRegistryViewer
             // 
             // treeComRegistry
             // 
-            this.tableLayoutPanel.SetColumnSpan(this.treeComRegistry, 5);
             this.treeComRegistry.ContextMenuStrip = this.contextMenuStrip;
             this.treeComRegistry.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeComRegistry.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeComRegistry.HideSelection = false;
             this.treeComRegistry.ImageIndex = 0;
             this.treeComRegistry.ImageList = this.treeImageList;
-            this.treeComRegistry.Location = new System.Drawing.Point(3, 39);
+            this.treeComRegistry.Location = new System.Drawing.Point(0, 0);
             this.treeComRegistry.Name = "treeComRegistry";
             this.treeComRegistry.SelectedImageIndex = 0;
             this.treeComRegistry.ShowNodeToolTips = true;
-            this.treeComRegistry.Size = new System.Drawing.Size(1394, 456);
+            this.treeComRegistry.Size = new System.Drawing.Size(692, 456);
             this.treeComRegistry.TabIndex = 0;
             this.treeComRegistry.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.treeComRegistry_AfterCollapse);
             this.treeComRegistry.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeComRegistry_BeforeExpand);
@@ -513,11 +512,11 @@ partial class COMRegistryViewer
             this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel.Controls.Add(labelFilter, 0, 0);
             this.tableLayoutPanel.Controls.Add(this.textBoxFilter, 1, 0);
-            this.tableLayoutPanel.Controls.Add(this.treeComRegistry, 0, 1);
             this.tableLayoutPanel.Controls.Add(labelMode, 2, 0);
             this.tableLayoutPanel.Controls.Add(this.comboBoxMode, 3, 0);
             this.tableLayoutPanel.Controls.Add(this.btnApply, 4, 0);
             this.tableLayoutPanel.Controls.Add(this.statusStrip, 0, 2);
+            this.tableLayoutPanel.Controls.Add(this.splitContainer, 0, 1);
             this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel.Name = "tableLayoutPanel";
@@ -525,6 +524,7 @@ partial class COMRegistryViewer
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel.Size = new System.Drawing.Size(1400, 530);
             this.tableLayoutPanel.TabIndex = 6;
             // 
@@ -560,20 +560,20 @@ partial class COMRegistryViewer
             // 
             // splitContainer
             // 
+            this.tableLayoutPanel.SetColumnSpan(this.splitContainer, 5);
             this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer.Location = new System.Drawing.Point(3, 39);
             this.splitContainer.Name = "splitContainer";
             // 
             // splitContainer.Panel1
             // 
-            this.splitContainer.Panel1.Controls.Add(this.tableLayoutPanel);
+            this.splitContainer.Panel1.Controls.Add(this.treeComRegistry);
             // 
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this.sourceCodeViewerControl);
-            this.splitContainer.Panel2Collapsed = true;
-            this.splitContainer.Size = new System.Drawing.Size(1400, 530);
-            this.splitContainer.SplitterDistance = 591;
+            this.splitContainer.Size = new System.Drawing.Size(1394, 456);
+            this.splitContainer.SplitterDistance = 692;
             this.splitContainer.TabIndex = 7;
             // 
             // sourceCodeViewerControl
@@ -581,12 +581,12 @@ partial class COMRegistryViewer
             this.sourceCodeViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sourceCodeViewerControl.Location = new System.Drawing.Point(0, 0);
             this.sourceCodeViewerControl.Name = "sourceCodeViewerControl";
-            this.sourceCodeViewerControl.Size = new System.Drawing.Size(805, 530);
+            this.sourceCodeViewerControl.Size = new System.Drawing.Size(698, 456);
             this.sourceCodeViewerControl.TabIndex = 0;
             // 
             // COMRegistryViewer
             // 
-            this.Controls.Add(this.splitContainer);
+            this.Controls.Add(this.tableLayoutPanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "COMRegistryViewer";
             this.Size = new System.Drawing.Size(1400, 530);

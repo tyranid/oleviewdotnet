@@ -2318,12 +2318,6 @@ internal partial class COMRegistryViewer : UserControl
         treeComRegistry.Nodes.AddRange(m_original_nodes);
         treeComRegistry.ResumeLayout();
         UpdateStatusLabel();
-        if (ProgramSettings.AlwaysShowSourceCode)
-        {
-            splitContainer.Panel2Collapsed = false;
-            showSourceCodeToolStripMenuItem.Checked = true;
-        }
-        sourceCodeViewerControl.AutoParse = ProgramSettings.EnableAutoParsing;
         if (m_visible_node != null)
         {
             m_visible_node.EnsureVisible();
@@ -2380,7 +2374,9 @@ internal partial class COMRegistryViewer : UserControl
         comboBoxMode.SelectedIndex = 0;
 
         Text = text;
-
+        splitContainer.Panel2Collapsed = !ProgramSettings.AlwaysShowSourceCode;
+        showSourceCodeToolStripMenuItem.Checked = ProgramSettings.AlwaysShowSourceCode;
+        sourceCodeViewerControl.AutoParse = ProgramSettings.EnableAutoParsing;
         m_original_nodes = nodes.ToArray();
     }
     #endregion
