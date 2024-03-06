@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Utilities.Format;
 using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
@@ -23,39 +24,102 @@ namespace OleViewDotNet.Forms;
 internal partial class SourceCodeNameEditor : Form
 {
     private readonly ICOMSourceCodeEditable m_obj;
+    private TreeNode CreateTree(ICOMSourceCodeEditable obj)
+    {
+        TreeNode node = new(obj.Name);
+        node.Tag = obj;
+        foreach (var member in obj.Members)
+        {
+            node.Nodes.Add(CreateTree(member));
+        }
+
+        return node;
+    }
+
+    private void SetupTree()
+    {
+        var root = CreateTree(m_obj);
+        treeViewEditor.Nodes.Add(root);
+        root.Expand();
+    }
 
     public SourceCodeNameEditor(ICOMSourceCodeEditable obj)
     {
         InitializeComponent();
         m_obj = obj;
+        SetupTree();
+        Text = $"Editing '{obj.Name}' Names";
+    }
 
-        textBoxName.Text = obj.Name;
-        foreach (var member in obj.Members)
+    private void UpdateNames(TreeNode root)
+    {
+        if (root.Tag is ICOMSourceCodeEditable editable)
         {
-            ListViewItem item = new(member.Name);
-            listViewNames.Items.Add(item);
-            item.Tag = member;
+            editable.Name = root.Text;
+            foreach (TreeNode node in root.Nodes)
+            {
+                UpdateNames(node);
+            }
         }
-        listViewNames.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-        Text = $"Editing {obj.Name}";
     }
 
     private void btnOK_Click(object sender, System.EventArgs e)
     {
+        foreach (TreeNode node in treeViewEditor.Nodes)
+        {
+            UpdateNames(node);
+        }
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private void treeViewEditor_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Label))
+        {
+            MessageBox.Show(this, "Name can't be empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            e.CancelEdit = true;
+        }
+    }
+
+    private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (treeViewEditor.SelectedNode != null)
+        {
+            treeViewEditor.SelectedNode.BeginEdit();
+        }
+    }
+
+    private void PasteNames(Func<string, string[]> parse_names)
+    {
         try
         {
-            if (string.IsNullOrWhiteSpace(textBoxName.Text))
+            TreeNode node = treeViewEditor.SelectedNode;
+            if (node is null)
             {
-                throw new FormatException("Name can't be empty.");
+                return;
             }
-            m_obj.Name = textBoxName.Text;
-            foreach (ListViewItem item in listViewNames.Items)
+
+            string text = Clipboard.GetText();
+            if (string.IsNullOrWhiteSpace(text))
             {
-                ICOMSourceCodeEditable member = (ICOMSourceCodeEditable)item.Tag;
-                member.Name = item.Text;
+                return;
             }
-            DialogResult = DialogResult.OK;
-            Close();
+
+            string[] names = parse_names(text);
+
+            if (names.Length != node.Nodes.Count)
+            {
+                var result = MessageBox.Show(this, "Number of names does not match number of children. Do you want to continue?",
+                    "Question?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
+            for (int i = 0; i < Math.Min(names.Length, node.Nodes.Count); ++i)
+            {
+                node.Nodes[i].Text = names[i];
+            }
         }
         catch (Exception ex)
         {
@@ -63,22 +127,48 @@ internal partial class SourceCodeNameEditor : Form
         }
     }
 
-    private void listViewNames_AfterLabelEdit(object sender, LabelEditEventArgs e)
+    private void pasteWinDBGDqsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        try
+        static string[] parse_names(string t)
         {
-            if (string.IsNullOrWhiteSpace(e.Label))
+            string[] lines = t.Split('\n').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
+            for (int i = 0; i < lines.Length; ++i)
             {
-                throw new FormatException("Name can't be empty.");
+                string[] values = lines[i].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length < 3)
+                    continue;
+                string name = values[2];
+                int index = name.IndexOf('!');
+                if (index >= 0)
+                {
+                    name = name.Substring(index + 1);
+                }
+                index = name.IndexOf("::");
+                if (index >= 0)
+                {
+                    name = name.Substring(index + 2);
+                }
+                index = name.IndexOf('<');
+                if (index >= 0)
+                {
+                    name = name.Substring(index + 1);
+                }
+                lines[i] = name;
             }
+            return lines.Where(l => l.Trim().Length > 0).ToArray();
+        }
+        PasteNames(parse_names);
+    }
 
-            listViewNames.Items[e.Item].Text = e.Label;
-            listViewNames.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-        }
-        catch (Exception ex)
-        {
-            EntryPoint.ShowError(this, ex);
-            e.CancelEdit = true;
-        }
+    private void resetNamesToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        treeViewEditor.Nodes.Clear();
+        SetupTree();
+    }
+
+    private void pasteListToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        PasteNames(t => t.Split('\n').Select(s => s.Trim())
+                .Where(s => s.Length > 0 && !s.StartsWith("#")).ToArray());
     }
 }
