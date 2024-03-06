@@ -190,6 +190,13 @@ public class COMEnumerateInterfaces
         else
         {
             hr = NativeMethods.CoGetClassObject(_clsid, clsctx, null, IID_IUnknown, out pfactory);
+            // If CLASS_E_CLASSNOTAVAILABLE then it might be a dodgy registration, try and 
+            // load as a local server instead.
+            if (hr == -2147221231)
+            {
+                clsctx = CLSCTX.LOCAL_SERVER;
+                hr = NativeMethods.CoGetClassObject(_clsid, clsctx, null, IID_IUnknown, out pfactory);
+            }
         }
         // If we can't get class object, no chance we'll get object.
         if (hr != 0)

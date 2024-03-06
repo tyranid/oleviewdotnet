@@ -111,7 +111,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         IDispatch disp = (IDispatch)obj;
 
         disp.GetTypeInfo(0, 0x409, out ITypeInfo type_info);
-        type_info.GetContainingTypeLib(out ITypeLib type_lib, out int iIndex);
+        type_info.GetContainingTypeLib(out ITypeLib type_lib, out _);
         using COMTypeLibParser parser = new(type_lib);
         return parser.Parse();
     }
