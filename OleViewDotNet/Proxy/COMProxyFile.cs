@@ -22,7 +22,6 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -55,8 +54,12 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         m_registry = registry;
 
         using var resolver = GetProxyParserSymbolResolver();
-        int hr = NativeMethods.CoGetClassObject(clsid.Clsid, CLSCTX.INPROC_SERVER, 
-            null, typeof(IPSFactoryBuffer).GUID, out IntPtr pUnk);
+        IntPtr pUnk = IntPtr.Zero;
+        if (clsid is not null)
+        {
+            NativeMethods.CoGetClassObject(clsid.Clsid, CLSCTX.INPROC_SERVER,
+                null, typeof(IPSFactoryBuffer).GUID, out pUnk);
+        }
         try
         {
             NdrParser parser = new(resolver);
@@ -84,7 +87,7 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         }
         finally
         {
-            if (hr != 0)
+            if (pUnk != IntPtr.Zero)
                 Marshal.Release(pUnk);
         }
     }

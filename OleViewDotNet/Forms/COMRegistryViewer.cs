@@ -1096,7 +1096,7 @@ internal partial class COMRegistryViewer : UserControl
         }
     }
 
-    private void AddProxyNodes(TreeNode node, IEnumerable<COMProxyTypeInfo> types, string category, string image_key)
+    private static void AddProxyNodes(TreeNode node, IEnumerable<COMProxyTypeInfo> types, string category, string image_key)
     {
         if (types.Any())
         {
@@ -1104,6 +1104,13 @@ internal partial class COMRegistryViewer : UserControl
             node.Nodes.Add(sub_node);
             sub_node.Nodes.AddRange(types.Select(type => CreateNode(type.Name, image_key, type)).ToArray());
         }
+    }
+
+    private static void SetupProxyNodeTree(COMProxyFile proxy_file, TreeNode node)
+    {
+        AddProxyNodes(node, proxy_file.Entries, "Interfaces", InterfaceKey);
+        AddProxyNodes(node, proxy_file.ComplexTypes.Where(t => !t.IsUnion), "Structs", ClassKey);
+        AddProxyNodes(node, proxy_file.ComplexTypes.Where(t => t.IsUnion), "Unions", ClassKey);
     }
 
     private async Task SetupCOMProxyNodeTree(COMProxyFormatter proxy, TreeNode node)
@@ -1118,9 +1125,7 @@ internal partial class COMRegistryViewer : UserControl
             await Task.Run(() => proxy.ParseSourceCode());
             treeComRegistry.SuspendLayout();
             node.Nodes.Remove(wait_node);
-            AddProxyNodes(node, proxy.ProxyFile.Entries, "Interfaces", InterfaceKey);
-            AddProxyNodes(node, proxy.ProxyFile.ComplexTypes.Where(t => !t.IsUnion), "Structs", ClassKey);
-            AddProxyNodes(node, proxy.ProxyFile.ComplexTypes.Where(t => t.IsUnion), "Unions", ClassKey);
+            SetupProxyNodeTree(proxy.ProxyFile, node);
             treeComRegistry.ResumeLayout();
             sourceCodeViewerControl.SelectedObject = proxy;
         }
@@ -1128,6 +1133,13 @@ internal partial class COMRegistryViewer : UserControl
         {
             wait_node.Text = $"Error parsing proxy file - {ex.Message}";
         }
+    }
+
+    private static TreeNode CreateProxyNodes(COMProxyFile proxy)
+    {
+        TreeNode root_node = CreateNode(proxy.Path, ClassKey, proxy);
+        SetupProxyNodeTree(proxy, root_node);
+        return root_node;
     }
 
     private async void treeComRegistry_BeforeExpand(object sender, TreeViewCancelEventArgs e)
@@ -2405,7 +2417,13 @@ internal partial class COMRegistryViewer : UserControl
 
     public COMRegistryViewer(COMRegistry reg, COMTypeLib typelib, COMTypeLibTypeInfo visible_type)
         : this(reg, COMRegistryDisplayMode.Typelibs, CreateTypeLibNodes(typelib), 
-              new[] { FilterType.TypeLibInfo }, typelib.ToString(), visible_type)
+              new[] { FilterType.TypeLibTypeInfo }, typelib.ToString(), visible_type)
+    {
+    }
+
+    public COMRegistryViewer(COMRegistry reg, COMProxyFile proxy, COMProxyTypeInfo visible_type)
+    : this(reg, COMRegistryDisplayMode.ProxyCLSIDs, CreateProxyNodes(proxy),
+          new[] { FilterType.TypeLibTypeInfo }, proxy.Path, visible_type)
     {
     }
     #endregion

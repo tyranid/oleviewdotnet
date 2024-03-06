@@ -22,6 +22,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Security;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.Proxy;
 
 namespace OleViewDotNet.Forms;
 
@@ -46,7 +47,8 @@ internal enum FilterType
     Ipid,
     RuntimeClass,
     RuntimeServer,
-    TypeLibInfo,
+    TypeLibTypeInfo,
+    ProxyTypeInfo,
 }
 
 internal enum FilterComparison
@@ -235,7 +237,8 @@ internal class RegistryViewerFilter : IRegistryViewerFilter
             FilterType.Ipid => typeof(COMIPIDEntry),
             FilterType.RuntimeClass => typeof(COMRuntimeClassEntry),
             FilterType.RuntimeServer => typeof(COMRuntimeServerEntry),
-            FilterType.TypeLibInfo => typeof(COMTypeLibTypeInfo),
+            FilterType.TypeLibTypeInfo => typeof(COMTypeLibTypeInfo),
+            FilterType.ProxyTypeInfo => typeof(COMProxyTypeInfo),
             _ => throw new ArgumentException("Invalid filter type", nameof(type)),
         };
     }

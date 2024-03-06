@@ -678,8 +678,8 @@ internal partial class MainForm : Form
         {
             try
             {
-                COMProxyFile proxy = COMProxyFile.GetFromFile(dlg.FileName, m_registry);
-                HostControl(new TypeLibControl(m_registry, Path.GetFileName(dlg.FileName), proxy, Guid.Empty));
+                HostControl(new COMRegistryViewer(m_registry,
+                    COMProxyFile.GetFromFile(dlg.FileName, m_registry), null));
             }
             catch (Exception ex)
             {
