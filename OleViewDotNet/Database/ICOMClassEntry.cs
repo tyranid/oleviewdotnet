@@ -37,6 +37,10 @@ public interface ICOMClassEntry
     /// The default server name.
     /// </summary>
     string DefaultServer { get; }
+    /// <summary>
+    /// Default type of the server.
+    /// </summary>
+    COMServerType DefaultServerType { get; }
 
     /// <summary>
     /// Get list of supported Interface IIDs (that we know about)

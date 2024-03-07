@@ -86,6 +86,8 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICO
 
     string ICOMClassEntry.DefaultServer => m_clsid.Value.DefaultServer;
 
+    COMServerType ICOMClassEntry.DefaultServerType => m_clsid.Value.DefaultServerType;
+
     bool ICOMClassEntry.InterfacesLoaded => m_clsid.Value.InterfacesLoaded;
 
     IEnumerable<COMInterfaceInstance> ICOMClassEntry.Interfaces => m_clsid.Value.Interfaces;

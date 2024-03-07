@@ -1078,7 +1078,7 @@ public static class COMUtilities
         }
     }
 
-    private static bool QueryAllInterfaces(IEnumerable<COMCLSIDEntry> clsids, IProgress<Tuple<string, int>> progress, CancellationToken token, int concurrent_queries)
+    private static bool QueryAllInterfaces(IEnumerable<ICOMClassEntry> clsids, IProgress<Tuple<string, int>> progress, CancellationToken token, int concurrent_queries)
     {
         ParallelOptions po = new();
         po.CancellationToken = token;
@@ -1102,7 +1102,7 @@ public static class COMUtilities
         return true;
     }
 
-    internal static bool QueryAllInterfaces(IWin32Window parent, IEnumerable<COMCLSIDEntry> clsids, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
+    internal static bool QueryAllInterfaces(IWin32Window parent, IEnumerable<ICOMClassEntry> clsids, IEnumerable<COMServerType> server_types, int concurrent_queries, bool refresh_interfaces)
     {
         using WaitingDialog dlg = new(
             (p, t) => QueryAllInterfaces(clsids.Where(c => (refresh_interfaces || !c.InterfacesLoaded) && server_types.Contains(c.DefaultServerType)),

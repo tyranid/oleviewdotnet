@@ -183,9 +183,12 @@ internal partial class COMRegistryViewer : UserControl
                 break;
             case COMRegistryDisplayMode.RuntimeClasses:
                 filter_types.Add(FilterType.RuntimeClass);
+                filter_types.Add(FilterType.Interface);
                 break;
             case COMRegistryDisplayMode.RuntimeServers:
                 filter_types.Add(FilterType.RuntimeServer);
+                filter_types.Add(FilterType.RuntimeClass);
+                filter_types.Add(FilterType.Interface);
                 break;
             default:
                 throw new ArgumentException("Invalid mode value");
@@ -1513,7 +1516,9 @@ internal partial class COMRegistryViewer : UserControl
                 }
             }
 
-            if (m_filter_types.Contains(FilterType.CLSID))
+            if (m_filter_types.Contains(FilterType.CLSID) || 
+                m_filter_types.Contains(FilterType.RuntimeClass) || 
+                m_filter_types.Contains(FilterType.ProgID))
             {
                 contextMenuStrip.Items.Add(queryAllInterfacesToolStripMenuItem);
             }
@@ -2020,11 +2025,11 @@ internal partial class COMRegistryViewer : UserControl
         await CreateClassFactory(null);
     }
 
-    private void GetClsidsFromNodes(List<COMCLSIDEntry> clsids, TreeNodeCollection nodes)
+    private void GetClsidsFromNodes(List<ICOMClassEntry> clsids, TreeNodeCollection nodes)
     {
         foreach (TreeNode node in nodes)
         {
-            if (node.Tag is COMCLSIDEntry clsid)
+            if (node.Tag is ICOMClassEntry clsid)
             {
                 clsids.Add(clsid);
             }
@@ -2041,7 +2046,7 @@ internal partial class COMRegistryViewer : UserControl
         using QueryInterfacesOptionsForm options = new();
         if (options.ShowDialog(this) == DialogResult.OK)
         {
-            List<COMCLSIDEntry> clsids = new();
+            List<ICOMClassEntry> clsids = new();
             GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
             if (clsids.Count > 0)
             {

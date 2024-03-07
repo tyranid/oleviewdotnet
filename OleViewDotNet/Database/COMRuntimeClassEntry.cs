@@ -61,6 +61,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
     public string Server { get; private set; }
     public string DefaultServer => Server;
     public bool HasServer => !string.IsNullOrWhiteSpace(Server);
+    COMServerType ICOMClassEntry.DefaultServerType => Server == null ? COMServerType.InProcServer32 : COMServerType.LocalServer32;
 
     public COMRuntimeServerEntry ServerEntry => m_registry.MapRuntimeClassToServerEntry(this);
 
