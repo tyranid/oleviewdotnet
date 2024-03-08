@@ -373,7 +373,7 @@ public static class COMWrapperFactory
 
         if (intf_type is null)
         {
-            throw new ArgumentNullException(nameof(intf_type), "Not type available for wrapper.");
+            throw new ArgumentNullException(nameof(intf_type), "No type available for wrapper.");
         }
 
         if (!Marshal.IsComObject(obj) && !intf_type.IsAssignableFrom(obj.GetType()))

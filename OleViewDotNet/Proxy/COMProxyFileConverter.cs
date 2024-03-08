@@ -224,6 +224,8 @@ public sealed class COMProxyFileConverter
         }
         else if (baseType is NdrPointerTypeReference pointer_type)
         {
+            if (field_type)
+                return new TypeDescriptor(typeof(IntPtr), paramAttributes);
             return new TypeDescriptor(GetTypeDescriptor(paramAttributes, pointer_type.Type));
         }
         else if (baseType is NdrInterfacePointerTypeReference interface_pointer)
@@ -369,9 +371,10 @@ public sealed class COMProxyFileConverter
             CreateInterface(entry.Entry);
         }
 
-        while (m_fixup.Count > 0)
+        var fixup = m_fixup.ToArray();
+        for (int i = 0; i < fixup.Length; ++i)
         {
-            m_fixup.Dequeue().CreateType();
+            fixup[i].CreateType();
         }
     }
 
