@@ -1169,6 +1169,18 @@ Return interfaces which have a registered proxy class.
 Return interfaces which have a registered type library.
 .PARAMETER Source
 Return interfaces which came from a specific source.
+.PARAMETER Class
+The COM or Runtime classes to enumerate.
+.PARAMETER Clsid
+The COM clsid to enumerate.
+.PARAMETER RuntimeClass
+The name of the runtime class to enumerate.
+.PARAMETER Refresh
+Specify to force the interfaces to be refreshed.
+.PARAMETER Factory
+Specify to return the implemented factory interfaces.
+.PARAMETER NoQuery
+Specify to not query for the interfaces at all and only return what's already available.
 .INPUTS
 None
 .OUTPUTS
@@ -1208,6 +1220,24 @@ function Get-ComInterface {
         [switch]$TypeLib,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
         [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
+        [Parameter(Mandatory, Position = 0, ParameterSetName="FromClass")]
+        [OleViewDotNet.Database.ICOMClassEntry]$Class,
+        [Parameter(Mandatory, ParameterSetName="FromClsid")]
+        [guid]$Clsid,
+        [Parameter(Mandatory, ParameterSetName="FromRuntimeClass")]
+        [string]$RuntimeClass,
+        [Parameter(ParameterSetName="FromClass")]
+        [Parameter(ParameterSetName="FromClsid")]
+        [Parameter(ParameterSetName="FromRuntimeClass")]
+        [switch]$Refresh,
+        [Parameter(ParameterSetName="FromClass")]
+        [Parameter(ParameterSetName="FromClsid")]
+        [Parameter(ParameterSetName="FromRuntimeClass")]
+        [switch]$Factory,
+        [Parameter(ParameterSetName="FromClass")]
+        [Parameter(ParameterSetName="FromClsid")]
+        [Parameter(ParameterSetName="FromRuntimeClass")]
+        [switch]$NoQuery,
         [OleViewDotNet.Database.COMRegistry]$Database
     )
     $Database = Get-CurrentComDatabase $Database
@@ -1243,6 +1273,21 @@ function Get-ComInterface {
         }
         "FromSource" {
             Get-ComInterface -Database $Database | Where-Object Source -eq $Source | Write-Output
+        }
+        "FromClass" {
+            Get-ComClassInterface -ClassEntry $Class -NoProgress -Refresh:$Refresh -Factory:$Factory -NoQuery:$NoQuery | Select-Object -ExpandProperty InterfaceEntry
+        }
+        "FromClsid" {
+            $Class = Get-ComClass -Clsid $Clsid
+            if ($Class -ne $null) {
+                Get-ComClassInterface -ClassEntry $Class -NoProgress -Refresh:$Refresh -Factory:$Factory -NoQuery:$NoQuery | Select-Object -ExpandProperty InterfaceEntry
+            }
+        }
+        "FromRuntimeClass" {
+            $Class = Get-ComRuntimeClass -Name $RuntimeClass
+            if ($Class -ne $null) {
+                Get-ComClassInterface -ClassEntry $Class -NoProgress -Refresh:$Refresh -Factory:$Factory -NoQuery:$NoQuery | Select-Object -ExpandProperty InterfaceEntry
+            }
         }
     }
 }

@@ -366,6 +366,16 @@ public static class COMWrapperFactory
 
     public static BaseComWrapper Wrap(object obj, Type intf_type)
     {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        if (intf_type is null)
+        {
+            throw new ArgumentNullException(nameof(intf_type), "Not type available for wrapper.");
+        }
+
         if (!Marshal.IsComObject(obj) && !intf_type.IsAssignableFrom(obj.GetType()))
         {
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));

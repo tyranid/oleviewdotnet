@@ -1427,7 +1427,3 @@ public static class COMUtilities
         }
     }
 }
-
-public static class TypeLibUtilities
-{
-}
