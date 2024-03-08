@@ -1157,25 +1157,28 @@ public static class COMUtilities
         };
     }
 
-    public static ServerInformation GetServerInformation(object obj)
+    public static ServerInformation? GetServerInformation(object obj, IEnumerable<COMInterfaceEntry> intfs)
     {
         IntPtr intf = Marshal.GetIUnknownForObject(obj);
         IntPtr proxy = IntPtr.Zero;
         try
         {
-            Guid iid = COMInterfaceEntry.IID_IDispatch;
-            if (Marshal.QueryInterface(intf, ref iid, out proxy) != 0)
+            foreach (var entry in intfs)
             {
+                if (!entry.HasProxy)
+                    continue;
+                Guid iid = entry.Iid;
+                if (Marshal.QueryInterface(intf, ref iid, out proxy) != 0)
+                {
+                    continue;
+                }
                 ServerInformation info = new();
-                int hr = NativeMethods.CoDecodeProxy(Process.GetCurrentProcess().Id, proxy.ToInt64(), out info);
-                if (hr == 0)
+                if (NativeMethods.CoDecodeProxy(Process.GetCurrentProcess().Id, 
+                    proxy.ToInt64(), out info) == 0)
                 {
                     return info;
                 }
             }
-        }
-        catch
-        {
         }
         finally
         {
@@ -1185,7 +1188,7 @@ public static class COMUtilities
                 Marshal.Release(proxy);
             }
         }
-        return new ServerInformation();
+        return null;
     }
 
     private static readonly Lazy<string> _assembly_version = new(() =>
@@ -1423,4 +1426,8 @@ public static class COMUtilities
             return (IRuntimeBroker)new RuntimeBrokerClass();
         }
     }
+}
+
+public static class TypeLibUtilities
+{
 }

@@ -109,13 +109,14 @@ internal partial class ObjectInformation : UserControl
         {
         }
 
-        ServerInformation info = COMUtilities.GetServerInformation(m_pObject);
-        if (info.dwServerPid != 0)
+        ServerInformation? info = COMUtilities.GetServerInformation(m_pObject, m_interfaces);
+        if (info.HasValue)
         {
-            listViewProperties.Items.Add("Server PID").SubItems.Add(info.dwServerPid.ToString());
-            listViewProperties.Items.Add("Server TID").SubItems.Add(info.dwServerTid.ToString());
-            listViewProperties.Items.Add("Server Address").SubItems.Add($"0x{info.ui64ServerAddress:X}");
+            listViewProperties.Items.Add("Server PID").SubItems.Add(info.Value.dwServerPid.ToString());
+            listViewProperties.Items.Add("Server TID").SubItems.Add(info.Value.dwServerTid.ToString());
+            listViewProperties.Items.Add("Server Address").SubItems.Add($"0x{info.Value.ui64ServerAddress:X}");
         }
+
         listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
     }
 
