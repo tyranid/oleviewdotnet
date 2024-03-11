@@ -40,9 +40,7 @@ public class COMRemoteObject : IDisposable
 
     public COMRemoteObject QueryInterface(Guid iid)
     {
-        var objref = m_rem_unknown.RemQueryInterface(Ipid, iid);
-        m_ping_set.AddObject(objref.Oid);
-        return new(m_rem_unknown.AddRef(), objref, m_ping_set);
+        return COMOxidResolver.GetRemoteObject(m_rem_unknown.RemQueryInterface(Ipid, iid));
     }
 
     public RpcClientBase CreateClient(COMProxyInterface proxy)
@@ -70,6 +68,5 @@ public class COMRemoteObject : IDisposable
     {
         m_ping_set.DeleteObject(m_objref.Oid);
         m_rem_unknown.RemRelease(Ipid, 1, 0);
-        m_rem_unknown.Dispose();
     }
 }

@@ -15,16 +15,16 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Win32.Rpc.Transport;
-using OleViewDotNet.Database;
 using OleViewDotNet.Rpc.Clients;
 
 namespace OleViewDotNet.Rpc.Transport;
 
 internal sealed class RpcCOMClientTransportConfiguration : RpcClientTransportConfiguration
 {
-    public RpcCOMClientTransportConfiguration(COMVersion version)
+    public RpcCOMClientTransportConfiguration(COMVERSION version)
     {
-        Version = new COMVERSION((short)version.Major, (short)version.Minor);
+        RpcCOMClientTransportFactory.SetupFactory();
+        Version = version;
     }
 
     public COMVERSION Version { get; set; }

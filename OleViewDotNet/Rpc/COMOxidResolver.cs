@@ -14,88 +14,135 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Win32.Rpc;
-using NtApiDotNet.Win32.Rpc.Transport;
+using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
-using OleViewDotNet.Rpc.Clients;
+using OleViewDotNet.Utilities;
+using OleViewDotNet.Wrappers;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading;
+using System.Net;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Rpc;
 
-public sealed class COMOxidResolver : IDisposable
+public static class COMOxidResolver
 {
-    private readonly OxidResolverClient m_client;
-    private long m_ref_count;
+    #region Private Members
+    private static readonly ConcurrentDictionary<COMStringBinding, COMOxidResolverInstance> m_resolvers = new();
+    private static readonly Lazy<HashSet<string>> m_local_hosts = new(GetLocalHosts);
 
-    private COMOxidResolver(OxidResolverClient client)
+    private static HashSet<string> GetLocalHosts()
     {
-        m_client = client;
-        m_ref_count = 1;
-    }
+        HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
+        string hostname = Dns.GetHostName();
+        names.Add(hostname);
+        names.Add("127.0.0.1");
+        names.Add("::1");
 
-    public static COMOxidResolver Connect(RpcStringBinding binding, RpcTransportSecurity transport_security)
-    {
-        OxidResolverClient client = new();
-        client.Connect(binding.ToString(), transport_security);
-        return new COMOxidResolver(client);
-    }
-
-    public static COMOxidResolver Connect()
-    {
-        RpcTransportSecurity sec = new()
+        try
         {
-            AuthenticationLevel = RpcAuthenticationLevel.PacketPrivacy,
-            AuthenticationType = RpcAuthenticationType.Negotiate
-        };
-        return Connect(RpcStringBinding.Parse("ncacn_ip_tcp:127.0.0.1[135]"), sec);
-    }
-
-    public ServerAliveResponse ServerAlive2()
-    {
-        int result = m_client.ServerAlive2(out COMVERSION ver, out DUALSTRINGARRAY? bindings, out _);
-        if (result != 0)
-            throw new Win32Exception(result);
-        return new(ver, bindings?.ToDSA());
-    }
-
-    public COMResolveOxidResponse ResolveOxid2(ulong oxid, params RpcTowerId[] request_protocol_seqs)
-    {
-        List<RpcTowerId> proto_seqs = new(request_protocol_seqs);
-        int hr = m_client.ResolveOxid2(oxid, (short)proto_seqs.Count, proto_seqs.Select(t => (short)t).ToArray(),
-            out DUALSTRINGARRAY? dsa, out Guid ipid, out int authn_hint, out COMVERSION ver);
-        if (hr != 0)
-            throw new Win32Exception(hr);
-        return new(ver, dsa?.ToDSA(), authn_hint, ipid, oxid);
-    }
-
-    public ulong ComplexPing(ulong set_id, ushort seq_num, ulong[] add_to_set, ulong[] del_from_set)
-    {
-        ushort add_set_count = (ushort)(add_to_set?.Length ?? 0);
-        ushort del_set_count = (ushort)(del_from_set?.Length ?? 0);
-
-        int hr = m_client.ComplexPing(ref set_id, seq_num, add_set_count, del_set_count,
-            add_to_set, del_from_set, out ushort backoff_factory);
-        if (hr != 0)
-            throw new Win32Exception(hr);
-        return set_id;
-    }
-
-    public void SimplePing(ulong set_id)
-    {
-        int hr = m_client.SimplePing(set_id);
-        if (hr != 0)
-            throw new Win32Exception(hr);
-    }
-
-    public void Dispose()
-    {
-        if (Interlocked.Decrement(ref m_ref_count) == 0)
-        {
-            m_client.Dispose();
+            var entry = Dns.GetHostEntry(hostname);
+            foreach (var addr in entry.AddressList)
+            {
+                names.Add(addr.ToString());
+            }
         }
+        catch
+        {
+        }
+        return names;
     }
+
+    private static COMStringBinding GetTargetBinding(COMObjRefStandard objref)
+    {
+        if (objref.StringBindings.Count == 0)
+            return new COMStringBinding(RpcTowerId.LRPC, string.Empty);
+
+        foreach (var binding in objref.StringBindings)
+        {
+            if (binding.TowerId == RpcTowerId.LRPC)
+                return new COMStringBinding(RpcTowerId.LRPC, string.Empty);
+
+            string name = binding.NetworkAddr;
+            int index = name.IndexOf('[');
+            if (index >= 0)
+            {
+                name = name.Substring(0, index);
+            }
+            if (m_local_hosts.Value.Contains(name))
+            {
+                return new COMStringBinding(RpcTowerId.LRPC, string.Empty);
+            }
+        }
+
+        return objref.StringBindings[0];
+    }
+
+    private static COMOxidResolverInstance CreateOxidResolver(COMStringBinding binding)
+    {
+        if (binding.TowerId == RpcTowerId.LRPC)
+            return COMOxidResolverInstance.Connect();
+        return COMOxidResolverInstance.Connect(binding.GetRpcStringBinding(true), false);
+    }
+    #endregion
+
+    #region Public Static Members
+    public static COMRemoteObject GetRemoteObject(COMObjRefStandard objref)
+    {
+        if (objref is null)
+        {
+            throw new ArgumentNullException(nameof(objref));
+        }
+
+        var resolver = m_resolvers.GetOrAdd(GetTargetBinding(objref), s => CreateOxidResolver(s));
+        return resolver.GetRemoteObject(objref);
+    }
+
+    public static COMRemoteObject GetRemoteObject(object obj, Guid iid = default)
+    {
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        if (!Marshal.IsComObject(obj))
+        {
+            throw new ArgumentException("Object is not a COM object.", nameof(obj));
+        }
+
+        if (iid == Guid.Empty)
+            iid = COMInterfaceEntry.IID_IUnknown;
+
+        if (COMUtilities.MarshalObjectToObjRef(obj,
+            iid, MSHCTX.LOCAL, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
+        {
+            throw new ArgumentException("Object cannot be standard marshaled.", nameof(obj));
+        }
+
+        return GetRemoteObject(objref);
+    }
+
+    public static COMRemoteObject GetRemoteObject(BaseComWrapper wrapper)
+    {
+        if (wrapper is null)
+        {
+            throw new ArgumentNullException(nameof(wrapper));
+        }
+
+        return GetRemoteObject(wrapper.Unwrap(), wrapper.Iid);
+    }
+
+    public static COMRemoteObject GetRemoteObject(NdrInterfacePointer intf)
+    {
+        if (COMObjRef.FromArray(intf.Data) is not COMObjRefStandard objref)
+        {
+            throw new ArgumentException("COM object can not be standard marshaled.", nameof(intf));
+        }
+
+        return GetRemoteObject(objref);
+    }
+    #endregion
 }

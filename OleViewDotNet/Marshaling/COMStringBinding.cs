@@ -14,13 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Win32.Rpc;
-using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace OleViewDotNet.Marshaling;
 
-public class COMStringBinding
+public sealed class COMStringBinding
 {
     public RpcTowerId TowerId { get; set; }
     public string NetworkAddr { get; set; }
@@ -80,5 +79,20 @@ public class COMStringBinding
     internal COMStringBinding Clone()
     {
         return (COMStringBinding)MemberwiseClone();
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is COMStringBinding binding &&
+               TowerId == binding.TowerId &&
+               NetworkAddr == binding.NetworkAddr;
+    }
+
+    public override int GetHashCode()
+    {
+        int hashCode = -522475143;
+        hashCode = hashCode * -1521134295 + TowerId.GetHashCode();
+        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(NetworkAddr);
+        return hashCode;
     }
 }

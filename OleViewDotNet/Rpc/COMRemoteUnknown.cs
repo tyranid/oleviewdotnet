@@ -14,48 +14,46 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
 using OleViewDotNet.Rpc.Transport;
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 
 namespace OleViewDotNet.Rpc;
 
-public sealed class COMRemoteUnknown : IDisposable
+internal sealed class COMRemoteUnknown : IDisposable
 {
     #region Private Members
     private readonly IRemUnknownClient m_client;
-    private readonly COMResolveOxidResponse m_response;
-    private long m_ref_count;
+    private readonly COMVERSION m_version;
     #endregion
 
     #region Internal Members
-    internal COMRemoteUnknown(COMResolveOxidResponse response)
+    internal COMRemoteUnknown(COMVERSION version, COMStringBinding binding, Guid ipid_rem_unknown, ulong oxid)
     {
-        var binding = response.StringBindings.FirstOrDefault(b => b.TowerId == RpcTowerId.LRPC) 
-            ?? throw new ArgumentException("Not ALPC binding available for remote IUnknown.");
-        m_response = response;
+        m_version = version;
+        string proto_seq = binding.TowerId switch
+        {
+            RpcTowerId.LRPC => RpcCOMClientTransportFactory.COMAlpcProtocol,
+            RpcTowerId.Tcp => RpcCOMClientTransportFactory.COMTcpProtocol,
+            _ => throw new ArgumentException("Unsupported COM string binding."),
+        };
+
+        StringBinding = $"{proto_seq}:{binding.NetworkAddr}";
+        IpidRemUnknown = ipid_rem_unknown;
+        Oxid = oxid;
         m_client = new IRemUnknownClient();
-        RpcCOMClientTransportFactory.SetupFactory();
         TransportSecurity = new RpcTransportSecurity()
         {
-            Configuration = new RpcCOMClientTransportConfiguration(m_response.Version)
+            AuthenticationType = RpcAuthenticationType.Negotiate,
+            AuthenticationLevel = RpcAuthenticationLevel.PacketPrivacy,
+            Configuration = new RpcCOMClientTransportConfiguration(m_version)
         };
-        StringBinding = $"{RpcCOMClientTransportFactory.COMAlpcProtocol}:{binding.NetworkAddr}";
         m_client.Connect(StringBinding, TransportSecurity);
-        m_client.ObjectUuid = m_response.IpidRemUnknown;
-        m_ref_count = 1;
-    }
-
-    internal COMRemoteUnknown AddRef()
-    {
-        Interlocked.Increment(ref m_ref_count);
-        return this;
+        m_client.ObjectUuid = IpidRemUnknown;
     }
 
     internal string StringBinding { get; }
@@ -63,8 +61,8 @@ public sealed class COMRemoteUnknown : IDisposable
     #endregion
 
     #region Public Properties
-    public Guid IpidRemUnknown => m_response.IpidRemUnknown;
-    public ulong Oxid => m_response.Oxid;
+    public Guid IpidRemUnknown { get; }
+    public ulong Oxid { get; }
     #endregion
 
     #region Public Methods
@@ -122,10 +120,7 @@ public sealed class COMRemoteUnknown : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.Decrement(ref m_ref_count) == 0)
-        {
-            m_client.Dispose();
-        }
+        m_client.Dispose();
     }
     #endregion
 }

@@ -35,7 +35,7 @@ internal sealed class COMPingSet : IDisposable
     public COMPingSet(OxidResolverClient client)
     {
         m_client = client;
-        int timeout = 2 * 60 * 60 * 1000;
+        int timeout = 2 * 60 * 1000;
         m_timer = new(PingServer, null, timeout, timeout);
     }
 

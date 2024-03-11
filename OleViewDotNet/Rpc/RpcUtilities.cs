@@ -36,8 +36,15 @@ internal static class RpcUtilities
         };
 
         string endpoint = string.Empty;
+        string hostname = binding.NetworkAddr;
         if (epmapper)
         {
+            int index = hostname.IndexOf('[');
+            if (index >= 0)
+            {
+                hostname = hostname.Substring(0, index);
+            }
+
             endpoint = binding.TowerId switch
             {
                 RpcTowerId.Tcp => "[135]",
@@ -48,7 +55,7 @@ internal static class RpcUtilities
             };
         }
 
-        return RpcStringBinding.Parse($"{protocol_sequence}:{binding.NetworkAddr}{endpoint}");
+        return RpcStringBinding.Parse($"{protocol_sequence}:{hostname}{endpoint}");
     }
 
     public static RpcTransportSecurity GetRpcTransportSecurity(this COMSecurityBinding binding)
