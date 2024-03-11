@@ -92,54 +92,9 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
         }
     }
 
-    private IEnumerable<NdrBaseTypeReference> GetStructTypes(NdrComplexTypeReference complex_type)
-    {
-        if (complex_type is NdrBaseStructureTypeReference struct_type)
-        {
-            return struct_type.MembersTypes;
-        }
-        else if (complex_type is NdrUnionTypeReference union_type)
-        {
-            return union_type.Arms.Arms.Select(a => a.ArmType);
-        }
-        return Array.Empty<NdrBaseTypeReference>();
-    }
-
-    private void GetComplexTypes(HashSet<NdrComplexTypeReference> complex_types, NdrBaseTypeReference type)
-    {
-        if (type is NdrComplexTypeReference complex_type)
-        {
-            if (complex_types.Add(complex_type))
-            {
-                foreach (var member_type in GetStructTypes(complex_type))
-                {
-                    GetComplexTypes(complex_types, member_type);
-                }
-            }
-        }
-        else if (type is NdrBaseArrayTypeReference array_type)
-        {
-            GetComplexTypes(complex_types, array_type.ElementType);
-        }
-        else if (type is NdrPointerTypeReference pointer_type)
-        {
-            GetComplexTypes(complex_types, pointer_type.Type);
-        }
-    }
-
     private COMProxyInterface GetInterfaceInstance(NdrComProxyDefinition proxy)
     {
-        HashSet<NdrComplexTypeReference> complex_types = new();
-        foreach (var proc in proxy.Procedures)
-        {
-            GetComplexTypes(complex_types, proc.ReturnValue.Type);
-            foreach (var p in proc.Params)
-            {
-                GetComplexTypes(complex_types, p.Type);
-            }
-        }
-        return new COMProxyInterface(ClassEntry, 
-            proxy, complex_types, m_registry, this);
+        return new COMProxyInterface(ClassEntry, new(proxy), m_registry, this);
     }
 
     private COMProxyFile(string path, COMRegistry registry)

@@ -15,17 +15,16 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 
-using NtApiDotNet;
 using OleViewDotNet.Database;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc.Clients;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OleViewDotNet.Rpc;
 
-public sealed class ResolveOxidResponse
+public sealed class COMResolveOxidResponse
 {
     public COMVersion Version { get; }
     public IReadOnlyList<COMStringBinding> StringBindings { get; }
@@ -33,40 +32,15 @@ public sealed class ResolveOxidResponse
     public int AuthenticationHint { get; }
     public Guid IpidRemUnknown { get; }
     public int ProcessId => COMUtilities.GetProcessIdFromIPid(IpidRemUnknown);
+    public ulong Oxid { get; }
 
-    internal ResolveOxidResponse(COMVERSION ver, COMDualStringArray dsa, int auth_hint, Guid ipid_rem_unknown)
+    internal COMResolveOxidResponse(COMVERSION ver, COMDualStringArray dsa, int auth_hint, Guid ipid_rem_unknown, ulong oxid)
     {
         Version = new(ver.MajorVersion, ver.MinorVersion);
         StringBindings = (dsa?.StringBindings ?? new List<COMStringBinding>()).AsReadOnly();
         SecurityBindings = (dsa?.SecurityBindings ?? new List<COMSecurityBinding>()).AsReadOnly();
         AuthenticationHint = auth_hint;
         IpidRemUnknown = ipid_rem_unknown;
-    }
-
-    public string FindAlpcBinding()
-    {
-        var ret = StringBindings.FirstOrDefault(b => b.TowerId == RpcTowerId.LRPC)?.NetworkAddr;
-        if (!string.IsNullOrEmpty(ret))
-            return ret;
-
-        // Generally the remote resolver doesn't return ALPC binding information, so let's try and 
-        // brute force it based on the PID in the IPID for the remote IUnknown.
-        using var rpc_dir = NtDirectory.Open(@"\RPC Control", null, DirectoryAccessRights.Query, false);
-        if (!rpc_dir.IsSuccess)
-            throw new InvalidOperationException("Can't enumerate RPC object directory.");
-
-        foreach (var entry in rpc_dir.Result.Query())
-        {
-            if (entry.NtType == NtType.GetTypeByType<NtAlpc>() && entry.Name.StartsWith("OLE"))
-            {
-                using var port = NtAlpcClient.Connect(entry.FullPath, null, null, 
-                    AlpcMessageFlags.None, null, null, null, null, NtWaitTimeout.Infinite, false);
-                if (!port.IsSuccess)
-                    continue;
-                if (port.Result.ServerProcessId == ProcessId)
-                    return entry.FullPath;
-            }
-        }
-        throw new InvalidOperationException("Can't find ALPC port hosted by process.");
+        Oxid = oxid;
     }
 }

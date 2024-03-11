@@ -14,24 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-
+using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
-using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
-using System.Collections.Generic;
 
-namespace OleViewDotNet.Rpc;
+namespace OleViewDotNet.Rpc.Transport;
 
-public sealed class ServerAliveResponse
+internal sealed class RpcCOMClientTransportConfiguration : RpcClientTransportConfiguration
 {
-    public COMVersion Version { get; }
-    public IReadOnlyList<COMStringBinding> StringBindings { get; }
-    public IReadOnlyList<COMSecurityBinding> SecurityBindings { get; }
-
-    internal ServerAliveResponse(COMVERSION ver, COMDualStringArray dsa)
+    public RpcCOMClientTransportConfiguration(COMVersion version)
     {
-        Version = new(ver.MajorVersion, ver.MinorVersion);
-        StringBindings = (dsa?.StringBindings ?? new List<COMStringBinding>()).AsReadOnly();
-        SecurityBindings = (dsa?.SecurityBindings ?? new List<COMSecurityBinding>()).AsReadOnly();
+        Version = new COMVERSION((short)version.Major, (short)version.Minor);
     }
+
+    public COMVERSION Version { get; set; }
+    public RpcClientTransportConfiguration InnerConfig { get; set; }
 }

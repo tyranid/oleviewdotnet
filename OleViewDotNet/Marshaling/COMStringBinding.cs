@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
+using System;
 using System.IO;
 
 namespace OleViewDotNet.Marshaling;

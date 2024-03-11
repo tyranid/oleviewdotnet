@@ -14,15 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Marshaling;
 using System;
 using System.IO;
 
-namespace OleViewDotNet.Rpc;
-
+namespace OleViewDotNet.Rpc.Clients;
 
 #region Marshal Helpers
 internal class _OxidResolver_Marshal_Helper : NdrMarshalBuffer
@@ -35,18 +33,18 @@ internal class _OxidResolver_Marshal_Helper : NdrMarshalBuffer
     {
         WriteConformantArray(p0, p1);
     }
-    public void Write_4(long[] p0, long p1)
+    public void Write_4(ulong[] p0, long p1)
     {
         WriteConformantArray(p0, p1);
     }
-    public void Write_5(long[] p0, long p1)
+    public void Write_5(ulong[] p0, long p1)
     {
         WriteConformantArray(p0, p1);
     }
 }
 internal class _OxidResolver_Unmarshal_Helper : NdrUnmarshalBuffer
 {
-    public _OxidResolver_Unmarshal_Helper(RpcClientResponse r) : 
+    public _OxidResolver_Unmarshal_Helper(RpcClientResponse r) :
             base(r.NdrBuffer, r.Handles, r.DataRepresentation)
     {
     }
@@ -57,7 +55,7 @@ internal class _OxidResolver_Unmarshal_Helper : NdrUnmarshalBuffer
 }
 #endregion
 #region Complex Types
-internal struct DUALSTRINGARRAY : INdrConformantStructure
+public struct DUALSTRINGARRAY : INdrConformantStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -91,7 +89,7 @@ internal struct DUALSTRINGARRAY : INdrConformantStructure
     public short wSecurityOffset;
     public short[] aStringArray;
 
-    public COMDualStringArray ToDSA()
+    internal COMDualStringArray ToDSA()
     {
         MemoryStream stm = new();
         BinaryWriter writer = new(stm);
@@ -106,38 +104,39 @@ internal struct DUALSTRINGARRAY : INdrConformantStructure
         return new(new BinaryReader(stm));
     }
 }
-internal struct COMVERSION : INdrStructure
+public struct COMVERSION : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
-    {
-        Marshal((_OxidResolver_Marshal_Helper)m);
-    }
-    private void Marshal(_OxidResolver_Marshal_Helper m)
     {
         m.WriteInt16(MajorVersion);
         m.WriteInt16(MinorVersion);
     }
+
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
-    {
-        Unmarshal((_OxidResolver_Unmarshal_Helper)u);
-    }
-    private void Unmarshal(_OxidResolver_Unmarshal_Helper u)
     {
         MajorVersion = u.ReadInt16();
         MinorVersion = u.ReadInt16();
     }
+
     int INdrStructure.GetAlignment()
     {
         return 2;
     }
+
+    public COMVERSION(short major, short minor)
+    {
+        MajorVersion = major;
+        MinorVersion = minor;
+    }
+
     public short MajorVersion;
     public short MinorVersion;
 }
 #endregion
 #region Client Implementation
-internal sealed class OxidResolverClient : RpcClientBase
+public sealed class OxidResolverClient : RpcClientBase
 {
-    public OxidResolverClient() : 
+    public OxidResolverClient() :
             base("99fcfec4-5260-101b-bbcb-00aa0021347a", 0, 0)
     {
     }
@@ -145,7 +144,7 @@ internal sealed class OxidResolverClient : RpcClientBase
     {
         return new _OxidResolver_Unmarshal_Helper(SendReceive(p, m.DataRepresentation, m.ToArray(), m.Handles));
     }
-    public uint ResolveOxid(ulong pOxid, short cRequestedProtseqs, short[] arRequestedProtseqs, out DUALSTRINGARRAY? ppdsaOxidBindings, out Guid pipidRemUnknown, out int pAuthnHint)
+    public int ResolveOxid(ulong pOxid, short cRequestedProtseqs, short[] arRequestedProtseqs, out DUALSTRINGARRAY? ppdsaOxidBindings, out Guid pipidRemUnknown, out int pAuthnHint)
     {
         _OxidResolver_Marshal_Helper m = new();
         m.WriteUInt64(pOxid);
@@ -155,37 +154,37 @@ internal sealed class OxidResolverClient : RpcClientBase
         ppdsaOxidBindings = u.ReadReferentValue(new Func<DUALSTRINGARRAY>(u.Read_0), false);
         pipidRemUnknown = u.ReadGuid();
         pAuthnHint = u.ReadInt32();
-        return u.ReadUInt32();
+        return u.ReadInt32();
     }
-    public uint SimplePing(long pSetId)
+    public int SimplePing(ulong pSetId)
     {
         _OxidResolver_Marshal_Helper m = new();
-        m.WriteInt64(pSetId);
+        m.WriteUInt64(pSetId);
         _OxidResolver_Unmarshal_Helper u = SendReceive(1, m);
-        return u.ReadUInt32();
+        return u.ReadInt32();
     }
-    public uint ComplexPing(ref long pSetId, short SequenceNum, short cAddToSet, short cDelFromSet, 
-        long[] AddToSet, long[] DelFromSet, out short pPingBackoffFactor)
+    public int ComplexPing(ref ulong pSetId, ushort SequenceNum, ushort cAddToSet, ushort cDelFromSet,
+        ulong[] AddToSet, ulong[] DelFromSet, out ushort pPingBackoffFactor)
     {
         _OxidResolver_Marshal_Helper m = new();
-        m.WriteInt64(pSetId);
-        m.WriteInt16(SequenceNum);
-        m.WriteInt16(cAddToSet);
-        m.WriteInt16(cDelFromSet);
-        m.WriteReferent(AddToSet, new Action<long[], long>(m.Write_4), cAddToSet);
-        m.WriteReferent(DelFromSet, new Action<long[], long>(m.Write_5), cDelFromSet);
+        m.WriteUInt64(pSetId);
+        m.WriteUInt16(SequenceNum);
+        m.WriteUInt16(cAddToSet);
+        m.WriteUInt16(cDelFromSet);
+        m.WriteReferent(AddToSet, new Action<ulong[], long>(m.Write_4), cAddToSet);
+        m.WriteReferent(DelFromSet, new Action<ulong[], long>(m.Write_5), cDelFromSet);
         _OxidResolver_Unmarshal_Helper u = SendReceive(2, m);
-        pSetId = u.ReadInt64();
-        pPingBackoffFactor = u.ReadInt16();
-        return u.ReadUInt32();
+        pSetId = u.ReadUInt64();
+        pPingBackoffFactor = u.ReadUInt16();
+        return u.ReadInt32();
     }
-    public uint ServerAlive()
+    public int ServerAlive()
     {
         _OxidResolver_Marshal_Helper m = new();
         _OxidResolver_Unmarshal_Helper u = SendReceive(3, m);
-        return u.ReadUInt32();
+        return u.ReadInt32();
     }
-    public uint ResolveOxid2(ulong pOxid, short cRequestedProtseqs, short[] arRequestedProtseqs, 
+    public int ResolveOxid2(ulong pOxid, short cRequestedProtseqs, short[] arRequestedProtseqs,
         out DUALSTRINGARRAY? ppdsaOxidBindings, out Guid pipidRemUnknown, out int pAuthnHint, out COMVERSION pComVersion)
     {
         _OxidResolver_Marshal_Helper m = new();
@@ -197,16 +196,16 @@ internal sealed class OxidResolverClient : RpcClientBase
         pipidRemUnknown = u.ReadGuid();
         pAuthnHint = u.ReadInt32();
         pComVersion = u.ReadStruct<COMVERSION>();
-        return u.ReadUInt32();
+        return u.ReadInt32();
     }
-    public uint ServerAlive2(out COMVERSION pComVersion, out DUALSTRINGARRAY? ppdsaOrBindings, out int pReserved)
+    public int ServerAlive2(out COMVERSION pComVersion, out DUALSTRINGARRAY? ppdsaOrBindings, out int pReserved)
     {
         _OxidResolver_Marshal_Helper m = new();
         _OxidResolver_Unmarshal_Helper u = SendReceive(5, m);
         pComVersion = u.ReadStruct<COMVERSION>();
         ppdsaOrBindings = u.ReadReferentValue(new Func<DUALSTRINGARRAY>(u.Read_0), false);
         pReserved = u.ReadInt32();
-        return u.ReadUInt32();
+        return u.ReadInt32();
     }
 }
 

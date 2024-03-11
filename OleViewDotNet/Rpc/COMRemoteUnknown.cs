@@ -1,0 +1,131 @@
+﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2024
+//
+//    OleViewDotNet is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    OleViewDotNet is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
+
+using NtApiDotNet.Win32.Rpc;
+using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc.Clients;
+using OleViewDotNet.Rpc.Transport;
+using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading;
+
+namespace OleViewDotNet.Rpc;
+
+public sealed class COMRemoteUnknown : IDisposable
+{
+    #region Private Members
+    private readonly IRemUnknownClient m_client;
+    private readonly COMResolveOxidResponse m_response;
+    private long m_ref_count;
+    #endregion
+
+    #region Internal Members
+    internal COMRemoteUnknown(COMResolveOxidResponse response)
+    {
+        var binding = response.StringBindings.FirstOrDefault(b => b.TowerId == RpcTowerId.LRPC) 
+            ?? throw new ArgumentException("Not ALPC binding available for remote IUnknown.");
+        m_response = response;
+        m_client = new IRemUnknownClient();
+        RpcCOMClientTransportFactory.SetupFactory();
+        TransportSecurity = new RpcTransportSecurity()
+        {
+            Configuration = new RpcCOMClientTransportConfiguration(m_response.Version)
+        };
+        StringBinding = $"{RpcCOMClientTransportFactory.COMAlpcProtocol}:{binding.NetworkAddr}";
+        m_client.Connect(StringBinding, TransportSecurity);
+        m_client.ObjectUuid = m_response.IpidRemUnknown;
+        m_ref_count = 1;
+    }
+
+    internal COMRemoteUnknown AddRef()
+    {
+        Interlocked.Increment(ref m_ref_count);
+        return this;
+    }
+
+    internal string StringBinding { get; }
+    internal RpcTransportSecurity TransportSecurity { get; }
+    #endregion
+
+    #region Public Properties
+    public Guid IpidRemUnknown => m_response.IpidRemUnknown;
+    public ulong Oxid => m_response.Oxid;
+    #endregion
+
+    #region Public Methods
+    public COMObjRefStandard RemQueryInterface(Guid ipid, Guid iid)
+    {
+        int hr = m_client.RemQueryInterface(ipid, 1, 1, new[] { iid }, out REMQIRESULT[] results);
+        if (hr != 0)
+            throw new Win32Exception(hr);
+        if (results.Length != 1)
+            throw new InvalidOperationException("Result list is invalid.");
+        if (results[0].hResult != 0)
+            throw new Win32Exception(results[0].hResult);
+        return new()
+        {
+            Iid = iid,
+            Ipid = results[0].std.ipid,
+            Oid = results[0].std.oid,
+            Oxid = results[0].std.oxid,
+            PublicRefs = results[0].std.cPublicRefs,
+            StdFlags = (COMStdObjRefFlags)results[0].std.flags
+        };
+    }
+
+    public void RemAddRef(Guid ipid, int public_refs, int private_refs)
+    {
+        REMINTERFACEREF[] intfs = new REMINTERFACEREF[1];
+        intfs[0] = new()
+        {
+            ipid = ipid,
+            cPublicRefs = public_refs,
+            cPrivateRefs = private_refs
+        };
+
+        int hr = m_client.RemAddRef(1, intfs, out int[] results);
+        if (hr != 0)
+            throw new Win32Exception(hr);
+        if (results[0] != 0)
+            throw new Win32Exception(results[0]);
+    }
+
+    public void RemRelease(Guid ipid, int public_refs, int private_refs)
+    {
+        REMINTERFACEREF[] intfs = new REMINTERFACEREF[1];
+        intfs[0] = new()
+        {
+            ipid = ipid,
+            cPublicRefs = public_refs,
+            cPrivateRefs = private_refs
+        };
+
+        int hr = m_client.RemRelease(1, intfs);
+        if (hr != 0)
+            throw new Win32Exception(hr);
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.Decrement(ref m_ref_count) == 0)
+        {
+            m_client.Dispose();
+        }
+    }
+    #endregion
+}

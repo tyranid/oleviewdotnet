@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr;
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
@@ -77,9 +78,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     /// </summary>
     public IList<NdrProcedureDefinition> Procedures => Entry.Procedures;
 
-    public NdrComProxyDefinition Entry { get; }
+    public NdrComProxyDefinition Entry => RpcProxy.Proxy;
 
-    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes { get; }
+    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes => RpcProxy.ComplexTypes.ToList().AsReadOnly();
 
     public string Path => ClassEntry.DefaultServer;
 
@@ -100,11 +101,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #endregion
 
     #region Internal Members
-    internal COMProxyInterface(COMCLSIDEntry clsid, NdrComProxyDefinition entry,
-            IEnumerable<NdrComplexTypeReference> complex_types, COMRegistry registry, COMProxyFile proxy)
+    internal RpcComProxy RpcProxy { get; }
+
+    internal COMProxyInterface(COMCLSIDEntry clsid, RpcComProxy rpc_proxy, COMRegistry registry, COMProxyFile proxy)
     {
         ClassEntry = clsid;
-        Entry = entry;
+        RpcProxy = rpc_proxy;
         ProxyFile = proxy;
         m_registry = registry;
         if (string.IsNullOrWhiteSpace(Entry.Name))
@@ -115,7 +117,6 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         }
-        ComplexTypes = complex_types.ToList().AsReadOnly();
         if (!m_proxies.ContainsKey(Iid))
         {
             m_proxies.Add(Iid, this);
@@ -163,6 +164,17 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #endregion
 
     #region Public Methods
+    public RpcClientBase CreateClient()
+    {
+        RpcClientBuilderArguments args = new();
+        args.Flags = RpcClientBuilderFlags.GenerateConstructorProperties |
+            RpcClientBuilderFlags.StructureReturn |
+            RpcClientBuilderFlags.HideWrappedMethods |
+            RpcClientBuilderFlags.UnsignedChar |
+            RpcClientBuilderFlags.NoNamespace;
+        return RpcClientBuilder.CreateClient(RpcProxy, args);
+    }
+
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
     {
         COMSourceCodeBuilder builder = new(m_registry);
