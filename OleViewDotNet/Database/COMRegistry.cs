@@ -1071,30 +1071,23 @@ public class COMRegistry
     {
         if (obj is IMultiQI multi_qi)
         {
-            try
+            List<COMInterfaceEntry> ret = new();
+            foreach (var part in Interfaces.Values.Partition(50))
             {
-                List<COMInterfaceEntry> ret = new();
-                foreach (var part in Interfaces.Values.Partition(50))
+                using DisposableList<MULTI_QI> list = new(part.Select(p => new MULTI_QI(p.Iid)));
+                var qis = list.ToArray();
+                int hr = multi_qi.QueryMultipleInterfaces(qis.Length, qis);
+                if (hr < 0)
+                    continue;
+                for (int i = 0; i < qis.Length; ++i)
                 {
-                    using DisposableList<MULTI_QI> list = new(part.Select(p => new MULTI_QI(p.Iid)));
-                    var qis = list.ToArray();
-                    int hr = multi_qi.QueryMultipleInterfaces(qis.Length, qis);
-                    if (hr < 0)
-                        continue;
-                    for (int i = 0; i < qis.Length; ++i)
+                    if (qis[i].HResult() == 0)
                     {
-                        if (qis[i].HResult() == 0)
-                        {
-                            ret.Add(part[i]);
-                        }
+                        ret.Add(part[i]);
                     }
                 }
-                return ret.AsReadOnly();
             }
-            finally
-            {
-                Marshal.ReleaseComObject(multi_qi);
-            }
+            return ret.AsReadOnly();
         }
         else
         {
