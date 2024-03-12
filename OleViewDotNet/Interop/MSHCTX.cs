@@ -23,5 +23,5 @@ public enum MSHCTX
     DIFFERENTMACHINE = 2,
     INPROC = 3,
     CROSSCTX = 4,
-    RESERVED1 = 5,
+    RESERVED1 = 5, // Container.
 }

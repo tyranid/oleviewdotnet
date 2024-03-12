@@ -20,7 +20,6 @@ using OleViewDotNet.Rpc.Clients;
 using OleViewDotNet.Rpc.Transport;
 using System;
 using System.ComponentModel;
-using System.Threading;
 
 namespace OleViewDotNet.Rpc;
 
@@ -28,13 +27,12 @@ internal sealed class COMRemoteUnknown : IDisposable
 {
     #region Private Members
     private readonly IRemUnknownClient m_client;
-    private readonly COMVERSION m_version;
     #endregion
 
     #region Internal Members
     internal COMRemoteUnknown(COMVERSION version, COMStringBinding binding, Guid ipid_rem_unknown, ulong oxid)
     {
-        m_version = version;
+        Version = version;
         string proto_seq = binding.TowerId switch
         {
             RpcTowerId.LRPC => RpcCOMClientTransportFactory.COMAlpcProtocol,
@@ -50,19 +48,19 @@ internal sealed class COMRemoteUnknown : IDisposable
         {
             AuthenticationType = RpcAuthenticationType.Negotiate,
             AuthenticationLevel = RpcAuthenticationLevel.PacketPrivacy,
-            Configuration = new RpcCOMClientTransportConfiguration(m_version)
+            Configuration = new RpcCOMClientTransportConfiguration(Version, null)
         };
         m_client.Connect(StringBinding, TransportSecurity);
         m_client.ObjectUuid = IpidRemUnknown;
     }
-
-    internal string StringBinding { get; }
-    internal RpcTransportSecurity TransportSecurity { get; }
     #endregion
 
     #region Public Properties
+    public string StringBinding { get; }
+    public RpcTransportSecurity TransportSecurity { get; }
     public Guid IpidRemUnknown { get; }
     public ulong Oxid { get; }
+    public COMVERSION Version { get; }
     #endregion
 
     #region Public Methods

@@ -29,12 +29,15 @@ internal sealed class RpcCOMClientTransport : IRpcClientTransport
     private readonly IRpcClientTransport m_transport;
     private readonly bool m_local;
     private readonly COMVERSION m_version;
+    private readonly COMRemoteObject m_remote_object;
 
-    public RpcCOMClientTransport(IRpcClientTransport transport, bool local, COMVERSION version)
+    public RpcCOMClientTransport(IRpcClientTransport transport, bool local, COMVERSION version, COMRemoteObject remote_object)
     {
         m_transport = transport;
         m_local = local;
         m_version = version;
+        m_remote_object = remote_object;
+        m_remote_object?.AddRef();
     }
 
     public bool Connected => m_transport.Connected;
@@ -79,31 +82,35 @@ internal sealed class RpcCOMClientTransport : IRpcClientTransport
     public void Dispose()
     {
         m_transport.Dispose();
+        m_remote_object?.Dispose();
     }
 
     public RpcClientResponse SendReceive(int proc_num, Guid objuuid, NdrDataRepresentation data_representation, byte[] ndr_buffer, IReadOnlyCollection<NtObject> handles)
     {
         _ThisAndThat_Marshal_Helper marshal = new();
-        ORPCTHIS orpc_this = new();
-        orpc_this.flags = m_local ? 1 : 0;
-        orpc_this.cid = Guid.NewGuid();
-        orpc_this.version = m_version;
-        orpc_this.reserved1 = 0;
-        // TODO: Implement channel hooks?
-        orpc_this.extensions = null;
+        ORPCTHIS orpc_this = new()
+        {
+            flags = m_local ? 1 : 0,
+            cid = Guid.NewGuid(),
+            version = m_version,
+            reserved1 = 0,
+            // TODO: Implement channel hooks?
+            extensions = null
+        };
         marshal.WriteStruct(orpc_this);
         if (m_local)
         {
-            LocalThis local_this = new();
-            local_this.passthroughTraceActivity = Guid.NewGuid();
-            local_this.callId = Guid.NewGuid();
-            local_this.dwClientThread = NtThread.Current.ThreadId;
+            LocalThis local_this = new()
+            {
+                passthroughTraceActivity = Guid.NewGuid(),
+                callId = Guid.NewGuid(),
+                dwClientThread = NtThread.Current.ThreadId
+            };
             marshal.WriteStruct(local_this);
         }
         marshal.WriteBytes(ndr_buffer);
 
         var result = m_transport.SendReceive(proc_num, objuuid, data_representation, marshal.ToArray(), handles);
-
         _ThisAndThat_Unmarshal_Helper unmarshal = new(result);
         unmarshal.ReadStruct<ORPCTHAT>();
         if (m_local)

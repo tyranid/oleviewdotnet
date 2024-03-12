@@ -3611,3 +3611,36 @@ function Get-ComAuthInfo {
     $auth_info.AuthIdentityData = $AuthIdentityData
     $auth_info
 }
+
+<#
+.SYNOPSIS
+Gets a connected RPC client for this COM object.
+.DESCRIPTION
+This cmdlet parses the COM proxy information for an interface and build an RPC client to call methods on the object.
+.PARAMETER Object
+The COM object to call.
+.PARAMETER Iid
+A COM IID which is being proxied.
+.OUTPUTS
+The RPC client.
+#>
+function Get-ComRpcClient {
+    [CmdletBinding(DefaultParameterSetName = "FromObject")]
+    Param(
+        [parameter(Mandatory, Position=0, ParameterSetName="FromObject")]
+        $Object,
+        [parameter(Mandatory, Position=1)]
+        [Guid]$Iid,
+        [OleViewDotNet.Database.COMRegistry]$Database
+    )
+
+    try {
+        $proxy = Get-ComProxy -Iid $Iid -Database $Database
+        $rem = [OleViewDotNet.Rpc.COMOxidResolver]::GetRemoteObject($Object)
+        $client = $rem.CreateClient($proxy)
+        $rem.Dispose()
+        $client
+    } catch {
+        Write-Error $_
+    }
+}

@@ -17,7 +17,9 @@
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Rpc.Transport;
 using System;
+using System.Threading;
 
 namespace OleViewDotNet.Rpc;
 
@@ -26,17 +28,24 @@ public class COMRemoteObject : IDisposable
     private readonly COMRemoteUnknown m_rem_unknown;
     private readonly COMObjRefStandard m_objref;
     private readonly COMPingSet m_ping_set;
+    private long m_ref_count;
 
     internal COMRemoteObject(COMRemoteUnknown rem_unknown, COMObjRefStandard objref, COMPingSet ping_set)
     {
         m_rem_unknown = rem_unknown;
         m_objref = objref;
         m_ping_set = ping_set;
+        m_ref_count = 1;
     }
 
     public Guid Iid => m_objref.Iid;
     public Guid Ipid => m_objref.Ipid;
     public ulong Oid => m_objref.Oid;
+
+    internal void AddRef()
+    {
+        Interlocked.Increment(ref m_ref_count);
+    }
 
     public COMRemoteObject QueryInterface(Guid iid)
     {
@@ -54,19 +63,23 @@ public class COMRemoteObject : IDisposable
         if (proxy.Iid != Iid)
         {
             using var obj = QueryInterface(proxy.Iid);
-            m_rem_unknown.RemAddRef(obj.Ipid, 1, 0);
-            ipid = obj.Ipid;
+            return obj.CreateClient(proxy);
         }
 
         var client = proxy.CreateClient();
-        client.Connect(m_rem_unknown.StringBinding, m_rem_unknown.TransportSecurity);
+        var transport_security = m_rem_unknown.TransportSecurity;
+        transport_security.Configuration = new RpcCOMClientTransportConfiguration(m_rem_unknown.Version, this);
+        client.Connect(m_rem_unknown.StringBinding, transport_security);
         client.ObjectUuid = ipid;
         return client;
     }
 
     public void Dispose()
     {
-        m_ping_set.DeleteObject(m_objref.Oid);
-        m_rem_unknown.RemRelease(Ipid, 1, 0);
+        if (Interlocked.Decrement(ref m_ref_count) == 0)
+        {
+            m_ping_set.DeleteObject(m_objref.Oid);
+            m_rem_unknown.RemRelease(Ipid, 1, 0);
+        }
     }
 }

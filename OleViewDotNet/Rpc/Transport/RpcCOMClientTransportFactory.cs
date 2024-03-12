@@ -49,10 +49,10 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
         string new_binding = RpcStringBinding.Compose(protoseq, curr_binding.NetworkAddress, curr_binding.Endpoint, curr_binding.NetworkOptions);
         endpoint = new RpcEndpoint(Guid.Empty, new Version(), RpcStringBinding.Parse(new_binding));
 
-        var config = transport_security.Configuration as RpcCOMClientTransportConfiguration;
-        transport_security.Configuration = config?.InnerConfig;
+        var config = transport_security.Configuration as RpcCOMClientTransportConfiguration ?? throw new ArgumentException("Must specific transport configuration.");
+        transport_security.Configuration = config.InnerConfig;
 
         var transport = RpcClientTransportFactory.ConnectEndpoint(endpoint, transport_security);
-        return new RpcCOMClientTransport(transport, transport is RpcAlpcClientTransport, config?.Version ?? new COMVERSION(5, 7));
+        return new RpcCOMClientTransport(transport, transport is RpcAlpcClientTransport, config.Version, config.RemoteObject);
     }
 }

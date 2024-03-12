@@ -21,12 +21,14 @@ namespace OleViewDotNet.Rpc.Transport;
 
 internal sealed class RpcCOMClientTransportConfiguration : RpcClientTransportConfiguration
 {
-    public RpcCOMClientTransportConfiguration(COMVERSION version)
+    public RpcCOMClientTransportConfiguration(COMVERSION version, COMRemoteObject remote_object)
     {
         RpcCOMClientTransportFactory.SetupFactory();
         Version = version;
+        RemoteObject = remote_object;
     }
 
     public COMVERSION Version { get; set; }
+    public COMRemoteObject RemoteObject { get; set; }
     public RpcClientTransportConfiguration InnerConfig { get; set; }
 }
