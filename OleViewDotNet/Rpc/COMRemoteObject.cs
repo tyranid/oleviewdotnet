@@ -52,7 +52,7 @@ public class COMRemoteObject : IDisposable
         return COMOxidResolver.GetRemoteObject(m_rem_unknown.RemQueryInterface(Ipid, iid));
     }
 
-    public RpcClientBase CreateClient(COMProxyInterface proxy)
+    public RpcClientBase CreateClient(COMProxyInterface proxy, bool scripting = false)
     {
         if (proxy is null)
         {
@@ -66,7 +66,7 @@ public class COMRemoteObject : IDisposable
             return obj.CreateClient(proxy);
         }
 
-        var client = proxy.CreateClient();
+        var client = proxy.CreateClient(scripting);
         var transport_security = m_rem_unknown.TransportSecurity;
         transport_security.Configuration = new RpcCOMClientTransportConfiguration(m_rem_unknown.Version, this);
         client.Connect(m_rem_unknown.StringBinding, transport_security);

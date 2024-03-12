@@ -164,9 +164,18 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #endregion
 
     #region Public Methods
-    public RpcClientBase CreateClient()
+    public RpcClientBase CreateClient(bool scripting = false)
     {
         RpcClientBuilderArguments args = new();
+        args.Flags = RpcClientBuilderFlags.UnsignedChar |
+            RpcClientBuilderFlags.NoNamespace;
+        if (scripting)
+        {
+            args.Flags |= RpcClientBuilderFlags.GenerateConstructorProperties |
+                RpcClientBuilderFlags.StructureReturn |
+                RpcClientBuilderFlags.HideWrappedMethods;
+        }
+
         args.Flags = RpcClientBuilderFlags.GenerateConstructorProperties |
             RpcClientBuilderFlags.StructureReturn |
             RpcClientBuilderFlags.HideWrappedMethods |

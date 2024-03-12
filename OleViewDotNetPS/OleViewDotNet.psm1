@@ -3637,7 +3637,7 @@ function Get-ComRpcClient {
     try {
         $proxy = Get-ComProxy -Iid $Iid -Database $Database
         $rem = [OleViewDotNet.Rpc.COMOxidResolver]::GetRemoteObject($Object)
-        $client = $rem.CreateClient($proxy)
+        $client = $rem.CreateClient($proxy, $true)
         $rem.Dispose()
         $client
     } catch {
