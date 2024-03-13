@@ -319,4 +319,22 @@ internal partial class ObjectInformation : UserControl
             EntryPoint.ShowError(this, ex);
         }
     }
+
+    private void viewServerToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (COMUtilities.MarshalObjectToObjRef(m_pObject,
+                    GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
+            {
+                throw new Exception("Object must be standard marshaled to view the interface");
+            }
+
+            EntryPoint.GetMainForm(m_registry).LoadProcessByProcessId(objref.ProcessId);
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
+    }
 }
