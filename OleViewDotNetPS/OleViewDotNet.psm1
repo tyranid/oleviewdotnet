@@ -3644,3 +3644,15 @@ function Get-ComRpcClient {
         Write-Error $_
     }
 }
+
+<#
+.SYNOPSIS
+Gets a COM standard activator object.
+.DESCRIPTION
+This cmdlet gets a new COM standard activator object.
+.OUTPUTS
+OleViewDotNet.Utilities.COMStandardActivator
+#>
+function New-ComStandardActivator {
+    [OleViewDotNet.Utilities.COMStandardActivator]::new()
+}

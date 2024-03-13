@@ -246,4 +246,9 @@ internal static class MiscUtilities
     {
         return guid.ToString().ToUpper();
     }
+
+    internal static OptionalGuidClass ToOptional(this Guid? guid)
+    {
+        return guid.HasValue ? new(guid.Value) : null;
+    }
 }
