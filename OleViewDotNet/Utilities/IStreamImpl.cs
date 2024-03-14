@@ -60,22 +60,18 @@ internal class IStreamImpl : IStream, IDisposable
 
     public void UnlockRegion(long libOffset, long cb, int dwLockType)
     {
-        throw new NotImplementedException();
     }
 
     public void LockRegion(long libOffset, long cb, int dwLockType)
     {
-        throw new NotImplementedException();
     }
 
     public void Revert()
     {
-        throw new NotImplementedException();
     }
 
     public void Commit(int grfCommitFlags)
     {
-        throw new NotImplementedException();
     }
 
     public void CopyTo(IStream pstm, long cb, IntPtr pcbRead, IntPtr pcbWritten)
@@ -85,7 +81,7 @@ internal class IStreamImpl : IStream, IDisposable
 
     public void SetSize(long lSize)
     {
-        throw new NotImplementedException();
+        m_stream.SetLength(lSize);
     }
 
     public void Seek(long dlibMove, int dwOrigin, IntPtr plibNewPosition)
@@ -106,6 +102,8 @@ internal class IStreamImpl : IStream, IDisposable
 
     public void Read(byte[] pv, int cb, IntPtr pcbRead)
     {
+        if (pv is null)
+            return;
         int readCount = m_stream.Read(pv, 0, cb);
         if (pcbRead != IntPtr.Zero)
         {
@@ -115,6 +113,8 @@ internal class IStreamImpl : IStream, IDisposable
 
     public void Write(byte[] pv, int cb, IntPtr pcbWritten)
     {
+        if (pv is null)
+            return;
         m_stream.Write(pv, 0, cb);
         if (pcbWritten != IntPtr.Zero)
         {
