@@ -36,6 +36,7 @@ public class COMProcessClassRegistration
     public int ProcessID => Process.ProcessId;
     public string ProcessName => Process.Name;
     public bool Registered => ClassEntry != null;
+    public bool LocalServer => Context.HasFlag(CLSCTX.LOCAL_SERVER);
 
     public COMProcessEntry Process { get; internal set; }
 

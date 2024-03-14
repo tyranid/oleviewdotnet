@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using System;
@@ -30,8 +29,8 @@ public class COMProcessEntry : ICOMAccessSecurity
     public int ProcessId { get; }
     public string ExecutablePath { get; }
     public string Name => Path.GetFileNameWithoutExtension(ExecutablePath);
-    public IEnumerable<COMIPIDEntry> Ipids { get; }
-    public IEnumerable<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning);
+    public IReadOnlyList<COMIPIDEntry> Ipids { get; }
+    public IReadOnlyList<COMIPIDEntry> RunningIpids => Ipids.Where(i => i.IsRunning).ToList().AsReadOnly();
     public bool Is64Bit { get; }
     public Guid AppId { get; }
     public COMSecurityDescriptor AccessPermissions { get; }
@@ -44,10 +43,10 @@ public class COMProcessEntry : ICOMAccessSecurity
     public RPC_IMP_LEVEL ImpLevel { get; }
     public IntPtr AccessControl { get; }
     public IntPtr STAMainHWnd { get; }
-    public IEnumerable<COMProcessClassRegistration> Classes { get; }
+    public IReadOnlyList<COMProcessClassRegistration> Classes { get; }
     public GLOBALOPT_UNMARSHALING_POLICY_VALUES UnmarshalPolicy { get; }
-    public IEnumerable<COMIPIDEntry> Clients { get; }
-    public IEnumerable<COMRuntimeActivableClassEntry> ActivatableClasses { get; }
+    public IReadOnlyList<COMIPIDEntry> Clients { get; }
+    public IReadOnlyList<COMRuntimeActivableClassEntry> ActivatableClasses { get; }
     public COMProcessToken Token { get; }
     public ActivationContext ActivationContext { get; }
     public IntPtr MTAContext { get; }
