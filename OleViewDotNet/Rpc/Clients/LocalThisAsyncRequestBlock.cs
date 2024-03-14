@@ -19,7 +19,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct LocalThisAsyncRequestBlock : INdrStructure
+internal struct LocalThisAsyncRequestBlock : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -35,6 +35,13 @@ public struct LocalThisAsyncRequestBlock : INdrStructure
     int INdrStructure.GetAlignment()
     {
         return 8;
+    }
+    public LocalThisAsyncRequestBlock()
+    {
+        asyncOperationId = default;
+        oxidClientProcessNA = default;
+        originalClientLogicalThreadId = default;
+        uClientCausalityTraceId = default;
     }
     public Guid asyncOperationId;
     public long oxidClientProcessNA;

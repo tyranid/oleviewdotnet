@@ -20,7 +20,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public sealed class OxidResolverClient : RpcClientBase
+internal sealed class OxidResolverClient : RpcClientBase
 {
     public OxidResolverClient() :
             base("99fcfec4-5260-101b-bbcb-00aa0021347a", 0, 0)

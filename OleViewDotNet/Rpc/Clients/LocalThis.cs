@@ -19,7 +19,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct LocalThis : INdrStructure
+internal struct LocalThis : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {

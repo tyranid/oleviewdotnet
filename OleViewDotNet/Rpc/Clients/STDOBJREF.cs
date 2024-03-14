@@ -19,7 +19,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct STDOBJREF : INdrStructure
+internal struct STDOBJREF : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {

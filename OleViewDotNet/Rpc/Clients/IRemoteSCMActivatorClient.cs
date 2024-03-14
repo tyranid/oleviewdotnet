@@ -16,14 +16,13 @@
 
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal sealed class IRemUnknownClient : RpcClientBase
+internal sealed class IRemoteSCMActivatorClient : RpcClientBase
 {
-    public IRemUnknownClient() :
-            base("00000131-0000-0000-c000-000000000046", 0, 0)
+    public IRemoteSCMActivatorClient() :
+            base("000001a0-0000-0000-c000-000000000046", 0, 0)
     {
     }
     private NdrUnmarshalBuffer SendReceive(int p, NdrMarshalBuffer m)
@@ -31,35 +30,25 @@ internal sealed class IRemUnknownClient : RpcClientBase
         var result = SendReceive(p, m.DataRepresentation, m.ToArray(), m.Handles);
         return new(result.NdrBuffer, result.Handles, result.DataRepresentation);
     }
-
-    public int RemQueryInterface(Guid ripid, int cRefs, short cIids, Guid[] iids, out REMQIRESULT[] ppQIResults)
+    public int RemoteGetClassObject(ORPCTHIS orpcthis, out ORPCTHAT orpcthat, MInterfacePointer? pActProperties, out MInterfacePointer? ppActProperties)
     {
         NdrMarshalBuffer m = new();
-        m.WriteGuid(ripid);
-        m.WriteInt32(cRefs);
-        m.WriteInt16(cIids);
-        m.WriteConformantArrayCallback(RpcUtils.CheckNull(iids, "iids"), new Action<Guid>(m.WriteGuid), cIids);
+        m.WriteStruct(orpcthis);
+        m.WriteReferent(pActProperties, m.WriteStruct);
         NdrUnmarshalBuffer u = SendReceive(3, m);
-        ppQIResults = u.ReadReferent(new Func<REMQIRESULT[]>(u.ReadConformantStructArray<REMQIRESULT>), false);
+        orpcthat = u.ReadStruct<ORPCTHAT>();
+        ppActProperties = u.ReadReferentValue(u.ReadStruct<MInterfacePointer>, false);
         return u.ReadInt32();
     }
-
-    public int RemAddRef(short cInterfaceRefs, REMINTERFACEREF[] InterfaceRefs, out int[] pResults)
+    public int RemoteCreateInstance(ORPCTHIS orpcthis, out ORPCTHAT orpcthat, MInterfacePointer? pUnkOuter, MInterfacePointer? pActProperties, out MInterfacePointer? ppActProperties)
     {
         NdrMarshalBuffer m = new();
-        m.WriteInt16(cInterfaceRefs);
-        m.WriteConformantArray(RpcUtils.CheckNull(InterfaceRefs, "InterfaceRefs"), cInterfaceRefs);
+        m.WriteStruct(orpcthis);
+        m.WriteReferent(pUnkOuter, m.WriteStruct);
+        m.WriteReferent(pActProperties, m.WriteStruct);
         NdrUnmarshalBuffer u = SendReceive(4, m);
-        pResults = u.ReadConformantArray<int>();
-        return u.ReadInt32();
-    }
-
-    public int RemRelease(short cInterfaceRefs, REMINTERFACEREF[] InterfaceRefs)
-    {
-        NdrMarshalBuffer m = new();
-        m.WriteInt16(cInterfaceRefs);
-        m.WriteConformantArray(RpcUtils.CheckNull(InterfaceRefs, "InterfaceRefs"), cInterfaceRefs);
-        NdrUnmarshalBuffer u = SendReceive(5, m);
+        orpcthat = u.ReadStruct<ORPCTHAT>();
+        ppActProperties = u.ReadReferentValue(u.ReadStruct<MInterfacePointer>, false);
         return u.ReadInt32();
     }
 }

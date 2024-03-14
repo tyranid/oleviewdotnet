@@ -15,34 +15,41 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
+using NtApiDotNet.Win32.Rpc;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct COMVERSION : INdrStructure
+internal struct MInterfacePointer : INdrConformantStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt16(MajorVersion);
-        m.WriteInt16(MinorVersion);
+        m.WriteInt32(ulCntData);
+        m.WriteConformantArray(RpcUtils.CheckNull(abData, "abData"), ulCntData);
     }
-
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        MajorVersion = u.ReadInt16();
-        MinorVersion = u.ReadInt16();
+        ulCntData = u.ReadInt32();
+        abData = u.ReadConformantArray<byte>();
     }
-
+    int INdrConformantStructure.GetConformantDimensions()
+    {
+        return 1;
+    }
     int INdrStructure.GetAlignment()
     {
-        return 2;
+        return 4;
     }
-
-    public COMVERSION(short major, short minor)
+    public int ulCntData;
+    public byte[] abData;
+    public static MInterfacePointer CreateDefault()
     {
-        MajorVersion = major;
-        MinorVersion = minor;
+        MInterfacePointer ret = new MInterfacePointer();
+        ret.abData = new byte[0];
+        return ret;
     }
-
-    public short MajorVersion;
-    public short MinorVersion;
+    public MInterfacePointer(int ulCntData, byte[] abData)
+    {
+        this.ulCntData = ulCntData;
+        this.abData = abData;
+    }
 }

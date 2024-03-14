@@ -21,7 +21,7 @@ using System.IO;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct DUALSTRINGARRAY : INdrConformantStructure
+internal struct DUALSTRINGARRAY : INdrConformantStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {

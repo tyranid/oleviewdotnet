@@ -20,7 +20,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct ORPC_EXTENT_ARRAY : INdrStructure
+internal struct ORPC_EXTENT_ARRAY : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {

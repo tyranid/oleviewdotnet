@@ -18,7 +18,7 @@ using NtApiDotNet.Ndr.Marshal;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-public struct REMQIRESULT : INdrStructure
+internal struct REMQIRESULT : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
