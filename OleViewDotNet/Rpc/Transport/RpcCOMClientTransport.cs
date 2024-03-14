@@ -87,7 +87,7 @@ internal sealed class RpcCOMClientTransport : IRpcClientTransport
 
     public RpcClientResponse SendReceive(int proc_num, Guid objuuid, NdrDataRepresentation data_representation, byte[] ndr_buffer, IReadOnlyCollection<NtObject> handles)
     {
-        _ThisAndThat_Marshal_Helper marshal = new();
+        NdrMarshalBuffer marshal = new();
         ORPCTHIS orpc_this = new()
         {
             flags = m_local ? 1 : 0,
@@ -111,7 +111,7 @@ internal sealed class RpcCOMClientTransport : IRpcClientTransport
         marshal.WriteBytes(ndr_buffer);
 
         var result = m_transport.SendReceive(proc_num, objuuid, data_representation, marshal.ToArray(), handles);
-        _ThisAndThat_Unmarshal_Helper unmarshal = new(result);
+        NdrUnmarshalBuffer unmarshal = new(result.NdrBuffer, result.Handles, result.DataRepresentation);
         unmarshal.ReadStruct<ORPCTHAT>();
         if (m_local)
         {
