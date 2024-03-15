@@ -15,12 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct LocationInfoData : INdrStructure, IActivationProperty
+internal struct LocationInfoData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -46,17 +44,8 @@ internal struct LocationInfoData : INdrStructure, IActivationProperty
     public int apartmentId;
     public int contextId;
 
-    public Guid Clsid => new("{000001a4-0000-0000-c000-000000000046}");
-
     public static LocationInfoData CreateDefault()
     {
         return new LocationInfoData();
-    }
-    public LocationInfoData(string machineName, int processId, int apartmentId, int contextId)
-    {
-        this.machineName = machineName;
-        this.processId = processId;
-        this.apartmentId = apartmentId;
-        this.contextId = contextId;
     }
 }

@@ -15,12 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct SecurityInfoData : INdrStructure, IActivationProperty
+internal struct SecurityInfoData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -43,8 +41,6 @@ internal struct SecurityInfoData : INdrStructure, IActivationProperty
     public int dwAuthnFlags;
     public NdrEmbeddedPointer<_COSERVERINFO> pServerInfo;
     public NdrEmbeddedPointer<_COAUTHIDENTITY> pAuthIdentityInfo;
-
-    public Guid Clsid => new("{000001a6-0000-0000-c000-000000000046}");
 
     public static SecurityInfoData CreateDefault()
     {

@@ -15,12 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct ScmReplyInfoData : INdrStructure, IActivationProperty
+internal struct ScmReplyInfoData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -39,8 +37,6 @@ internal struct ScmReplyInfoData : INdrStructure, IActivationProperty
     }
     public NdrEmbeddedPointer<CustomPrivResolverInfo> pResolverInfo;
     public NdrEmbeddedPointer<customREMOTE_REPLY_SCM_INFO> remoteReply;
-
-    public Guid Clsid => new("{000001b6-0000-0000-c000-000000000046}");
 
     public static ScmReplyInfoData CreateDefault()
     {

@@ -17,9 +17,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-internal interface IActivationProperty
+public sealed class ActivationContextInfo : IActivationProperty
 {
-    Guid PropertyClsid { get; }
-    //byte[] Serialize();
-    //void Deserialize(byte[] data);
+    public Guid PropertyClsid => new("{000001a5-0000-0000-c000-000000000046}");
 }

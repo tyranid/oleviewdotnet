@@ -13,13 +13,26 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
+using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc.Clients;
 using System;
+using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-internal interface IActivationProperty
+public sealed class ScmRequestInfo : IActivationProperty
 {
-    Guid PropertyClsid { get; }
-    //byte[] Serialize();
-    //void Deserialize(byte[] data);
+    private readonly List<RpcTowerId> m_proto_seqs = new();
+    private customREMOTE_REQUEST_SCM_INFO m_inner = new();
+
+    public Guid PropertyClsid => new("{000001aa-0000-0000-c000-000000000046}");
+
+    public RPC_IMP_LEVEL ClientImpLevel
+    {
+        get => (RPC_IMP_LEVEL)m_inner.ClientImpLevel;
+        set => m_inner.ClientImpLevel = (int)value;
+    }
+
+    public List<RpcTowerId> ProtocolSequences => m_proto_seqs;
 }

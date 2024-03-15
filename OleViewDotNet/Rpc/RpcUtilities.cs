@@ -17,7 +17,9 @@
 
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Database;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc;
@@ -65,5 +67,15 @@ internal static class RpcUtilities
             AuthenticationType = (RpcAuthenticationType)binding.AuthnSvc,
             ServicePrincipalName = binding.PrincName
         };
+    }
+
+    public static COMVersion ToVersion(this COMVERSION ver)
+    {
+        return new(ver.MajorVersion, ver.MinorVersion);
+    }
+
+    public static COMVERSION ToVersion(this COMVersion ver)
+    {
+        return new(ver.Major, ver.Minor);
     }
 }

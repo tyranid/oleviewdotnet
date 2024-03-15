@@ -15,15 +15,11 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct ActivationContextInfoData : INdrStructure, IActivationProperty
+internal struct ActivationContextInfoData : INdrStructure
 {
-    public Guid Clsid => new("{000001a5-0000-0000-c000-000000000046}");
-
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
         m.WriteInt32(clientOK);

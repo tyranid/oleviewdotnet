@@ -17,9 +17,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-internal interface IActivationProperty
+public sealed class ScmReplyInfo : IActivationProperty
 {
-    Guid PropertyClsid { get; }
-    //byte[] Serialize();
-    //void Deserialize(byte[] data);
+    public Guid PropertyClsid => new("{000001b6-0000-0000-c000-000000000046}");
 }

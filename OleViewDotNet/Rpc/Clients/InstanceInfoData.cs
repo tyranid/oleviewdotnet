@@ -15,12 +15,11 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
 using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct InstanceInfoData : INdrStructure, IActivationProperty
+internal struct InstanceInfoData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -44,8 +43,6 @@ internal struct InstanceInfoData : INdrStructure, IActivationProperty
     public int mode;
     public NdrEmbeddedPointer<MInterfacePointer> ifdROT;
     public NdrEmbeddedPointer<MInterfacePointer> ifdStg;
-
-    public Guid Clsid => new("{000001ad-0000-0000-c000-000000000046}");
 
     public static InstanceInfoData CreateDefault()
     {

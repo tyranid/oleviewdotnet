@@ -16,12 +16,11 @@
 
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
-using OleViewDotNet.Rpc.ActivationProperties;
 using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct SpecialPropertiesData : INdrStructure, IActivationProperty
+internal struct SpecialPropertiesData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -72,8 +71,6 @@ internal struct SpecialPropertiesData : INdrStructure, IActivationProperty
     public long hwnd;
     public int ulServiceId;
     public int[] Reserved3;
-
-    public Guid Clsid => new("{000001b9-0000-0000-c000-000000000046}");
 
     public static SpecialPropertiesData CreateDefault()
     {

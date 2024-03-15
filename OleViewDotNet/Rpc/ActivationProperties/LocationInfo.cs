@@ -13,13 +13,38 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-internal interface IActivationProperty
+public sealed class LocationInfo : IActivationProperty
 {
-    Guid PropertyClsid { get; }
-    //byte[] Serialize();
-    //void Deserialize(byte[] data);
+    private LocationInfoData m_inner;
+
+    public Guid PropertyClsid => new("{000001a4-0000-0000-c000-000000000046}");
+
+    public string MachineName
+    {
+        get => m_inner.machineName;
+        set => m_inner.machineName = value;
+    }
+
+    public int ProcessId
+    {
+        get => m_inner.processId;
+        set => m_inner.processId = value;
+    }
+
+    public int ApartmentId
+    {
+        get => m_inner.apartmentId;
+        set => m_inner.apartmentId = value;
+    }
+
+    public int ContextId
+    {
+        get => m_inner.contextId;
+        set => m_inner.contextId = value;
+    }
 }
