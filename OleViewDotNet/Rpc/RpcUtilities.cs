@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 
+using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
@@ -77,5 +78,21 @@ internal static class RpcUtilities
     public static COMVERSION ToVersion(this COMVersion ver)
     {
         return new(ver.Major, ver.Minor);
+    }
+
+    public static COMObjRef ToObjRef(this NdrEmbeddedPointer<MInterfacePointer> pointer)
+    {
+        if (pointer == null)
+            return null;
+        return COMObjRef.FromArray(pointer.GetValue().abData);
+    }
+
+    public static NdrEmbeddedPointer<MInterfacePointer> ToPointer(this COMObjRef objref)
+    {
+        if (objref == null)
+            return null;
+        byte[] ba = objref.ToArray();
+        MInterfacePointer p = new(ba.Length, ba);
+        return p;
     }
 }

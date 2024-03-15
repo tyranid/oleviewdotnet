@@ -17,8 +17,16 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class SpecialProperties : IActivationProperty
+[Flags]
+public enum SPD_FLAGS
 {
-    public Guid PropertyClsid => new("{000001b9-0000-0000-c000-000000000046}");
-
+    NONE = 0,
+    USE_CONSOLE_SESSION = 0x1,
+    USE_DEFAULT_AUTHN_LVL = 0x2,
+    USE_SERVER_PID = 0x4,
+    USE_LUA_LEVEL_ADMIN = 0x8,
+    COAUTH_USER_IS_NULL = 0x10,
+    COAUTH_DOMAIN_IS_NULL = 0x20,
+    COAUTH_PWD_IS_NULL = 0x40,
+    USE_LUA_LEVEL_HIGHEST = 0x80,
 }

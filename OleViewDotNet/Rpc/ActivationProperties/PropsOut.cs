@@ -19,5 +19,10 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class PropsOut : IActivationProperty
 {
-    public Guid PropertyClsid => new("{00000339-0000-0000-c000-000000000046}");
+    public Guid PropertyClsid => ActivationGuids.CLSID_PropsOutInfo;
+
+    public byte[] Serialize()
+    {
+        throw new NotImplementedException();
+    }
 }

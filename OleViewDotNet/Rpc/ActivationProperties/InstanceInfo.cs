@@ -13,11 +13,29 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class InstanceInfo : IActivationProperty
 {
-    public Guid PropertyClsid => new("{000001ad-0000-0000-c000-000000000046}");
+    private InstanceInfoData m_inner;
+
+    public InstanceInfo(NdrPickledType pickled_type)
+    {
+        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<InstanceInfoData>();
+    }
+
+    public InstanceInfo()
+    {
+    }
+
+    public Guid PropertyClsid => ActivationGuids.CLSID_InstanceInfo;
+
+    public byte[] Serialize()
+    {
+        throw new NotImplementedException();
+    }
 }

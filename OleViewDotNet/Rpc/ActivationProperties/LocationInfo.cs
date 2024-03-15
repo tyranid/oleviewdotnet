@@ -13,6 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Rpc.Clients;
 using System;
 
@@ -22,7 +23,16 @@ public sealed class LocationInfo : IActivationProperty
 {
     private LocationInfoData m_inner;
 
-    public Guid PropertyClsid => new("{000001a4-0000-0000-c000-000000000046}");
+    public LocationInfo(NdrPickledType pickled_type)
+    {
+        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<LocationInfoData>();
+    }
+
+    public LocationInfo()
+    {
+    }
+
+    public Guid PropertyClsid => ActivationGuids.CLSID_ServerLocationInfo;
 
     public string MachineName
     {
@@ -46,5 +56,12 @@ public sealed class LocationInfo : IActivationProperty
     {
         get => m_inner.contextId;
         set => m_inner.contextId = value;
+    }
+
+    public byte[] Serialize()
+    {
+        NdrMarshalBuffer m = new();
+        m.WriteStruct(m_inner);
+        return m.ToPickledType().ToArray();
     }
 }

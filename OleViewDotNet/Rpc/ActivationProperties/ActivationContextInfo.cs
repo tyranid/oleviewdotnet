@@ -13,11 +13,36 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class ActivationContextInfo : IActivationProperty
 {
-    public Guid PropertyClsid => new("{000001a5-0000-0000-c000-000000000046}");
+    private ActivationContextInfoData m_inner;
+
+    public ActivationContextInfo(NdrPickledType pickled_type)
+    {
+        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<ActivationContextInfoData>();
+    }
+
+    public ActivationContextInfo()
+    {
+    }
+
+    public int ClientOK { get => m_inner.clientOK; set => m_inner.clientOK = value; }
+    public COMObjRef ClientCtx { get => m_inner.pIFDClientCtx.ToObjRef(); set => m_inner.pIFDClientCtx = value.ToPointer(); }
+    public COMObjRef PrototypeCtx { get => m_inner.pIFDPrototypeCtx.ToObjRef(); set => m_inner.pIFDPrototypeCtx = value.ToPointer(); }
+
+    public Guid PropertyClsid => ActivationGuids.CLSID_ActivationContextInfo;
+
+    public byte[] Serialize()
+    {
+        var m = new NdrMarshalBuffer();
+        m.WriteStruct(m_inner);
+        return m.ToPickledType().ToArray();
+    }
 }

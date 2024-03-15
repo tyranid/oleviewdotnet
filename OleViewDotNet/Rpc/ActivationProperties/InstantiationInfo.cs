@@ -13,6 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Rpc.Clients;
@@ -26,7 +27,17 @@ public sealed class InstantiationInfo : IActivationProperty
     private readonly List<Guid> m_iids = new();
     private InstantiationInfoData m_inner = new();
 
-    public Guid PropertyClsid => new("{000001ab-0000-0000-c000-000000000046}");
+    public InstantiationInfo(NdrPickledType pickled_type)
+    {
+        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<InstantiationInfoData>();
+        m_iids = new(m_inner.pIID.GetValue());
+    }
+
+    public InstantiationInfo()
+    {
+    }
+
+    public Guid PropertyClsid => ActivationGuids.CLSID_InstantiationInfo;
 
     public Guid ClassId
     {
@@ -59,5 +70,18 @@ public sealed class InstantiationInfo : IActivationProperty
     {
         get => m_inner.clientCOMVersion.ToVersion();
         set => m_inner.clientCOMVersion = value.ToVersion();
+    }
+
+    public byte[] Serialize()
+    {
+        m_inner.cIID = m_iids.Count;
+        m_inner.pIID = m_iids.ToArray();
+        NdrMarshalBuffer m = new();
+        m.WriteStruct(m_inner);
+        int length = m.ToPickledType().ToArray().Length;
+        m_inner.thisSize = length;
+        m = new();
+        m.WriteStruct(m_inner);
+        return m.ToPickledType().ToArray();
     }
 }
