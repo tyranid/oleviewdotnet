@@ -15,40 +15,36 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
+using NtApiDotNet.Win32.Rpc;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct ScmReplyInfoData : INdrStructure, IActivationProperty
+public struct CONTAINER_EXTENT_ARRAY : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteEmbeddedPointer(pResolverInfo, m.WriteStruct);
-        m.WriteEmbeddedPointer(remoteReply, m.WriteStruct);
+        m.WriteInt32(size);
+        m.WriteInt32(reserved);
+        m.WriteEmbeddedPointer(extent, (a, l) => m.WriteConformantStructPointerArray(a, l), RpcUtils.OpBitwiseAnd(RpcUtils.OpPlus(size, 1), -2));
     }
-
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        pResolverInfo = u.ReadEmbeddedPointer(u.ReadStruct<CustomPrivResolverInfo>, false);
-        remoteReply = u.ReadEmbeddedPointer(u.ReadStruct<customREMOTE_REPLY_SCM_INFO>, false);
+        size = u.ReadInt32();
+        reserved = u.ReadInt32();
+        extent = u.ReadEmbeddedPointer(() => u.ReadConformantStructPointerArray<CONTAINER_EXTENT>(false), false);
     }
     int INdrStructure.GetAlignment()
     {
         return 4;
     }
-    public NdrEmbeddedPointer<CustomPrivResolverInfo> pResolverInfo;
-    public NdrEmbeddedPointer<customREMOTE_REPLY_SCM_INFO> remoteReply;
-
-    public Guid Clsid => new("{000001b6-0000-0000-c000-000000000046}");
-
-    public static ScmReplyInfoData CreateDefault()
+    public int size;
+    public int reserved;
+    public NdrEmbeddedPointer<CONTAINER_EXTENT?[]> extent;
+    public static CONTAINER_EXTENT_ARRAY CreateDefault()
     {
-        return new ScmReplyInfoData();
-    }
-    public ScmReplyInfoData(CustomPrivResolverInfo? pResolverInfo, customREMOTE_REPLY_SCM_INFO? remoteReply)
-    {
-        this.pResolverInfo = pResolverInfo;
-        this.remoteReply = remoteReply;
+        CONTAINER_EXTENT_ARRAY ret = new CONTAINER_EXTENT_ARRAY();
+        ret.extent = new CONTAINER_EXTENT?[0];
+        return ret;
     }
 }
+

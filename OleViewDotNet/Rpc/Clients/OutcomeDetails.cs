@@ -15,45 +15,36 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct SecurityInfoData : INdrStructure, IActivationProperty
+public struct OutcomeDetails : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt32(dwAuthnFlags);
-        m.WriteEmbeddedPointer(pServerInfo, m.WriteStruct);
-        m.WriteEmbeddedPointer(pAuthIdentityInfo, m.WriteStruct);
+        m.WriteInt32(outcome);
+        m.WriteUnion(outcomeResult, outcome);
     }
 
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        dwAuthnFlags = u.ReadInt32();
-        pServerInfo = u.ReadEmbeddedPointer(u.ReadStruct<_COSERVERINFO>, false);
-        pAuthIdentityInfo = u.ReadEmbeddedPointer(u.ReadStruct<_COAUTHIDENTITY>, false);
+        outcome = u.ReadInt32();
+        outcomeResult = u.ReadStruct<OutcomeDetailsUnion>();
     }
 
     int INdrStructure.GetAlignment()
     {
         return 4;
     }
-    public int dwAuthnFlags;
-    public NdrEmbeddedPointer<_COSERVERINFO> pServerInfo;
-    public NdrEmbeddedPointer<_COAUTHIDENTITY> pAuthIdentityInfo;
-
-    public Guid Clsid => new("{000001a6-0000-0000-c000-000000000046}");
-
-    public static SecurityInfoData CreateDefault()
+    public int outcome;
+    public OutcomeDetailsUnion outcomeResult;
+    public static OutcomeDetails CreateDefault()
     {
-        return new SecurityInfoData();
+        return new OutcomeDetails();
     }
-    public SecurityInfoData(int dwAuthnFlags, _COSERVERINFO? pServerInfo, _COAUTHIDENTITY? pAuthIdentityInfo)
+    public OutcomeDetails(int Member0, OutcomeDetailsUnion Member8)
     {
-        this.dwAuthnFlags = dwAuthnFlags;
-        this.pServerInfo = pServerInfo;
-        this.pAuthIdentityInfo = pAuthIdentityInfo;
+        this.outcome = Member0;
+        this.outcomeResult = Member8;
     }
 }

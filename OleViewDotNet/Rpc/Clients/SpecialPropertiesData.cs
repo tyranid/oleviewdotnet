@@ -16,6 +16,7 @@
 
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
+using OleViewDotNet.Rpc.ActivationProperties;
 using System;
 
 namespace OleViewDotNet.Rpc.Clients;

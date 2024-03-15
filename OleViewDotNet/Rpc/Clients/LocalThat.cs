@@ -29,9 +29,9 @@ internal struct LocalThat : INdrStructure
     {
         marshalingSetId = u.ReadInt64();
         reserved = u.ReadInt32();
-        pAsyncResponseBlock = u.ReadEmbeddedPointer(new Func<int>(u.ReadInt32), false);
-        containerErrorInformation = u.ReadEmbeddedPointer(new Func<int>(u.ReadInt32), false);
-        containerPassthroughData = u.ReadEmbeddedPointer(new Func<int>(u.ReadInt32), false);
+        pAsyncResponseBlock = u.ReadEmbeddedPointer(u.ReadStruct<AsyncResponseBlock>, false);
+        containerErrorInformation = u.ReadEmbeddedPointer(u.ReadStruct<CONTAINER_EXTENT>, false);
+        containerPassthroughData = u.ReadEmbeddedPointer(u.ReadStruct<CONTAINERTHAT>, false);
     }
     int INdrStructure.GetAlignment()
     {
@@ -39,7 +39,7 @@ internal struct LocalThat : INdrStructure
     }
     public long marshalingSetId;
     public int reserved;
-    public NdrEmbeddedPointer<int> pAsyncResponseBlock;
-    public NdrEmbeddedPointer<int> containerErrorInformation;
-    public NdrEmbeddedPointer<int> containerPassthroughData;
+    public NdrEmbeddedPointer<AsyncResponseBlock> pAsyncResponseBlock;
+    public NdrEmbeddedPointer<CONTAINER_EXTENT> containerErrorInformation;
+    public NdrEmbeddedPointer<CONTAINERTHAT> containerPassthroughData;
 }

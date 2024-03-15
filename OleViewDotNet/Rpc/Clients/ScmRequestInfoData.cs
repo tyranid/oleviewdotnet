@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Rpc.ActivationProperties;
 using System;
 
 namespace OleViewDotNet.Rpc.Clients;

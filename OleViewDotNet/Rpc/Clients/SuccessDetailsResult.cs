@@ -15,40 +15,37 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
+using NtApiDotNet.Win32.Rpc;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct ScmReplyInfoData : INdrStructure, IActivationProperty
+public struct SuccessDetailsResult : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteEmbeddedPointer(pResolverInfo, m.WriteStruct);
-        m.WriteEmbeddedPointer(remoteReply, m.WriteStruct);
+        m.WriteInt32(sizeOfMarshaledResults);
+        m.WriteInt32(reserved);
+        m.WriteEmbeddedPointer(pMarshaledResults, (b, l) => m.WriteConformantArray(b, l), RpcUtils.OpBitwiseAnd(RpcUtils.OpPlus(sizeOfMarshaledResults, 7), -8));
     }
 
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        pResolverInfo = u.ReadEmbeddedPointer(u.ReadStruct<CustomPrivResolverInfo>, false);
-        remoteReply = u.ReadEmbeddedPointer(u.ReadStruct<customREMOTE_REPLY_SCM_INFO>, false);
+        sizeOfMarshaledResults = u.ReadInt32();
+        reserved = u.ReadInt32();
+        pMarshaledResults = u.ReadEmbeddedPointer(u.ReadConformantArray<byte>, false);
     }
+
     int INdrStructure.GetAlignment()
     {
         return 4;
     }
-    public NdrEmbeddedPointer<CustomPrivResolverInfo> pResolverInfo;
-    public NdrEmbeddedPointer<customREMOTE_REPLY_SCM_INFO> remoteReply;
-
-    public Guid Clsid => new("{000001b6-0000-0000-c000-000000000046}");
-
-    public static ScmReplyInfoData CreateDefault()
+    public int sizeOfMarshaledResults;
+    public int reserved;
+    public NdrEmbeddedPointer<byte[]> pMarshaledResults;
+    public static SuccessDetailsResult CreateDefault()
     {
-        return new ScmReplyInfoData();
-    }
-    public ScmReplyInfoData(CustomPrivResolverInfo? pResolverInfo, customREMOTE_REPLY_SCM_INFO? remoteReply)
-    {
-        this.pResolverInfo = pResolverInfo;
-        this.remoteReply = remoteReply;
+        SuccessDetailsResult ret = new SuccessDetailsResult();
+        ret.pMarshaledResults = new byte[0];
+        return ret;
     }
 }

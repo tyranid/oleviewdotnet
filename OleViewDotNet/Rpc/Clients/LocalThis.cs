@@ -28,8 +28,8 @@ internal struct LocalThis : INdrStructure
         m.WriteGuid(passthroughTraceActivity);
         m.WriteGuid(callId);
         m.WriteStruct(asyncRequestBlock);
-        m.WriteEmbeddedPointer(pTouchedAstaArray, new Action<int>(m.WriteInt32));
-        m.WriteEmbeddedPointer(containerPassthroughData, new Action<int>(m.WriteInt32));
+        m.WriteEmbeddedPointer(pTouchedAstaArray, m.WriteStruct);
+        m.WriteEmbeddedPointer(containerPassthroughData, m.WriteStruct);
     }
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
@@ -44,13 +44,14 @@ internal struct LocalThis : INdrStructure
     public Guid passthroughTraceActivity;
     public Guid callId;
     public LocalThisAsyncRequestBlock asyncRequestBlock;
-    public NdrEmbeddedPointer<int> pTouchedAstaArray;
-    public NdrEmbeddedPointer<int> containerPassthroughData;
+    public NdrEmbeddedPointer<TouchedAstaArray> pTouchedAstaArray;
+    public NdrEmbeddedPointer<CONTAINERTHIS> containerPassthroughData;
     public static LocalThis CreateDefault()
     {
         return new LocalThis();
     }
-    public LocalThis(int dwFlags, int dwClientThread, Guid passthroughTraceActivity, Guid callId, LocalThisAsyncRequestBlock asyncRequestBlock, int? pTouchedAstaArray, int? containerPassthroughData)
+    public LocalThis(int dwFlags, int dwClientThread, Guid passthroughTraceActivity, Guid callId, 
+        LocalThisAsyncRequestBlock asyncRequestBlock, TouchedAstaArray? pTouchedAstaArray, CONTAINERTHIS? containerPassthroughData)
     {
         this.dwFlags = dwFlags;
         this.dwClientThread = dwClientThread;

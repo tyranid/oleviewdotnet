@@ -1,5 +1,4 @@
-﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2024
+﻿//    Copyright (C) James Forshaw 2024
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -16,7 +15,7 @@
 
 using System;
 
-namespace OleViewDotNet.Rpc.Clients;
+namespace OleViewDotNet.Rpc.ActivationProperties;
 
 internal interface IActivationProperty
 {

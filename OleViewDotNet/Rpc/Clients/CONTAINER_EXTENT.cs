@@ -15,40 +15,44 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
+using NtApiDotNet.Win32.Rpc;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct ScmReplyInfoData : INdrStructure, IActivationProperty
+public struct CONTAINER_EXTENT : INdrConformantStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteEmbeddedPointer(pResolverInfo, m.WriteStruct);
-        m.WriteEmbeddedPointer(remoteReply, m.WriteStruct);
+        m.WriteInt32(id);
+        m.WriteInt32(version);
+        m.WriteInt32(size);
+        m.WriteConformantArray(RpcUtils.CheckNull(data, "MemberC"), RpcUtils.OpBitwiseAnd(RpcUtils.OpPlus(size, 7), -8));
     }
 
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        pResolverInfo = u.ReadEmbeddedPointer(u.ReadStruct<CustomPrivResolverInfo>, false);
-        remoteReply = u.ReadEmbeddedPointer(u.ReadStruct<customREMOTE_REPLY_SCM_INFO>, false);
+        id = u.ReadInt32();
+        version = u.ReadInt32();
+        size = u.ReadInt32();
+        data = u.ReadConformantArray<byte>();
+    }
+
+    int INdrConformantStructure.GetConformantDimensions()
+    {
+        return 1;
     }
     int INdrStructure.GetAlignment()
     {
         return 4;
     }
-    public NdrEmbeddedPointer<CustomPrivResolverInfo> pResolverInfo;
-    public NdrEmbeddedPointer<customREMOTE_REPLY_SCM_INFO> remoteReply;
-
-    public Guid Clsid => new("{000001b6-0000-0000-c000-000000000046}");
-
-    public static ScmReplyInfoData CreateDefault()
+    public int id;
+    public int version;
+    public int size;
+    public byte[] data;
+    public static CONTAINER_EXTENT CreateDefault()
     {
-        return new ScmReplyInfoData();
-    }
-    public ScmReplyInfoData(CustomPrivResolverInfo? pResolverInfo, customREMOTE_REPLY_SCM_INFO? remoteReply)
-    {
-        this.pResolverInfo = pResolverInfo;
-        this.remoteReply = remoteReply;
+        CONTAINER_EXTENT ret = new CONTAINER_EXTENT();
+        ret.data = new byte[0];
+        return ret;
     }
 }

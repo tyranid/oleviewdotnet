@@ -15,45 +15,40 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.ActivationProperties;
-using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct SecurityInfoData : INdrStructure, IActivationProperty
+public struct TouchedAstaArray : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt32(dwAuthnFlags);
-        m.WriteEmbeddedPointer(pServerInfo, m.WriteStruct);
-        m.WriteEmbeddedPointer(pAuthIdentityInfo, m.WriteStruct);
+        m.WriteInt32(size);
+        m.WriteInt32(reserved);
+        m.WriteEmbeddedPointer(pAstaOxids, (a, l) => m.WriteConformantArray(a, l), size);
     }
-
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        dwAuthnFlags = u.ReadInt32();
-        pServerInfo = u.ReadEmbeddedPointer(u.ReadStruct<_COSERVERINFO>, false);
-        pAuthIdentityInfo = u.ReadEmbeddedPointer(u.ReadStruct<_COAUTHIDENTITY>, false);
+        size = u.ReadInt32();
+        reserved = u.ReadInt32();
+        pAstaOxids = u.ReadEmbeddedPointer(u.ReadConformantArray<long>, false);
     }
-
     int INdrStructure.GetAlignment()
     {
         return 4;
     }
-    public int dwAuthnFlags;
-    public NdrEmbeddedPointer<_COSERVERINFO> pServerInfo;
-    public NdrEmbeddedPointer<_COAUTHIDENTITY> pAuthIdentityInfo;
-
-    public Guid Clsid => new("{000001a6-0000-0000-c000-000000000046}");
-
-    public static SecurityInfoData CreateDefault()
+    public int size;
+    public int reserved;
+    public NdrEmbeddedPointer<long[]> pAstaOxids;
+    public static TouchedAstaArray CreateDefault()
     {
-        return new SecurityInfoData();
+        TouchedAstaArray ret = new TouchedAstaArray();
+        ret.pAstaOxids = new long[0];
+        return ret;
     }
-    public SecurityInfoData(int dwAuthnFlags, _COSERVERINFO? pServerInfo, _COAUTHIDENTITY? pAuthIdentityInfo)
+    public TouchedAstaArray(int size, int reserved, long[] pAstaOxids)
     {
-        this.dwAuthnFlags = dwAuthnFlags;
-        this.pServerInfo = pServerInfo;
-        this.pAuthIdentityInfo = pAuthIdentityInfo;
+        this.size = size;
+        this.reserved = reserved;
+        this.pAstaOxids = pAstaOxids;
     }
 }
