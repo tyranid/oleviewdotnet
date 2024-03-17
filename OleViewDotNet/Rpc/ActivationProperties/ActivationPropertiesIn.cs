@@ -78,6 +78,10 @@ public sealed class ActivationPropertiesIn
             {
                 properties.Add(new ScmRequestInfo(pickled_type));
             }
+            else if (clsid == ActivationGuids.CLSID_WinRTActivationProperties)
+            {
+                properties.Add(new ComWinRTActivationProperties(pickled_type));
+            }
             else
             {
                 properties.Add(new UnknownActivationProperty(clsid, data));

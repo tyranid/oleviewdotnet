@@ -1,4 +1,5 @@
-﻿//    Copyright (C) James Forshaw 2024
+﻿//    This file is part of OleViewDotNet.
+//    Copyright (C) James Forshaw 2024
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,32 +15,30 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Rpc.Clients;
-using System;
 
-namespace OleViewDotNet.Rpc.ActivationProperties;
+namespace OleViewDotNet.Rpc.Clients;
 
-public sealed class SecurityInfo : IActivationProperty
+public struct UserContextPropertiesData : INdrStructure
 {
-    private SecurityInfoData m_inner;
-
-    public SecurityInfo(NdrPickledType pickled_type)
+    void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<SecurityInfoData>();
+        m.WriteInt64(userContext);
     }
-
-    public SecurityInfo()
+    void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
+        userContext = u.ReadInt64();
     }
-
-    public string Server => m_inner.pServerInfo?.GetValue().pwszName;
-
-    public Guid PropertyClsid => ActivationGuids.CLSID_SecurityInfo;
-
-    public byte[] Serialize()
+    int INdrStructure.GetAlignment()
     {
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return 8;
+    }
+    public long userContext;
+    public static UserContextPropertiesData CreateDefault()
+    {
+        return new UserContextPropertiesData();
+    }
+    public UserContextPropertiesData(long userContext)
+    {
+        this.userContext = userContext;
     }
 }

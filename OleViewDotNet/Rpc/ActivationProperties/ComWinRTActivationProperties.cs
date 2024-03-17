@@ -19,22 +19,16 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class SecurityInfo : IActivationProperty
+public sealed class ComWinRTActivationProperties : IActivationProperty
 {
-    private SecurityInfoData m_inner;
+    private ComWinRTActivationPropertiesData m_inner;
 
-    public SecurityInfo(NdrPickledType pickled_type)
+    public ComWinRTActivationProperties(NdrPickledType pickled_type)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<SecurityInfoData>();
+        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<ComWinRTActivationPropertiesData>();
     }
 
-    public SecurityInfo()
-    {
-    }
-
-    public string Server => m_inner.pServerInfo?.GetValue().pwszName;
-
-    public Guid PropertyClsid => ActivationGuids.CLSID_SecurityInfo;
+    public Guid PropertyClsid => ActivationGuids.CLSID_WinRTActivationProperties;
 
     public byte[] Serialize()
     {

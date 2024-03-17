@@ -36,6 +36,8 @@ public sealed class InstanceInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        throw new NotImplementedException();
+        NdrMarshalBuffer m = new();
+        m.WriteStruct(m_inner);
+        return m.ToPickledType().ToArray();
     }
 }
