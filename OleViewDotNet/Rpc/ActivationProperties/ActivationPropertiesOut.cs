@@ -17,12 +17,12 @@ using OleViewDotNet.Marshaling;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class ActivationPropertiesIn : ActivationProperties
+public sealed class ActivationPropertiesOut : ActivationProperties
 {
-    public ActivationPropertiesIn(COMObjRefCustom objref)
+    public ActivationPropertiesOut(COMObjRefCustom objref) 
         : base(objref, 
-            ActivationGuids.CLSID_ActivationPropertiesIn, 
-            ActivationGuids.IID_IActivationPropertiesIn)
+        ActivationGuids.CLSID_ActivationPropertiesOut, 
+        ActivationGuids.IID_IActivationPropertiesOut)
     {
     }
 }
