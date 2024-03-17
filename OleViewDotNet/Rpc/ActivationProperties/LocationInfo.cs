@@ -23,9 +23,9 @@ public sealed class LocationInfo : IActivationProperty
 {
     private LocationInfoData m_inner;
 
-    public LocationInfo(NdrPickledType pickled_type)
+    public LocationInfo(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<LocationInfoData>();
+        data.Deserialize(ref m_inner);
     }
 
     public LocationInfo()
@@ -60,8 +60,6 @@ public sealed class LocationInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

@@ -27,6 +27,7 @@ internal struct LocalExporterOxidInfo : INdrStructure
         m.WriteInt32(dwPid);
         m.WriteInt32(dwAuthnHint);
         m.WriteStruct(version);
+        m.WriteStruct(containerVersion);
         m.WriteGuid(ipidRemUnknown);
         m.WriteInt32(dwFlags);
         m.WriteEmbeddedPointer(psa, m.WriteStruct);
@@ -46,6 +47,7 @@ internal struct LocalExporterOxidInfo : INdrStructure
         dwPid = u.ReadInt32();
         dwAuthnHint = u.ReadInt32();
         version = u.ReadStruct<COMVERSION>();
+        containerVersion = u.ReadStruct<CONTAINERVERSION>();
         ipidRemUnknown = u.ReadGuid();
         dwFlags = u.ReadInt32();
         psa = u.ReadEmbeddedPointer(u.ReadStruct<DUALSTRINGARRAY>, false);
@@ -67,6 +69,7 @@ internal struct LocalExporterOxidInfo : INdrStructure
     public int dwPid;
     public int dwAuthnHint;
     public COMVERSION version;
+    public CONTAINERVERSION containerVersion;
     public Guid ipidRemUnknown;
     public int dwFlags;
     public NdrEmbeddedPointer<DUALSTRINGARRAY> psa;
@@ -82,12 +85,14 @@ internal struct LocalExporterOxidInfo : INdrStructure
     {
         return new LocalExporterOxidInfo();
     }
-    public LocalExporterOxidInfo(int dwTid, int dwPid, int dwAuthnHint, COMVERSION version, Guid ipidRemUnknown, int dwFlags, DUALSTRINGARRAY? psa, Guid guidProcessIdentifier, long processHostId, NdrEnum16 clientDependencyBehavior, string packageFullName, string userSid, string appcontainerSid, long primaryOxid, Guid primaryIpidRemUnknown)
+    public LocalExporterOxidInfo(int dwTid, int dwPid, int dwAuthnHint, COMVERSION version, CONTAINERVERSION containerVersion, 
+        Guid ipidRemUnknown, int dwFlags, DUALSTRINGARRAY? psa, Guid guidProcessIdentifier, long processHostId, NdrEnum16 clientDependencyBehavior, string packageFullName, string userSid, string appcontainerSid, long primaryOxid, Guid primaryIpidRemUnknown)
     {
         this.dwTid = dwTid;
         this.dwPid = dwPid;
         this.dwAuthnHint = dwAuthnHint;
         this.version = version;
+        this.containerVersion = containerVersion;
         this.ipidRemUnknown = ipidRemUnknown;
         this.dwFlags = dwFlags;
         this.psa = psa;

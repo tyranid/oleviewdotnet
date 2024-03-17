@@ -69,38 +69,45 @@ public abstract class ActivationProperties
             Buffer.BlockCopy(data, ofs, ndr_data, 0, length);
             ofs += length;
 
-            pickled_type = new(ndr_data);
             if (prop_clsid == ActivationGuids.CLSID_InstantiationInfo)
             {
-                properties.Add(new InstantiationInfo(pickled_type));
+                properties.Add(new InstantiationInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ActivationContextInfo)
             {
-                properties.Add(new ActivationContextInfo(pickled_type));
+                properties.Add(new ActivationContextInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_SpecialSystemProperties)
             {
-                properties.Add(new SpecialSystemProperties(pickled_type));
+                properties.Add(new SpecialSystemProperties(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ServerLocationInfo)
             {
-                properties.Add(new LocationInfo(pickled_type));
+                properties.Add(new LocationInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_SecurityInfo)
             {
-                properties.Add(new SecurityInfo(pickled_type));
+                properties.Add(new SecurityInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_InstanceInfo)
             {
-                properties.Add(new InstanceInfo(pickled_type));
+                properties.Add(new InstanceInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ScmRequestInfo)
             {
-                properties.Add(new ScmRequestInfo(pickled_type));
+                properties.Add(new ScmRequestInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_WinRTActivationProperties)
             {
-                properties.Add(new ComWinRTActivationProperties(pickled_type));
+                properties.Add(new ComWinRTActivationProperties(ndr_data));
+            }
+            else if (prop_clsid == ActivationGuids.CLSID_PropsOutInfo)
+            {
+                properties.Add(new PropsOut(ndr_data));
+            }
+            else if (prop_clsid == ActivationGuids.CLSID_ScmReplyInfo)
+            {
+                properties.Add(new ScmReplyInfo(ndr_data));
             }
             else
             {

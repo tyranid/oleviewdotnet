@@ -13,12 +13,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class PropsOut : IActivationProperty
 {
+    private PropsOutInfo m_inner;
+
+    internal PropsOut(byte[] data)
+    {
+        data.Deserialize(ref m_inner);
+    }
+
     public Guid PropertyClsid => ActivationGuids.CLSID_PropsOutInfo;
 
     public byte[] Serialize()

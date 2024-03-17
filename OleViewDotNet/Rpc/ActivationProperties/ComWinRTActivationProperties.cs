@@ -23,17 +23,15 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
 {
     private ComWinRTActivationPropertiesData m_inner;
 
-    public ComWinRTActivationProperties(NdrPickledType pickled_type)
+    public ComWinRTActivationProperties(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<ComWinRTActivationPropertiesData>();
+        data.Deserialize(ref m_inner);
     }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_WinRTActivationProperties;
 
     public byte[] Serialize()
     {
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

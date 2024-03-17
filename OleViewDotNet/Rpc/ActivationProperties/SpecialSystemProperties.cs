@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Rpc.Clients;
 using System;
@@ -24,9 +23,9 @@ public sealed class SpecialSystemProperties : IActivationProperty
 {
     private SpecialPropertiesData m_inner;
 
-    public SpecialSystemProperties(NdrPickledType pickled_type)
+    internal SpecialSystemProperties(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<SpecialPropertiesData>();
+        data.Deserialize(ref m_inner);
     }
 
     public SpecialSystemProperties()
@@ -65,8 +64,6 @@ public sealed class SpecialSystemProperties : IActivationProperty
 
     public byte[] Serialize()
     {
-        var m = new NdrMarshalBuffer();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

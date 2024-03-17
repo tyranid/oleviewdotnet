@@ -23,11 +23,9 @@ public sealed class ScmRequestInfo : IActivationProperty
 {
     private ScmRequestInfoData m_inner;
 
-    public ScmRequestInfo(NdrPickledType pickled_type)
+    public ScmRequestInfo(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<ScmRequestInfoData>();
-        PrivateScmInfo = m_inner.pScmInfo != null ? new(m_inner.pScmInfo) : null;
-        RemoteRequestScmInfo = m_inner.remoteRequest != null ? new(m_inner.remoteRequest) : null;
+        data.Deserialize(ref m_inner);
     }
 
     public ScmRequestInfo()
@@ -41,10 +39,8 @@ public sealed class ScmRequestInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        NdrMarshalBuffer m = new();
         m_inner.pScmInfo = PrivateScmInfo?.ToStruct();
         m_inner.remoteRequest = RemoteRequestScmInfo?.ToStruct();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

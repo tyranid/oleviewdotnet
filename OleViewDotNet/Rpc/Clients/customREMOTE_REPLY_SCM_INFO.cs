@@ -24,7 +24,7 @@ internal struct customREMOTE_REPLY_SCM_INFO : INdrStructure
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
         m.WriteInt64(Oxid);
-        m.WriteEmbeddedPointer(pdsaOxidBindings, new Action<DUALSTRINGARRAY>(m.WriteStruct));
+        m.WriteEmbeddedPointer(pdsaOxidBindings, m.WriteStruct);
         m.WriteGuid(ipidRemUnknown);
         m.WriteInt32(authnHint);
         m.WriteStruct(serverVersion);
@@ -33,7 +33,7 @@ internal struct customREMOTE_REPLY_SCM_INFO : INdrStructure
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
         Oxid = u.ReadInt64();
-        pdsaOxidBindings = u.ReadEmbeddedPointer(new Func<DUALSTRINGARRAY>(u.ReadStruct<DUALSTRINGARRAY>), false);
+        pdsaOxidBindings = u.ReadEmbeddedPointer(u.ReadStruct<DUALSTRINGARRAY>, false);
         ipidRemUnknown = u.ReadGuid();
         authnHint = u.ReadInt32();
         serverVersion = u.ReadStruct<COMVERSION>();

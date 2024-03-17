@@ -23,9 +23,9 @@ public sealed class InstanceInfo : IActivationProperty
 {
     private InstanceInfoData m_inner;
 
-    public InstanceInfo(NdrPickledType pickled_type)
+    public InstanceInfo(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<InstanceInfoData>();
+        data.Deserialize(ref m_inner);
     }
 
     public InstanceInfo()
@@ -36,8 +36,6 @@ public sealed class InstanceInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

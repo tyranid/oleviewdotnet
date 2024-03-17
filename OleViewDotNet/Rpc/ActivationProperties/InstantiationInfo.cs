@@ -27,9 +27,9 @@ public sealed class InstantiationInfo : IActivationProperty
     private readonly List<Guid> m_iids = new();
     private InstantiationInfoData m_inner = new();
 
-    public InstantiationInfo(NdrPickledType pickled_type)
+    public InstantiationInfo(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<InstantiationInfoData>();
+        data.Deserialize(ref m_inner);
         m_iids = new(m_inner.pIID.GetValue());
     }
 
@@ -76,12 +76,7 @@ public sealed class InstantiationInfo : IActivationProperty
     {
         m_inner.cIID = m_iids.Count;
         m_inner.pIID = m_iids.ToArray();
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        int length = m.ToPickledType().ToArray().Length;
-        m_inner.thisSize = length;
-        m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        m_inner.thisSize = m_inner.Serialize().Length;
+        return m_inner.Serialize();
     }
 }

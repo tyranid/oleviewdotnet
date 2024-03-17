@@ -23,9 +23,9 @@ public sealed class SecurityInfo : IActivationProperty
 {
     private SecurityInfoData m_inner;
 
-    public SecurityInfo(NdrPickledType pickled_type)
+    public SecurityInfo(byte[] data)
     {
-        m_inner = new NdrUnmarshalBuffer(pickled_type).ReadStruct<SecurityInfoData>();
+        data.Deserialize(ref m_inner);
     }
 
     public SecurityInfo()
@@ -38,8 +38,6 @@ public sealed class SecurityInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        NdrMarshalBuffer m = new();
-        m.WriteStruct(m_inner);
-        return m.ToPickledType().ToArray();
+        return m_inner.Serialize();
     }
 }

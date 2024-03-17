@@ -14,33 +14,20 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Marshaling;
-using OleViewDotNet.Rpc.Clients;
-using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class ActivationContextInfo : IActivationProperty
+internal static class ActivationPropertySerializer
 {
-    private ActivationContextInfoData m_inner;
-
-    public ActivationContextInfo(byte[] data)
+    public static void Deserialize<T>(this byte[] data, ref T value) where T : struct, INdrStructure
     {
-        data.Deserialize(ref m_inner);
+        value = new NdrUnmarshalBuffer(new NdrPickledType(data)).ReadStruct<T>();
     }
 
-    public ActivationContextInfo()
+    public static byte[] Serialize<T>(this T value) where T : struct, INdrStructure
     {
-    }
-
-    public int ClientOK { get => m_inner.clientOK; set => m_inner.clientOK = value; }
-    public COMObjRef ClientCtx { get => m_inner.pIFDClientCtx.ToObjRef(); set => m_inner.pIFDClientCtx = value.ToPointer(); }
-    public COMObjRef PrototypeCtx { get => m_inner.pIFDPrototypeCtx.ToObjRef(); set => m_inner.pIFDPrototypeCtx = value.ToPointer(); }
-
-    public Guid PropertyClsid => ActivationGuids.CLSID_ActivationContextInfo;
-
-    public byte[] Serialize()
-    {
-        return m_inner.Serialize();
+        var m = new NdrMarshalBuffer();
+        m.WriteStruct(value);
+        return m.ToPickledType().ToArray();
     }
 }
