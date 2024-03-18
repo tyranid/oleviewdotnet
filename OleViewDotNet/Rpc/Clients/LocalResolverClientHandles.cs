@@ -75,6 +75,6 @@ internal sealed class LocalResolverClientHandles
 
     public static LocalResolverClientHandles Instance => m_instance.Value;
 
-    public NdrContextHandle? Handle { get; }
-    public long? ProcessSignature { get; }
+    public NdrContextHandle Handle { get; }
+    public long ProcessSignature { get; }
 }

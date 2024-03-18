@@ -14,6 +14,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Rpc.Clients;
+using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
@@ -62,6 +63,14 @@ public sealed class PrivateScmInfo
                 m_inner.pEnvBlock = buffer;
             }
         }
+    }
+
+    public void UpdateProcessSignature()
+    {
+        long signature = LocalResolverClientHandles.Instance.ProcessSignature;
+        if (signature == 0)
+            throw new InvalidOperationException("Couldn't get local process signature to update.");
+        ProcessSignature = signature;
     }
 
     internal PrivateScmInfo(CustomPrivScmInfo inner)

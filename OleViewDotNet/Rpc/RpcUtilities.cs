@@ -95,4 +95,13 @@ internal static class RpcUtilities
         MInterfacePointer p = new(ba.Length, ba);
         return p;
     }
+
+    public static MInterfacePointer? ToNullable(this COMObjRef objref)
+    {
+        if (objref == null)
+            return null;
+        byte[] ba = objref.ToArray();
+        MInterfacePointer p = new(ba.Length, ba);
+        return p;
+    }
 }

@@ -48,7 +48,7 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
         string new_binding = RpcStringBinding.Compose(protoseq, curr_binding.NetworkAddress, curr_binding.Endpoint, curr_binding.NetworkOptions);
         endpoint = new RpcEndpoint(Guid.Empty, new Version(), RpcStringBinding.Parse(new_binding));
 
-        var config = transport_security.Configuration as RpcCOMClientTransportConfiguration ?? throw new ArgumentException("Must specific transport configuration.");
+        var config = transport_security.Configuration as RpcCOMClientTransportConfiguration ?? throw new ArgumentException("Must specify a transport configuration.");
         transport_security.Configuration = config.InnerConfig;
 
         var transport = RpcClientTransportFactory.ConnectEndpoint(endpoint, transport_security);

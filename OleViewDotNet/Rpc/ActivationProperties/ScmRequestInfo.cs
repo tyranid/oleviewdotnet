@@ -26,6 +26,14 @@ public sealed class ScmRequestInfo : IActivationProperty
     public ScmRequestInfo(byte[] data)
     {
         data.Deserialize(ref m_inner);
+        if (m_inner.pScmInfo != null)
+        {
+            PrivateScmInfo = new(m_inner.pScmInfo);
+        }
+        if (m_inner.remoteRequest != null)
+        {
+            RemoteRequestScmInfo = new(m_inner.remoteRequest);
+        }
     }
 
     public ScmRequestInfo()

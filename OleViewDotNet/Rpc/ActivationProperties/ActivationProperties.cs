@@ -18,6 +18,8 @@ using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
@@ -122,6 +124,37 @@ public abstract class ActivationProperties
         var ret = new COMObjRefCustom();
         ret.Clsid = m_clsid;
         ret.Iid = m_iid;
+
+        List<Guid> clsids = new();
+        List<byte[]> ser = new();
+
+        foreach (var prop in Properties)
+        {
+            clsids.Add(prop.PropertyClsid);
+            byte[] data = prop.Serialize();
+            ser.Add(data);
+        }
+
+        CustomHeader header = new();
+        header.pclsid = clsids.ToArray();
+        header.pSizes = ser.Select(b => b.Length).ToArray();
+        header.cIfs = Properties.Count;
+        byte[] header_data = header.Serialize();
+        header.headerSize = header_data.Length;
+        header.totalSize = header_data.Length + ser.Sum(b => b.Length);
+
+        MemoryStream stm = new();
+        BinaryWriter writer = new(stm);
+        writer.Write(header.totalSize);
+        writer.Write(0);
+        writer.Write(header.Serialize());
+        foreach (var ba in ser)
+        {
+            writer.Write(ba);
+        }
+        ret.ObjectData = stm.ToArray();
+        ret.Reserved = ret.ObjectData.Length;
+        
         return ret;
     }
 }
