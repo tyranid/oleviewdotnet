@@ -30,12 +30,12 @@ namespace OleViewDotNet.Rpc;
 internal sealed class COMOxidResolverInstance : IDisposable
 {
     #region Private Members
-    private readonly OxidResolverClient m_client;
+    private readonly IOxidResolverClient m_client;
     private readonly COMPingSet m_ping_set;
     private readonly ConcurrentDictionary<ulong, COMRemoteUnknown> m_resolved_oxids = new();
     private readonly bool m_local;
 
-    private COMOxidResolverInstance(OxidResolverClient client, bool local)
+    private COMOxidResolverInstance(IOxidResolverClient client, bool local)
     {
         m_client = client;
         m_ping_set = new(client);
@@ -105,7 +105,7 @@ internal sealed class COMOxidResolverInstance : IDisposable
             AuthenticationType = RpcAuthenticationType.Negotiate
         };
 
-        OxidResolverClient client = new();
+        IOxidResolverClient client = new();
         client.Connect(binding.ToString(), transport_security);
         return new COMOxidResolverInstance(client, local);
     }

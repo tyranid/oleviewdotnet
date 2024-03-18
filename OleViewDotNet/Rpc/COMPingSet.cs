@@ -27,12 +27,12 @@ internal sealed class COMPingSet : IDisposable
     private readonly Dictionary<ulong, long> m_oids = new();
     private readonly HashSet<ulong> m_add = new();
     private readonly HashSet<ulong> m_del = new();
-    private readonly OxidResolverClient m_client;
+    private readonly IOxidResolverClient m_client;
     private readonly Timer m_timer;
     private ushort m_seq_num = 1;
     private ulong m_set_id;
 
-    public COMPingSet(OxidResolverClient client)
+    public COMPingSet(IOxidResolverClient client)
     {
         m_client = client;
         int timeout = 2 * 60 * 1000;
