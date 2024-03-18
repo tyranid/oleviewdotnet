@@ -25,33 +25,17 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public abstract class ActivationProperties
 {
-    private readonly Guid m_clsid;
-    private readonly Guid m_iid;
-
     public Guid ClassInfoClsid { get; set; }
     public int DestCtx { get; set; }
     public List<IActivationProperty> Properties { get; }
 
-    protected ActivationProperties(COMObjRefCustom objref, Guid clsid, Guid iid)
+    protected ActivationProperties()
     {
-        if (objref is null)
-        {
-            throw new ArgumentNullException(nameof(objref));
-        }
+        Properties = new();
+    }
 
-        if (objref.Clsid != clsid)
-        {
-            throw new ArgumentException("Invalid CLSID for activation properties.", nameof(objref));
-        }
-
-        if (objref.Iid != iid)
-        {
-            throw new ArgumentException("Invalid IID for activation properties.", nameof(objref));
-        }
-
-        m_clsid = clsid;
-        m_iid = iid;
-        List<IActivationProperty> properties = new();
+    protected ActivationProperties(COMObjRefCustom objref)
+    {
         byte[] data = objref.ObjectData;
         if (data.Length < 8 || BitConverter.ToInt32(data, 0) > data.Length)
             throw new ArgumentException("Invalid size for properties data.");
@@ -62,6 +46,7 @@ public abstract class ActivationProperties
         var header = buffer.ReadStruct<CustomHeader>();
         ClassInfoClsid = header.classInfoClsid;
         DestCtx = header.destCtx;
+        Properties = new();
         int ofs = header.headerSize + 8;
         for (int i = 0; i < header.cIfs; ++i)
         {
@@ -73,66 +58,94 @@ public abstract class ActivationProperties
 
             if (prop_clsid == ActivationGuids.CLSID_InstantiationInfo)
             {
-                properties.Add(new InstantiationInfo(ndr_data));
+                Properties.Add(new InstantiationInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ActivationContextInfo)
             {
-                properties.Add(new ActivationContextInfo(ndr_data));
+                Properties.Add(new ActivationContextInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_SpecialSystemProperties)
             {
-                properties.Add(new SpecialSystemProperties(ndr_data));
+                Properties.Add(new SpecialSystemProperties(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ServerLocationInfo)
             {
-                properties.Add(new LocationInfo(ndr_data));
+                Properties.Add(new LocationInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_SecurityInfo)
             {
-                properties.Add(new SecurityInfo(ndr_data));
+                Properties.Add(new SecurityInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_InstanceInfo)
             {
-                properties.Add(new InstanceInfo(ndr_data));
+                Properties.Add(new InstanceInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ScmRequestInfo)
             {
-                properties.Add(new ScmRequestInfo(ndr_data));
+                Properties.Add(new ScmRequestInfo(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_WinRTActivationProperties)
             {
-                properties.Add(new ComWinRTActivationProperties(ndr_data));
+                Properties.Add(new ComWinRTActivationProperties(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_PropsOutInfo)
             {
-                properties.Add(new PropsOut(ndr_data));
+                Properties.Add(new PropsOut(ndr_data));
             }
             else if (prop_clsid == ActivationGuids.CLSID_ScmReplyInfo)
             {
-                properties.Add(new ScmReplyInfo(ndr_data));
+                Properties.Add(new ScmReplyInfo(ndr_data));
             }
             else
             {
-                properties.Add(new UnknownActivationProperty(prop_clsid, data));
+                Properties.Add(new UnknownActivationProperty(prop_clsid, data));
             }
         }
-        Properties = properties;
+    }
+
+    public static ActivationProperties Parse(byte[] objref)
+    {
+        return Parse(COMObjRef.FromArray(objref));
+    }
+
+    public static ActivationProperties Parse(COMObjRef objref)
+    {
+        if (objref is not COMObjRefCustom objref_custom)
+        {
+            throw new ArgumentException("OBJREF must be custom marshaled.", nameof(objref));
+        }
+
+        if (objref_custom.Clsid == ActivationGuids.CLSID_ActivationPropertiesIn)
+        {
+            if (objref_custom.Iid != ActivationGuids.IID_IActivationPropertiesIn)
+            {
+                throw new ArgumentException("Invalid IID for IActivationPropertiesIn.", nameof(objref));
+            }
+            return new ActivationPropertiesIn(objref_custom);
+        }
+        else if (objref_custom.Clsid == ActivationGuids.CLSID_ActivationPropertiesOut)
+        {
+            if (objref_custom.Iid != ActivationGuids.IID_IActivationPropertiesOut)
+            {
+                throw new ArgumentException("Invalid IID for IActivationPropertiesOut.", nameof(objref));
+            }
+            return new ActivationPropertiesOut(objref_custom);
+        }
+        else
+        {
+            throw new ArgumentException("Unknown CLSID for activation properties.", nameof(objref));
+        }
     }
 
     public COMObjRefCustom ToObjRef()
     {
-        var ret = new COMObjRefCustom();
-        ret.Clsid = m_clsid;
-        ret.Iid = m_iid;
-
         List<Guid> clsids = new();
         List<byte[]> ser = new();
 
         foreach (var prop in Properties)
         {
             clsids.Add(prop.PropertyClsid);
-            byte[] data = prop.Serialize();
-            ser.Add(data);
+            ser.Add(prop.Serialize());
         }
 
         CustomHeader header = new();
@@ -152,9 +165,15 @@ public abstract class ActivationProperties
         {
             writer.Write(ba);
         }
-        ret.ObjectData = stm.ToArray();
-        ret.Reserved = ret.ObjectData.Length;
-        
-        return ret;
+
+        bool act_in = this is ActivationPropertiesIn;
+        byte[] data = stm.ToArray();
+        return new()
+        {
+            Clsid = act_in ? ActivationGuids.CLSID_ActivationPropertiesIn : ActivationGuids.CLSID_ActivationPropertiesOut,
+            Iid = act_in ? ActivationGuids.IID_IActivationPropertiesIn : ActivationGuids.IID_IActivationPropertiesOut,
+            ObjectData = data,
+            Reserved = data.Length
+        };
     }
 }

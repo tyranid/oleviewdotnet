@@ -19,10 +19,12 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class ActivationPropertiesIn : ActivationProperties
 {
-    public ActivationPropertiesIn(COMObjRefCustom objref)
-        : base(objref, 
-            ActivationGuids.CLSID_ActivationPropertiesIn, 
-            ActivationGuids.IID_IActivationPropertiesIn)
+    public ActivationPropertiesIn()
+    {
+    }
+
+    internal ActivationPropertiesIn(COMObjRefCustom objref)
+        : base(objref)
     {
     }
 }
