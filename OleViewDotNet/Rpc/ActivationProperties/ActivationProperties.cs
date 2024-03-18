@@ -29,6 +29,11 @@ public abstract class ActivationProperties
     public int DestCtx { get; set; }
     public List<IActivationProperty> Properties { get; }
 
+    protected T FindProperty<T>() where T : IActivationProperty
+    {
+        return Properties.OfType<T>().FirstOrDefault();
+    }
+
     protected ActivationProperties()
     {
         Properties = new();

@@ -13,14 +13,37 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
 using System;
+using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class PropsOut : IActivationProperty
 {
     private PropsOutInfo m_inner;
+
+    public IReadOnlyList<ActivationResult> Results
+    {
+        get
+        {
+            if (m_inner.cIfs == 0 || m_inner.piid is null || m_inner.ppIntfData is null || m_inner.phresults is null)
+            {
+                return Array.Empty<ActivationResult>();
+            }
+            List<ActivationResult> results = new();
+            Guid[] iids = m_inner.piid.GetValue();
+            MInterfacePointer?[] itfs = m_inner.ppIntfData.GetValue();
+            int[] hrs = m_inner.phresults.GetValue();
+            for (int i = 0; i < m_inner.cIfs; ++i)
+            {
+                COMObjRef objref = itfs[i].HasValue ? COMObjRef.FromArray(itfs[i].Value.abData) : null;
+                results.Add(new(objref, iids[i], hrs[i]));
+            }
+            return results.AsReadOnly();
+        }
+    }
 
     internal PropsOut(byte[] data)
     {

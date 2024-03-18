@@ -14,6 +14,8 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Marshaling;
+using System;
+using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
@@ -27,4 +29,9 @@ public sealed class ActivationPropertiesOut : ActivationProperties
         : base(objref)
     {
     }
+
+    public IReadOnlyList<ActivationResult> Results => FindProperty<PropsOut>()?.Results
+                ?? throw new InvalidOperationException("Properties doesn't contain any results.");
+
+    public ScmReplyInfo ScmInfo => FindProperty<ScmReplyInfo>();
 }

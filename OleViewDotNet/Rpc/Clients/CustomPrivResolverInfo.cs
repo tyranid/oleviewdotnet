@@ -34,7 +34,7 @@ internal struct CustomPrivResolverInfo : INdrStructure
     {
         OxidServer = u.ReadInt64();
         pServerORBindings = u.ReadEmbeddedPointer(u.ReadStruct<DUALSTRINGARRAY>, false);
-        OxidInfo = u.ReadStruct<LocalExporterOxidInfo>();
+        OxidInfo = u.ReadStruct<INTERNAL_OXID_INFO>();
         LocalMidOfRemote = u.ReadInt64();
         DllServerModel = u.ReadInt32();
         pwszDllServer = u.ReadEmbeddedPointer(u.ReadConformantVaryingString, false);
@@ -46,7 +46,7 @@ internal struct CustomPrivResolverInfo : INdrStructure
     }
     public long OxidServer;
     public NdrEmbeddedPointer<DUALSTRINGARRAY> pServerORBindings;
-    public LocalExporterOxidInfo OxidInfo;
+    public INTERNAL_OXID_INFO OxidInfo;
     public long LocalMidOfRemote;
     public int DllServerModel;
     public NdrEmbeddedPointer<string> pwszDllServer;
@@ -55,7 +55,7 @@ internal struct CustomPrivResolverInfo : INdrStructure
     {
         return new CustomPrivResolverInfo();
     }
-    public CustomPrivResolverInfo(long OxidServer, DUALSTRINGARRAY? pServerORBindings, LocalExporterOxidInfo OxidInfo, long LocalMidOfRemote, int DllServerModel, string pwszDllServer, int FoundInROT)
+    public CustomPrivResolverInfo(long OxidServer, DUALSTRINGARRAY? pServerORBindings, INTERNAL_OXID_INFO OxidInfo, long LocalMidOfRemote, int DllServerModel, string pwszDllServer, int FoundInROT)
     {
         this.OxidServer = OxidServer;
         this.pServerORBindings = pServerORBindings;

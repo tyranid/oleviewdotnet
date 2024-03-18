@@ -19,7 +19,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.Clients;
 
-internal struct LocalExporterOxidInfo : INdrStructure
+internal struct INTERNAL_OXID_INFO : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
@@ -81,11 +81,11 @@ internal struct LocalExporterOxidInfo : INdrStructure
     public NdrEmbeddedPointer<string> appcontainerSid;
     public long primaryOxid;
     public Guid primaryIpidRemUnknown;
-    public static LocalExporterOxidInfo CreateDefault()
+    public static INTERNAL_OXID_INFO CreateDefault()
     {
-        return new LocalExporterOxidInfo();
+        return new INTERNAL_OXID_INFO();
     }
-    public LocalExporterOxidInfo(int dwTid, int dwPid, int dwAuthnHint, COMVERSION version, CONTAINERVERSION containerVersion, 
+    public INTERNAL_OXID_INFO(int dwTid, int dwPid, int dwAuthnHint, COMVERSION version, CONTAINERVERSION containerVersion, 
         Guid ipidRemUnknown, int dwFlags, DUALSTRINGARRAY? psa, Guid guidProcessIdentifier, long processHostId, NdrEnum16 clientDependencyBehavior, string packageFullName, string userSid, string appcontainerSid, long primaryOxid, Guid primaryIpidRemUnknown)
     {
         this.dwTid = dwTid;

@@ -13,35 +13,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Rpc.Clients;
-using System;
-
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class ScmReplyInfo : IActivationProperty
+public enum OxidClientDependency
 {
-    private ScmReplyInfoData m_inner;
-
-    internal ScmReplyInfo(byte[] data)
-    {
-        data.Deserialize(ref m_inner);
-        if (m_inner.remoteReply is not null)
-        {
-            RemoteReplyScmInfo = new(m_inner.remoteReply);
-        }
-        if (m_inner.pResolverInfo is not null)
-        {
-            PrivateReplyScmInfo = new(m_inner.pResolverInfo);
-        }
-    }
-
-    public RemoteReplyScmInfo RemoteReplyScmInfo { get; }
-    public PrivateReplyScmInfo PrivateReplyScmInfo { get; }
-
-    public Guid PropertyClsid => ActivationGuids.CLSID_ScmReplyInfo;
-
-    public byte[] Serialize()
-    {
-        throw new NotImplementedException();
-    }
+    NONE = 0x0,
+    UNIDIRECTIONAL = 0x1,
+    BIDIRECTIONAL = 0x2,
 }
