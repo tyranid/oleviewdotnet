@@ -27,16 +27,16 @@ public sealed class ScmReplyInfo : IActivationProperty
         data.Deserialize(ref m_inner);
         if (m_inner.remoteReply is not null)
         {
-            RemoteReplyScmInfo = new(m_inner.remoteReply);
+            RemoteInfo = new(m_inner.remoteReply);
         }
         if (m_inner.pResolverInfo is not null)
         {
-            PrivateReplyScmInfo = new(m_inner.pResolverInfo);
+            PrivateInfo = new(m_inner.pResolverInfo);
         }
     }
 
-    public RemoteReplyScmInfo RemoteReplyScmInfo { get; }
-    public PrivateReplyScmInfo PrivateReplyScmInfo { get; }
+    public RemoteScmReplyInfo RemoteInfo { get; }
+    public PrivateScmReplyInfo PrivateInfo { get; }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_ScmReplyInfo;
 

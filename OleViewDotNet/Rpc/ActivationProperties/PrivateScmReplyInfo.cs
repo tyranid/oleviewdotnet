@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class PrivateReplyScmInfo
+public sealed class PrivateScmReplyInfo
 {
     public long OxidServer { get; }
     public IReadOnlyList<COMStringBinding> ServerORStringBindings { get; }
@@ -31,7 +31,7 @@ public sealed class PrivateReplyScmInfo
     public string DllServer { get; }
     public bool FoundInROT { get; }
 
-    internal PrivateReplyScmInfo(CustomPrivResolverInfo info)
+    internal PrivateScmReplyInfo(CustomPrivResolverInfo info)
     {
         OxidServer = info.OxidServer;
         OxidInfo = new(info.OxidInfo);

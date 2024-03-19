@@ -21,7 +21,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class RemoteRequestScmInfo
+public sealed class RemoteScmRequestInfo
 {
     private customREMOTE_REQUEST_SCM_INFO m_inner;
 
@@ -33,11 +33,11 @@ public sealed class RemoteRequestScmInfo
 
     public List<RpcTowerId> ProtocolSequences { get; }
 
-    public RemoteRequestScmInfo() : this(default)
+    public RemoteScmRequestInfo() : this(default)
     {
     }
 
-    internal RemoteRequestScmInfo(customREMOTE_REQUEST_SCM_INFO inner)
+    internal RemoteScmRequestInfo(customREMOTE_REQUEST_SCM_INFO inner)
     {
         m_inner = inner;
         ProtocolSequences = new();

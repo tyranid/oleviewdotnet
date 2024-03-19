@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class RemoteReplyScmInfo
+public sealed class RemoteScmReplyInfo
 {
     public long Oxid { get; }
     public IReadOnlyList<COMStringBinding> OxidStringBindings { get; }
@@ -31,7 +31,7 @@ public sealed class RemoteReplyScmInfo
     public RPC_AUTHN_LEVEL AuthenticationHint { get; }
     public COMVersion ServerVersion { get; }
 
-    internal RemoteReplyScmInfo(customREMOTE_REPLY_SCM_INFO info)
+    internal RemoteScmReplyInfo(customREMOTE_REPLY_SCM_INFO info)
     {
         Oxid = info.Oxid;
         if (info.pdsaOxidBindings is not null)

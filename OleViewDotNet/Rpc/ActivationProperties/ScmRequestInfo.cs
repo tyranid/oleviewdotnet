@@ -25,12 +25,12 @@ public sealed class ScmRequestInfo : IActivationProperty
 {
     private ScmRequestInfoData m_inner;
 
-    private PrivateRequestScmInfo PrivateScmInfoInternal
+    private PrivateScmRequestInfo PrivateScmInfoInternal
     {
         get
         {
-            PrivateScmInfo ??= new();
-            return PrivateScmInfo;
+            PrivateInfo ??= new();
+            return PrivateInfo;
         }
     }
 
@@ -39,11 +39,11 @@ public sealed class ScmRequestInfo : IActivationProperty
         data.Deserialize(ref m_inner);
         if (m_inner.pScmInfo != null)
         {
-            PrivateScmInfo = new(m_inner.pScmInfo);
+            PrivateInfo = new(m_inner.pScmInfo);
         }
         if (m_inner.remoteRequest != null)
         {
-            RemoteRequestScmInfo = new(m_inner.remoteRequest);
+            RemoteInfo = new(m_inner.remoteRequest);
         }
     }
 
@@ -53,8 +53,8 @@ public sealed class ScmRequestInfo : IActivationProperty
 
     public Guid PropertyClsid => ActivationGuids.CLSID_ScmRequestInfo;
 
-    public PrivateRequestScmInfo PrivateScmInfo { get; set; }
-    public RemoteRequestScmInfo RemoteRequestScmInfo { get; set; }
+    public PrivateScmRequestInfo PrivateInfo { get; set; }
+    public RemoteScmRequestInfo RemoteInfo { get; set; }
 
     public void SetProcessSignatureFromCurrentProcess()
     {
@@ -101,8 +101,8 @@ public sealed class ScmRequestInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        m_inner.pScmInfo = PrivateScmInfo?.ToStruct();
-        m_inner.remoteRequest = RemoteRequestScmInfo?.ToStruct();
+        m_inner.pScmInfo = PrivateInfo?.ToStruct();
+        m_inner.remoteRequest = RemoteInfo?.ToStruct();
         return m_inner.Serialize();
     }
 }

@@ -18,7 +18,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class PrivateRequestScmInfo
+public sealed class PrivateScmRequestInfo
 {
     private CustomPrivScmInfo m_inner;
 
@@ -65,12 +65,12 @@ public sealed class PrivateRequestScmInfo
         }
     }
 
-    internal PrivateRequestScmInfo(CustomPrivScmInfo inner)
+    internal PrivateScmRequestInfo(CustomPrivScmInfo inner)
     {
         m_inner = inner;
     }
 
-    public PrivateRequestScmInfo() : this(default)
+    public PrivateScmRequestInfo() : this(default)
     {
     }
 
