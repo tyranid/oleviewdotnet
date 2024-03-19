@@ -102,6 +102,10 @@ public abstract class ActivationProperties
             {
                 Properties.Add(new ComWinRTActivationProperties(ndr_data));
             }
+            else if (prop_clsid == ActivationGuids.CLSID_ExtensionActivationContextProperties)
+            {
+                Properties.Add(new ExtensionActivationContextProperties(ndr_data));
+            }
             else if (prop_clsid == ActivationGuids.CLSID_PropsOutInfo)
             {
                 Properties.Add(new PropsOut(ndr_data));

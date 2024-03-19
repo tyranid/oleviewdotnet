@@ -18,20 +18,16 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class ComWinRTActivationProperties : IActivationProperty
+public sealed class ExtensionActivationContextProperties : IActivationProperty
 {
-    private ComWinRTActivationPropertiesData m_inner;
+    private ExtensionActivationContextPropertiesData m_inner;
 
-    public ComWinRTActivationProperties()
-    {
-    }
+    public Guid PropertyClsid => ActivationGuids.CLSID_ExtensionActivationContextProperties;
 
-    internal ComWinRTActivationProperties(byte[] data)
+    internal ExtensionActivationContextProperties(byte[] data)
     {
         data.Deserialize(ref m_inner);
     }
-
-    public Guid PropertyClsid => ActivationGuids.CLSID_WinRTActivationProperties;
 
     public byte[] Serialize()
     {
