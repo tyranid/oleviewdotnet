@@ -24,7 +24,7 @@ public sealed class ScmReplyInfo : IActivationProperty
 
     internal ScmReplyInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
         if (m_inner.remoteReply is not null)
         {
             RemoteInfo = new(m_inner.remoteReply);

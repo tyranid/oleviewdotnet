@@ -29,7 +29,7 @@ public sealed class InstantiationInfo : IActivationProperty
 
     internal InstantiationInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
         m_iids = new(m_inner.pIID.GetValue());
     }
 

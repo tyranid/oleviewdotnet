@@ -25,7 +25,7 @@ public sealed class InstanceInfo : IActivationProperty
 
     internal InstanceInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
     }
 
     public InstanceInfo()

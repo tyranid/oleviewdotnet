@@ -25,7 +25,7 @@ public sealed class LocationInfo : IActivationProperty
 
     internal LocationInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
     }
 
     public LocationInfo()

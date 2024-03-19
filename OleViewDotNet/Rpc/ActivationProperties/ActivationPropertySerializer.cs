@@ -19,7 +19,7 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 internal static class ActivationPropertySerializer
 {
-    public static void Deserialize<T>(this byte[] data, ref T value) where T : struct, INdrStructure
+    public static void Deserialize<T>(this byte[] data, out T value) where T : struct, INdrStructure
     {
         value = new NdrUnmarshalBuffer(new NdrPickledType(data)).ReadStruct<T>();
     }

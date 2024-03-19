@@ -26,7 +26,7 @@ public sealed class ActivationContextInfo : IActivationProperty
 
     public ActivationContextInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
     }
 
     public ActivationContextInfo()

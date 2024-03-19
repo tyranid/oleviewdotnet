@@ -28,7 +28,7 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
 
     internal ComWinRTActivationProperties(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
     }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_WinRTActivationProperties;

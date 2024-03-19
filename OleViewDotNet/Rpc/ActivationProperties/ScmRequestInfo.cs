@@ -36,7 +36,7 @@ public sealed class ScmRequestInfo : IActivationProperty
 
     internal ScmRequestInfo(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
         if (m_inner.pScmInfo != null)
         {
             PrivateInfo = new(m_inner.pScmInfo);

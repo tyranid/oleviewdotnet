@@ -47,7 +47,7 @@ public sealed class PropsOut : IActivationProperty
 
     internal PropsOut(byte[] data)
     {
-        data.Deserialize(ref m_inner);
+        data.Deserialize(out m_inner);
     }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_PropsOutInfo;
