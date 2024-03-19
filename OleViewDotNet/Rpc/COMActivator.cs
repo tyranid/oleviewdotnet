@@ -78,7 +78,7 @@ public sealed class COMActivator : IDisposable
         RpcCOMClientTransportFactory.SetupFactory();
         ICOMActivatorClient client = new(true);
         RpcTransportSecurity transport_security = new();
-        transport_security.Configuration = new RpcCOMClientTransportConfiguration(new(5, 7), null);
+        transport_security.Configuration = new RpcCOMClientTransportConfiguration(RpcCOMClientTransportFactory.SupportedVersion, null);
         client.Connect(RpcCOMClientTransportFactory.COMAlpcProtocol, "epmapper", transport_security);
         return new COMActivator(client);
     }
@@ -96,7 +96,7 @@ public sealed class COMActivator : IDisposable
         {
             AuthenticationType = RpcAuthenticationType.Negotiate,
             AuthenticationLevel = RpcAuthenticationLevel.PacketPrivacy,
-            Configuration = new RpcCOMClientTransportConfiguration(new(5, 7), null)
+            Configuration = new RpcCOMClientTransportConfiguration(RpcCOMClientTransportFactory.SupportedVersion, null)
         };
         client.Connect(RpcCOMClientTransportFactory.COMTcpProtocol, "135", hostname, transport_security);
         return new COMActivator(client);

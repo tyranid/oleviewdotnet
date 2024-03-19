@@ -17,6 +17,7 @@
 using NtApiDotNet.Win32;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Rpc.Clients;
 using System;
 
 namespace OleViewDotNet.Rpc.Transport;
@@ -54,4 +55,6 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
         var transport = RpcClientTransportFactory.ConnectEndpoint(endpoint, transport_security);
         return new RpcCOMClientTransport(transport, transport is RpcAlpcClientTransport, config.Version, config.RemoteObject);
     }
+
+    public static COMVERSION SupportedVersion = new(5, 7);
 }

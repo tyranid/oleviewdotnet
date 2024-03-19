@@ -44,4 +44,5 @@ public static class ActivationGuids
     public static readonly Guid IID_IRemUnknown2 = new("00000143-0000-0000-C000-000000000046");
     public static readonly Guid IID_IUnknown = new("00000000-0000-0000-C000-000000000046");
     public static readonly Guid CLSID_WinRTActivationProperties = new("9fc104cb-0379-43b5-a1a0-ce1260700e0a");
+    public static readonly Guid CLSID_ExtensionActivationContextProperties = new("071742DC-587E-4930-81D5-8A7DE8547529");
 }

@@ -16,6 +16,7 @@
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Rpc.Clients;
+using OleViewDotNet.Rpc.Transport;
 using System;
 using System.Collections.Generic;
 
@@ -34,7 +35,7 @@ public sealed class InstantiationInfo : IActivationProperty
 
     public InstantiationInfo()
     {
-        ClientCOMVersion = new(5, 7);
+        ClientCOMVersion = RpcCOMClientTransportFactory.SupportedVersion.ToVersion();
     }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_InstantiationInfo;
