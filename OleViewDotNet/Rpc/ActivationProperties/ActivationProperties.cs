@@ -34,6 +34,15 @@ public abstract class ActivationProperties
         return Properties.OfType<T>().FirstOrDefault();
     }
 
+    protected T FindOrCreateProperty<T>() where T : IActivationProperty, new()
+    {
+        if (!Properties.OfType<T>().Any())
+        {
+            Properties.Add(new T());
+        }
+        return Properties.OfType<T>().FirstOrDefault();
+    }
+
     protected ActivationProperties()
     {
         Properties = new();

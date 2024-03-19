@@ -18,7 +18,7 @@ using System;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
-public sealed class PrivateScmInfo
+public sealed class PrivateRequestScmInfo
 {
     private CustomPrivScmInfo m_inner;
 
@@ -65,17 +65,13 @@ public sealed class PrivateScmInfo
         }
     }
 
-    public void UpdateProcessSignature()
-    {
-        long signature = LocalResolverClientHandles.Instance.ProcessSignature;
-        if (signature == 0)
-            throw new InvalidOperationException("Couldn't get local process signature to update.");
-        ProcessSignature = signature;
-    }
-
-    internal PrivateScmInfo(CustomPrivScmInfo inner)
+    internal PrivateRequestScmInfo(CustomPrivScmInfo inner)
     {
         m_inner = inner;
+    }
+
+    public PrivateRequestScmInfo() : this(default)
+    {
     }
 
     internal CustomPrivScmInfo ToStruct()

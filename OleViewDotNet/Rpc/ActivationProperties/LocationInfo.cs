@@ -23,7 +23,7 @@ public sealed class LocationInfo : IActivationProperty
 {
     private LocationInfoData m_inner;
 
-    public LocationInfo(byte[] data)
+    internal LocationInfo(byte[] data)
     {
         data.Deserialize(ref m_inner);
     }

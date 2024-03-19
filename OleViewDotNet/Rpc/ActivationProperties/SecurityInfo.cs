@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Rpc.Clients;
 using System;
 
@@ -23,7 +22,7 @@ public sealed class SecurityInfo : IActivationProperty
 {
     private SecurityInfoData m_inner;
 
-    public SecurityInfo(byte[] data)
+    internal SecurityInfo(byte[] data)
     {
         data.Deserialize(ref m_inner);
     }

@@ -33,6 +33,10 @@ public sealed class RemoteRequestScmInfo
 
     public List<RpcTowerId> ProtocolSequences { get; }
 
+    public RemoteRequestScmInfo() : this(default)
+    {
+    }
+
     internal RemoteRequestScmInfo(customREMOTE_REQUEST_SCM_INFO inner)
     {
         m_inner = inner;

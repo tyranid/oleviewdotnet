@@ -21,10 +21,6 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class ActivationPropertiesOut : ActivationProperties
 {
-    public ActivationPropertiesOut()
-    {
-    }
-
     internal ActivationPropertiesOut(COMObjRefCustom objref) 
         : base(objref)
     {
@@ -33,5 +29,5 @@ public sealed class ActivationPropertiesOut : ActivationProperties
     public IReadOnlyList<ActivationResult> Results => FindProperty<PropsOut>()?.Results
                 ?? throw new InvalidOperationException("Properties doesn't contain any results.");
 
-    public ScmReplyInfo ScmInfo => FindProperty<ScmReplyInfo>();
+    public ScmReplyInfo ScmReplyInfo => FindProperty<ScmReplyInfo>();
 }
