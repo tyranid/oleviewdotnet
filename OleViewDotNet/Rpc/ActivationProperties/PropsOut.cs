@@ -54,6 +54,6 @@ public sealed class PropsOut : IActivationProperty
 
     public byte[] Serialize()
     {
-        throw new NotImplementedException();
+        return m_inner.Serialize();
     }
 }

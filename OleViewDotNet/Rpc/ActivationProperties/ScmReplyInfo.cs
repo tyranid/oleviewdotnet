@@ -42,6 +42,6 @@ public sealed class ScmReplyInfo : IActivationProperty
 
     public byte[] Serialize()
     {
-        throw new NotImplementedException();
+        return m_inner.Serialize();
     }
 }
