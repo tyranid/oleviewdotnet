@@ -24,14 +24,14 @@ public sealed class ExtensionActivationContextProperties : IActivationProperty
 
     public Guid PropertyClsid => ActivationGuids.CLSID_ExtensionActivationContextProperties;
 
-    public long HostId { get => m_inner.hostId; set => m_inner.hostId = value; }
-    public long UserContext
+    public ulong HostId { get => m_inner.hostId; set => m_inner.hostId = value; }
+    public ulong UserContext
     {
         get => m_inner.userContextProperties.userContext;
         set => m_inner.userContextProperties.userContext = value;
     }
     public Guid ComponentProcessId { get => m_inner.componentProcessId; set => m_inner.componentProcessId = value; }
-    public long RacActivationTokenId { get => m_inner.racActivationTokenId; set => m_inner.racActivationTokenId = value; }
+    public ulong RacActivationTokenId { get => m_inner.racActivationTokenId; set => m_inner.racActivationTokenId = value; }
 
     public byte[] LpacAttributes
     {
@@ -45,8 +45,8 @@ public sealed class ExtensionActivationContextProperties : IActivationProperty
         }
     }
 
-    public long ConsoleHandlesId { get => m_inner.consoleHandlesId; set => m_inner.consoleHandlesId = value; }
-    public long AamActivationId { get => m_inner.aamActivationId; set => m_inner.aamActivationId = value; }
+    public ulong ConsoleHandlesId { get => m_inner.consoleHandlesId; set => m_inner.consoleHandlesId = value; }
+    public ulong AamActivationId { get => m_inner.aamActivationId; set => m_inner.aamActivationId = value; }
     public bool RunFullTrust { get => m_inner.runFullTrust != 0; set => m_inner.runFullTrust = value ? 1 : 0; }
 
     internal ExtensionActivationContextProperties(byte[] data)

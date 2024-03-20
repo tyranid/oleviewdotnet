@@ -23,25 +23,25 @@ public struct ExtensionActivationContextPropertiesData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt64(hostId);
+        m.WriteUInt64(hostId);
         m.WriteStruct(userContextProperties);
         m.WriteGuid(componentProcessId);
-        m.WriteInt64(racActivationTokenId);
+        m.WriteUInt64(racActivationTokenId);
         m.WriteEmbeddedPointer(lpacAttributes, m.WriteStruct);
-        m.WriteInt64(consoleHandlesId);
-        m.WriteInt64(aamActivationId);
+        m.WriteUInt64(consoleHandlesId);
+        m.WriteUInt64(aamActivationId);
         m.WriteInt32(runFullTrust);
     }
 
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        hostId = u.ReadInt64();
+        hostId = u.ReadUInt64();
         userContextProperties = u.ReadStruct<UserContextPropertiesData>();
         componentProcessId = u.ReadGuid();
-        racActivationTokenId = u.ReadInt64();
+        racActivationTokenId = u.ReadUInt64();
         lpacAttributes = u.ReadEmbeddedPointer(u.ReadStruct<BLOB>, false);
-        consoleHandlesId = u.ReadInt64();
-        aamActivationId = u.ReadInt64();
+        consoleHandlesId = u.ReadUInt64();
+        aamActivationId = u.ReadUInt64();
         runFullTrust = u.ReadInt32();
     }
 
@@ -49,13 +49,13 @@ public struct ExtensionActivationContextPropertiesData : INdrStructure
     {
         return 8;
     }
-    public long hostId;
+    public ulong hostId;
     public UserContextPropertiesData userContextProperties;
     public Guid componentProcessId;
-    public long racActivationTokenId;
+    public ulong racActivationTokenId;
     public NdrEmbeddedPointer<BLOB> lpacAttributes;
-    public long consoleHandlesId;
-    public long aamActivationId;
+    public ulong consoleHandlesId;
+    public ulong aamActivationId;
     public int runFullTrust;
     public static ExtensionActivationContextPropertiesData CreateDefault()
     {

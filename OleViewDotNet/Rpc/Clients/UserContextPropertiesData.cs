@@ -22,22 +22,22 @@ public struct UserContextPropertiesData : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt64(userContext);
+        m.WriteUInt64(userContext);
     }
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        userContext = u.ReadInt64();
+        userContext = u.ReadUInt64();
     }
     int INdrStructure.GetAlignment()
     {
         return 8;
     }
-    public long userContext;
+    public ulong userContext;
     public static UserContextPropertiesData CreateDefault()
     {
         return new UserContextPropertiesData();
     }
-    public UserContextPropertiesData(long userContext)
+    public UserContextPropertiesData(ulong userContext)
     {
         this.userContext = userContext;
     }

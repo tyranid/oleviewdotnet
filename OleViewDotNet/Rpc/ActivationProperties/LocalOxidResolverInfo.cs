@@ -32,12 +32,12 @@ public sealed class LocalOxidResolverInfo
     public IReadOnlyList<COMStringBinding> StringBindings { get; }
     public IReadOnlyList<COMSecurityBinding> SecurityBindings { get; }
     public Guid ProcessIdentifier { get; }
-    public long ProcessHostId { get; }
+    public ulong ProcessHostId { get; }
     public OxidClientDependency ClientDependencyBehavior { get; }
     public string PackageFullName { get; }
     public string UserSid { get; }
     public string AppcontainerSid { get; }
-    public long PrimaryOxid { get; }
+    public ulong PrimaryOxid { get; }
     public Guid PrimaryIpidRemUnknown { get; }
 
     internal LocalOxidResolverInfo(INTERNAL_OXID_INFO info)

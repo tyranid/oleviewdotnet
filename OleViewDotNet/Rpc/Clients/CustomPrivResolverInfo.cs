@@ -22,20 +22,20 @@ internal struct CustomPrivResolverInfo : INdrStructure
 {
     void INdrStructure.Marshal(NdrMarshalBuffer m)
     {
-        m.WriteInt64(OxidServer);
+        m.WriteUInt64(OxidServer);
         m.WriteEmbeddedPointer(pServerORBindings, m.WriteStruct);
         m.WriteStruct(OxidInfo);
-        m.WriteInt64(LocalMidOfRemote);
+        m.WriteUInt64(LocalMidOfRemote);
         m.WriteInt32(DllServerModel);
         m.WriteEmbeddedPointer(pwszDllServer, m.WriteTerminatedString);
         m.WriteInt32(FoundInROT);
     }
     void INdrStructure.Unmarshal(NdrUnmarshalBuffer u)
     {
-        OxidServer = u.ReadInt64();
+        OxidServer = u.ReadUInt64();
         pServerORBindings = u.ReadEmbeddedPointer(u.ReadStruct<DUALSTRINGARRAY>, false);
         OxidInfo = u.ReadStruct<INTERNAL_OXID_INFO>();
-        LocalMidOfRemote = u.ReadInt64();
+        LocalMidOfRemote = u.ReadUInt64();
         DllServerModel = u.ReadInt32();
         pwszDllServer = u.ReadEmbeddedPointer(u.ReadConformantVaryingString, false);
         FoundInROT = u.ReadInt32();
@@ -44,25 +44,15 @@ internal struct CustomPrivResolverInfo : INdrStructure
     {
         return 8;
     }
-    public long OxidServer;
+    public ulong OxidServer;
     public NdrEmbeddedPointer<DUALSTRINGARRAY> pServerORBindings;
     public INTERNAL_OXID_INFO OxidInfo;
-    public long LocalMidOfRemote;
+    public ulong LocalMidOfRemote;
     public int DllServerModel;
     public NdrEmbeddedPointer<string> pwszDllServer;
     public int FoundInROT;
     public static CustomPrivResolverInfo CreateDefault()
     {
         return new CustomPrivResolverInfo();
-    }
-    public CustomPrivResolverInfo(long OxidServer, DUALSTRINGARRAY? pServerORBindings, INTERNAL_OXID_INFO OxidInfo, long LocalMidOfRemote, int DllServerModel, string pwszDllServer, int FoundInROT)
-    {
-        this.OxidServer = OxidServer;
-        this.pServerORBindings = pServerORBindings;
-        this.OxidInfo = OxidInfo;
-        this.LocalMidOfRemote = LocalMidOfRemote;
-        this.DllServerModel = DllServerModel;
-        this.pwszDllServer = pwszDllServer;
-        this.FoundInROT = FoundInROT;
     }
 }

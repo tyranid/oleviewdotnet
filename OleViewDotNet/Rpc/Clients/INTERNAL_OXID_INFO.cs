@@ -32,12 +32,12 @@ internal struct INTERNAL_OXID_INFO : INdrStructure
         m.WriteInt32(dwFlags);
         m.WriteEmbeddedPointer(psa, m.WriteStruct);
         m.WriteGuid(guidProcessIdentifier);
-        m.WriteInt64(processHostId);
+        m.WriteUInt64(processHostId);
         m.WriteEnum16(clientDependencyBehavior);
         m.WriteEmbeddedPointer(packageFullName, m.WriteHString);
         m.WriteEmbeddedPointer(userSid, m.WriteHString);
         m.WriteEmbeddedPointer(appcontainerSid, m.WriteHString);
-        m.WriteInt64(primaryOxid);
+        m.WriteUInt64(primaryOxid);
         m.WriteGuid(primaryIpidRemUnknown);
     }
 
@@ -52,12 +52,12 @@ internal struct INTERNAL_OXID_INFO : INdrStructure
         dwFlags = u.ReadInt32();
         psa = u.ReadEmbeddedPointer(u.ReadStruct<DUALSTRINGARRAY>, false);
         guidProcessIdentifier = u.ReadGuid();
-        processHostId = u.ReadInt64();
+        processHostId = u.ReadUInt64();
         clientDependencyBehavior = u.ReadEnum16();
         packageFullName = u.ReadEmbeddedPointer(u.ReadHString, false);
         userSid = u.ReadEmbeddedPointer(u.ReadHString, false);
         appcontainerSid = u.ReadEmbeddedPointer(u.ReadHString, false);
-        primaryOxid = u.ReadInt64();
+        primaryOxid = u.ReadUInt64();
         primaryIpidRemUnknown = u.ReadGuid();
     }
 
@@ -74,35 +74,15 @@ internal struct INTERNAL_OXID_INFO : INdrStructure
     public int dwFlags;
     public NdrEmbeddedPointer<DUALSTRINGARRAY> psa;
     public Guid guidProcessIdentifier;
-    public long processHostId;
+    public ulong processHostId;
     public NdrEnum16 clientDependencyBehavior;
     public NdrEmbeddedPointer<string> packageFullName;
     public NdrEmbeddedPointer<string> userSid;
     public NdrEmbeddedPointer<string> appcontainerSid;
-    public long primaryOxid;
+    public ulong primaryOxid;
     public Guid primaryIpidRemUnknown;
     public static INTERNAL_OXID_INFO CreateDefault()
     {
         return new INTERNAL_OXID_INFO();
-    }
-    public INTERNAL_OXID_INFO(int dwTid, int dwPid, int dwAuthnHint, COMVERSION version, CONTAINERVERSION containerVersion, 
-        Guid ipidRemUnknown, int dwFlags, DUALSTRINGARRAY? psa, Guid guidProcessIdentifier, long processHostId, NdrEnum16 clientDependencyBehavior, string packageFullName, string userSid, string appcontainerSid, long primaryOxid, Guid primaryIpidRemUnknown)
-    {
-        this.dwTid = dwTid;
-        this.dwPid = dwPid;
-        this.dwAuthnHint = dwAuthnHint;
-        this.version = version;
-        this.containerVersion = containerVersion;
-        this.ipidRemUnknown = ipidRemUnknown;
-        this.dwFlags = dwFlags;
-        this.psa = psa;
-        this.guidProcessIdentifier = guidProcessIdentifier;
-        this.processHostId = processHostId;
-        this.clientDependencyBehavior = clientDependencyBehavior;
-        this.packageFullName = packageFullName;
-        this.userSid = userSid;
-        this.appcontainerSid = appcontainerSid;
-        this.primaryOxid = primaryOxid;
-        this.primaryIpidRemUnknown = primaryIpidRemUnknown;
     }
 }

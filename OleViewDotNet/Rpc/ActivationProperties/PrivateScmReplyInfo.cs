@@ -22,11 +22,11 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class PrivateScmReplyInfo
 {
-    public long OxidServer { get; }
+    public ulong OxidServer { get; }
     public IReadOnlyList<COMStringBinding> ServerORStringBindings { get; }
     public IReadOnlyList<COMSecurityBinding> ServerORSecurityBindings { get; }
     public LocalOxidResolverInfo OxidInfo { get; }
-    public long LocalMidOfRemote { get; }
+    public ulong LocalMidOfRemote { get; }
     public int DllServerModel { get; }
     public string DllServer { get; }
     public bool FoundInROT { get; }

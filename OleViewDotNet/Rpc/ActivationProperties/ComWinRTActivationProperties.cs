@@ -43,7 +43,7 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
         set => m_inner.winrtActivationPropertiesData.packageFullName = string.IsNullOrEmpty(value) ? null : value;
     }
 
-    public long UserContext 
+    public ulong UserContext 
     { 
         get => m_inner.userContextPropertiesData.userContext; 
         set => m_inner.userContextPropertiesData.userContext = value; 
