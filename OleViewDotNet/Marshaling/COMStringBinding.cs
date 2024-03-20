@@ -34,31 +34,23 @@ public sealed class COMStringBinding
         NetworkAddr = network_addr;
     }
 
-    internal COMStringBinding(BinaryReader reader, bool direct_string)
+    internal COMStringBinding(BinaryReader reader)
     {
-        if (direct_string)
-        {
-            try
-            {
-                TowerId = RpcTowerId.StringBinding;
-                NetworkAddr = reader.ReadZString();
-            }
-            catch (EndOfStreamException)
-            {
-                NetworkAddr = string.Empty;
-            }
-        }
-        else
+        NetworkAddr = string.Empty;
+        try
         {
             TowerId = (RpcTowerId)reader.ReadInt16();
             if (TowerId != RpcTowerId.None)
             {
                 NetworkAddr = reader.ReadZString();
+                if (TowerId == RpcTowerId.StringBinding)
+                {
+                    NetworkAddr = "n" + NetworkAddr;
+                }
             }
-            else
-            {
-                NetworkAddr = string.Empty;
-            }
+        }
+        catch (EndOfStreamException)
+        {
         }
     }
 

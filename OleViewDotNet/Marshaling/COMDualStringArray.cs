@@ -33,10 +33,10 @@ internal class COMDualStringArray
         SecurityBindings = new List<COMSecurityBinding>();
     }
 
-    private void ReadEntries(BinaryReader new_reader, int sec_offset, bool direct_string)
+    private void ReadEntries(BinaryReader new_reader, int sec_offset)
     {
-        COMStringBinding str = new(new_reader, direct_string);
-        if (direct_string)
+        COMStringBinding str = new(new_reader);
+        if (str.TowerId == RpcTowerId.StringBinding)
         {
             StringBindings.Add(str);
         }
@@ -45,7 +45,7 @@ internal class COMDualStringArray
             while (str.TowerId != 0)
             {
                 StringBindings.Add(str);
-                str = new COMStringBinding(new_reader, direct_string);
+                str = new COMStringBinding(new_reader);
             }
         }
 
@@ -58,14 +58,14 @@ internal class COMDualStringArray
         }
     }
 
-    public COMDualStringArray(IntPtr ptr, NtProcess process, bool direct_string) : this()
+    public COMDualStringArray(IntPtr ptr, NtProcess process) : this()
     {
         int num_entries = process.ReadMemory<ushort>(ptr.ToInt64());
         int sec_offset = process.ReadMemory<ushort>(ptr.ToInt64() + 2);
         if (num_entries > 0)
         {
             MemoryStream stm = new(process.ReadMemory(ptr.ToInt64() + 4, num_entries * 2));
-            ReadEntries(new BinaryReader(stm), sec_offset, direct_string);
+            ReadEntries(new BinaryReader(stm), sec_offset);
         }
     }
 
@@ -78,7 +78,7 @@ internal class COMDualStringArray
         {
             MemoryStream stm = new(reader.ReadAll(num_entries * 2));
             BinaryReader new_reader = new(stm);
-            ReadEntries(new_reader, sec_offset, false);
+            ReadEntries(new_reader, sec_offset);
         }
     }
 

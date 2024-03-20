@@ -36,5 +36,5 @@ public enum RpcTowerId : short
     MessageQueue = 0x1D,   // ncadg_mq
     Http = 0x1F,           // ncacn_http
     Container = 0x21,      // ncacn_hvsocket
-    StringBinding = -1,
+    StringBinding = 110,
 }

@@ -69,7 +69,7 @@ internal struct OXIDEntryNative : IOXIDEntry
             return new COMDualStringArray();
         try
         {
-            return new COMDualStringArray(_pBinding, process, true);
+            return new COMDualStringArray(_pBinding, process);
         }
         catch (NtException)
         {

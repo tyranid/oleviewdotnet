@@ -53,7 +53,7 @@ internal class OXIDEntryNative2004 : IOXIDEntry
             return new COMDualStringArray();
         try
         {
-            return new COMDualStringArray(info._psa, process, true);
+            return new COMDualStringArray(info._psa, process);
         }
         catch (NtException)
         {
