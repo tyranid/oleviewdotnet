@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Utilities;
@@ -114,7 +113,7 @@ public static class COMOxidResolver
         }
 
         if (iid == Guid.Empty)
-            iid = COMInterfaceEntry.IID_IUnknown;
+            iid = COMKnownGuids.IID_IUnknown;
 
         if (COMUtilities.MarshalObjectToObjRef(obj,
             iid, MSHCTX.LOCAL, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)

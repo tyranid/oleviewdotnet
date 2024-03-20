@@ -18,6 +18,7 @@ using NtApiDotNet;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes.Types;
 using OleViewDotNet.Proxy;
@@ -237,7 +238,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
         {
             return null;
         }
-        NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMInterfaceEntry.IID_IUnknown,
+        NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMKnownGuids.IID_IUnknown,
             Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
         return new COMProxyFile(new NdrComProxyDefinition[] { entry }, ComplexTypes, m_registry, $"IPID Proxy: {Ipid}");
     }

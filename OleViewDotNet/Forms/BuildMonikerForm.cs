@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using System;
 using System.Runtime.InteropServices;
@@ -36,7 +35,7 @@ internal partial class BuildMonikerForm : Form
     {
         if (moniker_string == "new")
         {
-            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
+            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);

@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using System;
 using System.IO;
 
@@ -28,7 +28,7 @@ public class COMObjRefCustom : COMObjRef
     public byte[] ObjectData { get; set; }
 
     public COMObjRefCustom()
-        : base(COMInterfaceEntry.IID_IUnknown)
+        : base(COMKnownGuids.IID_IUnknown)
     {
         ObjectData = new byte[0];
         ExtensionData = new byte[0];

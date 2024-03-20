@@ -611,7 +611,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
-        return COMUtilities.CreateClassFactory(Clsid, COMInterfaceEntry.IID_IUnknown, dwContext, server, auth_info);
+        return COMUtilities.CreateClassFactory(Clsid, COMKnownGuids.IID_IUnknown, dwContext, server, auth_info);
     }
 
     public bool SupportsRemoteActivation => true;

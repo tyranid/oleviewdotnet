@@ -92,7 +92,7 @@ internal partial class ObjectInformation : UserControl
             /* Also add IObjectSafety information if available */
             if (m_pObject is IObjectSafety objSafety)
             {
-                Guid iid = COMInterfaceEntry.IID_IDispatch;
+                Guid iid = COMKnownGuids.IID_IDispatch;
 
                 objSafety.GetInterfaceSafetyOptions(iid, out uint supportedOptions, out uint enabledOptions);
                 for (int i = 0; i < 4; i++)
@@ -247,7 +247,7 @@ internal partial class ObjectInformation : UserControl
                 return ent.Iid;
             }
         }
-        return COMInterfaceEntry.IID_IUnknown;
+        return COMKnownGuids.IID_IUnknown;
     }
 
     private void btnMarshal_Click(object sender, EventArgs e)
@@ -276,7 +276,7 @@ internal partial class ObjectInformation : UserControl
             IClassFactory factory = (IClassFactory)m_pObject;
             Dictionary<string, string> props = new();
             props.Add("Name", m_objName);
-            factory.CreateInstance(null, COMInterfaceEntry.IID_IUnknown, out object new_object);
+            factory.CreateInstance(null, COMKnownGuids.IID_IUnknown, out object new_object);
             ObjectInformation view = new(m_registry,
                 m_entry, m_objName, new_object,
                 props, m_registry.GetInterfacesForObject(new_object).ToArray());

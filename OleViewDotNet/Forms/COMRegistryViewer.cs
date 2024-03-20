@@ -1030,7 +1030,7 @@ internal partial class COMRegistryViewer : UserControl
                     node.Nodes.Add(factory);
 
                     if (clsid is COMCLSIDEntry clsid_entry &&
-                        (clsid.FactoryInterfaces.Any(i => i.Iid == COMInterfaceEntry.IID_IPSFactoryBuffer)
+                        (clsid.FactoryInterfaces.Any(i => i.Iid == COMKnownGuids.IID_IPSFactoryBuffer)
                         || m_registry.ProxiesByClsid.ContainsKey(clsid_entry.Clsid)))
                     {
                         TreeNode proxy = CreateNode("Proxy", ProcessKey, new COMProxyFormatter(clsid_entry));
@@ -2289,7 +2289,7 @@ internal partial class COMRegistryViewer : UserControl
                 object comObj;
                 if (factory)
                 {
-                    comObj = broker.GetActivationFactory(runtime_class.Name, COMInterfaceEntry.IID_IUnknown);
+                    comObj = broker.GetActivationFactory(runtime_class.Name, COMKnownGuids.IID_IUnknown);
                 }
                 else
                 {

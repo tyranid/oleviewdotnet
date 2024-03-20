@@ -15,7 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr;
-using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -257,11 +257,11 @@ public sealed class COMProxyFileConverter
     private ComInterfaceType GetInterfaceTypeAndProcs(NdrComProxyDefinition proxy, List<NdrProcedureDefinition> procs)
     {
         ComInterfaceType type = ComInterfaceType.InterfaceIsIUnknown;
-        if (proxy.BaseIid == COMInterfaceEntry.IID_IDispatch)
+        if (proxy.BaseIid == COMKnownGuids.IID_IDispatch)
         {
             type = ComInterfaceType.InterfaceIsIDispatch;
         }
-        else if (proxy.BaseIid == COMInterfaceEntry.IID_IInspectable)
+        else if (proxy.BaseIid == COMKnownGuids.IID_IInspectable)
         {
             type = ComInterfaceType.InterfaceIsIInspectable;
         }

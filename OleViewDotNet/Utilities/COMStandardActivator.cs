@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
-using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using System;
@@ -31,7 +30,7 @@ public sealed class COMStandardActivator
     private object GetObject(Action<COSERVERINFO, MULTI_QI[]> func, Guid? iid, string server, COMAuthInfo auth_info)
     {
         MULTI_QI[] qis = new MULTI_QI[1];
-        qis[0] = new MULTI_QI(iid ?? COMInterfaceEntry.IID_IUnknown);
+        qis[0] = new MULTI_QI(iid ?? COMKnownGuids.IID_IUnknown);
         using var list = new DisposableList();
         using var auth_info_buffer = auth_info?.ToBuffer(list);
         COSERVERINFO server_info = !string.IsNullOrEmpty(server) ? new(server, auth_info_buffer) : null;
@@ -55,7 +54,7 @@ public sealed class COMStandardActivator
 
     public object GetClassObject(Guid clsid, CLSCTX clsctx, Guid? iid = null, string server = null, COMAuthInfo auth_info = null)
     {
-        return m_activator.StandardGetClassObject(clsid, clsctx, null, iid ?? COMInterfaceEntry.IID_IUnknown);
+        return m_activator.StandardGetClassObject(clsid, clsctx, null, iid ?? COMKnownGuids.IID_IUnknown);
     }
 
     public object CreateInstance(Guid clsid, CLSCTX clsctx, Guid? iid = null, string server = null, COMAuthInfo auth_info = null)

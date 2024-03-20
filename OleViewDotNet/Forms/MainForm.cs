@@ -249,12 +249,12 @@ internal partial class MainForm : Form
 
                 if (class_factory)
                 {
-                    hr = NativeMethods.CoGetClassObject(clsid, clsctx, null, COMInterfaceEntry.IID_IUnknown, out pObj);
+                    hr = NativeMethods.CoGetClassObject(clsid, clsctx, null, COMKnownGuids.IID_IUnknown, out pObj);
                 }
                 else
                 {
                     hr = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, clsctx,
-                                COMInterfaceEntry.IID_IUnknown, out pObj);
+                                COMKnownGuids.IID_IUnknown, out pObj);
                 }
 
                 if (hr != 0)
@@ -436,7 +436,7 @@ internal partial class MainForm : Form
                 object comObj = frm.Moniker;
                 if (bind)
                 {
-                    Guid iid = COMInterfaceEntry.IID_IUnknown;
+                    Guid iid = COMKnownGuids.IID_IUnknown;
                     frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
                 }
 

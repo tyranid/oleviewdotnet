@@ -61,7 +61,7 @@ internal partial class ElevatedFactoryServerTypeViewer : UserControl
                 Dictionary<string, string> props = new();
                 props.Add("Name", _name);
                 props.Add("CLSID", vso.Clsid.FormatGuid());
-                factory.ServerCreateElevatedObject(vso.Clsid, COMInterfaceEntry.IID_IUnknown, out object new_object);
+                factory.ServerCreateElevatedObject(vso.Clsid, COMKnownGuids.IID_IUnknown, out object new_object);
                 ObjectInformation view = new(_registry, vso,
                     vso.Name, new_object,
                     props, _registry.GetInterfacesForObject(new_object).ToArray());

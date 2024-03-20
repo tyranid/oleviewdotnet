@@ -115,7 +115,7 @@ internal partial class ROTViewer : UserControl
             try
             {
                 IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
-                Guid unk = COMInterfaceEntry.IID_IUnknown;
+                Guid unk = COMKnownGuids.IID_IUnknown;
                 Type dispType;
 
                 info.moniker.BindToObject(bindCtx, null, ref unk, out object comObj);

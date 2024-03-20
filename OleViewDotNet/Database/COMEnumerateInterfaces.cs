@@ -173,7 +173,7 @@ public class COMEnumerateInterfaces
 
     private void GetInterfacesInternal(NtToken token)
     {
-        Guid IID_IUnknown = COMInterfaceEntry.IID_IUnknown;
+        Guid IID_IUnknown = COMKnownGuids.IID_IUnknown;
         CLSCTX clsctx = _clsctx;
         if (token != null)
         {
@@ -223,10 +223,10 @@ public class COMEnumerateInterfaces
         {
             HashSet<Guid> intfs = new(GetInterfacesFromRegistry())
             {
-                COMInterfaceEntry.IID_IMarshal,
-                COMInterfaceEntry.IID_IPSFactoryBuffer,
-                COMInterfaceEntry.IID_IStdMarshalInfo,
-                COMInterfaceEntry.IID_IMarshal2
+                COMKnownGuids.IID_IMarshal,
+                COMKnownGuids.IID_IPSFactoryBuffer,
+                COMKnownGuids.IID_IStdMarshalInfo,
+                COMKnownGuids.IID_IMarshal2
             };
 
             Dictionary<IntPtr, string> module_names = new();
@@ -443,8 +443,8 @@ public class COMEnumerateInterfaces
         int exitCode = process.Process.ExitStatus;
         if (exitCode != 0)
         {
-            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
-            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMInterfaceEntry.IID_IUnknown, registry) });
+            interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMKnownGuids.IID_IUnknown, registry) });
+            factory_interfaces = new List<COMInterfaceInstance>(new COMInterfaceInstance[] { new(COMKnownGuids.IID_IUnknown, registry) });
         }
         return new InterfaceLists() { Interfaces = interfaces, FactoryInterfaces = factory_interfaces };
     }

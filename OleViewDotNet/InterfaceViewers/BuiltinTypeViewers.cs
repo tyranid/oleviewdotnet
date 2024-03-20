@@ -74,7 +74,7 @@ internal class ElevatedFactoryServerViewerFactory : BaseTypeViewerFactory
 
 internal class PersistStreamViewerFactory : ITypeViewerFactory
 {
-    public Guid Iid => COMInterfaceEntry.IID_IPersistStream;
+    public Guid Iid => COMKnownGuids.IID_IPersistStream;
 
     public string IidName => "IPersistStream";
 
@@ -86,7 +86,7 @@ internal class PersistStreamViewerFactory : ITypeViewerFactory
 
 internal class PersistStreamInitViewerFactory : ITypeViewerFactory
 {
-    public Guid Iid => COMInterfaceEntry.IID_IPersistStreamInit;
+    public Guid Iid => COMKnownGuids.IID_IPersistStreamInit;
 
     public string IidName => "IPersistStreamInit";
 

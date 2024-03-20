@@ -730,7 +730,7 @@ public static class COMUtilities
         object ret;
 
         int iError = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
-            COMInterfaceEntry.IID_IUnknown, out IntPtr pObj);
+            COMKnownGuids.IID_IUnknown, out IntPtr pObj);
 
         if (iError != 0)
         {
@@ -747,7 +747,7 @@ public static class COMUtilities
 
     public static object CreateFromMoniker(string moniker, BIND_OPTS3 bind_opts)
     {
-        NativeMethods.CoGetObject(moniker, bind_opts, COMInterfaceEntry.IID_IUnknown, out object ret);
+        NativeMethods.CoGetObject(moniker, bind_opts, COMKnownGuids.IID_IUnknown, out object ret);
         return ret;
     }
 
@@ -772,7 +772,7 @@ public static class COMUtilities
 
     public static object UnmarshalObject(byte[] objref)
     {
-        return UnmarshalObject(new MemoryStream(objref), COMInterfaceEntry.IID_IUnknown);
+        return UnmarshalObject(new MemoryStream(objref), COMKnownGuids.IID_IUnknown);
     }
 
     public static object UnmarshalObject(COMObjRef objref)
@@ -837,7 +837,7 @@ public static class COMUtilities
 
     public static byte[] MarshalObject(object obj)
     {
-        return MarshalObject(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
+        return MarshalObject(obj, COMKnownGuids.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
     }
 
     public static COMObjRef MarshalObjectToObjRef(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
@@ -847,7 +847,7 @@ public static class COMUtilities
 
     public static COMObjRef MarshalObjectToObjRef(object obj)
     {
-        return MarshalObjectToObjRef(obj, COMInterfaceEntry.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
+        return MarshalObjectToObjRef(obj, COMKnownGuids.IID_IUnknown, MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL);
     }
 
     private static string GetNextToken(string name, out string token)
@@ -1302,7 +1302,7 @@ public static class COMUtilities
         if (moniker_string == "new")
         {
             int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero,
-                CLSCTX.INPROC_SERVER, COMInterfaceEntry.IID_IUnknown, out IntPtr unk);
+                CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown, out IntPtr unk);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -1364,7 +1364,7 @@ public static class COMUtilities
     {
         IBindCtx bind_context = NativeMethods.CreateBindCtx(0);
         IMoniker moniker = ParseMoniker(bind_context, moniker_string, composite);
-        Guid iid = COMInterfaceEntry.IID_IUnknown;
+        Guid iid = COMKnownGuids.IID_IUnknown;
         moniker.BindToObject(bind_context, null, ref iid, out object comObj);
         return comObj;
     }
