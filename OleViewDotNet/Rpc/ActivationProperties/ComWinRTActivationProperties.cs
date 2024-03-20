@@ -31,6 +31,36 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
         data.Deserialize(out m_inner);
     }
 
+    public string ActivatableClassId 
+    { 
+        get => m_inner.winrtActivationPropertiesData.activatableClassId;
+        set => m_inner.winrtActivationPropertiesData.activatableClassId = string.IsNullOrEmpty(value) ? null : value; 
+    }
+
+    public string PackageFullName
+    {
+        get => m_inner.winrtActivationPropertiesData.packageFullName;
+        set => m_inner.winrtActivationPropertiesData.packageFullName = string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    public long UserContext 
+    { 
+        get => m_inner.userContextPropertiesData.userContext; 
+        set => m_inner.userContextPropertiesData.userContext = value; 
+    }
+
+    public byte[] ProcessMitigationPolicy 
+    {
+        get => m_inner.rtbProcessMitigationPolcyBlob?.GetValue().pBlobData?.GetValue();
+        set
+        {
+            if (value == null)
+                m_inner.rtbProcessMitigationPolcyBlob = null;
+            else
+                m_inner.rtbProcessMitigationPolcyBlob = new BLOB(value.Length, value);
+        }
+    }
+
     public Guid PropertyClsid => ActivationGuids.CLSID_WinRTActivationProperties;
 
     public byte[] Serialize()
