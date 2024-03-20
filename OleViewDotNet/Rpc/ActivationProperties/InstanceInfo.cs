@@ -13,7 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
 using System;
 
@@ -33,6 +33,11 @@ public sealed class InstanceInfo : IActivationProperty
     }
 
     public Guid PropertyClsid => ActivationGuids.CLSID_InstanceInfo;
+
+    public string FileName { get => m_inner.fileName; set => m_inner.fileName = value; }
+    public int Mode { get => m_inner.mode; set => m_inner.mode = value; }
+    public COMObjRef IfdROT { get => m_inner.ifdROT.ToObjRef(); set => m_inner.ifdROT = value.ToPointer(); }
+    public COMObjRef IfdStg { get => m_inner.ifdStg.ToObjRef(); set => m_inner.ifdStg = value.ToPointer(); }
 
     public byte[] Serialize()
     {
