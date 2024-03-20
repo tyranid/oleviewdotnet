@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Rpc.Clients;
 using OleViewDotNet.Rpc.Transport;

@@ -16,7 +16,7 @@
 
 using System;
 
-namespace OleViewDotNet.Database;
+namespace OleViewDotNet.Interop;
 
 public readonly struct COMVersion : IEquatable<COMVersion>
 {

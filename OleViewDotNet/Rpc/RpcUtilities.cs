@@ -18,7 +18,7 @@
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
-using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
 using System;
