@@ -20,7 +20,12 @@ namespace OleViewDotNet.Interop;
 
 public static class COMKnownGuids
 {
-    public static Guid IID_IUnknown => new("{00000000-0000-0000-C000-000000000046}");
+    private static Guid GetGuid<T>()
+    {
+        return typeof(T).GUID;
+    }
+
+    public static Guid IID_IUnknown => GetGuid<IUnknown>();
 
     public static Guid IID_IMarshal => new("{00000003-0000-0000-C000-000000000046}");
 
@@ -32,15 +37,17 @@ public static class COMKnownGuids
 
     public static Guid IID_IMarshalEnvoy => new("000001C8-0000-0000-C000-000000000046");
 
-    public static Guid IID_IDispatch => new("00020400-0000-0000-c000-000000000046");
+    public static Guid IID_IDispatch => GetGuid<IDispatch>();
 
     public static Guid IID_IOleControl => new("{b196b288-bab4-101a-b69c-00aa00341d07}");
 
-    public static Guid IID_IPersistStream => typeof(IPersistStream).GUID;
+    public static Guid IID_IPersistStream => GetGuid<IPersistStream>();
 
-    public static Guid IID_IPersistStreamInit => typeof(IPersistStreamInit).GUID;
+    public static Guid IID_IPersistStreamInit => GetGuid<IPersistStreamInit>();
 
-    public static Guid IID_IPSFactoryBuffer => new("D5F569D0-593B-101A-B569-08002B2DBF7A");
+    public static Guid IID_IPSFactoryBuffer => GetGuid<IPSFactoryBuffer>();
 
-    public static Guid IID_IInspectable => new("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90");
+    public static Guid IID_IInspectable => GetGuid<IInspectable>();
+
+    public static Guid IID_IClassFactory => GetGuid<IClassFactory>();
 }

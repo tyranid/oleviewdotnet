@@ -18,7 +18,7 @@ using System;
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 [Flags]
-public enum ACTIVATION_FLAGS
+public enum ActivationFlags
 {
     NONE = 0x0,
     DISABLE_AAA = 0x2,

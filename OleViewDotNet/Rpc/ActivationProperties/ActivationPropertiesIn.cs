@@ -16,6 +16,7 @@
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using System;
+using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
@@ -33,7 +34,7 @@ public sealed class ActivationPropertiesIn : ActivationProperties
     {
     }
 
-    public void SetActivationFlags(ACTIVATION_FLAGS flags)
+    public void SetActivationFlags(ActivationFlags flags)
     {
         FindOrCreateProperty<InstantiationInfo>().ActivationFlags = flags;
     }
@@ -43,6 +44,26 @@ public sealed class ActivationPropertiesIn : ActivationProperties
         var info = FindOrCreateProperty<InstantiationInfo>();
         info.ClassId = clsid;
         info.ClassCtx = clsctx;
+    }
+
+    public void AddIUnknownIid()
+    {
+        AddIid(COMKnownGuids.IID_IUnknown);
+    }
+
+    public void AddIClassFactoryIid()
+    {
+        AddIid(COMKnownGuids.IID_IClassFactory);
+    }
+
+    public void AddIid(Guid iid)
+    {
+        FindOrCreateProperty<InstantiationInfo>().Iids.Add(iid);
+    }
+
+    public void AddIids(IEnumerable<Guid> iids)
+    {
+        FindOrCreateProperty<InstantiationInfo>().Iids.AddRange(iids);
     }
 
     public InstantiationInfo InstantiationInfo => FindProperty<InstantiationInfo>();

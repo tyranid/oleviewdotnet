@@ -51,9 +51,9 @@ public sealed class InstantiationInfo : IActivationProperty
         set => m_inner.classCtx = (int)value;
     }
 
-    public ACTIVATION_FLAGS ActivationFlags
+    public ActivationFlags ActivationFlags
     {
-        get => (ACTIVATION_FLAGS)m_inner.actvflags;
+        get => (ActivationFlags)m_inner.actvflags;
         set => m_inner.actvflags = (int)value;
     }
 
@@ -69,7 +69,7 @@ public sealed class InstantiationInfo : IActivationProperty
         set => m_inner.instFlag = value;
     }
 
-    public List<Guid> IIds => m_iids;
+    public List<Guid> Iids => m_iids;
 
     public COMVersion ClientCOMVersion
     {

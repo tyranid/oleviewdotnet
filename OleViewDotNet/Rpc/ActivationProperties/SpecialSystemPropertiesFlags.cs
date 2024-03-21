@@ -18,7 +18,7 @@ using System;
 namespace OleViewDotNet.Rpc.ActivationProperties;
 
 [Flags]
-public enum SPD_FLAGS
+public enum SpecialSystemPropertiesFlags
 {
     NONE = 0,
     USE_CONSOLE_SESSION = 0x1,

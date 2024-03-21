@@ -102,6 +102,9 @@ public sealed class COMActivator : IDisposable
         return new COMActivator(client);
     }
 
+    public string ProtocolSequence => m_client.Transport.ProtocolSequence;
+    public string Endpoint => m_client.Transport.Endpoint;
+
     public void Dispose()
     {
         m_client.Dispose();

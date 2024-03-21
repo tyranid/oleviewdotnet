@@ -55,7 +55,7 @@ public sealed class SpecialSystemProperties : IActivationProperty
     }
     public ProcessRequestType PRTFlags { get => (ProcessRequestType)m_inner.dwPRTFlags; set => m_inner.dwPRTFlags = (int)value; }
     public CLSCTX OrigClsctx { get => (CLSCTX)m_inner.dwOrigClsctx; set => m_inner.dwOrigClsctx = (int)value; }
-    public SPD_FLAGS Flags { get => (SPD_FLAGS)m_inner.dwFlags; set => m_inner.dwFlags = (int)value; }
+    public SpecialSystemPropertiesFlags Flags { get => (SpecialSystemPropertiesFlags)m_inner.dwFlags; set => m_inner.dwFlags = (int)value; }
     public int Pid { get => m_inner.dwPid; set => m_inner.dwPid = value; }
     public long Hwnd { get => m_inner.hwnd; set => m_inner.hwnd = value; }
     public int ServiceId { get => m_inner.ulServiceId; set => m_inner.ulServiceId = value; }

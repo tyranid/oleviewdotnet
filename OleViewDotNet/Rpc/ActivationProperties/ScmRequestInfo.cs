@@ -99,6 +99,13 @@ public sealed class ScmRequestInfo : IActivationProperty
         SetWinstaDesktop($"{winsta.Name}\\{desktop.Name}");
     }
 
+    public void SetPrivateScmInfoFromCurrentProcess()
+    {
+        SetProcessSignatureFromCurrentProcess();
+        SetEnvironmentBlockFromCurrentProcess();
+        SetWinstaDesktopFromCurrentProcess();
+    }
+
     public byte[] Serialize()
     {
         m_inner.pScmInfo = PrivateInfo?.ToStruct();

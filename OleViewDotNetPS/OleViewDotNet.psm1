@@ -3656,3 +3656,72 @@ OleViewDotNet.Utilities.COMStandardActivator
 function New-ComStandardActivator {
     [OleViewDotNet.Utilities.COMStandardActivator]::new()
 }
+
+<#
+.SYNOPSIS
+Gets a connected COM activator for this client.
+.DESCRIPTION
+This cmdlet creates and connects a COM activator client. This can either be local or remote.
+.PARAMETER Hostname
+The hostname to connect to.
+.OUTPUTS
+OleViewDotNet.Rpc.COMActivator
+#>
+function New-ComActivator {
+    [CmdletBinding(DefaultParameterSetName = "LocalActivator")]
+    Param(
+        [parameter(Mandatory, Position=0, ParameterSetName="RemoteActivator")]
+        [string]$Hostname
+    )
+
+    if ($PSCmdlet.ParameterSetName -eq "RemoteActivator") {
+        [OleViewDotNet.Rpc.COMActivator]::Connect($Hostname)
+    } else {
+        [OleViewDotNet.Rpc.COMActivator]::Connect()
+    }
+}
+
+<#
+.SYNOPSIS
+Creates a new activation properties in structure to send to a COM activator.
+.DESCRIPTION
+This cmdlet creates a new activation properties in structure to send to a COM activator.
+.PARAMETER Clsid
+Specify the clsid for initialization.
+.PARAMETER ClassContext
+Specify the class context.
+.PARAMETER ActivationFlags
+Specify activation flags.
+.PARAMETER InitLocalScmRequestInfo
+Specify to intialize the SCM request for a local call. Needs symbols configured.
+.PARAMETER Iid
+Specify a list of IIDs to request.
+.OUTPUTS
+OleViewDotNet.Rpc.ActivationProperties.ActivationPropertiesIn
+#>
+function New-ComActivationProperties {
+    [CmdletBinding(DefaultParameterSetName = "Default")]
+    Param(
+        [parameter(ParameterSetName="FromClsid")]
+        [Guid]$Clsid = [guid]::Empty,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [OleViewDotNet.Interop.CLSCTX]$ClassContext = "LOCAL_SERVER",
+        [Parameter(ParameterSetName = "FromClsid")]
+        [OleViewDotNet.Rpc.ActivationProperties.ActivationFlags]$ActivationFlags = 0,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [switch]$InitLocalScmRequestInfo,
+        [Parameter(ParameterSetName = "FromClsid")]
+        [guid[]]$Iid = @()
+    )
+
+    $props = [OleViewDotNet.Rpc.ActivationProperties.ActivationPropertiesIn]::new()
+    if ($PSCmdlet.ParameterSetName -eq "FromClsid") {
+        $props.SetClass($Clsid, $ClassContext)
+        $props.SetActivationFlags($ActivationFlags)
+        $props.AddIids($Iid)
+        if ($InitLocalScmRequestInfo) {
+            $props.ScmRequestInfo.SetPrivateScmInfoFromCurrentProcess()
+        }
+    }
+    $props
+}
