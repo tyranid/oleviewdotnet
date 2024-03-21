@@ -85,7 +85,7 @@ internal sealed class RpcCOMClientTransport : IRpcClientTransport
         m_remote_object?.Dispose();
     }
 
-    public RpcClientResponse SendReceive(int proc_num, Guid objuuid, NdrDataRepresentation data_representation, byte[] ndr_buffer, IReadOnlyCollection<NtObject> handles)
+    public RpcClientResponse SendReceive(int proc_num, Guid objuuid, NdrDataRepresentation data_representation, byte[] ndr_buffer, IReadOnlyCollection<NdrSystemHandle> handles)
     {
         NdrMarshalBuffer marshal = new();
         ORPCTHIS orpc_this = new()
