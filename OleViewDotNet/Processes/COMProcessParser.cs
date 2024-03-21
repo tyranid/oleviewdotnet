@@ -271,7 +271,7 @@ public static class COMProcessParser
             do
             {
                 var objs = map(next_obj, process, resolver, config, registry);
-                if (objs != null)
+                if (objs is not null)
                 {
                     entries.AddRange(objs);
                 }
@@ -288,10 +288,10 @@ public static class COMProcessParser
     {
         int pid = process.ProcessId;
         var stdid = obj.GetStdIdentity(process);
-        if (stdid != null && (stdid.GetFlags() & SMFLAGS.SMFLAGS_CLIENT_SIDE) != 0)
+        if (stdid is not null && (stdid.GetFlags() & SMFLAGS.SMFLAGS_CLIENT_SIDE) != 0)
         {
             var ipid = stdid.GetFirstIpid(process);
-            while (ipid != null)
+            while (ipid is not null)
             {
                 if (pid != COMUtilities.GetProcessIdFromIPid(ipid.Ipid))
                 {
@@ -389,7 +389,7 @@ public static class COMProcessParser
         {
             ICLSvrClassEntry entry = ReadCLSvrClassEntry(process, next);
             var class_entry = entry.GetClassEntry(process);
-            if (class_entry != null)
+            if (class_entry is not null)
             {
                 IntPtr vtable_ptr = ReadPointer(process, entry.GetIUnknown());
                 string vtable = resolver.GetModuleRelativeAddress(vtable_ptr);
@@ -711,7 +711,7 @@ public static class COMProcessParser
                         100 * current_count++ / total_count));
                 COMProcessEntry proc = ParseProcess(p.Id,
                     config, registry, ipids);
-                if (proc != null)
+                if (proc is not null)
                 {
                     ret.Add(proc);
                 }

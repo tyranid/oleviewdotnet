@@ -49,7 +49,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
     /// </summary>
     public COMThreadingModel ThreadingModel { get; private set; }
     public COMCLSIDServerDotNetEntry DotNet { get; private set; }
-    public bool HasDotNet => DotNet != null;
+    public bool HasDotNet => DotNet is not null;
     public string RawServer { get; private set; }
 
     public override bool Equals(object obj)
@@ -218,7 +218,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
         else if (server_type == COMServerType.InProcServer32)
         {
             ThreadingModel = ReadThreadingModel(key);
-            if (key.GetValue("Assembly") != null)
+            if (key.GetValue("Assembly") is not null)
             {
                 DotNet = new COMCLSIDServerDotNetEntry(key);
             }
@@ -258,7 +258,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
         writer.WriteEnum("type", ServerType);
         writer.WriteEnum("model", ThreadingModel);
         writer.WriteOptionalAttributeString("rawserver", RawServer);
-        if (DotNet != null)
+        if (DotNet is not null)
         {
             writer.WriteBool("dotnet", true);
             writer.WriteSerializableObjects("dotnet", 

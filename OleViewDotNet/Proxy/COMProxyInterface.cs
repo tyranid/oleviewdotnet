@@ -132,7 +132,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     public static COMProxyInterface GetFromIID(COMInterfaceEntry intf)
     {
-        if (intf == null || !intf.HasProxy)
+        if (intf is null || !intf.HasProxy)
         {
             throw new ArgumentException($"Interface {intf.Name} doesn't have a registered proxy");
         }

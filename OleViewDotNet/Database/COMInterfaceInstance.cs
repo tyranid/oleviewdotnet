@@ -35,7 +35,7 @@ public class COMInterfaceInstance : IXmlSerializable, ICOMSourceCodeFormattable
     {
         get
         {
-            if (m_registry == null || !m_registry.InterfacesToNames.ContainsKey(Iid))
+            if (m_registry is null || !m_registry.InterfacesToNames.ContainsKey(Iid))
             {
                 return string.Empty;
             }

@@ -45,7 +45,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         using (RegistryKey activatable_key = Registry.LocalMachine.OpenSubKey(
             @"SOFTWARE\Microsoft\WindowsRuntime\AllowedCOMCLSIDs"))
         {
-            if (activatable_key != null)
+            if (activatable_key is not null)
             {
                 foreach (string clsid in activatable_key.GetSubKeyNames())
                 {
@@ -69,7 +69,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     private COMCLSIDServerEntry ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
     {
         using RegistryKey server_key = key.OpenSubKey(server_type.ToString());
-        if (server_key == null)
+        if (server_key is null)
         {
             return null;
         }
@@ -103,7 +103,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         ReadServerKey(servers, key, COMServerType.InProcHandler32);
         Servers = new ReadOnlyDictionary<COMServerType, COMCLSIDServerEntry>(servers);
 
-        if (fake_name && inproc_server != null && inproc_server.HasDotNet)
+        if (fake_name && inproc_server is not null && inproc_server.HasDotNet)
         {
             Name = $"{inproc_server.DotNet.ClassName}, {inproc_server.DotNet.AssemblyName}";
         }
@@ -138,7 +138,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
         using (RegistryKey catkey = key.OpenSubKey("Implemented Categories"))
         {
-            if (catkey != null)
+            if (catkey is not null)
             {
                 string[] subKeys = catkey.GetSubKeyNames();
                 foreach (string s in subKeys)
@@ -157,7 +157,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         using (RegistryKey elev_key = key.OpenSubKey("Elevation"),
             vso_key = key.OpenSubKey("VirtualServerObjects"))
         {
-            if (elev_key != null)
+            if (elev_key is not null)
             {
                 using var base_key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,
                     Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Default);
@@ -170,7 +170,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         ActivatableFromApp = _app_activatable.Contains(Clsid);
         using (RegistryKey trustkey = Registry.LocalMachine.OpenSubKey(@"Software\Classes\Unmarshalers\System\" + Clsid.ToString("B")))
         {
-            TrustedMarshaller = trustkey != null || categories.Contains(COMCategory.CATID_TrustedMarshaler);
+            TrustedMarshaller = trustkey is not null || categories.Contains(COMCategory.CATID_TrustedMarshaler);
         }
 
         Source = key.GetSource();
@@ -282,7 +282,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public COMAppIDEntry AppIDEntry => Database.AppIDs.GetGuidEntry(AppID);
 
-    public bool HasAppID => AppIDEntry != null;
+    public bool HasAppID => AppIDEntry is not null;
 
     public Guid TypeLib { get; private set; }
 
@@ -290,7 +290,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     public bool HasTypeLib => TypeLib != Guid.Empty;
 
-    public bool CanElevate => Elevation != null && Elevation.Enabled;
+    public bool CanElevate => Elevation is not null && Elevation.Enabled;
 
     public bool AutoElevation => CanElevate && Elevation.AutoApproval;
 
@@ -303,7 +303,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         get; private set;
     }
 
-    public IEnumerable<COMCategory> CategoryEntries => Categories.Select(c => Database.ImplementedCategories.GetGuidEntry(c)).Where(c => c != null);
+    public IEnumerable<COMCategory> CategoryEntries => Categories.Select(c => Database.ImplementedCategories.GetGuidEntry(c)).Where(c => c is not null);
 
     public IEnumerable<string> ProgIds => ProgIdEntries.Select(p => p.ProgID);
 
@@ -379,14 +379,14 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             return false;
         }
 
-        if (Elevation != null)
+        if (Elevation is not null)
         {
             if (!Elevation.Equals(right.Elevation))
             {
                 return false;
             }
         }
-        else if (right.Elevation != null)
+        else if (right.Elevation is not null)
         {
             return false;
         }
@@ -626,9 +626,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
 
     Guid ICOMGuid.ComGuid => Clsid;
 
-    bool ICOMSourceCodeParsable.IsSourceCodeParsed => m_formattable != null;
+    bool ICOMSourceCodeParsable.IsSourceCodeParsed => m_formattable is not null;
 
-    bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() != null;
+    bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() is not null;
 
     public override string ToString()
     {
@@ -680,7 +680,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         writer.WriteBool("loaded", InterfacesLoaded);
         writer.WriteBool("activatable", ActivatableFromApp);
         writer.WriteBool("trusted", TrustedMarshaller);
-        writer.WriteBool("elevate", Elevation != null);
+        writer.WriteBool("elevate", Elevation is not null);
         writer.WriteEnum("src", Source);
         writer.WriteOptionalAttributeString("pkg", PackageId);
         writer.WriteOptionalAttributeString("name", Name);
@@ -690,7 +690,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             writer.WriteSerializableObjects("facts", m_factory_interfaces);
         }
         writer.WriteSerializableObjects("servers", Servers.Values);
-        if (Elevation != null)
+        if (Elevation is not null)
         {
             writer.WriteSerializableObjects("elevation", new COMCLSIDElevationEntry[] { Elevation });
         }
@@ -706,7 +706,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         try
         {
             var type_lib_version = TypeLibEntry?.Versions.FirstOrDefault();
-            if (type_lib_version != null)
+            if (type_lib_version is not null)
             {
                 var typelib = type_lib_version.Parse()
                     ?? throw new ArgumentException("Can't find a type library.");

@@ -149,7 +149,7 @@ internal class RegistryViewerFilterEntry
 
             PropertyInfo pi = RegistryViewerFilter.GetFieldForTypeAndName(Type, Field);
             object value_obj = pi.GetValue(entry);
-            if (value_obj == null)
+            if (value_obj is null)
             {
                 return false;
             }
@@ -192,7 +192,7 @@ internal class RegistryViewerFilter : IRegistryViewerFilter
 
     private FilterResult Filter(object entry)
     {
-        if (entry != null)
+        if (entry is not null)
         {
             foreach (var filter in Filters.Where(f => f.Enabled && f.Decision == FilterDecision.Exclude))
             {
@@ -257,7 +257,7 @@ internal class RegistryViewerFilter : IRegistryViewerFilter
     public static PropertyInfo GetFieldForTypeAndName(FilterType type, string name)
     {
         PropertyInfo pi = GetTypeForFilter(type).GetProperty(name);
-        if (pi == null || !IsFilterProperty(pi))
+        if (pi is null || !IsFilterProperty(pi))
         {
             throw new ArgumentException("Invalid field for filter", nameof(name));
         }

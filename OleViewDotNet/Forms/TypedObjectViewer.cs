@@ -140,7 +140,7 @@ internal partial class TypedObjectViewer : UserControl
                     val = null;
                 }
 
-                if (val != null)
+                if (val is not null)
                 {
                     item.SubItems.Add(val.ToString());
                 }
@@ -184,7 +184,7 @@ internal partial class TypedObjectViewer : UserControl
                 val = null;
             }
 
-            if (val != null)
+            if (val is not null)
             {
                 item.SubItems[2].Text = val.ToString();
             }
@@ -225,7 +225,7 @@ internal partial class TypedObjectViewer : UserControl
                     val = null;
                 }
 
-                if (val != null)
+                if (val is not null)
                 {
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, val, pi.PropertyType));
                 }

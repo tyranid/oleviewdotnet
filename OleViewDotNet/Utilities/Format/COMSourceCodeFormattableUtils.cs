@@ -22,7 +22,7 @@ internal static class COMSourceCodeFormattableUtils
 {
     public static SourceCodeFormattableType ToFormattable(this Type type)
     {
-        if (type == null)
+        if (type is null)
             return null;
         if (type is SourceCodeFormattableType formattable)
             return formattable;

@@ -68,7 +68,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         Types = types.AsReadOnly();
         var interfaces = types.OfType<COMTypeLibInterface>().ToDictionary(i => i.Uuid);
         var dispatch = Types.OfType<COMTypeLibDispatch>().ToList();
-        foreach (var disp in dispatch.Where(d => d.DualInterface != null))
+        foreach (var disp in dispatch.Where(d => d.DualInterface is not null))
         {
             if (!interfaces.ContainsKey(disp.DualInterface.Uuid))
             {

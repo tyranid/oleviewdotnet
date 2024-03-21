@@ -45,7 +45,7 @@ internal partial class MarshalEditorControl : UserControl
             ctl = new CustomMarshalEditorControl(registry, (COMObjRefCustom)objref);
         }
 
-        if (ctl != null)
+        if (ctl is not null)
         {
             tableLayoutPanel.Controls.Add(ctl, 0, 1);
             tableLayoutPanel.SetColumnSpan(ctl, tableLayoutPanel.ColumnCount);

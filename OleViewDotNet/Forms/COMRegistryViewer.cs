@@ -72,7 +72,7 @@ internal partial class COMRegistryViewer : UserControl
             {
                 return string.Compare(x.Text, y.Text);
             }
-            if (x.Tag == null)
+            if (x.Tag is null)
                 return -1;
             return 1;
         }
@@ -215,7 +215,7 @@ internal partial class COMRegistryViewer : UserControl
             SelectedImageKey = image_key,
             Tag = tag ?? new object()
         };
-        if (tooltip != null)
+        if (tooltip is not null)
         {
             node.ToolTipText = tooltip;
         }
@@ -356,7 +356,7 @@ internal partial class COMRegistryViewer : UserControl
     {
         string strRet;
         COMCLSIDEntry entry = registry.MapClsidToEntry(ent.Clsid);
-        if (entry != null)
+        if (entry is not null)
         {
             strRet = BuildCLSIDToolTip(registry, entry);
         }
@@ -378,7 +378,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             builder.AppendLine($"ProxyCLSID: {ent.ProxyClsid.FormatGuid()}");
         }
-        if (instance != null && instance.Module != null)
+        if (instance is not null && instance.Module is not null)
         {
             builder.AppendLine($"VTable Address: {instance.Module}+0x{instance.VTableOffset:X}");
         }
@@ -427,7 +427,7 @@ internal partial class COMRegistryViewer : UserControl
         foreach (var group in registry.RuntimeClasses.Values.GroupBy(p => p.Server.ToLower()))
         {
             COMRuntimeServerEntry server = registry.MapServerNameToEntry(group.Key);
-            if (server == null)
+            if (server is null)
             {
                 continue;
             }
@@ -620,7 +620,7 @@ internal partial class COMRegistryViewer : UserControl
                     if (curr_server.AppIdHosted)
                     {
                         var local_service = entry.AppIDEntry?.LocalService;
-                        if (local_service == null)
+                        if (local_service is null)
                             continue;
                         if (!string.IsNullOrEmpty(local_service.ServiceDll))
                         {
@@ -718,7 +718,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private static string LimitString(string s, int max)
     {
-        if (s == null)
+        if (s is null)
             return string.Empty;
         if (s.Length > max)
         {
@@ -857,7 +857,7 @@ internal partial class COMRegistryViewer : UserControl
             StringBuilder tooltip = new();
             List<COMCLSIDEntry> clsids = new();
             COMCLSIDEntry entry = ent.ClassEntry;
-            if (entry != null)
+            if (entry is not null)
             {
                 clsids.Add(entry);
             }
@@ -1039,7 +1039,7 @@ internal partial class COMRegistryViewer : UserControl
                 }
 
                 var typelib = m_registry.MapClsidToEntry(clsid.Clsid)?.TypeLibEntry;
-                if (typelib != null)
+                if (typelib is not null)
                 {
                     TreeNode typelib_node = CreateNode("Typelib", ProcessKey, typelib);
                     typelib_node.Nodes.AddRange(typelib.Versions.Select(v => CreateTypelibVersionNode(v)).ToArray());
@@ -1274,12 +1274,12 @@ internal partial class COMRegistryViewer : UserControl
     private async Task CreateInstance(CLSCTX clsctx, string server)
     {
         ICOMClassEntry ent = GetSelectedClassEntry();
-        if (ent == null)
+        if (ent is null)
             return;
         try
         {
             object comObj = ent.CreateInstanceAsObject(clsctx, server);
-            if (comObj != null)
+            if (comObj is not null)
             {
                 await SetupObjectView(ent, comObj, false);
             }
@@ -1293,12 +1293,12 @@ internal partial class COMRegistryViewer : UserControl
     private async Task CreateClassFactory(string server)
     {
         ICOMClassEntry ent = GetSelectedClassEntry();
-        if (ent == null)
+        if (ent is null)
             return;
         try
         {
             object comObj = ent.CreateClassFactory(CLSCTX.ALL, server);
-            if (comObj != null)
+            if (comObj is not null)
             {
                 await SetupObjectView(ent, comObj, true);
             }
@@ -1342,7 +1342,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private static bool HasServerType(COMCLSIDEntry clsid, COMServerType type)
     {
-        if (clsid == null)
+        if (clsid is null)
         {
             return false;
         }
@@ -1360,7 +1360,7 @@ internal partial class COMRegistryViewer : UserControl
     {
         TreeNode node = treeComRegistry.SelectedNode;
 
-        if ((node != null) && (node.Tag != null))
+        if ((node is not null) && (node.Tag is not null))
         {
             contextMenuStrip.Items.Clear();
             contextMenuStrip.Items.Add(copyToolStripMenuItem);
@@ -1414,12 +1414,12 @@ internal partial class COMRegistryViewer : UserControl
                 }
 
                 createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryToolStripMenuItem);
-                if (entry != null && entry.SupportsRemoteActivation)
+                if (entry is not null && entry.SupportsRemoteActivation)
                 {
                     createSpecialToolStripMenuItem.DropDownItems.Add(createClassFactoryRemoteToolStripMenuItem);
                 }
 
-                if (runtime_class != null && runtime_class.TrustLevel == TrustLevel.PartialTrust)
+                if (runtime_class is not null && runtime_class.TrustLevel == TrustLevel.PartialTrust)
                 {
                     createSpecialToolStripMenuItem.DropDownItems.Add(createInRuntimeBrokerToolStripMenuItem);
                     createSpecialToolStripMenuItem.DropDownItems.Add(createInPerUserRuntimeBrokerToolStripMenuItem);
@@ -1430,7 +1430,7 @@ internal partial class COMRegistryViewer : UserControl
                 contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                 contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
-                if (clsid != null)
+                if (clsid is not null)
                 {
                     if (m_registry.Typelibs.ContainsKey(clsid.TypeLib))
                     {
@@ -1448,12 +1448,12 @@ internal partial class COMRegistryViewer : UserControl
                     }
                 }
 
-                if (runtime_class != null)
+                if (runtime_class is not null)
                 {
                     COMRuntimeServerEntry server =
                         runtime_class.HasServer
                             ? m_registry.MapServerNameToEntry(runtime_class.Server) : null;
-                    if (runtime_class.HasPermission || (server != null && server.HasPermission))
+                    if (runtime_class.HasPermission || (server is not null && server.HasPermission))
                     {
                         contextMenuStrip.Items.Add(viewAccessPermissionsToolStripMenuItem);
                     }
@@ -1526,7 +1526,7 @@ internal partial class COMRegistryViewer : UserControl
             if (treeComRegistry.Nodes.Count > 0)
             {
                 contextMenuStrip.Items.Add(cloneTreeToolStripMenuItem);
-                selectedToolStripMenuItem.Enabled = treeComRegistry.SelectedNode != null;
+                selectedToolStripMenuItem.Enabled = treeComRegistry.SelectedNode is not null;
             }
 
             if (PropertiesControl.SupportsProperties(node.Tag))
@@ -1545,7 +1545,7 @@ internal partial class COMRegistryViewer : UserControl
     private async void refreshInterfacesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             ICOMClassEntry class_entry = node.Tag as ICOMClassEntry;
 
@@ -1554,7 +1554,7 @@ internal partial class COMRegistryViewer : UserControl
                 class_entry = m_registry.MapClsidToEntry(typelib_class.Uuid);
             }
 
-            if (class_entry != null)
+            if (class_entry is not null)
             {
                 await SetupCLSIDNodeTree(class_entry, node, true);
             }
@@ -1742,13 +1742,13 @@ internal partial class COMRegistryViewer : UserControl
             else
             {
                 Func<string, bool> filterFunc = CreateFilter(textBoxFilter.Text, mode, false);
-                if (filterFunc != null)
+                if (filterFunc is not null)
                 {
                     filter = new RegistryViewerDisplayFilter(filterFunc);
                 }
             }
 
-            if (filter != null)
+            if (filter is not null)
             {
                 using (filter)
                 {
@@ -1799,7 +1799,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             TreeNode node = treeComRegistry.GetNodeAt(e.X, e.Y);
 
-            if (node != null)
+            if (node is not null)
             {
                 treeComRegistry.SelectedNode = node;
             }
@@ -1867,7 +1867,7 @@ internal partial class COMRegistryViewer : UserControl
     private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, node.Text, node.Tag));
         }
@@ -1876,7 +1876,7 @@ internal partial class COMRegistryViewer : UserControl
     private void ViewPermissions(bool access)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             if (node.Tag is COMProcessEntry proc)
             {
@@ -1886,8 +1886,8 @@ internal partial class COMRegistryViewer : UserControl
             {
                 COMRuntimeServerEntry runtime_server = node.Tag as COMRuntimeServerEntry;
                 COMRuntimeClassEntry runtime_class = node.Tag as COMRuntimeClassEntry;
-                string name = runtime_class != null ? runtime_class.Name : runtime_server.Name;
-                if (runtime_class != null && runtime_class.HasServer)
+                string name = runtime_class is not null ? runtime_class.Name : runtime_server.Name;
+                if (runtime_class is not null && runtime_class.HasServer)
                 {
                     runtime_server = m_registry.MapServerNameToEntry(runtime_class.Server);
                 }
@@ -1899,21 +1899,21 @@ internal partial class COMRegistryViewer : UserControl
             else
             {
                 COMAppIDEntry appid = node.Tag as COMAppIDEntry;
-                if (appid == null)
+                if (appid is null)
                 {
                     COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
-                    if (clsid == null && node.Tag is COMProgIDEntry prog_id)
+                    if (clsid is null && node.Tag is COMProgIDEntry prog_id)
                     {
                         clsid = m_registry.MapClsidToEntry(prog_id.Clsid);
                     }
 
-                    if (clsid != null && m_registry.AppIDs.ContainsKey(clsid.AppID))
+                    if (clsid is not null && m_registry.AppIDs.ContainsKey(clsid.AppID))
                     {
                         appid = m_registry.AppIDs[clsid.AppID];
                     }
                 }
 
-                if (appid != null)
+                if (appid is not null)
                 {
                     COMSecurity.ViewSecurity(m_registry, appid, access);
                 }
@@ -1975,7 +1975,7 @@ internal partial class COMRegistryViewer : UserControl
     private void copyToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             MiscUtilities.CopyTextToClipboard(node.Text);
         }
@@ -1984,11 +1984,11 @@ internal partial class COMRegistryViewer : UserControl
     private void viewProxyLibraryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             COMCLSIDEntry clsid = node.Tag as COMCLSIDEntry;
             Guid selected_iid = Guid.Empty;
-            if (clsid == null && (node.Tag is COMInterfaceEntry || node.Tag is COMIPIDEntry))
+            if (clsid is null && (node.Tag is COMInterfaceEntry || node.Tag is COMIPIDEntry))
             {
                 COMInterfaceEntry intf = node.Tag as COMInterfaceEntry;
                 intf ??= m_registry.MapIidToInterface(((COMIPIDEntry)node.Tag).Iid);
@@ -1997,7 +1997,7 @@ internal partial class COMRegistryViewer : UserControl
                 clsid = m_registry.Clsids[intf.ProxyClsid];
             }
 
-            if (clsid != null)
+            if (clsid is not null)
             {
                 try
                 {
@@ -2080,7 +2080,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private void comboBoxMode_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (comboBoxMode.SelectedItem != null)
+        if (comboBoxMode.SelectedItem is not null)
         {
             FilterMode mode = (FilterMode)comboBoxMode.SelectedItem;
             textBoxFilter.Enabled = mode != FilterMode.Complex && mode != FilterMode.Accessible && mode != FilterMode.NotAccessible;
@@ -2130,11 +2130,11 @@ internal partial class COMRegistryViewer : UserControl
     private void refreshProcessToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null && node.Tag is COMProcessEntry)
+        if (node is not null && node.Tag is COMProcessEntry)
         {
             COMProcessEntry process = (COMProcessEntry)node.Tag;
             process = COMProcessParser.ParseProcess(process.ProcessId, COMProcessParserConfig.Default, m_registry);
-            if (process == null)
+            if (process is null)
             {
                 treeComRegistry.Nodes.Remove(treeComRegistry.SelectedNode);
                 m_original_nodes = m_original_nodes.Where(n => n != node).ToArray();
@@ -2150,7 +2150,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private COMIPIDEntry GetSelectedIpid()
     {
-        if (treeComRegistry.SelectedNode != null)
+        if (treeComRegistry.SelectedNode is not null)
         {
             return treeComRegistry.SelectedNode.Tag as COMIPIDEntry;
         }
@@ -2160,7 +2160,7 @@ internal partial class COMRegistryViewer : UserControl
     private void toHexEditorToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry,
                 ipid.Ipid.ToString(),
@@ -2171,7 +2171,7 @@ internal partial class COMRegistryViewer : UserControl
     private void toFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             using SaveFileDialog dlg = new();
             dlg.Filter = "All Files (*.*)|*.*";
@@ -2192,7 +2192,7 @@ internal partial class COMRegistryViewer : UserControl
     private async void toObjectToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             try
             {
@@ -2230,7 +2230,7 @@ internal partial class COMRegistryViewer : UserControl
     private void selectedToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode selected = treeComRegistry.SelectedNode;
-        if (selected != null)
+        if (selected is not null)
         {
             CreateClonedTree(new TreeNode[] { selected });
         }
@@ -2259,7 +2259,7 @@ internal partial class COMRegistryViewer : UserControl
     private void allChildrenToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode selected = treeComRegistry.SelectedNode;
-        if (selected != null && selected.Nodes.Count > 0)
+        if (selected is not null && selected.Nodes.Count > 0)
         {
             CreateClonedTree(selected.Nodes.OfType<TreeNode>());
         }
@@ -2268,7 +2268,7 @@ internal partial class COMRegistryViewer : UserControl
     private void viewRuntimeInterfaceToolStripMenuItem_Click(object sender, EventArgs e)
     {
         TreeNode node = treeComRegistry.SelectedNode;
-        if (node != null)
+        if (node is not null)
         {
             if (node.Tag is COMInterfaceEntry ent && RuntimeMetadata.Interfaces.ContainsKey(ent.Iid))
             {
@@ -2354,7 +2354,7 @@ internal partial class COMRegistryViewer : UserControl
                 break;
             }
             curr_node = FindVisibleNode(node.Nodes.OfType<TreeNode>(), tag);
-            if (curr_node != null)
+            if (curr_node is not null)
             {
                 break;
             }

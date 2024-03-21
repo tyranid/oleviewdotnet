@@ -31,7 +31,7 @@ internal class InputTextBox : TextBox
         if (m.Msg == WM_PASTE)
         {
             EventHandler<ClipboardEventArgs> evt = TextPasted;
-            if (evt != null && Clipboard.ContainsText())
+            if (evt is not null && Clipboard.ContainsText())
             {
                 ClipboardEventArgs args = new(Clipboard.GetText());
 

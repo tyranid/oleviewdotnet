@@ -35,7 +35,7 @@ internal class COMPackagedRegistry
         Packages = packages;
 
         using var packageKey = rootKey.OpenSubKeySafe("Package");
-        if (packageKey == null)
+        if (packageKey is null)
         {
             return;
         }
@@ -43,7 +43,7 @@ internal class COMPackagedRegistry
         foreach (var packageName in packageKey.GetSubKeyNames())
         {
             using var packageNameKey = packageKey.OpenSubKeySafe(packageName);
-            if (packageNameKey != null)
+            if (packageNameKey is not null)
             {
                 packages[packageName] = new COMPackagedEntry(packageName, packageNameKey);
             }

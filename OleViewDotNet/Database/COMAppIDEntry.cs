@@ -72,7 +72,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         LaunchPermission = key.ReadSecurityDescriptor("LaunchPermission");
 
         DllSurrogate = key.GetValue("DllSurrogate") as string;
-        if (DllSurrogate != null)
+        if (DllSurrogate is not null)
         {
             if (string.IsNullOrWhiteSpace(DllSurrogate))
             {
@@ -93,7 +93,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         }
 
         object flags = key.GetValue("AppIDFlags");
-        if (flags != null)
+        if (flags is not null)
         {
             Flags = (COMAppIDFlags)flags;
         }
@@ -113,13 +113,13 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         }
 
         object rotflags = key.GetValue("ROTFlags");
-        if (rotflags != null && rotflags is int)
+        if (rotflags is not null && rotflags is int)
         {
             RotFlags = (COMAppIDRotFlags)rotflags;
         }
 
         object bitness = key.GetValue("PreferredServerBitness");
-        if (bitness != null && bitness is int)
+        if (bitness is not null && bitness is int)
         {
             PreferredServerBitness = (PreferredServerBitness)bitness;
         }
@@ -150,7 +150,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
     public COMAppIDFlags Flags { get; private set; }
 
-    public bool IsService => LocalService != null;
+    public bool IsService => LocalService is not null;
 
     public string ServiceName => IsService ? LocalService.Name : string.Empty;
 
@@ -168,9 +168,9 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         get; private set;
     }
 
-    public bool HasLaunchPermission => LaunchPermission != null;
+    public bool HasLaunchPermission => LaunchPermission is not null;
 
-    public bool HasAccessPermission => AccessPermission != null;
+    public bool HasAccessPermission => AccessPermission is not null;
 
     public bool HasPermission => HasLaunchPermission || HasAccessPermission;
 
@@ -229,14 +229,14 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             return false;
         }
 
-        if (LocalService != null)
+        if (LocalService is not null)
         {
             if (!LocalService.Equals(right.LocalService))
             {
                 return false;
             }
         }
-        else if (right.LocalService != null)
+        else if (right.LocalService is not null)
         {
             return false;
         }
@@ -298,7 +298,7 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
         writer.WriteEnum("rot", RotFlags);
         writer.WriteEnum("bit", PreferredServerBitness);
         writer.WriteEnum("src", Source);
-        if (LocalService != null)
+        if (LocalService is not null)
         {
             writer.WriteBool("service", true);
             writer.WriteSerializableObjects("service", new COMAppIDServiceEntry[] { LocalService });

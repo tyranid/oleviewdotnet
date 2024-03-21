@@ -148,7 +148,7 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     public string ExePath { get; private set; }
     public string ExeName => MiscUtilities.GetFileName(ExePath);
     public COMSecurityDescriptor Permissions { get; private set; }
-    public bool HasPermission => Permissions != null;
+    public bool HasPermission => Permissions is not null;
     public IdentityType IdentityType { get; private set; }
     public ServerType ServerType { get; private set; }
     public InstancingType InstancingType { get; private set; }

@@ -34,7 +34,7 @@ public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase
         var base_interface = ImplementedInterfaces.FirstOrDefault();
         builder.AppendAttributes(GetTypeAttributes("odl"));
         int last_offset = base_interface?.Methods.LastOrDefault()?.VTableOffset ?? -1;
-        if (base_interface == null)
+        if (base_interface is null)
         {
             builder.AppendLine($"interface {Name} {{");
         }

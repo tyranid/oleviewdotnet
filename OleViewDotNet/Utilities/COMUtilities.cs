@@ -60,7 +60,7 @@ public static class COMUtilities
 
     private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
-        if (m_typelibsname != null)
+        if (m_typelibsname is not null)
         {
             lock (m_typelibsname)
             {
@@ -120,7 +120,7 @@ public static class COMUtilities
 
         foreach (Type t in types)
         {
-            if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() == null)
+            if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() is null)
             {
                 InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
                 if (!m_iidtypes.ContainsKey(t.GUID))
@@ -135,7 +135,7 @@ public static class COMUtilities
     {
         foreach (Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
         {
-            if (t.GetCustomAttribute<ObsoleteAttribute>() != null)
+            if (t.GetCustomAttribute<ObsoleteAttribute>() is not null)
             {
                 continue;
             }
@@ -148,7 +148,7 @@ public static class COMUtilities
 
     public static Type GetInterfaceType(Guid iid, COMRegistry registry)
     {
-        if (registry != null && registry.Interfaces.ContainsKey(iid))
+        if (registry is not null && registry.Interfaces.ContainsKey(iid))
         {
             return GetInterfaceType(registry.Interfaces[iid]);
         }
@@ -158,7 +158,7 @@ public static class COMUtilities
 
     public static Type GetInterfaceType(Guid iid)
     {
-        if (m_iidtypes == null)
+        if (m_iidtypes is null)
         {
             LoadTypeLibAssemblies();
         }
@@ -173,18 +173,18 @@ public static class COMUtilities
 
     public static Type GetInterfaceType(COMInterfaceEntry intf)
     {
-        if (intf == null)
+        if (intf is null)
         {
             return null;
         }
 
         Type type = GetInterfaceType(intf.Iid);
-        if (type != null)
+        if (type is not null)
         {
             return type;
         }
 
-        if (intf.ProxyClassEntry == null)
+        if (intf.ProxyClassEntry is null)
         {
             return null;
         }
@@ -195,20 +195,20 @@ public static class COMUtilities
 
     public static Type GetInterfaceType(COMIPIDEntry ipid)
     {
-        if (ipid == null)
+        if (ipid is null)
         {
             return null;
         }
 
         Type type = GetInterfaceType(ipid.Iid);
-        if (type != null)
+        if (type is not null)
         {
             return type;
         }
 
         COMProxyFile proxy = ipid.ToProxyInstance();
 
-        if (proxy == null)
+        if (proxy is null)
         {
             return null;
         }
@@ -219,7 +219,7 @@ public static class COMUtilities
 
     public static void LoadTypesFromAssembly(Assembly assembly)
     {
-        if (m_iidtypes == null)
+        if (m_iidtypes is null)
         {
             LoadTypeLibAssemblies();
         }
@@ -229,7 +229,7 @@ public static class COMUtilities
 
     public static void LoadTypeLibAssemblies()
     {
-        if (m_typelibs == null)
+        if (m_typelibs is null)
         {
             try
             {
@@ -292,7 +292,7 @@ public static class COMUtilities
         }
         finally
         {
-            if (typeLib != null)
+            if (typeLib is not null)
             {
                 Marshal.ReleaseComObject(typeLib);
             }
@@ -307,7 +307,7 @@ public static class COMUtilities
         }
         finally
         {
-            if (typeLib != null)
+            if (typeLib is not null)
             {
                 Marshal.ReleaseComObject(typeLib);
             }
@@ -316,7 +316,7 @@ public static class COMUtilities
 
     public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
     {
-        if (m_typelibs == null)
+        if (m_typelibs is null)
         {
             progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
@@ -350,7 +350,7 @@ public static class COMUtilities
 
     private static void ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, string output_path, IProgress<Tuple<string, int>> progress)
     {
-        if (m_typelibs == null)
+        if (m_typelibs is null)
         {
             progress?.Report(Tuple.Create("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
@@ -378,7 +378,7 @@ public static class COMUtilities
 
     public static Assembly ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, IProgress<Tuple<string, int>> progress)
     {
-        if (m_typelibs == null)
+        if (m_typelibs is null)
         {
             progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
             LoadTypeLibAssemblies();
@@ -426,7 +426,7 @@ public static class COMUtilities
                     Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
                     Assembly asm = LoadTypeLib(parent, tl);
 
-                    if (asm != null)
+                    if (asm is not null)
                     {
                         string name = Marshal.GetTypeInfoName(ti);
                         ret = asm.GetTypes().First(t => t.Name == name);
@@ -633,7 +633,7 @@ public static class COMUtilities
             else
             {
                 ret = results.CompiledAssembly.GetType(t.Name + "Wrapper");
-                if (ret != null)
+                if (ret is not null)
                 {
                     lock (_wrappers)
                     {
@@ -662,12 +662,12 @@ public static class COMUtilities
             }
         }
 
-        if (instanceType == null)
+        if (instanceType is null)
         {
             instanceType = CreateWrapper(t);
         }
 
-        if (instanceType != null)
+        if (instanceType is not null)
         {
             return Activator.CreateInstance(instanceType, target);
         }
@@ -1004,7 +1004,7 @@ public static class COMUtilities
         {
             return (Assembly)dlg.Result;
         }
-        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -1020,7 +1020,7 @@ public static class COMUtilities
         {
             return (Assembly)dlg.Result;
         }
-        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -1035,7 +1035,7 @@ public static class COMUtilities
         {
             return (IEnumerable<COMProcessEntry>)dlg.Result;
         }
-        else if (dlg.Error != null && dlg.Error is not OperationCanceledException)
+        else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
         {
             EntryPoint.ShowError(window, dlg.Error);
         }
@@ -1283,7 +1283,7 @@ public static class COMUtilities
         using var auth_info_buffer = auth_info?.ToBuffer(list);
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server, auth_info_buffer) : null;
 
-        int hr = NativeMethods.CoGetClassObject(clsid, server_info != null ? CLSCTX.REMOTE_SERVER
+        int hr = NativeMethods.CoGetClassObject(clsid, server_info is not null ? CLSCTX.REMOTE_SERVER
             : context, server_info, iid, out IntPtr obj);
         if (hr != 0)
         {

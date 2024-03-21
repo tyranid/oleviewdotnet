@@ -188,7 +188,7 @@ internal partial class PropertiesControl : UserControl
 
         SetupTypeLibVersionEntry(m_registry.GetTypeLibVersionEntry(entry.TypeLib, null));
 
-        if (entry.Elevation != null)
+        if (entry.Elevation is not null)
         {
             textBoxElevationEnabled.Text = entry.Elevation.Enabled.ToString();
             textBoxElevationAutoApproval.Text = entry.Elevation.AutoApproval.ToString();
@@ -276,7 +276,7 @@ internal partial class PropertiesControl : UserControl
         }
 
         COMRuntimeServerEntry server = m_registry.MapRuntimeClassToServerEntry(entry);
-        if (server != null)
+        if (server is not null)
         {
             SetupRuntimeServerEntry(server, !entry.HasPermission);
         }
@@ -363,7 +363,7 @@ internal partial class PropertiesControl : UserControl
         tabControlProperties.TabPages.Add(tabPageProcess);
         if (m_registry.AppIDs.ContainsKey(obj.AppId))
         {
-            SetupAppIdEntry(m_registry.AppIDs[obj.AppId], obj.AccessPermissions == null);
+            SetupAppIdEntry(m_registry.AppIDs[obj.AppId], obj.AccessPermissions is null);
         }
         if (obj.Classes.Any())
         {
@@ -383,7 +383,7 @@ internal partial class PropertiesControl : UserControl
             listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listViewRegisteredClasses.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
-        if (obj.AccessPermissions != null)
+        if (obj.AccessPermissions is not null)
         {
             tabControlProperties.TabPages.Add(tabPageAccessSecurity);
             COMSecurity.SetupSecurityDescriptorControl(securityDescriptorViewerAccessSecurity, obj.AccessPermissions, true);
@@ -412,7 +412,7 @@ internal partial class PropertiesControl : UserControl
             item.SubItems.Add(method.Name);
             item.SubItems.Add(method.Address);
             item.SubItems.Add(method.Symbol);
-            int count = method.Procedure != null ? method.Procedure.Params.Count : 0;
+            int count = method.Procedure is not null ? method.Procedure.Params.Count : 0;
             if (i == 0)
             {
                 count = 3;
@@ -429,7 +429,7 @@ internal partial class PropertiesControl : UserControl
 
     private void SetupTypeLibVersionEntry(COMTypeLibVersionEntry entry)
     {
-        if (entry == null)
+        if (entry is null)
         {
             return;
         }
@@ -505,7 +505,7 @@ internal partial class PropertiesControl : UserControl
         try
         {
             object comObj = m_clsid.CreateInstanceAsObject(m_clsid.CreateContext, null);
-            if (comObj != null)
+            if (comObj is not null)
             {
                 await EntryPoint.GetMainForm(m_registry).HostObject(m_clsid, comObj, false);
             }
@@ -528,7 +528,7 @@ internal partial class PropertiesControl : UserControl
 
     private async void btnOpenTypeLib_Click(object sender, EventArgs e)
     {
-        if (m_typelib != null)
+        if (m_typelib is not null)
         {
             try
             {
@@ -557,7 +557,7 @@ internal partial class PropertiesControl : UserControl
 
     private void CopyIID(ListView view, GuidFormat type)
     {
-        if (view != null && view.SelectedIndices.Count > 0)
+        if (view is not null && view.SelectedIndices.Count > 0)
         {
             ListViewItem item = view.SelectedItems[0];
             Tuple<COMInterfaceInstance, COMInterfaceEntry> intf = item.Tag as Tuple<COMInterfaceInstance, COMInterfaceEntry>;
@@ -589,7 +589,7 @@ internal partial class PropertiesControl : UserControl
             menu = item.Owner as ContextMenuStrip;
         }
 
-        if (menu != null)
+        if (menu is not null)
         {
             return menu.SourceControl as ListView;
         }
@@ -599,7 +599,7 @@ internal partial class PropertiesControl : UserControl
     private void contextMenuStripInterfaces_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
         ListView view = GetListViewForMenu(sender);
-        if (view != null && view.SelectedIndices.Count > 0)
+        if (view is not null && view.SelectedIndices.Count > 0)
         {
             ListViewItem item = view.SelectedItems[0];
             Tuple<COMInterfaceInstance, COMInterfaceEntry> intf =
@@ -617,7 +617,7 @@ internal partial class PropertiesControl : UserControl
         try
         {
             ListView view = GetListViewForMenu(sender);
-            if (view != null && view.SelectedIndices.Count > 0)
+            if (view is not null && view.SelectedIndices.Count > 0)
             {
                 ListViewItem item = view.SelectedItems[0];
                 Tuple<COMInterfaceInstance, COMInterfaceEntry> intf =
@@ -650,7 +650,7 @@ internal partial class PropertiesControl : UserControl
     private void copyInterfacePointerToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             MiscUtilities.CopyTextToClipboard($"0x{ipid.Interface.ToInt64():X}");
         }
@@ -659,7 +659,7 @@ internal partial class PropertiesControl : UserControl
     private void copyStubPointerToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             MiscUtilities.CopyTextToClipboard($"0x{ipid.Stub.ToInt64():X}");
         }
@@ -668,7 +668,7 @@ internal partial class PropertiesControl : UserControl
     private void toHexEditorToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new ObjectHexEditor(m_registry, ipid.Ipid.ToString(), ipid.ToObjref()));
         }
@@ -677,7 +677,7 @@ internal partial class PropertiesControl : UserControl
     private void toFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             using SaveFileDialog dlg = new();
             dlg.Filter = "All Files (*.*)|*.*";
@@ -698,7 +698,7 @@ internal partial class PropertiesControl : UserControl
     private async void toObjectToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             try
             {
@@ -729,7 +729,7 @@ internal partial class PropertiesControl : UserControl
 
     private void listView_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag is not null)
         {
             EntryPoint.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
         }
@@ -756,7 +756,7 @@ internal partial class PropertiesControl : UserControl
             }
 
             EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
-                    asm, m_clsid != null ? m_clsid.Clsid : Guid.Empty, true));
+                    asm, m_clsid is not null ? m_clsid.Clsid : Guid.Empty, true));
         }
         catch (Exception ex)
         {
@@ -772,7 +772,7 @@ internal partial class PropertiesControl : UserControl
     private void copyIPIDToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             MiscUtilities.CopyGuidToClipboard(ipid.Ipid, GuidFormat.String);
         }
@@ -781,7 +781,7 @@ internal partial class PropertiesControl : UserControl
     private void copyIPIDIIDToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             MiscUtilities.CopyGuidToClipboard(ipid.Iid, GuidFormat.String);
         }
@@ -790,7 +790,7 @@ internal partial class PropertiesControl : UserControl
     private void listViewProcessIPids_DoubleClick(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry,
                     $"IPID: {ipid.Ipid.FormatGuid()}", ipid));
@@ -812,7 +812,7 @@ internal partial class PropertiesControl : UserControl
         bool has_ndr = false;
         foreach (var method in m_ipid.Methods)
         {
-            if (method.Procedure != null)
+            if (method.Procedure is not null)
             {
                 has_ndr = true;
                 break;
@@ -841,7 +841,7 @@ internal partial class PropertiesControl : UserControl
     private void copyCLSIDToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMProcessClassRegistration c = GetRegisteredClass();
-        if (c != null)
+        if (c is not null)
         {
             MiscUtilities.CopyGuidToClipboard(c.Clsid, GuidFormat.String);
         }
@@ -850,7 +850,7 @@ internal partial class PropertiesControl : UserControl
     private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMProcessClassRegistration c = GetRegisteredClass();
-        if (c != null && m_registry.Clsids.ContainsKey(c.Clsid))
+        if (c is not null && m_registry.Clsids.ContainsKey(c.Clsid))
         {
             COMCLSIDEntry clsid = m_registry.MapClsidToEntry(c.Clsid);
             EntryPoint.GetMainForm(m_registry).HostControl(new PropertiesControl(m_registry, clsid.Name, clsid));
@@ -860,13 +860,13 @@ internal partial class PropertiesControl : UserControl
     private void contextMenuStripRegisteredClasses_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
         COMProcessClassRegistration c = GetRegisteredClass();
-        propertiesToolStripMenuItem.Visible = c != null && m_registry.Clsids.ContainsKey(c.Clsid);
+        propertiesToolStripMenuItem.Visible = c is not null && m_registry.Clsids.ContainsKey(c.Clsid);
     }
 
     private void toClipboardToolStripMenuItem_Click(object sender, EventArgs e)
     {
         COMIPIDEntry ipid = GetSelectedIpid();
-        if (ipid != null)
+        if (ipid is not null)
         {
             var objref = $"objref:{Convert.ToBase64String(ipid.ToObjref())}:";
             MiscUtilities.CopyTextToClipboard(objref);
@@ -876,7 +876,7 @@ internal partial class PropertiesControl : UserControl
     private async Task CreateInstance(bool class_factory)
     {
         COMProcessClassRegistration c = GetRegisteredClass();
-        if (c != null)
+        if (c is not null)
         {
             await EntryPoint.GetMainForm(m_registry).CreateInstanceFromCLSID(c.Clsid, CLSCTX.LOCAL_SERVER, class_factory);
         }

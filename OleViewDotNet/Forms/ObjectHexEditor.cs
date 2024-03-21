@@ -31,7 +31,7 @@ internal partial class ObjectHexEditor : UserControl
     {
         InitializeComponent();
         hexEditor.Bytes = bytes;
-        if (name != null)
+        if (name is not null)
         {
             Text = name;
         }

@@ -38,7 +38,7 @@ internal partial class ElevatedFactoryServerTypeViewer : UserControl
         _name = objName;
         _registry = registry;
         _entry = entry;
-        if (_entry != null && _entry.Elevation != null)
+        if (_entry is not null && _entry.Elevation is not null)
         {
             foreach (COMCLSIDEntry vso in _entry.Elevation.VirtualServerObjects.Select(v => registry.MapClsidToEntry(v)))
             {

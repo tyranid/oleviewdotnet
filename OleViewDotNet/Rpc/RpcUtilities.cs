@@ -82,14 +82,14 @@ internal static class RpcUtilities
 
     public static COMObjRef ToObjRef(this NdrEmbeddedPointer<MInterfacePointer> pointer)
     {
-        if (pointer == null)
+        if (pointer is null)
             return null;
         return COMObjRef.FromArray(pointer.GetValue().abData);
     }
 
     public static NdrEmbeddedPointer<MInterfacePointer> ToPointer(this COMObjRef objref)
     {
-        if (objref == null)
+        if (objref is null)
             return null;
         byte[] ba = objref.ToArray();
         MInterfacePointer p = new(ba.Length, ba);
@@ -98,7 +98,7 @@ internal static class RpcUtilities
 
     public static MInterfacePointer? ToNullable(this COMObjRef objref)
     {
-        if (objref == null)
+        if (objref is null)
             return null;
         byte[] ba = objref.ToArray();
         MInterfacePointer p = new(ba.Length, ba);

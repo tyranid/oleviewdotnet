@@ -126,7 +126,7 @@ internal static class XmlUtils
     internal static IEnumerable<Guid> ReadGuids(this XmlReader reader, string name)
     {
         string guids = reader.GetAttribute(name);
-        if (guids == null)
+        if (guids is null)
         {
             return new Guid[0];
         }
@@ -145,7 +145,7 @@ internal static class XmlUtils
     internal static Guid ReadGuid(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
-        if (value == null || !Guid.TryParse(value, out Guid guid))
+        if (value is null || !Guid.TryParse(value, out Guid guid))
         {
             return Guid.Empty;
         }
@@ -171,7 +171,7 @@ internal static class XmlUtils
     internal static int ReadInt(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
-        if (value == null)
+        if (value is null)
         {
             return 0;
         }
@@ -189,7 +189,7 @@ internal static class XmlUtils
     internal static long ReadLong(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
-        if (value == null)
+        if (value is null)
         {
             return 0;
         }
@@ -211,7 +211,7 @@ internal static class XmlUtils
 
     internal static void WriteSecurityDescriptor(this XmlWriter writer, string name, COMSecurityDescriptor sd)
     {
-        if (sd == null)
+        if (sd is null)
             return;
         writer.WriteOptionalAttributeString(name, sd.ToBase64());
     }
@@ -219,7 +219,7 @@ internal static class XmlUtils
     internal static T ReadEnum<T>(this XmlReader reader, string name) where T : struct
     {
         string value = reader.GetAttribute(name);
-        if (value == null)
+        if (value is null)
         {
             return default;
         }
@@ -256,7 +256,7 @@ internal static class XmlUtils
     internal static bool ReadBool(this XmlReader reader, string name)
     {
         string value = reader.GetAttribute(name);
-        if (value == null)
+        if (value is null)
         {
             return false;
         }

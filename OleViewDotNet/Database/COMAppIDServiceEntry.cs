@@ -91,7 +91,7 @@ public class COMAppIDServiceEntry : IXmlSerializable
                 return;
             ServiceHostType = service.ServiceHostType;
             using var key = Registry.LocalMachine.OpenSubKey($@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\{service.ServiceHostType}");
-            if (key == null)
+            if (key is null)
                 return;
             InitializeSecurity = key.ReadBool("CoInitializeSecurityParam");
             if (!InitializeSecurity)

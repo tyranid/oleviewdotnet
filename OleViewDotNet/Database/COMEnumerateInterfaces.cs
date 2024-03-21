@@ -58,7 +58,7 @@ public class COMEnumerateInterfaces
 
             using (SafeLoadLibraryHandle module = SafeLoadLibraryHandle.GetModuleHandle(vtable))
             {
-                if (_clsctx == CLSCTX.INPROC_SERVER && module != null)
+                if (_clsctx == CLSCTX.INPROC_SERVER && module is not null)
                 {
                     if (!module_names.ContainsKey(module.DangerousGetHandle()))
                     {
@@ -175,7 +175,7 @@ public class COMEnumerateInterfaces
     {
         Guid IID_IUnknown = COMKnownGuids.IID_IUnknown;
         CLSCTX clsctx = _clsctx;
-        if (token != null)
+        if (token is not null)
         {
             clsctx |= CLSCTX.ENABLE_CLOAKING;
         }
@@ -232,7 +232,7 @@ public class COMEnumerateInterfaces
             Dictionary<IntPtr, string> module_names = new();
             
             var actctx = ActivationContext.FromProcess();
-            if (actctx != null)
+            if (actctx is not null)
             {
                 foreach (var intf in actctx.ComInterfaces)
                 {
@@ -355,7 +355,7 @@ public class COMEnumerateInterfaces
         if (mta)
             args.Add("-mta");
         using var imp_token = token?.Token.DuplicateToken(SecurityImpersonationLevel.Impersonation);
-        if (imp_token != null)
+        if (imp_token is not null)
         {
             args.Add("-t");
             args.Add(imp_token.Handle.DangerousGetHandle().ToInt32().ToString());
@@ -367,7 +367,7 @@ public class COMEnumerateInterfaces
 
         Win32ProcessConfig config = AppUtilities.GetConfigForArchitecture(registry.Architecture, string.Join(" ", args));
         config.InheritHandleList.Add(server.ClientSafePipeHandle.DangerousGetHandle());
-        if (imp_token != null)
+        if (imp_token is not null)
         {
             config.AddInheritedHandle(imp_token);
         }
@@ -383,7 +383,7 @@ public class COMEnumerateInterfaces
         while (true)
         {
             string line = await reader.ReadLineAsync();
-            if (line == null)
+            if (line is null)
             {
                 break;
             }

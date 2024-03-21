@@ -34,7 +34,7 @@ public class COMRuntimeExtensionEntry : IXmlSerializable
         var custom_properties = new Dictionary<string, string>();
         using (var prop_key = key.OpenSubKeySafe("CustomProperties"))
         {
-            if (prop_key != null)
+            if (prop_key is not null)
             {
                 foreach (var value_name in prop_key.GetValueNames())
                 {

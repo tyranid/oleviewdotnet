@@ -232,7 +232,7 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
             {
                 builder.AppendLine($"[Guid(\"{t.GUID}\")]");
                 ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
-                if (class_attr != null)
+                if (class_attr is not null)
                 {
                     builder.AppendLine($"[ClassInterface(ClassInterfaceType.{class_attr.Value})]");
                 }

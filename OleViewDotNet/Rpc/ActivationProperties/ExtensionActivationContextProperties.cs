@@ -38,7 +38,7 @@ public sealed class ExtensionActivationContextProperties : IActivationProperty
         get => m_inner.lpacAttributes?.GetValue().pBlobData?.GetValue();
         set
         {
-            if (value == null)
+            if (value is null)
                 m_inner.lpacAttributes = null;
             else
                 m_inner.lpacAttributes = new BLOB(value.Length, value);

@@ -24,7 +24,7 @@ internal partial class RegistryPropertiesControl : UserControl
 {
     private void AddListItem(string name, object value)
     {
-        if (value != null)
+        if (value is not null)
         {
             ListViewItem item = listViewProperties.Items.Add(name);
             item.SubItems.Add(value.ToString());

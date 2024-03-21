@@ -61,7 +61,7 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
     public string Server { get; private set; }
     public string DefaultServer => Server;
     public bool HasServer => !string.IsNullOrWhiteSpace(Server);
-    COMServerType ICOMClassEntry.DefaultServerType => Server == null ? COMServerType.InProcServer32 : COMServerType.LocalServer32;
+    COMServerType ICOMClassEntry.DefaultServerType => Server is null ? COMServerType.InProcServer32 : COMServerType.LocalServer32;
 
     public COMRuntimeServerEntry ServerEntry => m_registry.MapRuntimeClassToServerEntry(this);
 
@@ -72,11 +72,11 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         get; private set;
     }
 
-    public bool HasPermission => Permissions != null;
+    public bool HasPermission => Permissions is not null;
 
     public COMSecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
 
-    public bool HasServerPermission => ServerPermissions != null;
+    public bool HasServerPermission => ServerPermissions is not null;
 
     public TrustLevel TrustLevel
     {

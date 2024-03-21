@@ -190,7 +190,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
             {
                 IntPtr base_ptr = new(stub_vptr.ToInt64() - GetPointerSize(process) * 3);
                 IntPtr[] stub_info = COMProcessParser.ReadPointerArray(process, base_ptr, 3);
-                if (stub_info != null)
+                if (stub_info is not null)
                 {
                     if (stub_info[2] == IntPtr.Zero)
                     {
@@ -211,7 +211,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
             }
 
             IntPtr[] method_ptrs = COMProcessParser.ReadPointerArray(process, vtable_ptr, (int)count);
-            if (method_ptrs != null)
+            if (method_ptrs is not null)
             {
                 methods.AddRange(method_ptrs.Select((p, i) => ResolveMethod(i, p, resolver, config)));
                 if (config.ParseStubMethods && server_info != IntPtr.Zero && count > 3)
@@ -239,7 +239,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
             return null;
         }
         NdrComProxyDefinition entry = NdrComProxyDefinition.FromProcedures(Name, Iid, COMKnownGuids.IID_IUnknown,
-            Methods.Count(), Methods.SkipWhile(m => m.Procedure == null).Select(m => m.Procedure));
+            Methods.Count(), Methods.SkipWhile(m => m.Procedure is null).Select(m => m.Procedure));
         return new COMProxyFile(new NdrComProxyDefinition[] { entry }, ComplexTypes, m_registry, $"IPID Proxy: {Ipid}");
     }
 

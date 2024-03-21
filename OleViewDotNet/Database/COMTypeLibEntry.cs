@@ -38,7 +38,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
             if (int.TryParse(locale, out int locale_int))
             {
                 using RegistryKey subkey = key.OpenSubKey(locale);
-                if (subkey != null)
+                if (subkey is not null)
                 {
                     COMTypeLibVersionEntry entry = new(m_registry,
                         name, version, TypelibId, locale_int, subkey);
@@ -58,7 +58,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         foreach (string version in key.GetSubKeyNames())
         {
             using RegistryKey subKey = key.OpenSubKey(version);
-            if (subKey != null)
+            if (subKey is not null)
             {
                 ret.AddRange(LoadFromLocales(subKey.GetValue(null, string.Empty).ToString(), version, subKey));
             }

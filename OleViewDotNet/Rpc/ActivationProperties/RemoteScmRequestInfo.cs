@@ -42,7 +42,7 @@ public sealed class RemoteScmRequestInfo
         m_inner = inner;
         ProtocolSequences = new();
         var proto_seqs = m_inner.pRequestedProtseqs?.GetValue();
-        if (proto_seqs != null)
+        if (proto_seqs is not null)
         {
             ProtocolSequences.AddRange(proto_seqs.Select(p => (RpcTowerId)p));
         }

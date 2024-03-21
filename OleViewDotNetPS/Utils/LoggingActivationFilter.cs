@@ -63,13 +63,13 @@ public class LoggingActivationFilter : IActivationFilter
         pReplacementClsId = rclsid;
         lock (this)
         {
-            if (_writer == null)
+            if (_writer is null)
             {
                 return;
             }
 
             COMCLSIDEntry entry = _registry?.MapClsidToEntry(rclsid);
-            if (entry == null)
+            if (entry is null)
             {
                 _writer.WriteLine("dwActivationType: {0} rclsid: {1}",
                     dwActivationType, rclsid);

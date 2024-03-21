@@ -40,7 +40,7 @@ public sealed class COMAuthInfo
     internal SafeStructureInOutBuffer<COAUTHINFO> ToBuffer(DisposableList list)
     {
         var auth_id = AuthIdentityData?.ToBuffer(list);
-        if (auth_id != null)
+        if (auth_id is not null)
             list.Add(auth_id);
 
         COAUTHINFO auth_info = new()

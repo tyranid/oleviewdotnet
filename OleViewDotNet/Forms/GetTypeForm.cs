@@ -36,7 +36,7 @@ internal partial class GetTypeForm : Form
 
     public GetTypeForm(Type currType, object data)
     {
-        if (currType.GetElementType() != null)
+        if (currType.GetElementType() is not null)
         {
             m_currType = currType.GetElementType();
         }
@@ -52,7 +52,7 @@ internal partial class GetTypeForm : Form
 
     private void GetTypeForm_Load(object sender, EventArgs e)
     {
-        if (m_data == null)
+        if (m_data is null)
         {
             checkBoxSetNULL.Checked = true;
         }
@@ -81,7 +81,7 @@ internal partial class GetTypeForm : Form
             comboBoxTypes.Enabled = false;
         }
 
-        if (m_data != null)
+        if (m_data is not null)
         {
             comboBoxValue.Items.Add(m_data.ToString());
             comboBoxValue.SelectedIndex = 0;
@@ -98,11 +98,11 @@ internal partial class GetTypeForm : Form
             {
                 Type t = (Type)comboBoxTypes.SelectedItem;
 
-                if (t != null)
+                if (t is not null)
                 {
                     /* First check if this type has a constructor which takes a string */
                     ConstructorInfo ci = t.GetConstructor(new Type[] { typeof(string) });
-                    if (ci != null)
+                    if (ci is not null)
                     {
                         m_data = ci.Invoke(new object[] { comboBoxValue.Text });
                     }                        
@@ -138,13 +138,13 @@ internal partial class GetTypeForm : Form
     {
         Type t = (Type)comboBoxTypes.SelectedItem;
         comboBoxValue.Items.Clear();
-        if (t != null)
+        if (t is not null)
         {
             if (m_history.ContainsKey(t.GUID))
             {
                 foreach (string s in m_history[t.GUID])
                 {
-                    if (s != null)
+                    if (s is not null)
                     {
                         comboBoxValue.Items.Add(s);
                     }

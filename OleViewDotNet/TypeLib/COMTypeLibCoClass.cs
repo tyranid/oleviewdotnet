@@ -56,7 +56,7 @@ public sealed class COMTypeLibCoClass : COMTypeLibTypeInfo
                     attrs.Add("restricted");
                 if (intf.Flags.HasFlag(IMPLTYPEFLAGS.IMPLTYPEFLAG_FSOURCE))
                     attrs.Add("source");
-                if (intf.Interface is COMTypeLibDispatch disp && disp.DualInterface == null)
+                if (intf.Interface is COMTypeLibDispatch disp && disp.DualInterface is null)
                 {
                     builder.AppendLine($"{attrs.FormatAttrs()}dispinterface {intf.Interface.Name};");
                 }

@@ -44,14 +44,14 @@ public sealed class PrivateScmRequestInfo
     {
         get
         {
-            if (m_inner.pEnvBlock == null)
+            if (m_inner.pEnvBlock is null)
                 return null;
             return new string(m_inner.pEnvBlock);
         }
 
         set
         {
-            if (value == null)
+            if (value is null)
             {
                 m_inner.pEnvBlock = null;
                 m_inner.EnvBlockLength = 0;

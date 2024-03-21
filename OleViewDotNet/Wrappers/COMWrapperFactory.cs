@@ -281,7 +281,7 @@ public static class COMWrapperFactory
 
     private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
-        if (intf_type == null)
+        if (intf_type is null)
         {
             throw new ArgumentNullException("No interface type available", nameof(intf_type));
         }
@@ -293,7 +293,7 @@ public static class COMWrapperFactory
 
         HashSet<Type> structured_types = new();
         bool created_queue = false;
-        if (fixup_queue == null)
+        if (fixup_queue is null)
         {
             fixup_queue = new Queue<Tuple<Guid, TypeBuilder>>();
             created_queue = true;

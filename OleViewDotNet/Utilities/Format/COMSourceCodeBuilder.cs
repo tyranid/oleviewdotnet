@@ -75,7 +75,7 @@ public sealed class COMSourceCodeBuilder
     internal INdrFormatter GetNdrFormatter()
     {
         Tuple<COMSourceCodeBuilderType, bool> config = Tuple.Create(OutputType, HideComments);
-        if (config == m_current_ndr_config && m_formatter != null)
+        if (config == m_current_ndr_config && m_formatter is not null)
         {
             return m_formatter;
         }

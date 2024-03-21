@@ -60,7 +60,7 @@ public class COMProcessToken
             Elevated = token.Elevated;
             LowPrivilegeAppContainer = token.LowPrivilegeAppContainer;
             var pkghostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
-            if (pkghostid != null && pkghostid.ValueType == ClaimSecurityValueType.UInt64 && pkghostid.Values.Any())
+            if (pkghostid is not null && pkghostid.ValueType == ClaimSecurityValueType.UInt64 && pkghostid.Values.Any())
             {
                 PackageHostId = (ulong)pkghostid.Values.First();
             }

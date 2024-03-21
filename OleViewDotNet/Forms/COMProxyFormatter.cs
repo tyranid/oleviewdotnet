@@ -34,7 +34,7 @@ internal sealed class COMProxyFormatter : ICOMSourceCodeParsable
         }
     }
 
-    public bool IsSourceCodeParsed => ProxyFile != null;
+    public bool IsSourceCodeParsed => ProxyFile is not null;
 
     public bool IsFormattable => true;
 

@@ -76,7 +76,7 @@ internal class SymbolResolverWrapper : ISymbolResolver
 
     public IntPtr GetAddressOfSymbol(string symbol)
     {
-        if (_resolved.ContainsKey(symbol) && _base_module != null && symbol.StartsWith(_dllprefix))
+        if (_resolved.ContainsKey(symbol) && _base_module is not null && symbol.StartsWith(_dllprefix))
         {
             return _base_module.BaseAddress + _resolved[symbol];
         }

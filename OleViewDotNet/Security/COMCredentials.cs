@@ -44,7 +44,7 @@ public sealed class COMCredentials : IDisposable
 
         public DisposableString(SecureString s)
         {
-            if (s != null)
+            if (s is not null)
             {
                 Pointer = Marshal.SecureStringToCoTaskMemUnicode(s);
             }

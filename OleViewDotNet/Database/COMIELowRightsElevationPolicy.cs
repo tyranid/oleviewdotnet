@@ -87,13 +87,13 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
     {
         object policyValue = key.GetValue("Policy", 0);
 
-        if (policyValue != null && !string.IsNullOrEmpty(policyValue.ToString()))
+        if (policyValue is not null && !string.IsNullOrEmpty(policyValue.ToString()))
         {
             Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
         }
         
         string clsid = (string)key.GetValue("CLSID");
-        if (clsid != null)
+        if (clsid is not null)
         {
 
             if (Guid.TryParse(clsid, out Guid cls))
@@ -105,7 +105,7 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
         string appName = (string)key.GetValue("AppName", null);
         string appPath = (string)key.GetValue("AppPath");
 
-        if ((appName != null) && (appPath != null))
+        if ((appName is not null) && (appPath is not null))
         {
             try
             {

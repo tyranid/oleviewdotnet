@@ -81,7 +81,7 @@ internal partial class InvokeForm : Form
 
         try
         {
-            if (t.GetElementType() != null)
+            if (t.GetElementType() is not null)
             {
                 t = t.GetElementType();
             }
@@ -124,7 +124,7 @@ internal partial class InvokeForm : Form
         {
             ListViewItem item = listViewParameters.Items.Add(data.pi.Name);
             item.SubItems.Add(data.pi.ParameterType.ToString());
-            if (data.data == null)
+            if (data.data is null)
             {
                 item.SubItems.Add("<null>");
             }
@@ -181,7 +181,7 @@ internal partial class InvokeForm : Form
 
             Type baseType = data.pi.ParameterType;
 
-            if (baseType.GetElementType() != null)
+            if (baseType.GetElementType() is not null)
             {
                 baseType = baseType.GetElementType();
             }
@@ -220,7 +220,7 @@ internal partial class InvokeForm : Form
         try
         {
             m_ret = m_mi.Invoke(m_pObject, p);
-            if (m_ret != null)
+            if (m_ret is not null)
             {
                 lblReturn.Text = "Return: " + m_ret.GetType().ToString();
                 textBoxReturn.Text = m_ret.ToString();
@@ -244,7 +244,7 @@ internal partial class InvokeForm : Form
         catch (Exception ex)
         {
             Exception printEx = ex;
-            if (printEx.InnerException != null)
+            if (printEx.InnerException is not null)
             {
                 printEx = printEx.InnerException;
             }
@@ -258,7 +258,7 @@ internal partial class InvokeForm : Form
         /* Try and clean up any referenced Com Objects */
         foreach (ParamData data in m_paramdata)
         {
-            if (data.data != null)
+            if (data.data is not null)
             {
                 try
                 {
@@ -282,7 +282,7 @@ internal partial class InvokeForm : Form
 
     private void btnOpenObject_Click(object sender, EventArgs e)
     {
-        if (m_ret != null)
+        if (m_ret is not null)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new TypedObjectViewer(m_registry, m_objName, m_ret, m_mi.ReturnType));
             DialogResult = DialogResult.OK;

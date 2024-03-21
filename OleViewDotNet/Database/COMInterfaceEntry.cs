@@ -214,7 +214,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         get
         {
             var typelib = TypeLibEntry;
-            if (typelib != null)
+            if (typelib is not null)
             {
                 return typelib.Versions.Where(v => v.Version == TypeLibVersion).FirstOrDefault();
             }
@@ -239,11 +239,11 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     Guid ICOMGuid.ComGuid => Iid;
 
     bool ICOMSourceCodeFormattable.IsFormattable => RuntimeInterface 
-                || TypeLibVersionEntry != null || ProxyClassEntry != null;
+                || TypeLibVersionEntry is not null || ProxyClassEntry is not null;
 
     private bool CheckForParsed()
     {
-        if (m_formattable != null)
+        if (m_formattable is not null)
             return true;
         if (RuntimeInterface && RuntimeMetadata.Interfaces.TryGetValue(Iid, out Type type))
         {
@@ -258,7 +258,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         {
             m_formattable = proxy;
         }
-        return m_formattable != null;
+        return m_formattable is not null;
     }
 
     bool ICOMSourceCodeParsable.IsSourceCodeParsed => CheckForParsed();
@@ -365,7 +365,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         if (CheckForParsed())
             return;
         // If the runtime interface exists, that's already populated in CheckForParsed.
-        if (TypeLibVersionEntry != null)
+        if (TypeLibVersionEntry is not null)
         {
             var typelib = TypeLibVersionEntry.Parse();
             if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))

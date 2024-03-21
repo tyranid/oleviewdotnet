@@ -94,7 +94,7 @@ internal class ListItemComparer : IComparer
 
     public static void UpdateListComparer(ListView view, int selected_column)
     {
-        if (view != null)
+        if (view is not null)
         {
             if (view.ListViewItemSorter is ListItemComparer comparer)
             {

@@ -31,7 +31,7 @@ internal class TypeLibCallback : ITypeLibImporterNotifySink
 
     public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)
     {
-        if (eventKind == ImporterEventKind.NOTIF_TYPECONVERTED && _progress != null)
+        if (eventKind == ImporterEventKind.NOTIF_TYPECONVERTED && _progress is not null)
         {
             _progress.Report(new Tuple<string, int>(eventMsg, -1));
         }

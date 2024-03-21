@@ -102,7 +102,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
         // We can't be sure of there being a 0 LCID, leave for now
         using (RegistryKey subKey = key.OpenSubKey("win32"))
         {
-            if (subKey != null)
+            if (subKey is not null)
             {
                 Win32Path = subKey.GetValue(null) as string;
             }
@@ -110,7 +110,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
 
         using (RegistryKey subKey = key.OpenSubKey("win64"))
         {
-            if (subKey != null)
+            if (subKey is not null)
             {
                 Win64Path = subKey.GetValue(null) as string;
             }

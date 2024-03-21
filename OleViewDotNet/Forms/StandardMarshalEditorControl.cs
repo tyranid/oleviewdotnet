@@ -55,7 +55,7 @@ internal partial class StandardMarshalEditorControl : UserControl
         {
             textBoxHandlerClsid.Text = handler.Clsid.FormatGuid();
             COMCLSIDEntry ent = registry.MapClsidToEntry(handler.Clsid);
-            if (ent != null)
+            if (ent is not null)
             {
                 textBoxHandlerName.Text = ent.Name;
             }
@@ -89,7 +89,7 @@ internal partial class StandardMarshalEditorControl : UserControl
 
     private void listView_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag != null)
+        if (sender is ListView list_view && list_view.SelectedItems.Count > 0 && list_view.SelectedItems[0].Tag is not null)
         {
             EntryPoint.GetMainForm(m_registry).UpdatePropertyGrid(list_view.SelectedItems[0].Tag);
         }

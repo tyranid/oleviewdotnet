@@ -54,7 +54,7 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
         get => m_inner.rtbProcessMitigationPolcyBlob?.GetValue().pBlobData?.GetValue();
         set
         {
-            if (value == null)
+            if (value is null)
                 m_inner.rtbProcessMitigationPolcyBlob = null;
             else
                 m_inner.rtbProcessMitigationPolcyBlob = new BLOB(value.Length, value);

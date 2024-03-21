@@ -81,7 +81,7 @@ public class RuntimeExtensionActivator
 
                 var sysappid = token.GetSecurityAttributeByName("WIN://SYSAPPID");
                 var hostid = token.GetSecurityAttributeByName("WIN://PKGHOSTID");
-                if (hostid == null || sysappid.Values.Count() != 3)
+                if (hostid is null || sysappid.Values.Count() != 3)
                 {
                     continue;
                 }

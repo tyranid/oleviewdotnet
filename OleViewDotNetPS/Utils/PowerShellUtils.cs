@@ -164,7 +164,7 @@ public static class PowerShellUtils
 
     public static string FormatSecurityDescriptor(COMSecurityDescriptor desc, bool sdk_name = false)
     {
-        if (desc == null)
+        if (desc is null)
             return string.Empty;
 
         var sd = desc.SecurityDescriptor;
@@ -172,7 +172,7 @@ public static class PowerShellUtils
         StringBuilder builder = new();
 
         builder.AppendLine($"Control: {(sdk_name ? NtSecurity.ControlFlagsToSDKName(sd.Control) : sd.Control.ToString())}");
-        if (sd.Owner == null && sd.Group == null && sd.Dacl == null && sd.Sacl == null)
+        if (sd.Owner is null && sd.Group is null && sd.Dacl is null && sd.Sacl is null)
         {
             builder.AppendLine("<NO SECURITY INFORMATION>");
         }

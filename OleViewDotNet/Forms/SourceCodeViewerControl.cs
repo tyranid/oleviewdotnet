@@ -28,6 +28,7 @@ internal partial class SourceCodeViewerControl : UserControl
     private COMRegistry m_registry;
     private object m_selected_obj;
     private ICOMSourceCodeFormattable m_formattable_obj;
+    private ICOMSourceCodeEditable m_editable_obj;
     private COMSourceCodeBuilderType m_output_type;
     private bool m_hide_comments;
     private bool m_interfaces_only;
@@ -94,7 +95,7 @@ internal partial class SourceCodeViewerControl : UserControl
         }
         else
         {
-            builder.AppendLine(m_selected_obj == null ?
+            builder.AppendLine(m_selected_obj is null ?
                 "No formattable object selected"
                 : $"'{m_selected_obj}' is not formattable.");
         }
@@ -120,13 +121,15 @@ internal partial class SourceCodeViewerControl : UserControl
                 m_formattable_obj = null;
             }
 
+            m_editable_obj = value as ICOMSourceCodeEditable;
+
             if (!IsParsed(m_formattable_obj) && AutoParse)
             {
                 ParseSourceCode();
             }
 
-            parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj != null && !IsParsed(m_formattable_obj);
-            editNamesToolStripMenuItem.Enabled = m_formattable_obj is ICOMSourceCodeEditable;
+            parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj is not null && !IsParsed(m_formattable_obj);
+            editNamesToolStripMenuItem.Enabled = m_editable_obj is not null;
             Format();
         }
     }
@@ -243,9 +246,9 @@ internal partial class SourceCodeViewerControl : UserControl
 
     private void editNamesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (m_formattable_obj is ICOMSourceCodeEditable editable)
+        if (m_editable_obj is not null)
         {
-            using var form = new SourceCodeNameEditor(editable);
+            using var form = new SourceCodeNameEditor(m_editable_obj);
             if (form.ShowDialog() == DialogResult.OK)
             {
                 Format();

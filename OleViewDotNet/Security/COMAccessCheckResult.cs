@@ -26,7 +26,7 @@ public readonly struct COMAccessCheckResult
     public ICOMAccessSecurity ComObject { get; }
     public COMSecurityDescriptor AccessSecurity { get; }
     public COMSecurityDescriptor LaunchSecurity { get; }
-    public bool IsValid => ComObject != null;
+    public bool IsValid => ComObject is not null;
     public bool LaunchChecked { get; }
     public bool LocalAccess => IsAccessGranted(COMAccessRights.ExecuteLocal);
     public bool RemoteAccess => IsAccessGranted(COMAccessRights.ExecuteRemote);

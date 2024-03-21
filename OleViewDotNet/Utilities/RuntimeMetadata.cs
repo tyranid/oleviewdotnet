@@ -67,7 +67,7 @@ public sealed class RuntimeMetadata
             {
                 Assembly asm = Assembly.ReflectionOnlyLoadFrom(file.FullName);
                 Type type = asm.GetTypes().FirstOrDefault();
-                if (type == null)
+                if (type is null)
                 {
                     continue;
                 }

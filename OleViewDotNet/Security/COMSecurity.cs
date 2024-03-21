@@ -53,7 +53,7 @@ public static class COMSecurity
 
     public static void ViewSecurity(COMRegistry registry, string name, COMSecurityDescriptor sd, bool access)
     {
-        if (sd == null)
+        if (sd is null)
             return;
 
         SecurityDescriptorViewerControl control = new();
@@ -123,10 +123,10 @@ public static class COMSecurity
         else if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
         {
             COMAppIDEntry appid = obj as COMAppIDEntry;
-            if (appid == null && obj is COMCLSIDEntry clsid)
+            if (appid is null && obj is COMCLSIDEntry clsid)
             {
                 appid = clsid.AppIDEntry;
-                if (appid == null)
+                if (appid is null)
                 {
                     throw new ArgumentException("No AppID available for class");
                 }
@@ -147,10 +147,10 @@ public static class COMSecurity
         if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
         {
             COMAppIDEntry appid = obj as COMAppIDEntry;
-            if (appid == null && obj is COMCLSIDEntry clsid)
+            if (appid is null && obj is COMCLSIDEntry clsid)
             {
                 appid = clsid.AppIDEntry;
-                if (appid == null)
+                if (appid is null)
                 {
                     throw new ArgumentException("No AppID available for class");
                 }
@@ -187,7 +187,7 @@ public static class COMSecurity
 
     private static bool SDHasAllowedAce(COMSecurityDescriptor desc, bool allow_null_dacl, Func<Ace, bool> check_func)
     {
-        if (desc == null)
+        if (desc is null)
         {
             return allow_null_dacl;
         }
@@ -196,7 +196,7 @@ public static class COMSecurity
 
         try
         {
-            if (allow_null_dacl && (sd.Dacl == null || sd.Dacl.NullAcl))
+            if (allow_null_dacl && (sd.Dacl is null || sd.Dacl.NullAcl))
             {
                 return true;
             }
@@ -248,7 +248,7 @@ public static class COMSecurity
 
     internal static int GetSDHashCode(this COMSecurityDescriptor sd)
     {
-        if (sd == null)
+        if (sd is null)
             return 0;
         return sd.ToBase64().GetHashCode();
     }

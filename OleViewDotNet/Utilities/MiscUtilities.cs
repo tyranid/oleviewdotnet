@@ -173,7 +173,7 @@ internal static class MiscUtilities
 
     internal static int GetSafeHashCode<T>(this T obj) where T : class
     {
-        if (obj == null)
+        if (obj is null)
         {
             return 0;
         }

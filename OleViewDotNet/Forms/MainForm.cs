@@ -63,7 +63,7 @@ internal partial class MainForm : Form
             }
         }
 
-        if (m_registry.FilePath != null)
+        if (m_registry.FilePath is not null)
         {
             Text += $" - {m_registry.FilePath}";
         }
@@ -275,7 +275,7 @@ internal partial class MainForm : Form
                 }
             }
 
-            if (comObj != null)
+            if (comObj is not null)
             {
                 /* Need to implement a type library reader */
                 Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
@@ -340,7 +340,7 @@ internal partial class MainForm : Form
 
     public async Task OpenObjectInformation(object comObj, string defaultName)
     {
-        if (comObj != null)
+        if (comObj is not null)
         {
             COMCLSIDEntry ent = null;
             Dictionary<string, string> props = new();
@@ -440,7 +440,7 @@ internal partial class MainForm : Form
                     frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
                 }
 
-                if (comObj != null)
+                if (comObj is not null)
                 {
                     await OpenObjectInformation(comObj, _last_moniker);
                 }
@@ -595,7 +595,7 @@ internal partial class MainForm : Form
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 COMCLSIDEntry entry = m_registry.GetFileClass(dlg.FileName);
-                if (entry != null)
+                if (entry is not null)
                 {
                     IPersistFile ps = (IPersistFile)entry.CreateInstanceAsObject(entry.CreateContext, null);
                     ps.Load(dlg.FileName, (int)STGM.READ);
@@ -736,7 +736,7 @@ internal partial class MainForm : Form
     {
         ConfigureSymbols();
         IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this, m_registry);
-        if (processes != null && processes.Any())
+        if (processes is not null && processes.Any())
         {
             OpenView(COMRegistryDisplayMode.Processes, processes.OrderBy(orderby_selector));
         }
@@ -748,10 +748,10 @@ internal partial class MainForm : Form
         {
             ConfigureSymbols();
             var proc = COMUtilities.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this, m_registry).FirstOrDefault();
-            if (proc != null)
+            if (proc is not null)
             {
                 COMIPIDEntry ipid_entry = proc.Ipids.Where(e => e.Ipid == ipid).FirstOrDefault();
-                if (ipid_entry != null)
+                if (ipid_entry is not null)
                 {
                     HostControl(new PropertiesControl(m_registry, $"IPID: {ipid.FormatGuid()}", ipid_entry));
                 }
@@ -824,7 +824,7 @@ internal partial class MainForm : Form
 
     public void UpdatePropertyGrid(object obj)
     {
-        if (m_property_grid != null && !m_property_grid.IsDisposed)
+        if (m_property_grid is not null && !m_property_grid.IsDisposed)
         {
             m_property_grid.SelectedObject = obj;
         }
@@ -832,7 +832,7 @@ internal partial class MainForm : Form
 
     public void CreatePropertyGrid(bool autohide)
     {
-        if (m_property_grid == null || m_property_grid.IsDisposed)
+        if (m_property_grid is null || m_property_grid.IsDisposed)
         {
             m_property_grid = new()
             {
@@ -1111,7 +1111,7 @@ internal partial class MainForm : Form
 
     private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
     {
-        if (ProgramSettings.EnableSaveOnExit && m_registry.FilePath == null && m_registry.LoadingMode == COMRegistryMode.Merged)
+        if (ProgramSettings.EnableSaveOnExit && m_registry.FilePath is null && m_registry.LoadingMode == COMRegistryMode.Merged)
         {
             try
             {
@@ -1135,7 +1135,7 @@ internal partial class MainForm : Form
 
     private void menuItemView_Popup(object sender, EventArgs e)
     {
-        menuViewOpenPropertiesViewer.Enabled = m_property_grid == null || m_property_grid.IsDisposed;
+        menuViewOpenPropertiesViewer.Enabled = m_property_grid is null || m_property_grid.IsDisposed;
     }
 
     private void menuViewRegistryViewOptions_Popup(object sender, EventArgs e)

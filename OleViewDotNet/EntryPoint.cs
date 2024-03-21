@@ -79,7 +79,7 @@ public static class EntryPoint
         }
 
         COMEnumerateInterfaces intf = new(clsid, clsctx, activatable_class, !mta, timeout, token);
-        if (intf.Exception != null)
+        if (intf.Exception is not null)
         {
             writer.WriteLine("ERROR:{0:X08}", intf.Exception.NativeErrorCode);
             return 1;
@@ -182,25 +182,25 @@ public static class EntryPoint
             { "i|in=",  "Open a database file.", v => database_file = v },
             { "o|out=", "Save database and exit.", v => save_file = v },
             { "e|enum=",  "Enumerate the provided CLSID (GUID) or runtime class (string).", v => enum_class = v },
-            { "q|query", "Query all interfaces for database", v => query_interfaces = v != null },
+            { "q|query", "Query all interfaces for database", v => query_interfaces = v is not null },
             { "c|conn=", "Number of concurrent interface queries", v => concurrent_queries = int.Parse(v) },
             { "s|server=", "Specify server types for query", v => server_types = ParseServerTypes(v) },
-            { "refresh", "Refresh interfaces in query", v => refresh_interfaces = v != null },
+            { "refresh", "Refresh interfaces in query", v => refresh_interfaces = v is not null },
             { "m", "Loading mode is machine only.", v => mode = COMRegistryMode.MachineOnly },
             { "u", "Loading mode is user only.", v => mode = COMRegistryMode.UserOnly },
-            { "a", "Enable activation filter.", v => enable_activation_filter = v != null },
+            { "a", "Enable activation filter.", v => enable_activation_filter = v is not null },
             { "g=", "Generate a symbol file in the specified directory.", v => symbol_dir = v },
-            { "d", "Delete the input database once loaded", v => delete_database = v != null },
+            { "d", "Delete the input database once loaded", v => delete_database = v is not null },
             { "v=", "View a COM security descriptor (specify as Base64)", v => view_sd = v },
-            { "access", "View a COM launch security descriptor (specify the SDDL)", v => access_sd = v != null },
+            { "access", "View a COM launch security descriptor (specify the SDDL)", v => access_sd = v is not null },
             { "n=", "Name any simple form display such as security descriptor", v => view_name = v },
             { "t=", "Specify a token to use when enumerating interfaces", v => enum_token = NtToken.FromHandle(new IntPtr(int.Parse(v))) },
-            { "mta", "Specify to use MTA for interface enumeration. Default is STA.", v => enum_mta = v != null },
+            { "mta", "Specify to use MTA for interface enumeration. Default is STA.", v => enum_mta = v is not null },
             { "timeout=", "Specify the timeout for interface enumeration. Default is 10000ms.", v => enum_timeout = int.Parse(v) },
             { "pipe=", "Specify the pipe to send interface enumeration output.", v => enum_pipe = v },
             { "clsctx=", "Specify the CLSCTX to create the object for interface enumeration.", v => enum_clsctx = (CLSCTX)Enum.Parse(typeof(CLSCTX), v, true) },
             { "arch=", "Specify the architecture to run. Used only for admin elevation.", v => arch = (ProgramArchitecture)Enum.Parse(typeof(ProgramArchitecture), v, true) },
-            { "h|help",  "Show this message and exit.", v => show_help = v != null },
+            { "h|help",  "Show this message and exit.", v => show_help = v is not null },
         };
 
         List<string> additional_args = new();
@@ -214,7 +214,7 @@ public static class EntryPoint
             show_help = true;
         }
 
-        if (show_help || (do_enum && additional_args.Count < 4) || (symbol_dir != null && !Directory.Exists(symbol_dir)))
+        if (show_help || (do_enum && additional_args.Count < 4) || (symbol_dir is not null && !Directory.Exists(symbol_dir)))
         {
             StringWriter writer = new();
             writer.WriteLine("Usage: OleViewDotNet [options] [enum args]");
@@ -242,7 +242,7 @@ public static class EntryPoint
                 Environment.Exit(42);
             }
         }
-        else if (symbol_dir != null)
+        else if (symbol_dir is not null)
         {
             try
             {
@@ -262,7 +262,7 @@ public static class EntryPoint
 
             try
             {
-                if (view_sd != null)
+                if (view_sd is not null)
                 {
                     ShowSecurityDescriptor(view_sd, access_sd, view_name);
                     return;
@@ -270,7 +270,7 @@ public static class EntryPoint
 
                 COMRegistry registry = null;
                 string default_db = ProgramSettings.GetDefaultDatabasePath(false);
-                if (database_file == null && File.Exists(default_db))
+                if (database_file is null && File.Exists(default_db))
                 {
                     try
                     {
@@ -284,10 +284,10 @@ public static class EntryPoint
                     }
                 }
 
-                registry ??= database_file != null ? COMUtilities.LoadRegistry(null, database_file)
+                registry ??= database_file is not null ? COMUtilities.LoadRegistry(null, database_file)
                         : COMUtilities.LoadRegistry(null, mode);
 
-                if (delete_database && database_file != null)
+                if (delete_database && database_file is not null)
                 {
                     File.Delete(database_file);
                     registry.FilePath = null;
@@ -301,7 +301,7 @@ public static class EntryPoint
                     }
                 }
 
-                if (save_file != null)
+                if (save_file is not null)
                 {
                     registry.Save(save_file);
                     Environment.Exit(0);

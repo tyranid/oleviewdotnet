@@ -56,7 +56,7 @@ internal static class DockPanelHelper
     public static void NavigateDocument(this DockPanel dockPanel, Direction direction)
     {
         DockPanelDocumentInfo info = dockPanel.GetDocumentInfo();
-        if (info.SelectedDockContent != null)
+        if (info.SelectedDockContent is not null)
         {
             var newIndex = info.SelectedDockContentIndex + (int)direction;
             if (newIndex > -1 && newIndex < info.DockContents.Length)

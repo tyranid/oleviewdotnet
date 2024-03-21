@@ -112,10 +112,10 @@ internal class InterfaceViewers
                         try
                         {
                             ConstructorInfo con = t.GetConstructor(new Type[0]);
-                            if (con != null)
+                            if (con is not null)
                             {
                                 factory = (ITypeViewerFactory)con.Invoke(new object[0]);
-                                if (factory != null)
+                                if (factory is not null)
                                 {
                                     m_viewfactory.Add(factory.Iid, factory);
                                 }
@@ -134,7 +134,7 @@ internal class InterfaceViewers
 
     public static void LoadInterfaceViewers()
     {
-        if (m_viewfactory == null)
+        if (m_viewfactory is null)
         {
             m_viewfactory = new Dictionary<Guid, ITypeViewerFactory>();
 
@@ -171,7 +171,7 @@ internal class InterfaceViewers
 
     public static ITypeViewerFactory GetInterfaceViewer(Guid iid)
     {
-        if (m_viewfactory == null)
+        if (m_viewfactory is null)
         {
             LoadInterfaceViewers();
         }
@@ -188,7 +188,7 @@ internal class InterfaceViewers
 
     public static void AddFactory(ITypeViewerFactory factory)
     {
-        if (GetInterfaceViewer(factory.Iid) == null)
+        if (GetInterfaceViewer(factory.Iid) is null)
         {
             m_viewfactory.Add(factory.Iid, factory);
         }

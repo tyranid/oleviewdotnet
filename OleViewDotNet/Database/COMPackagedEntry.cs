@@ -39,7 +39,7 @@ internal class COMPackagedEntry
         var result = new Dictionary<K, T>();
         using (var subkey = rootKey.OpenSubKeySafe(rootName))
         {
-            if (subkey == null)
+            if (subkey is null)
             {
                 return result;
             }
@@ -52,7 +52,7 @@ internal class COMPackagedEntry
                 }
 
                 using var valueKey = subkey.OpenSubKeySafe(name);
-                if (valueKey != null)
+                if (valueKey is not null)
                 {
                     result[key] = valueMap(key, packagePath, valueKey);
                 }
@@ -103,7 +103,7 @@ internal class COMPackagedEntry
         foreach (var name in rootKey.GetSubKeyNames())
         {
             using var subkey = rootKey.OpenSubKeySafe(name);
-            if (subkey == null)
+            if (subkey is null)
             {
                 continue;
             }

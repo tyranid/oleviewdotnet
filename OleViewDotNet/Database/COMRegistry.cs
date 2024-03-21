@@ -81,7 +81,7 @@ public class COMRegistry
 
     private static RegistryKey OpenClassesKey(COMRegistryMode mode, COMSid user)
     {
-        if (user == null)
+        if (user is null)
         {
             throw new ArgumentNullException("user");
         }
@@ -99,7 +99,7 @@ public class COMRegistry
     {
         ConcurrentDictionary<Guid, string> ret = new();
         using StreamReader reader = new(path);
-        for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
+        for (string line = reader.ReadLine(); line is not null; line = reader.ReadLine())
         {
             string[] values = line.Split(new[] { '\t' }, 2);
             if (values.Length == 2 && Guid.TryParse(values[0], out Guid iid))
@@ -138,7 +138,7 @@ public class COMRegistry
         if (include_machine_key)
         {
             using var packagedComKey = classes_key.OpenSubKeySafe("PackagedCom");
-            if (packagedComKey != null)
+            if (packagedComKey is not null)
             {
                 packagedRegistry = new COMPackagedRegistry(packagedComKey);
             }
@@ -251,7 +251,7 @@ public class COMRegistry
         Dictionary<Guid, COMCLSIDEntry> clsids = new();
         Dictionary<Guid, List<Guid>> categories = new();
 
-        if (actctx != null)
+        if (actctx is not null)
         {
             foreach (var com_server in actctx.ComServers)
             {
@@ -261,7 +261,7 @@ public class COMRegistry
 
         using (RegistryKey clsidKey = rootKey.OpenSubKeySafe("CLSID"))
         {
-            if (clsidKey != null)
+            if (clsidKey is not null)
             {
                 string[] subkeys = clsidKey.GetSubKeyNames();
                 foreach (string key in subkeys)
@@ -276,7 +276,7 @@ public class COMRegistry
                     }
 
                     using RegistryKey regKey = clsidKey.OpenSubKey(key);
-                    if (regKey != null)
+                    if (regKey is not null)
                     {
                         COMCLSIDEntry ent = new(this, clsid, regKey);
                         clsids.Add(clsid, ent);
@@ -314,7 +314,7 @@ public class COMRegistry
     {
         Dictionary<string, COMProgIDEntry> progids = new(StringComparer.OrdinalIgnoreCase);
 
-        if (actctx != null)
+        if (actctx is not null)
         {
             foreach (var progid in actctx.ComProgIds)
             {
@@ -371,7 +371,7 @@ public class COMRegistry
             interfaces.Add(unk.Iid, unk);
         }
 
-        if (actctx != null)
+        if (actctx is not null)
         {
             foreach (var intf in actctx.ComInterfaces)
             {
@@ -381,7 +381,7 @@ public class COMRegistry
 
         using (RegistryKey iidKey = rootKey.OpenSubKey("Interface"))
         {
-            if (iidKey != null)
+            if (iidKey is not null)
             {
                 string[] subkeys = iidKey.GetSubKeyNames();
                 foreach (string key in subkeys)
@@ -391,7 +391,7 @@ public class COMRegistry
                         if (!interfaces.ContainsKey(iid))
                         {
                             using RegistryKey regKey = iidKey.OpenSubKey(key);
-                            if (regKey != null)
+                            if (regKey is not null)
                             {
                                 COMInterfaceEntry ent = new(this, iid, regKey);
                                 interfaces.Add(iid, ent);
@@ -437,7 +437,7 @@ public class COMRegistry
         List<Guid> ret = new();
         using (RegistryKey key = rootKey.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\PreApproved"))
         {
-            if (key != null)
+            if (key is not null)
             {
                 string[] subkeys = key.GetSubKeyNames();
                 foreach (string s in subkeys)
@@ -463,7 +463,7 @@ public class COMRegistry
         if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
         {
             using RegistryKey key = Registry.Users.OpenSubKey(user.ToString());
-            if (key != null)
+            if (key is not null)
             {
                 m_preapproved.AddRange(ReadPreApproved(key));
             }
@@ -473,7 +473,7 @@ public class COMRegistry
     private void LoadTypelibs(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry)
     {
         Dictionary<Guid, COMTypeLibEntry> typelibs = new();
-        if (actctx != null)
+        if (actctx is not null)
         {
             foreach (var typelib in actctx.ComTypeLibs)
             {
@@ -483,7 +483,7 @@ public class COMRegistry
 
         using (RegistryKey key = rootKey.OpenSubKey("TypeLib"))
         {
-            if (key != null)
+            if (key is not null)
             {
                 string[] subkeys = key.GetSubKeyNames();
                 foreach (string s in subkeys)
@@ -491,7 +491,7 @@ public class COMRegistry
                     if (Guid.TryParse(s, out Guid g))
                     {
                         using RegistryKey subKey = key.OpenSubKey(s);
-                        if (subKey != null)
+                        if (subKey is not null)
                         {
                             COMTypeLibEntry typelib = new(this, g, subKey);
 
@@ -516,7 +516,7 @@ public class COMRegistry
     private void LoadLowRightsKey(RegistryKey rootKey, COMRegistryEntrySource source)
     {
         using RegistryKey key = rootKey.OpenSubKey(@"SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy");
-        if (key != null)
+        if (key is not null)
         {
             string[] subkeys = key.GetSubKeyNames();
             foreach (string s in subkeys)
@@ -546,7 +546,7 @@ public class COMRegistry
         if (mode == COMRegistryMode.Merged || mode == COMRegistryMode.UserOnly)
         {
             using RegistryKey key = Registry.Users.OpenSubKey(user.ToString());
-            if (key != null)
+            if (key is not null)
             {
                 LoadLowRightsKey(key, COMRegistryEntrySource.User);
             }
@@ -559,7 +559,7 @@ public class COMRegistry
     {
         m_mimetypes = new List<COMMimeType>();
         RegistryKey key = rootKey.OpenSubKey(@"mime\database\content type");
-        if (key == null)
+        if (key is null)
         {
             return;
         }
@@ -567,7 +567,7 @@ public class COMRegistry
         foreach (string mime_type in key.GetSubKeyNames())
         {
             RegistryKey sub_key = key.OpenSubKey(mime_type);
-            if (sub_key != null)
+            if (sub_key is not null)
             {
                 COMMimeType obj = new(this, mime_type, sub_key);
                 if (obj.Clsid != Guid.Empty)
@@ -584,7 +584,7 @@ public class COMRegistry
 
         using (RegistryKey appIdKey = rootKey.OpenSubKey("AppID"))
         {
-            if (appIdKey != null)
+            if (appIdKey is not null)
             {
                 string[] subkeys = appIdKey.GetSubKeyNames();
                 foreach (string key in subkeys)
@@ -599,7 +599,7 @@ public class COMRegistry
                     }
 
                     using RegistryKey regKey = appIdKey.OpenSubKey(key);
-                    if (regKey != null)
+                    if (regKey is not null)
                     {
                         COMAppIDEntry ent = new(appid, regKey, this);
                         m_appid.Add(appid, ent);
@@ -632,7 +632,7 @@ public class COMRegistry
         if (mode == COMRegistryMode.MachineOnly || mode == COMRegistryMode.Merged)
         {
             using RegistryKey runtime_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\WindowsRuntime");
-            if (runtime_key != null)
+            if (runtime_key is not null)
             {
                 LoadRuntimeClasses(runtime_key, string.Empty, this, classes);
                 LoadRuntimeServers(runtime_key, string.Empty, this, servers);
@@ -641,12 +641,12 @@ public class COMRegistry
 
         using (RegistryKey package_key = classes_key.OpenSubKey(@"ActivatableClasses\Package"))
         {
-            if (package_key != null)
+            if (package_key is not null)
             {
                 foreach (var package_id in package_key.GetSubKeyNames())
                 {
                     using RegistryKey runtime_key = package_key.OpenSubKey(package_id);
-                    if (runtime_key != null)
+                    if (runtime_key is not null)
                     {
                         LoadRuntimeClasses(runtime_key, package_id, this, classes);
                         LoadRuntimeServers(runtime_key, package_id, this, servers);
@@ -657,12 +657,12 @@ public class COMRegistry
 
         using (RegistryKey ext_key = classes_key.OpenSubKey(@"Extensions\ContractId"))
         {
-            if (ext_key != null)
+            if (ext_key is not null)
             {
                 foreach (string contract_id in ext_key.GetSubKeyNames())
                 {
                     using var package_key = ext_key.OpenSubKey($@"{contract_id}\PackageId");
-                    if (package_key != null)
+                    if (package_key is not null)
                     {
                         LoadRuntimeExtensions(package_key, contract_id, this, exts);
                     }
@@ -680,12 +680,12 @@ public class COMRegistry
     {
         using RegistryKey classes_key = runtime_key.OpenSubKey("ActivatableClassId");
         List<COMRuntimeClassEntry> entries = new();
-        if (classes_key != null)
+        if (classes_key is not null)
         {
             foreach (string name in classes_key.GetSubKeyNames())
             {
                 using RegistryKey subkey = classes_key.OpenSubKey(name);
-                if (subkey != null)
+                if (subkey is not null)
                 {
                     classes[name] = new COMRuntimeClassEntry(registry, package_id, name, subkey);
                 }
@@ -698,12 +698,12 @@ public class COMRegistry
     {
         using RegistryKey server_key = runtime_key.OpenSubKey("Server");
         List<COMRuntimeServerEntry> entries = new();
-        if (server_key != null)
+        if (server_key is not null)
         {
             foreach (string name in server_key.GetSubKeyNames())
             {
                 using RegistryKey subkey = server_key.OpenSubKey(name);
-                if (subkey != null)
+                if (subkey is not null)
                 {
                     servers[name] = new COMRuntimeServerEntry(registry, package_id, name, subkey);
                 }
@@ -717,12 +717,12 @@ public class COMRegistry
         foreach (var package_id in package_key.GetSubKeyNames())
         {
             using var class_key = package_key.OpenSubKey($@"{package_id}\ActivatableClassId");
-            if (class_key != null)
+            if (class_key is not null)
             {
                 foreach (var app_id in class_key.GetSubKeyNames())
                 {
                     using var app_key = class_key.OpenSubKey(app_id);
-                    if (app_key != null)
+                    if (app_key is not null)
                     {
                         exts.Add(new COMRuntimeExtensionEntry(package_id, contract_id, app_id, app_key, registry));
                     }
@@ -735,7 +735,7 @@ public class COMRegistry
     #region Internal Members
     internal byte[] SerializeInterfaces()
     {
-        if (m_serialized_interfaces == null)
+        if (m_serialized_interfaces is null)
         {
             MemoryStream stm = new();
             BinaryWriter writer = new(stm);
@@ -789,7 +789,7 @@ public class COMRegistry
 
     public IDictionary<Guid, COMCategory> ImplementedCategories => m_categories;
 
-    public IEnumerable<COMCLSIDEntry> PreApproved => m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e != null);
+    public IEnumerable<COMCLSIDEntry> PreApproved => m_preapproved.Select(g => MapClsidToEntry(g)).Where(e => e is not null);
 
     public IEnumerable<COMIELowRightsElevationPolicy> LowRights => m_lowrights.AsReadOnly();
 
@@ -919,7 +919,7 @@ public class COMRegistry
 
     public void Save(string path, IProgress<Tuple<string, int>> progress)
     {
-        if (progress == null)
+        if (progress is null)
         {
             throw new ArgumentNullException("progress");
         }
@@ -972,7 +972,7 @@ public class COMRegistry
 
     public static COMRegistry Load(string path, IProgress<Tuple<string, int>> progress)
     {
-        if (progress == null)
+        if (progress is null)
         {
             throw new ArgumentNullException("progress");
         }
@@ -1198,7 +1198,7 @@ public class COMRegistry
         COMTypeLibEntry entry = m_typelibs[typelib];
         foreach (var ver in entry.Versions)
         {
-            if (version == null || ver.Version == version)
+            if (version is null || ver.Version == version)
             {
                 return ver;
             }

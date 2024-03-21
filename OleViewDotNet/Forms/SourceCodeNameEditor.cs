@@ -84,7 +84,7 @@ internal partial class SourceCodeNameEditor : Form
 
     private void renameToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (treeViewEditor.SelectedNode != null)
+        if (treeViewEditor.SelectedNode is not null)
         {
             treeViewEditor.SelectedNode.BeginEdit();
         }

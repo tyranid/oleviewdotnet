@@ -34,19 +34,19 @@ internal static class RegistryUtilities
 
         try
         {
-            if (keyName != null)
+            if (keyName is not null)
             {
                 key = rootKey.OpenSubKey(keyName);
             }
 
-            if (key != null)
+            if (key is not null)
             {
                 return key.GetValue(valueName, null, options);
             }
         }
         finally
         {
-            if (key != null && key != rootKey)
+            if (key is not null && key != rootKey)
             {
                 key.Close();
             }
@@ -58,7 +58,7 @@ internal static class RegistryUtilities
     {
         object valueObject = rootKey.ReadObject(keyName, valueName, options);
         string valueString = string.Empty;
-        if (valueObject != null)
+        if (valueObject is not null)
         {
             valueString = valueObject.ToString();
         }
@@ -85,7 +85,7 @@ internal static class RegistryUtilities
     public static int ReadInt(this RegistryKey rootKey, string keyName, string valueName)
     {
         object obj = rootKey.ReadObject(keyName, valueName, RegistryValueOptions.None);
-        if (obj == null)
+        if (obj is null)
         {
             return 0;
         }
@@ -116,7 +116,7 @@ internal static class RegistryUtilities
     public static Guid ReadGuid(this RegistryKey rootKey, string keyName, string valueName)
     {
         string guid = rootKey.ReadString(keyName, valueName);
-        if (guid != null && Guid.TryParse(guid, out Guid ret))
+        if (guid is not null && Guid.TryParse(guid, out Guid ret))
         {
             return ret;
         }
@@ -140,12 +140,12 @@ internal static class RegistryUtilities
 
         try
         {
-            if (keyName != null)
+            if (keyName is not null)
             {
                 key = rootKey.OpenSubKey(keyName);
             }
 
-            if (key != null)
+            if (key is not null)
             {
                 yield return new RegistryValue("", key.GetValue(null));
                 foreach (var valueName in key.GetValueNames())
@@ -156,7 +156,7 @@ internal static class RegistryUtilities
         }
         finally
         {
-            if (key != null && key != rootKey)
+            if (key is not null && key != rootKey)
             {
                 key.Close();
             }
@@ -169,19 +169,19 @@ internal static class RegistryUtilities
 
         try
         {
-            if (keyName != null)
+            if (keyName is not null)
             {
                 key = rootKey.OpenSubKey(keyName);
             }
 
-            if (key != null)
+            if (key is not null)
             {
                 return key.GetValueNames();
             }
         }
         finally
         {
-            if (key != null && key != rootKey)
+            if (key is not null && key != rootKey)
             {
                 key.Close();
             }
@@ -220,6 +220,6 @@ internal static class RegistryUtilities
     public static bool HasSubkey(this RegistryKey key, string name)
     {
         using RegistryKey subkey = key.OpenSubKey(name);
-        return subkey != null;
+        return subkey is not null;
     }
 }

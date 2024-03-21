@@ -33,7 +33,7 @@ internal partial class CustomMarshalEditorControl : UserControl
         InitializeComponent();
         textBoxClsid.Text = objref.Clsid.FormatGuid();
         COMCLSIDEntry ent = registry.MapClsidToEntry(objref.Clsid);
-        if (ent != null)
+        if (ent is not null)
         {
             textBoxName.Text = ent.Name;
         }

@@ -56,7 +56,7 @@ public sealed class COMProxyFileConverter
     private static CustomAttributeBuilder CreateAttribute<T>(params object[] args) where T : Attribute
     {
         var con = typeof(T).GetConstructor(args.Select(p => p.GetType()).ToArray());
-        if (con == null)
+        if (con is null)
         {
             throw new ArgumentException("Can't find suitable constructor");
         }
@@ -287,7 +287,7 @@ public sealed class COMProxyFileConverter
         }
 
         Type existing_type = COMUtilities.GetInterfaceType(intf.Iid);
-        if (existing_type != null)
+        if (existing_type is not null)
         {
             m_types[intf.Iid] = existing_type;
             return existing_type;
@@ -344,7 +344,7 @@ public sealed class COMProxyFileConverter
         foreach (var member in struct_type.Members)
         {
             var type_desc = GetTypeDescriptor(0, member.MemberType, true);
-            if (type_desc == null)
+            if (type_desc is null)
             {
                 break;
             }

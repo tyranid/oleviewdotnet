@@ -95,7 +95,7 @@ internal partial class WaitingDialog : Form
 
     private void RunWorkerCompletedCallback(object sender, RunWorkerCompletedEventArgs e)
     {
-        if (e.Error != null)
+        if (e.Error is not null)
         {
             DialogResult = DialogResult.Cancel;
             Error = e.Error;

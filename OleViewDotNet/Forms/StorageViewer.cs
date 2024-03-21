@@ -28,7 +28,7 @@ internal partial class StorageViewer : UserControl
 {
     private static string EscapeStorageName(string name)
     {
-        if (name == null)
+        if (name is null)
         {
             return name;
         }
@@ -75,7 +75,7 @@ internal partial class StorageViewer : UserControl
 
     private static string UnescapeStorageName(string name)
     {
-        if (name == null)
+        if (name is null)
         {
             return name;
         }

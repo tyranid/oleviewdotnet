@@ -49,7 +49,7 @@ internal partial class ObjectInformation : UserControl
     public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
     {
         m_entry = entry;
-        if (m_entry == null)
+        if (m_entry is null)
         {
             Guid clsid = COMUtilities.GetObjectClass(pObject);
             if (registry.Clsids.ContainsKey(clsid))
@@ -141,7 +141,7 @@ internal partial class ObjectInformation : UserControl
             item.SubItems.Add(ent.Iid.FormatGuid());
 
             InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
-            if (factory != null)
+            if (factory is not null)
             {
                 item.SubItems.Add("Yes");
             }
@@ -186,10 +186,10 @@ internal partial class ObjectInformation : UserControl
 
             try
             {
-                if (factory != null)
+                if (factory is not null)
                 {
                     Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, m_pEntry);
-                    if ((frm != null) && !frm.IsDisposed)
+                    if ((frm is not null) && !frm.IsDisposed)
                     {
                         EntryPoint.GetMainForm(m_registry).HostControl(frm);
                     }
@@ -205,7 +205,7 @@ internal partial class ObjectInformation : UserControl
     private void btnOleContainer_Click(object sender, EventArgs e)
     {
         Control frm = new ObjectContainer(m_objName, m_pObject);
-        if ((frm != null) && !frm.IsDisposed)
+        if ((frm is not null) && !frm.IsDisposed)
         {
             EntryPoint.GetMainForm(m_registry).HostControl(frm);
         }
@@ -214,10 +214,10 @@ internal partial class ObjectInformation : UserControl
     private void btnDispatch_Click(object sender, EventArgs e)
     {
         Type disp_type = COMUtilities.GetDispatchTypeInfo(this, m_pObject);
-        if (disp_type != null)
+        if (disp_type is not null)
         {
             Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, disp_type);
-            if ((frm != null) && !frm.IsDisposed)
+            if ((frm is not null) && !frm.IsDisposed)
             {
                 EntryPoint.GetMainForm(m_registry).HostControl(frm);
             }

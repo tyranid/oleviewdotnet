@@ -37,7 +37,7 @@ public class COMCLSIDElevationEntry : IXmlSerializable
         Enabled = key.ReadInt(null, "Enabled") != 0;
         IconReference = key.ReadString(null, "IconReference");
         HashSet<Guid> vsos = new();
-        if (vso_key != null)
+        if (vso_key is not null)
         {
             foreach (string value in vso_key.GetValueNames())
             {

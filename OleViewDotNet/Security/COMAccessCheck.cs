@@ -39,7 +39,7 @@ public sealed class COMAccessCheck : IDisposable
 
     private static COMAccessRights GetGrantedAccess(COMSecurityDescriptor desc, COMSid principal, NtToken token, bool launch)
     {
-        if (desc == null)
+        if (desc is null)
             return 0;
 
         SecurityDescriptor sd = desc.SecurityDescriptor.Clone();
@@ -85,7 +85,7 @@ public sealed class COMAccessCheck : IDisposable
 
     public COMAccessCheckResult GetMaximumAccess(ICOMAccessSecurity obj)
     {
-        if (obj == null)
+        if (obj is null)
         {
             return default;
         }
@@ -105,10 +105,10 @@ public sealed class COMAccessCheck : IDisposable
         else if (obj is COMAppIDEntry || obj is COMCLSIDEntry)
         {
             COMAppIDEntry appid = obj as COMAppIDEntry;
-            if (appid == null && obj is COMCLSIDEntry clsid)
+            if (appid is null && obj is COMCLSIDEntry clsid)
             {
                 appid = clsid.AppIDEntry;
-                if (appid == null)
+                if (appid is null)
                 {
                     return default;
                 }

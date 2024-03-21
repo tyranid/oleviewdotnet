@@ -51,7 +51,7 @@ public class COMTypeLibParameter
             attrs.Add("optional");
         if (IsLcid)
             attrs.Add("lcid");
-        if (HasDefault && DefaultValue != null)
+        if (HasDefault && DefaultValue is not null)
         {
             if (DefaultValue is string s)
             {
