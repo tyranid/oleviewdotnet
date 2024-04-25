@@ -94,6 +94,9 @@ PrivateData = @{
         ReleaseNotes = 'v1.14
 ----
 * Fixes for Windows 11.
+* Added "default" database.
+* Reimplemented settings.
+* Better support for ARM64 systems.
 '
 
     } # End of PSData hashtable
