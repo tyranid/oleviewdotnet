@@ -219,4 +219,7 @@ internal static class NativeMethods
 
     [DllImport("ole32.dll")]
     public extern static int CoGetSystemSecurityPermissions(COMSD comSDType, out IntPtr ppSD);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public extern static bool IsWow64Process2(SafeKernelObjectHandle hProcess, out DllMachineType pProcessMachine, out DllMachineType pNativeMachine);
 }

@@ -14,24 +14,30 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using NtApiDotNet.Win32;
+using NtApiDotNet.Win32.Debugger;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OleViewDotNet.Processes;
 
 internal class SymbolResolverWrapper : ISymbolResolver
 {
     private readonly ISymbolResolver _resolver;
+    private readonly ISymbolEnumerator _sym_enum;
     private readonly SymbolLoadedModule _base_module;
     private readonly Dictionary<string, int> _resolved;
+    private readonly DllMachineType _machine_type;
     private static readonly string _dllname = COMUtilities.GetCOMDllName();
     private static readonly string _dllprefix = $"{_dllname}!";
 
-    public SymbolResolverWrapper(ISymbolResolver resolver, Dictionary<string, int> resolved)
+    public SymbolResolverWrapper(ISymbolResolver resolver, Dictionary<string, int> resolved, DllMachineType machine_type)
     {
         _resolver = resolver;
+        _sym_enum = resolver as ISymbolEnumerator;
         foreach (var module in _resolver.GetLoadedModules())
         {
             if (module.Name.Equals(_dllname, StringComparison.OrdinalIgnoreCase))
@@ -42,6 +48,7 @@ internal class SymbolResolverWrapper : ISymbolResolver
         }
 
         _resolved = resolved;
+        _machine_type = machine_type;
     }
 
     public IEnumerable<SymbolLoadedModule> GetLoadedModules()
@@ -81,7 +88,24 @@ internal class SymbolResolverWrapper : ISymbolResolver
             return _base_module.BaseAddress + _resolved[symbol];
         }
 
-        IntPtr ret = _resolver.GetAddressOfSymbol(symbol);
+        IntPtr ret = IntPtr.Zero;
+        if (_machine_type == DllMachineType.ARM64 && _sym_enum != null)
+        {
+            foreach(var sym in _sym_enum.EnumerateSymbols(IntPtr.Zero, symbol).OfType<DataSymbolInformation>())
+            {
+                if (sym.MachineType == DllMachineType.ARM64)
+                {
+                    ret = new IntPtr(sym.Address);
+                    break;
+                }
+            }
+        }
+
+        if (ret == IntPtr.Zero)
+        {
+            ret = _resolver.GetAddressOfSymbol(symbol);
+        }
+
         if (ret != IntPtr.Zero && symbol.StartsWith(_dllprefix))
         {
             _resolved[symbol] = (int)(ret.ToInt64() - _base_module.BaseAddress.ToInt64());

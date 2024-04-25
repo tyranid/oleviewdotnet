@@ -40,6 +40,21 @@ public static class COMProcessParser
     private readonly static Dictionary<string, int> m_resolved_32 = new();
     private readonly static Dictionary<string, int> m_resolved_native = new();
 
+    private static DllMachineType GetProcessMachineType(NtProcess process)
+    {
+        try
+        {
+            if (NativeMethods.IsWow64Process2(process.Handle, out DllMachineType process_machine, out DllMachineType native_machine))
+            {
+                return process_machine == DllMachineType.UNKNOWN ? native_machine : process_machine;
+            }
+        }
+        catch
+        {
+        }
+        return DllMachineType.UNKNOWN;
+    }
+
     private static string GetFileMD5(string file)
     {
         using var stm = File.OpenRead(file);
@@ -631,7 +646,7 @@ public static class COMProcessParser
 
             using ISymbolResolver resolver = new SymbolResolverWrapper(
                 SymbolResolver.Create(process, ProgramSettings.DbgHelpPath, ProgramSettings.SymbolPath),
-                resolved);
+                resolved, GetProcessMachineType(process));
             Sid user = process.User;
 
             return new COMProcessEntry(
