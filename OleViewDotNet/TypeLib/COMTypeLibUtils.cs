@@ -16,7 +16,6 @@
 
 using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
-using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

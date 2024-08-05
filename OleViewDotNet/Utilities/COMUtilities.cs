@@ -24,7 +24,6 @@ using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
-using OleViewDotNet.Utilities.Format;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;

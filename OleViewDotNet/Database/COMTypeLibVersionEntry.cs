@@ -23,7 +23,6 @@ using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities.Format;
-using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
