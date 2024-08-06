@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using NtApiDotNet.Win32;
+using OleViewDotNet.Interop;
 using System;
 using System.IO;
 using System.Reflection;
@@ -107,5 +108,20 @@ public static class AppUtilities
     public static void StartProcess(string command_line)
     {
         StartArchProcess(CurrentArchitecture, command_line);
+    }
+
+    internal static DllMachineType GetProcessMachineType(NtProcess process)
+    {
+        try
+        {
+            if (NativeMethods.IsWow64Process2(process.Handle, out DllMachineType process_machine, out DllMachineType native_machine))
+            {
+                return process_machine == DllMachineType.UNKNOWN ? native_machine : process_machine;
+            }
+        }
+        catch
+        {
+        }
+        return DllMachineType.UNKNOWN;
     }
 }

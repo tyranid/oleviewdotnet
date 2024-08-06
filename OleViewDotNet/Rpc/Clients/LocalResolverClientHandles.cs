@@ -17,6 +17,8 @@
 using NtApiDotNet;
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32;
+using OleViewDotNet.Processes;
+using OleViewDotNet.Utilities;
 using System;
 using System.Runtime.InteropServices;
 
@@ -35,7 +37,9 @@ internal sealed class LocalResolverClientHandles
             return null;
         }
 
-        return SymbolResolver.Create(NtProcess.Current, dbghelp, ProgramSettings.SymbolPath);
+        return new SymbolResolverWrapper(
+                SymbolResolver.Create(NtProcess.Current, ProgramSettings.DbgHelpPath, ProgramSettings.SymbolPath),
+                new(), AppUtilities.GetProcessMachineType(NtProcess.Current));
     }
 
     [StructLayout(LayoutKind.Sequential)]
