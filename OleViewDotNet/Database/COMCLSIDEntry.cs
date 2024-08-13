@@ -35,9 +35,12 @@ namespace OleViewDotNet.Database;
 
 public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
+    #region Private Members
     private List<COMInterfaceInstance> m_interfaces;
     private List<COMInterfaceInstance> m_factory_interfaces;
     private ICOMSourceCodeFormattable m_formattable;
+
+    private static readonly HashSet<Guid> _app_activatable = LoadAppActivatableClsids();
 
     private static HashSet<Guid> LoadAppActivatableClsids()
     {
@@ -59,13 +62,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         return app_activatable;
     }
 
-    private static readonly HashSet<Guid> _app_activatable = LoadAppActivatableClsids();
 
-    public int CompareTo(COMCLSIDEntry right)
-    {
-        return string.Compare(Name, right.Name);
-    }
-    
     private COMCLSIDServerEntry ReadServerKey(Dictionary<COMServerType, COMCLSIDServerEntry> servers, RegistryKey key, COMServerType server_type)
     {
         using RegistryKey server_key = key.OpenSubKey(server_type.ToString());
@@ -176,6 +173,53 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         Source = key.GetSource();
     }
 
+    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(COMAccessToken token)
+    {
+        try
+        {
+            return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token);
+        }
+        catch (Win32Exception)
+        {
+            throw;
+        }
+        catch (AggregateException agg)
+        {
+            throw agg.InnerException;
+        }
+    }
+
+    private COMCLSIDServerEntry GetDefaultServer()
+    {
+        if (Servers.ContainsKey(COMServerType.InProcServer32))
+        {
+            return Servers[COMServerType.InProcServer32];
+        }
+
+        if (Servers.ContainsKey(COMServerType.LocalServer32))
+        {
+            return Servers[COMServerType.LocalServer32];
+        }
+
+        if (Servers.ContainsKey(COMServerType.InProcHandler32))
+        {
+            return Servers[COMServerType.InProcHandler32];
+        }
+
+        return new COMCLSIDServerEntry(COMServerType.UnknownServer);
+    }
+    #endregion
+
+    #region Constructors
+    private COMCLSIDEntry(COMRegistry registry, Guid clsid) : this(registry)
+    {
+        Clsid = clsid;
+        Servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
+        Name = string.Empty;
+        Categories = new Guid[0];
+        PackageId = string.Empty;
+    }
+
     internal COMCLSIDEntry(COMRegistry registry, Guid clsid, COMPackagedEntry packageEntry,
         COMPackagedClassEntry classEntry) : this(registry, clsid)
     {
@@ -233,15 +277,6 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         LoadFromKey(rootKey);
     }
 
-    private COMCLSIDEntry(COMRegistry registry, Guid clsid) : this(registry)
-    {
-        Clsid = clsid;
-        Servers = new Dictionary<COMServerType, COMCLSIDServerEntry>();
-        Name = string.Empty;
-        Categories = new Guid[0];
-        PackageId = string.Empty;
-    }
-
     public COMCLSIDEntry(COMRegistry registry, Guid clsid, COMServerType type)
         : this(registry, clsid)
     {
@@ -258,12 +293,14 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     {
         Clsid = com_server.Clsid;
         TypeLib = com_server.TypeLibraryId;
-        Servers[COMServerType.InProcServer32] = 
+        Servers[COMServerType.InProcServer32] =
             new COMCLSIDServerEntry(COMServerType.InProcServer32, com_server.FullPath, com_server.ThreadingModel);
         Name = string.IsNullOrWhiteSpace(com_server.ProgId) ? Clsid.ToString() : com_server.ProgId;
         Source = COMRegistryEntrySource.ActCtx;
     }
+    #endregion
 
+    #region Public Properties
     public Guid Clsid { get; private set; }
 
     public string Name { get; private set; }
@@ -362,141 +399,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         get; private set;
     }
 
-    private static Guid CLSID_PSAutomation = new("00020424-0000-0000-C000-000000000046");
-    private static Guid CLSID_PSDispatch = new("00020420-0000-0000-C000-000000000046");
-
-    internal bool IsAutomationProxy => Clsid == CLSID_PSDispatch || Clsid == CLSID_PSAutomation;
-
-    public override bool Equals(object obj)
-    {
-        if (base.Equals(obj))
-        {
-            return true;
-        }
-
-        if (obj is not COMCLSIDEntry right)
-        {
-            return false;
-        }
-
-        if (Elevation is not null)
-        {
-            if (!Elevation.Equals(right.Elevation))
-            {
-                return false;
-            }
-        }
-        else if (right.Elevation is not null)
-        {
-            return false;
-        }
-
-        // We don't consider the loaded interfaces.
-        return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID
-            && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values)
-            && ActivatableFromApp == right.ActivatableFromApp && TrustedMarshaller == right.TrustedMarshaller
-            && Source == right.Source && PackageId == right.PackageId;
-    }
-
-    public override int GetHashCode()
-    {
-        return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
-            ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode()
-            ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode() ^ TrustedMarshaller.GetHashCode()
-            ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
-    }
-
-    private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(COMAccessToken token)
-    {
-        try
-        {
-            return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token);
-        }
-        catch (Win32Exception)
-        {
-            throw;
-        }
-        catch (AggregateException agg)
-        {
-            throw agg.InnerException;
-        }
-    }
-
-    private COMCLSIDServerEntry GetDefaultServer()
-    {
-        if (Servers.ContainsKey(COMServerType.InProcServer32))
-        {
-            return Servers[COMServerType.InProcServer32];
-        }
-
-        if (Servers.ContainsKey(COMServerType.LocalServer32))
-        {
-            return Servers[COMServerType.LocalServer32];
-        }
-
-        if (Servers.ContainsKey(COMServerType.InProcHandler32))
-        {
-            return Servers[COMServerType.InProcHandler32];
-        }
-
-        return new COMCLSIDServerEntry(COMServerType.UnknownServer);
-    }
-
-    /// <summary>
-    /// Get list of supported Interface IIDs (that we know about)
-    /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
-    /// The returned array is cached so subsequent calls to this function return without calling into COM
-    /// </summary>
-    /// <param name="refresh">Force the supported interface list to refresh</param>
-    /// <param name="token">Token to use when checking for the interfaces.</param>
-    /// <returns>Returns true if supported interfaces were refreshed.</returns>
-    /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
-    {
-        if (Clsid == Guid.Empty)
-        {
-            return false;
-        }
-
-        if (refresh || !InterfacesLoaded)
-        {
-            COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
-            m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
-            m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
-            InterfacesLoaded = true;
-            return true;
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// Get list of supported Interface IIDs Synchronously
-    /// </summary>
-    /// <param name="refresh">Force the supported interface list to refresh</param>
-    /// <param name="token">Token to use when querying for the interfaces.</param>
-    /// <returns>Returns true if supported interfaces were refreshed.</returns>
-    /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
-    {
-        Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
-        try
-        {
-            result.Wait();
-            if (result.IsFaulted)
-            {
-                throw result.Exception.InnerException;
-            }
-            return result.Result;
-        }
-        catch (Exception ex)
-        {
-            if (ex is AggregateException agg)
-            {
-                throw agg.InnerException;
-            }
-            throw;
-        }
-    }
+    public bool IsAutomationProxy => Clsid == COMKnownGuids.CLSID_PSDispatch || Clsid == COMKnownGuids.CLSID_PSAutomation;
 
     /// <summary>
     /// Indicates that the class' interface list has been loaded.
@@ -564,6 +467,114 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         }
     }
 
+    public bool SupportsRemoteActivation => true;
+
+    public bool Proxy => Database.GetProxiesForClsid(this).Length > 0;
+
+    public COMRegistry Database { get; }
+    #endregion
+
+    #region Public Methods
+    public int CompareTo(COMCLSIDEntry right)
+    {
+        return string.Compare(Name, right.Name);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        if (obj is not COMCLSIDEntry right)
+        {
+            return false;
+        }
+
+        if (Elevation is not null)
+        {
+            if (!Elevation.Equals(right.Elevation))
+            {
+                return false;
+            }
+        }
+        else if (right.Elevation is not null)
+        {
+            return false;
+        }
+
+        // We don't consider the loaded interfaces.
+        return Clsid == right.Clsid && Name == right.Name && TreatAs == right.TreatAs && AppID == right.AppID
+            && TypeLib == right.TypeLib && Servers.Values.SequenceEqual(right.Servers.Values)
+            && ActivatableFromApp == right.ActivatableFromApp && TrustedMarshaller == right.TrustedMarshaller
+            && Source == right.Source && PackageId == right.PackageId;
+    }
+
+    public override int GetHashCode()
+    {
+        return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ TreatAs.GetHashCode()
+            ^ AppID.GetHashCode() ^ TypeLib.GetHashCode() ^ Servers.Values.GetEnumHashCode()
+            ^ Elevation.GetSafeHashCode() ^ ActivatableFromApp.GetHashCode() ^ TrustedMarshaller.GetHashCode()
+            ^ Source.GetHashCode() ^ PackageId.GetSafeHashCode();
+    }
+
+    /// <summary>
+    /// Get list of supported Interface IIDs (that we know about)
+    /// NOTE: This will load the object itself to check what is supported, it _might_ crash the app
+    /// The returned array is cached so subsequent calls to this function return without calling into COM
+    /// </summary>
+    /// <param name="refresh">Force the supported interface list to refresh</param>
+    /// <param name="token">Token to use when checking for the interfaces.</param>
+    /// <returns>Returns true if supported interfaces were refreshed.</returns>
+    /// <exception cref="Win32Exception">Thrown on error.</exception>
+    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
+    {
+        if (Clsid == Guid.Empty)
+        {
+            return false;
+        }
+
+        if (refresh || !InterfacesLoaded)
+        {
+            COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
+            m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
+            m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
+            InterfacesLoaded = true;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Get list of supported Interface IIDs Synchronously
+    /// </summary>
+    /// <param name="refresh">Force the supported interface list to refresh</param>
+    /// <param name="token">Token to use when querying for the interfaces.</param>
+    /// <returns>Returns true if supported interfaces were refreshed.</returns>
+    /// <exception cref="Win32Exception">Thrown on error.</exception>
+    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
+    {
+        Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
+        try
+        {
+            result.Wait();
+            if (result.IsFaulted)
+            {
+                throw result.Exception.InnerException;
+            }
+            return result.Result;
+        }
+        catch (Exception ex)
+        {
+            if (ex is AggregateException agg)
+            {
+                throw agg.InnerException;
+            }
+            throw;
+        }
+    }
+
     public IntPtr CreateInstance(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
         if (dwContext == CLSCTX.ALL)
@@ -614,27 +625,31 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         return COMUtilities.CreateClassFactory(Clsid, COMKnownGuids.IID_IUnknown, dwContext, server, auth_info);
     }
 
-    public bool SupportsRemoteActivation => true;
-
-    public bool Proxy => Database.GetProxiesForClsid(this).Length > 0;
-
-    internal COMRegistry Database { get; }
-
-    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
-
-    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
-
-    Guid ICOMGuid.ComGuid => Clsid;
-
-    bool ICOMSourceCodeParsable.IsSourceCodeParsed => m_formattable is not null;
-
-    bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() is not null;
-
     public override string ToString()
     {
         return Name;
     }
+    #endregion
 
+    #region ICOMAccessSecurity Implementation
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
+
+    COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    #endregion
+
+    #region ICOMGuid Implementation
+    Guid ICOMGuid.ComGuid => Clsid;
+    #endregion
+
+    #region ICOMSourceCodeParsable Implementation
+    bool ICOMSourceCodeParsable.IsSourceCodeParsed => m_formattable is not null;
+    #endregion
+
+    #region ICOMSourceCodeFormattable Implementation
+    bool ICOMSourceCodeFormattable.IsFormattable => TypeLibEntry?.Versions.FirstOrDefault() is not null;
+    #endregion
+
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -695,7 +710,9 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             writer.WriteSerializableObjects("elevation", new COMCLSIDElevationEntry[] { Elevation });
         }
     }
+    #endregion
 
+    #region ICOMSourceCodeFormattable Implementation
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         m_formattable?.Format(builder);
@@ -719,4 +736,5 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
             m_formattable = new SourceCodeFormattableText($"ERROR: {ex.Message}");
         }
     }
+    #endregion
 }

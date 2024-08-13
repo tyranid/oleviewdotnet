@@ -26,12 +26,11 @@ namespace OleViewDotNet.Database;
 
 public class COMCategory : IXmlSerializable, ICOMGuid
 {
-    private readonly COMRegistry m_registry;
-    
     public Guid CategoryID { get; private set; }
     public string Name { get; private set; }
     public IEnumerable<Guid> Clsids { get; private set; }
-    public IEnumerable<COMCLSIDEntry> ClassEntries => Clsids.Select(g => m_registry.MapClsidToEntry(g)).Where(e => e is not null);
+    public IEnumerable<COMCLSIDEntry> ClassEntries => Clsids.Select(g => Database.MapClsidToEntry(g)).Where(e => e is not null);
+    internal COMRegistry Database { get; }
 
     Guid ICOMGuid.ComGuid => CategoryID;
 
@@ -45,7 +44,7 @@ public class COMCategory : IXmlSerializable, ICOMGuid
 
     internal COMCategory(COMRegistry registry)
     {
-        m_registry = registry;
+        Database = registry;
     }
 
     XmlSchema IXmlSerializable.GetSchema()

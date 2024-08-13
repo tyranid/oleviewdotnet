@@ -50,4 +50,7 @@ public static class COMKnownGuids
     public static Guid IID_IInspectable => GetGuid<IInspectable>();
 
     public static Guid IID_IClassFactory => GetGuid<IClassFactory>();
+
+    public static Guid CLSID_PSAutomation = new("00020424-0000-0000-C000-000000000046");
+    public static Guid CLSID_PSDispatch = new("00020420-0000-0000-C000-000000000046");
 }

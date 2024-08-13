@@ -33,7 +33,6 @@ namespace OleViewDotNet.Database;
 public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, 
     ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
-    private readonly COMRegistry m_registry;
     private ICOMSourceCodeFormattable m_formattable;
 
     public int CompareTo(COMInterfaceEntry right)
@@ -44,10 +43,10 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     private void LoadFromKey(RegistryKey key)
     {
         string name = key.GetValue(null) as string;
-        if (!string.IsNullOrWhiteSpace(name?.Trim()) || m_registry.IidNameCache.TryGetValue(Iid, out name))
+        if (!string.IsNullOrWhiteSpace(name?.Trim()) || Database.IidNameCache.TryGetValue(Iid, out name))
         {
             InternalName = name;
-            m_registry.IidNameCache.TryAdd(Iid, InternalName);
+            Database.IidNameCache.TryAdd(Iid, InternalName);
         }
         else
         {
@@ -74,7 +73,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
     internal COMInterfaceEntry(COMRegistry registry)
     {
-        m_registry = registry;
+        Database = registry;
     }
 
     private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, 
@@ -99,7 +98,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     internal COMInterfaceEntry(COMRegistry registry, Type type) 
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
-        m_registry.IidNameCache.TryAdd(Iid, InternalName);
+        Database.IidNameCache.TryAdd(Iid, InternalName);
         RuntimeInterface = true;
         Source = COMRegistryEntrySource.Metadata;
     }
@@ -113,7 +112,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     public COMInterfaceEntry(COMRegistry registry, Guid iid)
         : this(registry, iid, Guid.Empty, 3, "IUnknown", string.Empty)
     {
-        if (m_registry.IidNameCache.TryGetValue(iid, out string name))
+        if (Database.IidNameCache.TryGetValue(iid, out string name))
         {
             InternalName = name;
         }
@@ -142,6 +141,8 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     public bool IsClassFactory => Iid == typeof(IClassFactory).GUID;
 
     internal string InternalName { get; set; }
+
+    internal COMRegistry Database { get; }
 
     private static COMInterfaceEntry CreateBuiltinEntry(COMRegistry registry, Guid iid, string name, int num_methods)
     {
@@ -178,14 +179,14 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         get; private set;
     }
 
-    public COMInterfaceEntry InterfaceEntry => m_registry.Interfaces.GetGuidEntry(Iid);
+    public COMInterfaceEntry InterfaceEntry => Database.Interfaces.GetGuidEntry(Iid);
 
     public Guid ProxyClsid
     {
         get; private set;
     }
 
-    public COMCLSIDEntry ProxyClassEntry => m_registry.Clsids.GetGuidEntry(ProxyClsid);
+    public COMCLSIDEntry ProxyClassEntry => Database.Clsids.GetGuidEntry(ProxyClsid);
 
     public int NumMethods
     {
@@ -207,7 +208,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         get; private set;
     }
 
-    public COMTypeLibEntry TypeLibEntry => m_registry.Typelibs.GetGuidEntry(TypeLib);
+    public COMTypeLibEntry TypeLibEntry => Database.Typelibs.GetGuidEntry(TypeLib);
 
     public COMTypeLibVersionEntry TypeLibVersionEntry
     {
@@ -338,7 +339,7 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
 
         if (!string.IsNullOrWhiteSpace(InternalName))
         {
-            m_registry.IidNameCache.TryAdd(Iid, InternalName);
+            Database.IidNameCache.TryAdd(Iid, InternalName);
         }
     }
 

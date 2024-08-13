@@ -28,7 +28,6 @@ namespace OleViewDotNet.Database;
 
 public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
-    private readonly COMRegistry m_registry;
     private Lazy<COMTypeLib> m_typelib;
 
     private COMTypeLib ParseInternal()
@@ -38,7 +37,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
         {
             if (intf.Name != string.Empty)
             {
-                m_registry.IidNameCache.TryAdd(intf.Uuid, intf.Name);
+                Database.IidNameCache.TryAdd(intf.Uuid, intf.Name);
             }
         }
         return type_lib;
@@ -52,7 +51,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     public int Locale { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
     internal bool IsParsed => m_typelib?.IsValueCreated ?? false;
-    internal COMRegistry Database => m_registry;
+    internal COMRegistry Database { get; }
 
     public override bool Equals(object obj)
     {
@@ -131,7 +130,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
 
     public COMTypeLibVersionEntry(COMRegistry registry, Guid typelibid)
     {
-        m_registry = registry;
+        Database = registry;
         TypelibId = typelibid;
     }
 
