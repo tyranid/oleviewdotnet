@@ -19,6 +19,7 @@ using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace OleViewDotNet.Utilities.Format;
@@ -182,6 +183,10 @@ public sealed class COMSourceCodeBuilder
             if (obj is Type type)
             {
                 formattable = new SourceCodeFormattableType(type);
+            }
+            else if (obj is Assembly asm)
+            {
+                formattable = new SourceCodeFormattableAssembly(asm, true);
             }
         }
 

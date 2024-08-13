@@ -2027,6 +2027,7 @@ function Get-ComProxy {
         [parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Guid]$Clsid,
         [parameter(Mandatory, Position=0, ParameterSetName = "FromIid")]
+        [parameter(Mandatory, ParameterSetName = "FromTypeLib")]
         [Guid]$Iid,
         [parameter(ParameterSetName = "FromIid")]
         [parameter(ParameterSetName = "FromClsid")]
@@ -2036,7 +2037,8 @@ function Get-ComProxy {
         [parameter(ParameterSetName = "FromInterface")]
         [parameter(ParameterSetName = "FromInterfaceInstance")]
         [switch]$ParseAutomation,
-        [parameter(ParameterSetName = "FromPath")]
+        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [parameter(Mandatory, ParameterSetName = "FromTypeLib")]
         [string]$Path,
         [switch]$AsText
     )
@@ -2071,6 +2073,14 @@ function Get-ComProxy {
                     return
                 }
                 [OleViewDotNet.Proxy.COMProxyFile]::GetFromFile($Path, $Database)
+            }
+            "FromTypeLib" {
+                $Database = Get-CurrentComDatabase $Database
+                if ($null -eq $Database) {
+                    Write-Error "No database specified and current database isn't set."
+                    return
+                }
+                [OleViewDotNet.Proxy.COMProxyInterface]::GetFromTypeLibrary($Path, $Iid, $Database)
             }
         }
         if ($null -ne $proxy) {
@@ -2427,9 +2437,9 @@ function Get-ComTypeLibAssembly {
 
 <#
 .SYNOPSIS
-Formats a .NET assembly or Type which represents COM type.
+Formats a COM type library.
 .DESCRIPTION
-This cmdlet formats a .NET assembly or a .NET type which represents a COM type.
+This cmdlet formats a COM type library. It also supports formatting the assembly or types returns from Get-ComTypeLibAssembly.
 .PARAMETER Assembly
 Specify a converted COM type library assembly.
 .PARAMETER InterfacesOnly
@@ -2437,18 +2447,18 @@ Only convert interfaces to text.
 .PARAMETER Type
 Specify COM type object.
 .PARAMETER TypeLib
-Specify a registered COM typelib entry to format.
-.PARAMETER NoProgress
-Don't show progress for conversion.
+Specify a COM typelib to format.
 .PARAMETER Path
 The path to a type library to format.
 .INPUTS
+OleViewDotNet.TypeLib.COMTypeLib
 System.Reflection.Assembly
+System.Type
 .OUTPUTS
 string
 .EXAMPLE
 Format-ComTypeLib $typelib
-Format a .NET assembly.
+Format type library.
 .EXAMPLE
 Format-ComTypeLib $type
 Format a .NET assembly.
@@ -2456,37 +2466,38 @@ Format a .NET assembly.
 function Format-ComTypeLib {
     [CmdletBinding()]
     Param(
+        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
+        [OleViewDotNet.TypeLib.COMTypeLib]$TypeLib,
         [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromAssembly")]
         [System.Reflection.Assembly]$Assembly,
         [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromType")]
         [System.Type]$Type,
-        [parameter(Mandatory, ValueFromPipeline, Position=0, ParameterSetName = "FromTypeLib")]
-        [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
         [parameter(Mandatory, ParameterSetName = "FromPath")]
         [string]$Path,
         [parameter(ParameterSetName = "FromAssembly")]
         [parameter(ParameterSetName = "FromTypeLib")]
         [parameter(ParameterSetName = "FromPath")]
-        [switch]$InterfacesOnly,
-        [parameter(ParameterSetName = "FromTypeLib")]
-        [parameter(ParameterSetName = "FromPath")]
-        [switch]$NoProgress
+        [switch]$InterfacesOnly
     )
 
     PROCESS {
-        switch($PSCmdlet.ParameterSetName) {
-            "FromAssembly" {
-                [OleViewDotNet.Utilities.COMUtilities]::FormatComAssembly($Assembly, $InterfacesOnly) | Write-Output
+        try {
+            switch($PSCmdlet.ParameterSetName) {
+                "FromAssembly" {
+                    ConvertTo-ComSourceCode -InputObject $Assembly -InterfacesOnly:$InterfacesOnly
+                }
+                "FromType" {
+                    ConvertTo-ComSourceCode -InputObject $Type -InterfacesOnly:$InterfacesOnly
+                }
+                "FromTypeLib" {
+                    ConvertTo-ComSourceCode -InputObject $TypeLib -InterfacesOnly:$InterfacesOnly
+                }
+                "FromPath" {
+                    [OleViewDotNet.TypeLib.COMTypeLib]::FromFile($Path) | ConvertTo-ComSourceCode -InterfacesOnly:$InterfacesOnly
+                }
             }
-            "FromType" {
-                [OleViewDotNet.Utilities.COMUtilities]::FormatComType($Type) | Write-Output
-            }
-            "FromTypeLib" {
-                Get-ComTypeLibAssembly -TypeLib $TypeLib -NoProgress:$NoProgress | Format-ComTypeLib -InterfacesOnly:$InterfacesOnly
-            }
-            "FromPath" {
-                Get-ComTypeLibAssembly -Path $Path -NoProgress:$NoProgress | Format-ComTypeLib -InterfacesOnly:$InterfacesOnly
-            }
+        } catch {
+            Write-Error $_
         }
     }
 }

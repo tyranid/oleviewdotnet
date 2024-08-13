@@ -94,7 +94,7 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
 
     private COMProxyInterface GetInterfaceInstance(NdrComProxyDefinition proxy)
     {
-        return new COMProxyInterface(ClassEntry, new(proxy), m_registry, this);
+        return new COMProxyInterface(ClassEntry, new(proxy), m_registry, this, true);
     }
 
     private COMProxyFile(string path, COMRegistry registry)

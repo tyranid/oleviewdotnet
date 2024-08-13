@@ -50,16 +50,15 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
     }
 
-    private static COMProxyInterface GetFromTypeLibrary(COMInterfaceEntry intf)
+    private static COMProxyInterface GetFromTypeLibrary(COMTypeLibParser type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
     {
-        using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
-        using var info = type_lib.GetTypeInfoFromGuid(intf.Iid);
+        using var info = type_lib.GetTypeInfoFromGuid(iid);
 
         var parsed_intf = info.Parse() as COMTypeLibInterfaceBase;
 
-        NativeMethods.CreateProxyFromTypeInfo(info.Instance, null, intf.Iid, out IntPtr proxy, out IntPtr ptr);
+        NativeMethods.CreateProxyFromTypeInfo(info.Instance, null, iid, out IntPtr proxy, out IntPtr ptr);
         TypeInfoVtbl type_info = (ptr.GetStructure<IntPtr>() - Marshal.SizeOf<TypeInfoVtbl>()).GetStructure<TypeInfoVtbl>();
-        if (type_info.iid != intf.Iid)
+        if (type_info.iid != iid)
         {
             throw new ArgumentException("Invalid COM automation proxy vtable.");
         }
@@ -68,13 +67,18 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         var stub = type_info.stubVtbl.header;
         var result = parser.ReadFromMidlServerInfo(stub.pServerInfo, 3, stub.DispatchTableCount, parsed_intf.Methods.Skip(3).Select(m => m.Name).ToList());
 
-        NdrComProxyDefinition proxy_def = NdrComProxyDefinition.FromProcedures(intf.Name, intf.Iid, COMKnownGuids.IID_IUnknown, stub.DispatchTableCount, result);
+        NdrComProxyDefinition proxy_def = NdrComProxyDefinition.FromProcedures(parsed_intf.Name, iid, COMKnownGuids.IID_IUnknown, stub.DispatchTableCount, result);
 
         RpcComProxy com_proxy = new(proxy_def);
 
-        return new COMProxyInterface(intf.ProxyClassEntry, com_proxy, intf.ProxyClassEntry.Database, null);
+        return new COMProxyInterface(proxy_class, com_proxy, proxy_class.Database, null, cache);
     }
 
+    private static COMProxyInterface GetFromTypeLibrary(COMInterfaceEntry intf)
+    {
+        using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
+        return GetFromTypeLibrary(type_lib, intf.Iid, intf.ProxyClassEntry, true);
+    }
     #endregion
 
     #region Public Properties
@@ -132,7 +136,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #region Internal Members
     internal RpcComProxy RpcProxy { get; }
 
-    internal COMProxyInterface(COMCLSIDEntry clsid, RpcComProxy rpc_proxy, COMRegistry registry, COMProxyFile proxy)
+    internal COMProxyInterface(COMCLSIDEntry clsid, RpcComProxy rpc_proxy, COMRegistry registry, COMProxyFile proxy, bool cache)
     {
         ClassEntry = clsid;
         RpcProxy = rpc_proxy;
@@ -146,7 +150,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         }
-        if (!m_proxies.ContainsKey(Iid))
+        if (cache && !m_proxies.ContainsKey(Iid))
         {
             m_proxies.Add(Iid, this);
         }
@@ -196,6 +200,23 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     public static COMProxyInterface GetFromIID(COMInterfaceInstance intf, bool parse_automation = false)
     {
         return GetFromIID(intf.InterfaceEntry, parse_automation);
+    }
+
+    public static COMProxyInterface GetFromTypeLibrary(string path, Guid iid, COMRegistry registry)
+    {
+        if (path is null)
+        {
+            throw new ArgumentNullException(nameof(path));
+        }
+
+        if (registry is null)
+        {
+            throw new ArgumentNullException(nameof(registry));
+        }
+
+        using COMTypeLibParser type_lib = new(path);
+        COMCLSIDEntry proxy_class = new(registry, COMKnownGuids.CLSID_PSAutomation, COMServerType.InProcServer32);
+        return GetFromTypeLibrary(type_lib, iid, proxy_class, false);
     }
     #endregion
 

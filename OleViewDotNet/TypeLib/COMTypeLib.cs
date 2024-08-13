@@ -115,6 +115,8 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         using COMTypeLibParser parser = new(type_lib);
         return parser.Parse();
     }
+
+    public static explicit operator COMTypeLib(COMTypeLibVersionEntry type_lib) => type_lib.Parse();
     #endregion
 
     #region Public Properties
