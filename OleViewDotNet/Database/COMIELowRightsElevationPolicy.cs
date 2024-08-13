@@ -83,7 +83,6 @@ public class COMIELowRightsElevationPolicy : COMRegistryEntry, IComparable<COMIE
     public COMCLSIDEntry ClassEntry => Database.MapClsidToEntry(Clsid);
     public string AppPath { get; private set; }
     public IEElevationPolicy Policy { get; private set; }
-    public COMRegistryEntrySource Source { get; private set; }
     #endregion
 
     #region Public Methods

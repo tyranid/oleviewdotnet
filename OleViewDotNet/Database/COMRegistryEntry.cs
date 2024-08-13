@@ -27,5 +27,10 @@ public abstract class COMRegistryEntry
 
     #region Public Properties
     public COMRegistry Database { get; }
+
+    public COMRegistryEntrySource Source
+    {
+        get; protected set;
+    }
     #endregion
 }

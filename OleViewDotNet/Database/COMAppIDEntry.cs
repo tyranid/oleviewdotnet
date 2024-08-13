@@ -256,8 +256,6 @@ public class COMAppIDEntry : COMRegistryEntry, IComparable<COMAppIDEntry>, IXmlS
     {
         get; private set;
     }
-
-    public COMRegistryEntrySource Source { get; private set; }
     #endregion
 
     #region ICOMAccessSecurity Implementation

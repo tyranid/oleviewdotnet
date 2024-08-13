@@ -46,7 +46,6 @@ public class COMRuntimeExtensionEntry : COMRegistryEntry, IXmlSerializable
         Icon = key.ReadString(null, "Icon");
         Vendor = key.ReadString(null, "Vendor");
     }
-
     #endregion
 
     #region Constructors
@@ -153,7 +152,6 @@ public class COMRuntimeExtensionEntry : COMRegistryEntry, IXmlSerializable
             return string.Empty;
         }
     }
-    public COMRegistryEntrySource Source { get; private set; }
 
     #endregion
 }

@@ -393,11 +393,6 @@ public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlS
 
     public bool IsInteractiveUser => AppIDEntry?.IsInteractiveUser ?? false;
 
-    public COMRegistryEntrySource Source
-    {
-        get; private set;
-    }
-
     public bool IsAutomationProxy => Clsid == COMKnownGuids.CLSID_PSDispatch || Clsid == COMKnownGuids.CLSID_PSAutomation;
 
     /// <summary>

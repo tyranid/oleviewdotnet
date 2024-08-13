@@ -153,6 +153,5 @@ public class COMRuntimeServerEntry : COMRegistryEntry, IComparable<COMRuntimeSer
     public int ClassCount => m_get_classes.Value.Count;
     public string PackageId { get; private set; }
     public bool RuntimeServer => string.IsNullOrEmpty(PackageId);
-    public COMRegistryEntrySource Source { get; private set; }
     #endregion
 }

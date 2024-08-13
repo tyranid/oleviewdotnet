@@ -151,11 +151,6 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     public Type RuntimeType => Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
 
-    public COMRegistryEntrySource Source
-    {
-        get; private set;
-    }
-
     public bool SupportsRemoteActivation => false;
 
     /// <summary>

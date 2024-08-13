@@ -70,7 +70,6 @@ public class COMTypeLibEntry : COMRegistryEntry, IComparable<COMTypeLibEntry>, I
     public Guid TypelibId { get; private set; }
     public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
     public string Name { get; private set; }
-    public COMRegistryEntrySource Source { get; private set; }
     #endregion
 
     #region Public Methods

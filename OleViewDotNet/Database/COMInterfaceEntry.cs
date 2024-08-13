@@ -298,11 +298,6 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     {
         get; internal set;
     }
-
-    public COMRegistryEntrySource Source
-    {
-        get; private set;
-    }
     #endregion
 
     #region Static Members

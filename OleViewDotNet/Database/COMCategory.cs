@@ -44,6 +44,7 @@ public class COMCategory : COMRegistryEntry, IXmlSerializable, ICOMGuid
 
     internal COMCategory(COMRegistry registry) : base(registry)
     {
+        Source = COMRegistryEntrySource.LocalMachine;
     }
     #endregion
 
