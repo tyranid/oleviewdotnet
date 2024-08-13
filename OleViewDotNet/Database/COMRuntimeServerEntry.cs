@@ -26,10 +26,9 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
+public class COMRuntimeServerEntry : COMRegistryEntry, IComparable<COMRuntimeServerEntry>, IXmlSerializable, ICOMAccessSecurity
 {
     #region Private Members
-    private readonly COMRegistry m_registry;
     private readonly Lazy<List<COMRuntimeClassEntry>> m_get_classes;
 
     private void LoadFromKey(RegistryKey key)
@@ -45,10 +44,9 @@ public class COMRuntimeServerEntry : IComparable<COMRuntimeServerEntry>, IXmlSer
     #endregion
 
     #region Constructors
-    internal COMRuntimeServerEntry(COMRegistry registry)
+    internal COMRuntimeServerEntry(COMRegistry registry) : base(registry)
     {
-        m_registry = registry;
-        m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => m_registry.RuntimeClasses.Values.Where(c => 
+        m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => Database.RuntimeClasses.Values.Where(c => 
             c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
     }
 

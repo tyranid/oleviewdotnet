@@ -24,16 +24,16 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Database;
 
-public class COMCategory : IXmlSerializable, ICOMGuid
+public class COMCategory : COMRegistryEntry, IXmlSerializable, ICOMGuid
 {
+    #region Public Properties
     public Guid CategoryID { get; private set; }
     public string Name { get; private set; }
     public IEnumerable<Guid> Clsids { get; private set; }
     public IEnumerable<COMCLSIDEntry> ClassEntries => Clsids.Select(g => Database.MapClsidToEntry(g)).Where(e => e is not null);
-    internal COMRegistry Database { get; }
+    #endregion
 
-    Guid ICOMGuid.ComGuid => CategoryID;
-
+    #region Constructors
     internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
         : this(registry)
     {
@@ -42,11 +42,44 @@ public class COMCategory : IXmlSerializable, ICOMGuid
         Name = COMUtilities.GetCategoryName(catid);
     }
 
-    internal COMCategory(COMRegistry registry)
+    internal COMCategory(COMRegistry registry) : base(registry)
     {
-        Database = registry;
+    }
+    #endregion
+
+    #region Public Methods
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        if (obj is not COMCategory right)
+        {
+            return false;
+        }
+
+        return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
     }
 
+    public override int GetHashCode()
+    {
+        return CategoryID.GetHashCode() ^ Name.GetSafeHashCode()
+            ^ Clsids.GetEnumHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+    #endregion
+
+    #region ICOMGuid Implementation
+    Guid ICOMGuid.ComGuid => CategoryID;
+    #endregion
+
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -65,37 +98,5 @@ public class COMCategory : IXmlSerializable, ICOMGuid
         writer.WriteGuid("catid", CategoryID);
         writer.WriteGuids("clsids", Clsids);
     }
-
-    public override bool Equals(object obj)
-    {
-        if (base.Equals(obj))
-        {
-            return true;
-        }
-
-        if (obj is not COMCategory right)
-        {
-            return false;
-        }
-
-        return Clsids.SequenceEqual(right.Clsids) && CategoryID == right.CategoryID && Name == right.Name;
-    }
-
-    public override int GetHashCode()
-    {
-        return CategoryID.GetHashCode() ^ Name.GetSafeHashCode() 
-            ^ Clsids.GetEnumHashCode();
-    }
-
-    public override string ToString()
-    {
-        return Name;
-    }
-
-    public static readonly Guid CATID_TrustedMarshaler = new("00000003-0000-0000-C000-000000000046");
-    public static readonly Guid CATID_SafeForScripting = new("7DD95801-9882-11CF-9FA9-00AA006C42C4");
-    public static readonly Guid CATID_SafeForInitializing = new("7DD95802-9882-11CF-9FA9-00AA006C42C4");
-    public static readonly Guid CATID_Control = new("{40FC6ED4-2438-11CF-A3DB-080036F12502}");
-    public static readonly Guid CATID_Insertable = new("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
-    public static readonly Guid CATID_Document = new("{40fc6ed8-2438-11cf-a3db-080036f12502}");
+    #endregion
 }

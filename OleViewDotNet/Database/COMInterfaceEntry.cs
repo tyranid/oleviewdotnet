@@ -30,15 +30,11 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializable, 
+public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable, 
     ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
+    #region Private Members
     private ICOMSourceCodeFormattable m_formattable;
-
-    public int CompareTo(COMInterfaceEntry right)
-    {
-        return string.Compare(Name, right.Name);
-    }
 
     private void LoadFromKey(RegistryKey key)
     {
@@ -71,9 +67,108 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         Source = key.GetSource();
     }
 
-    internal COMInterfaceEntry(COMRegistry registry)
+    private static COMInterfaceEntry CreateBuiltinEntry(COMRegistry registry, Guid iid, string name, int num_methods)
     {
-        Database = registry;
+        return new COMInterfaceEntry(registry)
+        {
+            Base = "",
+            Iid = iid,
+            ProxyClsid = Guid.Empty,
+            NumMethods = num_methods,
+            InternalName = name,
+            TypeLibVersion = string.Empty,
+            Source = COMRegistryEntrySource.Builtin
+        };
+    }
+
+    private bool CheckForParsed()
+    {
+        if (m_formattable is not null)
+            return true;
+        if (RuntimeInterface && RuntimeMetadata.Interfaces.TryGetValue(Iid, out Type type))
+        {
+            m_formattable = new SourceCodeFormattableType(type);
+        }
+        else if (TypeLibVersionEntry?.IsParsed == true
+            && TypeLibVersionEntry.Parse().InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
+        {
+            m_formattable = intf;
+        }
+        else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
+        {
+            m_formattable = proxy;
+        }
+        return m_formattable is not null;
+    }
+
+    #endregion
+
+    #region Public Methods
+    public int CompareTo(COMInterfaceEntry right)
+    {
+        return string.Compare(Name, right.Name);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        if (obj is not COMInterfaceEntry right)
+        {
+            return false;
+        }
+
+        return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
+            && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
+            && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
+            && Source == right.Source;
+    }
+
+    public override int GetHashCode()
+    {
+        return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode()
+            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
+            ^ Source.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public bool TestInterface(IntPtr obj)
+    {
+        Guid iid = Iid;
+        if (Marshal.QueryInterface(obj, ref iid, out IntPtr pRequested) == 0)
+        {
+            Marshal.Release(pRequested);
+            return true;
+        }
+        return false;
+    }
+
+    public bool TestInterface(object obj)
+    {
+        IntPtr punk = IntPtr.Zero;
+        try
+        {
+            punk = Marshal.GetIUnknownForObject(obj);
+            return TestInterface(punk);
+        }
+        finally
+        {
+            if (punk != IntPtr.Zero)
+                Marshal.Release(punk);
+        }
+    }
+    #endregion
+
+    #region Constructors
+    internal COMInterfaceEntry(COMRegistry registry) : base(registry)
+    {
     }
 
     private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, 
@@ -129,7 +224,9 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         TypeLibVersion = entry.TypeLibVersionNumber;
         Source = COMRegistryEntrySource.Packaged;
     }
+    #endregion
 
+    #region Public Properties
     public bool IsOleControl => Iid == COMKnownGuids.IID_IOleControl;
 
     public bool IsDispatch => Iid == COMKnownGuids.IID_IDispatch;
@@ -141,36 +238,6 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     public bool IsClassFactory => Iid == typeof(IClassFactory).GUID;
 
     internal string InternalName { get; set; }
-
-    internal COMRegistry Database { get; }
-
-    private static COMInterfaceEntry CreateBuiltinEntry(COMRegistry registry, Guid iid, string name, int num_methods)
-    {
-        return new COMInterfaceEntry(registry)
-        {
-            Base = "",
-            Iid = iid,
-            ProxyClsid = Guid.Empty,
-            NumMethods = num_methods,
-            InternalName = name,
-            TypeLibVersion = string.Empty,
-            Source = COMRegistryEntrySource.Builtin
-        };
-    }
-
-    public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, COMKnownInterfaces known)
-    {
-        return known switch
-        {
-            COMKnownInterfaces.IUnknown => CreateBuiltinEntry(registry, COMKnownGuids.IID_IUnknown, "IUnknown", 3),
-            COMKnownInterfaces.IMarshal => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshal, "IMarshal", 9),
-            COMKnownInterfaces.IMarshal2 => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshal2, "IMarshal2", 9),
-            COMKnownInterfaces.IPSFactoryBuffer => CreateBuiltinEntry(registry, COMKnownGuids.IID_IPSFactoryBuffer, "IPSFactoryBuffer", 4),
-            COMKnownInterfaces.IMarshalEnvoy => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshalEnvoy, "IMarshalEnvoy", 7),
-            COMKnownInterfaces.IStdMarshalInfo => CreateBuiltinEntry(registry, COMKnownGuids.IID_IStdMarshalInfo, "IStdMarshalInfo", 4),
-            _ => null,
-        };
-    }
 
     public string Name => string.IsNullOrWhiteSpace(InternalName) ? Iid.FormatGuid() : COMUtilities.DemangleWinRTName(InternalName);
 
@@ -236,90 +303,70 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
     {
         get; private set;
     }
+    #endregion
 
+    #region Static Members
+    public static COMInterfaceEntry CreateKnownInterface(COMRegistry registry, COMKnownInterfaces known)
+    {
+        return known switch
+        {
+            COMKnownInterfaces.IUnknown => CreateBuiltinEntry(registry, COMKnownGuids.IID_IUnknown, "IUnknown", 3),
+            COMKnownInterfaces.IMarshal => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshal, "IMarshal", 9),
+            COMKnownInterfaces.IMarshal2 => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshal2, "IMarshal2", 9),
+            COMKnownInterfaces.IPSFactoryBuffer => CreateBuiltinEntry(registry, COMKnownGuids.IID_IPSFactoryBuffer, "IPSFactoryBuffer", 4),
+            COMKnownInterfaces.IMarshalEnvoy => CreateBuiltinEntry(registry, COMKnownGuids.IID_IMarshalEnvoy, "IMarshalEnvoy", 7),
+            COMKnownInterfaces.IStdMarshalInfo => CreateBuiltinEntry(registry, COMKnownGuids.IID_IStdMarshalInfo, "IStdMarshalInfo", 4),
+            _ => null,
+        };
+    }
+    #endregion
+
+    #region ICOMGuid Implementation
     Guid ICOMGuid.ComGuid => Iid;
+    #endregion
 
+    #region ICOMSourceCodeFormattable Implementation
     bool ICOMSourceCodeFormattable.IsFormattable => RuntimeInterface 
                 || TypeLibVersionEntry is not null || ProxyClassEntry is not null;
 
-    private bool CheckForParsed()
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        if (m_formattable is not null)
-            return true;
-        if (RuntimeInterface && RuntimeMetadata.Interfaces.TryGetValue(Iid, out Type type))
-        {
-            m_formattable = new SourceCodeFormattableType(type);
-        }
-        else if (TypeLibVersionEntry?.IsParsed == true 
-            && TypeLibVersionEntry.Parse().InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
-        {
-            m_formattable = intf;
-        }
-        else if (COMProxyInterface.TryGetFromIID(this, out COMProxyInterface proxy))
-        {
-            m_formattable = proxy;
-        }
-        return m_formattable is not null;
+        m_formattable?.Format(builder);
     }
+    #endregion
 
+    #region ICOMSourceCodeParsable Implementation
     bool ICOMSourceCodeParsable.IsSourceCodeParsed => CheckForParsed();
 
-    public override bool Equals(object obj)
+    void ICOMSourceCodeParsable.ParseSourceCode()
     {
-        if (base.Equals(obj))
+        if (CheckForParsed())
+            return;
+        // If the runtime interface exists, that's already populated in CheckForParsed.
+        if (TypeLibVersionEntry is not null)
         {
-            return true;
+            var typelib = TypeLibVersionEntry.Parse();
+            if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
+            {
+                m_formattable = intf;
+            }
+            else
+            {
+                m_formattable = new SourceCodeFormattableText("ERROR: Can't find type library for IID.");
+            }
         }
-
-        if (obj is not COMInterfaceEntry right)
+        else if (HasProxy)
         {
-            return false;
+            m_formattable = COMProxyInterface.GetFromIID(this);
         }
-
-        return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
-            && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
-            && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
-            && Source == right.Source;
-    }
-
-    public override int GetHashCode()
-    {
-        return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode() 
-            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
-            ^ Source.GetHashCode();
-    }
-
-    public override string ToString()
-    {
-        return Name;
-    }
-
-    public bool TestInterface(IntPtr obj)
-    {
-        Guid iid = Iid;
-        if (Marshal.QueryInterface(obj, ref iid, out IntPtr pRequested) == 0)
+        else
         {
-            Marshal.Release(pRequested);
-            return true;
-        }
-        return false;
-    }
-
-    public bool TestInterface(object obj)
-    {
-        IntPtr punk = IntPtr.Zero;
-        try
-        {
-            punk = Marshal.GetIUnknownForObject(obj);
-            return TestInterface(punk);
-        }
-        finally
-        {
-            if (punk != IntPtr.Zero)
-                Marshal.Release(punk);
+            m_formattable = new SourceCodeFormattableText("ERROR: Can't parse the interface source.");
         }
     }
+    #endregion
 
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -355,36 +402,5 @@ public class COMInterfaceEntry : IComparable<COMInterfaceEntry>, IXmlSerializabl
         writer.WriteBool("rt", RuntimeInterface);
         writer.WriteEnum("src", Source);
     }
-
-    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
-    {
-        m_formattable?.Format(builder);
-    }
-
-    void ICOMSourceCodeParsable.ParseSourceCode()
-    {
-        if (CheckForParsed())
-            return;
-        // If the runtime interface exists, that's already populated in CheckForParsed.
-        if (TypeLibVersionEntry is not null)
-        {
-            var typelib = TypeLibVersionEntry.Parse();
-            if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
-            {
-                m_formattable = intf;
-            }
-            else
-            {
-                m_formattable = new SourceCodeFormattableText("ERROR: Can't find type library for IID.");
-            }
-        }
-        else if (HasProxy)
-        {
-            m_formattable = COMProxyInterface.GetFromIID(this);
-        }
-        else
-        {
-            m_formattable = new SourceCodeFormattableText("ERROR: Can't parse the interface source.");
-        }
-    }
+    #endregion
 }

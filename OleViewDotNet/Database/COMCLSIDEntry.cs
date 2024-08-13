@@ -33,7 +33,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
+public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
     #region Private Members
     private List<COMInterfaceInstance> m_interfaces;
@@ -120,17 +120,17 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         TypeLib = key.ReadGuid("TypeLib", null);
         if (key.HasSubkey("Control"))
         {
-            categories.Add(COMCategory.CATID_Control);
+            categories.Add(COMKnownGuids.CATID_Control);
         }
 
         if (key.HasSubkey("Insertable"))
         {
-            categories.Add(COMCategory.CATID_Insertable);
+            categories.Add(COMKnownGuids.CATID_Insertable);
         }
 
         if (key.HasSubkey("DocObject"))
         {
-            categories.Add(COMCategory.CATID_Document);
+            categories.Add(COMKnownGuids.CATID_Document);
         }
 
         using (RegistryKey catkey = key.OpenSubKey("Implemented Categories"))
@@ -167,7 +167,7 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         ActivatableFromApp = _app_activatable.Contains(Clsid);
         using (RegistryKey trustkey = Registry.LocalMachine.OpenSubKey(@"Software\Classes\Unmarshalers\System\" + Clsid.ToString("B")))
         {
-            TrustedMarshaller = trustkey is not null || categories.Contains(COMCategory.CATID_TrustedMarshaler);
+            TrustedMarshaller = trustkey is not null || categories.Contains(COMKnownGuids.CATID_TrustedMarshaler);
         }
 
         Source = key.GetSource();
@@ -283,9 +283,8 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
         Name = clsid.ToString();
     }
 
-    internal COMCLSIDEntry(COMRegistry registry)
+    internal COMCLSIDEntry(COMRegistry registry) : base(registry)
     {
-        Database = registry;
     }
 
     internal COMCLSIDEntry(COMRegistry registry, ActCtxComServerRedirection com_server)
@@ -364,17 +363,17 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     /// <summary>
     /// True if this class has the trusted marshaller category.
     /// </summary>
-    public bool TrustedMarshallerCategory => Categories.Contains(COMCategory.CATID_TrustedMarshaler);
+    public bool TrustedMarshallerCategory => Categories.Contains(COMKnownGuids.CATID_TrustedMarshaler);
 
     /// <summary>
     /// True if this class is marked as safe to script.
     /// </summary>
-    public bool SafeForScripting => Categories.Contains(COMCategory.CATID_SafeForScripting);
+    public bool SafeForScripting => Categories.Contains(COMKnownGuids.CATID_SafeForScripting);
 
     /// <summary>
     /// True if this class is marked as safe to initialize.
     /// </summary>
-    public bool SafeForInitializing => Categories.Contains(COMCategory.CATID_SafeForInitializing);
+    public bool SafeForInitializing => Categories.Contains(COMKnownGuids.CATID_SafeForInitializing);
 
     public bool HasLaunchPermission => AppIDEntry?.HasLaunchPermission ?? false;
 
@@ -470,8 +469,6 @@ public class COMCLSIDEntry : IComparable<COMCLSIDEntry>, IXmlSerializable, ICOMC
     public bool SupportsRemoteActivation => true;
 
     public bool Proxy => Database.GetProxiesForClsid(this).Length > 0;
-
-    public COMRegistry Database { get; }
     #endregion
 
     #region Public Methods

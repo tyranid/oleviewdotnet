@@ -28,28 +28,9 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity, ICOMGuid
+public class COMAppIDEntry : COMRegistryEntry, IComparable<COMAppIDEntry>, IXmlSerializable, ICOMAccessSecurity, ICOMGuid
 {
-    internal COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
-    {
-        AppId = appId;
-        LoadFromKey(key);
-    }
-
-    internal COMAppIDEntry(COMPackagedServerEntry server, COMRegistry registry) : this(registry)
-    {
-        AppId = server.SurrogateAppId;
-        RunAs = string.Empty;
-        Name = server.DisplayName;
-        LaunchPermission = server.LaunchAndActivationPermission;
-        Source = COMRegistryEntrySource.Packaged;
-        DllSurrogate = server.Executable;
-        if (string.IsNullOrWhiteSpace(DllSurrogate))
-        {
-            DllSurrogate = "dllhost.exe";
-        }
-    }
-
+    #region Private Members
     private void LoadFromKey(RegistryKey key)
     {
         RunAs = key.GetValue("RunAs") as string;
@@ -126,12 +107,86 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
 
         Source = key.GetSource();
     }
+    #endregion
 
+    #region Constructors
+    internal COMAppIDEntry(Guid appId, RegistryKey key, COMRegistry registry) : this(registry)
+    {
+        AppId = appId;
+        LoadFromKey(key);
+    }
+
+    internal COMAppIDEntry(COMPackagedServerEntry server, COMRegistry registry) : this(registry)
+    {
+        AppId = server.SurrogateAppId;
+        RunAs = string.Empty;
+        Name = server.DisplayName;
+        LaunchPermission = server.LaunchAndActivationPermission;
+        Source = COMRegistryEntrySource.Packaged;
+        DllSurrogate = server.Executable;
+        if (string.IsNullOrWhiteSpace(DllSurrogate))
+        {
+            DllSurrogate = "dllhost.exe";
+        }
+    }
+
+    internal COMAppIDEntry(COMRegistry registry) : base(registry)
+    {
+    }
+    #endregion
+
+    #region Public Methods
     public int CompareTo(COMAppIDEntry other)
     {
         return AppId.CompareTo(other.AppId);
     }
 
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        if (obj is not COMAppIDEntry right)
+        {
+            return false;
+        }
+
+        if (LocalService is not null)
+        {
+            if (!LocalService.Equals(right.LocalService))
+            {
+                return false;
+            }
+        }
+        else if (right.LocalService is not null)
+        {
+            return false;
+        }
+
+        return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
+            && LaunchPermission.SDIsEqual(right.LaunchPermission) && AccessPermission.SDIsEqual(right.AccessPermission) && RotFlags == right.RotFlags
+            && PreferredServerBitness == right.PreferredServerBitness && Source == right.Source;
+    }
+
+    public override int GetHashCode()
+    {
+        return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode()
+            ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
+            LaunchPermission.GetSDHashCode() ^ AccessPermission.GetSDHashCode() ^
+            LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode()
+            ^ Source.GetHashCode();
+    }
+    #endregion
+
+    #region Public Properties
     public Guid AppId { get; private set; }
 
     public string DllSurrogate { get; private set; }
@@ -203,63 +258,19 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
     }
 
     public COMRegistryEntrySource Source { get; private set; }
+    #endregion
 
-    internal COMRegistry Database { get; }
-
+    #region ICOMAccessSecurity Implementation
     COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => Database.DefaultAccessPermission;
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => Database.DefaultLaunchPermission;
+    #endregion
 
+    #region ICOMGuid Implementation
     Guid ICOMGuid.ComGuid => AppId;
+    #endregion
 
-    public override string ToString()
-    {
-        return Name;
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (base.Equals(obj))
-        {
-            return true;
-        }
-
-        if (obj is not COMAppIDEntry right)
-        {
-            return false;
-        }
-
-        if (LocalService is not null)
-        {
-            if (!LocalService.Equals(right.LocalService))
-            {
-                return false;
-            }
-        }
-        else if (right.LocalService is not null)
-        {
-            return false;
-        }
-
-        return AppId == right.AppId && DllSurrogate == right.DllSurrogate && RunAs == right.RunAs && Name == right.Name && Flags == right.Flags
-            && LaunchPermission.SDIsEqual(right.LaunchPermission) && AccessPermission.SDIsEqual(right.AccessPermission) && RotFlags == right.RotFlags 
-            && PreferredServerBitness == right.PreferredServerBitness && Source == right.Source;
-    }
-
-    public override int GetHashCode()
-    {
-        return AppId.GetHashCode() ^ DllSurrogate.GetSafeHashCode()
-            ^ RunAs.GetSafeHashCode() ^ Name.GetSafeHashCode() ^ Flags.GetHashCode() ^
-            LaunchPermission.GetSDHashCode() ^ AccessPermission.GetSDHashCode() ^
-            LocalService.GetSafeHashCode() ^ RotFlags.GetHashCode() ^ PreferredServerBitness.GetHashCode()
-            ^ Source.GetHashCode();
-    }
-
-    internal COMAppIDEntry(COMRegistry registry)
-    {
-        Database = registry;
-    }
-
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -304,4 +315,5 @@ public class COMAppIDEntry : IComparable<COMAppIDEntry>, IXmlSerializable, ICOMA
             writer.WriteSerializableObjects("service", new COMAppIDServiceEntry[] { LocalService });
         }
     }
+    #endregion
 }

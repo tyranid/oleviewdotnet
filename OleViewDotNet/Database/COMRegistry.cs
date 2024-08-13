@@ -761,7 +761,6 @@ public class COMRegistry
     #endregion
 
     #region Public Properties
-
     public IDictionary<Guid, COMCLSIDEntry> Clsids => m_clsids;
 
     public IDictionary<Guid, COMInterfaceEntry> Interfaces => m_interfaces;

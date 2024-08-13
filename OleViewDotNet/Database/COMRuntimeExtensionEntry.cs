@@ -24,11 +24,9 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMRuntimeExtensionEntry : IXmlSerializable
+public class COMRuntimeExtensionEntry : COMRegistryEntry, IXmlSerializable
 {
     #region Private Members
-    private readonly COMRegistry m_registry;
-
     private void LoadFromKey(RegistryKey key)
     {
         var custom_properties = new Dictionary<string, string>();
@@ -52,9 +50,8 @@ public class COMRuntimeExtensionEntry : IXmlSerializable
     #endregion
 
     #region Constructors
-    internal COMRuntimeExtensionEntry(COMRegistry registry)
+    internal COMRuntimeExtensionEntry(COMRegistry registry) : base(registry)
     {
-        m_registry = registry;
     }
 
     internal COMRuntimeExtensionEntry(string package_id, string contract_id, string id, 

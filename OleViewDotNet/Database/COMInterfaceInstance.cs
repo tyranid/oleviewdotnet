@@ -25,24 +25,22 @@ namespace OleViewDotNet.Database;
 
 public class COMInterfaceInstance : IXmlSerializable, ICOMSourceCodeFormattable
 {
-    private readonly COMRegistry m_registry;
-
     public Guid Iid { get; private set; }
     public string Module { get; private set; }
     public long VTableOffset { get; private set; }
-    internal COMRegistry Database => m_registry;
+    public COMRegistry Database { get; }
     public string Name
     {
         get
         {
-            if (m_registry is null || !m_registry.InterfacesToNames.ContainsKey(Iid))
+            if (Database is null || !Database.InterfacesToNames.ContainsKey(Iid))
             {
                 return string.Empty;
             }
-            return m_registry.InterfacesToNames[Iid];
+            return Database.InterfacesToNames[Iid];
         }
     }
-    public COMInterfaceEntry InterfaceEntry => m_registry?.Interfaces.GetGuidEntry(Iid);
+    public COMInterfaceEntry InterfaceEntry => Database?.Interfaces.GetGuidEntry(Iid);
 
     bool ICOMSourceCodeFormattable.IsFormattable => ((ICOMSourceCodeFormattable)InterfaceEntry)?.IsFormattable ?? false;
 
@@ -59,7 +57,7 @@ public class COMInterfaceInstance : IXmlSerializable, ICOMSourceCodeFormattable
 
     public COMInterfaceInstance(COMRegistry registry)
     {
-        m_registry = registry;
+        Database = registry;
     }
 
     public override string ToString()

@@ -24,28 +24,69 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Database;
 
-public enum IEElevationPolicy
+public class COMIELowRightsElevationPolicy : COMRegistryEntry, IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
 {
-    NoRun = 0,
-    RunAtCurrent = 1,
-    RunAfterPrompt = 2,
-    RunAtMedium = 3,
-    BlockCOM = 0x10,
-    KillBit = 0x20,
-}
+    #region Private Members
+    private static string HandleNulTerminate(string s)
+    {
+        int index = s.IndexOf('\0');
+        if (index >= 0)
+        {
+            return s.Substring(0, index);
+        }
+        else
+        {
+            return s;
+        }
+    }
 
-public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevationPolicy>, IXmlSerializable
-{
-    private readonly COMRegistry m_registry;
-    
+    private void LoadFromRegistry(RegistryKey key)
+    {
+        object policyValue = key.GetValue("Policy", 0);
+
+        if (policyValue is not null && !string.IsNullOrEmpty(policyValue.ToString()))
+        {
+            Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
+        }
+
+        string clsid = (string)key.GetValue("CLSID");
+        if (clsid is not null)
+        {
+
+            if (Guid.TryParse(clsid, out Guid cls))
+            {
+                Clsid = cls;
+            }
+        }
+
+        string appName = (string)key.GetValue("AppName", null);
+        string appPath = (string)key.GetValue("AppPath");
+
+        if ((appName is not null) && (appPath is not null))
+        {
+            try
+            {
+                Name = HandleNulTerminate(appName);
+                AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();
+            }
+            catch (ArgumentException)
+            {
+            }
+        }
+    }
+    #endregion
+
+    #region Public Properties
     public string Name { get; private set; }
     public Guid Uuid { get; private set; }
     public Guid Clsid { get; private set; }
-    public COMCLSIDEntry ClassEntry => m_registry.MapClsidToEntry(Clsid);
+    public COMCLSIDEntry ClassEntry => Database.MapClsidToEntry(Clsid);
     public string AppPath { get; private set; }
     public IEElevationPolicy Policy { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
+    #endregion
 
+    #region Public Methods
     public override bool Equals(object obj)
     {
         if (base.Equals(obj))
@@ -69,54 +110,14 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
             ^ Source.GetHashCode();
     }
 
-    private static string HandleNulTerminate(string s)
+    public int CompareTo(COMIELowRightsElevationPolicy other)
     {
-        int index = s.IndexOf('\0');
-        if (index >= 0)
-        {
-            return s.Substring(0, index);
-        }
-        else
-        {
-            return s;
-        }
+        return Uuid.CompareTo(other.Uuid);
     }
+    #endregion
 
-    private void LoadFromRegistry(RegistryKey key)
-    {
-        object policyValue = key.GetValue("Policy", 0);
 
-        if (policyValue is not null && !string.IsNullOrEmpty(policyValue.ToString()))
-        {
-            Policy = (IEElevationPolicy)Enum.ToObject(typeof(IEElevationPolicy), policyValue);
-        }
-        
-        string clsid = (string)key.GetValue("CLSID");
-        if (clsid is not null)
-        {
-
-            if (Guid.TryParse(clsid, out Guid cls))
-            {
-                Clsid = cls;
-            }
-        }
-        
-        string appName = (string)key.GetValue("AppName", null);
-        string appPath = (string)key.GetValue("AppPath");
-
-        if ((appName is not null) && (appPath is not null))
-        {
-            try
-            {
-                Name = HandleNulTerminate(appName);
-                AppPath = Path.Combine(HandleNulTerminate(appPath), Name).ToLower();
-            }
-            catch (ArgumentException)
-            {
-            }
-        }
-    }
-
+    #region Constructors
     public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key) 
         : this(registry)
     {
@@ -126,16 +127,12 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
         LoadFromRegistry(key);
     }
 
-    internal COMIELowRightsElevationPolicy(COMRegistry registry)
+    internal COMIELowRightsElevationPolicy(COMRegistry registry) : base(registry)
     {
-        m_registry = registry;
     }
+    #endregion
 
-    public int CompareTo(COMIELowRightsElevationPolicy other)
-    {
-        return Uuid.CompareTo(other.Uuid);
-    }
-
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -160,4 +157,5 @@ public class COMIELowRightsElevationPolicy : IComparable<COMIELowRightsElevation
         writer.WriteEnum("policy", Policy);
         writer.WriteEnum("src", Source);
     }
+    #endregion
 }

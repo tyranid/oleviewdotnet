@@ -23,17 +23,17 @@ using OleViewDotNet.Utilities;
 
 namespace OleViewDotNet.Database;
 
-public class COMMimeType : IXmlSerializable
+public class COMMimeType : COMRegistryEntry, IXmlSerializable
 {
-    private readonly COMRegistry m_registry;
-
+    #region Public Properties
     public string MimeType { get; private set; }
     public Guid Clsid { get; private set; }
-    public COMCLSIDEntry ClassEntry => m_registry.Clsids.GetGuidEntry(Clsid);
-
+    public COMCLSIDEntry ClassEntry => Database.Clsids.GetGuidEntry(Clsid);
     public string Extension { get; private set; }
     public string Name => ClassEntry?.Name ?? string.Empty;
+    #endregion
 
+    #region Public Methods
     public override string ToString()
     {
         return MimeType;
@@ -59,7 +59,9 @@ public class COMMimeType : IXmlSerializable
     {
         return MimeType.GetSafeHashCode() ^ Clsid.GetHashCode() ^ Extension.GetSafeHashCode();
     }
+    #endregion
 
+    #region Constructors
     internal COMMimeType(COMRegistry registry, string mime_type, RegistryKey key) : this(registry)
     {
         string extension = key.GetValue("Extension") as string;
@@ -71,11 +73,12 @@ public class COMMimeType : IXmlSerializable
         MimeType = mime_type;
     }
 
-    internal COMMimeType(COMRegistry registry)
+    internal COMMimeType(COMRegistry registry) : base(registry)
     {
-        m_registry = registry;
     }
+    #endregion
 
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -94,4 +97,5 @@ public class COMMimeType : IXmlSerializable
         writer.WriteGuid("clsid", Clsid);
         writer.WriteOptionalAttributeString("ext", Extension);
     }
+    #endregion
 }

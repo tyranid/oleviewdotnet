@@ -30,72 +30,11 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
+public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
 {
+    #region Private Members
     private List<COMInterfaceInstance> m_interfaces;
     private List<COMInterfaceInstance> m_factory_interfaces;
-    private readonly COMRegistry m_registry;
-
-    public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
-
-    public string Name { get; private set; }
-    public Guid Clsid { get; private set; }
-    public string DllPath { get; private set; }
-    public string DllName
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(DllPath))
-            {
-                return string.Empty;
-            }
-            return MiscUtilities.GetFileName(DllPath);
-        }
-    }
-    public string PackageId { get; private set; }
-    public string PackageName => Package?.Name ?? string.Empty;
-    public AppxPackageName Package => AppxPackageName.FromFullName(PackageId);
-
-    public bool RuntimeClass => string.IsNullOrEmpty(PackageId);
-    public string Server { get; private set; }
-    public string DefaultServer => Server;
-    public bool HasServer => !string.IsNullOrWhiteSpace(Server);
-    COMServerType ICOMClassEntry.DefaultServerType => Server is null ? COMServerType.InProcServer32 : COMServerType.LocalServer32;
-
-    public COMRuntimeServerEntry ServerEntry => m_registry.MapRuntimeClassToServerEntry(this);
-
-    public ActivationType ActivationType { get; private set; }
-
-    public COMSecurityDescriptor Permissions
-    {
-        get; private set;
-    }
-
-    public bool HasPermission => Permissions is not null;
-
-    public COMSecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
-
-    public bool HasServerPermission => ServerPermissions is not null;
-
-    public TrustLevel TrustLevel
-    {
-        get; private set;
-    }
-    public ThreadingType Threading
-    {
-        get; private set;
-    }
-    public bool ActivateInSharedBroker
-    {
-        get; private set;
-    }
-
-    public Type RuntimeType => Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
-
-    public COMRegistryEntrySource Source
-    {
-        get; private set;
-    }
 
     private void LoadFromKey(RegistryKey key)
     {
@@ -109,151 +48,16 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         ActivateInSharedBroker = key.ReadInt(null, "ActivateInSharedBroker") != 0;
     }
 
-    internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 
-        : this(registry)
-    {
-        Name = name;
-        DllPath = string.Empty;
-        Server = string.Empty;
-        PackageId = package_id ?? string.Empty;
-    }
-
-    public COMRuntimeClassEntry(COMRegistry registry, 
-        string package_id, string name, RegistryKey rootKey) 
-        : this(registry, package_id, name)
-    {
-        LoadFromKey(rootKey);
-        Source = rootKey.GetSource();
-    }
-
-    internal COMRuntimeClassEntry(COMRegistry registry)
-    {
-        m_registry = registry;
-    }
-
-    XmlSchema IXmlSerializable.GetSchema()
-    {
-        return null;
-    }
-
-    void IXmlSerializable.ReadXml(XmlReader reader)
-    {
-        Clsid = reader.ReadGuid("clsid");
-        Name = reader.ReadString("name");
-        DllPath = reader.ReadString("dllpath");
-        Server = reader.ReadString("server");
-        ActivationType = reader.ReadEnum<ActivationType>("type");
-        Permissions = reader.ReadSecurityDescriptor("perms");
-        TrustLevel = reader.ReadEnum<TrustLevel>("trust");
-        Threading = reader.ReadEnum<ThreadingType>("thread");
-        ActivateInSharedBroker = reader.ReadBool("shared");
-        PackageId = reader.ReadString("pkg");
-        Source = reader.ReadEnum<COMRegistryEntrySource>("src");
-        InterfacesLoaded = reader.ReadBool("loaded");
-        if (InterfacesLoaded)
-        {
-            m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(m_registry)).ToList();
-            m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(m_registry)).ToList();
-        }
-    }
-
-    void IXmlSerializable.WriteXml(XmlWriter writer)
-    {
-        writer.WriteGuid("clsid", Clsid);
-        writer.WriteAttributeString("name", Name);
-        writer.WriteOptionalAttributeString("dllpath", DllPath);
-        writer.WriteOptionalAttributeString("server", Server);
-        writer.WriteEnum("type", ActivationType);
-        writer.WriteEnum("trust", TrustLevel);
-        writer.WriteSecurityDescriptor("perms", Permissions);
-        writer.WriteEnum("thread", Threading);
-        writer.WriteBool("shared", ActivateInSharedBroker);
-        writer.WriteOptionalAttributeString("pkg", PackageId);
-        writer.WriteEnum("src", Source);
-        writer.WriteBool("loaded", InterfacesLoaded);
-        if (InterfacesLoaded)
-        {
-            writer.WriteSerializableObjects("ints", m_interfaces);
-            writer.WriteSerializableObjects("facts", m_factory_interfaces);
-        }
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (base.Equals(obj))
-        {
-            return true;
-        }
-
-        if (obj is not COMRuntimeClassEntry right)
-        {
-            return false;
-        }
-
-        return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
-            && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
-            Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
-            && PackageId == right.PackageId && Source == right.Source;
-    }
-
-    public override int GetHashCode()
-    {
-        return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
-            ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
-            ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
-            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
-    }
-
-    public override string ToString()
-    {
-        return Name;
-    }
-
-    int IComparable<COMRuntimeClassEntry>.CompareTo(COMRuntimeClassEntry other)
-    {
-        return Server.CompareTo(other.Server);
-    }
-
     private async Task<COMEnumerateInterfaces> GetSupportedInterfacesInternal(COMAccessToken token)
     {
         try
         {
-            return await COMEnumerateInterfaces.GetInterfacesOOP(this, m_registry, token);
+            return await COMEnumerateInterfaces.GetInterfacesOOP(this, Database, token);
         }
         catch (Win32Exception)
         {
             throw;
         }
-    }
-
-    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
-    {
-        if (refresh || !InterfacesLoaded)
-        {
-            COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
-            m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
-            m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
-            InterfacesLoaded = true;
-            return true;
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// Get list of supported Interface IIDs Synchronously
-    /// </summary>
-    /// <param name="refresh">Force the supported interface list to refresh</param>
-    /// <returns>Returns true if supported interfaces were refreshed.</returns>
-    /// <exception cref="Win32Exception">Thrown on error.</exception>
-    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
-    {
-        Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
-        result.Wait();
-        if (result.IsFaulted)
-        {
-            throw result.Exception.InnerException;
-        }
-        return result.Result;
     }
 
     private object CreateInstance(string server, bool factory)
@@ -291,15 +95,65 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
             }
         }
     }
+    #endregion
 
-    public object CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
+    #region Public Properties
+    public string Name { get; private set; }
+    public Guid Clsid { get; private set; }
+    public string DllPath { get; private set; }
+    public string DllName
     {
-        return CreateInstance(server, false);
+        get
+        {
+            if (string.IsNullOrWhiteSpace(DllPath))
+            {
+                return string.Empty;
+            }
+            return MiscUtilities.GetFileName(DllPath);
+        }
+    }
+    public string PackageId { get; private set; }
+    public string PackageName => Package?.Name ?? string.Empty;
+    public AppxPackageName Package => AppxPackageName.FromFullName(PackageId);
+
+    public bool RuntimeClass => string.IsNullOrEmpty(PackageId);
+    public string Server { get; private set; }
+    public string DefaultServer => Server;
+    public bool HasServer => !string.IsNullOrWhiteSpace(Server);
+
+    public COMRuntimeServerEntry ServerEntry => Database.MapRuntimeClassToServerEntry(this);
+
+    public ActivationType ActivationType { get; private set; }
+
+    public COMSecurityDescriptor Permissions
+    {
+        get; private set;
     }
 
-    public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
+    public bool HasPermission => Permissions is not null;
+
+    public COMSecurityDescriptor ServerPermissions => ServerEntry?.Permissions;
+
+    public bool HasServerPermission => ServerPermissions is not null;
+
+    public TrustLevel TrustLevel
     {
-        return CreateInstance(server, true);
+        get; private set;
+    }
+    public ThreadingType Threading
+    {
+        get; private set;
+    }
+    public bool ActivateInSharedBroker
+    {
+        get; private set;
+    }
+
+    public Type RuntimeType => Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
+
+    public COMRegistryEntrySource Source
+    {
+        get; private set;
     }
 
     public bool SupportsRemoteActivation => false;
@@ -347,7 +201,166 @@ public class COMRuntimeClassEntry : IComparable<COMRuntimeClassEntry>, IXmlSeria
         }
     }
 
+    public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
+    #endregion
+
+    #region ICOMClassEntry Implementation
+    COMServerType ICOMClassEntry.DefaultServerType => Server is null ? COMServerType.InProcServer32 : COMServerType.LocalServer32;
+    #endregion
+
+    #region Constructors
+    internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 
+        : this(registry)
+    {
+        Name = name;
+        DllPath = string.Empty;
+        Server = string.Empty;
+        PackageId = package_id ?? string.Empty;
+    }
+
+    public COMRuntimeClassEntry(COMRegistry registry, 
+        string package_id, string name, RegistryKey rootKey) 
+        : this(registry, package_id, name)
+    {
+        LoadFromKey(rootKey);
+        Source = rootKey.GetSource();
+    }
+
+    internal COMRuntimeClassEntry(COMRegistry registry) : base(registry)
+    {
+    }
+    #endregion
+
+    #region IXmlSerializable Implementation
+    XmlSchema IXmlSerializable.GetSchema()
+    {
+        return null;
+    }
+
+    void IXmlSerializable.ReadXml(XmlReader reader)
+    {
+        Clsid = reader.ReadGuid("clsid");
+        Name = reader.ReadString("name");
+        DllPath = reader.ReadString("dllpath");
+        Server = reader.ReadString("server");
+        ActivationType = reader.ReadEnum<ActivationType>("type");
+        Permissions = reader.ReadSecurityDescriptor("perms");
+        TrustLevel = reader.ReadEnum<TrustLevel>("trust");
+        Threading = reader.ReadEnum<ThreadingType>("thread");
+        ActivateInSharedBroker = reader.ReadBool("shared");
+        PackageId = reader.ReadString("pkg");
+        Source = reader.ReadEnum<COMRegistryEntrySource>("src");
+        InterfacesLoaded = reader.ReadBool("loaded");
+        if (InterfacesLoaded)
+        {
+            m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(Database)).ToList();
+            m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(Database)).ToList();
+        }
+    }
+
+    void IXmlSerializable.WriteXml(XmlWriter writer)
+    {
+        writer.WriteGuid("clsid", Clsid);
+        writer.WriteAttributeString("name", Name);
+        writer.WriteOptionalAttributeString("dllpath", DllPath);
+        writer.WriteOptionalAttributeString("server", Server);
+        writer.WriteEnum("type", ActivationType);
+        writer.WriteEnum("trust", TrustLevel);
+        writer.WriteSecurityDescriptor("perms", Permissions);
+        writer.WriteEnum("thread", Threading);
+        writer.WriteBool("shared", ActivateInSharedBroker);
+        writer.WriteOptionalAttributeString("pkg", PackageId);
+        writer.WriteEnum("src", Source);
+        writer.WriteBool("loaded", InterfacesLoaded);
+        if (InterfacesLoaded)
+        {
+            writer.WriteSerializableObjects("ints", m_interfaces);
+            writer.WriteSerializableObjects("facts", m_factory_interfaces);
+        }
+    }
+    #endregion
+
+    #region Public Methods
+    public async Task<bool> LoadSupportedInterfacesAsync(bool refresh, COMAccessToken token)
+    {
+        if (refresh || !InterfacesLoaded)
+        {
+            COMEnumerateInterfaces enum_int = await GetSupportedInterfacesInternal(token);
+            m_interfaces = new List<COMInterfaceInstance>(enum_int.Interfaces);
+            m_factory_interfaces = new List<COMInterfaceInstance>(enum_int.FactoryInterfaces);
+            InterfacesLoaded = true;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Get list of supported Interface IIDs Synchronously
+    /// </summary>
+    /// <param name="refresh">Force the supported interface list to refresh</param>
+    /// <returns>Returns true if supported interfaces were refreshed.</returns>
+    /// <exception cref="Win32Exception">Thrown on error.</exception>
+    public bool LoadSupportedInterfaces(bool refresh, COMAccessToken token)
+    {
+        Task<bool> result = LoadSupportedInterfacesAsync(refresh, token);
+        result.Wait();
+        if (result.IsFaulted)
+        {
+            throw result.Exception.InnerException;
+        }
+        return result.Result;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (base.Equals(obj))
+        {
+            return true;
+        }
+
+        if (obj is not COMRuntimeClassEntry right)
+        {
+            return false;
+        }
+
+        return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
+            && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
+            Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
+            && PackageId == right.PackageId && Source == right.Source;
+    }
+
+    public override int GetHashCode()
+    {
+        return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
+            ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
+            ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
+            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public int CompareTo(COMRuntimeClassEntry other)
+    {
+        return Server.CompareTo(other.Server);
+    }
+
+    public object CreateInstanceAsObject(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
+    {
+        return CreateInstance(server, false);
+    }
+
+    public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
+    {
+        return CreateInstance(server, true);
+    }
+    #endregion
+
+    #region ICOMAccessSecurity Implementation
     COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
+    #endregion
 }

@@ -26,10 +26,9 @@ using OleViewDotNet.Interop.SxS;
 
 namespace OleViewDotNet.Database;
 
-public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, ICOMGuid
+public class COMTypeLibEntry : COMRegistryEntry, IComparable<COMTypeLibEntry>, IXmlSerializable, ICOMGuid
 {
-    private readonly COMRegistry m_registry;
-
+    #region Private Members
     private IEnumerable<COMTypeLibVersionEntry> LoadFromLocales(string name, string version, RegistryKey key)
     {
         List<COMTypeLibVersionEntry> entries = new();
@@ -40,7 +39,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
                 using RegistryKey subkey = key.OpenSubKey(locale);
                 if (subkey is not null)
                 {
-                    COMTypeLibVersionEntry entry = new(m_registry,
+                    COMTypeLibVersionEntry entry = new(Database,
                         name, version, TypelibId, locale_int, subkey);
                     if (!string.IsNullOrWhiteSpace(entry.NativePath))
                     {
@@ -65,14 +64,16 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         }
         return ret;
     }
+    #endregion
 
+    #region Public Properties
     public Guid TypelibId { get; private set; }
     public IEnumerable<COMTypeLibVersionEntry> Versions { get; private set; }
     public string Name { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
+    #endregion
 
-    Guid ICOMGuid.ComGuid => TypelibId;
-
+    #region Public Methods
     public override bool Equals(object obj)
     {
         if (base.Equals(obj))
@@ -93,6 +94,18 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         return TypelibId.GetHashCode() ^ Versions.GetEnumHashCode() ^ Source.GetHashCode();
     }
 
+    public int CompareTo(COMTypeLibEntry other)
+    {
+        return TypelibId.CompareTo(other.TypelibId);
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+    #endregion
+
+    #region Constructors
     public COMTypeLibEntry(COMRegistry registry, Guid typelibid, RegistryKey rootKey) : this(registry)
     {
         TypelibId = typelibid;
@@ -120,16 +133,16 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         Source = COMRegistryEntrySource.ActCtx;
     }
 
-    internal COMTypeLibEntry(COMRegistry registry)
+    internal COMTypeLibEntry(COMRegistry registry) : base(registry)
     {
-        m_registry = registry;
     }
+    #endregion
 
-    public int CompareTo(COMTypeLibEntry other)
-    {
-        return TypelibId.CompareTo(other.TypelibId);
-    }
+    #region ICOMGuid Implementation
+    Guid ICOMGuid.ComGuid => TypelibId;
+    #endregion
 
+    #region IXmlSerializable Implementation
     XmlSchema IXmlSerializable.GetSchema()
     {
         return null;
@@ -141,7 +154,7 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         Name = reader.ReadString("name");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
         reader.Read();
-        Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(m_registry, TypelibId));
+        Versions = reader.ReadSerializableObjects("libvers", () => new COMTypeLibVersionEntry(Database, TypelibId));
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -151,9 +164,5 @@ public class COMTypeLibEntry : IComparable<COMTypeLibEntry>, IXmlSerializable, I
         writer.WriteEnum("src", Source);
         writer.WriteSerializableObjects("libvers", Versions);
     }
-
-    public override string ToString()
-    {
-        return Name;
-    }
+    #endregion
 }
