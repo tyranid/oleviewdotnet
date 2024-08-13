@@ -65,7 +65,24 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
         NdrParser parser = new();
         var stub = type_info.stubVtbl.header;
-        var result = parser.ReadFromMidlServerInfo(stub.pServerInfo, 3, stub.DispatchTableCount, parsed_intf.Methods.Skip(3).Select(m => m.Name).ToList());
+        IEnumerable<string> names;
+        int skip = 3;
+
+        if (parsed_intf.Methods.Count == stub.DispatchTableCount)
+        {
+            names = parsed_intf.Methods.Skip(3).Select(m => m.Name);
+        }
+        else if (parsed_intf.Methods.Count < stub.DispatchTableCount)
+        {
+            names = parsed_intf.Methods.Select(m => m.Name);
+            skip = stub.DispatchTableCount - parsed_intf.Methods.Count;
+        }
+        else
+        {
+            names = null;
+        }
+
+        var result = parser.ReadFromMidlServerInfo(stub.pServerInfo, skip, stub.DispatchTableCount, names?.ToList());
 
         NdrComProxyDefinition proxy_def = NdrComProxyDefinition.FromProcedures(parsed_intf.Name, iid, COMKnownGuids.IID_IUnknown, stub.DispatchTableCount, result);
 
