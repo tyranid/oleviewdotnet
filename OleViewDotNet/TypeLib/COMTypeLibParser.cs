@@ -61,6 +61,12 @@ internal sealed class COMTypeLibParser : IDisposable
         return new TypeInfo(this, type_info);
     }
 
+    internal TypeInfo GetTypeInfoFromGuid(Guid guid)
+    {
+        _type_lib.GetTypeInfoOfGuid(ref guid, out ITypeInfo type_info);
+        return new TypeInfo(this, type_info);
+    }
+
     internal COMTypeLib Parse()
     {
         List<COMTypeLibTypeInfo> types = new();
@@ -213,6 +219,8 @@ internal sealed class COMTypeLibParser : IDisposable
         }
 
         public bool IsDispatch => _attr.typekind == TYPEKIND.TKIND_DISPATCH;
+
+        public ITypeInfo Instance => _type_info;
     
         void IDisposable.Dispose()
         {

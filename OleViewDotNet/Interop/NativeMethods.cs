@@ -222,4 +222,13 @@ internal static class NativeMethods
 
     [DllImport("kernel32.dll", SetLastError = true)]
     public extern static bool IsWow64Process2(SafeKernelObjectHandle hProcess, out DllMachineType pProcessMachine, out DllMachineType pNativeMachine);
+
+    [DllImport("rpcrt4.dll", PreserveSig = false)]
+    public extern static void CreateProxyFromTypeInfo(
+        ITypeInfo pTypeInfo,
+        [MarshalAs(UnmanagedType.IUnknown)] object punkOuter,
+        in Guid riid,
+        out IntPtr ppProxy,
+        //[MarshalAs(UnmanagedType.IUnknown)] out object ppProxy, // IRpcProxyBuffer**
+        out IntPtr ppv);
 }

@@ -52,6 +52,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     public int Locale { get; private set; }
     public COMRegistryEntrySource Source { get; private set; }
     internal bool IsParsed => m_typelib?.IsValueCreated ?? false;
+    internal COMRegistry Database => m_registry;
 
     public override bool Equals(object obj)
     {

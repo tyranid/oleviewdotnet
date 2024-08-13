@@ -17,11 +17,14 @@
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Proxy;
 
@@ -46,6 +49,32 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
         }
     }
+
+    private static COMProxyInterface GetFromTypeLibrary(COMInterfaceEntry intf)
+    {
+        using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
+        using var info = type_lib.GetTypeInfoFromGuid(intf.Iid);
+
+        var parsed_intf = info.Parse() as COMTypeLibInterfaceBase;
+
+        NativeMethods.CreateProxyFromTypeInfo(info.Instance, null, intf.Iid, out IntPtr proxy, out IntPtr ptr);
+        TypeInfoVtbl type_info = (ptr.GetStructure<IntPtr>() - Marshal.SizeOf<TypeInfoVtbl>()).GetStructure<TypeInfoVtbl>();
+        if (type_info.iid != intf.Iid)
+        {
+            throw new ArgumentException("Invalid COM automation proxy vtable.");
+        }
+
+        NdrParser parser = new();
+        var stub = type_info.stubVtbl.header;
+        var result = parser.ReadFromMidlServerInfo(stub.pServerInfo, 3, stub.DispatchTableCount, parsed_intf.Methods.Skip(3).Select(m => m.Name).ToList());
+
+        NdrComProxyDefinition proxy_def = NdrComProxyDefinition.FromProcedures(intf.Name, intf.Iid, COMKnownGuids.IID_IUnknown, stub.DispatchTableCount, result);
+
+        RpcComProxy com_proxy = new(proxy_def);
+
+        return new COMProxyInterface(intf.ProxyClassEntry, com_proxy, intf.ProxyClassEntry.Database, null);
+    }
+
     #endregion
 
     #region Public Properties
@@ -130,7 +159,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return m_proxies.TryGetValue(intf.Iid, out proxy);
     }
 
-    public static COMProxyInterface GetFromIID(COMInterfaceEntry intf)
+    public static COMProxyInterface GetFromIID(COMInterfaceEntry intf, bool parse_automation = false)
     {
         if (intf is null || !intf.HasProxy)
         {
@@ -145,7 +174,14 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         COMCLSIDEntry clsid = intf.ProxyClassEntry;
         if (clsid.IsAutomationProxy)
         {
-            throw new ArgumentException("Can't get proxy for automation interfaces.");
+            if (parse_automation && intf.TypeLibVersionEntry != null)
+            {
+                return GetFromTypeLibrary(intf);
+            }
+            else
+            {
+                throw new ArgumentException("Can't get proxy for automation interfaces.");
+            }
         }
 
         COMProxyFile.GetFromCLSID(clsid);
@@ -157,9 +193,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return instance;
     }
 
-    public static COMProxyInterface GetFromIID(COMInterfaceInstance intf)
+    public static COMProxyInterface GetFromIID(COMInterfaceInstance intf, bool parse_automation = false)
     {
-        return GetFromIID(intf.InterfaceEntry);
+        return GetFromIID(intf.InterfaceEntry, parse_automation);
     }
     #endregion
 

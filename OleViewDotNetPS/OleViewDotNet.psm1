@@ -2031,6 +2031,10 @@ function Get-ComProxy {
         [parameter(ParameterSetName = "FromIid")]
         [parameter(ParameterSetName = "FromClsid")]
         [OleViewDotNet.Database.COMRegistry]$Database,
+        [parameter(ParameterSetName = "FromIid")]
+        [parameter(ParameterSetName = "FromInterface")]
+        [parameter(ParameterSetName = "FromInterfaceInstance")]
+        [switch]$ParseAutomation,
         [switch]$AsText
     )
 
@@ -2040,15 +2044,15 @@ function Get-ComProxy {
                 [OleViewDotNet.Proxy.COMProxyFile]::GetFromCLSID($Class)
             }
             "FromInterface" {
-                [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($Interface)
+                [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($Interface, $ParseAutomation)
             }
             "FromInterfaceInstance" {
-                [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($InterfaceInstance)
+                [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($InterfaceInstance, $ParseAutomation)
             }
             "FromIid" {
                 $intf = Get-ComInterface -Database $Database -Iid $Iid
                 if ($null -ne $intf) {
-                    [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($intf)
+                    [OleViewDotNet.Proxy.COMProxyInterface]::GetFromIID($intf, $ParseAutomation)
                 }
             }
             "FromClsid" {
