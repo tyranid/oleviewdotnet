@@ -2030,11 +2030,14 @@ function Get-ComProxy {
         [Guid]$Iid,
         [parameter(ParameterSetName = "FromIid")]
         [parameter(ParameterSetName = "FromClsid")]
+        [parameter(ParameterSetName = "FromPath")]
         [OleViewDotNet.Database.COMRegistry]$Database,
         [parameter(ParameterSetName = "FromIid")]
         [parameter(ParameterSetName = "FromInterface")]
         [parameter(ParameterSetName = "FromInterfaceInstance")]
         [switch]$ParseAutomation,
+        [parameter(ParameterSetName = "FromPath")]
+        [string]$Path,
         [switch]$AsText
     )
 
@@ -2060,6 +2063,14 @@ function Get-ComProxy {
                 if ($null -ne $class) {
                     [OleViewDotNet.Proxy.COMProxyFile]::GetFromCLSID($class)
                 }
+            }
+            "FromPath" {
+                $Database = Get-CurrentComDatabase $Database
+                if ($null -eq $Database) {
+                    Write-Error "No database specified and current database isn't set."
+                    return
+                }
+                [OleViewDotNet.Proxy.COMProxyFile]::GetFromFile($Path, $Database)
             }
         }
         if ($null -ne $proxy) {
