@@ -21,6 +21,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
+using SYSKIND = System.Runtime.InteropServices.ComTypes.SYSKIND;
+
 namespace OleViewDotNet.Interop;
 
 internal static class NativeMethods
@@ -36,6 +38,38 @@ internal static class NativeMethods
         ushort wVerMajor,
         ushort wVerMinor,
         int lcid
+    );
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    public static extern void RegisterTypeLib(
+        ITypeLib ptlib,
+        string szFullPath,
+        string szHelpDir
+    );
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    public static extern void RegisterTypeLibForUser(
+        ITypeLib ptlib,
+        string szFullPath,
+        string szHelpDir
+    );
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    public static extern void UnRegisterTypeLib(
+        in Guid libID,
+        ushort wVerMajor,
+        ushort wVerMinor,
+        int lcid,
+        SYSKIND syskind
+    );
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    public static extern void UnRegisterTypeLibForUser(
+        in Guid libID,
+        ushort wVerMajor,
+        ushort wVerMinor,
+        int lcid,
+        SYSKIND syskind
     );
 
     [DllImport("ole32.dll")]

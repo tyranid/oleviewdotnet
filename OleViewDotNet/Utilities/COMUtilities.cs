@@ -279,6 +279,32 @@ public static class COMUtilities
         return NativeMethods.LoadTypeLibEx(path, reg_kind);
     }
 
+    public static void RegisterTypeLib(string path, string help_path = null)
+    {
+        ITypeLib type_lib = LoadTypeLib(path, RegKind.None);
+        try
+        {
+            NativeMethods.RegisterTypeLib(type_lib, path, help_path);
+        }
+        finally
+        {
+            Marshal.ReleaseComObject(type_lib);
+        }
+    }
+
+    public static void RegisterTypeLibForUser(string path, string help_path = null)
+    {
+        ITypeLib type_lib = LoadTypeLib(path, RegKind.None);
+        try
+        {
+            NativeMethods.RegisterTypeLibForUser(type_lib, path, help_path);
+        }
+        finally
+        {
+            Marshal.ReleaseComObject(type_lib);
+        }
+    }
+
     public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
     {
         ITypeLib typeLib = null;
