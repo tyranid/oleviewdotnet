@@ -44,6 +44,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using SYSKIND = System.Runtime.InteropServices.ComTypes.SYSKIND;
+
 namespace OleViewDotNet.Utilities;
 
 public static class COMUtilities
@@ -279,12 +281,19 @@ public static class COMUtilities
         return NativeMethods.LoadTypeLibEx(path, reg_kind);
     }
 
-    public static void RegisterTypeLib(string path, string help_path = null)
+    private static void RegisterTypeLib(string path, string help_path, bool user)
     {
         ITypeLib type_lib = LoadTypeLib(path, RegKind.None);
         try
         {
-            NativeMethods.RegisterTypeLib(type_lib, path, help_path);
+            if (user)
+            {
+                NativeMethods.RegisterTypeLibForUser(type_lib, path, help_path);
+            }
+            else
+            {
+                NativeMethods.RegisterTypeLib(type_lib, path, help_path);
+            }
         }
         finally
         {
@@ -292,17 +301,46 @@ public static class COMUtilities
         }
     }
 
+    public static void RegisterTypeLib(string path, string help_path = null)
+    {
+        RegisterTypeLib(path, help_path, false);
+    }
+
     public static void RegisterTypeLibForUser(string path, string help_path = null)
     {
-        ITypeLib type_lib = LoadTypeLib(path, RegKind.None);
-        try
+        RegisterTypeLib(path, help_path, true);
+    }
+
+    private static void UnregisterTypeLib(Guid lib_id,
+        COMVersion version,
+        int lcid,
+        SYSKIND syskind,
+        bool user)
+    {
+        if (user)
         {
-            NativeMethods.RegisterTypeLibForUser(type_lib, path, help_path);
+            NativeMethods.UnRegisterTypeLibForUser(lib_id, version.Major, version.Minor, lcid, syskind);
         }
-        finally
+        else
         {
-            Marshal.ReleaseComObject(type_lib);
+            NativeMethods.UnRegisterTypeLib(lib_id, version.Major, version.Minor, lcid, syskind);
         }
+    }
+
+    public static void UnregisterTypeLib(Guid lib_id,
+        COMVersion version,
+        int lcid,
+        SYSKIND syskind)
+    {
+        UnregisterTypeLib(lib_id, version, lcid, syskind, false);
+    }
+
+    public static void UnregisterTypeLibForUser(Guid lib_id,
+        COMVersion version,
+        int lcid,
+        SYSKIND syskind)
+    {
+        UnregisterTypeLib(lib_id, version, lcid, syskind, true);
     }
 
     public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)

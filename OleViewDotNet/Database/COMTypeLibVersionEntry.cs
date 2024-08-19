@@ -23,6 +23,8 @@ using OleViewDotNet.Utilities;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities.Format;
+using OleViewDotNet.Interop;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Database;
 
@@ -171,6 +173,12 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     public override string ToString()
     {
         return string.IsNullOrWhiteSpace(Name) ? TypelibId.FormatGuid() : Name;
+    }
+
+    public void Unregister()
+    {
+        var version = COMVersion.Parse(Version);
+        COMUtilities.UnregisterTypeLib(TypelibId, version, Locale, SYSKIND.SYS_WIN32);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
