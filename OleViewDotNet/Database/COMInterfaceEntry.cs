@@ -255,6 +255,8 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
     public COMCLSIDEntry ProxyClassEntry => Database.Clsids.GetGuidEntry(ProxyClsid);
 
+    public bool IsAutomationProxy => ProxyClassEntry?.IsAutomationProxy ?? false;
+
     public int NumMethods
     {
         get; private set;

@@ -393,8 +393,6 @@ public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlS
 
     public bool IsInteractiveUser => AppIDEntry?.IsInteractiveUser ?? false;
 
-    public bool IsAutomationProxy => Clsid == COMKnownGuids.CLSID_PSDispatch || Clsid == COMKnownGuids.CLSID_PSAutomation;
-
     /// <summary>
     /// Indicates that the class' interface list has been loaded.
     /// </summary>
@@ -464,6 +462,8 @@ public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlS
     public bool SupportsRemoteActivation => true;
 
     public bool Proxy => Database.GetProxiesForClsid(this).Length > 0;
+
+    public bool IsAutomationProxy => Clsid == COMKnownGuids.CLSID_PSDispatch || Clsid == COMKnownGuids.CLSID_PSAutomation;
     #endregion
 
     #region Public Methods

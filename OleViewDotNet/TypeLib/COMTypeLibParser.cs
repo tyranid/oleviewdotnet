@@ -50,7 +50,7 @@ internal sealed class COMTypeLibParser : IDisposable
     }
 
     internal COMTypeLibParser(string path) 
-        : this(NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default))
+        : this(NativeMethods.LoadTypeLibEx(path, RegKind.None))
     {
         _path = path;
     }

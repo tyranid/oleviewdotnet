@@ -274,9 +274,9 @@ public static class COMUtilities
         }
     }
 
-    public static ITypeLib LoadTypeLib(string path)
+    public static ITypeLib LoadTypeLib(string path, RegKind reg_kind = RegKind.None)
     {
-        return NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default);
+        return NativeMethods.LoadTypeLibEx(path, reg_kind);
     }
 
     public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
@@ -285,7 +285,7 @@ public static class COMUtilities
 
         try
         {
-            typeLib = NativeMethods.LoadTypeLibEx(path, RegKind.RegKind_Default);
+            typeLib = NativeMethods.LoadTypeLibEx(path, RegKind.None);
 
             return ConvertTypeLibToAssembly(typeLib, progress);
         }

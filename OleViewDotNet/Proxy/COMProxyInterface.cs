@@ -193,7 +193,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
 
         COMCLSIDEntry clsid = intf.ProxyClassEntry;
-        if (clsid.IsAutomationProxy)
+        if (intf.IsAutomationProxy)
         {
             if (parse_automation && intf.TypeLibVersionEntry != null)
             {

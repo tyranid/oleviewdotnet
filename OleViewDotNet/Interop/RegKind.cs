@@ -16,9 +16,9 @@
 
 namespace OleViewDotNet.Interop;
 
-internal enum RegKind
+public enum RegKind
 {
-    RegKind_Default = 0,
-    RegKind_Register = 1,
-    RegKind_None = 2
+    Default = 0,
+    Register = 1,
+    None = 2
 }
