@@ -175,10 +175,10 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
         return string.IsNullOrWhiteSpace(Name) ? TypelibId.FormatGuid() : Name;
     }
 
-    public void Unregister()
+    public void Unregister(SYSKIND sys_kind = SYSKIND.SYS_WIN32)
     {
         var version = COMVersion.Parse(Version);
-        COMUtilities.UnregisterTypeLib(TypelibId, version, Locale, SYSKIND.SYS_WIN32);
+        COMUtilities.UnregisterTypeLib(TypelibId, version, Locale, sys_kind);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)

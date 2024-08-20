@@ -45,6 +45,7 @@ public class COMTypeLibReference
     public string HelpFile => _doc.HelpFile ?? string.Empty;
     public Guid TypeLibId => _attr.guid;
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
+    public SYSKIND SysKind => _attr.syskind;
     #endregion
 
     #region Public Methods
