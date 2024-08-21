@@ -30,29 +30,41 @@ internal sealed class COMTypeLibParser : IDisposable
     private readonly ConcurrentDictionary<Guid, COMTypeLibInterface> _parsed_intfs = new();
     private readonly ConcurrentDictionary<Guid, COMTypeLibDispatch> _parsed_disp = new();
     private readonly ConcurrentDictionary<Tuple<string, TYPEKIND>, COMTypeLibTypeInfo> _named_types = new();
+    private readonly ConcurrentDictionary<TYPELIBATTR, COMTypeLibReference> _ref_type_libs = new();
     private readonly TYPELIBATTR _attr;
     private readonly string _path;
-    #endregion
 
-    #region Internal Members
-    internal COMTypeLibParser(ITypeLib type_lib)
+    private static TYPELIBATTR GetAttributes(ITypeLib type_lib)
     {
-        _type_lib = type_lib;
         type_lib.GetLibAttr(out IntPtr ptr);
         try
         {
-            _attr = ptr.GetStructure<TYPELIBATTR>();
+            return ptr.GetStructure<TYPELIBATTR>();
         }
         finally
         {
             type_lib.ReleaseTLibAttr(ptr);
         }
     }
+    #endregion
+
+    #region Internal Members
+    internal COMTypeLibParser(ITypeLib type_lib)
+    {
+        _type_lib = type_lib;
+        _attr = GetAttributes(type_lib);
+    }
 
     internal COMTypeLibParser(string path) 
         : this(NativeMethods.LoadTypeLibEx(path, RegKind.None))
     {
         _path = path;
+    }
+
+    internal COMTypeLibParser(Guid type_lib_id,
+        COMVersion version, int lcid) 
+        : this(NativeMethods.LoadRegTypeLib(type_lib_id, version.Major, version.Minor, lcid))
+    {
     }
 
     internal TypeInfo GetTypeInfo(int index)
@@ -65,6 +77,12 @@ internal sealed class COMTypeLibParser : IDisposable
     {
         _type_lib.GetTypeInfoOfGuid(ref guid, out ITypeInfo type_info);
         return new TypeInfo(this, type_info);
+    }
+
+    internal COMTypeLibReference GetTypeLibReference(ITypeLib type_lib)
+    {
+        return _ref_type_libs.GetOrAdd(GetAttributes(type_lib), 
+            a => new COMTypeLibReference(new(type_lib), a));
     }
 
     internal COMTypeLib Parse()
@@ -216,6 +234,24 @@ internal sealed class COMTypeLibParser : IDisposable
         public TYPEATTR GetAttr()
         {
             return _attr;
+        }
+
+        public COMTypeLibReference GetTypeLibReference()
+        {
+            ITypeLib type_lib = null;
+            try
+            {
+                _type_info.GetContainingTypeLib(out type_lib, out int index);
+                return _type_lib.GetTypeLibReference(type_lib);
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                type_lib.ReleaseComObject();
+            }
         }
 
         public bool IsDispatch => _attr.typekind == TYPEKIND.TKIND_DISPATCH;

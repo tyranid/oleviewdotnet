@@ -28,6 +28,7 @@ public class COMTypeLibReference
     #region Private Members
     private protected readonly COMTypeLibDocumentation _doc;
     private protected readonly TYPELIBATTR _attr;
+    private readonly Lazy<COMTypeLib> _parsed;
     #endregion
 
     #region Internal Members
@@ -35,6 +36,7 @@ public class COMTypeLibReference
     {
         _doc = doc;
         _attr = attr;
+        _parsed = new(() => COMTypeLib.FromRegistered(TypeLibId, Version, Locale));
     }
     #endregion
 
@@ -46,9 +48,19 @@ public class COMTypeLibReference
     public Guid TypeLibId => _attr.guid;
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
     public SYSKIND SysKind => _attr.syskind;
+    public int Locale => _attr.lcid;
     #endregion
 
     #region Public Methods
+    public COMTypeLib Parse()
+    {
+        if (this is COMTypeLib ret)
+        {
+            return ret;
+        }
+        return _parsed.Value;
+    }
+
     public override string ToString()
     {
         return $"{Name} - {Version}";

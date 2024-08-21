@@ -88,6 +88,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
         }
 
         _parsed = true;
+        TypeLib = type_info.GetTypeLibReference();
         OnParse(type_info, _attr);
     }
 

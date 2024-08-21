@@ -43,7 +43,10 @@ internal static class COMTypeLibUtils
 
     public static void ReleaseComObject(this object obj)
     {
-        Marshal.ReleaseComObject(obj);
+        if (obj is not null)
+        {
+            Marshal.ReleaseComObject(obj);
+        }
     }
 
     public static string FormatAttrs(this ICollection<string> attrs)
