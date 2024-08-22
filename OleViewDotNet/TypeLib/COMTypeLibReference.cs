@@ -49,6 +49,7 @@ public class COMTypeLibReference
     public COMVersion Version => new(_attr.wMajorVerNum, _attr.wMinorVerNum);
     public SYSKIND SysKind => _attr.syskind;
     public int Locale => _attr.lcid;
+    public LIBFLAGS Flags => _attr.wLibFlags;
     #endregion
 
     #region Public Methods
