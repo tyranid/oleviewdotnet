@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib.Parser;
+namespace OleViewDotNet.TypeLib.Instance;
 
 public sealed class COMTypeLibInstance : IDisposable
 {
@@ -100,6 +100,10 @@ public sealed class COMTypeLibInstance : IDisposable
         }
     }
 
+    public COMTypeDocumentation Documentation => GetDocumentation(-1);
+
+    internal ITypeLib Instance => m_type_lib;
+
     public COMTypeCompInstance GetTypeComp()
     {
         m_type_lib.GetTypeComp(out ITypeComp ppTComp);
@@ -146,7 +150,7 @@ public sealed class COMTypeLibInstance : IDisposable
         try
         {
             var custdata = buffer.Result;
-            return  custdata.prgCustData.ReadArray<CUSTDATAITEM>(custdata.cCustData).Select(i => new COMTypeCustomDataItem(i)).ToList().AsReadOnly();
+            return custdata.prgCustData.ReadArray<CUSTDATAITEM>(custdata.cCustData).Select(i => new COMTypeCustomDataItem(i)).ToList().AsReadOnly();
         }
         finally
         {

@@ -17,16 +17,45 @@
 using NtApiDotNet;
 using OleViewDotNet.Interop;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib.Parser;
+namespace OleViewDotNet.TypeLib.Instance;
+
+public sealed class COMTypeVariableDescriptor
+{
+    internal readonly IntPtr m_ptr;
+
+    public VARDESC Descriptor { get; }
+
+    internal COMTypeVariableDescriptor(IntPtr ptr)
+    {
+        m_ptr = ptr;
+        Descriptor = ptr.GetStructure<VARDESC>();
+    }
+}
+
+public sealed class COMTypeFunctionDescriptor
+{
+    internal readonly IntPtr m_ptr;
+
+    public FUNCDESC Descriptor { get; }
+
+    internal COMTypeFunctionDescriptor(IntPtr ptr)
+    {
+        m_ptr = ptr;
+        Descriptor = ptr.GetStructure<FUNCDESC>();
+    }
+}
 
 public sealed class COMTypeInfoInstance : IDisposable
 {
     private readonly ITypeInfo m_type_info;
     private readonly ITypeInfo2 m_type_info2;
+    private readonly ConcurrentDictionary<int, COMTypeVariableDescriptor> m_var_desc = new();
+    private readonly ConcurrentDictionary<int, COMTypeFunctionDescriptor> m_func_desc = new();
 
     private ITypeInfo2 GetTypeInfo2()
     {
@@ -62,36 +91,32 @@ public sealed class COMTypeInfoInstance : IDisposable
         }
     }
 
+    public COMTypeDocumentation Documentation => GetDocumentation(-1);
+
+    internal ITypeInfo Instance => m_type_info;
+
     public COMTypeCompInstance GetTypeComp()
     {
         m_type_info.GetTypeComp(out ITypeComp ppTComp);
         return new(ppTComp);
     }
 
-    public FUNCDESC GetFuncDesc(int index)
+    public COMTypeFunctionDescriptor GetFuncDesc(int index)
     {
-        m_type_info.GetFuncDesc(index, out IntPtr ppFuncDesc);
-        try
+        return m_func_desc.GetOrAdd(index, i =>
         {
-            return ppFuncDesc.GetStructure<FUNCDESC>();
-        }
-        finally
-        {
-            m_type_info.ReleaseFuncDesc(ppFuncDesc);
-        }
+            m_type_info.GetFuncDesc(index, out IntPtr ppFuncDesc);
+            return new(ppFuncDesc);
+        });
     }
 
-    public VARDESC GetVarDesc(int index)
+    public COMTypeVariableDescriptor GetVarDesc(int index)
     {
-        m_type_info.GetVarDesc(index, out IntPtr ppVarDesc);
-        try
+        return m_var_desc.GetOrAdd(index, i =>
         {
-            return ppVarDesc.GetStructure<VARDESC>();
-        }
-        finally
-        {
-            m_type_info.ReleaseVarDesc(ppVarDesc);
-        }
+            m_type_info.GetVarDesc(index, out IntPtr ppVarDesc);
+            return new(ppVarDesc);
+        });
     }
 
     public IReadOnlyList<string> GetNames(int memid, int max_names)
@@ -282,6 +307,16 @@ public sealed class COMTypeInfoInstance : IDisposable
 
     void IDisposable.Dispose()
     {
+        foreach (var desc in m_var_desc.Values)
+        {
+            m_type_info.ReleaseVarDesc(desc.m_ptr);
+        }
+        m_var_desc.Clear();
+        foreach (var desc in m_func_desc.Values)
+        {
+            m_type_info.ReleaseFuncDesc(desc.m_ptr);
+        }
+        m_func_desc.Clear();
         m_type_info.ReleaseComObject();
         m_type_info2?.ReleaseComObject();
     }

@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib.Instance;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

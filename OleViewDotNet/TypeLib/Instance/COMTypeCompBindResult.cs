@@ -16,7 +16,7 @@
 
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib.Parser;
+namespace OleViewDotNet.TypeLib.Instance;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 

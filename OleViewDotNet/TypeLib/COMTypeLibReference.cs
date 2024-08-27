@@ -15,7 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
-using OleViewDotNet.TypeLib.Parser;
+using OleViewDotNet.TypeLib.Instance;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 

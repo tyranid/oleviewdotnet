@@ -14,34 +14,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System;
-using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Instance;
 
-internal sealed class COMFuncDesc : IDisposable
+public sealed class COMTypeCustomDataItem
 {
-    private readonly ITypeInfo _type_info;
-    private readonly IntPtr _ptr;
+    public Guid Guid { get; }
+    public object Value { get; }
 
-    public FUNCDESC Descriptor { get; }
-
-    public COMFuncDesc(ITypeInfo type_info, IntPtr ptr)
+    internal COMTypeCustomDataItem(CUSTDATAITEM item)
     {
-        _type_info = type_info;
-        _ptr = ptr;
-        Descriptor = ptr.GetStructure<FUNCDESC>();
-    }
-
-    public string[] GetNames()
-    {
-        string[] names = new string[Descriptor.cParams + 1];
-        _type_info.GetNames(Descriptor.memid, names, names.Length, out int name_count);
-        return names;
-    }
-
-    void IDisposable.Dispose()
-    {
-        _type_info.ReleaseFuncDesc(_ptr);
+        Guid = item.guid;
+        Value = item.varValue.ToObject();
     }
 }
+

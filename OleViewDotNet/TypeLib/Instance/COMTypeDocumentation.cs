@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib.Parser;
+namespace OleViewDotNet.TypeLib.Instance;
 
 public readonly struct COMTypeDocumentation
 {

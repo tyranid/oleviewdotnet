@@ -17,6 +17,7 @@
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;

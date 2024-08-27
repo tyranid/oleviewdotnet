@@ -17,24 +17,32 @@
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Instance;
 
-internal sealed class COMVarDesc : IDisposable
+public sealed class COMTypeCompInstance : IDisposable
 {
-    private readonly ITypeInfo _type_info;
-    private readonly IntPtr _ptr;
+    private readonly ITypeComp m_type_comp;
 
-    public VARDESC Descriptor { get; }
-
-    public COMVarDesc(ITypeInfo type_info, IntPtr ptr)
+    internal COMTypeCompInstance(ITypeComp type_comp)
     {
-        _type_info = type_info;
-        _ptr = ptr;
-        Descriptor = ptr.GetStructure<VARDESC>();
+        m_type_comp = type_comp;
+    }
+
+    public COMTypeCompBindResult Bind(string szName, int lHashVal, short wFlags)
+    {
+        m_type_comp.Bind(szName, lHashVal, wFlags, out ITypeInfo ppTInfo, out DESCKIND pDescKind, out BINDPTR pBindPtr);
+        return new COMTypeCompBindResult(ppTInfo, pDescKind, pBindPtr);
+    }
+
+    public COMTypeCompBindResult BindType(string szName, int lHashVal)
+    {
+        m_type_comp.BindType(szName, lHashVal, out ITypeInfo ppTInfo, out ITypeComp ppTComp);
+        return new COMTypeCompBindResult(ppTInfo, ppTComp);
     }
 
     void IDisposable.Dispose()
     {
-        _type_info.ReleaseVarDesc(_ptr);
+        m_type_comp.ReleaseComObject();
     }
 }
+

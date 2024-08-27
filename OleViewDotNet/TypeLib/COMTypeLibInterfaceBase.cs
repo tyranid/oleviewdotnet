@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.TypeLib.Parser;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;

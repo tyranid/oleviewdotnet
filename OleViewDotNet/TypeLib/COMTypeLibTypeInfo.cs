@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;
