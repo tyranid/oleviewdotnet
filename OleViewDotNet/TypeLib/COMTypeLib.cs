@@ -17,6 +17,7 @@
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -60,7 +61,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
     #endregion
 
     #region Internal Members
-    internal COMTypeLib(string path, COMTypeLibDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
+    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
         : base(doc, attr)
     {
         Path = path ?? string.Empty;

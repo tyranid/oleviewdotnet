@@ -14,28 +14,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.TypeLib.Parser;
-using OleViewDotNet.Utilities.Format;
-using System.Runtime.InteropServices.ComTypes;
+using OleViewDotNet.Interop;
+using System;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Parser;
 
-public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
+public sealed class COMTypeCustomDataItem
 {
-    public COMTypeLibTypeDesc AliasType { get; private set; }
+    public Guid Guid { get; }
+    public object Value { get; }
 
-    internal COMTypeLibAlias(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeCustomDataItem(CUSTDATAITEM item)
     {
-    }
-
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
-    {
-        AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
-    }
-
-    internal override void FormatInternal(COMSourceCodeBuilder builder)
-    {
-        builder.AppendLine($"typedef {GetTypeAttributes("public").FormatAttrs()}{AliasType.FormatType()} {Name}{AliasType.FormatPostName()};");
+        Guid = item.guid;
+        Value = item.varValue.ToObject();
     }
 }
+

@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib.Parser;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -26,13 +27,13 @@ namespace OleViewDotNet.TypeLib;
 public class COMTypeLibReference
 {
     #region Private Members
-    private protected readonly COMTypeLibDocumentation _doc;
+    private protected readonly COMTypeDocumentation _doc;
     private protected readonly TYPELIBATTR _attr;
     private readonly Lazy<COMTypeLib> _parsed;
     #endregion
 
     #region Internal Members
-    internal COMTypeLibReference(COMTypeLibDocumentation doc, TYPELIBATTR attr)
+    internal COMTypeLibReference(COMTypeDocumentation doc, TYPELIBATTR attr)
     {
         _doc = doc;
         _attr = attr;

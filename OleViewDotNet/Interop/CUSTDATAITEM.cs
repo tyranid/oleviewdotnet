@@ -14,30 +14,15 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.TypeLib.Parser;
-using OleViewDotNet.Utilities.Format;
-using System.Runtime.InteropServices.ComTypes;
+using System;
+using System.Runtime.InteropServices;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.Interop;
 
-public sealed class COMTypeLibUnion : COMTypeLibComplexType
+[StructLayout(LayoutKind.Sequential)]
+internal struct CUSTDATAITEM
 {
-    internal COMTypeLibUnion(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
-    {
-    }
-
-    internal override void FormatInternal(COMSourceCodeBuilder builder)
-    {
-        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}union {{");
-        using (builder.PushIndent(4))
-        {
-            foreach (var v in Fields)
-            {
-                builder.AppendLine($"{v.Type.FormatType()} {v.Name}{v.Type.FormatPostName()};");
-            }
-        }
-        builder.AppendLine($"}} {Name};");
-    }
+    public Guid guid;
+    public VARIANTARG varValue;
 }
 

@@ -72,6 +72,12 @@ internal static class NativeMethods
         SYSKIND syskind
     );
 
+    [DllImport("oleaut32.dll")]
+
+    public static extern void ClearCustData(
+        IntPtr pCustData
+    );
+
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, in Guid riid, out IntPtr ppv);
     [DllImport("ole32.dll")]

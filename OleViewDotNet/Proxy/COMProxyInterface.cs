@@ -19,6 +19,7 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;

@@ -17,11 +17,11 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Parser;
 
-internal readonly struct COMTypeLibDocumentation
+public readonly struct COMTypeDocumentation
 {
-    internal delegate void GetDocumentationDel(int index, out string name, 
+    internal delegate void GetDocumentationDel(int index, out string name,
         out string doc_string, out int help_context, out string help_file);
 
     public readonly string Name;
@@ -29,17 +29,17 @@ internal readonly struct COMTypeLibDocumentation
     public readonly int HelpContext;
     public readonly string HelpFile;
 
-    public COMTypeLibDocumentation(ITypeLib type_lib, int index = -1) 
+    internal COMTypeDocumentation(ITypeLib type_lib, int index = -1)
     {
         type_lib.GetDocumentation(index, out Name, out DocString, out HelpContext, out HelpFile);
     }
 
-    public COMTypeLibDocumentation(ITypeInfo type_info, int index = -1)
+    internal COMTypeDocumentation(ITypeInfo type_info, int index = -1)
     {
         type_info.GetDocumentation(index, out Name, out DocString, out HelpContext, out HelpFile);
     }
 
-    public IEnumerable<string> GetAttrs()
+    internal IEnumerable<string> GetAttrs()
     {
         List<string> attrs = new();
         if (!string.IsNullOrEmpty(DocString))

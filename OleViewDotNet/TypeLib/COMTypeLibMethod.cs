@@ -17,13 +17,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using OleViewDotNet.TypeLib.Parser;
 
 namespace OleViewDotNet.TypeLib;
 
 public class COMTypeLibMethod
 {
     #region Private Members
-    private readonly COMTypeLibDocumentation _doc;
+    private readonly COMTypeDocumentation _doc;
     private readonly FUNCFLAGS _flags;
     private protected readonly FUNCDESC _desc;
     #endregion

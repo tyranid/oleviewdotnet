@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib.Parser;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -46,7 +47,7 @@ public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo
     #endregion
 
     #region Internal Members
-    internal COMTypeLibInterfaceBase(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibInterfaceBase(COMTypeDocumentation doc, TYPEATTR attr)
         : base(doc, attr)
     {
     }

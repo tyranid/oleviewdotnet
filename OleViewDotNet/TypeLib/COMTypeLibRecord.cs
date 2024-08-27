@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -21,7 +22,7 @@ namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibRecord : COMTypeLibComplexType
 {
-    internal COMTypeLibRecord(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibRecord(COMTypeDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }

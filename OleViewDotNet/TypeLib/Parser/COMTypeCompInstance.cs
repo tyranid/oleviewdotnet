@@ -14,28 +14,35 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.TypeLib.Parser;
-using OleViewDotNet.Utilities.Format;
+using System;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Parser;
 
-public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
+public sealed class COMTypeCompInstance : IDisposable
 {
-    public COMTypeLibTypeDesc AliasType { get; private set; }
+    private readonly ITypeComp m_type_comp;
 
-    internal COMTypeLibAlias(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeCompInstance(ITypeComp type_comp)
     {
+        m_type_comp = type_comp;
     }
 
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    public COMTypeCompBindResult Bind(string szName, int lHashVal, short wFlags)
     {
-        AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
+        m_type_comp.Bind(szName, lHashVal, wFlags, out ITypeInfo ppTInfo, out DESCKIND pDescKind, out BINDPTR pBindPtr);
+        return new COMTypeCompBindResult(ppTInfo, pDescKind, pBindPtr);
     }
 
-    internal override void FormatInternal(COMSourceCodeBuilder builder)
+    public COMTypeCompBindResult BindType(string szName, int lHashVal)
     {
-        builder.AppendLine($"typedef {GetTypeAttributes("public").FormatAttrs()}{AliasType.FormatType()} {Name}{AliasType.FormatPostName()};");
+        m_type_comp.BindType(szName, lHashVal, out ITypeInfo ppTInfo, out ITypeComp ppTComp);
+        return new COMTypeCompBindResult(ppTInfo, ppTComp);
+    }
+
+    void IDisposable.Dispose()
+    {
+        m_type_comp.ReleaseComObject();
     }
 }
+

@@ -19,7 +19,7 @@ using System;
 namespace OleViewDotNet.Interop;
 
 [Flags]
-public enum VariantType
+public enum VariantType : ushort
 {
     VT_EMPTY = 0,
     VT_NULL = 1,

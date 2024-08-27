@@ -14,30 +14,32 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.TypeLib.Parser;
-using OleViewDotNet.Utilities.Format;
-using System.Runtime.InteropServices.ComTypes;
+using NtApiDotNet;
+using System;
+using System.Runtime.InteropServices;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.Interop;
 
-public sealed class COMTypeLibUnion : COMTypeLibComplexType
+[StructLayout(LayoutKind.Explicit)]
+public struct VARIANTARG
 {
-    internal COMTypeLibUnion(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
-    {
-    }
+    [FieldOffset(0)]
+    public VariantType vt;
+    [FieldOffset(2)]
+    public ushort wReserved1;
+    [FieldOffset(4)]
+    public ushort wReserved2;
+    [FieldOffset(6)]
+    public ushort wReserved3;
+    [FieldOffset(8)]
+    public IntPtr pVal;
+    [FieldOffset(8)]
+    public long llVal;
 
-    internal override void FormatInternal(COMSourceCodeBuilder builder)
+    public readonly object ToObject()
     {
-        builder.AppendLine($"typedef {GetTypeAttributes().FormatAttrs()}union {{");
-        using (builder.PushIndent(4))
-        {
-            foreach (var v in Fields)
-            {
-                builder.AppendLine($"{v.Type.FormatType()} {v.Name}{v.Type.FormatPostName()};");
-            }
-        }
-        builder.AppendLine($"}} {Name};");
+        using var buffer = new SafeStructureInOutBuffer<VARIANTARG>(this);
+        return Marshal.GetObjectForNativeVariant(buffer.DangerousGetHandle());
     }
 }
 

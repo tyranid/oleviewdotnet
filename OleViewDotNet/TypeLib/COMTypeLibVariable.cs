@@ -16,13 +16,14 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
+using OleViewDotNet.TypeLib.Parser;
 
 namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibVariable
 {
     #region Private Members
-    private readonly COMTypeLibDocumentation _doc;
+    private readonly COMTypeDocumentation _doc;
     private readonly VARDESC _desc;
     private readonly VARFLAGS _flags;
 

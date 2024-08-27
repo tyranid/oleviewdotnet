@@ -16,12 +16,13 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
+using OleViewDotNet.TypeLib.Parser;
 
 namespace OleViewDotNet.TypeLib;
 
 public abstract class COMTypeLibComplexType : COMTypeLibTypeInfo
 {
-    internal COMTypeLibComplexType(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibComplexType(COMTypeDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }

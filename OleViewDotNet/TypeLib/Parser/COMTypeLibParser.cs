@@ -21,7 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.TypeLib;
+namespace OleViewDotNet.TypeLib.Parser;
 
 internal sealed class COMTypeLibParser : IDisposable
 {
@@ -55,14 +55,14 @@ internal sealed class COMTypeLibParser : IDisposable
         _attr = GetAttributes(type_lib);
     }
 
-    internal COMTypeLibParser(string path) 
+    internal COMTypeLibParser(string path)
         : this(NativeMethods.LoadTypeLibEx(path, RegKind.None))
     {
         _path = path;
     }
 
     internal COMTypeLibParser(Guid type_lib_id,
-        COMVersion version, int lcid) 
+        COMVersion version, int lcid)
         : this(NativeMethods.LoadRegTypeLib(type_lib_id, version.Major, version.Minor, lcid))
     {
     }
@@ -81,7 +81,7 @@ internal sealed class COMTypeLibParser : IDisposable
 
     internal COMTypeLibReference GetTypeLibReference(ITypeLib type_lib)
     {
-        return _ref_type_libs.GetOrAdd(GetAttributes(type_lib), 
+        return _ref_type_libs.GetOrAdd(GetAttributes(type_lib),
             a => new COMTypeLibReference(new(type_lib), a));
     }
 
@@ -120,7 +120,7 @@ internal sealed class COMTypeLibParser : IDisposable
             return ret;
         }
 
-        internal COMTypeLibTypeInfo ParseType(COMTypeLibTypeInfo type) 
+        internal COMTypeLibTypeInfo ParseType(COMTypeLibTypeInfo type)
         {
             var key = Tuple.Create(type.Name, type.Kind);
             var ret = _type_lib._named_types.GetOrAdd(key, type);
@@ -208,9 +208,9 @@ internal sealed class COMTypeLibParser : IDisposable
             return new(flags, intf);
         }
 
-        public COMTypeLibDocumentation GetDocumentation(int index = -1)
+        public COMTypeDocumentation GetDocumentation(int index = -1)
         {
-            return new COMTypeLibDocumentation(_type_info, index);
+            return new COMTypeDocumentation(_type_info, index);
         }
 
         public Tuple<string, string, int> GetDllEntry(int memid, INVOKEKIND kind)
@@ -218,7 +218,7 @@ internal sealed class COMTypeLibParser : IDisposable
             try
             {
                 using var buffer = new SafeHGlobalBuffer(IntPtr.Size * 3);
-                _type_info.GetDllEntry(memid, kind, buffer.DangerousGetHandle(), 
+                _type_info.GetDllEntry(memid, kind, buffer.DangerousGetHandle(),
                     buffer.DangerousGetHandle() + IntPtr.Size, buffer.DangerousGetHandle() + IntPtr.Size * 2);
                 IntPtr dll_name = buffer.Read<IntPtr>(0);
                 IntPtr entry_point = buffer.Read<IntPtr>((ulong)IntPtr.Size);
@@ -257,7 +257,7 @@ internal sealed class COMTypeLibParser : IDisposable
         public bool IsDispatch => _attr.typekind == TYPEKIND.TKIND_DISPATCH;
 
         public ITypeInfo Instance => _type_info;
-    
+
         void IDisposable.Dispose()
         {
             _type_info.ReleaseComObject();

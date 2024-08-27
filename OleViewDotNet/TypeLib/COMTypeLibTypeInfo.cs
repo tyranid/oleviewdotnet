@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace OleViewDotNet.TypeLib;
 public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
 {
     #region Private Members
-    private readonly COMTypeLibDocumentation _doc;
+    private readonly COMTypeDocumentation _doc;
     private readonly TYPEATTR _attr;
     private bool _parsed;
 
@@ -74,7 +75,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
     #endregion
 
     #region Internal Members
-    internal COMTypeLibTypeInfo(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibTypeInfo(COMTypeDocumentation doc, TYPEATTR attr)
     {
         _doc = doc;
         _attr = attr;

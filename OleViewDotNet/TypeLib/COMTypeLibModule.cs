@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ public sealed class COMTypeLibModule : COMTypeLibTypeInfo
     public IReadOnlyList<COMTypeLibModuleFunction> Functions { get; private set; }
     public IReadOnlyList<COMTypeLibVariable> Constants { get; private set; }
 
-    internal COMTypeLibModule(COMTypeLibDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibModule(COMTypeDocumentation doc, TYPEATTR attr)
        : base(doc, attr)
     {
     }

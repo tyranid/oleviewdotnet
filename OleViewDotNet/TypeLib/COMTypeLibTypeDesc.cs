@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib.Parser;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
