@@ -21,20 +21,45 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [StructLayout(LayoutKind.Explicit)]
-public struct VARIANTARG
+internal struct VARIANTARG
 {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct TypeUnion
+    {
+        private ushort _vt;
+
+        private ushort _wReserved1;
+
+        private ushort _wReserved2;
+
+        private ushort _wReserved3;
+
+        private UnionTypes _unionTypes;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Record
+    {
+        private IntPtr _record;
+
+        private IntPtr _recordInfo;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    private struct UnionTypes
+    {
+        [FieldOffset(0)]
+        private long _i8;
+
+        [FieldOffset(0)]
+        private Record _record;
+    }
+
     [FieldOffset(0)]
-    public VariantType vt;
-    [FieldOffset(2)]
-    public ushort wReserved1;
-    [FieldOffset(4)]
-    public ushort wReserved2;
-    [FieldOffset(6)]
-    public ushort wReserved3;
-    [FieldOffset(8)]
-    public IntPtr pVal;
-    [FieldOffset(8)]
-    public long llVal;
+    private TypeUnion _typeUnion;
+
+    [FieldOffset(0)]
+    private decimal _decimal;
 
     public readonly object ToObject()
     {
@@ -42,4 +67,3 @@ public struct VARIANTARG
         return Marshal.GetObjectForNativeVariant(buffer.DangerousGetHandle());
     }
 }
-

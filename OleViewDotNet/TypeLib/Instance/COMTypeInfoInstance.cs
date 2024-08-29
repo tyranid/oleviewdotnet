@@ -24,32 +24,6 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib.Instance;
 
-public sealed class COMTypeVariableDescriptor
-{
-    internal readonly IntPtr m_ptr;
-
-    public VARDESC Descriptor { get; }
-
-    internal COMTypeVariableDescriptor(IntPtr ptr)
-    {
-        m_ptr = ptr;
-        Descriptor = ptr.GetStructure<VARDESC>();
-    }
-}
-
-public sealed class COMTypeFunctionDescriptor
-{
-    internal readonly IntPtr m_ptr;
-
-    public FUNCDESC Descriptor { get; }
-
-    internal COMTypeFunctionDescriptor(IntPtr ptr)
-    {
-        m_ptr = ptr;
-        Descriptor = ptr.GetStructure<FUNCDESC>();
-    }
-}
-
 public sealed class COMTypeInfoInstance : IDisposable
 {
     private readonly ITypeInfo m_type_info;
