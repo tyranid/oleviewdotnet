@@ -2504,6 +2504,41 @@ function Format-ComTypeLib {
 
 <#
 .SYNOPSIS
+Imports a COM type library.
+.DESCRIPTION
+This cmdlet imports a COM type library from a file.
+.PARAMETER Path
+The path to a type library to import.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.TypeLib.COMTypeLib
+.EXAMPLE
+Import-ComTypeLib -Path lib.tlb
+Import a type library.
+#>
+function Import-ComTypeLib {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, ParameterSetName = "FromPath")]
+        [string]$Path
+    )
+
+    PROCESS {
+        try {
+            switch($PSCmdlet.ParameterSetName) {
+                "FromPath" {
+                    [OleViewDotNet.TypeLib.COMTypeLib]::FromFile($Path)
+                }
+            }
+        } catch {
+            Write-Error $_
+        }
+    }
+}
+
+<#
+.SYNOPSIS
 Formats a GUID in various formats.
 .DESCRIPTION
 This cmdlet formats a GUID in various formats.
