@@ -2506,13 +2506,24 @@ function Format-ComTypeLib {
 .SYNOPSIS
 Imports a COM type library.
 .DESCRIPTION
-This cmdlet imports a COM type library from a file.
+This cmdlet imports a COM type library from an external source.
 .PARAMETER Path
 The path to a type library to import.
+.PARAMETER Object
+Get from an IDispatch object.
+.PARAMETER TypeLibId
+Specify the type library ID.
+.PARAMETER Version
+Specify the type library version.
+.PARAMETER LocalId
+Specify the locale ID.
+.PARAMETER AsObject
+Returns the type library as a COM object.
 .INPUTS
 None
 .OUTPUTS
 OleViewDotNet.TypeLib.COMTypeLib
+OleViewDotNet.TypeLib.Instance.COMTypeLibInstance
 .EXAMPLE
 Import-ComTypeLib -Path lib.tlb
 Import a type library.
@@ -2520,15 +2531,42 @@ Import a type library.
 function Import-ComTypeLib {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory, ParameterSetName = "FromPath")]
-        [string]$Path
+        [parameter(Mandatory, Position = 0, ParameterSetName = "FromPath")]
+        [string]$Path,
+        [parameter(Mandatory, ParameterSetName = "FromObject")]
+        [object]$Object,
+        [parameter(Mandatory, ParameterSetName = "FromRegistered")]
+        [guid]$TypeLibId,
+        [parameter(Mandatory, ParameterSetName = "FromRegistered")]
+        [OleViewDotNet.Interop.COMVersion]$Version,
+        [parameter(ParameterSetName = "FromRegistered")]
+        [int]$LocaleId = 0,
+        [switch]$AsObject
     )
 
     PROCESS {
         try {
             switch($PSCmdlet.ParameterSetName) {
                 "FromPath" {
-                    [OleViewDotNet.TypeLib.COMTypeLib]::FromFile($Path)
+                    if ($AsObject) {
+                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromFile($Path)
+                    } else {
+                        [OleViewDotNet.TypeLib.COMTypeLib]::FromFile($Path)
+                    }
+                }
+                "FromObject" {
+                    if ($AsObject) {
+                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromObject($Object)
+                    } else {
+                        [OleViewDotNet.TypeLib.COMTypeLib]::FromObject($Object)
+                    }
+                }
+                "FromRegistered" {
+                    if ($AsObject) {
+                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromRegistered($TypeLibId, $Version, $LocaleId)
+                    } else {
+                        [OleViewDotNet.TypeLib.COMTypeLib]::FromRegistered($TypeLibId, $Version, $LocaleId)
+                    }
                 }
             }
         } catch {

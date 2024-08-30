@@ -59,10 +59,15 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         }
         builder.AppendLine("};");
     }
+
+    private bool IsSameTypeLib(COMTypeLibReference ref_typelib)
+    {
+        return ref_typelib.TypeLibId == TypeLibId && ref_typelib.Version == Version && ref_typelib.Locale == Locale;
+    }
     #endregion
 
     #region Internal Members
-    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types) 
+    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types, IEnumerable<COMTypeLibReference> ref_typelibs) 
         : base(doc, attr)
     {
         Path = path ?? string.Empty;
@@ -88,6 +93,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         Modules = types.OfType<COMTypeLibModule>().ToList().AsReadOnly();
         Classes = types.OfType<COMTypeLibCoClass>().ToList().AsReadOnly();
         ComplexTypes = types.OfType<COMTypeLibComplexType>().ToList().AsReadOnly();
+        ReferencedTypeLibs = ref_typelibs.Where(t => !IsSameTypeLib(t)).ToList().AsReadOnly();
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
@@ -141,6 +147,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
     public IReadOnlyList<COMTypeLibCoClass> Classes { get; }
     public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
     public IReadOnlyDictionary<Guid, COMTypeLibInterface> InterfacesByIid => Interfaces.ToDictionary(i => i.Uuid);
+    public IReadOnlyList<COMTypeLibReference> ReferencedTypeLibs { get; }
     Guid ICOMGuid.ComGuid => TypeLibId;
     bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
