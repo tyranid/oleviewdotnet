@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 namespace OleViewDotNet.TypeLib.Instance;
 
@@ -261,6 +262,12 @@ public sealed class COMTypeInfoInstance : IDisposable
     public IReadOnlyList<COMTypeCustomDataItem> GetAllImplTypeCustData(int index)
     {
         return GetAllCustData(p => GetTypeInfo2().GetAllImplTypeCustData(index, p));
+    }
+
+    public Type ToType()
+    {
+        using var handle = SafeComObjectHandle.FromObject(m_type_info, typeof(ITypeInfo).GUID);
+        return Marshal.GetTypeForITypeInfo(handle.DangerousGetHandle());
     }
 
     private static IReadOnlyList<COMTypeCustomDataItem> GetAllCustData(Action<IntPtr> get_all_cust_data)
