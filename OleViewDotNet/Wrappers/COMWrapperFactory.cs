@@ -29,49 +29,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComWrapper
-{
-    internal IEnumerable<COMInterfaceEntry> _interfaces;
-
-    public string InterfaceName { get; }
-    public Guid Iid { get; }
-    public abstract BaseComWrapper QueryInterface(Guid iid);
-    public abstract object Unwrap();
-
-    protected BaseComWrapper(Guid iid, string name)
-    {
-        InterfaceName = name;
-        Iid = iid;
-    }
-}
-
-public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : class
-{
-    protected readonly T _object;
-
-    protected BaseComWrapper(object obj) 
-        : base(typeof(T).GUID, typeof(T).Name)
-    {
-        System.Diagnostics.Debug.Assert(typeof(T).IsInterface);
-        _object = (T)obj;
-    }
-
-    public override BaseComWrapper QueryInterface(Guid iid)
-    {
-        return COMWrapperFactory.Wrap(_object, COMUtilities.GetInterfaceType(iid));
-    }
-
-    public override object Unwrap()
-    {
-        return _object;
-    }
-
-    void IDisposable.Dispose()
-    {
-        Marshal.ReleaseComObject(_object);
-    }
-}
-
 public static class COMWrapperFactory
 {
     private static readonly AssemblyName _name = new("ComWrapperTypes");
