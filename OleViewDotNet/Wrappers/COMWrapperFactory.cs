@@ -17,6 +17,7 @@
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -339,6 +340,16 @@ public static class COMWrapperFactory
         }
 
         return (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
+    }
+
+    public static BaseComWrapper Wrap(object obj)
+    {
+        if (obj is IDispatch)
+        {
+            using var type_info = COMTypeInfoInstance.FromObject(obj);
+            return Wrap(obj, type_info.ToType());
+        }
+        return new IUnknownWrapper(obj);
     }
 
     public static object Unwrap(object obj)
