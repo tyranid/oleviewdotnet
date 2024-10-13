@@ -19,10 +19,15 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[ComImport, Guid("00000001-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IClassFactory
+[StructLayout(LayoutKind.Sequential)]
+public struct RPCOLEMESSAGE
 {
-    void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter,
-        in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
-    void LockServer(bool fLock);
+    public IntPtr reserved1;
+    public int dataRepresentation;
+    public IntPtr Buffer;
+    public int cbBuffer;
+    public int iMethod;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+    public IntPtr[] reserved2;
+    public int rpcFlags;
 }

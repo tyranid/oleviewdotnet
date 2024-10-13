@@ -66,4 +66,6 @@ public static class COMKnownGuids
     public static readonly Guid CATID_Insertable = new("{40FC6ED3-2438-11CF-A3DB-080036F12502}");
 
     public static readonly Guid CATID_Document = new("{40fc6ed8-2438-11cf-a3db-080036f12502}");
+
+    public static readonly Guid IID_IProxyManager = new("{00000008-0000-0000-C000-000000000046}");
 }

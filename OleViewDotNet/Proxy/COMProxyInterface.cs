@@ -16,8 +16,10 @@
 
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32.Rpc;
+using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities;
@@ -251,12 +253,16 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
                 RpcClientBuilderFlags.HideWrappedMethods;
         }
 
-        args.Flags = RpcClientBuilderFlags.GenerateConstructorProperties |
-            RpcClientBuilderFlags.StructureReturn |
-            RpcClientBuilderFlags.HideWrappedMethods |
-            RpcClientBuilderFlags.UnsignedChar |
-            RpcClientBuilderFlags.NoNamespace;
         return RpcClientBuilder.CreateClient(RpcProxy, args);
+    }
+
+    public RpcClientBase ConnectClient(object obj, bool scripting = false)
+    {
+        RpcCOMClientTransportFactory.SetupFactory();
+        RpcClientBase client = CreateClient(scripting);
+        RpcChannelBufferClientTransportConfiguration config = new() { Instance = obj };
+        client.Connect($"{RpcCOMClientTransportFactory.COMBufferProtocol}:[proxy]", new RpcTransportSecurity() { Configuration = config });
+        return client;
     }
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)

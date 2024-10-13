@@ -60,6 +60,11 @@ public class SafeComObjectHandle : SafeHandle
         return obj != null;
     }
 
+    public bool IsProxy()
+    {
+        return HasInterface(COMKnownGuids.IID_IProxyManager);
+    }
+
     public IntPtr ReadVTable()
     {
         if (IsClosed || IsInvalid)
@@ -67,6 +72,11 @@ public class SafeComObjectHandle : SafeHandle
             throw new ObjectDisposedException(nameof(handle));
         }
         return Marshal.ReadIntPtr(handle);
+    }
+
+    public SafeComObjectHandle Clone()
+    {
+        return FromIUnknown(handle);
     }
 
     public static SafeComObjectHandle FromObject(object obj)

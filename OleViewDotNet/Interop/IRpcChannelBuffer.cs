@@ -19,10 +19,20 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[ComImport, Guid("00000001-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IClassFactory
+[ComImport, Guid("D5F56B60-593B-101A-B569-08002B2DBF7A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IRpcChannelBuffer
 {
-    void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter,
-        in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
-    void LockServer(bool fLock);
+    void GetBuffer(
+        ref RPCOLEMESSAGE pMessage,
+        in Guid riid);
+    void SendReceive(
+        ref RPCOLEMESSAGE pMessage,
+        out int pStatus);
+    void FreeBuffer(
+        ref RPCOLEMESSAGE pMessage);
+    void GetDestCtx(
+        out int pdwDestContext,
+        out IntPtr ppvDestContext);
+    [PreserveSig]
+    int IsConnected();
 }

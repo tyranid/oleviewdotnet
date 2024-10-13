@@ -26,6 +26,7 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
 {
     public const string COMAlpcProtocol = "com_lrpc";
     public const string COMTcpProtocol = "com_tcp";
+    public const string COMBufferProtocol = "com_buffer";
     private static bool m_setup_factory;
 
     internal static void SetupFactory()
@@ -35,25 +36,34 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
         m_setup_factory = true;
         RpcClientTransportFactory.AddFactory(COMAlpcProtocol, new RpcCOMClientTransportFactory());
         RpcClientTransportFactory.AddFactory(COMTcpProtocol, new RpcCOMClientTransportFactory());
+        RpcClientTransportFactory.AddFactory(COMBufferProtocol, new RpcCOMClientTransportFactory());
     }
 
     public IRpcClientTransport Connect(RpcEndpoint endpoint, RpcTransportSecurity transport_security)
     {
-        string protoseq = endpoint.ProtocolSequence switch
+        if (endpoint.ProtocolSequence == COMBufferProtocol)
         {
-            COMAlpcProtocol => RpcProtocolSequence.LRPC,
-            COMTcpProtocol => RpcProtocolSequence.Tcp,
-            _ => throw new ArgumentException("Unsupported COM RPC protocol sequence."),
-        };
-        RpcStringBinding curr_binding = endpoint.Binding;
-        string new_binding = RpcStringBinding.Compose(protoseq, curr_binding.NetworkAddress, curr_binding.Endpoint, curr_binding.NetworkOptions);
-        endpoint = new RpcEndpoint(Guid.Empty, new Version(), RpcStringBinding.Parse(new_binding));
+            var config = transport_security.Configuration as RpcChannelBufferClientTransportConfiguration ?? throw new ArgumentException("Must specify a transport configuration.");
+            return new RpcChannelBufferClientTransport(config.Instance);
+        }
+        else
+        {
+            string protoseq = endpoint.ProtocolSequence switch
+            {
+                COMAlpcProtocol => RpcProtocolSequence.LRPC,
+                COMTcpProtocol => RpcProtocolSequence.Tcp,
+                _ => throw new ArgumentException("Unsupported COM RPC protocol sequence."),
+            };
+            RpcStringBinding curr_binding = endpoint.Binding;
+            string new_binding = RpcStringBinding.Compose(protoseq, curr_binding.NetworkAddress, curr_binding.Endpoint, curr_binding.NetworkOptions);
+            endpoint = new RpcEndpoint(Guid.Empty, new Version(), RpcStringBinding.Parse(new_binding));
 
-        var config = transport_security.Configuration as RpcCOMClientTransportConfiguration ?? throw new ArgumentException("Must specify a transport configuration.");
-        transport_security.Configuration = config.InnerConfig;
+            var config = transport_security.Configuration as RpcCOMClientTransportConfiguration ?? throw new ArgumentException("Must specify a transport configuration.");
+            transport_security.Configuration = config.InnerConfig;
 
-        var transport = RpcClientTransportFactory.ConnectEndpoint(endpoint, transport_security);
-        return new RpcCOMClientTransport(transport, transport is RpcAlpcClientTransport, config.Version, config.RemoteObject);
+            var transport = RpcClientTransportFactory.ConnectEndpoint(endpoint, transport_security);
+            return new RpcCOMClientTransport(transport, transport is RpcAlpcClientTransport, config.Version, config.RemoteObject);
+        }
     }
 
     public static COMVERSION SupportedVersion = new(5, 7);

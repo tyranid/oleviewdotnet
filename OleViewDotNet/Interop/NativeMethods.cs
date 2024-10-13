@@ -271,4 +271,31 @@ internal static class NativeMethods
         out IntPtr ppProxy,
         //[MarshalAs(UnmanagedType.IUnknown)] out object ppProxy, // IRpcProxyBuffer**
         out IntPtr ppv);
+
+    [DllImport("rpcrt4.dll")]
+    public extern static void NdrProxyInitialize(
+        SafeComObjectHandle This,
+        in RPC_MESSAGE pRpcMsg,
+        ref MIDL_STUB_MESSAGE pStubMsg,
+        in MIDL_STUB_DESC pStubDescriptor,
+        int ProcNum
+    );
+
+    [DllImport("rpcrt4.dll")]
+    public extern static void NdrProxyGetBuffer(
+        SafeComObjectHandle This,
+        ref MIDL_STUB_MESSAGE pStubMsg
+    );
+
+    [DllImport("rpcrt4.dll")]
+    public extern static void NdrProxySendReceive(
+      SafeComObjectHandle This,
+      ref MIDL_STUB_MESSAGE pStubMsg
+    );
+
+    [DllImport("rpcrt4.dll")]
+    public extern static void NdrProxyFreeBuffer(
+        SafeComObjectHandle This,
+        ref MIDL_STUB_MESSAGE pStubMsg
+    );
 }

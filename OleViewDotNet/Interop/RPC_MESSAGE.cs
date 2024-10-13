@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2014, 2016
+//    Copyright (C) James Forshaw 2014
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,10 +19,18 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[ComImport, Guid("00000001-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IClassFactory
+[StructLayout(LayoutKind.Sequential)]
+public struct RPC_MESSAGE
 {
-    void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter,
-        in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppvObject);
-    void LockServer(bool fLock);
+    public IntPtr Handle;
+    public int DataRepresentation;
+    public IntPtr Buffer;
+    public int BufferLength;
+    public int ProcNum;
+    public IntPtr TransferSyntax;
+    public IntPtr RpcInterfaceInformation;
+    public IntPtr ReservedForRuntime;
+    public IntPtr ManagerEpv;
+    public IntPtr ImportContext;
+    public int RpcFlags;
 }
