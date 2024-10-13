@@ -24,6 +24,7 @@ using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Wrappers;
 using System;
 using System.CodeDom;
@@ -114,7 +115,6 @@ public static class COMUtilities
         return strDesc;
     }
 
-
     private static void RegisterTypeInterfaces(Assembly a)
     {
         Type[] types = a.GetTypes();
@@ -185,12 +185,20 @@ public static class COMUtilities
             return type;
         }
 
+        if (intf.HasTypeLib)
+        {
+            using var type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
+            using var type_info = type_lib.GetTypeInfoOfGuid(intf.Iid);
+            return type_info.ToType();
+        }
+
         if (intf.ProxyClassEntry is null)
         {
             return null;
         }
 
-        ConvertProxyToAssembly(COMProxyInterface.GetFromIID(intf), null);
+        var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
+        m_iidtypes.Add(intf.Iid, proxy.CreateClientType());
         return GetInterfaceType(intf.Iid);
     }
 
@@ -208,13 +216,12 @@ public static class COMUtilities
         }
 
         COMProxyFile proxy = ipid.ToProxyInstance();
-
         if (proxy is null)
         {
             return null;
         }
 
-        ConvertProxyToAssembly(proxy, null);
+        m_iidtypes.Add(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType());
         return GetInterfaceType(ipid.Iid);
     }
 

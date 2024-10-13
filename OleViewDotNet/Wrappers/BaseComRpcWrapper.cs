@@ -17,7 +17,6 @@
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Rpc.Transport;
-using OleViewDotNet.Utilities;
 using System;
 
 namespace OleViewDotNet.Wrappers;
@@ -29,17 +28,13 @@ public abstract class BaseComRpcWrapper<T> : BaseComWrapper, IDisposable where T
     private BaseComRpcWrapper(T client, object obj) : base(client.InterfaceId, typeof(T).Name)
     {
         _object = client;
+        RpcCOMClientTransportFactory.SetupFactory();
         RpcChannelBufferClientTransportConfiguration config = new() { Instance = obj };
         client.Connect($"{RpcCOMClientTransportFactory.COMBufferProtocol}:[proxy]", new RpcTransportSecurity() { Configuration = config });
     }
 
     protected BaseComRpcWrapper(object obj) : this(new T(), obj)
     {
-    }
-
-    public override BaseComWrapper QueryInterface(Guid iid)
-    {
-        return COMWrapperFactory.Wrap(_object, COMUtilities.GetInterfaceType(iid));
     }
 
     public override object Unwrap()

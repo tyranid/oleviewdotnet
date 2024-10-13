@@ -50,8 +50,6 @@ function Wrap-ComObject {
         [object]$Object,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
         [Guid]$Iid,
-        [Parameter(ParameterSetName = "FromIid")]
-        [switch]$LoadType,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
         [Type]$Type,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromInterface")]
@@ -68,18 +66,13 @@ function Wrap-ComObject {
         return $Object
     }
 
-    $db = $null
-
-    if ($LoadType) {
-        $db = Get-CurrentComDatabase $Database
-        if ($null -eq $db) {
-            Write-Error "No database specified and current database isn't set"
-            return
-        }
-     }
-
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
+            $db = Get-CurrentComDatabase $Database
+            if ($null -eq $db) {
+                Write-Error "No database specified and current database isn't set"
+                return
+            }
             [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
         }
         "FromType" {
@@ -116,10 +109,8 @@ This cmdlet generates a callable wrapper for a COM interface and wraps the objec
 The object to wrap.
 .PARAMETER Iid
 The interface ID to base the wrapper on.
-.PARAMETER LoadType
-Specify to load interface type from proxy/typelib if available and not already loaded.
 .PARAMETER Database
-Specify with LoadType to indicate the database to get interface information from.
+Specify to indicate the database to get interface information from.
 .PARAMETER Type
 The existing interface type to wrap with.
 .PARAMETER Interface
@@ -132,8 +123,6 @@ function Get-ComObjectInterface {
         [object[]]$Object,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromIid")]
         [Guid]$Iid,
-        [Parameter(ParameterSetName = "FromIid")]
-        [switch]$LoadType,
         [Parameter(ParameterSetName = "FromIid")]
         [OleViewDotNet.Database.COMRegistry]$Database,
         [Parameter(Mandatory, Position = 1, ParameterSetName = "FromType")]
@@ -149,7 +138,7 @@ function Get-ComObjectInterface {
             $o = Unwrap-ComObject $o
             switch($PSCmdlet.ParameterSetName) {
                 "FromIid" {
-                    Wrap-ComObject -Object $o -Iid $Iid -LoadType:$LoadType | Write-Output
+                    Wrap-ComObject -Object $o -Iid $Iid -Database $Database | Write-Output
                 }
                 "FromType" {
                     Wrap-ComObject -Object $o -Type $Type | Write-Output
@@ -1769,10 +1758,8 @@ Specify the console session to create the object in.
 Don't wrap object in a callable wrapper.
 .PARAMETER Iid
 Specify the interface to query for initially.
-.PARAMETER LoadType
-Specify to load interface type from proxy/typelib if available and not already loaded.
 .PARAMETER Database
-Specify with LoadType to indicate the database to get interface information from.
+Specify to indicate the database to get interface information from.
 .PARAMETER Ipid
 Create the object from an existing IPID.
 #>
@@ -1807,7 +1794,6 @@ function New-ComObject {
         [int]$SessionId,
         [switch]$NoWrapper,
         [Guid]$Iid = [guid]::Empty,
-        [switch]$LoadType,
         [OleViewDotNet.Database.COMRegistry]$Database
     )
 
@@ -1851,7 +1837,7 @@ function New-ComObject {
             if ($null -ne $Ipid -and !$iid_set) {
                 Wrap-ComObject $obj -Ipid $Ipid -NoWrapper:$NoWrapper | Write-Output
             } else {
-                Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper -LoadType:$LoadType -DataBase $DataBase | Write-Output
+                Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper -DataBase $DataBase | Write-Output
             }
         }
     }

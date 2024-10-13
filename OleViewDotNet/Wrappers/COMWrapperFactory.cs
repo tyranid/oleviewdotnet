@@ -18,8 +18,6 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
-using OleViewDotNet.Rpc.Transport;
-using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -34,6 +32,7 @@ namespace OleViewDotNet.Wrappers;
 
 public static class COMWrapperFactory
 {
+    #region Private Members
     private static readonly AssemblyName _name = new("ComWrapperTypes");
     private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
     private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
@@ -58,37 +57,17 @@ public static class COMWrapperFactory
             return false;
         }
 
+        if (t.IsConstructedGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            return false;
+        }
+
+        if (t.Assembly == typeof(RpcClientBase).Assembly)
+        {
+            return false;
+        }
+
         return true;
-    }
-
-    public static BaseComWrapper<T> Wrap<T>(object obj) where T : class
-    {
-        return (BaseComWrapper<T>)Wrap(obj, typeof(T));
-    }
-
-    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry)
-    {
-        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry));
-    }
-
-    public static BaseComWrapper Wrap(object obj, Guid iid)
-    {
-        return Wrap(obj, iid, null);
-    }
-
-    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
-    {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf));
-    }
-
-    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
-    {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry));
-    }
-
-    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
-    {
-        return Wrap(obj, COMUtilities.GetInterfaceType(ipid));
     }
 
     private static bool AddType(this HashSet<Type> types, Type t)
@@ -97,7 +76,7 @@ public static class COMWrapperFactory
         {
             t = t.GetElementType();
         }
-        return types.Add(t);
+        return types.Add(UnwrapType(t));
     }
 
     private static string GenerateName(this HashSet<string> names, MemberInfo member)
@@ -164,7 +143,17 @@ public static class COMWrapperFactory
         return _constructors[type];
     }
 
-    private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes, 
+    private static Type UnwrapType(Type type)
+    {
+        if (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            return type.GenericTypeArguments[0];
+        }
+
+        return type;
+    }
+
+    private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
         Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         string name = names.GenerateName(mi);
@@ -176,7 +165,7 @@ public static class COMWrapperFactory
         }
         structured_types.AddType(mi.ReturnType);
 
-        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes, 
+        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes,
             mi.ReturnType, param_types);
 
         for (int i = 0; i < param_info.Length; ++i)
@@ -218,7 +207,7 @@ public static class COMWrapperFactory
             }
         }
         ilgen.Emit(OpCodes.Callvirt, mi);
-        foreach(var local in locals)
+        foreach (var local in locals)
         {
             var con = GetConstructor(param_types[local.Item1]);
             ilgen.Emit(OpCodes.Ldarg, local.Item1 + 1);
@@ -239,6 +228,15 @@ public static class COMWrapperFactory
         return COMUtilities.IsComImport(intf_type) && intf_type.IsInterface && intf_type.IsPublic && !intf_type.Assembly.ReflectionOnly;
     }
 
+    private static bool IsDefined(Type intf_type, MemberInfo member)
+    {
+        if (!typeof(RpcClientBase).IsAssignableFrom(intf_type))
+        {
+            return true;
+        }
+        return member.DeclaringType == intf_type;
+    }
+
     private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         if (intf_type is null)
@@ -246,9 +244,11 @@ public static class COMWrapperFactory
             throw new ArgumentNullException("No interface type available", nameof(intf_type));
         }
 
-        if (!IsComInterfaceType(intf_type))
+        bool is_rpc_client = typeof(RpcClientBase).IsAssignableFrom(intf_type);
+
+        if (!IsComInterfaceType(intf_type) && !is_rpc_client)
         {
-            throw new ArgumentException("Wrapper type must be a public COM interface and not reflection only.", nameof(intf_type));
+            throw new ArgumentException("Wrapper type must be a public COM interface and not reflection only or an RPC client.", nameof(intf_type));
         }
 
         HashSet<Type> structured_types = new();
@@ -261,7 +261,7 @@ public static class COMWrapperFactory
 
         if (!_types.ContainsKey(intf_type.GUID))
         {
-            Type base_type = typeof(BaseComWrapper<>).MakeGenericType(intf_type);
+            Type base_type = is_rpc_client ? typeof(BaseComRpcWrapper<>).MakeGenericType(intf_type) : typeof(BaseComWrapper<>).MakeGenericType(intf_type);
             TypeBuilder tb = _module.DefineType(
                 $"{intf_type.Name}Wrapper",
                  TypeAttributes.Public | TypeAttributes.Sealed, base_type);
@@ -278,11 +278,19 @@ public static class COMWrapperFactory
             conil.Emit(OpCodes.Ret);
             foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
             {
+                if (!IsDefined(intf_type, mi))
+                {
+                    continue;
+                }
                 GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
             }
 
             foreach (var pi in intf_type.GetProperties())
             {
+                if (!IsDefined(intf_type, pi))
+                {
+                    continue;
+                }
                 string name = names.GenerateName(pi);
                 var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                 if (pi.CanRead)
@@ -299,7 +307,7 @@ public static class COMWrapperFactory
 
             foreach (var type in structured_types.Where(FilterStructuredTypes))
             {
-                var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public | MethodAttributes.Static,
+                var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
                         type, new Type[0]);
                 var ilgen = methbuilder.GetILGenerator();
                 var local = ilgen.DeclareLocal(type);
@@ -324,7 +332,7 @@ public static class COMWrapperFactory
         return _types[intf_type.GUID];
     }
 
-    public static BaseComWrapper Wrap(object obj, Type intf_type)
+    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
         if (obj is null)
         {
@@ -336,22 +344,46 @@ public static class COMWrapperFactory
             throw new ArgumentNullException(nameof(intf_type), "No type available for wrapper.");
         }
 
-        if (!Marshal.IsComObject(obj) && !intf_type.IsAssignableFrom(obj.GetType()))
+        if (!Marshal.IsComObject(obj))
         {
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
         }
 
-        return (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
+        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
+        wrapper.Database = registry;
+        return wrapper;
+    }
+    #endregion
+
+    #region Public Static Members
+    public static BaseComWrapper<T> Wrap<T>(object obj) where T : class
+    {
+        return (BaseComWrapper<T>)Wrap(obj, typeof(T));
     }
 
-    public static BaseComWrapper Wrap(object obj)
+    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
     {
-        if (obj is IDispatch)
-        {
-            using var type_info = COMTypeInfoInstance.FromObject(obj);
-            return Wrap(obj, type_info.ToType());
-        }
-        return new IUnknownWrapper(obj);
+        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry), registry);
+    }
+
+    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
+    {
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf), intf.Database);
+    }
+
+    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
+    {
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry), intf.Database);
+    }
+
+    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
+    {
+        return Wrap(obj, COMUtilities.GetInterfaceType(ipid));
+    }
+
+    public static BaseComWrapper Wrap(object obj, Type intf_type)
+    {
+        return Wrap(obj, intf_type, null);
     }
 
     public static object Unwrap(object obj)
@@ -359,10 +391,6 @@ public static class COMWrapperFactory
         if (obj is BaseComWrapper wrapper)
         {
             return wrapper.Unwrap();
-        }
-        else if (obj is RpcClientBase client && client.Transport is RpcChannelBufferClientTransport transport) 
-        {
-            return transport.GetObject();
         }
         return obj;
     }
@@ -376,4 +404,5 @@ public static class COMWrapperFactory
     {
         _builder.Save(_name.Name + ".dll");
     }
+    #endregion
 }

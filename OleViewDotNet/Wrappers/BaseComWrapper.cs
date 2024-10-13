@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -28,8 +27,14 @@ public abstract class BaseComWrapper
 
     public string InterfaceName { get; }
     public Guid Iid { get; }
-    public abstract BaseComWrapper QueryInterface(Guid iid);
     public abstract object Unwrap();
+
+    public BaseComWrapper QueryInterface(Guid iid)
+    {
+        return COMWrapperFactory.Wrap(Unwrap(), iid, Database);
+    }
+
+    internal COMRegistry Database { get; set; }
 
     protected BaseComWrapper(Guid iid, string name)
     {
@@ -47,11 +52,6 @@ public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : 
     {
         System.Diagnostics.Debug.Assert(typeof(T).IsInterface);
         _object = (T)obj;
-    }
-
-    public override BaseComWrapper QueryInterface(Guid iid)
-    {
-        return COMWrapperFactory.Wrap(_object, COMUtilities.GetInterfaceType(iid));
     }
 
     public override object Unwrap()

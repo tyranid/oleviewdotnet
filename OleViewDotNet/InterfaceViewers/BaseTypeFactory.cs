@@ -70,25 +70,6 @@ internal class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
     }
 }
 
-/// <summary>
-/// Generic factory implementation for use when we have a instantiated type object
-/// </summary>
-internal class InstanceTypeViewerFactory : BaseTypeViewerFactory
-{
-    private readonly Type m_type;
-    public InstanceTypeViewerFactory(Type t)
-        : base(t)
-    {
-        m_type = t;
-    }
-
-    public override Control CreateInstance(COMRegistry registry,
-        ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-    {
-        return new TypedObjectViewer(registry, strObjName, pObject, m_type);
-    }
-}
-
 internal class InterfaceViewers
 {
     private static Dictionary<Guid, ITypeViewerFactory> m_viewfactory;
