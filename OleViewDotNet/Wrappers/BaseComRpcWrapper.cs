@@ -14,39 +14,27 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
+using NtApiDotNet.Win32.Rpc;
+using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComWrapper
-{
-    internal IEnumerable<COMInterfaceEntry> _interfaces;
-
-    public string InterfaceName { get; }
-    public Guid Iid { get; }
-    public abstract BaseComWrapper QueryInterface(Guid iid);
-    public abstract object Unwrap();
-
-    protected BaseComWrapper(Guid iid, string name)
-    {
-        InterfaceName = name;
-        Iid = iid;
-    }
-}
-
-public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : class
+public abstract class BaseComRpcWrapper<T> : BaseComWrapper, IDisposable where T : RpcClientBase, new()
 {
     protected readonly T _object;
 
-    protected BaseComWrapper(object obj)
-        : base(typeof(T).GUID, typeof(T).Name)
+    private BaseComRpcWrapper(T client, object obj) : base(client.InterfaceId, typeof(T).Name)
     {
-        System.Diagnostics.Debug.Assert(typeof(T).IsInterface);
-        _object = (T)obj;
+        _object = client;
+        RpcChannelBufferClientTransportConfiguration config = new() { Instance = obj };
+        client.Connect($"{RpcCOMClientTransportFactory.COMBufferProtocol}:[proxy]", new RpcTransportSecurity() { Configuration = config });
+    }
+
+    protected BaseComRpcWrapper(object obj) : this(new T(), obj)
+    {
     }
 
     public override BaseComWrapper QueryInterface(Guid iid)
@@ -56,11 +44,15 @@ public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : 
 
     public override object Unwrap()
     {
-        return _object;
+        if (_object.Transport is not RpcChannelBufferClientTransport transport)
+        {
+            return this;
+        }
+        return transport.GetObject();
     }
 
     void IDisposable.Dispose()
     {
-        Marshal.ReleaseComObject(_object);
+        _object.Dispose();
     }
 }

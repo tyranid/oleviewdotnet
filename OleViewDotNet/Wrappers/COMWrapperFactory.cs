@@ -14,9 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
+using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
 using System;
@@ -357,6 +359,10 @@ public static class COMWrapperFactory
         if (obj is BaseComWrapper wrapper)
         {
             return wrapper.Unwrap();
+        }
+        else if (obj is RpcClientBase client && client.Transport is RpcChannelBufferClientTransport transport) 
+        {
+            return transport.GetObject();
         }
         return obj;
     }

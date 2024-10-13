@@ -28,6 +28,8 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport
     private readonly object m_object;
     private RpcChannelBuffer m_buffer;
 
+    internal object GetObject() => m_object;
+
     public RpcChannelBufferClientTransport(object obj)
     {
         m_object = obj ?? throw new ArgumentNullException(nameof(obj));

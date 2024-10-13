@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.CSharp;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
@@ -99,6 +100,22 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
         return GetFromTypeLibrary(type_lib, intf.Iid, intf.ProxyClassEntry, true);
     }
+
+    private RpcClientBuilderArguments CreateBuilderArgs(bool scripting)
+    {
+        RpcClientBuilderArguments args = new();
+        args.Flags = RpcClientBuilderFlags.UnsignedChar |
+            RpcClientBuilderFlags.NoNamespace;
+        args.ClientName = $"{Name}_RpcClient";
+        if (scripting)
+        {
+            args.Flags |= RpcClientBuilderFlags.GenerateConstructorProperties |
+                RpcClientBuilderFlags.StructureReturn |
+                RpcClientBuilderFlags.HideWrappedMethods;
+        }
+        return args;
+    }
+
     #endregion
 
     #region Public Properties
@@ -243,16 +260,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #region Public Methods
     public RpcClientBase CreateClient(bool scripting = false)
     {
-        RpcClientBuilderArguments args = new();
-        args.Flags = RpcClientBuilderFlags.UnsignedChar |
-            RpcClientBuilderFlags.NoNamespace;
-        if (scripting)
-        {
-            args.Flags |= RpcClientBuilderFlags.GenerateConstructorProperties |
-                RpcClientBuilderFlags.StructureReturn |
-                RpcClientBuilderFlags.HideWrappedMethods;
-        }
-
+        var args = CreateBuilderArgs(scripting);
         return RpcClientBuilder.CreateClient(RpcProxy, args);
     }
 
@@ -263,6 +271,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         RpcChannelBufferClientTransportConfiguration config = new() { Instance = obj };
         client.Connect($"{RpcCOMClientTransportFactory.COMBufferProtocol}:[proxy]", new RpcTransportSecurity() { Configuration = config });
         return client;
+    }
+
+    public Type CreateClientType(bool scripting = false)
+    {
+        var args = CreateBuilderArgs(scripting);
+        return RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider()).GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
     }
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
