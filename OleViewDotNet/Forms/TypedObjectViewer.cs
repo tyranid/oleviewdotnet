@@ -16,8 +16,10 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -29,10 +31,18 @@ namespace OleViewDotNet.Forms;
 internal partial class TypedObjectViewer : UserControl
 {
     private readonly string m_objName;
-    private readonly ObjectEntry m_pEntry;
     private readonly object m_pObject;
     private readonly Type m_dispType;
     private readonly COMRegistry m_registry;
+
+    private bool IncludeMember(MemberInfo member)
+    {
+        if (!typeof(BaseComWrapper).IsAssignableFrom(m_dispType))
+        {
+            return true;
+        }
+        return member.DeclaringType == m_dispType;
+    }
 
     /// <summary>
     /// Constructor
@@ -42,7 +52,6 @@ internal partial class TypedObjectViewer : UserControl
     /// <param name="dispType">Reflected type</param>
     public TypedObjectViewer(COMRegistry registry, string strObjName, ObjectEntry pEntry, Type dispType)
     {
-        m_pEntry = pEntry;
         m_pObject = pEntry.Instance;
         m_objName = strObjName;
         m_dispType = dispType;
@@ -70,7 +79,7 @@ internal partial class TypedObjectViewer : UserControl
 
         lblName.Text = m_dispType.Name;
         MemberInfo[] members = m_dispType.GetMembers();
-        foreach (MemberInfo info in members)
+        foreach (MemberInfo info in members.Where(IncludeMember))
         {
             if (info.MemberType == MemberTypes.Method)
             {

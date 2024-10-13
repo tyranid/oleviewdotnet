@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
@@ -110,7 +111,7 @@ public static class COMWrapperFactory
         return t.GetElementType();
     }
 
-    private static Type GetParameterType(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    private static Type GetParameterType(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, bool scripting)
     {
         Type ret = pi.ParameterType;
         if (!pi.IsOut && ret.IsByRef)
@@ -124,7 +125,7 @@ public static class COMWrapperFactory
         else if (IsComInterfaceType(pi.ParameterType))
         {
             Type type = pi.ParameterType.Deref();
-            ret = CreateType(type, fixup_queue);
+            ret = CreateType(type, fixup_queue, scripting);
             if (pi.ParameterType.IsByRef)
             {
                 ret = ret.MakeByRefType();
@@ -154,11 +155,12 @@ public static class COMWrapperFactory
     }
 
     private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
-        Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+        Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue,
+        bool scripting)
     {
         string name = names.GenerateName(mi);
         var param_info = mi.GetParameters();
-        var param_types = param_info.Select(p => p.GetParameterType(fixup_queue)).ToArray();
+        var param_types = param_info.Select(p => p.GetParameterType(fixup_queue, scripting)).ToArray();
         foreach (var t in param_types)
         {
             structured_types.AddType(t);
@@ -237,7 +239,7 @@ public static class COMWrapperFactory
         return member.DeclaringType == intf_type;
     }
 
-    private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, bool scripting)
     {
         if (intf_type is null)
         {
@@ -282,7 +284,7 @@ public static class COMWrapperFactory
                 {
                     continue;
                 }
-                GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
+                GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue, scripting);
             }
 
             foreach (var pi in intf_type.GetProperties())
@@ -295,26 +297,29 @@ public static class COMWrapperFactory
                 var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                 if (pi.CanRead)
                 {
-                    var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                    var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue, scripting);
                     pb.SetGetMethod(get_method);
                 }
                 if (pi.CanWrite)
                 {
-                    var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                    var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue, scripting);
                     pb.SetSetMethod(set_method);
                 }
             }
 
-            foreach (var type in structured_types.Where(FilterStructuredTypes))
+            if (scripting && !is_rpc_client)
             {
-                var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
-                        type, new Type[0]);
-                var ilgen = methbuilder.GetILGenerator();
-                var local = ilgen.DeclareLocal(type);
-                ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
-                ilgen.Emit(OpCodes.Initobj, type);
-                ilgen.Emit(OpCodes.Ldloc_0);
-                ilgen.Emit(OpCodes.Ret);
+                foreach (var type in structured_types.Where(FilterStructuredTypes))
+                {
+                    var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
+                            type, new Type[0]);
+                    var ilgen = methbuilder.GetILGenerator();
+                    var local = ilgen.DeclareLocal(type);
+                    ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
+                    ilgen.Emit(OpCodes.Initobj, type);
+                    ilgen.Emit(OpCodes.Ldloc_0);
+                    ilgen.Emit(OpCodes.Ret);
+                }
             }
 
             fixup_queue.Enqueue(Tuple.Create(intf_type.GUID, tb));
@@ -332,7 +337,7 @@ public static class COMWrapperFactory
         return _types[intf_type.GUID];
     }
 
-    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
+    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry, bool scripting)
     {
         if (obj is null)
         {
@@ -349,7 +354,7 @@ public static class COMWrapperFactory
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
         }
 
-        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
+        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null, scripting), obj);
         wrapper.Database = registry;
         return wrapper;
     }
@@ -361,29 +366,29 @@ public static class COMWrapperFactory
         return (BaseComWrapper<T>)Wrap(obj, typeof(T));
     }
 
-    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
+    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null, bool scripting = false)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry), registry);
+        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry, scripting), registry, scripting);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
+    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf, bool scripting = false)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf), intf.Database);
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf, scripting), intf.Database, scripting);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
+    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf, bool scripting = false)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry), intf.Database);
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry, scripting), intf.Database, scripting);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
+    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid, bool scripting = false)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(ipid));
+        return Wrap(obj, COMUtilities.GetInterfaceType(ipid, scripting), null, scripting);
     }
 
-    public static BaseComWrapper Wrap(object obj, Type intf_type)
+    public static BaseComWrapper Wrap(object obj, Type intf_type, bool scripting = false)
     {
-        return Wrap(obj, intf_type, null);
+        return Wrap(obj, intf_type, null, scripting);
     }
 
     public static object Unwrap(object obj)

@@ -147,11 +147,11 @@ public static class COMUtilities
         }
     }
 
-    public static Type GetInterfaceType(Guid iid, COMRegistry registry)
+    public static Type GetInterfaceType(Guid iid, COMRegistry registry, bool scripting = false)
     {
         if (registry is not null && registry.Interfaces.ContainsKey(iid))
         {
-            return GetInterfaceType(registry.Interfaces[iid]);
+            return GetInterfaceType(registry.Interfaces[iid], scripting);
         }
 
         return GetInterfaceType(iid);
@@ -172,7 +172,7 @@ public static class COMUtilities
         return null;
     }
 
-    public static Type GetInterfaceType(COMInterfaceEntry intf)
+    public static Type GetInterfaceType(COMInterfaceEntry intf, bool scripting = false)
     {
         if (intf is null)
         {
@@ -198,11 +198,11 @@ public static class COMUtilities
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        m_iidtypes.Add(intf.Iid, proxy.CreateClientType());
+        m_iidtypes.Add(intf.Iid, proxy.CreateClientType(scripting));
         return GetInterfaceType(intf.Iid);
     }
 
-    public static Type GetInterfaceType(COMIPIDEntry ipid)
+    public static Type GetInterfaceType(COMIPIDEntry ipid, bool scripting = false)
     {
         if (ipid is null)
         {
@@ -221,7 +221,7 @@ public static class COMUtilities
             return null;
         }
 
-        m_iidtypes.Add(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType());
+        m_iidtypes.Add(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType(scripting));
         return GetInterfaceType(ipid.Iid);
     }
 

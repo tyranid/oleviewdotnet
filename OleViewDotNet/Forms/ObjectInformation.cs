@@ -18,6 +18,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -145,6 +146,14 @@ internal partial class ObjectInformation : UserControl
             {
                 item.SubItems.Add("Yes");
             }
+            else if (ent.HasTypeLib)
+            {
+                item.SubItems.Add("TypeLib");
+            }
+            else if (ent.HasProxy)
+            {
+                item.SubItems.Add("Proxy");
+            }
             else
             {
                 item.SubItems.Add("No");
@@ -182,13 +191,20 @@ internal partial class ObjectInformation : UserControl
         if (listViewInterfaces.SelectedItems.Count > 0)
         {
             COMInterfaceEntry ent = (COMInterfaceEntry)listViewInterfaces.SelectedItems[0].Tag;
-            InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
 
             try
             {
+                ObjectEntry obj = m_pEntry;
+                InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
+                if (factory is null)
+                {
+                    obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));
+                    factory = new InterfaceViewers.InstanceTypeViewerFactory(obj.Instance.GetType());
+                }
+
                 if (factory is not null)
                 {
-                    Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, m_pEntry);
+                    Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, obj);
                     if ((frm is not null) && !frm.IsDisposed)
                     {
                         EntryPoint.GetMainForm(m_registry).HostControl(frm);

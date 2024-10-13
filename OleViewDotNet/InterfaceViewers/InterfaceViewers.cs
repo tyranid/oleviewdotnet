@@ -14,61 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Database;
-using OleViewDotNet.Forms;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace OleViewDotNet.InterfaceViewers;
-
-internal interface ITypeViewerFactory
-{
-    Guid Iid { get; }
-    string IidName { get; }
-    Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject);
-}
-
-/// <summary>
-/// Simple base implementation to reduce the amount of code to write
-/// </summary>
-internal abstract class BaseTypeViewerFactory : ITypeViewerFactory
-{
-    public BaseTypeViewerFactory(string strName, Guid iid)
-    {
-        IidName = strName;
-        Iid = iid;
-    }
-
-    public BaseTypeViewerFactory(Type type)
-    {
-        IidName = type.Name;
-        Iid = type.GUID;
-    }
-
-    public string IidName { get; private set; }
-    public Guid Iid { get; private set; }
-    abstract public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject);
-}
-
-/// <summary>
-/// Generic factory implementation for use if we have a predefined type
-/// </summary>
-/// <typeparam name="T">The interface type to create the factory for</typeparam>
-internal class GenericTypeViewerFactory<T> : BaseTypeViewerFactory
-{
-    public GenericTypeViewerFactory() : base(typeof(T))
-    {
-    }
-
-    public override Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
-    {
-        return new TypedObjectViewer(registry, strObjName, pObject, typeof(T));
-    }
-}
 
 internal class InterfaceViewers
 {

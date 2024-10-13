@@ -73,19 +73,19 @@ function Wrap-ComObject {
                 Write-Error "No database specified and current database isn't set"
                 return
             }
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db, $true)
         }
         "FromType" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type, $true)
         }
         "FromInterface" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface, $true)
         }
         "FromInterfaceInstance" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance, $true)
         }
         "FromIpid" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid, $true)
         }
     }
 }
