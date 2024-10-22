@@ -14,10 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
@@ -39,7 +41,7 @@ internal partial class InvokeForm : Form
         public object data;
     }
 
-    private ParamData[] m_paramdata;        
+    private ParamData[] m_paramdata;
 
     public InvokeForm(COMRegistry registry, MethodInfo mi, object pObject, string objName)
     {
@@ -49,7 +51,7 @@ internal partial class InvokeForm : Form
         m_registry = registry;
         LoadParameters();
 
-        InitializeComponent(); 
+        InitializeComponent();
     }
 
     private void LoadParameters()
@@ -85,7 +87,7 @@ internal partial class InvokeForm : Form
             {
                 t = t.GetElementType();
             }
-           
+
             if (t == typeof(string))
             {
                 ret = string.Empty;
@@ -165,7 +167,7 @@ internal partial class InvokeForm : Form
     }
 
     private void InvokeForm_Load(object sender, EventArgs e)
-    {            
+    {
         RefreshParameters();
 
         Text = "Invoke " + m_mi.Name;
@@ -186,7 +188,7 @@ internal partial class InvokeForm : Form
                 baseType = baseType.GetElementType();
             }
 
-            if(baseType == typeof(IStream))
+            if (baseType == typeof(IStream))
             {
                 using CreateIStreamForm frm = new();
                 if (frm.ShowDialog() == DialogResult.OK)
@@ -208,12 +210,12 @@ internal partial class InvokeForm : Form
     }
 
     private void btnInvoke_Click(object sender, EventArgs e)
-    {            
+    {
         object[] p = new object[m_paramdata.Length];
         int i = 0;
 
         foreach (ParamData data in m_paramdata)
-        {                
+        {
             p[i++] = data.data;
         }
 
@@ -223,7 +225,14 @@ internal partial class InvokeForm : Form
             if (m_ret is not null)
             {
                 lblReturn.Text = "Return: " + m_ret.GetType().ToString();
-                textBoxReturn.Text = m_ret.ToString();
+                if (m_ret is int hr)
+                {
+                    textBoxReturn.Text = $"0x{hr:X08} - {new Win32Exception(hr).Message}";
+                }
+                else
+                {
+                    textBoxReturn.Text = m_ret.ToString();
+                }
 
                 if (Marshal.IsComObject(m_ret))
                 {
@@ -262,15 +271,13 @@ internal partial class InvokeForm : Form
             {
                 try
                 {
-                    if (data.data is IStreamImpl)
+                    if (data.data is IDisposable impl)
                     {
-                        ((IStreamImpl)data.data).Dispose();
+                        impl.Dispose();
                     }
-                    else
+                    else if (Marshal.IsComObject(data.data))
                     {
-                        while (Marshal.ReleaseComObject(data.data) != 0)
-                        {
-                        }
+                        Marshal.ReleaseComObject(data.data);
                     }
                 }
                 catch (Exception)
