@@ -1210,7 +1210,7 @@ function Get-ComInterface {
         [switch]$TypeLib,
         [Parameter(Mandatory, ParameterSetName = "FromSource")]
         [OleViewDotNet.Database.COMRegistryEntrySource]$Source,
-        [Parameter(Mandatory, Position = 0, ParameterSetName="FromClass")]
+        [Parameter(Mandatory, ParameterSetName="FromClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, ParameterSetName="FromClsid")]
         [guid]$Clsid,

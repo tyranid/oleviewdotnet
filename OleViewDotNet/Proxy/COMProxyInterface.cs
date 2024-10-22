@@ -106,7 +106,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         RpcClientBuilderArguments args = new();
         args.Flags = RpcClientBuilderFlags.UnsignedChar |
             RpcClientBuilderFlags.NoNamespace | RpcClientBuilderFlags.MarshalComObjects;
-        args.ClientName = $"{Name}_RpcClient";
+        args.ClientName = $"{Name.Replace('.', '_')}_RpcClient";
         if (scripting)
         {
             args.Flags |= RpcClientBuilderFlags.GenerateConstructorProperties |
@@ -277,6 +277,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     {
         var args = CreateBuilderArgs(scripting);
         return RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider()).GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
+    }
+
+    public string BuildClientSource(bool scripting = false)
+    {
+        var args = CreateBuilderArgs(scripting);
+        return RpcClientBuilder.BuildSource(RpcProxy, args, provider: new CSharpCodeProvider());
     }
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)
