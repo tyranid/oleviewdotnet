@@ -25,9 +25,16 @@ public sealed class IClassFactoryWrapper : BaseComWrapper<IClassFactory>
     {
     }
 
-    public void CreateInstance(object pUnkOuter, in Guid riid, out object ppvObject)
+    public void CreateInstance(object pUnkOuter, Guid riid, out BaseComWrapper ppvObject)
     {
-        _object.CreateInstance(pUnkOuter, riid, out ppvObject);
+        _object.CreateInstance(pUnkOuter, riid, out object obj);
+        ppvObject = COMWrapperFactory.Wrap(obj, riid, _database);
+    }
+
+    public BaseComWrapper CreateInstance(object pUnkOuter, Guid riid)
+    {
+        CreateInstance(pUnkOuter, riid, out BaseComWrapper obj);
+        return obj;
     }
 
     public void LockServer(bool fLock)

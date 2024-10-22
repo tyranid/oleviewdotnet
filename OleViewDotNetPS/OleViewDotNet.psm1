@@ -17,6 +17,7 @@
 Set-StrictMode -Version Latest
 
 $Script:CurrentComDatabase = $null
+[OleViewDotNet.Wrappers.COMWrapperFactory]::EnableScripting = $true
 
 function New-CallbackProgress {
     Param(
@@ -73,19 +74,19 @@ function Wrap-ComObject {
                 Write-Error "No database specified and current database isn't set"
                 return
             }
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db, $true)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
         }
         "FromType" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type, $true)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
         }
         "FromInterface" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface, $true)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
         }
         "FromInterfaceInstance" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance, $true)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
         }
         "FromIpid" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid, $true)
+            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid)
         }
     }
 }

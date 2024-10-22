@@ -1343,8 +1343,8 @@ public static class COMUtilities
 
     public static object CreateInstanceFromFactory(IClassFactoryWrapper factory, Guid iid)
     {
-        factory.CreateInstance(null, iid, out object ret);
-        return ret;
+        factory.CreateInstance(null, iid, out BaseComWrapper ret);
+        return ret.Unwrap();
     }
 
     public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)

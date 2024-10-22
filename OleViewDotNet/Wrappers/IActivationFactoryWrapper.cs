@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace OleViewDotNet.Wrappers;
@@ -24,8 +25,8 @@ public sealed class IActivationFactoryWrapper : BaseComWrapper<IActivationFactor
     {
     }
 
-    public object ActivateInstance()
+    public BaseComWrapper ActivateInstance()
     {
-        return _object.ActivateInstance();
+        return COMWrapperFactory.Wrap(_object.ActivateInstance(), COMKnownGuids.IID_IUnknown, _database);
     }
 }

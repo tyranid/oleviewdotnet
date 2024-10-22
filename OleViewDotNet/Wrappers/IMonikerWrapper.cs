@@ -52,16 +52,16 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
         return pcbSize;
     }
 
-    public object BindToObject(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riidResult)
+    public BaseComWrapper BindToObject(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riidResult)
     {
         _object.BindToObject(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riidResult, out object ppvResult);
-        return ppvResult;
+        return COMWrapperFactory.Wrap(ppvResult, riidResult, _database);
     }
 
-    public object BindToStorage(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riid)
+    public BaseComWrapper BindToStorage(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riid)
     {
         _object.BindToStorage(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riid, out object ppvObj);
-        return ppvObj;
+        return COMWrapperFactory.Wrap(ppvObj, riid, _database);
     }
 
     public IMonikerWrapper Reduce(IBindCtxWrapper pbc, int dwReduceHowFar, ref IMoniker ppmkToLeft)

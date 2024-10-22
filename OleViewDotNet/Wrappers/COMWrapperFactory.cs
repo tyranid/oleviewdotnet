@@ -111,7 +111,7 @@ public static class COMWrapperFactory
         return t.GetElementType();
     }
 
-    private static Type GetParameterType(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, bool scripting)
+    private static Type GetParameterType(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         Type ret = pi.ParameterType;
         if (!pi.IsOut && ret.IsByRef)
@@ -125,7 +125,7 @@ public static class COMWrapperFactory
         else if (IsComInterfaceType(pi.ParameterType))
         {
             Type type = pi.ParameterType.Deref();
-            ret = CreateType(type, fixup_queue, scripting);
+            ret = CreateType(type, fixup_queue);
             if (pi.ParameterType.IsByRef)
             {
                 ret = ret.MakeByRefType();
@@ -155,12 +155,11 @@ public static class COMWrapperFactory
     }
 
     private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
-        Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue,
-        bool scripting)
+        Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         string name = names.GenerateName(mi);
         var param_info = mi.GetParameters();
-        var param_types = param_info.Select(p => p.GetParameterType(fixup_queue, scripting)).ToArray();
+        var param_types = param_info.Select(p => p.GetParameterType(fixup_queue)).ToArray();
         foreach (var t in param_types)
         {
             structured_types.AddType(t);
@@ -239,7 +238,7 @@ public static class COMWrapperFactory
         return member.DeclaringType == intf_type;
     }
 
-    private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, bool scripting)
+    private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         if (intf_type is null)
         {
@@ -284,7 +283,7 @@ public static class COMWrapperFactory
                 {
                     continue;
                 }
-                GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue, scripting);
+                GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
             }
 
             foreach (var pi in intf_type.GetProperties())
@@ -297,17 +296,17 @@ public static class COMWrapperFactory
                 var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                 if (pi.CanRead)
                 {
-                    var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue, scripting);
+                    var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                     pb.SetGetMethod(get_method);
                 }
                 if (pi.CanWrite)
                 {
-                    var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue, scripting);
+                    var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                     pb.SetSetMethod(set_method);
                 }
             }
 
-            if (scripting && !is_rpc_client)
+            if (EnableScripting && !is_rpc_client)
             {
                 foreach (var type in structured_types.Where(FilterStructuredTypes))
                 {
@@ -337,7 +336,7 @@ public static class COMWrapperFactory
         return _types[intf_type.GUID];
     }
 
-    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry, bool scripting)
+    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
         if (obj is null)
         {
@@ -354,7 +353,7 @@ public static class COMWrapperFactory
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
         }
 
-        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null, scripting), obj);
+        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
         wrapper.SetDatabase(registry);
         return wrapper;
     }
@@ -366,29 +365,29 @@ public static class COMWrapperFactory
         return (BaseComWrapper<T>)Wrap(obj, typeof(T));
     }
 
-    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null, bool scripting = false)
+    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry, scripting), registry, scripting);
+        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry, EnableScripting), registry);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf, bool scripting = false)
+    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf, scripting), intf.Database, scripting);
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf, EnableScripting), intf.Database);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf, bool scripting = false)
+    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry, scripting), intf.Database, scripting);
+        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry, EnableScripting), intf.Database);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid, bool scripting = false)
+    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(ipid, scripting), null, scripting);
+        return Wrap(obj, COMUtilities.GetInterfaceType(ipid, EnableScripting), null);
     }
 
-    public static BaseComWrapper Wrap(object obj, Type intf_type, bool scripting = false)
+    public static BaseComWrapper Wrap(object obj, Type intf_type)
     {
-        return Wrap(obj, intf_type, null, scripting);
+        return Wrap(obj, intf_type, null);
     }
 
     public static object Unwrap(object obj)
@@ -409,5 +408,7 @@ public static class COMWrapperFactory
     {
         _builder.Save(_name.Name + ".dll");
     }
+
+    public static bool EnableScripting { get; set; }
     #endregion
 }

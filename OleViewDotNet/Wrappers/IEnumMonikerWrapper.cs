@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Wrappers;
@@ -25,9 +26,10 @@ public class IEnumMonikerWrapper : BaseComWrapper<IEnumMoniker>
     {
     }
 
-    public int Next(int celt, IMoniker[] rgelt, IntPtr pceltFetched)
+    public int Next(int celt, IMonikerWrapper[] rgelt, IntPtr pceltFetched)
     {
-        return _object.Next(celt, rgelt, pceltFetched);
+        var monikers = rgelt.Select(m => m.UnwrapTyped()).ToArray();
+        return _object.Next(celt, monikers, pceltFetched);
     }
 
     public int Skip(int celt)

@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -21,14 +22,14 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTable>
 {
-    public IRunningObjectTableWrapper([In] object obj)
+    public IRunningObjectTableWrapper(object obj)
         : base(obj)
     {
     }
 
-    public int Register(int grfFlags, object punkObject, IMonikerWrapper pmkObjectName)
+    public int Register(int grfFlags, BaseComWrapper punkObject, IMonikerWrapper pmkObjectName)
     {
-        return _object.Register(grfFlags, punkObject, pmkObjectName.UnwrapTyped());
+        return _object.Register(grfFlags, punkObject.Unwrap(), pmkObjectName.UnwrapTyped());
     }
 
     public void Revoke(int dwRegister)
@@ -41,9 +42,11 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
         return _object.IsRunning(pmkObjectName.UnwrapTyped());
     }
 
-    public int GetObject(IMonikerWrapper pmkObjectName, out object ppunkObject)
+    public int GetObject(IMonikerWrapper pmkObjectName, out BaseComWrapper ppunkObject)
     {
-        return _object.GetObject(pmkObjectName.UnwrapTyped(), out ppunkObject);
+        int hr = _object.GetObject(pmkObjectName.UnwrapTyped(), out object obj);
+        ppunkObject = COMWrapperFactory.Wrap(obj, COMKnownGuids.IID_IUnknown, _database);
+        return hr;
     }
 
     public void NoteChangeTime(int dwRegister, System.Runtime.InteropServices.ComTypes.FILETIME pfiletime)

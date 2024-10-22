@@ -24,7 +24,7 @@ namespace OleViewDotNet.Wrappers;
 
 public abstract class BaseComWrapper : NdrComObject
 {
-    private COMRegistry _database;
+    protected COMRegistry _database;
     internal IEnumerable<COMInterfaceEntry> _interfaces;
 
     public string InterfaceName { get; }

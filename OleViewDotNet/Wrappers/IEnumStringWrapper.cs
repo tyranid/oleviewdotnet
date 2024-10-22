@@ -22,12 +22,12 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IEnumStringWrapper : BaseComWrapper<IEnumString>
 {
-    public IEnumStringWrapper([In] object obj)
+    public IEnumStringWrapper(object obj)
         : base(obj)
     {
     }
 
-    public int Next(int celt, [Out] string[] rgelt, IntPtr pceltFetched)
+    public int Next(int celt, string[] rgelt, IntPtr pceltFetched)
     {
         return _object.Next(celt, rgelt, pceltFetched);
     }

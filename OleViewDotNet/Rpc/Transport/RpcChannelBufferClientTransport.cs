@@ -114,7 +114,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
     NdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
     {
         COMObjRef objref = COMObjRef.FromArray(intf.Data);
-        return COMWrapperFactory.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database, true);
+        return COMWrapperFactory.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database);
     }
 
     internal void SetDatabase(COMRegistry database)
