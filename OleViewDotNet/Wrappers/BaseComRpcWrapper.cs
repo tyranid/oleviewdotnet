@@ -16,6 +16,7 @@
 
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Database;
 using OleViewDotNet.Rpc.Transport;
 using System;
 
@@ -35,6 +36,15 @@ public abstract class BaseComRpcWrapper<T> : BaseComWrapper, IDisposable where T
 
     protected BaseComRpcWrapper(object obj) : this(new T(), obj)
     {
+    }
+
+    internal override void SetDatabase(COMRegistry database)
+    {
+        base.SetDatabase(database);
+        if (_object.Transport is RpcChannelBufferClientTransport transport)
+        {
+            transport.SetDatabase(database);
+        }
     }
 
     public override object Unwrap()

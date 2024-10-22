@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Database;
 using System;
 using System.Collections.Generic;
@@ -21,8 +22,9 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComWrapper
+public abstract class BaseComWrapper : NdrComObject
 {
+    private COMRegistry _database;
     internal IEnumerable<COMInterfaceEntry> _interfaces;
 
     public string InterfaceName { get; }
@@ -31,10 +33,13 @@ public abstract class BaseComWrapper
 
     public BaseComWrapper QueryInterface(Guid iid)
     {
-        return COMWrapperFactory.Wrap(Unwrap(), iid, Database);
+        return COMWrapperFactory.Wrap(Unwrap(), iid, _database);
     }
 
-    internal COMRegistry Database { get; set; }
+    internal virtual void SetDatabase(COMRegistry database)
+    {
+        _database = database;
+    }
 
     protected BaseComWrapper(Guid iid, string name)
     {

@@ -32,7 +32,7 @@ public sealed class RpcChannelBuffer : IDisposable
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     private delegate int fFreeBuffer(SafeComObjectHandle This, ref RPC_MESSAGE pMessage);
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fGetDestCtx(SafeComObjectHandle This, out int pdwDestContext, out IntPtr ppvDestContext);
+    private delegate int fGetDestCtx(SafeComObjectHandle This, out MSHCTX pdwDestContext, out IntPtr ppvDestContext);
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     private delegate int fIsConnected(SafeComObjectHandle This);
 
@@ -97,6 +97,14 @@ public sealed class RpcChannelBuffer : IDisposable
     public bool IsConnected()
     {
         return m_is_connected(m_buffer) == 0;
+    }
+
+    public MSHCTX GetDestCtx()
+    {
+        int hr = m_get_dest_ctx(m_buffer, out MSHCTX dest_context, out IntPtr _);
+        if (hr != 0)
+            Marshal.ThrowExceptionForHR(hr);
+        return dest_context;
     }
 
     public static RpcChannelBuffer FromObject(object obj, Guid iid)

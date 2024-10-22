@@ -105,7 +105,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     {
         RpcClientBuilderArguments args = new();
         args.Flags = RpcClientBuilderFlags.UnsignedChar |
-            RpcClientBuilderFlags.NoNamespace;
+            RpcClientBuilderFlags.NoNamespace | RpcClientBuilderFlags.MarshalComObjects;
         args.ClientName = $"{Name}_RpcClient";
         if (scripting)
         {

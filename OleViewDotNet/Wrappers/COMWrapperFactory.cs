@@ -355,7 +355,7 @@ public static class COMWrapperFactory
         }
 
         var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null, scripting), obj);
-        wrapper.Database = registry;
+        wrapper.SetDatabase(registry);
         return wrapper;
     }
     #endregion

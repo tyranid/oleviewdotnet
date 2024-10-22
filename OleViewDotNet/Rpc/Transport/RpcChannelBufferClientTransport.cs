@@ -18,21 +18,32 @@ using NtApiDotNet;
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
+using OleViewDotNet.Marshaling;
+using OleViewDotNet.Utilities;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.Transport;
 
-internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport
+internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrTransportMarshaler
 {
     private readonly object m_object;
+    private COMRegistry m_database;
     private RpcChannelBuffer m_buffer;
 
     internal object GetObject() => m_object;
 
-    public RpcChannelBufferClientTransport(object obj)
+    public RpcChannelBufferClientTransport(RpcChannelBufferClientTransportConfiguration config)
     {
-        m_object = obj ?? throw new ArgumentNullException(nameof(obj));
+        if (config is null)
+        {
+            throw new ArgumentNullException(nameof(config));
+        }
+
+        m_object = config.Instance ?? throw new ArgumentNullException(nameof(config.Instance));
     }
 
     public bool Connected => m_buffer?.IsConnected() ?? false;
@@ -88,5 +99,26 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport
         if (handles.Count > 0)
             throw new ArgumentException("Transport doesn't support sending kernel handles.", nameof(handles));
         return new(m_buffer.SendReceive(ndr_buffer, proc_num), new NtObject[0]);
+    }
+
+    NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(NdrComObject obj, Guid iid)
+    {
+        if (obj is BaseComWrapper wrapper)
+        {
+            return new NdrInterfacePointer(COMUtilities.MarshalObject(wrapper.Unwrap(), iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
+        }
+
+        throw new NotSupportedException("Only support wrapped objects on this transport.");
+    }
+
+    NdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
+    {
+        COMObjRef objref = COMObjRef.FromArray(intf.Data);
+        return COMWrapperFactory.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database, true);
+    }
+
+    internal void SetDatabase(COMRegistry database)
+    {
+        m_database = database;
     }
 }

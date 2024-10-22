@@ -44,7 +44,7 @@ internal sealed class RpcCOMClientTransportFactory : IRpcClientTransportFactory
         if (endpoint.ProtocolSequence == COMBufferProtocol)
         {
             var config = transport_security.Configuration as RpcChannelBufferClientTransportConfiguration ?? throw new ArgumentException("Must specify a transport configuration.");
-            return new RpcChannelBufferClientTransport(config.Instance);
+            return new RpcChannelBufferClientTransport(config);
         }
         else
         {
