@@ -1598,7 +1598,7 @@ function Get-ComObjRef {
     PROCESS {
         switch($PSCmdlet.ParameterSetName) {
             "FromObject" {
-                [OleViewDotNet.Utilities.COMUtilities]::MarshalObjectToObjRef($Object, `
+                [OleViewDotNet.Marshaling.COMObjRef]::FromObject($Object, `
                         $Iid, $MarshalContext, $MarshalFlags) | Out-ObjRef -Output $Output
             }
             "FromPath" {

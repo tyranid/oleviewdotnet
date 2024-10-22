@@ -115,7 +115,7 @@ public static class COMOxidResolver
         if (iid == Guid.Empty)
             iid = COMKnownGuids.IID_IUnknown;
 
-        if (COMUtilities.MarshalObjectToObjRef(obj,
+        if (COMObjRef.FromObject(obj,
             iid, MSHCTX.LOCAL, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
         {
             throw new ArgumentException("Object cannot be standard marshaled.", nameof(obj));

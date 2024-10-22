@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
 using System.IO;
 
@@ -83,17 +85,17 @@ public abstract class COMObjRef
 
         COMObjrefFlags flags = (COMObjrefFlags)reader.ReadInt32();
         Guid iid = reader.ReadGuid();
-        switch (flags)
+        return flags switch
         {
-            case COMObjrefFlags.Custom:
-                return new COMObjRefCustom(reader, iid);
-            case COMObjrefFlags.Standard:
-                return new COMObjRefStandard(reader, iid);
-            case COMObjrefFlags.Handler:
-                return new COMObjRefHandler(reader, iid);
-            case COMObjrefFlags.Extended:
-            default:
-                throw new ArgumentException("Invalid OBJREF Type Flags");
-        }
+            COMObjrefFlags.Custom => new COMObjRefCustom(reader, iid),
+            COMObjrefFlags.Standard => new COMObjRefStandard(reader, iid),
+            COMObjrefFlags.Handler => new COMObjRefHandler(reader, iid),
+            _ => throw new ArgumentException("Invalid OBJREF Type Flags"),
+        };
+    }
+
+    public static COMObjRef FromObject(object obj, Guid iid, MSHCTX mshctx, MSHLFLAGS mshflags)
+    {
+        return FromArray(COMUtilities.MarshalObject(obj, iid, mshctx, mshflags));
     }
 }

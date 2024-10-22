@@ -309,7 +309,7 @@ internal partial class ObjectInformation : UserControl
         try
         {
             EntryPoint.GetMainForm(m_registry).HostControl(new MarshalEditorControl(m_registry,
-                COMUtilities.MarshalObjectToObjRef(m_pObject, GetSelectedIID(),
+                COMObjRef.FromObject(m_pObject, GetSelectedIID(),
                 MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL)));
         }
         catch (Exception ex)
@@ -322,7 +322,7 @@ internal partial class ObjectInformation : UserControl
     {
         try
         {
-            if (COMUtilities.MarshalObjectToObjRef(m_pObject,
+            if (COMObjRef.FromObject(m_pObject,
                 GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
             {
                 throw new Exception("Object must be standard marshaled to view the interface");
@@ -340,7 +340,7 @@ internal partial class ObjectInformation : UserControl
     {
         try
         {
-            if (COMUtilities.MarshalObjectToObjRef(m_pObject,
+            if (COMObjRef.FromObject(m_pObject,
                     GetSelectedIID(), MSHCTX.DIFFERENTMACHINE, MSHLFLAGS.NORMAL) is not COMObjRefStandard objref)
             {
                 throw new Exception("Object must be standard marshaled to view the interface");
