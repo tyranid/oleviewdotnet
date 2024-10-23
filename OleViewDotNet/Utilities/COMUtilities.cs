@@ -1240,4 +1240,9 @@ public static class COMUtilities
             return (IRuntimeBroker)new RuntimeBrokerClass();
         }
     }
+
+    internal static void FlushIidType(Guid iid)
+    {
+        m_iidtypes?.Remove(iid);
+    }
 }

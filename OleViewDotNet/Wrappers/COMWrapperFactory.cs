@@ -411,5 +411,11 @@ public static class COMWrapperFactory
     }
 
     public static bool EnableScripting { get; set; }
+
+    internal static void FlushProxyType(Guid iid)
+    {
+        _types.Remove(iid);
+        COMUtilities.FlushIidType(iid);
+    }
     #endregion
 }

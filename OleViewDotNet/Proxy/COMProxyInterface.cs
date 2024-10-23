@@ -26,6 +26,7 @@ using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
+using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -305,11 +306,20 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             throw new ArgumentException("Names object doesn't match the proxy identity");
         }
 
-        if (names.Name is not null)
+        bool updated = false;
+
+        if (names.Name is not null && Entry.Name != names.Name)
         {
             Entry.Name = names.Name;
+            updated = true;
         }
-        names.UpdateNames(this);
+
+        names.UpdateNames(this, ref updated);
+
+        if (updated)
+        {
+            COMWrapperFactory.FlushProxyType(Iid);
+        }
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)

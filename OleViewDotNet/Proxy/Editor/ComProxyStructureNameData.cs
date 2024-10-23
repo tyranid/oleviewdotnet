@@ -42,11 +42,12 @@ public sealed class COMProxyStructureNameData
         Members = type.Members.Select((m, i) => new COMProxyStructureMemberNameData(m, i)).ToList();
     }
 
-    internal void UpdateNames(NdrBaseStructureTypeReference type)
+    internal void UpdateNames(NdrBaseStructureTypeReference type, ref bool updated)
     {
-        if (Name is not null)
+        if (Name is not null && type.Name != Name)
         {
             type.Name = Name;
+            updated = true;
         }
 
         if (Members is not null)
@@ -56,7 +57,11 @@ public sealed class COMProxyStructureNameData
             {
                 if (members.Count > member.Index)
                 {
-                    members[member.Index].Name = member.Name;
+                    if (member.Name is not null && members[member.Index].Name != member.Name)
+                    {
+                        members[member.Index].Name = member.Name;
+                        updated = true;
+                    }
                 }
             }
         }

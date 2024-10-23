@@ -42,11 +42,12 @@ public sealed class COMProxyProcedureNameData
         Parameters = procedure.Params.Select((p, i) => new COMProxyProcedureParameterNameData(p, i)).ToList();
     }
 
-    public void UpdateNames(NdrProcedureDefinition procedure)
+    internal void UpdateNames(NdrProcedureDefinition procedure, ref bool updated)
     {
-        if (Name is not null)
+        if (Name is not null && procedure.Name != Name)
         {
             procedure.Name = Name;
+            updated = true;
         }
 
         if (Parameters is not null)
@@ -56,7 +57,11 @@ public sealed class COMProxyProcedureNameData
             {
                 if (ps.Count > p.Index)
                 {
-                    ps[p.Index].Name = p.Name;
+                    if (p.Name is not null && ps[p.Index].Name != p.Name)
+                    {
+                        ps[p.Index].Name = p.Name;
+                        updated = true;
+                    }
                 }
             }
         }

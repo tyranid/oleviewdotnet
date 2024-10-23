@@ -26,12 +26,6 @@ using System.Xml;
 
 namespace OleViewDotNet.Proxy.Editor;
 
-public enum COMProxyInterfaceNameDataExportFormat
-{
-    Xml,
-    Json
-}
-
 [DataContract]
 public sealed class COMProxyInterfaceNameData
 {
@@ -57,7 +51,7 @@ public sealed class COMProxyInterfaceNameData
         Procedures = proxy.Procedures.Select((p,i) => new COMProxyProcedureNameData(p, i)).ToList();
     }
 
-    internal void UpdateNames(COMProxyInterface proxy)
+    internal void UpdateNames(COMProxyInterface proxy, ref bool updated)
     {
         if (Structures is not null)
         {
@@ -66,7 +60,7 @@ public sealed class COMProxyInterfaceNameData
             {
                 if (structures.Count > s.Index)
                 {
-                    s.UpdateNames(structures[s.Index]);
+                    s.UpdateNames(structures[s.Index], ref updated);
                 }
             }
         }
@@ -78,7 +72,7 @@ public sealed class COMProxyInterfaceNameData
             {
                 if (procedures.Count > p.Index)
                 {
-                    p.UpdateNames(procedures[p.Index]);
+                    p.UpdateNames(procedures[p.Index], ref updated);
                 }
             }
         }
