@@ -34,9 +34,9 @@ namespace OleViewDotNet.Utilities;
 public static class COMTypeManager
 {
     #region Private Members
-    private static ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
-    private static ConcurrentDictionary<string, Assembly> m_typelibsname = new();
-    private static ConcurrentDictionary<Guid, Type> m_iidtypes = new();
+    private static readonly ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
+    private static readonly ConcurrentDictionary<string, Assembly> m_typelibsname = new();
+    private static readonly ConcurrentDictionary<Guid, Type> m_iidtypes = new();
 
     static COMTypeManager()
     {

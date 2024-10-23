@@ -91,9 +91,9 @@ public sealed class COMSourceCodeBuilder
 
         m_formatter = OutputType switch
         {
-            COMSourceCodeBuilderType.Idl => IdlNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
-            COMSourceCodeBuilderType.Generic => DefaultNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
-            COMSourceCodeBuilderType.Cpp => CppNdrFormatter.Create(m_registry?.IidNameCache, s => COMUtilities.DemangleWinRTName(s), flags),
+            COMSourceCodeBuilderType.Idl => IdlNdrFormatter.Create(m_registry?.IidNameCache, s => WinRTNameUtils.DemangleName(s), flags),
+            COMSourceCodeBuilderType.Generic => DefaultNdrFormatter.Create(m_registry?.IidNameCache, s => WinRTNameUtils.DemangleName(s), flags),
+            COMSourceCodeBuilderType.Cpp => CppNdrFormatter.Create(m_registry?.IidNameCache, s => WinRTNameUtils.DemangleName(s), flags),
             _ => throw new ArgumentException("Invalid output type."),
         };
         return m_formatter;

@@ -165,7 +165,7 @@ public sealed class COMTypeInfoInstance : IDisposable
     public COMTypeLibInstance GetContainingTypeLib(out int pIndex)
     {
         m_type_info.GetContainingTypeLib(out ITypeLib ppTLB, out pIndex);
-        return new(ppTLB);
+        return new(ppTLB, string.Empty);
     }
 
     public COMTypeLibInstance GetContainingTypeLib()

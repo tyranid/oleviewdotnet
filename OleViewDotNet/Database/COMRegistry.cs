@@ -417,6 +417,7 @@ public class COMRegistry
                     entry.InternalName = pair.Value.FullName;
                     m_iid_name_cache[pair.Key] = pair.Value.FullName;
                     entry.RuntimeInterface = true;
+                    entry.RuntimeInterfaceAssembly = pair.Value.Assembly.FullName;
                 }
             }
         }

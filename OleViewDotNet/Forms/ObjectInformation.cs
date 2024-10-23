@@ -229,7 +229,7 @@ internal partial class ObjectInformation : UserControl
 
     private void btnDispatch_Click(object sender, EventArgs e)
     {
-        Type disp_type = COMUtilities.GetDispatchTypeInfo(this, m_pObject);
+        Type disp_type = FormUtils.GetDispatchTypeInfo(this, m_pObject);
         if (disp_type is not null)
         {
             Control frm = new TypedObjectViewer(m_registry, m_objName, m_pEntry, disp_type);

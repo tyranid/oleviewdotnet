@@ -274,7 +274,7 @@ public static class EntryPoint
                 {
                     try
                     {
-                        registry = COMUtilities.LoadRegistry(null, default_db);
+                        registry = FormUtils.LoadRegistry(null, default_db);
                         registry.FilePath = null;
                     }
                     catch
@@ -284,8 +284,8 @@ public static class EntryPoint
                     }
                 }
 
-                registry ??= database_file is not null ? COMUtilities.LoadRegistry(null, database_file)
-                        : COMUtilities.LoadRegistry(null, mode);
+                registry ??= database_file is not null ? FormUtils.LoadRegistry(null, database_file)
+                        : FormUtils.LoadRegistry(null, mode);
 
                 if (delete_database && database_file is not null)
                 {
@@ -295,7 +295,7 @@ public static class EntryPoint
 
                 if (query_interfaces)
                 {
-                    if (!COMUtilities.QueryAllInterfaces(null, registry.Clsids.Values, server_types, concurrent_queries, refresh_interfaces))
+                    if (!FormUtils.QueryAllInterfaces(null, registry.Clsids.Values, server_types, concurrent_queries, refresh_interfaces))
                     {
                         Environment.Exit(1);
                     }

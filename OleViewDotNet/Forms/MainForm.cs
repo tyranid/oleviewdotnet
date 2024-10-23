@@ -140,7 +140,7 @@ internal partial class MainForm : Form
         props.Add("Server", ent.DefaultServer);
 
         /* Need to implement a type library reader */
-        Type dispType = COMUtilities.GetDispatchTypeInfo(this, obj);
+        Type dispType = FormUtils.GetDispatchTypeInfo(this, obj);
 
         if (!ent.InterfacesLoaded)
         {
@@ -278,7 +278,7 @@ internal partial class MainForm : Form
             if (comObj is not null)
             {
                 /* Need to implement a type library reader */
-                Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
+                Type dispType = FormUtils.GetDispatchTypeInfo(this, comObj);
 
                 HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
             }
@@ -365,7 +365,7 @@ internal partial class MainForm : Form
                 props.Add("CLSID", clsid.FormatGuid());
             }
 
-            Type dispType = COMUtilities.GetDispatchTypeInfo(this, comObj);
+            Type dispType = FormUtils.GetDispatchTypeInfo(this, comObj);
             HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
         }
     }
@@ -511,7 +511,7 @@ internal partial class MainForm : Form
         dlg.Filter = "OleViewDotNet DB File (*.ovdb)|*.ovdb|All Files (*.*)|*.*";
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
-            LoadRegistry(() => COMUtilities.LoadRegistry(this, dlg.FileName));
+            LoadRegistry(() => FormUtils.LoadRegistry(this, dlg.FileName));
         }
     }
 
@@ -569,12 +569,12 @@ internal partial class MainForm : Form
 
     private void menuFileOpenMachineOnly_Click(object sender, EventArgs e)
     {
-        LoadRegistry(() => COMUtilities.LoadRegistry(this, COMRegistryMode.MachineOnly));
+        LoadRegistry(() => FormUtils.LoadRegistry(this, COMRegistryMode.MachineOnly));
     }
 
     private void menuFileOpenUserOnly_Click(object sender, EventArgs e)
     {
-        LoadRegistry(() => COMUtilities.LoadRegistry(this, COMRegistryMode.UserOnly));
+        LoadRegistry(() => FormUtils.LoadRegistry(this, COMRegistryMode.UserOnly));
     }
 
     private void menuFileDiff_Click(object sender, EventArgs e)
@@ -693,7 +693,7 @@ internal partial class MainForm : Form
         using QueryInterfacesOptionsForm options = new();
         if (options.ShowDialog(this) == DialogResult.OK)
         {
-            COMUtilities.QueryAllInterfaces(this, m_registry.Clsids.Values,
+            FormUtils.QueryAllInterfaces(this, m_registry.Clsids.Values,
                 options.ServerTypes, options.ConcurrentQueries,
                 options.RefreshInterfaces);
         }
@@ -735,7 +735,7 @@ internal partial class MainForm : Form
     private void LoadProcesses<TKey>(Func<COMProcessEntry, TKey> orderby_selector)
     {
         ConfigureSymbols();
-        IEnumerable<COMProcessEntry> processes = COMUtilities.LoadProcesses(this, m_registry);
+        IEnumerable<COMProcessEntry> processes = FormUtils.LoadProcesses(this, m_registry);
         if (processes is not null && processes.Any())
         {
             OpenView(COMRegistryDisplayMode.Processes, processes.OrderBy(orderby_selector));
@@ -747,7 +747,7 @@ internal partial class MainForm : Form
         try
         {
             ConfigureSymbols();
-            var proc = COMUtilities.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this, m_registry).FirstOrDefault();
+            var proc = FormUtils.LoadProcesses(new int[] { COMUtilities.GetProcessIdFromIPid(ipid) }, this, m_registry).FirstOrDefault();
             if (proc is not null)
             {
                 COMIPIDEntry ipid_entry = proc.Ipids.Where(e => e.Ipid == ipid).FirstOrDefault();
@@ -776,7 +776,7 @@ internal partial class MainForm : Form
         try
         {
             ConfigureSymbols();
-            var processes = COMUtilities.LoadProcesses(new int[] { pid }, this, m_registry);
+            var processes = FormUtils.LoadProcesses(new int[] { pid }, this, m_registry);
             if (!processes.Any())
             {
                 throw new ArgumentException($"Process {pid} has not initialized COM, or is inaccessible");

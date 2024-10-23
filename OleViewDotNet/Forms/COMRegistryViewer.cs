@@ -2050,7 +2050,7 @@ internal partial class COMRegistryViewer : UserControl
             GetClsidsFromNodes(clsids, treeComRegistry.Nodes);
             if (clsids.Count > 0)
             {
-                COMUtilities.QueryAllInterfaces(this, clsids,
+                FormUtils.QueryAllInterfaces(this, clsids,
                     options.ServerTypes, options.ConcurrentQueries,
                     options.RefreshInterfaces);
             }

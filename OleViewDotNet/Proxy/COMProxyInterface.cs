@@ -185,7 +185,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
         else
         {
-            Entry.Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
+            Entry.Name = WinRTNameUtils.DemangleName(Entry.Name, Iid);
         }
         if (cache && !m_proxies.ContainsKey(Iid))
         {

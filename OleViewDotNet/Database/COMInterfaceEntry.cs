@@ -31,7 +31,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
-public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable, 
+public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable,
     ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable, ICOMSourceCodeEditable
 {
     #region Private Members
@@ -172,7 +172,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     {
     }
 
-    private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid, 
+    private COMInterfaceEntry(COMRegistry registry, Guid iid, Guid proxyclsid,
         int nummethods, string baseName, string name) : this(registry)
     {
         Iid = iid;
@@ -183,15 +183,15 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         TypeLibVersion = string.Empty;
     }
 
-    internal COMInterfaceEntry(COMRegistry registry, ActCtxComInterfaceRedirection intf_redirection) 
-        : this(registry, intf_redirection.Iid, intf_redirection.ProxyStubClsid32, intf_redirection.NumMethods, 
+    internal COMInterfaceEntry(COMRegistry registry, ActCtxComInterfaceRedirection intf_redirection)
+        : this(registry, intf_redirection.Iid, intf_redirection.ProxyStubClsid32, intf_redirection.NumMethods,
               string.Empty, intf_redirection.Name)
     {
         TypeLib = intf_redirection.TypeLibraryId;
         Source = COMRegistryEntrySource.ActCtx;
     }
 
-    internal COMInterfaceEntry(COMRegistry registry, Type type) 
+    internal COMInterfaceEntry(COMRegistry registry, Type type)
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
@@ -214,7 +214,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         }
     }
 
-    internal COMInterfaceEntry(COMRegistry registry, COMPackagedInterfaceEntry entry) 
+    internal COMInterfaceEntry(COMRegistry registry, COMPackagedInterfaceEntry entry)
         : this(registry, entry.Iid, entry.ProxyStubCLSID, 3, "IUnknown", string.Empty)
     {
         if (entry.UseUniversalMarshaler)
@@ -240,7 +240,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
     internal string InternalName { get; set; }
 
-    public string Name => string.IsNullOrWhiteSpace(InternalName) ? Iid.FormatGuid() : COMUtilities.DemangleWinRTName(InternalName);
+    public string Name => string.IsNullOrWhiteSpace(InternalName) ? Iid.FormatGuid() : WinRTNameUtils.DemangleName(InternalName);
 
     public Guid Iid
     {
@@ -296,6 +296,11 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     public bool HasTypeLib => TypeLib != Guid.Empty;
 
     public bool HasProxy => ProxyClsid != Guid.Empty;
+
+    public string RuntimeInterfaceAssembly
+    {
+        get; internal set;
+    }
 
     public bool RuntimeInterface
     {
@@ -380,6 +385,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         TypeLibVersion = reader.ReadString("ver");
         TypeLib = reader.ReadGuid("tlib");
         RuntimeInterface = reader.ReadBool("rt");
+        RuntimeInterfaceAssembly = reader.ReadString("rta");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
         if (!string.IsNullOrWhiteSpace(InternalName))
@@ -398,6 +404,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         writer.WriteOptionalAttributeString("ver", TypeLibVersion);
         writer.WriteGuid("tlib", TypeLib);
         writer.WriteBool("rt", RuntimeInterface);
+        writer.WriteOptionalAttributeString("rta", RuntimeInterfaceAssembly);
         writer.WriteEnum("src", Source);
     }
     #endregion

@@ -25,6 +25,7 @@ namespace OleViewDotNet.TypeLib.Instance;
 
 public sealed class COMTypeLibInstance : IDisposable
 {
+    private readonly string m_path;
     private readonly ITypeLib m_type_lib;
     private readonly ITypeLib2 m_type_lib2;
 
@@ -33,10 +34,11 @@ public sealed class COMTypeLibInstance : IDisposable
         return m_type_lib2 ?? throw new NotSupportedException("Method is not supported.");
     }
 
-    internal COMTypeLibInstance(ITypeLib type_lib)
+    internal COMTypeLibInstance(ITypeLib type_lib, string path)
     {
         m_type_lib = type_lib;
         m_type_lib2 = type_lib as ITypeLib2;
+        m_path = path ?? string.Empty;
     }
 
     public static COMTypeLibInstance FromFile(string path)
@@ -46,7 +48,7 @@ public sealed class COMTypeLibInstance : IDisposable
             throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
         }
 
-        return new(NativeMethods.LoadTypeLibEx(path, RegKind.None));
+        return new(NativeMethods.LoadTypeLibEx(path, RegKind.None), path);
     }
 
     public static COMTypeLibInstance FromObject(object obj)
@@ -58,7 +60,7 @@ public sealed class COMTypeLibInstance : IDisposable
     public static COMTypeLibInstance FromRegistered(Guid type_lib_id,
         COMVersion version, int lcid)
     {
-        return new(NativeMethods.LoadRegTypeLib(type_lib_id, version.Major, version.Minor, lcid));
+        return new(NativeMethods.LoadRegTypeLib(type_lib_id, version.Major, version.Minor, lcid), string.Empty);
     }
 
     public int GetTypeInfoCount()
@@ -158,10 +160,60 @@ public sealed class COMTypeLibInstance : IDisposable
         }
     }
 
+    public void RegisterTypeLibForUser(string help_path = null)
+    {
+        if (m_path is null)
+        {
+            throw new ArgumentNullException("To registry type library must be loaded from a path.");
+        }
+        NativeMethods.RegisterTypeLibForUser(m_type_lib, m_path, help_path);
+    }
+
+    public void RegisterTypeLib(string help_path = null)
+    {
+        if (m_path is null)
+        {
+            throw new ArgumentNullException("To registry type library must be loaded from a path.");
+        }
+        NativeMethods.RegisterTypeLib(m_type_lib, m_path, help_path);
+    }
+
     void IDisposable.Dispose()
     {
         m_type_lib.ReleaseComObject();
         m_type_lib2?.ReleaseComObject();
+    }
+
+    public static void RegisterTypeLib(string path, string help_path = null)
+    {
+        using (var type_lib = FromFile(path))
+        {
+            type_lib.RegisterTypeLib(help_path);
+        }
+    }
+
+    public static void RegisterTypeLibForUser(string path, string help_path = null)
+    {
+        using (var type_lib = FromFile(path))
+        {
+            type_lib.RegisterTypeLibForUser(help_path);
+        }
+    }
+
+    public static void UnRegisterTypeLib(Guid lib_id,
+                                         COMVersion version,
+                                         int lcid,
+                                         SYSKIND syskind)
+    {
+        NativeMethods.UnRegisterTypeLib(lib_id, version.Major, version.Minor, lcid, syskind);
+    }
+
+    public static void UnRegisterTypeLibForUser(Guid lib_id,
+        COMVersion version,
+        int lcid,
+        SYSKIND syskind)
+    {
+        NativeMethods.UnRegisterTypeLibForUser(lib_id, version.Major, version.Minor, lcid, syskind);
     }
 }
 

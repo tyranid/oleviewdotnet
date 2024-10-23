@@ -15,16 +15,17 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Win32;
-using System;
-using System.Xml.Serialization;
-using System.Xml;
-using System.Xml.Schema;
-using OleViewDotNet.Utilities;
+using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.TypeLib.Instance;
+using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
-using OleViewDotNet.Interop;
+using System;
 using System.Runtime.InteropServices.ComTypes;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
@@ -178,7 +179,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
     public void Unregister(SYSKIND sys_kind = SYSKIND.SYS_WIN32)
     {
         var version = COMVersion.Parse(Version);
-        COMUtilities.UnregisterTypeLib(TypelibId, version, Locale, sys_kind);
+        COMTypeLibInstance.UnRegisterTypeLib(TypelibId, version, Locale, sys_kind);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
