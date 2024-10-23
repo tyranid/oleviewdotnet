@@ -293,12 +293,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return builder.ToString();
     }
 
-    public ComProxyInterfaceNameData GetNames()
+    public COMProxyInterfaceNameData GetNames()
     {
         return new(this);
     }
 
-    public void UpdateNames(ComProxyInterfaceNameData names)
+    public void UpdateNames(COMProxyInterfaceNameData names)
     {
         if (Iid != names.Iid)
         {

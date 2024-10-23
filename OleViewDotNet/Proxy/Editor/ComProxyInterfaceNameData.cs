@@ -26,28 +26,28 @@ using System.Xml;
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class ComProxyInterfaceNameData
+public sealed class COMProxyInterfaceNameData
 {
     [DataMember]
     public Guid Iid { get; set; }
     [DataMember]
     public string Name { get; set; }
     [DataMember]
-    public List<ComProxyStructureNameData> Structures { get; set; }
+    public List<COMProxyStructureNameData> Structures { get; set; }
     [DataMember]
-    public List<ComProxyProcedureNameData> Procedures { get; set; }
+    public List<COMProxyProcedureNameData> Procedures { get; set; }
 
-    public ComProxyInterfaceNameData()
+    public COMProxyInterfaceNameData()
     {
     }
 
-    internal ComProxyInterfaceNameData(COMProxyInterface proxy)
+    internal COMProxyInterfaceNameData(COMProxyInterface proxy)
     {
         Iid = proxy.Iid;
         Name = proxy.Name;
         Structures = proxy.ComplexTypes.OfType<NdrBaseStructureTypeReference>()
-            .Select((s, i) => new ComProxyStructureNameData(s, i)).ToList();
-        Procedures = proxy.Procedures.Select((p,i) => new ComProxyProcedureNameData(p, i)).ToList();
+            .Select((s, i) => new COMProxyStructureNameData(s, i)).ToList();
+        Procedures = proxy.Procedures.Select((p,i) => new COMProxyProcedureNameData(p, i)).ToList();
     }
 
     internal void UpdateNames(COMProxyInterface proxy)
@@ -79,7 +79,7 @@ public sealed class ComProxyInterfaceNameData
 
     public string ToXml()
     {
-        DataContractSerializer ser = new(typeof(ComProxyInterfaceNameData));
+        DataContractSerializer ser = new(typeof(COMProxyInterfaceNameData));
         XmlWriterSettings settings = new()
         {
             OmitXmlDeclaration = true,
@@ -93,12 +93,12 @@ public sealed class ComProxyInterfaceNameData
         return builder.ToString();
     }
 
-    public static ComProxyInterfaceNameData FromXml(string xml)
+    public static COMProxyInterfaceNameData Parse(string xml)
     {
-        DataContractSerializer ser = new(typeof(ComProxyInterfaceNameData));
+        DataContractSerializer ser = new(typeof(COMProxyInterfaceNameData));
         using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
         {
-            return (ComProxyInterfaceNameData)ser.ReadObject(reader);
+            return (COMProxyInterfaceNameData)ser.ReadObject(reader);
         }
     }
 }

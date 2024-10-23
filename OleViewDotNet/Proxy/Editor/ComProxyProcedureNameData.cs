@@ -22,24 +22,24 @@ using System.Runtime.Serialization;
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class ComProxyProcedureNameData
+public sealed class COMProxyProcedureNameData
 {
     [DataMember]
     public int Index { get; set; }
     [DataMember]
     public string Name { get; set; }
     [DataMember]
-    public List<ComProxyProcedureParameterNameData> Parameters { get; set; }
+    public List<COMProxyProcedureParameterNameData> Parameters { get; set; }
 
-    public ComProxyProcedureNameData()
+    public COMProxyProcedureNameData()
     {
     }
 
-    internal ComProxyProcedureNameData(NdrProcedureDefinition procedure, int index)
+    internal COMProxyProcedureNameData(NdrProcedureDefinition procedure, int index)
     {
         Index = index;
         Name = procedure.Name;
-        Parameters = procedure.Params.Select((p, i) => new ComProxyProcedureParameterNameData(p, i)).ToList();
+        Parameters = procedure.Params.Select((p, i) => new COMProxyProcedureParameterNameData(p, i)).ToList();
     }
 
     public void UpdateNames(NdrProcedureDefinition procedure)

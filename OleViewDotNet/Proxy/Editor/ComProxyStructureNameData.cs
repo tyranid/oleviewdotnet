@@ -22,24 +22,24 @@ using System.Runtime.Serialization;
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class ComProxyStructureNameData
+public sealed class COMProxyStructureNameData
 {
     [DataMember]
     public int Index { get; set; }
     [DataMember]
     public string Name { get; set; }
     [DataMember]
-    public List<ComProxyStructureMemberNameData> Members { get; set; }
+    public List<COMProxyStructureMemberNameData> Members { get; set; }
 
-    public ComProxyStructureNameData()
+    public COMProxyStructureNameData()
     {
     }
 
-    internal ComProxyStructureNameData(NdrBaseStructureTypeReference type, int index)
+    internal COMProxyStructureNameData(NdrBaseStructureTypeReference type, int index)
     {
         Index = index;
         Name = type.Name;
-        Members = type.Members.Select((m, i) => new ComProxyStructureMemberNameData(m, i)).ToList();
+        Members = type.Members.Select((m, i) => new COMProxyStructureMemberNameData(m, i)).ToList();
     }
 
     internal void UpdateNames(NdrBaseStructureTypeReference type)

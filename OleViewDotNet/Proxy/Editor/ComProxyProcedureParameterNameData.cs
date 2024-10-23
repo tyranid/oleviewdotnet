@@ -20,19 +20,19 @@ using System.Runtime.Serialization;
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class ComProxyProcedureParameterNameData
+public sealed class COMProxyProcedureParameterNameData
 {
     [DataMember]
     public int Index { get; set; }
     [DataMember]
     public string Name { get; set; }
 
-    public ComProxyProcedureParameterNameData()
+    public COMProxyProcedureParameterNameData()
     {
         Name = string.Empty;
     }
 
-    internal ComProxyProcedureParameterNameData(NdrProcedureParameter parameter, int index)
+    internal COMProxyProcedureParameterNameData(NdrProcedureParameter parameter, int index)
     {
         Name = parameter.Name;
         Index = index;

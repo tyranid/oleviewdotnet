@@ -65,7 +65,8 @@ FunctionsToExport = 'Get-ComDatabase', 'Set-ComDatabase', 'Compare-ComDatabase',
                     'Start-ComRuntimeExtension', 'Get-ComMimeType', 'Get-ComProgId', 'Get-ComObjectInterface', 'ConvertTo-ComAssembly', 'Get-ComGuid',
                     'Test-ComInterface', 'Format-ComSecurityDescriptor', 'Test-ComAccess', 'Get-ComAccess', 'Clear-ComDatabase', 'Export-ComInterfaceNameCache',
                     'Get-ComAccessToken', 'ConvertTo-ComSourceCode', 'Get-ComSymbolResolver', 'Reset-ComSymbolResolver', 'Get-ComCredential', 'Get-ComAuthInfo',
-                    'Get-ComRpcClient', 'New-ComStandardActivator', 'New-ComActivator', 'New-ComActivationProperties', 'Import-ComTypeLib'
+                    'Get-ComRpcClient', 'New-ComStandardActivator', 'New-ComActivator', 'New-ComActivationProperties', 'Import-ComTypeLib', 'Get-ComProxyName',
+                    'Set-ComProxyName'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

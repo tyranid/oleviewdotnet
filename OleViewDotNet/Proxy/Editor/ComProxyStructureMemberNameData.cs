@@ -20,18 +20,18 @@ using System.Runtime.Serialization;
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class ComProxyStructureMemberNameData
+public sealed class COMProxyStructureMemberNameData
 {
     [DataMember]
     public int Index { get; set; }
     [DataMember]
     public string Name { get; set; }
 
-    public ComProxyStructureMemberNameData()
+    public COMProxyStructureMemberNameData()
     {
     }
 
-    internal ComProxyStructureMemberNameData(NdrStructureMember member, int index)
+    internal COMProxyStructureMemberNameData(NdrStructureMember member, int index)
     {
         Index = index;
         Name = member.Name;
