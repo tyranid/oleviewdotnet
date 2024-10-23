@@ -47,7 +47,9 @@ public static class COMWrapperFactory
         { typeof(IEnumMoniker).GUID, typeof(IEnumMonikerWrapper) },
         { typeof(IEnumString).GUID, typeof(IEnumStringWrapper) },
         { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
-        { typeof(IStream).GUID, typeof(IStreamWrapper) } };
+        { typeof(IStream).GUID, typeof(IStreamWrapper) },
+        { typeof(IInspectable).GUID, typeof(IInspectableWrapper) }
+    };
     private static readonly MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
     private static readonly Dictionary<Type, ConstructorInfo> _constructors = new();
 

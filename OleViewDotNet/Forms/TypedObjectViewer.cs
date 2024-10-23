@@ -193,14 +193,7 @@ internal partial class TypedObjectViewer : UserControl
                 val = null;
             }
 
-            if (val is not null)
-            {
-                item.SubItems[2].Text = val.ToString();
-            }
-            else
-            {
-                item.SubItems[2].Text = "<null>";
-            }
+            item.SubItems[2].Text = FormUtils.FormatObject(val, false);
         }
         listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         listViewProperties.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
