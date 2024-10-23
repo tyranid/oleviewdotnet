@@ -21,9 +21,7 @@ using OleViewDotNet.Forms;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Processes;
-using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
-using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Concurrent;
@@ -33,10 +31,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,31 +44,6 @@ namespace OleViewDotNet.Utilities;
 
 public static class COMUtilities
 {
-    private static Dictionary<Guid, Assembly> m_typelibs;
-    private static Dictionary<string, Assembly> m_typelibsname;
-    private static Dictionary<Guid, Type> m_iidtypes;
-
-    static COMUtilities()
-    {
-        AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-    }
-
-    private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-    {
-        if (m_typelibsname is not null)
-        {
-            lock (m_typelibsname)
-            {
-                if (m_typelibsname.ContainsKey(args.Name))
-                {
-                    return m_typelibsname[args.Name];
-                }
-            }
-        }
-
-        return null;
-    }
-
     public static string GetCategoryName(Guid catid)
     {
         Guid clsid = new("{0002E005-0000-0000-C000-000000000046}");
@@ -110,174 +81,6 @@ public static class COMUtilities
         }
 
         return strDesc;
-    }
-
-    private static void RegisterTypeInterfaces(Assembly a)
-    {
-        Type[] types = a.GetTypes();
-
-        foreach (Type t in types)
-        {
-            if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() is null)
-            {
-                InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
-                if (!m_iidtypes.ContainsKey(t.GUID))
-                {
-                    m_iidtypes.Add(t.GUID, t);
-                }
-            }
-        }
-    }
-
-    private static void LoadBuiltinTypes(Assembly asm)
-    {
-        foreach (Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
-        {
-            if (t.GetCustomAttribute<ObsoleteAttribute>() is not null)
-            {
-                continue;
-            }
-            if (!m_iidtypes.ContainsKey(t.GUID))
-            {
-                m_iidtypes.Add(t.GUID, t);
-            }
-        }
-    }
-
-    public static Type GetInterfaceType(Guid iid, COMRegistry registry, bool scripting = false)
-    {
-        if (registry is not null && registry.Interfaces.ContainsKey(iid))
-        {
-            return GetInterfaceType(registry.Interfaces[iid], scripting);
-        }
-
-        return GetInterfaceType(iid);
-    }
-
-    public static Type GetInterfaceType(Guid iid)
-    {
-        if (m_iidtypes is null)
-        {
-            LoadTypeLibAssemblies();
-        }
-
-        if (m_iidtypes.ContainsKey(iid))
-        {
-            return m_iidtypes[iid];
-        }
-
-        return null;
-    }
-
-    public static Type GetInterfaceType(COMInterfaceEntry intf, bool scripting = false)
-    {
-        if (intf is null)
-        {
-            return null;
-        }
-
-        Type type = GetInterfaceType(intf.Iid);
-        if (type is not null)
-        {
-            return type;
-        }
-
-        if (intf.HasTypeLib)
-        {
-            using var type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
-            using var type_info = type_lib.GetTypeInfoOfGuid(intf.Iid);
-            return type_info.ToType();
-        }
-
-        if (intf.ProxyClassEntry is null)
-        {
-            return null;
-        }
-
-        var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        m_iidtypes.Add(intf.Iid, proxy.CreateClientType(scripting));
-        return GetInterfaceType(intf.Iid);
-    }
-
-    public static Type GetInterfaceType(COMIPIDEntry ipid, bool scripting = false)
-    {
-        if (ipid is null)
-        {
-            return null;
-        }
-
-        Type type = GetInterfaceType(ipid.Iid);
-        if (type is not null)
-        {
-            return type;
-        }
-
-        COMProxyFile proxy = ipid.ToProxyInstance();
-        if (proxy is null)
-        {
-            return null;
-        }
-
-        m_iidtypes.Add(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType(scripting));
-        return GetInterfaceType(ipid.Iid);
-    }
-
-    public static void LoadTypesFromAssembly(Assembly assembly)
-    {
-        if (m_iidtypes is null)
-        {
-            LoadTypeLibAssemblies();
-        }
-
-        LoadBuiltinTypes(assembly);
-    }
-
-    public static void LoadTypeLibAssemblies()
-    {
-        if (m_typelibs is null)
-        {
-            try
-            {
-                string strTypeLibDir = ProgramSettings.GetTypeLibDirectory();
-                Directory.CreateDirectory(strTypeLibDir);
-                string[] files = Directory.GetFiles(strTypeLibDir, "*.dll");
-
-                m_typelibs = new Dictionary<Guid, Assembly>();
-                m_iidtypes = new Dictionary<Guid, Type>();
-                m_typelibsname = new Dictionary<string, Assembly>();
-
-                foreach (string f in files)
-                {
-                    try
-                    {
-                        Assembly a = Assembly.LoadFrom(f);
-                        Guid typelib_guid = Marshal.GetTypeLibGuidForAssembly(a);
-                        if (!m_typelibs.ContainsKey(typelib_guid))
-                        {
-                            m_typelibs.Add(typelib_guid, a);
-
-                            lock (m_typelibsname)
-                            {
-                                m_typelibsname[a.FullName] = a;
-                            }
-
-                            RegisterTypeInterfaces(a);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine(e.ToString());
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.ToString());
-            }
-
-            LoadBuiltinTypes(Assembly.GetExecutingAssembly());
-            LoadBuiltinTypes(typeof(int).Assembly);
-        }
     }
 
     public static ITypeLib LoadTypeLib(string path, RegKind reg_kind = RegKind.None)
@@ -347,117 +150,30 @@ public static class COMUtilities
         UnregisterTypeLib(lib_id, version, lcid, syskind, true);
     }
 
-    public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
-    {
-        ITypeLib typeLib = null;
-
-        try
-        {
-            typeLib = NativeMethods.LoadTypeLibEx(path, RegKind.None);
-
-            return ConvertTypeLibToAssembly(typeLib, progress);
-        }
-        finally
-        {
-            if (typeLib is not null)
-            {
-                Marshal.ReleaseComObject(typeLib);
-            }
-        }
-    }
-
-    public static Assembly LoadTypeLib(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
-    {
-        try
-        {
-            return ConvertTypeLibToAssembly(typeLib, progress);
-        }
-        finally
-        {
-            if (typeLib is not null)
-            {
-                Marshal.ReleaseComObject(typeLib);
-            }
-        }
-    }
-
-    public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
-    {
-        if (m_typelibs is null)
-        {
-            progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
-            LoadTypeLibAssemblies();
-        }
-
-        if (m_typelibs.ContainsKey(Marshal.GetTypeLibGuid(typeLib)))
-        {
-            return m_typelibs[Marshal.GetTypeLibGuid(typeLib)];
-        }
-        else
-        {
-            string strAssemblyPath = ProgramSettings.GetTypeLibDirectory();
-            strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibGuid(typeLib).ToString() + ".dll");
-
-            TypeLibConverter conv = new();
-            AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
-                                    new TypeLibCallback(progress), null, null, null, null);
-            asm.Save(Path.GetFileName(strAssemblyPath));
-            Assembly a = Assembly.LoadFile(strAssemblyPath);
-
-            m_typelibs[Marshal.GetTypeLibGuid(typeLib)] = a;
-            lock (m_typelibsname)
-            {
-                m_typelibsname[a.FullName] = a;
-            }
-            RegisterTypeInterfaces(a);
-
-            return a;
-        }
-    }
-
     public static Type GetDispatchTypeInfo(IWin32Window parent, object comObj)
     {
         Type ret = null;
 
         try
         {
-            if (!comObj.GetType().IsCOMObject)
+            using WaitingDialog dlg = new((progress, token) => COMTypeManager.GetDispatchTypeInfo(comObj, progress), s => s);
+            dlg.Text = "Loading TypeLib";
+            dlg.CancelEnabled = false;
+            if (dlg.ShowDialog(parent) == DialogResult.OK)
             {
-                ret = comObj.GetType();
+                return (Type)dlg.Result;
             }
-            else
+            else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
             {
-                try
-                {
-                    IDispatch disp = (IDispatch)comObj;
-
-                    disp.GetTypeInfo(0, 0x409, out ITypeInfo ti);
-                    ti.GetContainingTypeLib(out ITypeLib tl, out int iIndex);
-                    Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
-                    Assembly asm = LoadTypeLib(parent, tl);
-
-                    if (asm is not null)
-                    {
-                        string name = Marshal.GetTypeInfoName(ti);
-                        ret = asm.GetTypes().First(t => t.Name == name);
-                    }
-                }
-                catch (Exception)
-                {
-                }
+                EntryPoint.ShowError(parent, dlg.Error);
             }
+            return null;
         }
         catch (Exception)
         {
         }
 
         return ret;
-    }
-
-    public static bool IsComImport(Type t)
-    {
-        return t.GetCustomAttributes(typeof(ComImportAttribute), false).Length > 0 ||
-            t.GetCustomAttributes(typeof(InterfaceTypeAttribute), false).Length > 0;
     }
 
     public static void SaveObjectToStream(object obj, Stream stm)
@@ -768,22 +484,6 @@ public static class COMUtilities
         return LoadRegistry(window, (progress, token) => COMRegistry.Diff(left, right, mode, progress));
     }
 
-    internal static Assembly LoadTypeLib(IWin32Window window, ITypeLib typelib)
-    {
-        using WaitingDialog dlg = new((progress, token) => LoadTypeLib(typelib, progress), s => s);
-        dlg.Text = "Loading TypeLib";
-        dlg.CancelEnabled = false;
-        if (dlg.ShowDialog(window) == DialogResult.OK)
-        {
-            return (Assembly)dlg.Result;
-        }
-        else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
-        {
-            EntryPoint.ShowError(window, dlg.Error);
-        }
-        return null;
-    }
-
     internal static IEnumerable<COMProcessEntry> LoadProcesses(IEnumerable<Process> procs, IWin32Window window, COMRegistry registry)
     {
         using WaitingDialog dlg = new((progress, token) => COMProcessParser.GetProcesses(procs, COMProcessParserConfig.Default, progress, registry), s => s);
@@ -924,7 +624,7 @@ public static class COMUtilities
                     continue;
                 }
                 ServerInformation info = new();
-                if (NativeMethods.CoDecodeProxy(Process.GetCurrentProcess().Id, 
+                if (NativeMethods.CoDecodeProxy(Process.GetCurrentProcess().Id,
                     proxy.ToInt64(), out info) == 0)
                 {
                     return info;
@@ -1151,10 +851,5 @@ public static class COMUtilities
         {
             return (IRuntimeBroker)new RuntimeBrokerClass();
         }
-    }
-
-    internal static void FlushIidType(Guid iid)
-    {
-        m_iidtypes?.Remove(iid);
     }
 }

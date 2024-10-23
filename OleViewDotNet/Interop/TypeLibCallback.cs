@@ -26,7 +26,7 @@ internal class TypeLibCallback : ITypeLibImporterNotifySink
 {
     public Assembly ResolveRef(object tl)
     {
-        return COMUtilities.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);
+        return COMTypeManager.ConvertTypeLibToAssembly((ITypeLib)tl, _progress);
     }
 
     public void ReportEvent(ImporterEventKind eventKind, int eventCode, string eventMsg)

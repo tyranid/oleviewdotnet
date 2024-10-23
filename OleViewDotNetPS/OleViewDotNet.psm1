@@ -2417,7 +2417,7 @@ function Get-ComTypeLibAssembly {
             }
         }
         if ($Path -ne "") {
-            [OleViewDotNet.Utilities.COMUtilities]::LoadTypeLib($Path, $callback) | Write-Output
+            [OleViewDotNet.Utilities.COMTypeCache]::LoadTypeLib($Path, $callback) | Write-Output
         }
     }
 }

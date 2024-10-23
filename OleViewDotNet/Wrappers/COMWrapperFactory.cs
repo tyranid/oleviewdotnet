@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
@@ -227,7 +226,7 @@ public static class COMWrapperFactory
         {
             intf_type = intf_type.GetElementType();
         }
-        return COMUtilities.IsComImport(intf_type) && intf_type.IsInterface && intf_type.IsPublic && !intf_type.Assembly.ReflectionOnly;
+        return COMTypeManager.IsComImport(intf_type) && intf_type.IsInterface && intf_type.IsPublic && !intf_type.Assembly.ReflectionOnly;
     }
 
     private static bool IsDefined(Type intf_type, MemberInfo member)
@@ -368,22 +367,22 @@ public static class COMWrapperFactory
 
     public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(iid, registry, EnableScripting), registry);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(iid, registry, EnableScripting), registry);
     }
 
     public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf, EnableScripting), intf.Database);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(intf, EnableScripting), intf.Database);
     }
 
     public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(intf.InterfaceEntry, EnableScripting), intf.Database);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, EnableScripting), intf.Database);
     }
 
     public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
     {
-        return Wrap(obj, COMUtilities.GetInterfaceType(ipid, EnableScripting), null);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(ipid, EnableScripting), null);
     }
 
     public static BaseComWrapper Wrap(object obj, Type intf_type)
@@ -415,7 +414,7 @@ public static class COMWrapperFactory
     internal static void FlushProxyType(Guid iid)
     {
         _types.Remove(iid);
-        COMUtilities.FlushIidType(iid);
+        COMTypeManager.FlushIidType(iid);
     }
     #endregion
 }
