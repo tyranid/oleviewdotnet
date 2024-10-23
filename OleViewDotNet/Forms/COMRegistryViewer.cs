@@ -1475,7 +1475,7 @@ internal partial class COMRegistryViewer : UserControl
                     contextMenuStrip.Items.Add(viewProxyLibraryToolStripMenuItem);
                 }
 
-                if (RuntimeMetadata.Interfaces.ContainsKey(intf.Iid))
+                if (intf.TryGetRuntimeType(out _))
                 {
                     contextMenuStrip.Items.Add(viewRuntimeInterfaceToolStripMenuItem);
                 }
@@ -2270,11 +2270,18 @@ internal partial class COMRegistryViewer : UserControl
         TreeNode node = treeComRegistry.SelectedNode;
         if (node is not null)
         {
-            if (node.Tag is COMInterfaceEntry ent && RuntimeMetadata.Interfaces.ContainsKey(ent.Iid))
+            if (node.Tag is COMInterfaceEntry ent)
             {
-                Assembly asm = RuntimeMetadata.Interfaces[ent.Iid].Assembly;
-                EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
-                    asm, ent.Iid, false));
+                try
+                {
+                    Assembly asm = ent.GetRuntimeType().Assembly;
+                    EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
+                        asm, ent.Iid, false));
+                }
+                catch(Exception ex)
+                {
+                    EntryPoint.ShowError(this, ex);
+                }
             }
         }
     }

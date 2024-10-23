@@ -116,10 +116,7 @@ internal partial class ROTViewer : UserControl
             {
                 IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
                 Guid unk = COMKnownGuids.IID_IUnknown;
-                Type dispType;
-
                 info.moniker.BindToObject(bindCtx, null, ref unk, out object comObj);
-                dispType = FormUtils.GetDispatchTypeInfo(this, comObj);
                 ObjectInformation view = new(m_registry, null, info.strDisplayName, 
                     comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);

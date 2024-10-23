@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,9 @@ using System.Reflection;
 
 namespace OleViewDotNet.InterfaceViewers;
 
-internal class InterfaceViewers
+internal static class InterfaceViewers
 {
-    private static Dictionary<Guid, ITypeViewerFactory> m_viewfactory;
+    private static readonly Lazy<Dictionary<Guid, ITypeViewerFactory>> m_viewfactory = new(LoadInterfaceViewers);
 
     private static void LoadInterfaceViewersFromAssembly(Assembly a)
     {
@@ -50,7 +51,7 @@ internal class InterfaceViewers
                                 factory = (ITypeViewerFactory)con.Invoke(new object[0]);
                                 if (factory is not null)
                                 {
-                                    m_viewfactory.Add(factory.Iid, factory);
+                                    m_viewfactory.Value.Add(factory.Iid, factory);
                                 }
                             }
                         }
@@ -65,53 +66,46 @@ internal class InterfaceViewers
         }
     }
 
-    public static void LoadInterfaceViewers()
+    public static Dictionary<Guid, ITypeViewerFactory> LoadInterfaceViewers()
     {
-        if (m_viewfactory is null)
+        Dictionary<Guid, ITypeViewerFactory> viewfactory = new();
+
+        try
         {
-            m_viewfactory = new Dictionary<Guid, ITypeViewerFactory>();
+            /* See if we have any registered in the current assembly */
+            LoadInterfaceViewersFromAssembly(Assembly.GetExecutingAssembly());
+        }
+        catch
+        {
+        }
 
-            try
-            {
-                /* See if we have any registered in the current assembly */
-                LoadInterfaceViewersFromAssembly(Assembly.GetExecutingAssembly());
-            }
-            catch
-            {
-            }
+        try
+        {
+            string[] plugins = Directory.GetFiles(AppUtilities.GetPluginDirectory(), "*.dll");
 
-            try
+            foreach (string p in plugins)
             {
-                string[] plugins = Directory.GetFiles(AppUtilities.GetPluginDirectory(), "*.dll");
-
-                foreach (string p in plugins)
+                try
                 {
-                    try
-                    {
-                        Assembly a = Assembly.LoadFile(p);
-                        LoadInterfaceViewersFromAssembly(a);
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    Assembly a = Assembly.LoadFile(p);
+                    LoadInterfaceViewersFromAssembly(a);
+                }
+                catch (Exception)
+                {
                 }
             }
-            catch (Exception)
-            {
-            }
         }
+        catch (Exception)
+        {
+        }
+        return viewfactory;
     }
 
-    public static ITypeViewerFactory GetInterfaceViewer(Guid iid)
+    public static ITypeViewerFactory GetInterfaceViewer(COMInterfaceEntry intf)
     {
-        if (m_viewfactory is null)
+        if (m_viewfactory.Value.ContainsKey(intf.Iid))
         {
-            LoadInterfaceViewers();
-        }
-
-        if (m_viewfactory.ContainsKey(iid))
-        {
-            return m_viewfactory[iid];
+            return m_viewfactory.Value[intf.Iid];
         }
         else
         {
@@ -121,9 +115,9 @@ internal class InterfaceViewers
 
     public static void AddFactory(ITypeViewerFactory factory)
     {
-        if (GetInterfaceViewer(factory.Iid) is null)
+        if (!m_viewfactory.Value.ContainsKey(factory.Iid))
         {
-            m_viewfactory.Add(factory.Iid, factory);
+            m_viewfactory.Value.Add(factory.Iid, factory);
         }
     }
 }

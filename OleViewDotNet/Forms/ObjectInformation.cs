@@ -141,18 +141,22 @@ internal partial class ObjectInformation : UserControl
             item.Tag = ent;
             item.SubItems.Add(ent.Iid.FormatGuid());
 
-            InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
+            InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent);
             if (factory is not null)
             {
                 item.SubItems.Add("Yes");
             }
             else if (ent.HasTypeLib)
             {
-                item.SubItems.Add("TypeLib");
+                item.SubItems.Add("Yes (TypeLib)");
+            }
+            else if (ent.RuntimeInterface)
+            {
+                item.SubItems.Add("Yes (WinRT)");
             }
             else if (ent.HasProxy)
             {
-                item.SubItems.Add("Proxy");
+                item.SubItems.Add("Yes (Proxy)");
             }
             else
             {
@@ -195,7 +199,7 @@ internal partial class ObjectInformation : UserControl
             try
             {
                 ObjectEntry obj = m_pEntry;
-                InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent.Iid);
+                InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent);
                 if (factory is null)
                 {
                     obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));

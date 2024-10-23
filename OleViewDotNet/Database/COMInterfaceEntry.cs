@@ -86,7 +86,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     {
         if (m_formattable is not null)
             return true;
-        if (RuntimeInterface && RuntimeMetadata.Interfaces.TryGetValue(Iid, out Type type))
+        if (RuntimeInterface && TryGetRuntimeType(out Type type))
         {
             m_formattable = new SourceCodeFormattableType(type);
         }
@@ -195,7 +195,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
-        RuntimeInterface = true;
+        RuntimeInterfaceAssembly = type.Assembly.FullName;
         Source = COMRegistryEntrySource.Metadata;
     }
 
@@ -302,10 +302,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         get; internal set;
     }
 
-    public bool RuntimeInterface
-    {
-        get; internal set;
-    }
+    public bool RuntimeInterface => !string.IsNullOrEmpty(RuntimeInterfaceAssembly);
     #endregion
 
     #region Static Members
@@ -384,7 +381,10 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         Base = reader.ReadString("base");
         TypeLibVersion = reader.ReadString("ver");
         TypeLib = reader.ReadGuid("tlib");
-        RuntimeInterface = reader.ReadBool("rt");
+        if (reader.ReadBool("rt"))
+        {
+            RuntimeInterfaceAssembly = "Unknown";
+        }
         RuntimeInterfaceAssembly = reader.ReadString("rta");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
@@ -403,7 +403,6 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         writer.WriteOptionalAttributeString("base", Base);
         writer.WriteOptionalAttributeString("ver", TypeLibVersion);
         writer.WriteGuid("tlib", TypeLib);
-        writer.WriteBool("rt", RuntimeInterface);
         writer.WriteOptionalAttributeString("rta", RuntimeInterfaceAssembly);
         writer.WriteEnum("src", Source);
     }
@@ -422,5 +421,30 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => GetEditable().Members;
 
     bool ICOMSourceCodeEditable.IsEditable => (m_formattable as ICOMSourceCodeEditable)?.IsEditable ?? false;
+    #endregion
+
+    #region Internal Members
+    internal Type GetRuntimeType()
+    {
+        if (!RuntimeInterface)
+        {
+            return null;
+        }
+        return Type.GetType($"{InternalName}, {RuntimeInterfaceAssembly}");
+    }
+
+    internal bool TryGetRuntimeType(out Type type)
+    {
+        try
+        {
+            type = GetRuntimeType();
+            return type is not null;
+        }
+        catch
+        {
+            type = null;
+            return false;
+        }
+    }
     #endregion
 }

@@ -272,14 +272,18 @@ public static class COMTypeManager
         }
         else
         {
-            IDispatch disp = (IDispatch)obj;
+            IDispatch disp = obj as IDispatch;
+            if (disp is null)
+            {
+                return null;
+            }
 
             disp.GetTypeInfo(0, 0x409, out ITypeInfo ti);
             ti.GetContainingTypeLib(out ITypeLib tl, out int iIndex);
             Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
             Assembly asm = LoadTypeLib(tl, progress) ?? throw new InvalidOperationException("Couldn't convert the assembly.");
             string name = Marshal.GetTypeInfoName(ti);
-            return asm.GetTypes().First(t => t.Name == name);
+            return asm.GetTypes().FirstOrDefault(t => t.Name == name);
         }
     }
     #endregion

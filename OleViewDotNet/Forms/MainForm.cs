@@ -139,9 +139,6 @@ internal partial class MainForm : Form
         props.Add("Name", ent.Name);
         props.Add("Server", ent.DefaultServer);
 
-        /* Need to implement a type library reader */
-        Type dispType = FormUtils.GetDispatchTypeInfo(this, obj);
-
         if (!ent.InterfacesLoaded)
         {
             await ent.LoadSupportedInterfacesAsync(false, null);
@@ -277,9 +274,6 @@ internal partial class MainForm : Form
 
             if (comObj is not null)
             {
-                /* Need to implement a type library reader */
-                Type dispType = FormUtils.GetDispatchTypeInfo(this, comObj);
-
                 HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
             }
         }
@@ -365,7 +359,6 @@ internal partial class MainForm : Form
                 props.Add("CLSID", clsid.FormatGuid());
             }
 
-            Type dispType = FormUtils.GetDispatchTypeInfo(this, comObj);
             HostControl(new ObjectInformation(m_registry, ent, strObjName, comObj, props, ints.ToArray()));
         }
     }
