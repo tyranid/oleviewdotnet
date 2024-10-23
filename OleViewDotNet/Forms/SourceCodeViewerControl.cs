@@ -121,14 +121,13 @@ internal partial class SourceCodeViewerControl : UserControl
                 m_formattable_obj = null;
             }
 
-            m_editable_obj = value as ICOMSourceCodeEditable;
-
             if (!IsParsed(m_formattable_obj) && AutoParse)
             {
                 ParseSourceCode();
             }
 
             parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj is not null && !IsParsed(m_formattable_obj);
+            m_editable_obj = value as ICOMSourceCodeEditable;
             editNamesToolStripMenuItem.Enabled = m_editable_obj is not null;
             Format();
         }

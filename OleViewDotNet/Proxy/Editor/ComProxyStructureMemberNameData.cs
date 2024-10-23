@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2014
+//    Copyright (C) James Forshaw 2018
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,13 +14,27 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using NtApiDotNet.Ndr;
+using System.Runtime.Serialization;
 
-namespace OleViewDotNet.Utilities.Format;
+namespace OleViewDotNet.Proxy.Editor;
 
-public interface ICOMSourceCodeEditable
+[DataContract]
+public sealed class ComProxyStructureMemberNameData
 {
-    string Name { get; set; }
-    IReadOnlyList<ICOMSourceCodeEditable> Members { get; }
-    bool IsEditable { get; }
+    [DataMember]
+    public int Index { get; set; }
+    [DataMember]
+    public string Name { get; set; }
+
+    public ComProxyStructureMemberNameData()
+    {
+    }
+
+    internal ComProxyStructureMemberNameData(NdrStructureMember member, int index)
+    {
+        Index = index;
+        Name = member.Name;
+    }
 }
+

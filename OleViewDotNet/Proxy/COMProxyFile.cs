@@ -141,6 +141,11 @@ public class COMProxyFile : IProxyFormatter, ICOMSourceCodeFormattable
 
     public static COMProxyFile GetFromCLSID(COMCLSIDEntry clsid)
     {
+        if (clsid is null)
+        {
+            throw new ArgumentNullException(nameof(clsid));
+        }
+
         if (clsid.IsAutomationProxy)
         {
             throw new ArgumentException("Can't get proxy for automation interfaces.");

@@ -35,4 +35,6 @@ internal class COMSourceCodeEditableObject : ICOMSourceCodeEditable
     string ICOMSourceCodeEditable.Name { get =>  m_get_name(); set => m_set_name(value); }
 
     IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => m_members;
+
+    bool ICOMSourceCodeEditable.IsEditable => true;
 }

@@ -20,6 +20,7 @@ using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.Proxy.Editor;
 using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeLib.Parser;
@@ -122,11 +123,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     /// <summary>
     /// The name of the proxy interface.
     /// </summary>
-    public override string Name { get; }
-    /// <summary>
-    /// Original name of the interface.
-    /// </summary>
-    public string OriginalName { get; }
+    public override string Name => Entry.Name;
     /// <summary>
     /// The IID of the proxy interface.
     /// </summary>
@@ -166,6 +163,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
 
+    bool ICOMSourceCodeEditable.IsEditable => true;
+
     IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members =>
         Procedures.Select(p => new EditableProcedure(p)).ToList().AsReadOnly();
     #endregion
@@ -181,11 +180,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         m_registry = registry;
         if (string.IsNullOrWhiteSpace(Entry.Name))
         {
-            Name = m_registry.MapIidToInterface(Iid).Name;
+            Entry.Name = m_registry.MapIidToInterface(Iid).Name;
         }
         else
         {
-            Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
+            Entry.Name = COMUtilities.DemangleWinRTName(Entry.Name, Iid);
         }
         if (cache && !m_proxies.ContainsKey(Iid))
         {
@@ -292,6 +291,25 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         builder.InterfacesOnly = flags.HasFlag(ProxyFormatterFlags.RemoveComplexTypes);
         ((ICOMSourceCodeFormattable)this).Format(builder);
         return builder.ToString();
+    }
+
+    public ComProxyInterfaceNameData GetNames()
+    {
+        return new(this);
+    }
+
+    public void UpdateNames(ComProxyInterfaceNameData names)
+    {
+        if (Iid != names.Iid)
+        {
+            throw new ArgumentException("Names object doesn't match the proxy identity");
+        }
+
+        if (names.Name is not null)
+        {
+            Entry.Name = names.Name;
+        }
+        names.UpdateNames(this);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)

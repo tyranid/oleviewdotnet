@@ -36,6 +36,8 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
 
     string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
 
+    bool ICOMSourceCodeEditable.IsEditable => true;
+
     IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members
     {
         get
