@@ -20,10 +20,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
 
 namespace OleViewDotNet.Proxy.Editor;
+
+public enum COMProxyInterfaceNameDataExportFormat
+{
+    Xml,
+    Json
+}
 
 [DataContract]
 public sealed class COMProxyInterfaceNameData
@@ -77,7 +84,7 @@ public sealed class COMProxyInterfaceNameData
         }
     }
 
-    public string ToXml()
+    private string ToXml()
     {
         DataContractSerializer ser = new(typeof(COMProxyInterfaceNameData));
         XmlWriterSettings settings = new()
@@ -93,11 +100,52 @@ public sealed class COMProxyInterfaceNameData
         return builder.ToString();
     }
 
-    public static COMProxyInterfaceNameData Parse(string xml)
+    private string ToJson()
     {
-        DataContractSerializer ser = new(typeof(COMProxyInterfaceNameData));
-        using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
+        DataContractJsonSerializerSettings settings = new();
+        settings.EmitTypeInformation = EmitTypeInformation.Never;
+        settings.UseSimpleDictionaryFormat = true;
+        DataContractJsonSerializer ser = new(typeof(COMProxyInterfaceNameData), settings);
+        MemoryStream stm = new();
+        using (var writer = JsonReaderWriterFactory.CreateJsonWriter(stm, Encoding.UTF8, false, true))
         {
+            ser.WriteObject(writer, this);
+        }
+        stm.Position = 0;
+        StreamReader reader = new(stm);
+        return reader.ReadToEnd();
+    }
+
+    public string Export(COMProxyInterfaceNameDataExportFormat format)
+    {
+        switch (format)
+        {
+            case COMProxyInterfaceNameDataExportFormat.Json:
+                return ToJson();
+            case COMProxyInterfaceNameDataExportFormat.Xml:
+                return ToXml();
+            default:
+                throw new ArgumentException("Unknown output format.", nameof(format));
+        }
+    }
+
+    public static COMProxyInterfaceNameData Parse(string names)
+    {
+        if (string.IsNullOrWhiteSpace(names))
+        {
+            throw new ArgumentException($"'{nameof(names)}' cannot be null or whitespace.", nameof(names));
+        }
+
+        if (names.Contains("<COMProxyInterfaceNameData"))
+        {
+            DataContractSerializer ser = new(typeof(COMProxyInterfaceNameData));
+            using XmlReader reader = XmlReader.Create(new StringReader(names));
+            return (COMProxyInterfaceNameData)ser.ReadObject(reader);
+        }
+        else
+        {
+            DataContractJsonSerializer ser = new(typeof(COMProxyInterfaceNameData));
+            using var reader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(names), XmlDictionaryReaderQuotas.Max);
             return (COMProxyInterfaceNameData)ser.ReadObject(reader);
         }
     }

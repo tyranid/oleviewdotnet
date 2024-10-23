@@ -3816,11 +3816,13 @@ function New-ComActivationProperties {
 .SYNOPSIS
 Gets a COM proxy name information.
 .DESCRIPTION
-This cmdlet gets a COM proxy's names as an XML file so that you then can be edited.
+This cmdlet gets a COM proxy's names as an XML or JSON file so that you then can be edited.
 .PARAMETER Proxy
 The proxy get the names for.
 .PARAMETER AsObject
 Return the name information as an object.
+.PARAMETER Format
+Specify the output format of XML or JSON.
 .PARAMETER Path
 Write the name information to a file path.
 .INPUTS
@@ -3832,29 +3834,35 @@ OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameData
 Get-ComProxyName $proxy
 Get COM proxy names as XML.
 .EXAMPLE
+Get-ComProxyName $proxy -Format Json
+Get COM proxy names as JSON.
+.EXAMPLE
 Get-ComProxyName $proxy -AsObject
 Get COM proxy names as an object.
 #>
 function Get-ComProxyName {
-    [CmdletBinding(DefaultParameterSetName="AsXml")]
+    [CmdletBinding(DefaultParameterSetName="AsString")]
     Param(
         [parameter(Mandatory, Position=0)]
         [OleViewDotNet.Proxy.COMProxyInterface]$Proxy,
         [parameter(Mandatory, ParameterSetName = "AsObject")]
         [switch]$AsObject,
-        [parameter(Mandatory, ParameterSetName = "AsFile")]
-        [string]$Path
+        [parameter(Mandatory, ParameterSetName = "ToFile")]
+        [string]$Path,
+        [parameter(ParameterSetName = "AsString")]
+        [parameter(ParameterSetName = "ToFile")]
+        [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameDataExportFormat]$Format = "Xml"
     )
 
     switch($PSCmdlet.ParameterSetName) {
-        "AsXml" {
-            $Proxy.GetNames().ToXml()
+        "AsString" {
+            $Proxy.GetNames().Export($Format)
         }
         "AsObject" {
             $Proxy.GetNames()
         }
-        "AsFile" {
-            $Proxy.GetNames().ToXml() | Set-Content -Path $Path
+        "ToFile" {
+            $Proxy.GetNames().Export($Format) | Set-Content -Path $Path
         }
     }
 }
@@ -3863,13 +3871,13 @@ function Get-ComProxyName {
 .SYNOPSIS
 Set a COM proxy name information.
 .DESCRIPTION
-This cmdlet sets a COM proxy's names from an XML file or object so that you then can be edited.
+This cmdlet sets a COM proxy's names from an XML/JSON file or object so that you then can be edited.
 .PARAMETER Proxy
 The proxy entry to set.
 .PARAMETER Name
-The proxy name information. Can be an object or an XML document string.
+The proxy name information. Can be an object or an XML or JSON document string.
 .PARAMETER Path
-The proxy name information as an XML file.
+The proxy name information as an XML or JSON file.
 .INPUTS
 None
 .OUTPUTS
