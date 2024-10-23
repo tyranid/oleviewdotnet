@@ -98,7 +98,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
             throw new InvalidOperationException("Transport must be connected before sending.");
         if (handles.Count > 0)
             throw new ArgumentException("Transport doesn't support sending kernel handles.", nameof(handles));
-        return new(m_buffer.SendReceive(ndr_buffer, proc_num), new NtObject[0]);
+        return new(m_buffer.SendReceive(ndr_buffer, proc_num), new NtObject[0], this);
     }
 
     NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(NdrComObject obj, Guid iid)
