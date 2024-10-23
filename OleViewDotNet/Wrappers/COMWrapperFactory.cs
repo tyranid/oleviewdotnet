@@ -37,7 +37,6 @@ public static class COMWrapperFactory
     private static readonly AssemblyName _name = new("ComWrapperTypes");
     private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
     private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
-    private static readonly Dictionary<Type, Type> _generated_intfs = new();
     private static readonly Dictionary<Guid, Type> _types = new() {
         { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
         { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
