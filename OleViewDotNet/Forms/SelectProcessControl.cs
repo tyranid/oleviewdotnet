@@ -71,7 +71,7 @@ internal partial class SelectProcessControl : UserControl
 
                 ListViewItem item = listViewProcesses.Items.Add(p.ProcessId.ToString());
                 item.SubItems.Add(p.Name);
-                item.SubItems.Add(COMUtilities.FormatBitness(p.Is64Bit));
+                item.SubItems.Add(AppUtilities.FormatBitness(p.Is64Bit));
                 if (result.IsSuccess)
                 {
                     NtToken token = result.Result;

@@ -3219,9 +3219,9 @@ function Get-ComProgId {
 
 <#
 .SYNOPSIS
-Converts a type library or proxy instance to a .NET assembly.
+Converts a type library to a .NET assembly.
 .DESCRIPTION
-This cmdlet converts a type library or proxy instance object to a .NET assembly. This assembly can then be used to 
+This cmdlet converts a type library to a .NET assembly. This assembly can then be used to 
 access COM interfaces. The assembly will be automatically registered with the applications so that you can use it with
 Get-ComObjectInterface.
 .PARAMETER TypeLib
@@ -3230,10 +3230,6 @@ The type library version entry to convert.
 The path to a type library to convert.
 .PARAMETER NoProgress
 Don't show progress during conversion.
-.PARAMETER Proxy
-The proxy instance to convert.
-.PARAMETER Ipid
-The IPID entry to convert. Must have been created with ParseStubMethods parameter.
 .INPUTS
 None
 .OUTPUTS
@@ -3246,12 +3242,6 @@ function ConvertTo-ComAssembly {
         [OleViewDotNet.Database.COMTypeLibVersionEntry]$TypeLib,
         [parameter(Mandatory, ParameterSetName = "FromPath", Position = 0)]
         [string]$Path,
-        [parameter(Mandatory, ParameterSetName = "FromProxy", Position = 0)]
-        [OleViewDotNet.Proxy.COMProxyFile]$Proxy,
-        [parameter(Mandatory, ParameterSetName = "FromProxyInterface", Position = 0)]
-        [OleViewDotNet.Proxy.COMProxyInterface]$ProxyInterface,
-        [parameter(Mandatory, ParameterSetName = "FromIpid", Position = 0)]
-        [OleViewDotNet.Processes.COMIPIDEntry]$Ipid,
         [switch]$NoProgress
     )
 
@@ -3263,15 +3253,6 @@ function ConvertTo-ComAssembly {
             }
             "FromPath" {
                 Get-ComTypeLibAssembly -Path $TypeLib -NoProgress:$NoProgress | Write-Output
-            }
-            "FromProxy" {
-                [OleViewDotNet.Utilities.COMUtilities]::ConvertProxyToAssembly($Proxy, $callback) | Write-Output
-            }
-            "FromProxyInterface" {
-                [OleViewDotNet.Utilities.COMUtilities]::ConvertProxyToAssembly($ProxyInterface, $callback) | Write-Output
-            }
-            "FromIpid" {
-                [OleViewDotNet.Utilities.COMUtilities]::ConvertProxyToAssembly($Ipid, $callback) | Write-Output
             }
         }
     }

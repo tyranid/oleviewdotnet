@@ -415,63 +415,6 @@ public static class COMUtilities
         }
     }
 
-    private static void ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, string output_path, IProgress<Tuple<string, int>> progress)
-    {
-        if (m_typelibs is null)
-        {
-            progress?.Report(Tuple.Create("Initializing Global Libraries", -1));
-            LoadTypeLibAssemblies();
-        }
-
-        COMProxyFileConverter converter = new(output_path, progress);
-        converter.AddProxy(entries);
-        converter.Save();
-    }
-
-    public static void ConvertProxyToAssembly(COMProxyFile proxy, string output_path, IProgress<Tuple<string, int>> progress)
-    {
-        ConvertProxyToAssembly(proxy.Entries, output_path, progress);
-    }
-
-    public static void ConvertProxyToAssembly(COMProxyInterface proxy, string output_path, IProgress<Tuple<string, int>> progress)
-    {
-        ConvertProxyToAssembly(proxy.ProxyFile, output_path, progress);
-    }
-
-    public static void ConvertProxyToAssembly(COMIPIDEntry ipid, string output_path, IProgress<Tuple<string, int>> progress)
-    {
-        ConvertProxyToAssembly(ipid.ToProxyInstance(), output_path, progress);
-    }
-
-    public static Assembly ConvertProxyToAssembly(IEnumerable<COMProxyInterface> entries, IProgress<Tuple<string, int>> progress)
-    {
-        if (m_typelibs is null)
-        {
-            progress?.Report(new Tuple<string, int>("Initializing Global Libraries", -1));
-            LoadTypeLibAssemblies();
-        }
-
-        COMProxyFileConverter converter = new($"{Guid.NewGuid()}.dll", progress);
-        converter.AddProxy(entries);
-        RegisterTypeInterfaces(converter.BuiltAssembly);
-        return converter.BuiltAssembly;
-    }
-
-    public static Assembly ConvertProxyToAssembly(COMProxyFile proxy, IProgress<Tuple<string, int>> progress)
-    {
-        return ConvertProxyToAssembly(proxy.Entries, progress);
-    }
-
-    public static Assembly ConvertProxyToAssembly(COMProxyInterface proxy, IProgress<Tuple<string, int>> progress)
-    {
-        return ConvertProxyToAssembly(proxy.ProxyFile, progress);
-    }
-
-    public static Assembly ConvertProxyToAssembly(COMIPIDEntry ipid, IProgress<Tuple<string, int>> progress)
-    {
-        return ConvertProxyToAssembly(ipid.ToProxyInstance(), progress);
-    }
-
     public static Type GetDispatchTypeInfo(IWin32Window parent, object comObj)
     {
         Type ret = null;
@@ -932,12 +875,6 @@ public static class COMUtilities
         return group.ToDictionary(s => s.Key, g => new HashSet<string>(g.Select(s => s.Name), StringComparer.OrdinalIgnoreCase));
     }
 
-    internal static bool IsAdministrator()
-    {
-        using WindowsIdentity id = WindowsIdentity.GetCurrent();
-        return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
-    }
-
     internal static string GetCOMDllName()
     {
         if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "combase.dll")))
@@ -1003,31 +940,6 @@ public static class COMUtilities
             }
         }
         return null;
-    }
-
-    private static readonly Lazy<string> _assembly_version = new(() =>
-    {
-        Assembly asm = Assembly.GetCallingAssembly();
-        return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-    });
-
-    public static string GetVersion()
-    {
-        return _assembly_version.Value;
-    }
-
-    public static string FormatBitness(bool is64bit)
-    {
-        return is64bit ? "64 bit" : "32 bit";
-    }
-
-    public static T GetGuidEntry<T>(this IDictionary<Guid, T> dict, Guid guid)
-    {
-        if (dict.ContainsKey(guid))
-        {
-            return dict[guid];
-        }
-        return default;
     }
 
     public static IntPtr CreateInstance(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)

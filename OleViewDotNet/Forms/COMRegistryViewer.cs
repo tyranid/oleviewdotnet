@@ -473,7 +473,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             builder.AppendLine($"Access Control: 0x{proc.AccessControl.ToInt64():X}");
         }
-        builder.AppendLine(COMUtilities.FormatBitness(proc.Is64Bit));
+        builder.AppendLine(AppUtilities.FormatBitness(proc.Is64Bit));
         return builder.ToString();
     }
 

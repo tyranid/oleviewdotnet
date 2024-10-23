@@ -21,6 +21,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace OleViewDotNet.Utilities;
 
@@ -110,6 +111,22 @@ public static class AppUtilities
         StartArchProcess(CurrentArchitecture, command_line);
     }
 
+    private static readonly Lazy<string> _assembly_version = new(() =>
+    {
+        Assembly asm = Assembly.GetCallingAssembly();
+        return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    });
+
+    public static string GetVersion()
+    {
+        return _assembly_version.Value;
+    }
+
+    internal static string FormatBitness(bool is64bit)
+    {
+        return is64bit ? "64 bit" : "32 bit";
+    }
+
     internal static DllMachineType GetProcessMachineType(NtProcess process)
     {
         try
@@ -123,5 +140,11 @@ public static class AppUtilities
         {
         }
         return DllMachineType.UNKNOWN;
+    }
+
+    internal static bool IsAdministrator()
+    {
+        using WindowsIdentity id = WindowsIdentity.GetCurrent();
+        return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
     }
 }

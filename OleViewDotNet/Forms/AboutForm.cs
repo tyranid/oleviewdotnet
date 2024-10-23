@@ -26,7 +26,7 @@ internal partial class AboutForm : Form
     public AboutForm()
     {
         InitializeComponent();
-        labelText.Text = string.Format(labelText.Text, COMUtilities.GetVersion());
+        labelText.Text = string.Format(labelText.Text, AppUtilities.GetVersion());
     }
 
     private void btnOK_Click(object sender, EventArgs e)

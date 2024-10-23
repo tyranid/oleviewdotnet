@@ -358,7 +358,7 @@ internal partial class PropertiesControl : UserControl
         textBoxProcessStaHwnd.Text = $"0x{obj.STAMainHWnd.ToInt64():X}";
         SetupIpidEntries(obj.Ipids, false);
         listViewProcessIPids.ListViewItemSorter = new ListItemComparer(0);
-        lblProcess64bit.Text = COMUtilities.FormatBitness(obj.Is64Bit);
+        lblProcess64bit.Text = AppUtilities.FormatBitness(obj.Is64Bit);
         tabControlProperties.TabPages.Add(tabPageProcess);
         if (m_registry.AppIDs.ContainsKey(obj.AppId))
         {

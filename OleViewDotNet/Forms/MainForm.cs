@@ -44,8 +44,8 @@ internal partial class MainForm : Form
 
     private void UpdateTitle()
     {
-        Text = $"OleView .NET v{COMUtilities.GetVersion()}";
-        if (COMUtilities.IsAdministrator())
+        Text = $"OleView .NET v{AppUtilities.GetVersion()}";
+        if (AppUtilities.IsAdministrator())
         {
             Text += " - Administrator";
             menuFileOpenAsAdmin.Visible = false;
