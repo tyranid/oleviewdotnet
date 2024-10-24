@@ -151,7 +151,7 @@ internal partial class ObjectInformation : UserControl
             {
                 item.SubItems.Add("Yes (TypeLib)");
             }
-            else if (ent.RuntimeInterface)
+            else if (ent.HasRuntimeType)
             {
                 item.SubItems.Add("Yes (WinRT)");
             }

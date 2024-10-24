@@ -17,8 +17,8 @@
 using Microsoft.Win32;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Interop.SxS;
-using OleViewDotNet.TypeLib;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using System;
@@ -27,12 +27,11 @@ using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using System.Collections.Generic;
 
 namespace OleViewDotNet.Database;
 
 public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable,
-    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable, ICOMSourceCodeEditable
+    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
 {
     #region Private Members
     private ICOMSourceCodeFormattable m_formattable;
@@ -86,7 +85,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     {
         if (m_formattable is not null)
             return true;
-        if (RuntimeInterface && TryGetRuntimeType(out Type type))
+        if (HasRuntimeType && TryGetRuntimeType(out Type type))
         {
             m_formattable = new SourceCodeFormattableType(type);
         }
@@ -124,14 +123,14 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
         return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
             && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
-            && TypeLibVersion == right.TypeLibVersion && RuntimeInterface == right.RuntimeInterface
+            && TypeLibVersion == right.TypeLibVersion && RuntimeInterfaceAssembly == right.RuntimeInterfaceAssembly
             && Source == right.Source;
     }
 
     public override int GetHashCode()
     {
         return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode()
-            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterface.GetHashCode()
+            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterfaceAssembly.GetSafeHashCode()
             ^ Source.GetHashCode();
     }
 
@@ -163,6 +162,29 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         {
             if (punk != IntPtr.Zero)
                 Marshal.Release(punk);
+        }
+    }
+
+    public Type GetRuntimeType()
+    {
+        if (!HasRuntimeType)
+        {
+            return null;
+        }
+        return Type.GetType($"{InternalName}, {RuntimeInterfaceAssembly}");
+    }
+
+    public bool TryGetRuntimeType(out Type type)
+    {
+        try
+        {
+            type = GetRuntimeType();
+            return type is not null;
+        }
+        catch
+        {
+            type = null;
+            return false;
         }
     }
     #endregion
@@ -302,7 +324,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         get; internal set;
     }
 
-    public bool RuntimeInterface => !string.IsNullOrEmpty(RuntimeInterfaceAssembly);
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeInterfaceAssembly);
     #endregion
 
     #region Static Members
@@ -326,7 +348,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     #endregion
 
     #region ICOMSourceCodeFormattable Implementation
-    bool ICOMSourceCodeFormattable.IsFormattable => RuntimeInterface 
+    bool ICOMSourceCodeFormattable.IsFormattable => HasRuntimeType 
                 || TypeLibVersionEntry is not null || ProxyClassEntry is not null;
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
@@ -405,46 +427,6 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         writer.WriteGuid("tlib", TypeLib);
         writer.WriteOptionalAttributeString("rta", RuntimeInterfaceAssembly);
         writer.WriteEnum("src", Source);
-    }
-    #endregion
-
-    #region ICOMSourceCodeEditable Implementation
-    private ICOMSourceCodeEditable GetEditable()
-    {
-        if (m_formattable is not ICOMSourceCodeEditable editable)
-            throw new NotSupportedException();
-        return editable;
-    }
-
-    string ICOMSourceCodeEditable.Name { get => GetEditable().Name; set => GetEditable().Name = value; }
-
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => GetEditable().Members;
-
-    bool ICOMSourceCodeEditable.IsEditable => (m_formattable as ICOMSourceCodeEditable)?.IsEditable ?? false;
-    #endregion
-
-    #region Internal Members
-    internal Type GetRuntimeType()
-    {
-        if (!RuntimeInterface)
-        {
-            return null;
-        }
-        return Type.GetType($"{InternalName}, {RuntimeInterfaceAssembly}");
-    }
-
-    internal bool TryGetRuntimeType(out Type type)
-    {
-        try
-        {
-            type = GetRuntimeType();
-            return type is not null;
-        }
-        catch
-        {
-            type = null;
-            return false;
-        }
     }
     #endregion
 }

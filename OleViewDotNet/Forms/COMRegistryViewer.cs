@@ -668,7 +668,7 @@ internal partial class COMRegistryViewer : UserControl
     {
         var total_intfs = registry.Interfaces.Values.AsEnumerable();
         if (runtime_interfaces)
-            total_intfs = total_intfs.Where(i => i.RuntimeInterface);
+            total_intfs = total_intfs.Where(i => i.HasRuntimeType);
 
         if (by_name)
         {
@@ -980,7 +980,7 @@ internal partial class COMRegistryViewer : UserControl
     {
         Dictionary<string, TreeNode> tree = new();
         List<TreeNode> base_nodes = new();
-        foreach (var intf in registry.Interfaces.Values.Where(i => i.RuntimeInterface).OrderBy(i => i.Name))
+        foreach (var intf in registry.Interfaces.Values.Where(i => i.HasRuntimeType).OrderBy(i => i.Name))
         {
             var node = CreateNodes(base_nodes, tree, intf.Name);
             node.ImageKey = InterfaceKey;

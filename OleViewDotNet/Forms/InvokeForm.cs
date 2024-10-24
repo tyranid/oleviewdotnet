@@ -280,7 +280,7 @@ internal partial class InvokeForm : Form
         GC.Collect();
     }
 
-    private void OpenObject(object obj, Type type, bool info)
+    private void OpenObject(object obj, Type type, bool info, bool close)
     {
         if (!IsComObject(obj))
         {
@@ -302,6 +302,11 @@ internal partial class InvokeForm : Form
             c = new TypedObjectViewer(m_registry, m_objName, obj, type);
         }
         EntryPoint.GetMainForm(m_registry).HostControl(c);
+        if (close)
+        {
+            DialogResult = DialogResult.OK;
+            Close();
+        }
     }
 
     private void btnOpenObject_Click(object sender, EventArgs e)
@@ -315,7 +320,7 @@ internal partial class InvokeForm : Form
         {
             type = m_mi.DeclaringType;
         }
-        OpenObject(m_ret, type, false);
+        OpenObject(m_ret, type, false, true);
     }
 
     private void contextMenuStrip_Opening(object sender, CancelEventArgs e)
@@ -338,7 +343,7 @@ internal partial class InvokeForm : Form
             return;
         }
 
-        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, false);
+        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, false, false);
     }
 
     private void openObjectInformationToolStripMenuItem_Click(object sender, EventArgs e)
@@ -349,6 +354,6 @@ internal partial class InvokeForm : Form
             return;
         }
 
-        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, true);
+        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, true, false);
     }
 }

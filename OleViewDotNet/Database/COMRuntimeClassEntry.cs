@@ -197,6 +197,8 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     public string RuntimeClassAssembly { get; internal set; }
 
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeClassAssembly);
+
     public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
     #endregion
 
@@ -325,7 +327,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
             && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
             Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
-            && PackageId == right.PackageId && Source == right.Source;
+            && PackageId == right.PackageId && Source == right.Source && RuntimeClassAssembly == right.RuntimeClassAssembly;
     }
 
     public override int GetHashCode()
@@ -333,7 +335,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
             ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
             ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
-            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode();
+            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode() ^ RuntimeClassAssembly.GetSafeHashCode();
     }
 
     public override string ToString()
@@ -362,10 +364,22 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         {
             return null;
         }
-        return Type.GetType($"{Name}, {RuntimeClassAssembly}", false);
+        return Type.GetType($"{Name}, {RuntimeClassAssembly}");
     }
 
-
+    public bool TryGetRuntimeType(out Type type)
+    {
+        try
+        {
+            type = GetRuntimeType();
+            return type is not null;
+        }
+        catch
+        {
+            type = null;
+            return false;
+        }
+    }
     #endregion
 
     #region ICOMAccessSecurity Implementation
@@ -375,7 +389,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
     #endregion
 
     #region ICOMSourceCodeFormattable Implementation
-    bool ICOMSourceCodeFormattable.IsFormattable => GetRuntimeType() != null;
+    bool ICOMSourceCodeFormattable.IsFormattable => TryGetRuntimeType(out _);
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
