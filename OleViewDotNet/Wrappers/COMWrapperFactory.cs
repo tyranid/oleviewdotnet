@@ -353,7 +353,13 @@ public static class COMWrapperFactory
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
         }
 
-        var wrapper = (BaseComWrapper)Activator.CreateInstance(CreateType(intf_type, null), obj);
+        Type type = CreateType(intf_type, null);
+        if (typeof(BaseComRpcWrapper).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
+        {
+            type = typeof(IUnknownWrapper);
+        }
+
+        var wrapper = (BaseComWrapper)Activator.CreateInstance(type, obj);
         wrapper.SetDatabase(registry);
         return wrapper;
     }

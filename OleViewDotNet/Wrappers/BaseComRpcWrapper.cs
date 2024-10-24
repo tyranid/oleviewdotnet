@@ -22,7 +22,15 @@ using System;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComRpcWrapper<T> : BaseComWrapper, IDisposable where T : RpcClientBase, new()
+public abstract class BaseComRpcWrapper : BaseComWrapper
+{
+    protected BaseComRpcWrapper(Guid iid, string name) 
+        : base(iid, name)
+    {
+    }
+}
+
+public abstract class BaseComRpcWrapper<T> : BaseComRpcWrapper, IDisposable where T : RpcClientBase, new()
 {
     protected readonly T _object;
 
