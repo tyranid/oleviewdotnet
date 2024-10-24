@@ -165,16 +165,21 @@ public static class COMTypeManager
             return m_iidtypes.GetOrAdd(intf.Iid, _ => type_info.ToType());
         }
 
+        if (intf.HasRuntimeType && intf.TryGetRuntimeType(out Type runtime_type))
+        {
+            return runtime_type;
+        }
+
         if (intf.ProxyClassEntry is null)
         {
             return null;
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        if (intf.TryGetRuntimeType(out Type runtime_type))
-        {
-            proxy.UpdateNames(runtime_type);
-        }
+        //if (runtime_type != null)
+        //{
+        //    proxy.UpdateNames(runtime_type);
+        //}
         return m_iidtypes.GetOrAdd(intf.Iid, _ => proxy.CreateClientType(scripting));
     }
 
