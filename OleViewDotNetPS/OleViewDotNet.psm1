@@ -3895,3 +3895,32 @@ function Set-ComProxyName {
 
     $Proxy.UpdateNames($n)
 }
+
+<#
+.SYNOPSIS
+Get a COM runtime type from an interface or class.
+.DESCRIPTION
+This cmdlet gets a COM runtime type from an interface or clss.
+.PARAMETER InputObject
+The object to query.
+.INPUTS
+None
+.OUTPUTS
+System.Type
+.EXAMPLE
+Get-ComRuntimeType $intf
+Get the runtime type from an interface.
+#>
+function Get-ComRuntimeType {
+    [CmdletBinding(DefaultParameterSetName="FromObject")]
+    Param(
+        [parameter(Mandatory, Position=0, ValueFromPipeline)]
+        [OleViewDotNet.DataBase.ICOMRuntimeType]$InputObject
+    )
+
+    PROCESS {
+        if ($InputObject.HasRuntimeType) {
+            $InputObject.GetRuntimeType()
+        }
+    }
+}

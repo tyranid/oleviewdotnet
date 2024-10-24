@@ -1427,7 +1427,7 @@ internal partial class COMRegistryViewer : UserControl
                     createSpecialToolStripMenuItem.DropDownItems.Add(createFactoryInPerUserRuntimeBrokerToolStripMenuItem);
                 }
 
-                if (runtime_class is not null && !string.IsNullOrEmpty(runtime_class.RuntimeClassAssembly))
+                if (runtime_class is not null && !string.IsNullOrEmpty(runtime_class.RuntimeTypeAssembly))
                 {
                     createSpecialToolStripMenuItem.DropDownItems.Add(createRuntimeClassToolStripMenuItem);
                 }

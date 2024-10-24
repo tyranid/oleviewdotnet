@@ -31,7 +31,7 @@ using System.Xml.Serialization;
 namespace OleViewDotNet.Database;
 
 public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable,
-    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable
+    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable, ICOMRuntimeType
 {
     #region Private Members
     private ICOMSourceCodeFormattable m_formattable;
@@ -123,14 +123,14 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
         return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
             && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
-            && TypeLibVersion == right.TypeLibVersion && RuntimeInterfaceAssembly == right.RuntimeInterfaceAssembly
+            && TypeLibVersion == right.TypeLibVersion && RuntimeTypeAssembly == right.RuntimeTypeAssembly
             && Source == right.Source;
     }
 
     public override int GetHashCode()
     {
         return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode()
-            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeInterfaceAssembly.GetSafeHashCode()
+            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeTypeAssembly.GetSafeHashCode()
             ^ Source.GetHashCode();
     }
 
@@ -171,7 +171,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         {
             return null;
         }
-        return Type.GetType($"{InternalName}, {RuntimeInterfaceAssembly}");
+        return Type.GetType($"{InternalName}, {RuntimeTypeAssembly}");
     }
 
     public bool TryGetRuntimeType(out Type type)
@@ -217,7 +217,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
-        RuntimeInterfaceAssembly = type.Assembly.FullName;
+        RuntimeTypeAssembly = type.Assembly.FullName;
         Source = COMRegistryEntrySource.Metadata;
     }
 
@@ -319,12 +319,12 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
     public bool HasProxy => ProxyClsid != Guid.Empty;
 
-    public string RuntimeInterfaceAssembly
+    public string RuntimeTypeAssembly
     {
         get; internal set;
     }
 
-    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeInterfaceAssembly);
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeAssembly);
     #endregion
 
     #region Static Members
@@ -405,9 +405,9 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         TypeLib = reader.ReadGuid("tlib");
         if (reader.ReadBool("rt"))
         {
-            RuntimeInterfaceAssembly = "Unknown";
+            RuntimeTypeAssembly = "Unknown";
         }
-        RuntimeInterfaceAssembly = reader.ReadString("rta");
+        RuntimeTypeAssembly = reader.ReadString("rta");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
         if (!string.IsNullOrWhiteSpace(InternalName))
@@ -425,7 +425,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         writer.WriteOptionalAttributeString("base", Base);
         writer.WriteOptionalAttributeString("ver", TypeLibVersion);
         writer.WriteGuid("tlib", TypeLib);
-        writer.WriteOptionalAttributeString("rta", RuntimeInterfaceAssembly);
+        writer.WriteOptionalAttributeString("rta", RuntimeTypeAssembly);
         writer.WriteEnum("src", Source);
     }
     #endregion

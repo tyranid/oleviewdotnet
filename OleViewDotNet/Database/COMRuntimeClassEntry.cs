@@ -31,7 +31,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMSourceCodeFormattable
+public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMSourceCodeFormattable, ICOMRuntimeType
 {
     #region Private Members
     private List<COMInterfaceInstance> m_interfaces;
@@ -195,9 +195,9 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         }
     }
 
-    public string RuntimeClassAssembly { get; internal set; }
+    public string RuntimeTypeAssembly { get; internal set; }
 
-    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeClassAssembly);
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeAssembly);
 
     public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
     #endregion
@@ -226,7 +226,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     internal COMRuntimeClassEntry(COMRegistry registry) : base(registry)
     {
-        RuntimeClassAssembly = string.Empty;
+        RuntimeTypeAssembly = string.Empty;
     }
     #endregion
 
@@ -255,7 +255,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
             m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(Database)).ToList();
             m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(Database)).ToList();
         }
-        RuntimeClassAssembly = reader.ReadString("rca");
+        RuntimeTypeAssembly = reader.ReadString("rca");
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -277,7 +277,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
             writer.WriteSerializableObjects("ints", m_interfaces);
             writer.WriteSerializableObjects("facts", m_factory_interfaces);
         }
-        writer.WriteOptionalAttributeString("rca", RuntimeClassAssembly);
+        writer.WriteOptionalAttributeString("rca", RuntimeTypeAssembly);
     }
     #endregion
 
@@ -327,7 +327,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
             && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
             Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
-            && PackageId == right.PackageId && Source == right.Source && RuntimeClassAssembly == right.RuntimeClassAssembly;
+            && PackageId == right.PackageId && Source == right.Source && RuntimeTypeAssembly == right.RuntimeTypeAssembly;
     }
 
     public override int GetHashCode()
@@ -335,7 +335,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
             ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
             ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
-            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode() ^ RuntimeClassAssembly.GetSafeHashCode();
+            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode() ^ RuntimeTypeAssembly.GetSafeHashCode();
     }
 
     public override string ToString()
@@ -360,11 +360,11 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     public Type GetRuntimeType()
     {
-        if (string.IsNullOrEmpty(RuntimeClassAssembly))
+        if (string.IsNullOrEmpty(RuntimeTypeAssembly))
         {
             return null;
         }
-        return Type.GetType($"{Name}, {RuntimeClassAssembly}");
+        return Type.GetType($"{Name}, {RuntimeTypeAssembly}");
     }
 
     public bool TryGetRuntimeType(out Type type)
