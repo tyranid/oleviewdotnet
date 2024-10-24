@@ -46,6 +46,44 @@ public sealed class RuntimeMetadata
         m_assemblies = assemblies;
     }
 
+    private static void AddType(Dictionary<Guid, Type> interfaces, Dictionary<string, Type> classes, Type t)
+    {
+        if (t.IsInterface)
+        {
+            foreach (var attr in t.GetCustomAttributesData())
+            {
+                if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
+                {
+                    if (!interfaces.ContainsKey(t.GUID))
+                    {
+                        interfaces[t.GUID] = t;
+
+                        foreach (var method in t.GetMethods())
+                        {
+                            AddType(interfaces, classes, method.ReturnType);
+                            foreach (var p in method.GetParameters())
+                            {
+                                AddType(interfaces, classes, p.ParameterType);
+                            }
+                        }
+
+                        if (t.IsConstructedGenericType)
+                        {
+                            foreach (var g in t.GetGenericArguments())
+                            {
+                                AddType(interfaces, classes, g);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (t.IsClass && t.IsPublic)
+        {
+            classes[t.FullName] = t;
+        }
+    }
+
     private static RuntimeMetadata LoadMetadata()
     {
         string base_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WinMetaData");
@@ -77,20 +115,7 @@ public sealed class RuntimeMetadata
                 Type[] types = asm.GetTypes();
                 foreach (Type t in types)
                 {
-                    if (t.IsInterface)
-                    {
-                        foreach (var attr in t.GetCustomAttributesData())
-                        {
-                            if (attr.AttributeType.FullName == "Windows.Foundation.Metadata.GuidAttribute")
-                            {
-                                interfaces[t.GUID] = t;
-                            }
-                        }
-                    }
-                    else if (t.IsClass && t.IsPublic)
-                    {
-                        classes[t.FullName] = t;
-                    }
+                    AddType(interfaces, classes, t);
                 }
             }
             catch
