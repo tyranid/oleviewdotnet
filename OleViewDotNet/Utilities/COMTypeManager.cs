@@ -19,6 +19,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.TypeLib.Instance;
+using OleViewDotNet.Viewers;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -98,7 +99,7 @@ public static class COMTypeManager
         {
             if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() is null)
             {
-                InterfaceViewers.InterfaceViewers.AddFactory(new InterfaceViewers.InstanceTypeViewerFactory(t));
+                InterfaceViewers.AddFactory(new InstanceTypeViewerFactory(t));
                 m_iidtypes.TryAdd(t.GUID, t);
             }
         }

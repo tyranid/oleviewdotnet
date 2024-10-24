@@ -22,7 +22,7 @@ using System;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.InterfaceViewers;
+namespace OleViewDotNet.Viewers;
 
 internal class MonikerViewerFactory : GenericTypeViewerFactory<IMoniker>
 {

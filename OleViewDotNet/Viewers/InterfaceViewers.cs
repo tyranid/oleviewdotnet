@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace OleViewDotNet.InterfaceViewers;
+namespace OleViewDotNet.Viewers;
 
 internal static class InterfaceViewers
 {

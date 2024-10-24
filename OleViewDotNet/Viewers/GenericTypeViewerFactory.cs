@@ -19,7 +19,7 @@ using OleViewDotNet.Forms;
 using OleViewDotNet.Utilities;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.InterfaceViewers;
+namespace OleViewDotNet.Viewers;
 
 /// <summary>
 /// Generic factory implementation for use if we have a predefined type

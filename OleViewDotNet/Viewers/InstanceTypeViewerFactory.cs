@@ -15,15 +15,28 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
+using OleViewDotNet.Forms;
 using OleViewDotNet.Utilities;
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.InterfaceViewers;
+namespace OleViewDotNet.Viewers;
 
-internal interface ITypeViewerFactory
+/// <summary>
+/// Generic factory implementation for use when we have a instantiated type object
+/// </summary>
+internal class InstanceTypeViewerFactory : BaseTypeViewerFactory
 {
-    Guid Iid { get; }
-    string IidName { get; }
-    Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject);
+    private readonly Type m_type;
+    public InstanceTypeViewerFactory(Type t)
+        : base(t)
+    {
+        m_type = t;
+    }
+
+    public override Control CreateInstance(COMRegistry registry,
+        ICOMClassEntry entry, string strObjName, ObjectEntry pObject)
+    {
+        return new TypedObjectViewer(registry, strObjName, pObject, m_type);
+    }
 }

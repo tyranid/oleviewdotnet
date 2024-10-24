@@ -19,26 +19,11 @@ using OleViewDotNet.Utilities;
 using System;
 using System.Windows.Forms;
 
-namespace OleViewDotNet.InterfaceViewers;
+namespace OleViewDotNet.Viewers;
 
-/// <summary>
-/// Simple base implementation to reduce the amount of code to write
-/// </summary>
-internal abstract class BaseTypeViewerFactory : ITypeViewerFactory
+internal interface ITypeViewerFactory
 {
-    public BaseTypeViewerFactory(string strName, Guid iid)
-    {
-        IidName = strName;
-        Iid = iid;
-    }
-
-    public BaseTypeViewerFactory(Type type)
-    {
-        IidName = type.Name;
-        Iid = type.GUID;
-    }
-
-    public string IidName { get; private set; }
-    public Guid Iid { get; private set; }
-    abstract public Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject);
+    Guid Iid { get; }
+    string IidName { get; }
+    Control CreateInstance(COMRegistry registry, ICOMClassEntry entry, string strObjName, ObjectEntry pObject);
 }

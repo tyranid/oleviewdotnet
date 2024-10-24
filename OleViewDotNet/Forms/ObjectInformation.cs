@@ -18,6 +18,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Viewers;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -141,7 +142,7 @@ internal partial class ObjectInformation : UserControl
             item.Tag = ent;
             item.SubItems.Add(ent.Iid.FormatGuid());
 
-            InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent);
+            ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
             if (factory is not null)
             {
                 item.SubItems.Add("Yes");
@@ -199,11 +200,11 @@ internal partial class ObjectInformation : UserControl
             try
             {
                 ObjectEntry obj = m_pEntry;
-                InterfaceViewers.ITypeViewerFactory factory = InterfaceViewers.InterfaceViewers.GetInterfaceViewer(ent);
+                ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
                 if (factory is null)
                 {
                     obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));
-                    factory = new InterfaceViewers.InstanceTypeViewerFactory(obj.Instance.GetType());
+                    factory = new InstanceTypeViewerFactory(obj.Instance.GetType());
                 }
 
                 if (factory is not null)
