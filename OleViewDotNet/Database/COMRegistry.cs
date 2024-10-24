@@ -688,6 +688,10 @@ public class COMRegistry
                 if (subkey is not null)
                 {
                     classes[name] = new COMRuntimeClassEntry(registry, package_id, name, subkey);
+                    if (RuntimeMetadata.Classes.TryGetValue(name, out Type t))
+                    {
+                        classes[name].RuntimeClassAssembly = t.Assembly.FullName;
+                    }
                 }
             }
         }

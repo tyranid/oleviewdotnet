@@ -149,8 +149,6 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         get; private set;
     }
 
-    public Type RuntimeType => Type.GetType($"{Name}, Windows, ContentType=WindowsRuntime");
-
     public bool SupportsRemoteActivation => false;
 
     /// <summary>
@@ -196,6 +194,8 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         }
     }
 
+    public string RuntimeClassAssembly { get; internal set; }
+
     public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
     #endregion
 
@@ -223,6 +223,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     internal COMRuntimeClassEntry(COMRegistry registry) : base(registry)
     {
+        RuntimeClassAssembly = string.Empty;
     }
     #endregion
 
@@ -251,6 +252,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
             m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(Database)).ToList();
             m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(Database)).ToList();
         }
+        RuntimeClassAssembly = reader.ReadString("rca");
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -272,6 +274,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
             writer.WriteSerializableObjects("ints", m_interfaces);
             writer.WriteSerializableObjects("facts", m_factory_interfaces);
         }
+        writer.WriteOptionalAttributeString("rca", RuntimeClassAssembly);
     }
     #endregion
 
@@ -350,6 +353,15 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
     public object CreateClassFactory(CLSCTX dwContext, string server, COMAuthInfo auth_info = null)
     {
         return CreateInstance(server, true);
+    }
+
+    public Type GetRuntimeType()
+    {
+        if (string.IsNullOrEmpty(RuntimeClassAssembly))
+        {
+            return null;
+        }
+        return Type.GetType($"{Name}, {RuntimeClassAssembly}", false);
     }
     #endregion
 
