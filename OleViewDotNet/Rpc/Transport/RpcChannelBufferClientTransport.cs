@@ -36,14 +36,10 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
 
     internal object GetObject() => m_object;
 
-    public RpcChannelBufferClientTransport(RpcChannelBufferClientTransportConfiguration config)
+    public RpcChannelBufferClientTransport(object obj, Guid interface_id)
     {
-        if (config is null)
-        {
-            throw new ArgumentNullException(nameof(config));
-        }
-
-        m_object = config.Instance ?? throw new ArgumentNullException(nameof(config.Instance));
+        m_object = obj ?? throw new ArgumentNullException(nameof(obj));
+        m_buffer = RpcChannelBuffer.FromObject(m_object, interface_id);
     }
 
     public bool Connected => m_buffer?.IsConnected() ?? false;
@@ -77,9 +73,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
 
     public void Bind(Guid interface_id, Version interface_version, Guid transfer_syntax_id, Version transfer_syntax_version)
     {
-        if (Connected)
-            throw new InvalidOperationException("Transport already connected.");
-        m_buffer = RpcChannelBuffer.FromObject(m_object, interface_id);
+        throw new NotSupportedException("Binding not supporting on this transport.");
     }
 
     public void Disconnect()
@@ -90,6 +84,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
     public void Dispose()
     {
         m_buffer?.Dispose();
+        m_buffer = null;
     }
 
     public RpcClientResponse SendReceive(int proc_num, Guid objuuid, NdrDataRepresentation data_representation, byte[] ndr_buffer, IReadOnlyCollection<NdrSystemHandle> handles)

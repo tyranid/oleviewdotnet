@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Win32.Rpc;
-using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
 using OleViewDotNet.Rpc.Transport;
 using System;
@@ -37,9 +36,7 @@ public abstract class BaseComRpcWrapper<T> : BaseComRpcWrapper, IDisposable wher
     private BaseComRpcWrapper(T client, object obj) : base(client.InterfaceId, typeof(T).Name)
     {
         _object = client;
-        RpcCOMClientTransportFactory.SetupFactory();
-        RpcChannelBufferClientTransportConfiguration config = new() { Instance = obj };
-        client.Connect($"{RpcCOMClientTransportFactory.COMBufferProtocol}:[proxy]", new RpcTransportSecurity() { Configuration = config });
+        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId));
     }
 
     protected BaseComRpcWrapper(object obj) : this(new T(), obj)

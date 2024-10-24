@@ -17,7 +17,6 @@
 using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
-using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Concurrent;
