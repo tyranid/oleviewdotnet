@@ -42,6 +42,10 @@ internal static class FormUtils
         {
             return $"0x{hr:X08} - {new Win32Exception(hr).Message}";
         }
+        else if (obj is string s)
+        {
+            return s;
+        }
         else if (obj is IEnumerable list)
         {
             return string.Join(", ", list.OfType<object>().ToArray());

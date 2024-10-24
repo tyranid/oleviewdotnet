@@ -1427,6 +1427,11 @@ internal partial class COMRegistryViewer : UserControl
                     createSpecialToolStripMenuItem.DropDownItems.Add(createFactoryInPerUserRuntimeBrokerToolStripMenuItem);
                 }
 
+                if (runtime_class is not null && !string.IsNullOrEmpty(runtime_class.RuntimeClassAssembly))
+                {
+                    createSpecialToolStripMenuItem.DropDownItems.Add(createRuntimeClassToolStripMenuItem);
+                }
+
                 contextMenuStrip.Items.Add(createSpecialToolStripMenuItem);
                 contextMenuStrip.Items.Add(refreshInterfacesToolStripMenuItem);
 
@@ -2367,6 +2372,28 @@ internal partial class COMRegistryViewer : UserControl
             }
         }
         return curr_node;
+    }
+
+    private void createRuntimeClassToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (GetSelectedClassEntry() is COMRuntimeClassEntry runtime_class)
+            {
+                Type runtime_type = runtime_class.GetRuntimeType();
+                if (runtime_type is null)
+                {
+                    return;
+                }
+
+                TypedObjectViewer viewer = new(m_registry, runtime_class.Name, runtime_type);
+                EntryPoint.GetMainForm(m_registry).HostControl(viewer, runtime_class.Name);
+            }
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,

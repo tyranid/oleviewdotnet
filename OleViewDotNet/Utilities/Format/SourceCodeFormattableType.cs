@@ -25,6 +25,7 @@ namespace OleViewDotNet.Utilities.Format;
 
 internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeFormattable
 {
+    private readonly bool m_runtime_type;
     bool ICOMSourceCodeFormattable.IsFormattable => true;
 
     private static string RemoveGenericPart(string name)
@@ -139,7 +140,8 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
     {
         if (member is MethodInfo mi)
         {
-            return $"{ConvertTypeToName(mi.ReturnType)} {mi.Name}({FormatParameters(mi.GetParameters())});";
+            string is_static = mi.IsStatic ? "static " : string.Empty;
+            return $"{is_static}{ConvertTypeToName(mi.ReturnType)} {mi.Name}({FormatParameters(mi.GetParameters())});";
         }
         else if (member is PropertyInfo prop)
         {
@@ -161,7 +163,8 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
                 ps = $"({FormatParameters(index_params)})";
             }
 
-            return $"{ConvertTypeToName(prop.PropertyType)} {prop.Name}{ps} {{ {string.Join(" ", propdirs)} }}";
+            string is_static = (prop.GetMethod?.IsStatic) ?? false ? "static " : string.Empty;
+            return $"{is_static}{ConvertTypeToName(prop.PropertyType)} {prop.Name}{ps} {{ {string.Join(" ", propdirs)} }}";
         }
         else if (member is FieldInfo fi)
         {
@@ -170,6 +173,10 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
         else if (member is EventInfo ei)
         {
             return $"event {ConvertTypeToName(ei.EventHandlerType)} {ei.Name};";
+        }
+        else if (member is ConstructorInfo ci)
+        {
+            return $"{ConvertTypeToName(ci.DeclaringType)}({FormatParameters(ci.GetParameters())});";
         }
         else
         {
@@ -215,7 +222,7 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
         return enum_type.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(e => e.Name, e => e.GetRawConstantValue());
     }
 
-    private static void FormatComType(COMSourceCodeBuilder builder, Type t)
+    private static void FormatComType(COMSourceCodeBuilder builder, Type t, bool runtime_type)
     {
         try
         {
@@ -230,11 +237,14 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
             }
             else if (t.IsClass)
             {
-                builder.AppendLine($"[Guid(\"{t.GUID}\")]");
-                ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
-                if (class_attr is not null)
+                if (!runtime_type)
                 {
-                    builder.AppendLine($"[ClassInterface(ClassInterfaceType.{class_attr.Value})]");
+                    builder.AppendLine($"[Guid(\"{t.GUID}\")]");
+                    ClassInterfaceAttribute class_attr = t.GetCustomAttribute<ClassInterfaceAttribute>();
+                    if (class_attr is not null)
+                    {
+                        builder.AppendLine($"[ClassInterface(ClassInterfaceType.{class_attr.Value})]");
+                    }
                 }
                 builder.AppendLine($"class {t.Name}");
             }
@@ -246,15 +256,15 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
 
             if (t.IsInterface || t.IsClass)
             {
-                MethodInfo[] methods = t.GetMethods().Where(
-                    m => !m.IsStatic && (m.Attributes & MethodAttributes.SpecialName) == 0).ToArray();
+                var methods = t.GetMethods().Where(
+                    m => (!m.IsStatic || runtime_type) && (m.Attributes & MethodAttributes.SpecialName) == 0 && m.DeclaringType == t).ToArray();
                 if (methods.Length > 0)
                 {
                     using (builder.PushIndent(4))
                     {
                         builder.AppendCommentLine("/* Methods */");
                         Dictionary<MethodInfo, string> name_mapping = new();
-                        if (t.IsClass)
+                        if (t.IsClass && !runtime_type)
                         {
                             name_mapping = MapMethodNamesToCOM(methods);
                         }
@@ -271,7 +281,7 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
                     }
                 }
 
-                var props = t.GetProperties().Where(p => !(p.GetMethod?.IsStatic ?? false));
+                var props = t.GetProperties().Where(p => runtime_type || !(p.GetMethod?.IsStatic ?? false));
                 if (props.Any())
                 {
                     using (builder.PushIndent(4))
@@ -293,6 +303,22 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
                         foreach (EventInfo ei in evs)
                         {
                             EmitMember(builder, ei);
+                        }
+                    }
+                }
+
+                if (t.IsClass && runtime_type)
+                {
+                    var cis = t.GetConstructors();
+                    if (cis.Length > 0)
+                    {
+                        using (builder.PushIndent(4))
+                        {
+                            builder.AppendCommentLine("/* Constructors */");
+                            foreach (ConstructorInfo ci in cis)
+                            {
+                                EmitMember(builder, ci);
+                            }
                         }
                     }
                 }
@@ -337,12 +363,13 @@ internal sealed class SourceCodeFormattableType : TypeDelegator, ICOMSourceCodeF
         }
     }
 
-    public SourceCodeFormattableType(Type type) : base(type)
+    public SourceCodeFormattableType(Type type, bool runtime_type = false) : base(type)
     {
+        m_runtime_type = runtime_type;
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
-        FormatComType(builder, typeImpl);
+        FormatComType(builder, typeImpl, m_runtime_type);
     }
 }

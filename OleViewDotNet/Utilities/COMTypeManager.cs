@@ -165,21 +165,13 @@ public static class COMTypeManager
             return m_iidtypes.GetOrAdd(intf.Iid, _ => type_info.ToType());
         }
 
-        if (intf.TryGetRuntimeType(out Type runtime_type))
-        {
-            if (runtime_type.IsPublic)
-            {
-                return m_iidtypes.GetOrAdd(intf.Iid, runtime_type);
-            }
-        }
-
         if (intf.ProxyClassEntry is null)
         {
             return null;
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        if (runtime_type is not null)
+        if (intf.TryGetRuntimeType(out Type runtime_type))
         {
             proxy.UpdateNames(runtime_type);
         }

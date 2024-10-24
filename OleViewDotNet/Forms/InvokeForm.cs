@@ -30,7 +30,7 @@ namespace OleViewDotNet.Forms;
 
 internal partial class InvokeForm : Form
 {
-    private readonly MethodInfo m_mi;
+    private readonly MethodBase m_mi;
     private readonly object m_pObject;
     private object m_ret;
     private readonly string m_objName;
@@ -49,7 +49,7 @@ internal partial class InvokeForm : Form
         return Marshal.IsComObject(obj) || obj is BaseComWrapper;
     }
 
-    public InvokeForm(COMRegistry registry, MethodInfo mi, object pObject, string objName)
+    public InvokeForm(COMRegistry registry, MethodBase mi, object pObject, string objName)
     {
         m_mi = mi;
         m_pObject = pObject;
@@ -170,7 +170,10 @@ internal partial class InvokeForm : Form
         RefreshParameters();
 
         Text = "Invoke " + m_mi.Name;
-        lblReturn.Text = "Return: " + m_mi.ReturnType.ToString();
+        if (m_mi is MethodInfo mi)
+        {
+            lblReturn.Text = "Return: " + mi.ReturnType.ToString();
+        }
     }
 
     private ParamData GetSelectedParam()
@@ -229,7 +232,14 @@ internal partial class InvokeForm : Form
 
         try
         {
-            m_ret = m_mi.Invoke(m_pObject, p);
+            if (m_mi is ConstructorInfo ci)
+            {
+                m_ret = ci.Invoke(p);
+            }
+            else
+            {
+                m_ret = m_mi.Invoke(m_pObject, p);
+            }
             if (m_ret is not null)
             {
                 lblReturn.Text = "Return: " + m_ret.GetType().ToString();
@@ -296,7 +306,16 @@ internal partial class InvokeForm : Form
 
     private void btnOpenObject_Click(object sender, EventArgs e)
     {
-        OpenObject(m_ret, m_mi.ReturnType, false);
+        Type type;
+        if (m_mi is MethodInfo mi)
+        {
+            type = mi.ReturnType;
+        }
+        else
+        {
+            type = m_mi.DeclaringType;
+        }
+        OpenObject(m_ret, type, false);
     }
 
     private void contextMenuStrip_Opening(object sender, CancelEventArgs e)

@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
 using OleViewDotNet.Utilities;
+using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,7 +31,7 @@ using System.Xml.Serialization;
 
 namespace OleViewDotNet.Database;
 
-public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity
+public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClassEntry>, IXmlSerializable, ICOMClassEntry, ICOMAccessSecurity, ICOMSourceCodeFormattable
 {
     #region Private Members
     private List<COMInterfaceInstance> m_interfaces;
@@ -363,11 +364,23 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         }
         return Type.GetType($"{Name}, {RuntimeClassAssembly}", false);
     }
+
+
     #endregion
 
     #region ICOMAccessSecurity Implementation
     COMSecurityDescriptor ICOMAccessSecurity.DefaultAccessPermission => new("O:SYG:SYD:");
 
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => new("O:SYG:SYD:");
+    #endregion
+
+    #region ICOMSourceCodeFormattable Implementation
+    bool ICOMSourceCodeFormattable.IsFormattable => GetRuntimeType() != null;
+
+    void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
+    {
+        ICOMSourceCodeFormattable fmt = new SourceCodeFormattableType(GetRuntimeType(), true);
+        fmt.Format(builder);
+    }
     #endregion
 }
