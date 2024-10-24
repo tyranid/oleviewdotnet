@@ -27,7 +27,7 @@ internal static class InterfaceViewers
 {
     private static readonly Lazy<Dictionary<Guid, ITypeViewerFactory>> m_viewfactory = new(LoadInterfaceViewers);
 
-    private static void LoadInterfaceViewersFromAssembly(Assembly a)
+    private static void LoadInterfaceViewersFromAssembly(Dictionary<Guid, ITypeViewerFactory> viewfactory, Assembly a)
     {
         Type[] types = a.GetTypes();
         foreach (Type t in types)
@@ -51,7 +51,7 @@ internal static class InterfaceViewers
                                 factory = (ITypeViewerFactory)con.Invoke(new object[0]);
                                 if (factory is not null)
                                 {
-                                    m_viewfactory.Value.Add(factory.Iid, factory);
+                                    viewfactory.Add(factory.Iid, factory);
                                 }
                             }
                         }
@@ -73,7 +73,7 @@ internal static class InterfaceViewers
         try
         {
             /* See if we have any registered in the current assembly */
-            LoadInterfaceViewersFromAssembly(Assembly.GetExecutingAssembly());
+            LoadInterfaceViewersFromAssembly(viewfactory, Assembly.GetExecutingAssembly());
         }
         catch
         {
@@ -88,7 +88,7 @@ internal static class InterfaceViewers
                 try
                 {
                     Assembly a = Assembly.LoadFile(p);
-                    LoadInterfaceViewersFromAssembly(a);
+                    LoadInterfaceViewersFromAssembly(viewfactory, a);
                 }
                 catch (Exception)
                 {

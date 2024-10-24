@@ -322,6 +322,38 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
     }
 
+    internal void UpdateNames(Type type)
+    {
+        if (Iid != type.GUID)
+        {
+            return;
+        }
+
+        Entry.Name = type.FullName;
+        var methods = type.GetMethods();
+        if (methods.Length != Procedures.Count)
+        {
+            return;
+        }
+        for (int i = 0; i < methods.Length; ++i)
+        {
+            Procedures[i].Name = methods[i].Name;
+            var ps_names = methods[i].GetParameters().Select(p => p.Name).ToList();
+            if (methods[i].ReturnType != typeof(void))
+            {
+                ps_names.Add("retval");
+            }
+            if (ps_names.Count != Procedures[i].Params.Count)
+            {
+                continue;
+            }
+            for (int j = 0; j < ps_names.Count; ++j)
+            {
+                Procedures[i].Params[j].Name = ps_names[j];
+            }
+        }
+    }
+
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();

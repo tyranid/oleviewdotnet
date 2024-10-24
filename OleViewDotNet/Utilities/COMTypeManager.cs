@@ -161,7 +161,15 @@ public static class COMTypeManager
         {
             using var type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
             using var type_info = type_lib.GetTypeInfoOfGuid(intf.Iid);
-            return type_info.ToType();
+            return m_iidtypes.GetOrAdd(intf.Iid, _ => type_info.ToType());
+        }
+
+        if (intf.TryGetRuntimeType(out Type runtime_type))
+        {
+            if (runtime_type.IsPublic)
+            {
+                return m_iidtypes.GetOrAdd(intf.Iid, runtime_type);
+            }
         }
 
         if (intf.ProxyClassEntry is null)
@@ -170,8 +178,11 @@ public static class COMTypeManager
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        m_iidtypes.TryAdd(intf.Iid, proxy.CreateClientType(scripting));
-        return GetInterfaceType(intf.Iid);
+        if (runtime_type is not null)
+        {
+            proxy.UpdateNames(runtime_type);
+        }
+        return m_iidtypes.GetOrAdd(intf.Iid, _ => proxy.CreateClientType(scripting));
     }
 
     public static Type GetInterfaceType(COMIPIDEntry ipid, bool scripting = false)
