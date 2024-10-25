@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
@@ -51,6 +52,10 @@ internal partial class ObjectInformation : UserControl
     public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
     {
         m_entry = entry;
+        if (pObject is BaseComWrapper wrapper)
+        {
+            pObject = wrapper.Unwrap();
+        }
         if (m_entry is null)
         {
             Guid clsid = COMUtilities.GetObjectClass(pObject);
@@ -203,8 +208,16 @@ internal partial class ObjectInformation : UserControl
                 ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
                 if (factory is null)
                 {
-                    obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));
-                    factory = new InstanceTypeViewerFactory(obj.Instance.GetType());
+                    Type type = COMTypeManager.GetInterfaceType(ent);
+                    if (typeof(RpcClientBase).IsAssignableFrom(type))
+                    {
+                        obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));
+                        factory = new InstanceTypeViewerFactory(obj.Instance.GetType());
+                    }
+                    else
+                    {
+                        factory = new InstanceTypeViewerFactory(type);
+                    }
                 }
 
                 if (factory is not null)
