@@ -290,10 +290,7 @@ internal partial class InvokeForm : Form
         Control c;
         if (info)
         {
-            if (obj is BaseComWrapper wrapper)
-            {
-                obj = wrapper.Unwrap();
-            }
+            obj = COMWrapperFactory.Unwrap(obj);
             c = new ObjectInformation(m_registry, null, m_objName, obj,
                 new(), m_registry.GetInterfacesForObject(obj).ToArray());
         }

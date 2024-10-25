@@ -1114,7 +1114,7 @@ public class COMRegistry
     /// <returns>List of interfaces supported</returns>
     public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(BaseComWrapper obj)
     {
-        obj._interfaces ??= GetInterfacesForObject(COMWrapperFactory.Unwrap(obj)).ToList();
+        obj._interfaces ??= GetInterfacesForObject(obj.Unwrap()).ToList();
         return obj._interfaces;
     }
 
