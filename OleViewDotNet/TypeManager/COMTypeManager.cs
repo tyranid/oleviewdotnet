@@ -30,7 +30,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Utilities;
+namespace OleViewDotNet.TypeManager;
 
 public static class COMTypeManager
 {

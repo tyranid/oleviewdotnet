@@ -16,7 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Processes;
-using OleViewDotNet.Utilities;
+using OleViewDotNet.TypeManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;

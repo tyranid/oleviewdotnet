@@ -18,7 +18,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using OleViewDotNet.Utilities;
+using OleViewDotNet.TypeManager;
 
 namespace OleViewDotNet.Interop;
 

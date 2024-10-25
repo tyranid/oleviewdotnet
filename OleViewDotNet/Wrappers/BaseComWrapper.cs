@@ -16,6 +16,7 @@
 
 using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Database;
+using OleViewDotNet.TypeManager;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

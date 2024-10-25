@@ -18,6 +18,7 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
