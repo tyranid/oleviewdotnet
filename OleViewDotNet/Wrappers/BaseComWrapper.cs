@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComWrapper : NdrComObject
+public abstract class BaseComWrapper : INdrComObject
 {
     protected COMRegistry _database;
     internal IEnumerable<COMInterfaceEntry> _interfaces;
@@ -40,6 +40,23 @@ public abstract class BaseComWrapper : NdrComObject
     {
         _database = database;
     }
+
+    INdrComObject INdrComObject.QueryInterface(Guid iid)
+    {
+        return QueryInterface(iid);
+    }
+
+    Guid INdrComObject.GetIid()
+    {
+        return Iid;
+    }
+
+    void IDisposable.Dispose()
+    {
+        OnDispose();
+    }
+
+    protected abstract void OnDispose();
 
     protected BaseComWrapper(Guid iid, string name)
     {
@@ -64,7 +81,7 @@ public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : 
         return _object;
     }
 
-    void IDisposable.Dispose()
+    protected override void OnDispose()
     {
         Marshal.ReleaseComObject(_object);
     }

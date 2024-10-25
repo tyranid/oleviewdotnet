@@ -96,20 +96,48 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
         return new(m_buffer.SendReceive(ndr_buffer, proc_num), new NtObject[0], this);
     }
 
-    NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(NdrComObject obj, Guid iid)
+    NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(INdrComObject obj, Guid iid)
     {
-        if (obj is BaseComWrapper wrapper)
+        object base_obj = null;
+        if (obj is BaseComRpcWrapper wrapper)
         {
-            return new NdrInterfacePointer(COMUtilities.MarshalObject(wrapper.Unwrap(), iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
+            base_obj = wrapper.Unwrap();
+        }
+        else if (obj is RpcClientBase client)
+        {
+            if (client.Transport is RpcChannelBufferClientTransport transport)
+            {
+                base_obj = transport.GetObject();
+            }
+        }
+
+        if (base_obj is not null)
+        {
+            return new NdrInterfacePointer(COMUtilities.MarshalObject(base_obj, iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
         }
 
         throw new NotSupportedException("Only support wrapped objects on this transport.");
     }
 
-    NdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
+    INdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
     {
         COMObjRef objref = COMObjRef.FromArray(intf.Data);
         return COMWrapperFactory.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database);
+    }
+
+    INdrComObject INdrTransportMarshaler.QueryComObject(INdrComObject obj, Guid iid)
+    {
+        if (obj is not RpcClientBase client || !client.Connected)
+        {
+            throw new ArgumentException("COM object must be a connected RPC client.");
+        }
+
+        if (client.Transport is not RpcChannelBufferClientTransport transport)
+        {
+            throw new ArgumentException("Transport must be a channel buffer client.");
+        }
+
+        return COMWrapperFactory.Wrap(transport.m_object, iid, m_database);
     }
 
     internal void SetDatabase(COMRegistry database)

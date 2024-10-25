@@ -445,8 +445,10 @@ public static class COMWrapperFactory
 
         return _public_types[intf_type.GUID];
     }
+    #endregion
 
-    private static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
+    #region Public Static Members
+    public static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
         if (obj is null)
         {
@@ -473,9 +475,7 @@ public static class COMWrapperFactory
         wrapper.SetDatabase(registry);
         return wrapper;
     }
-    #endregion
 
-    #region Public Static Members
     public static BaseComWrapper<T> Wrap<T>(object obj) where T : class
     {
         return (BaseComWrapper<T>)Wrap(obj, typeof(T));
