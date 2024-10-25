@@ -416,7 +416,8 @@ public class COMRegistry
                     COMInterfaceEntry entry = interfaces[pair.Key];
                     entry.InternalName = pair.Value.FullName;
                     m_iid_name_cache[pair.Key] = pair.Value.FullName;
-                    entry.RuntimeTypeAssembly = pair.Value.Assembly.FullName;
+                    entry.RuntimeTypeName = pair.Value.AssemblyQualifiedName;
+                    entry.IsWinRTType = true;
                 }
             }
         }
@@ -688,6 +689,10 @@ public class COMRegistry
                 if (subkey is not null)
                 {
                     classes[name] = new COMRuntimeClassEntry(registry, package_id, name, subkey);
+                    if (RuntimeMetadata.Classes.TryGetValue(name, out Type t))
+                    {
+                        classes[name].RuntimeTypeName = t.AssemblyQualifiedName;
+                    }
                 }
             }
         }

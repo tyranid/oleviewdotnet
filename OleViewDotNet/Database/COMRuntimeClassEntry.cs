@@ -195,10 +195,6 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         }
     }
 
-    public string RuntimeTypeAssembly { get; internal set; }
-
-    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeAssembly);
-
     public const string DefaultActivationPermission = "O:SYG:SYD:(A;;CCDCSW;;;AC)(A;;CCDCSW;;;PS)(A;;CCDCSW;;;SY)(A;;CCDCSW;;;LS)(A;;CCDCSW;;;NS)(XA;;CCDCSW;;;IU;(!(WIN://ISMULTISESSIONSKU)))S:(ML;;NX;;;LW)";
     #endregion
 
@@ -226,7 +222,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
 
     internal COMRuntimeClassEntry(COMRegistry registry) : base(registry)
     {
-        RuntimeTypeAssembly = string.Empty;
+        RuntimeTypeName = string.Empty;
     }
     #endregion
 
@@ -249,13 +245,13 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         ActivateInSharedBroker = reader.ReadBool("shared");
         PackageId = reader.ReadString("pkg");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
+        RuntimeTypeName = reader.ReadString("rca");
         InterfacesLoaded = reader.ReadBool("loaded");
         if (InterfacesLoaded)
         {
             m_interfaces = reader.ReadSerializableObjects("ints", () => new COMInterfaceInstance(Database)).ToList();
             m_factory_interfaces = reader.ReadSerializableObjects("facts", () => new COMInterfaceInstance(Database)).ToList();
         }
-        RuntimeTypeAssembly = reader.ReadString("rca");
     }
 
     void IXmlSerializable.WriteXml(XmlWriter writer)
@@ -272,12 +268,12 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         writer.WriteOptionalAttributeString("pkg", PackageId);
         writer.WriteEnum("src", Source);
         writer.WriteBool("loaded", InterfacesLoaded);
+        writer.WriteOptionalAttributeString("rca", RuntimeTypeName);
         if (InterfacesLoaded)
         {
             writer.WriteSerializableObjects("ints", m_interfaces);
             writer.WriteSerializableObjects("facts", m_factory_interfaces);
         }
-        writer.WriteOptionalAttributeString("rca", RuntimeTypeAssembly);
     }
     #endregion
 
@@ -327,7 +323,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid == right.Clsid && Name == right.Name && DllPath == right.DllPath && Server == right.Server
             && ActivationType == right.ActivationType && TrustLevel == right.TrustLevel &&
             Permissions.SDIsEqual(right.Permissions) && Threading == right.Threading && ActivateInSharedBroker == right.ActivateInSharedBroker
-            && PackageId == right.PackageId && Source == right.Source && RuntimeTypeAssembly == right.RuntimeTypeAssembly;
+            && PackageId == right.PackageId && Source == right.Source && RuntimeTypeName == right.RuntimeTypeName;
     }
 
     public override int GetHashCode()
@@ -335,7 +331,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         return Clsid.GetHashCode() ^ Name.GetSafeHashCode() ^ DllPath.GetSafeHashCode()
             ^ Server.GetSafeHashCode() ^ ActivationType.GetHashCode() ^ TrustLevel.GetHashCode()
             ^ Permissions.GetSDHashCode() ^ Threading.GetHashCode() ^ ActivateInSharedBroker.GetHashCode()
-            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode() ^ RuntimeTypeAssembly.GetSafeHashCode();
+            ^ PackageId.GetSafeHashCode() ^ Source.GetHashCode() ^ RuntimeTypeName.GetSafeHashCode();
     }
 
     public override string ToString()
@@ -357,29 +353,6 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
     {
         return CreateInstance(server, true);
     }
-
-    public Type GetRuntimeType()
-    {
-        if (string.IsNullOrEmpty(RuntimeTypeAssembly))
-        {
-            return null;
-        }
-        return Type.GetType($"{Name}, {RuntimeTypeAssembly}");
-    }
-
-    public bool TryGetRuntimeType(out Type type)
-    {
-        try
-        {
-            type = GetRuntimeType();
-            return type is not null;
-        }
-        catch
-        {
-            type = null;
-            return false;
-        }
-    }
     #endregion
 
     #region ICOMAccessSecurity Implementation
@@ -395,6 +368,38 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
     {
         ICOMSourceCodeFormattable fmt = new SourceCodeFormattableType(GetRuntimeType(), true);
         fmt.Format(builder);
+    }
+    #endregion
+
+    #region ICOMRuntimeType Implementation
+    public string RuntimeTypeName
+    {
+        get; internal set;
+    }
+
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeName);
+
+    public Type GetRuntimeType()
+    {
+        if (!HasRuntimeType)
+        {
+            return null;
+        }
+        return Type.GetType(RuntimeTypeName);
+    }
+
+    public bool TryGetRuntimeType(out Type type)
+    {
+        try
+        {
+            type = GetRuntimeType();
+            return type is not null;
+        }
+        catch
+        {
+            type = null;
+            return false;
+        }
     }
     #endregion
 }

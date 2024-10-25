@@ -668,7 +668,7 @@ internal partial class COMRegistryViewer : UserControl
     {
         var total_intfs = registry.Interfaces.Values.AsEnumerable();
         if (runtime_interfaces)
-            total_intfs = total_intfs.Where(i => i.HasRuntimeType);
+            total_intfs = total_intfs.Where(i => i.IsWinRTType);
 
         if (by_name)
         {
@@ -1427,7 +1427,7 @@ internal partial class COMRegistryViewer : UserControl
                     createSpecialToolStripMenuItem.DropDownItems.Add(createFactoryInPerUserRuntimeBrokerToolStripMenuItem);
                 }
 
-                if (runtime_class is not null && !string.IsNullOrEmpty(runtime_class.RuntimeTypeAssembly))
+                if (runtime_class.HasRuntimeType)
                 {
                     createSpecialToolStripMenuItem.DropDownItems.Add(createRuntimeClassToolStripMenuItem);
                 }

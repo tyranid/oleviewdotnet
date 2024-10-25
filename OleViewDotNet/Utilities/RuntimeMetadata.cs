@@ -48,6 +48,10 @@ public sealed class RuntimeMetadata
 
     private static void AddType(Dictionary<Guid, Type> interfaces, Dictionary<string, Type> classes, Type t)
     {
+        if (string.IsNullOrEmpty(t.FullName))
+        {
+            return;
+        }
         if (t.IsInterface)
         {
             foreach (var attr in t.GetCustomAttributesData())

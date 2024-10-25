@@ -20,7 +20,7 @@ namespace OleViewDotNet.Database;
 
 public interface ICOMRuntimeType
 {
-    string RuntimeTypeAssembly { get; }
+    string RuntimeTypeName { get; }
 
     bool HasRuntimeType { get; }
 

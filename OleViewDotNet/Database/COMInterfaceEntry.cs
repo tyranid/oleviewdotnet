@@ -123,15 +123,15 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
         return InternalName == right.InternalName && Iid == right.Iid && ProxyClsid == right.ProxyClsid
             && NumMethods == right.NumMethods && Base == right.Base && TypeLib == right.TypeLib
-            && TypeLibVersion == right.TypeLibVersion && RuntimeTypeAssembly == right.RuntimeTypeAssembly
-            && Source == right.Source;
+            && TypeLibVersion == right.TypeLibVersion && RuntimeTypeName == right.RuntimeTypeName
+            && Source == right.Source && IsWinRTType == right.IsWinRTType;
     }
 
     public override int GetHashCode()
     {
         return InternalName.GetSafeHashCode() ^ Iid.GetHashCode() ^ ProxyClsid.GetHashCode() ^ NumMethods.GetHashCode()
-            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeTypeAssembly.GetSafeHashCode()
-            ^ Source.GetHashCode();
+            ^ Base.GetSafeHashCode() ^ TypeLib.GetHashCode() ^ TypeLibVersion.GetSafeHashCode() ^ RuntimeTypeName.GetSafeHashCode()
+            ^ Source.GetHashCode() ^ IsWinRTType.GetHashCode();
     }
 
     public override string ToString()
@@ -164,29 +164,6 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
                 Marshal.Release(punk);
         }
     }
-
-    public Type GetRuntimeType()
-    {
-        if (!HasRuntimeType)
-        {
-            return null;
-        }
-        return Type.GetType($"{InternalName}, {RuntimeTypeAssembly}");
-    }
-
-    public bool TryGetRuntimeType(out Type type)
-    {
-        try
-        {
-            type = GetRuntimeType();
-            return type is not null;
-        }
-        catch
-        {
-            type = null;
-            return false;
-        }
-    }
     #endregion
 
     #region Constructors
@@ -217,8 +194,9 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
-        RuntimeTypeAssembly = type.Assembly.FullName;
+        RuntimeTypeName = type.AssemblyQualifiedName;
         Source = COMRegistryEntrySource.Metadata;
+        IsWinRTType = true;
     }
 
     public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
@@ -319,12 +297,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
     public bool HasProxy => ProxyClsid != Guid.Empty;
 
-    public string RuntimeTypeAssembly
-    {
-        get; internal set;
-    }
-
-    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeAssembly);
+    public bool IsWinRTType { get; internal set; }
     #endregion
 
     #region Static Members
@@ -403,11 +376,8 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         Base = reader.ReadString("base");
         TypeLibVersion = reader.ReadString("ver");
         TypeLib = reader.ReadGuid("tlib");
-        if (reader.ReadBool("rt"))
-        {
-            RuntimeTypeAssembly = "Unknown";
-        }
-        RuntimeTypeAssembly = reader.ReadString("rta");
+        IsWinRTType = reader.ReadBool("rt");
+        RuntimeTypeName = reader.ReadString("rta");
         Source = reader.ReadEnum<COMRegistryEntrySource>("src");
 
         if (!string.IsNullOrWhiteSpace(InternalName))
@@ -425,8 +395,41 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         writer.WriteOptionalAttributeString("base", Base);
         writer.WriteOptionalAttributeString("ver", TypeLibVersion);
         writer.WriteGuid("tlib", TypeLib);
-        writer.WriteOptionalAttributeString("rta", RuntimeTypeAssembly);
+        writer.WriteBool("rt", IsWinRTType);
+        writer.WriteOptionalAttributeString("rta", RuntimeTypeName);
         writer.WriteEnum("src", Source);
+    }
+    #endregion
+
+    #region ICOMRuntimeType Implementation
+    public string RuntimeTypeName
+    {
+        get; internal set;
+    }
+
+    public bool HasRuntimeType => !string.IsNullOrEmpty(RuntimeTypeName);
+
+    public Type GetRuntimeType()
+    {
+        if (!HasRuntimeType)
+        {
+            return null;
+        }
+        return Type.GetType(RuntimeTypeName);
+    }
+
+    public bool TryGetRuntimeType(out Type type)
+    {
+        try
+        {
+            type = GetRuntimeType();
+            return type is not null;
+        }
+        catch
+        {
+            type = null;
+            return false;
+        }
     }
     #endregion
 }
