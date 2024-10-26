@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.TypeManager;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -52,16 +53,16 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
         return pcbSize;
     }
 
-    public BaseComWrapper BindToObject(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riidResult)
+    public ICOMObjectWrapper BindToObject(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riidResult)
     {
         _object.BindToObject(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riidResult, out object ppvResult);
-        return COMWrapperFactory.Wrap(ppvResult, riidResult, _database);
+        return COMTypeManager.Wrap(ppvResult, riidResult, _database);
     }
 
-    public BaseComWrapper BindToStorage(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riid)
+    public ICOMObjectWrapper BindToStorage(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riid)
     {
         _object.BindToStorage(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riid, out object ppvObj);
-        return COMWrapperFactory.Wrap(ppvObj, riid, _database);
+        return COMTypeManager.Wrap(ppvObj, riid, _database);
     }
 
     public IMonikerWrapper Reduce(IBindCtxWrapper pbc, int dwReduceHowFar, ref IMoniker ppmkToLeft)

@@ -32,9 +32,9 @@ public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
     public Guid Iid { get; }
     public abstract object Unwrap();
 
-    public BaseComWrapper QueryInterface(Guid iid)
+    public ICOMObjectWrapper QueryInterface(Guid iid)
     {
-        return COMWrapperFactory.Wrap(Unwrap(), iid, _database);
+        return COMTypeManager.Wrap(Unwrap(), iid, _database);
     }
 
     internal virtual void SetDatabase(COMRegistry database)

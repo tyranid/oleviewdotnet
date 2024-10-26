@@ -16,6 +16,7 @@
 
 using System;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeManager;
 
 namespace OleViewDotNet.Wrappers;
 
@@ -25,15 +26,15 @@ public sealed class IClassFactoryWrapper : BaseComWrapper<IClassFactory>
     {
     }
 
-    public void CreateInstance(object pUnkOuter, Guid riid, out BaseComWrapper ppvObject)
+    public void CreateInstance(object pUnkOuter, Guid riid, out ICOMObjectWrapper ppvObject)
     {
         _object.CreateInstance(pUnkOuter, riid, out object obj);
-        ppvObject = COMWrapperFactory.Wrap(obj, riid, _database);
+        ppvObject = COMTypeManager.Wrap(obj, riid, _database);
     }
 
-    public BaseComWrapper CreateInstance(object pUnkOuter, Guid riid)
+    public ICOMObjectWrapper CreateInstance(object pUnkOuter, Guid riid)
     {
-        CreateInstance(pUnkOuter, riid, out BaseComWrapper obj);
+        CreateInstance(pUnkOuter, riid, out ICOMObjectWrapper obj);
         return obj;
     }
 

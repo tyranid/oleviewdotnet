@@ -14,11 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr.Marshal;
 using System;
 
 namespace OleViewDotNet.TypeManager;
 
-public interface ICOMObjectWrapper
+public interface ICOMObjectWrapper : INdrComObject
 {
     Guid Iid { get; }
     object Unwrap();

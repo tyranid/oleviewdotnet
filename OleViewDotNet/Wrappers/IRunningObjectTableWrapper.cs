@@ -15,7 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
-using System.Runtime.InteropServices;
+using OleViewDotNet.TypeManager;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Wrappers;
@@ -42,10 +42,10 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
         return _object.IsRunning(pmkObjectName.UnwrapTyped());
     }
 
-    public int GetObject(IMonikerWrapper pmkObjectName, out BaseComWrapper ppunkObject)
+    public int GetObject(IMonikerWrapper pmkObjectName, out ICOMObjectWrapper ppunkObject)
     {
         int hr = _object.GetObject(pmkObjectName.UnwrapTyped(), out object obj);
-        ppunkObject = COMWrapperFactory.Wrap(obj, COMKnownGuids.IID_IUnknown, _database);
+        ppunkObject = COMTypeManager.Wrap(obj, COMKnownGuids.IID_IUnknown, _database);
         return hr;
     }
 

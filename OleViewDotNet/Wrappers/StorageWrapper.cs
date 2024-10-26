@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeManager;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -25,11 +26,12 @@ namespace OleViewDotNet.Wrappers;
 /// <summary>
 /// A wrapper object for an IStorage.
 /// </summary>
-public sealed class StorageWrapper : IDisposable
+public sealed class StorageWrapper : COMObjectWrapper, IDisposable
 {
     private readonly IStorage _stg;
 
-    public StorageWrapper(IStorage stg)
+    public StorageWrapper(IStorage stg) 
+        : base(stg, typeof(IStorage).GUID, null)
     {
         _stg = stg;
     }
@@ -185,6 +187,4 @@ public sealed class StorageWrapper : IDisposable
         _stg.SetElementTimes(string.IsNullOrEmpty(name) ? null : name,
             DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
     }
-
-    public BaseComWrapper<IStorage> Object => COMWrapperFactory.Wrap<IStorage>(_stg);
 }

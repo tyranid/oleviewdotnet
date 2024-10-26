@@ -15,24 +15,27 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet.Ndr.Marshal;
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using System;
 
 namespace OleViewDotNet.TypeManager;
 
-public sealed class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
+public class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
 {
     private readonly object _obj;
+    private readonly COMRegistry _database;
 
-    public COMObjectWrapper(object obj, Guid iid)
+    public COMObjectWrapper(object obj, Guid iid, COMRegistry database)
     {
         _obj = obj;
+        _database = database;
         Iid = iid;
     }
 
     public Guid Iid { get; }
 
-    public object Unwrap()
+    public virtual object Unwrap()
     {
         return _obj;
     }
@@ -49,6 +52,6 @@ public sealed class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
     INdrComObject INdrComObject.QueryInterface(Guid iid)
     {
         using var unk = SafeComObjectHandle.FromObject(_obj, iid);
-        return new COMObjectWrapper(_obj, iid);
+        return new COMObjectWrapper(_obj, iid, _database);
     }
 }

@@ -120,7 +120,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
     INdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
     {
         COMObjRef objref = COMObjRef.FromArray(intf.Data);
-        return COMWrapperFactory.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database);
+        return COMTypeManager.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database);
     }
 
     INdrComObject INdrTransportMarshaler.QueryComObject(INdrComObject obj, Guid iid)
@@ -135,7 +135,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
             throw new ArgumentException("Transport must be a channel buffer client.");
         }
 
-        return COMWrapperFactory.Wrap(transport.m_object, iid, m_database);
+        return COMTypeManager.Wrap(transport.m_object, iid, m_database);
     }
 
     internal void SetDatabase(COMRegistry database)

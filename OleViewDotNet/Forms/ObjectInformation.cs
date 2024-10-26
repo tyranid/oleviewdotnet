@@ -54,7 +54,7 @@ internal partial class ObjectInformation : UserControl
     public ObjectInformation(COMRegistry registry, ICOMClassEntry entry, string objName, object pObject, Dictionary<string, string> properties, COMInterfaceEntry[] interfaces)
     {
         m_entry = entry;
-        pObject = COMWrapperFactory.Unwrap(pObject);
+        pObject = COMTypeManager.Unwrap(pObject);
         if (m_entry is null)
         {
             Guid clsid = COMUtilities.GetObjectClass(pObject);

@@ -20,6 +20,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -367,7 +368,7 @@ public static class COMUtilities
 
     public static object CreateInstanceFromFactory(IClassFactoryWrapper factory, Guid iid)
     {
-        factory.CreateInstance(null, iid, out BaseComWrapper ret);
+        factory.CreateInstance(null, iid, out ICOMObjectWrapper ret);
         return ret.Unwrap();
     }
 

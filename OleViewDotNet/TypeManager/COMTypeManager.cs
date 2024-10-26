@@ -14,10 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
+using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Viewers;
 using System;
@@ -32,12 +34,17 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeManager;
 
+public delegate ICOMObjectWrapper WrapObjectDelegate(object obj, Guid iid, COMRegistry database);
+public delegate void FlushIidDelegate(Guid iid);
+
 public static class COMTypeManager
 {
     #region Private Members
     private static readonly ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
     private static readonly ConcurrentDictionary<string, Assembly> m_typelibsname = new();
     private static readonly ConcurrentDictionary<Guid, Type> m_iidtypes = new();
+    private static FlushIidDelegate m_flush_iid;
+    private static WrapObjectDelegate m_wrap_obj;
 
     static COMTypeManager()
     {
@@ -295,12 +302,50 @@ public static class COMTypeManager
             return asm.GetTypes().FirstOrDefault(t => t.Name == name);
         }
     }
+
+    public static void SetWrapObject(WrapObjectDelegate wrap_obj)
+    {
+        m_wrap_obj = wrap_obj;
+    }
+
+    public static void SetFlushIid(FlushIidDelegate flush_iid)
+    {
+        m_flush_iid = flush_iid;
+    }
+
+    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry database)
+    {
+        if (m_wrap_obj is not null)
+        {
+            return m_wrap_obj(obj, iid, database);
+        }
+
+        return new COMObjectWrapper(obj, iid, database);
+    }
+
+    public static object Unwrap(object obj)
+    {
+        if (Marshal.IsComObject(obj))
+        {
+            return obj;
+        }
+        if (obj is ICOMObjectWrapper wrapper)
+        {
+            return wrapper.Unwrap();
+        }
+        if (obj is RpcClientBase client)
+        {
+            return client.Unwrap();
+        }
+        throw new ArgumentException("Unknown wrapped object.", nameof(obj));
+    }
     #endregion
 
     #region Internal Members
     internal static void FlushIidType(Guid iid)
     {
         m_iidtypes?.TryRemove(iid, out _);
+        m_flush_iid?.Invoke(iid);
     }
     #endregion
 }

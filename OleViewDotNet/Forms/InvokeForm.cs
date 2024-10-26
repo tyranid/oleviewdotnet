@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -290,7 +291,7 @@ internal partial class InvokeForm : Form
         Control c;
         if (info)
         {
-            obj = COMWrapperFactory.Unwrap(obj);
+            obj = COMTypeManager.Unwrap(obj);
             c = new ObjectInformation(m_registry, null, m_objName, obj,
                 new(), m_registry.GetInterfacesForObject(obj).ToArray());
         }

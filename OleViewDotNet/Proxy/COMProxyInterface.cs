@@ -24,6 +24,7 @@ using OleViewDotNet.Proxy.Editor;
 using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeLib.Parser;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
 using OleViewDotNet.Wrappers;
@@ -316,7 +317,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
         if (updated)
         {
-            COMWrapperFactory.FlushProxyType(Iid);
+            COMTypeManager.FlushIidType(Iid);
         }
     }
 
