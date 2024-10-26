@@ -21,6 +21,7 @@ using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Wrappers;
 using System;
@@ -99,16 +100,13 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
     NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(INdrComObject obj, Guid iid)
     {
         object base_obj = null;
-        if (obj is BaseComRpcWrapper wrapper)
+        if (obj is ICOMObjectWrapper wrapper)
         {
             base_obj = wrapper.Unwrap();
         }
         else if (obj is RpcClientBase client)
         {
-            if (client.Transport is RpcChannelBufferClientTransport transport)
-            {
-                base_obj = transport.GetObject();
-            }
+            base_obj = client.Unwrap();
         }
 
         if (base_obj is not null)

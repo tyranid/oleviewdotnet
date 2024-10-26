@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Wrappers;
 
-public abstract class BaseComWrapper : INdrComObject
+public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 {
     protected COMRegistry _database;
     internal IEnumerable<COMInterfaceEntry> _interfaces;
@@ -66,7 +66,7 @@ public abstract class BaseComWrapper : INdrComObject
     }
 }
 
-public abstract class BaseComWrapper<T> : BaseComWrapper, IDisposable where T : class
+public abstract class BaseComWrapper<T> : BaseComWrapper where T : class
 {
     protected readonly T _object;
 

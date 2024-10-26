@@ -21,11 +21,12 @@ using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
+using OleViewDotNet.Rpc.Transport;
 using System;
 
 namespace OleViewDotNet.Rpc;
 
-internal static class RpcUtilities
+internal static class RpcComUtils
 {
     public static RpcStringBinding GetRpcStringBinding(this COMStringBinding binding, bool epmapper = false)
     {
@@ -103,5 +104,21 @@ internal static class RpcUtilities
         byte[] ba = objref.ToArray();
         MInterfacePointer p = new(ba.Length, ba);
         return p;
+    }
+
+    public static RpcClientBase CreateClient(Type type, object obj)
+    {
+        RpcClientBase client = (RpcClientBase)Activator.CreateInstance(type);
+        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId));
+        return client;
+    }
+
+    public static object Unwrap(this RpcClientBase client)
+    {
+        if (client.Transport is not RpcChannelBufferClientTransport transport)
+        {
+            throw new ArgumentException("Unsupported RPC transport.");
+        }
+        return transport.GetObject();
     }
 }

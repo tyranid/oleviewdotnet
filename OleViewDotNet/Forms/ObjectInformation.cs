@@ -18,6 +18,7 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
+using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Viewers;
@@ -209,8 +210,8 @@ internal partial class ObjectInformation : UserControl
                     Type type = COMTypeManager.GetInterfaceType(ent);
                     if (typeof(RpcClientBase).IsAssignableFrom(type))
                     {
-                        obj = new ObjectEntry(m_registry, ent.Name, COMWrapperFactory.Wrap(m_pEntry.Instance, ent));
-                        factory = new InstanceTypeViewerFactory(obj.Instance.GetType());
+                        obj = new ObjectEntry(ent.Name, RpcComUtils.CreateClient(type, m_pEntry.Instance), m_interfaces);
+                        factory = new InstanceTypeViewerFactory(type);
                     }
                     else
                     {

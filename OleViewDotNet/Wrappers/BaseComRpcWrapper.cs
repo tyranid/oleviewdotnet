@@ -61,7 +61,7 @@ public abstract class BaseComRpcWrapper<T> : BaseComRpcWrapper, IDisposable wher
         return transport.GetObject();
     }
 
-    void IDisposable.Dispose()
+    protected override void OnDispose()
     {
         _object.Dispose();
     }
