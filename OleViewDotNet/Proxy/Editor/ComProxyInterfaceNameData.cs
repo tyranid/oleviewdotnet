@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +33,7 @@ public sealed class COMProxyInterfaceNameData
     [DataMember]
     public string Name { get; set; }
     [DataMember]
-    public List<COMProxyStructureNameData> Structures { get; set; }
+    public List<COMProxyComplexTypeNameData> ComplexTypes { get; set; }
     [DataMember]
     public List<COMProxyProcedureNameData> Procedures { get; set; }
 
@@ -46,21 +45,19 @@ public sealed class COMProxyInterfaceNameData
     {
         Iid = proxy.Iid;
         Name = proxy.Name;
-        Structures = proxy.ComplexTypes.OfType<NdrBaseStructureTypeReference>()
-            .Select((s, i) => new COMProxyStructureNameData(s, i)).ToList();
+        ComplexTypes = proxy.ComplexTypes.Select((s, i) => new COMProxyComplexTypeNameData(s, i)).ToList();
         Procedures = proxy.Procedures.Select((p,i) => new COMProxyProcedureNameData(p, i)).ToList();
     }
 
     internal void UpdateNames(COMProxyInterface proxy)
     {
-        if (Structures is not null)
+        if (ComplexTypes is not null)
         {
-            var structures = proxy.ComplexTypes.OfType<NdrBaseStructureTypeReference>().ToList();
-            foreach (var s in Structures)
+            foreach (var type in ComplexTypes)
             {
-                if (structures.Count > s.Index)
+                if (ComplexTypes.Count > type.Index)
                 {
-                    s.UpdateNames(structures[s.Index]);
+                    type.UpdateNames(proxy.ComplexTypes[type.Index]);
                 }
             }
         }

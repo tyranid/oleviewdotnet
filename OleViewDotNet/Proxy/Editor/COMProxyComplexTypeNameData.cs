@@ -14,27 +14,47 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace OleViewDotNet.Proxy.Editor;
 
 [DataContract]
-public sealed class COMProxyStructureMemberNameData
+public sealed class COMProxyComplexTypeNameData
 {
     [DataMember]
     public int Index { get; set; }
     [DataMember]
     public string Name { get; set; }
+    [DataMember]
+    public List<COMProxyComplexTypeMemberNameData> Members { get; set; }
 
-    public COMProxyStructureMemberNameData()
+    public COMProxyComplexTypeNameData()
     {
     }
 
-    internal COMProxyStructureMemberNameData(NdrStructureMember member, int index)
+    internal COMProxyComplexTypeNameData(COMProxyComplexType type, int index)
     {
         Index = index;
-        Name = member.Name;
+        Name = type.Name;
+        Members = type.Members.Select((m, i) => new COMProxyComplexTypeMemberNameData(m, i)).ToList();
+    }
+
+    internal void UpdateNames(COMProxyComplexType type)
+    {
+        type.Name = Name;
+        if (Members is not null)
+        {
+            var members = type.Members.ToList();
+            foreach (var member in Members)
+            {
+                if (members.Count > member.Index)
+                {
+                    members[member.Index].Name = member.Name;
+                }
+            }
+        }
     }
 }
 
