@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.14'
+ModuleVersion = '1.15'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -35,7 +35,7 @@ Author = 'James Forshaw'
 CompanyName = 'None'
 
 # Copyright statement for this module
-Copyright = 'James Forshaw (c) 2023'
+Copyright = 'James Forshaw (c) 2024'
 
 # Description of the functionality provided by this module
 Description = 'PowerShell module for OleViewDotNet'
@@ -92,12 +92,10 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.14
+        ReleaseNotes = 'v1.15
 ----
-* Fixes for Windows 11.
-* Added "default" database.
-* Reimplemented settings.
-* Better support for ARM64 systems.
+* Better support for COM proxies including creating an RPC client for them.
+* Editing of COM proxy names.
 '
 
     } # End of PSData hashtable

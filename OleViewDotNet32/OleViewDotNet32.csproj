@@ -13,10 +13,10 @@
         <Company>None</Company>
         <Product>OleViewDotNet</Product>
         <FileVersion>1.0.0.0</FileVersion>
-        <Version>1.14</Version>
+        <Version>1.15</Version>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-        <Copyright>Copyright © James Forshaw 2014-2023</Copyright>
+        <Copyright>Copyright © James Forshaw 2014-2024</Copyright>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <BaseOutputPath>..\bin</BaseOutputPath>
