@@ -51,7 +51,7 @@ public sealed class COMProxyInterfaceNameData
         Procedures = proxy.Procedures.Select((p,i) => new COMProxyProcedureNameData(p, i)).ToList();
     }
 
-    internal void UpdateNames(COMProxyInterface proxy, ref bool updated)
+    internal void UpdateNames(COMProxyInterface proxy)
     {
         if (Structures is not null)
         {
@@ -60,7 +60,7 @@ public sealed class COMProxyInterfaceNameData
             {
                 if (structures.Count > s.Index)
                 {
-                    s.UpdateNames(structures[s.Index], ref updated);
+                    s.UpdateNames(structures[s.Index]);
                 }
             }
         }
@@ -72,7 +72,7 @@ public sealed class COMProxyInterfaceNameData
             {
                 if (procedures.Count > p.Index)
                 {
-                    p.UpdateNames(procedures[p.Index], ref updated);
+                    p.UpdateNames(procedures[p.Index]);
                 }
             }
         }
@@ -112,15 +112,12 @@ public sealed class COMProxyInterfaceNameData
 
     public string Export(COMProxyInterfaceNameDataExportFormat format)
     {
-        switch (format)
+        return format switch
         {
-            case COMProxyInterfaceNameDataExportFormat.Json:
-                return ToJson();
-            case COMProxyInterfaceNameDataExportFormat.Xml:
-                return ToXml();
-            default:
-                throw new ArgumentException("Unknown output format.", nameof(format));
-        }
+            COMProxyInterfaceNameDataExportFormat.Json => ToJson(),
+            COMProxyInterfaceNameDataExportFormat.Xml => ToXml(),
+            _ => throw new ArgumentException("Unknown output format.", nameof(format)),
+        };
     }
 
     public static COMProxyInterfaceNameData Parse(string names)

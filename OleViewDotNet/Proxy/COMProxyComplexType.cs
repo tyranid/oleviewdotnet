@@ -23,8 +23,12 @@ namespace OleViewDotNet.Proxy;
 
 public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable, ICOMSourceCodeEditable
 {
+    #region Private Members
+    private readonly COMProxyInterface m_intf;
+    #endregion
+
     #region Public Properties
-    public override string Name => Entry.Name;
+    public override string Name { get => Entry.Name; set => Entry.Name = m_intf?.CheckName(Entry.Name, value) ?? value ?? Entry.Name; }
 
     public NdrComplexTypeReference Entry { get; }
 
@@ -32,34 +36,28 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
 
     public bool IsUnion => Entry is NdrUnionTypeReference;
 
-    bool ICOMSourceCodeFormattable.IsFormattable => true;
+    public IReadOnlyList<COMProxyComplexTypeMember> Members { get; }
 
-    string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
+    bool ICOMSourceCodeFormattable.IsFormattable => true;
 
     bool ICOMSourceCodeEditable.IsEditable => true;
 
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members
-    {
-        get
-        {
-            List<ICOMSourceCodeEditable> ret = new();
-            if (Entry is NdrBaseStructureTypeReference struct_type)
-            {
-                ret.AddRange(struct_type.Members.Select(m => new COMSourceCodeEditableObject(() => m.Name, n => m.Name = n)));
-            }
-            else if (Entry is NdrUnionTypeReference union_type)
-            {
-                ret.AddRange(union_type.Arms.Arms.Select(m => new COMSourceCodeEditableObject(() => m.Name, n => m.Name = n)));
-            }
-            return ret.AsReadOnly();
-        }
-    }
+    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Members;
     #endregion
 
     #region Internal Members
-    internal COMProxyComplexType(NdrComplexTypeReference entry)
+    internal COMProxyComplexType(NdrComplexTypeReference entry, COMProxyInterface intf = null)
     {
         Entry = entry;
+        if (Entry is NdrUnionTypeReference union)
+        {
+            Members = union.Arms.Arms.Select(a => new COMProxyComplexTypeUnionArm(a, m_intf)).ToList().AsReadOnly();
+        }
+        else if (Entry is NdrBaseStructureTypeReference st)
+        {
+            Members = st.Members.Select(m => new COMProxyComplexTypeStructMember(m, m_intf)).ToList().AsReadOnly();
+        }
+        m_intf = intf;
     }
     #endregion
 

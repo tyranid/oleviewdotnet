@@ -14,9 +14,26 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Ndr;
+
 namespace OleViewDotNet.Proxy;
 
-public abstract class COMProxyTypeInfo
+public sealed class COMProxyComplexTypeStructMember : COMProxyComplexTypeMember
 {
-    public virtual string Name { get; set; }
+    internal COMProxyComplexTypeStructMember(NdrStructureMember member, COMProxyInterface intf) : base(intf)
+    {
+        Entry = member;
+    }
+
+    protected override string GetName()
+    {
+        return Entry.Name;
+    }
+
+    protected override void SetName(string name)
+    {
+        Entry.Name = name;
+    }
+
+    public NdrStructureMember Entry { get; }
 }

@@ -35,33 +35,25 @@ public sealed class COMProxyProcedureNameData
     {
     }
 
-    internal COMProxyProcedureNameData(NdrProcedureDefinition procedure, int index)
+    internal COMProxyProcedureNameData(COMProxyInterfaceProcedure procedure, int index)
     {
         Index = index;
         Name = procedure.Name;
-        Parameters = procedure.Params.Select((p, i) => new COMProxyProcedureParameterNameData(p, i)).ToList();
+        Parameters = procedure.Parameters.Select((p, i) => new COMProxyProcedureParameterNameData(p, i)).ToList();
     }
 
-    internal void UpdateNames(NdrProcedureDefinition procedure, ref bool updated)
+    internal void UpdateNames(COMProxyInterfaceProcedure procedure)
     {
-        if (Name is not null && procedure.Name != Name)
-        {
-            procedure.Name = Name;
-            updated = true;
-        }
-
+        procedure.Name = Name;
+        
         if (Parameters is not null)
         {
-            var ps = procedure.Params;
+            var ps = procedure.Parameters;
             foreach (var p in Parameters)
             {
                 if (ps.Count > p.Index)
                 {
-                    if (p.Name is not null && ps[p.Index].Name != p.Name)
-                    {
-                        ps[p.Index].Name = p.Name;
-                        updated = true;
-                    }
+                    ps[p.Index].Name = p.Name;
                 }
             }
         }

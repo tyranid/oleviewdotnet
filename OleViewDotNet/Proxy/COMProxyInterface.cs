@@ -41,22 +41,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     private bool m_names_from_type;
     private Type m_type;
     private Type m_scripting_type;
-
-    private sealed class EditableParameter : COMSourceCodeEditableObject
-    {
-        public EditableParameter(NdrProcedureParameter p) 
-            : base(() => p.Name, n => p.Name = n)
-        {
-        }
-    }
-
-    private sealed class EditableProcedure : COMSourceCodeEditableObject
-    {
-        public EditableProcedure(NdrProcedureDefinition proc) 
-            : base(() => proc.Name, n => proc.Name = n, proc.Params.Select(p => new EditableParameter(p)))
-        {
-        }
-    }
+    private bool m_modified;
 
     private static COMProxyInterface GetFromTypeLibrary(COMTypeLibParser type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
     {
@@ -141,13 +126,13 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             {
                 ps_names.Add("retval");
             }
-            if (ps_names.Count != Procedures[i].Params.Count)
+            if (ps_names.Count != Procedures[i].Parameters.Count)
             {
                 continue;
             }
             for (int j = 0; j < ps_names.Count; ++j)
             {
-                Procedures[i].Params[j].Name = ps_names[j];
+                Procedures[i].Parameters[j].Name = ps_names[j];
             }
         }
     }
@@ -165,13 +150,14 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
     }
 
-    public Type CreateClientType(ref Type type, RpcClientBuilderArguments args)
+    private Type CreateClientType(ref Type type, RpcClientBuilderArguments args)
     {
         if(type is not null)
         {
             return type;
         }
 
+        m_modified = false;
         type = RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider(), ignore_cache: true)
             .GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
         return type;
@@ -182,7 +168,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     /// <summary>
     /// The name of the proxy interface.
     /// </summary>
-    public override string Name => Entry.Name;
+    public override string Name
+    {
+        get => Entry.Name;
+        set => Entry.Name = CheckName(Entry.Name, value);
+    }
     /// <summary>
     /// The IID of the proxy interface.
     /// </summary>
@@ -202,11 +192,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     /// <summary>
     /// List of parsed procedures for the interface.
     /// </summary>
-    public IList<NdrProcedureDefinition> Procedures => Entry.Procedures;
+    public IReadOnlyList<COMProxyInterfaceProcedure> Procedures { get; }
 
     public NdrComProxyDefinition Entry => RpcProxy.Proxy;
 
-    public IReadOnlyList<NdrComplexTypeReference> ComplexTypes => RpcProxy.ComplexTypes.ToList().AsReadOnly();
+    public IReadOnlyList<COMProxyComplexType> ComplexTypes { get; }
 
     public string Path => ClassEntry.DefaultServer;
 
@@ -220,12 +210,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     Guid ICOMGuid.ComGuid => Iid;
 
-    string ICOMSourceCodeEditable.Name { get => Entry.Name; set => Entry.Name = value; }
-
     bool ICOMSourceCodeEditable.IsEditable => true;
 
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members =>
-        Procedures.Select(p => new EditableProcedure(p)).ToList().AsReadOnly();
+    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Procedures;
     #endregion
 
     #region Internal Members
@@ -249,6 +236,26 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             m_proxies.Add(Iid, this);
         }
+        Procedures = Entry.Procedures.Select(p => new COMProxyInterfaceProcedure(this, p)).ToList().AsReadOnly();
+        ComplexTypes = rpc_proxy.ComplexTypes.Select(c => new COMProxyComplexType(c, this)).ToList().AsReadOnly();
+    }
+
+    internal string CheckName(string name, string new_name)
+    {
+        if (string.IsNullOrEmpty(new_name))
+        {
+            return name;
+        }
+
+        if (!m_modified && name != new_name)
+        {
+            m_modified = true;
+            m_type = null;
+            m_scripting_type = null;
+            COMTypeManager.FlushIidType(Iid);
+        }
+
+        return new_name;
     }
     #endregion
 
@@ -320,8 +327,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #region Public Methods
     public RpcClientBase CreateClient(bool scripting = false)
     {
-        var args = CreateBuilderArgs(scripting);
-        return RpcClientBuilder.CreateClient(RpcProxy, args);
+        Type type = CreateClientType(scripting);
+        return (RpcClientBase)Activator.CreateInstance(type);
     }
 
     public RpcClientBase ConnectClient(object obj, bool scripting = false)
@@ -364,22 +371,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             throw new ArgumentException("Names object doesn't match the proxy identity");
         }
 
-        bool updated = false;
-
-        if (names.Name is not null && Entry.Name != names.Name)
-        {
-            Entry.Name = names.Name;
-            updated = true;
-        }
-
-        names.UpdateNames(this, ref updated);
-
-        if (updated)
-        {
-            COMTypeManager.FlushIidType(Iid);
-            m_type = null;
-            m_scripting_type = null;
-        }
+        Name = names.Name;
+        names.UpdateNames(this);
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
@@ -389,7 +382,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             foreach (var type in ComplexTypes)
             {
-                builder.AppendLine(formatter.FormatComplexType(type).TrimEnd());
+                builder.AppendLine(formatter.FormatComplexType(type.Entry).TrimEnd());
             }
             builder.AppendLine();
         }

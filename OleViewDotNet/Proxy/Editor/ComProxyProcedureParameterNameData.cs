@@ -32,7 +32,7 @@ public sealed class COMProxyProcedureParameterNameData
         Name = string.Empty;
     }
 
-    internal COMProxyProcedureParameterNameData(NdrProcedureParameter parameter, int index)
+    internal COMProxyProcedureParameterNameData(COMProxyInterfaceProcedureParameter parameter, int index)
     {
         Name = parameter.Name;
         Index = index;
