@@ -14,13 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-
 namespace OleViewDotNet.Utilities.Format;
 
 public interface ICOMSourceCodeEditable
 {
-    string Name { get; set; }
-    IReadOnlyList<ICOMSourceCodeEditable> Members { get; }
     bool IsEditable { get; }
+    void Update();
 }

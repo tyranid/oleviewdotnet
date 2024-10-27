@@ -3924,3 +3924,30 @@ function Get-ComRuntimeType {
         }
     }
 }
+
+<#
+.SYNOPSIS
+Edit a source code object.
+.DESCRIPTION
+This cmdlet allows you to edit a source code object such as a proxy.
+.PARAMETER Proxy
+The proxy to edit.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Edit-ComSourceCode $proxy
+Edit a COM proxy.
+#>
+function Edit-ComSourceCode {
+    [CmdletBinding()]
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [OleViewDotNet.Utilities.Format.ICOMSourceCodeEditable]$InputObject
+    )
+
+    $frm = [OleViewDotNet.Forms.EditSourceCodeForm]::new($InputObject)
+    $frm.ShowDialog() | Out-Null
+    $frm.Dispose()
+}

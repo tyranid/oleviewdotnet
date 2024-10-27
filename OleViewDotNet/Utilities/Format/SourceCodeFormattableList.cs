@@ -19,7 +19,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Utilities.Format;
 
-internal sealed class SourceCodeFormattableList : ICOMSourceCodeFormattable
+internal sealed class SourceCodeFormattableList : ICOMSourceCodeFormattable, ICOMSourceCodeEditable
 {
     private readonly List<ICOMSourceCodeFormattable> m_objs;
 
@@ -36,6 +36,29 @@ internal sealed class SourceCodeFormattableList : ICOMSourceCodeFormattable
         {
             obj.Format(builder);
             builder.AppendLine();
+        }
+    }
+
+    bool ICOMSourceCodeEditable.IsEditable
+    {
+        get
+        {
+            foreach (var obj in m_objs.OfType<ICOMSourceCodeEditable>())
+            {
+                if (obj.IsEditable)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    void ICOMSourceCodeEditable.Update()
+    {
+        foreach (var obj in m_objs.OfType<ICOMSourceCodeEditable>())
+        {
+            obj.Update();
         }
     }
 }

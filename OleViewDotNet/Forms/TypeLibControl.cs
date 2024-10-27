@@ -191,7 +191,7 @@ internal partial class TypeLibControl : UserControl
 
     private string GetTextFromTag(object tag)
     {
-        m_builder.Reset();
+        m_builder.Clear();
         if (tag is ICOMSourceCodeFormattable formattable)
         {
             formattable.Format(m_builder);

@@ -212,7 +212,16 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     bool ICOMSourceCodeEditable.IsEditable => true;
 
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Procedures;
+    void ICOMSourceCodeEditable.Update()
+    {
+        if (!m_modified)
+        {
+            m_modified = true;
+            m_type = null;
+            m_scripting_type = null;
+            COMTypeManager.FlushIidType(Iid);
+        }
+    }
     #endregion
 
     #region Internal Members
@@ -378,17 +387,34 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
-        if (!builder.InterfacesOnly && ComplexTypes.Count > 0)
+        if (formatter is INdrFormatterBuilder format_builder)
         {
-            foreach (var type in ComplexTypes)
+            if (!builder.InterfacesOnly && ComplexTypes.Count > 0)
             {
-                builder.AppendLine(formatter.FormatComplexType(type.Entry).TrimEnd());
+                foreach (var type in ComplexTypes)
+                {
+                    format_builder.FormatComplexType(builder, type.Entry);
+                }
+                builder.AppendLine();
             }
+
+            format_builder.FormatComProxy(builder, Entry);
             builder.AppendLine();
         }
+        else
+        {
+            if (!builder.InterfacesOnly && ComplexTypes.Count > 0)
+            {
+                foreach (var type in ComplexTypes)
+                {
+                    builder.AppendLine(formatter.FormatComplexType(type.Entry).TrimEnd());
+                }
+                builder.AppendLine();
+            }
 
-        builder.AppendLine(formatter.FormatComProxy(Entry).TrimEnd());
-        builder.AppendLine();
+            builder.AppendLine(formatter.FormatComProxy(Entry).TrimEnd());
+            builder.AppendLine();
+        }
     }
     #endregion
 }

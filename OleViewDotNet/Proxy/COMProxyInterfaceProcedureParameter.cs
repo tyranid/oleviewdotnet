@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyInterfaceProcedureParameter : ICOMSourceCodeEditable
+public sealed class COMProxyInterfaceProcedureParameter
 {
     private readonly COMProxyInterface m_intf;
 
@@ -42,8 +42,4 @@ public sealed class COMProxyInterfaceProcedureParameter : ICOMSourceCodeEditable
     public bool IsInOut => Entry.IsInOut;
 
     public NdrProcedureParameter Entry { get; }
-
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Array.Empty<ICOMSourceCodeEditable>();
-
-    bool ICOMSourceCodeEditable.IsEditable => true;
 }

@@ -31,7 +31,7 @@ using System.Xml.Serialization;
 namespace OleViewDotNet.Database;
 
 public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry>, IXmlSerializable,
-    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable, ICOMRuntimeType
+    ICOMGuid, ICOMSourceCodeFormattable, ICOMSourceCodeParsable, ICOMRuntimeType, ICOMSourceCodeEditable
 {
     #region Private Members
     private ICOMSourceCodeFormattable m_formattable;
@@ -429,6 +429,27 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         {
             type = null;
             return false;
+        }
+    }
+    #endregion
+
+    #region ICOMSourceCodeEditable Implementation
+    bool ICOMSourceCodeEditable.IsEditable
+    {
+        get
+        {
+            if (m_formattable is ICOMSourceCodeEditable editable)
+            {
+                return editable.IsEditable;
+            }
+            return false;
+        }
+    }
+    void ICOMSourceCodeEditable.Update()
+    {
+        if (m_formattable is ICOMSourceCodeEditable editable)
+        {
+            editable.Update();
         }
     }
     #endregion

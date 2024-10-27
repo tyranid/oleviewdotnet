@@ -14,10 +14,13 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using ICSharpCode.TextEditor.Document;
+using NtApiDotNet.Ndr;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
@@ -28,11 +31,21 @@ internal partial class SourceCodeViewerControl : UserControl
     private COMRegistry m_registry;
     private object m_selected_obj;
     private ICOMSourceCodeFormattable m_formattable_obj;
-    private ICOMSourceCodeEditable m_editable_obj;
     private COMSourceCodeBuilderType m_output_type;
     private bool m_hide_comments;
     private bool m_interfaces_only;
     private bool m_hide_parsing_options;
+
+    private class NdrTextMarker : TextMarker
+    {
+        public INdrNamedObject Tag { get; }
+
+        public NdrTextMarker(int offset, int length, TextMarkerType textMarkerType, INdrNamedObject tag)
+            : base(offset, length, textMarkerType)
+        {
+            Tag = tag;
+        }
+    }
 
     public SourceCodeViewerControl()
     {
@@ -45,12 +58,16 @@ internal partial class SourceCodeViewerControl : UserControl
         toolStripMenuItemInterfacesOnly.Checked = true;
         toolStripMenuItemIDLOutputType.Checked = true;
         m_output_type = COMSourceCodeBuilderType.Idl;
-        SetText(string.Empty);
+        SetText(string.Empty, Array.Empty<NdrFormatterNameTag>());
     }
 
-    private void SetText(string text)
+    private void SetText(string text, IEnumerable<NdrFormatterNameTag> tags)
     {
         textEditor.Text = text.TrimEnd();
+        foreach (var tag in tags)
+        {
+            textEditor.Document.MarkerStrategy.AddMarker(new NdrTextMarker(tag.Offset, tag.Length, TextMarkerType.Underlined, tag.Entry));
+        }
         textEditor.Refresh();
     }
 
@@ -99,7 +116,7 @@ internal partial class SourceCodeViewerControl : UserControl
                 "No formattable object selected"
                 : $"'{m_selected_obj}' is not formattable.");
         }
-        SetText(builder.ToString());
+        SetText(builder.ToString(), builder.Tags);
     }
 
     internal object SelectedObject
@@ -127,10 +144,14 @@ internal partial class SourceCodeViewerControl : UserControl
             }
 
             parseSourceCodeToolStripMenuItem.Enabled = m_formattable_obj is not null && !IsParsed(m_formattable_obj);
-            m_editable_obj = value as ICOMSourceCodeEditable;
-            editNamesToolStripMenuItem.Enabled = m_editable_obj is not null;
             Format();
         }
+    }
+
+    internal bool InterfacesOnly
+    {
+        get => m_interfaces_only;
+        set => m_interfaces_only = value;
     }
 
     private void OnHideParsingOptionsChanged()
@@ -243,15 +264,48 @@ internal partial class SourceCodeViewerControl : UserControl
         }
     }
 
-    private void editNamesToolStripMenuItem_Click(object sender, EventArgs e)
+    private NdrTextMarker GetTagAtCaret()
     {
-        if (m_editable_obj is not null)
+        var tags = textEditor.Document.MarkerStrategy.GetMarkers(textEditor.ActiveTextAreaControl.Caret.Position);
+        if (tags.Count > 0)
         {
-            using var form = new SourceCodeNameEditor(m_editable_obj);
-            if (form.ShowDialog() == DialogResult.OK)
+            return (NdrTextMarker)tags[0];
+        }
+        return null;
+    }
+
+    private void contextMenuStrip_Opening(object sender, CancelEventArgs e)
+    {
+        editNameToolStripMenuItem.Enabled = GetTagAtCaret() is not null;
+    }
+
+    private void editNameToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        NdrTextMarker tag = GetTagAtCaret();
+        if (tag is null)
+        {
+            return;
+        }
+
+        using GetTextForm frm = new(tag.Tag.Name);
+        frm.Text = "Edit Proxy Name";
+        if (frm.ShowDialog(this) == DialogResult.OK)
+        {
+            tag.Tag.Name = frm.Data;
+            textEditor.Document.ReadOnly = false;
+            textEditor.Document.Replace(tag.Offset, tag.Length, frm.Data);
+            textEditor.Document.MarkerStrategy.AddMarker(new NdrTextMarker(tag.Offset, frm.Data.Length, TextMarkerType.Underlined, tag.Tag));
+            textEditor.Document.ReadOnly = true;
+            textEditor.Refresh();
+            if (m_selected_obj is ICOMSourceCodeEditable editable)
             {
-                Format();
+                editable.Update();
             }
         }
+    }
+
+    private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        Format();
     }
 }

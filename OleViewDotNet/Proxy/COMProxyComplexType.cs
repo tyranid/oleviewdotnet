@@ -21,7 +21,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable, ICOMSourceCodeEditable
+public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormattable
 {
     #region Private Members
     private readonly COMProxyInterface m_intf;
@@ -39,10 +39,6 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
     public IReadOnlyList<COMProxyComplexTypeMember> Members { get; }
 
     bool ICOMSourceCodeFormattable.IsFormattable => true;
-
-    bool ICOMSourceCodeEditable.IsEditable => true;
-
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Members;
     #endregion
 
     #region Internal Members
@@ -65,7 +61,14 @@ public sealed class COMProxyComplexType : COMProxyTypeInfo, ICOMSourceCodeFormat
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
     {
         INdrFormatter formatter = builder.GetNdrFormatter();
-        builder.AppendLine(formatter.FormatComplexType(Entry).TrimEnd());
+        if (formatter is INdrFormatterBuilder format_builder)
+        {
+            format_builder.FormatComplexType(builder, Entry);
+        }
+        else
+        {
+            builder.AppendLine(formatter.FormatComplexType(Entry).TrimEnd());
+        }
         builder.AppendLine();
     }
     #endregion

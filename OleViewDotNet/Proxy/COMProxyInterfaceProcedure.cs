@@ -21,7 +21,7 @@ using System.Linq;
 
 namespace OleViewDotNet.Proxy;
 
-public sealed class COMProxyInterfaceProcedure : ICOMSourceCodeEditable
+public sealed class COMProxyInterfaceProcedure
 {
     private readonly COMProxyInterface m_intf;
 
@@ -45,8 +45,4 @@ public sealed class COMProxyInterfaceProcedure : ICOMSourceCodeEditable
     public COMProxyInterfaceProcedureParameter ReturnValue => new(m_intf, Entry.ReturnValue);
 
     public int ProcNum => Entry.ProcNum;
-
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Parameters;
-
-    bool ICOMSourceCodeEditable.IsEditable => true;
 }

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Proxy;
 
-public abstract class COMProxyComplexTypeMember : ICOMSourceCodeEditable
+public abstract class COMProxyComplexTypeMember
 {
     #region Private Members
     private readonly COMProxyInterface m_intf;
@@ -37,9 +37,5 @@ public abstract class COMProxyComplexTypeMember : ICOMSourceCodeEditable
 
     #region Public Properties
     public string Name { get => GetName(); set => SetName(m_intf?.CheckName(GetName(), value) ?? value); }
-
-    IReadOnlyList<ICOMSourceCodeEditable> ICOMSourceCodeEditable.Members => Array.Empty<ICOMSourceCodeEditable>();
-
-    bool ICOMSourceCodeEditable.IsEditable => true;
     #endregion
 }
