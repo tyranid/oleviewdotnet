@@ -17,7 +17,7 @@
 using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
-using OleViewDotNet.Wrappers;
+using OleViewDotNet.TypeManager;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -123,7 +123,7 @@ public static class COMOxidResolver
         return GetRemoteObject(objref);
     }
 
-    public static COMRemoteObject GetRemoteObject(BaseComWrapper wrapper)
+    public static COMRemoteObject GetRemoteObject(ICOMObjectWrapper wrapper)
     {
         if (wrapper is null)
         {

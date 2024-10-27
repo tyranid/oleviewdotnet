@@ -18,8 +18,8 @@ using Microsoft.Win32;
 using NtApiDotNet;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Security;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -1073,6 +1073,8 @@ public class COMRegistry
     /// <returns>List of interfaces supported</returns>
     public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(object obj)
     {
+        obj = COMTypeManager.Unwrap(obj);
+
         if (obj is IMultiQI multi_qi)
         {
             List<COMInterfaceEntry> ret = new();
@@ -1105,17 +1107,6 @@ public class COMRegistry
                 Marshal.Release(pObject);
             }
         }
-    }
-
-    /// <summary>
-    /// Get list of supported interfaces for a COM wrapper
-    /// </summary>
-    /// <param name="obj">COM Wrapper Object</param>
-    /// <returns>List of interfaces supported</returns>
-    public IEnumerable<COMInterfaceEntry> GetInterfacesForObject(BaseComWrapper obj)
-    {
-        obj._interfaces ??= GetInterfacesForObject(obj.Unwrap()).ToList();
-        return obj._interfaces;
     }
 
     public COMInterfaceEntry[] GetProxiesForClsid(COMCLSIDEntry clsid)

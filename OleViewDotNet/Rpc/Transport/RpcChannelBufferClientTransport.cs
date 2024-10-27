@@ -23,7 +23,6 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 

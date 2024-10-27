@@ -22,7 +22,6 @@ using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Viewers;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -210,7 +209,7 @@ internal partial class ObjectInformation : UserControl
                     Type type = COMTypeManager.GetInterfaceType(ent);
                     if (typeof(RpcClientBase).IsAssignableFrom(type))
                     {
-                        obj = new ObjectEntry(ent.Name, RpcComUtils.CreateClient(type, m_pEntry.Instance), m_interfaces);
+                        obj = new ObjectEntry(ent.Name, RpcComUtils.CreateClient(type, m_pEntry.Instance, m_registry), m_interfaces);
                         factory = new InstanceTypeViewerFactory(type);
                     }
                     else

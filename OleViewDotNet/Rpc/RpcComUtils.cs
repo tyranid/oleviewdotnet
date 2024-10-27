@@ -18,6 +18,7 @@
 using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32.Rpc;
 using NtApiDotNet.Win32.Rpc.Transport;
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc.Clients;
@@ -26,9 +27,9 @@ using System;
 
 namespace OleViewDotNet.Rpc;
 
-internal static class RpcComUtils
+public static class RpcComUtils
 {
-    public static RpcStringBinding GetRpcStringBinding(this COMStringBinding binding, bool epmapper = false)
+    internal static RpcStringBinding GetRpcStringBinding(this COMStringBinding binding, bool epmapper = false)
     {
         string protocol_sequence = binding.TowerId switch
         {
@@ -62,7 +63,7 @@ internal static class RpcComUtils
         return RpcStringBinding.Parse($"{protocol_sequence}:{hostname}{endpoint}");
     }
 
-    public static RpcTransportSecurity GetRpcTransportSecurity(this COMSecurityBinding binding)
+    internal static RpcTransportSecurity GetRpcTransportSecurity(this COMSecurityBinding binding)
     {
         return new()
         {
@@ -71,24 +72,24 @@ internal static class RpcComUtils
         };
     }
 
-    public static COMVersion ToVersion(this COMVERSION ver)
+    internal static COMVersion ToVersion(this COMVERSION ver)
     {
         return new(ver.MajorVersion, ver.MinorVersion);
     }
 
-    public static COMVERSION ToVersion(this COMVersion ver)
+    internal static COMVERSION ToVersion(this COMVersion ver)
     {
         return new(ver.Major, ver.Minor);
     }
 
-    public static COMObjRef ToObjRef(this NdrEmbeddedPointer<MInterfacePointer> pointer)
+    internal static COMObjRef ToObjRef(this NdrEmbeddedPointer<MInterfacePointer> pointer)
     {
         if (pointer is null)
             return null;
         return COMObjRef.FromArray(pointer.GetValue().abData);
     }
 
-    public static NdrEmbeddedPointer<MInterfacePointer> ToPointer(this COMObjRef objref)
+    internal static NdrEmbeddedPointer<MInterfacePointer> ToPointer(this COMObjRef objref)
     {
         if (objref is null)
             return null;
@@ -97,7 +98,7 @@ internal static class RpcComUtils
         return p;
     }
 
-    public static MInterfacePointer? ToNullable(this COMObjRef objref)
+    internal static MInterfacePointer? ToNullable(this COMObjRef objref)
     {
         if (objref is null)
             return null;
@@ -106,11 +107,18 @@ internal static class RpcComUtils
         return p;
     }
 
-    public static RpcClientBase CreateClient(Type type, object obj)
+    public static RpcClientBase CreateClient(Type type, object obj, COMRegistry database)
     {
         RpcClientBase client = (RpcClientBase)Activator.CreateInstance(type);
-        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId));
+        ConnectClient(client, obj, database);
         return client;
+    }
+
+    public static void ConnectClient(RpcClientBase client, object obj, COMRegistry database)
+    {
+        var transport = new RpcChannelBufferClientTransport(obj, client.InterfaceId);
+        transport.SetDatabase(database);
+        client.Connect(transport);
     }
 
     public static object Unwrap(this RpcClientBase client)

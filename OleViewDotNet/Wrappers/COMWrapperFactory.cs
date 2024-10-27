@@ -316,7 +316,7 @@ public static class COMWrapperFactory
                 }
             }
 
-            if (EnableScripting && !is_rpc_client)
+            if (!is_rpc_client)
             {
                 foreach (var type in structured_types.Where(FilterStructuredTypes))
                 {
@@ -451,6 +451,11 @@ public static class COMWrapperFactory
     #region Public Static Members
     public static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
+        if (obj is ICOMObjectWrapper obj_wrapper)
+        {
+            obj = obj_wrapper.Unwrap();
+        }
+
         if (obj is null)
         {
             throw new ArgumentNullException(nameof(obj));
@@ -477,29 +482,24 @@ public static class COMWrapperFactory
         return wrapper;
     }
 
-    public static BaseComWrapper<T> Wrap<T>(object obj) where T : class
-    {
-        return (BaseComWrapper<T>)Wrap(obj, typeof(T));
-    }
-
     public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(iid, registry, EnableScripting), registry);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(iid, registry, true), registry);
     }
 
     public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(intf, EnableScripting), intf.Database);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(intf, true), intf.Database);
     }
 
     public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, EnableScripting), intf.Database);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, true), intf.Database);
     }
 
     public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(ipid, EnableScripting), null);
+        return Wrap(obj, COMTypeManager.GetInterfaceType(ipid, true), null);
     }
 
     public static BaseComWrapper Wrap(object obj, Type intf_type)
@@ -526,12 +526,10 @@ public static class COMWrapperFactory
         _builder.Save(_name.Name + ".dll");
     }
 
-    public static bool EnableScripting { get; set; }
-
-    internal static void FlushProxyType(Guid iid)
+    public static void EnableScripting()
     {
-        _types.Remove(iid);
-        COMTypeManager.FlushIidType(iid);
+        COMTypeManager.SetWrapObject(Wrap);
+        COMTypeManager.SetFlushIid(iid => _types.Remove(iid));
     }
     #endregion
 }

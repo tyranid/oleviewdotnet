@@ -15,13 +15,13 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
+using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Security;
 using OleViewDotNet.TypeManager;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -366,12 +366,6 @@ public static class COMUtilities
         return ret;
     }
 
-    public static object CreateInstanceFromFactory(IClassFactoryWrapper factory, Guid iid)
-    {
-        factory.CreateInstance(null, iid, out ICOMObjectWrapper ret);
-        return ret.Unwrap();
-    }
-
     public static object CreateClassFactory(Guid clsid, Guid iid, CLSCTX context, string server, COMAuthInfo auth_info = null)
     {
         using var list = new DisposableList();
@@ -479,24 +473,24 @@ public static class COMUtilities
         return RPCOPT_SERVER_LOCALITY_VALUES.PROCESS_LOCAL;
     }
 
-    public static StorageWrapper CreateStorage(string name, STGM mode, STGFMT format)
+    public static INdrComObject CreateStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(NativeMethods.StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
+        return COMTypeManager.Wrap(NativeMethods.StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid), iid, null);
     }
 
-    public static StorageWrapper CreateReadOnlyStorage(string name)
+    public static INdrComObject CreateReadOnlyStorage(string name)
     {
         return CreateStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
     }
 
-    public static StorageWrapper OpenStorage(string name, STGM mode, STGFMT format)
+    public static INdrComObject OpenStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
-        return new StorageWrapper(NativeMethods.StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid));
+        return COMTypeManager.Wrap(NativeMethods.StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid), iid, null);
     }
 
-    public static StorageWrapper OpenReadOnlyStorage(string name)
+    public static INdrComObject OpenReadOnlyStorage(string name)
     {
         return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
     }

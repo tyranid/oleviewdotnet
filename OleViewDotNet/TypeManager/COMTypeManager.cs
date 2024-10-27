@@ -183,10 +183,6 @@ public static class COMTypeManager
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        //if (runtime_type != null)
-        //{
-        //    proxy.UpdateNames(runtime_type);
-        //}
         return m_iidtypes.GetOrAdd(intf.Iid, _ => proxy.CreateClientType(scripting));
     }
 
@@ -319,7 +315,6 @@ public static class COMTypeManager
         {
             return m_wrap_obj(obj, iid, database);
         }
-
         return new COMObjectWrapper(obj, iid, database);
     }
 

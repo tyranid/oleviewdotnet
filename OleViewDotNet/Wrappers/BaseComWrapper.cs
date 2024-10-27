@@ -18,7 +18,6 @@ using NtApiDotNet.Ndr.Marshal;
 using OleViewDotNet.Database;
 using OleViewDotNet.TypeManager;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Wrappers;
@@ -26,7 +25,6 @@ namespace OleViewDotNet.Wrappers;
 public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 {
     protected COMRegistry _database;
-    internal IEnumerable<COMInterfaceEntry> _interfaces;
 
     public string InterfaceName { get; }
     public Guid Iid { get; }

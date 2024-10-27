@@ -17,7 +17,7 @@
 Set-StrictMode -Version Latest
 
 $Script:CurrentComDatabase = $null
-[OleViewDotNet.Wrappers.COMWrapperFactory]::EnableScripting = $true
+[OleViewDotNet.Wrappers.COMWrapperFactory]::EnableScripting()
 
 function New-CallbackProgress {
     Param(
@@ -1815,7 +1815,7 @@ function New-ComObject {
                     $Iid, $ClassContext, $RemoteServer, $AuthInfo)
             }
             "FromFactory" {
-                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateInstanceFromFactory($Factory, $Iid)
+                $obj = $Factory.CreateInstance($null, $Iid)
             }
             "FromActivationFactory" {
                 $obj = $ActivationFactory.ActivateInstance()

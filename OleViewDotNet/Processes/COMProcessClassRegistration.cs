@@ -16,7 +16,6 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Utilities;
 using System;
 
 namespace OleViewDotNet.Processes;

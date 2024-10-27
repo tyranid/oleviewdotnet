@@ -17,7 +17,6 @@
 using Microsoft.CSharp;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32.Rpc;
-using NtApiDotNet.Win32.Rpc.Transport;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy.Editor;
@@ -27,7 +26,6 @@ using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +38,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #region Private Members
     private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
     private readonly COMRegistry m_registry;
+    private bool m_names_from_type;
 
     private sealed class EditableParameter : COMSourceCodeEditableObject
     {
@@ -119,6 +118,50 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return args;
     }
 
+    private void UpdateNames(Type type)
+    {
+        if (Iid != type.GUID)
+        {
+            return;
+        }
+
+        Entry.Name = type.FullName;
+        var methods = type.GetMethods();
+        if (methods.Length != Procedures.Count)
+        {
+            return;
+        }
+        for (int i = 0; i < methods.Length; ++i)
+        {
+            Procedures[i].Name = methods[i].Name;
+            var ps_names = methods[i].GetParameters().Select(p => p.Name).ToList();
+            if (methods[i].ReturnType != typeof(void))
+            {
+                ps_names.Add("retval");
+            }
+            if (ps_names.Count != Procedures[i].Params.Count)
+            {
+                continue;
+            }
+            for (int j = 0; j < ps_names.Count; ++j)
+            {
+                Procedures[i].Params[j].Name = ps_names[j];
+            }
+        }
+    }
+
+    private void CheckNameUpdate(COMInterfaceEntry ent)
+    {
+        if (m_names_from_type)
+        {
+            return;
+        }
+        m_names_from_type = true;
+        if (ent.TryGetRuntimeType(out Type type))
+        {
+            UpdateNames(type);
+        }
+    }
     #endregion
 
     #region Public Properties
@@ -210,6 +253,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
         if (m_proxies.TryGetValue(intf.Iid, out COMProxyInterface instance))
         {
+            instance.CheckNameUpdate(intf);
             return instance;
         }
 
@@ -232,6 +276,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             throw new ArgumentException($"No Proxy Found for IID {intf.Iid}");
         }
 
+        instance.CheckNameUpdate(intf);
         return instance;
     }
 
@@ -268,7 +313,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     public RpcClientBase ConnectClient(object obj, bool scripting = false)
     {
         RpcClientBase client = CreateClient(scripting);
-        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId));
+        var transport = new RpcChannelBufferClientTransport(obj, client.InterfaceId);
+        transport.SetDatabase(m_registry);
+        client.Connect(transport);
         return client;
     }
 
@@ -318,38 +365,6 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         if (updated)
         {
             COMTypeManager.FlushIidType(Iid);
-        }
-    }
-
-    internal void UpdateNames(Type type)
-    {
-        if (Iid != type.GUID)
-        {
-            return;
-        }
-
-        Entry.Name = type.FullName;
-        var methods = type.GetMethods();
-        if (methods.Length != Procedures.Count)
-        {
-            return;
-        }
-        for (int i = 0; i < methods.Length; ++i)
-        {
-            Procedures[i].Name = methods[i].Name;
-            var ps_names = methods[i].GetParameters().Select(p => p.Name).ToList();
-            if (methods[i].ReturnType != typeof(void))
-            {
-                ps_names.Add("retval");
-            }
-            if (ps_names.Count != Procedures[i].Params.Count)
-            {
-                continue;
-            }
-            for (int j = 0; j < ps_names.Count; ++j)
-            {
-                Procedures[i].Params[j].Name = ps_names[j];
-            }
         }
     }
 

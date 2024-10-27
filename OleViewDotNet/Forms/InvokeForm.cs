@@ -14,10 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
-using OleViewDotNet.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -47,7 +47,7 @@ internal partial class InvokeForm : Form
 
     private static bool IsComObject(object obj)
     {
-        return Marshal.IsComObject(obj) || obj is BaseComWrapper;
+        return Marshal.IsComObject(obj) || obj is ICOMObjectWrapper;
     }
 
     public InvokeForm(COMRegistry registry, MethodBase mi, object pObject, string objName)
@@ -341,7 +341,20 @@ internal partial class InvokeForm : Form
             return;
         }
 
-        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, false, false);
+        try
+        {
+            Type type = data.pi.ParameterType;
+            if (data.data is ICOMObjectWrapper)
+            {
+                type = data.data.GetType();
+            }
+
+            OpenObject(data.data, type, false, false);
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
     }
 
     private void openObjectInformationToolStripMenuItem_Click(object sender, EventArgs e)
@@ -352,6 +365,19 @@ internal partial class InvokeForm : Form
             return;
         }
 
-        OpenObject(data.data, data.data is BaseComWrapper ? data.data.GetType() : data.pi.ParameterType, true, false);
+        try
+        {
+            Type type = data.pi.ParameterType;
+            if (data.data is RpcClientBase)
+            {
+                type = data.data.GetType();
+            }
+
+            OpenObject(data.data, type, true, false);
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
     }
 }
