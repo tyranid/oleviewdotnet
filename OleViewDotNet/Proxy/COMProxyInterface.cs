@@ -313,9 +313,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     public RpcClientBase ConnectClient(object obj, bool scripting = false)
     {
         RpcClientBase client = CreateClient(scripting);
-        var transport = new RpcChannelBufferClientTransport(obj, client.InterfaceId);
-        transport.SetDatabase(m_registry);
-        client.Connect(transport);
+        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId, m_registry));
         return client;
     }
 

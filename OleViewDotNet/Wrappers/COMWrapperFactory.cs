@@ -278,14 +278,15 @@ public static class COMWrapperFactory
                  TypeAttributes.Public | TypeAttributes.Sealed, base_type);
             _types[intf_type.GUID] = tb;
             HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
-            var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object) });
+            var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
             _constructors[tb] = con;
             con.DefineParameter(1, ParameterAttributes.In, "obj");
             var conil = con.GetILGenerator();
             conil.Emit(OpCodes.Ldarg_0);
             conil.Emit(OpCodes.Ldarg_1);
+            conil.Emit(OpCodes.Ldarg_2);
             conil.Emit(OpCodes.Call,
-                base_type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(object) }, null));
+                base_type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(object), typeof(COMRegistry) }, null));
             conil.Emit(OpCodes.Ret);
             foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
             {
@@ -477,9 +478,7 @@ public static class COMWrapperFactory
             type = typeof(IUnknownWrapper);
         }
 
-        var wrapper = (BaseComWrapper)Activator.CreateInstance(type, obj);
-        wrapper.SetDatabase(registry);
-        return wrapper;
+        return (BaseComWrapper)Activator.CreateInstance(type, obj, registry);
     }
 
     public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)

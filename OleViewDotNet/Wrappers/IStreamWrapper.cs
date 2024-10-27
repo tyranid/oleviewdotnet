@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -21,7 +22,7 @@ namespace OleViewDotNet.Wrappers;
 
 public class IStreamWrapper : BaseComWrapper<IStream>
 {
-    public IStreamWrapper(object obj) : base(obj)
+    public IStreamWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -78,6 +79,6 @@ public class IStreamWrapper : BaseComWrapper<IStream>
     public IStreamWrapper Clone()
     {
         _object.Clone(out IStream stm);
-        return new IStreamWrapper(stm);
+        return new IStreamWrapper(stm, m_registry);
     }
 }

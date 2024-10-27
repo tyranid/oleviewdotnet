@@ -114,5 +114,5 @@ public sealed class StreamWrapper : Stream
         _stm.Write(buffer, count, IntPtr.Zero);
     }
 
-    public IStreamWrapper Object => new IStreamWrapper(_stm);
+    public IStreamWrapper Object => new IStreamWrapper(_stm, null);
 }

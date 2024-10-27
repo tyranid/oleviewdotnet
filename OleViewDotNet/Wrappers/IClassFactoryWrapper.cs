@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
 
@@ -22,14 +23,14 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IClassFactoryWrapper : BaseComWrapper<IClassFactory>
 {
-    public IClassFactoryWrapper(object obj) : base(obj)
+    public IClassFactoryWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
     public void CreateInstance(object pUnkOuter, Guid riid, out ICOMObjectWrapper ppvObject)
     {
         _object.CreateInstance(pUnkOuter, riid, out object obj);
-        ppvObject = COMTypeManager.Wrap(obj, riid, _database);
+        ppvObject = COMTypeManager.Wrap(obj, riid, m_registry);
     }
 
     public ICOMObjectWrapper CreateInstance(object pUnkOuter, Guid riid)

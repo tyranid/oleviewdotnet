@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -21,8 +22,7 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IBindCtxWrapper : BaseComWrapper<IBindCtx>
 {
-    public IBindCtxWrapper(object obj)
-        : base(obj)
+    public IBindCtxWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -56,7 +56,7 @@ public sealed class IBindCtxWrapper : BaseComWrapper<IBindCtx>
     public IRunningObjectTableWrapper GetRunningObjectTable()
     {
         _object.GetRunningObjectTable(out IRunningObjectTable rot);
-        return new IRunningObjectTableWrapper(rot);
+        return new IRunningObjectTableWrapper(rot, m_registry);
     }
 
     public void RegisterObjectParam(string pszKey, object punk)

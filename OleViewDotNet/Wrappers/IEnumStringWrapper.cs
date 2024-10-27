@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -21,8 +22,7 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IEnumStringWrapper : BaseComWrapper<IEnumString>
 {
-    public IEnumStringWrapper(object obj)
-        : base(obj)
+    public IEnumStringWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -44,6 +44,6 @@ public sealed class IEnumStringWrapper : BaseComWrapper<IEnumString>
     public IEnumStringWrapper Clone()
     {
         _object.Clone(out IEnumString ppenum2);
-        return new IEnumStringWrapper(ppenum2);
+        return new IEnumStringWrapper(ppenum2, m_registry);
     }
 }

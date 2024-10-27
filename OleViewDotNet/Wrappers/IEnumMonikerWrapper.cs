@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
@@ -22,7 +23,7 @@ namespace OleViewDotNet.Wrappers;
 
 public class IEnumMonikerWrapper : BaseComWrapper<IEnumMoniker>
 {
-    public IEnumMonikerWrapper(object obj) : base(obj)
+    public IEnumMonikerWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -45,6 +46,6 @@ public class IEnumMonikerWrapper : BaseComWrapper<IEnumMoniker>
     public IEnumMonikerWrapper Clone()
     {
         _object.Clone(out IEnumMoniker out_enum);
-        return new IEnumMonikerWrapper(out_enum);
+        return new IEnumMonikerWrapper(out_enum, m_registry);
     }
 }

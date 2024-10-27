@@ -31,15 +31,16 @@ namespace OleViewDotNet.Rpc.Transport;
 internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrTransportMarshaler
 {
     private readonly object m_object;
-    private COMRegistry m_database;
+    private readonly COMRegistry m_registry;
     private RpcChannelBuffer m_buffer;
 
     internal object GetObject() => m_object;
 
-    public RpcChannelBufferClientTransport(object obj, Guid interface_id)
+    public RpcChannelBufferClientTransport(object obj, Guid interface_id, COMRegistry registry)
     {
         m_object = obj ?? throw new ArgumentNullException(nameof(obj));
         m_buffer = RpcChannelBuffer.FromObject(m_object, interface_id);
+        m_registry = registry;
     }
 
     public bool Connected => m_buffer?.IsConnected() ?? false;
@@ -119,7 +120,7 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
     INdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)
     {
         COMObjRef objref = COMObjRef.FromArray(intf.Data);
-        return COMTypeManager.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_database);
+        return COMTypeManager.Wrap(COMUtilities.UnmarshalObject(objref), objref.Iid, m_registry);
     }
 
     INdrComObject INdrTransportMarshaler.QueryComObject(INdrComObject obj, Guid iid)
@@ -134,11 +135,6 @@ internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INd
             throw new ArgumentException("Transport must be a channel buffer client.");
         }
 
-        return COMTypeManager.Wrap(transport.m_object, iid, m_database);
-    }
-
-    internal void SetDatabase(COMRegistry database)
-    {
-        m_database = database;
+        return COMTypeManager.Wrap(transport.m_object, iid, m_registry);
     }
 }

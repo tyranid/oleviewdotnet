@@ -23,7 +23,7 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IInspectableWrapper : BaseComWrapper<IInspectable>
 {
-    public IInspectableWrapper(object obj) : base(obj)
+    public IInspectableWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 

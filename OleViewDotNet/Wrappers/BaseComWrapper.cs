@@ -24,7 +24,7 @@ namespace OleViewDotNet.Wrappers;
 
 public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 {
-    protected COMRegistry _database;
+    protected readonly COMRegistry m_registry;
 
     public string InterfaceName { get; }
     public Guid Iid { get; }
@@ -32,12 +32,7 @@ public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 
     public ICOMObjectWrapper QueryInterface(Guid iid)
     {
-        return COMTypeManager.Wrap(Unwrap(), iid, _database);
-    }
-
-    internal virtual void SetDatabase(COMRegistry database)
-    {
-        _database = database;
+        return COMTypeManager.Wrap(Unwrap(), iid, m_registry);
     }
 
     INdrComObject INdrComObject.QueryInterface(Guid iid)
@@ -57,10 +52,11 @@ public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 
     protected abstract void OnDispose();
 
-    protected BaseComWrapper(Guid iid, string name)
+    protected BaseComWrapper(Guid iid, string name, COMRegistry registry)
     {
         InterfaceName = name;
         Iid = iid;
+        m_registry = registry;
     }
 }
 
@@ -68,8 +64,8 @@ public abstract class BaseComWrapper<T> : BaseComWrapper where T : class
 {
     protected readonly T _object;
 
-    protected BaseComWrapper(object obj)
-        : base(typeof(T).GUID, typeof(T).Name)
+    protected BaseComWrapper(object obj, COMRegistry registry)
+        : base(typeof(T).GUID, typeof(T).Name, registry)
     {
         System.Diagnostics.Debug.Assert(typeof(T).IsInterface);
         _object = (T)obj;

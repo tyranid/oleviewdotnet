@@ -23,8 +23,8 @@ namespace OleViewDotNet.Wrappers;
 
 public abstract class BaseComRpcWrapper : BaseComWrapper
 {
-    protected BaseComRpcWrapper(Guid iid, string name) 
-        : base(iid, name)
+    protected BaseComRpcWrapper(Guid iid, string name, COMRegistry registry) 
+        : base(iid, name, registry)
     {
     }
 }
@@ -33,23 +33,14 @@ public abstract class BaseComRpcWrapper<T> : BaseComRpcWrapper, IDisposable wher
 {
     protected readonly T _object;
 
-    private BaseComRpcWrapper(T client, object obj) : base(client.InterfaceId, typeof(T).Name)
+    private BaseComRpcWrapper(T client, object obj, COMRegistry registry) : base(client.InterfaceId, typeof(T).Name, registry)
     {
         _object = client;
-        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId));
+        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId, registry));
     }
 
-    protected BaseComRpcWrapper(object obj) : this(new T(), obj)
+    protected BaseComRpcWrapper(object obj, COMRegistry registry) : this(new T(), obj, registry)
     {
-    }
-
-    internal override void SetDatabase(COMRegistry database)
-    {
-        base.SetDatabase(database);
-        if (_object.Transport is RpcChannelBufferClientTransport transport)
-        {
-            transport.SetDatabase(database);
-        }
     }
 
     public override object Unwrap()

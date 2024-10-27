@@ -114,11 +114,9 @@ public static class RpcComUtils
         return client;
     }
 
-    public static void ConnectClient(RpcClientBase client, object obj, COMRegistry database)
+    public static void ConnectClient(RpcClientBase client, object obj, COMRegistry registry)
     {
-        var transport = new RpcChannelBufferClientTransport(obj, client.InterfaceId);
-        transport.SetDatabase(database);
-        client.Connect(transport);
+        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId, registry));
     }
 
     public static object Unwrap(this RpcClientBase client)

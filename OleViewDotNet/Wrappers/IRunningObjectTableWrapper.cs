@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
 using System.Runtime.InteropServices.ComTypes;
@@ -22,8 +23,7 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTable>
 {
-    public IRunningObjectTableWrapper(object obj)
-        : base(obj)
+    public IRunningObjectTableWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -45,7 +45,7 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
     public int GetObject(IMonikerWrapper pmkObjectName, out ICOMObjectWrapper ppunkObject)
     {
         int hr = _object.GetObject(pmkObjectName.UnwrapTyped(), out object obj);
-        ppunkObject = COMTypeManager.Wrap(obj, COMKnownGuids.IID_IUnknown, _database);
+        ppunkObject = COMTypeManager.Wrap(obj, COMKnownGuids.IID_IUnknown, m_registry);
         return hr;
     }
 
@@ -62,6 +62,6 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
     public IEnumMonikerWrapper EnumRunning()
     {
         _object.EnumRunning(out IEnumMoniker ppenumMoniker2);
-        return new IEnumMonikerWrapper(ppenumMoniker2);
+        return new IEnumMonikerWrapper(ppenumMoniker2, m_registry);
     }
 }

@@ -14,13 +14,14 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 
 namespace OleViewDotNet.Wrappers;
 
 public sealed class IUnknownWrapper : BaseComWrapper<IUnknown>
 {
-    public IUnknownWrapper(object obj) : base(obj)
+    public IUnknownWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 }

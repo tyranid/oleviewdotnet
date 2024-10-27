@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.TypeManager;
 using System;
 using System.Runtime.InteropServices.ComTypes;
@@ -22,7 +23,7 @@ namespace OleViewDotNet.Wrappers;
 
 public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
 {
-    public IMonikerWrapper(object obj) : base(obj)
+    public IMonikerWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
     }
 
@@ -56,37 +57,37 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
     public ICOMObjectWrapper BindToObject(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riidResult)
     {
         _object.BindToObject(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riidResult, out object ppvResult);
-        return COMTypeManager.Wrap(ppvResult, riidResult, _database);
+        return COMTypeManager.Wrap(ppvResult, riidResult, m_registry);
     }
 
     public ICOMObjectWrapper BindToStorage(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, Guid riid)
     {
         _object.BindToStorage(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), ref riid, out object ppvObj);
-        return COMTypeManager.Wrap(ppvObj, riid, _database);
+        return COMTypeManager.Wrap(ppvObj, riid, m_registry);
     }
 
     public IMonikerWrapper Reduce(IBindCtxWrapper pbc, int dwReduceHowFar, ref IMoniker ppmkToLeft)
     {
         _object.Reduce(pbc.UnwrapTyped(), dwReduceHowFar, ppmkToLeft, out IMoniker mk);
-        return new IMonikerWrapper(mk);
+        return new IMonikerWrapper(mk, m_registry);
     }
 
     public IMonikerWrapper ComposeWith(IMonikerWrapper pmkRight, bool fOnlyIfNotGeneric)
     {
         _object.ComposeWith(pmkRight.UnwrapTyped(), fOnlyIfNotGeneric, out IMoniker out_mk);
-        return new IMonikerWrapper(out_mk);
+        return new IMonikerWrapper(out_mk, m_registry);
     }
 
     public void ComposeWith(IMonikerWrapper pmkRight, bool fOnlyIfNotGeneric, out IMonikerWrapper wrapper)
     {
         _object.ComposeWith(pmkRight.UnwrapTyped(), fOnlyIfNotGeneric, out IMoniker out_mk);
-        wrapper = new IMonikerWrapper(out_mk);
+        wrapper = new IMonikerWrapper(out_mk, m_registry);
     }
 
     public IEnumMonikerWrapper Enum(bool fForward)
     {
         _object.Enum(fForward, out IEnumMoniker ppenumMoniker);
-        return new IEnumMonikerWrapper(ppenumMoniker);
+        return new IEnumMonikerWrapper(ppenumMoniker, m_registry);
     }
 
     public int IsEqual(IMonikerWrapper pmkOtherMoniker)
@@ -113,19 +114,19 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
     public IMonikerWrapper Inverse()
     {
         _object.Inverse(out IMoniker ppmk);
-        return new IMonikerWrapper(ppmk);
+        return new IMonikerWrapper(ppmk, m_registry);
     }
 
     public IMonikerWrapper CommonPrefixWith(IMonikerWrapper pmkOther)
     {
         _object.CommonPrefixWith(pmkOther.UnwrapTyped(), out IMoniker out_mk);
-        return new IMonikerWrapper(out_mk);
+        return new IMonikerWrapper(out_mk, m_registry);
     }
 
     public IMonikerWrapper RelativePathTo(IMonikerWrapper pmkOther)
     {
         _object.RelativePathTo(pmkOther.UnwrapTyped(), out IMoniker out_mk);
-        return new IMonikerWrapper(out_mk);
+        return new IMonikerWrapper(out_mk, m_registry);
     }
 
     public string GetDisplayName(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft)
@@ -137,7 +138,7 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
     public IMonikerWrapper ParseDisplayName(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft, string pszDisplayName, out int pchEaten)
     {
         _object.ParseDisplayName(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), pszDisplayName, out pchEaten, out IMoniker out_mk);
-        return new IMonikerWrapper(out_mk);
+        return new IMonikerWrapper(out_mk, m_registry);
     }
 
     public int IsSystemMoniker(out int pdwMksys)
