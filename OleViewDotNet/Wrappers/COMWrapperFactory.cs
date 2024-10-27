@@ -450,7 +450,7 @@ public static class COMWrapperFactory
     #endregion
 
     #region Public Static Members
-    public static BaseComWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
+    public static ICOMObjectWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
         if (obj is ICOMObjectWrapper obj_wrapper)
         {
@@ -481,38 +481,34 @@ public static class COMWrapperFactory
         return (BaseComWrapper)Activator.CreateInstance(type, obj, registry);
     }
 
-    public static BaseComWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
+    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
     {
         return Wrap(obj, COMTypeManager.GetInterfaceType(iid, registry, true), registry);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceEntry intf)
+    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
         return Wrap(obj, COMTypeManager.GetInterfaceType(intf, true), intf.Database);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMInterfaceInstance intf)
+    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
         return Wrap(obj, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, true), intf.Database);
     }
 
-    public static BaseComWrapper Wrap(object obj, COMIPIDEntry ipid)
+    public static ICOMObjectWrapper Wrap(object obj, COMIPIDEntry ipid)
     {
         return Wrap(obj, COMTypeManager.GetInterfaceType(ipid, true), null);
     }
 
-    public static BaseComWrapper Wrap(object obj, Type intf_type)
+    public static ICOMObjectWrapper Wrap(object obj, Type intf_type)
     {
         return Wrap(obj, intf_type, null);
     }
 
     public static object Unwrap(object obj)
     {
-        if (obj is BaseComWrapper wrapper)
-        {
-            return wrapper.Unwrap();
-        }
-        return obj;
+        return COMTypeManager.Unwrap(obj);
     }
 
     public static T UnwrapTyped<T>(this BaseComWrapper<T> obj) where T : class
