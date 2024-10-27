@@ -21,7 +21,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using ComTypes = System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class StreamWrapper : Stream
 {

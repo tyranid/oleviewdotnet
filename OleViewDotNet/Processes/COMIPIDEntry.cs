@@ -58,6 +58,7 @@ public class COMIPIDEntry : IProxyFormatter, ICOMGuid, ICOMSourceCodeFormattable
     public bool IsRunning => (Flags & (IPIDFlags.IPIDF_DISCONNECTED | IPIDFlags.IPIDF_DEACTIVATED)) == 0;
 
     public COMProcessEntry Process { get; internal set; }
+    public COMRegistry Database => m_registry;
 
     private readonly COMDualStringArray _stringarray;
 

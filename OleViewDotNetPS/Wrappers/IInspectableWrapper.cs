@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class IInspectableWrapper : BaseComWrapper<IInspectable>
 {

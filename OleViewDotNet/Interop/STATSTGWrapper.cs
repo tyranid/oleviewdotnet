@@ -28,7 +28,7 @@ public sealed class STATSTGWrapper
         return DateTime.FromFileTime(result);
     }
 
-    internal STATSTGWrapper(string name, ComTypes.STATSTG stat, byte[] bytes)
+    public STATSTGWrapper(string name, ComTypes.STATSTG stat, byte[] bytes)
     {
         Name = name;
         Type = (STGTY)stat.type;

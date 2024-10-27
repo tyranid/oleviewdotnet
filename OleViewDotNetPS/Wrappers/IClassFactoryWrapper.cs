@@ -19,7 +19,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class IClassFactoryWrapper : BaseComWrapper<IClassFactory>
 {

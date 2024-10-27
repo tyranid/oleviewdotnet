@@ -19,7 +19,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTable>
 {
@@ -27,7 +27,7 @@ public sealed class IRunningObjectTableWrapper : BaseComWrapper<IRunningObjectTa
     {
     }
 
-    public int Register(int grfFlags, BaseComWrapper punkObject, IMonikerWrapper pmkObjectName)
+    public int Register(int grfFlags, ICOMObjectWrapper punkObject, IMonikerWrapper pmkObjectName)
     {
         return _object.Register(grfFlags, punkObject.Unwrap(), pmkObjectName.UnwrapTyped());
     }

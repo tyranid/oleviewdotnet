@@ -17,7 +17,7 @@
 Set-StrictMode -Version Latest
 
 $Script:CurrentComDatabase = $null
-[OleViewDotNet.Wrappers.COMWrapperFactory]::EnableScripting()
+[OleViewDotNetPS.Wrappers.COMWrapperFactory]::EnableScripting()
 
 function New-CallbackProgress {
     Param(
@@ -74,19 +74,19 @@ function Wrap-ComObject {
                 Write-Error "No database specified and current database isn't set"
                 return
             }
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
         }
         "FromType" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
         }
         "FromInterface" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
         }
         "FromInterfaceInstance" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
         }
         "FromIpid" {
-            [OleViewDotNet.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid)
         }
     }
 }
@@ -98,7 +98,7 @@ function Unwrap-ComObject {
         [object]$Object
     )
 
-    [OleViewDotNet.Wrappers.COMWrapperFactory]::Unwrap($Object)
+    [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Unwrap($Object)
 }
 
 <#
@@ -1771,9 +1771,9 @@ function New-ComObject {
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory", ValueFromPipeline)]
-        [OleViewDotNet.Wrappers.IClassFactoryWrapper]$Factory,
+        [OleViewDotNetPS.Wrappers.IClassFactoryWrapper]$Factory,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromActivationFactory")]
-        [OleViewDotNet.Wrappers.IActivationFactoryWrapper]$ActivationFactory,
+        [OleViewDotNetPS.Wrappers.IActivationFactoryWrapper]$ActivationFactory,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [Guid]$Clsid,

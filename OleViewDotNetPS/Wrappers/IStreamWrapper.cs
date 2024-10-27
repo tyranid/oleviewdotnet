@@ -18,7 +18,7 @@ using OleViewDotNet.Database;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public class IStreamWrapper : BaseComWrapper<IStream>
 {

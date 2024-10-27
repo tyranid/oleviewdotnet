@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public static class COMWrapperFactory
 {
@@ -128,7 +128,7 @@ public static class COMWrapperFactory
         else if (IsComInterfaceType(pi.ParameterType))
         {
             Type type = pi.ParameterType.Deref();
-            ret = CreateType(type, fixup_queue);
+            ret = CreateType(type, type.GUID, fixup_queue);
             if (pi.ParameterType.IsByRef)
             {
                 ret = ret.MakeByRefType();
@@ -238,7 +238,7 @@ public static class COMWrapperFactory
         return member.DeclaringType == intf_type;
     }
 
-    private static Type CreateType(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    private static Type CreateType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         if (intf_type is null)
         {
@@ -266,17 +266,13 @@ public static class COMWrapperFactory
             created_queue = true;
         }
 
-        if (!_types.ContainsKey(intf_type.GUID))
+        if (!_types.ContainsKey(iid))
         {
             Type base_type = is_rpc_client ? typeof(BaseComRpcWrapper<>).MakeGenericType(intf_type) : typeof(BaseComWrapper<>).MakeGenericType(intf_type);
-            string type_name = intf_type.FullName;
-            if (!type_name.StartsWith($"{ASSEMBLY_NAME}."))
-            {
-                type_name = $"{ASSEMBLY_NAME}." + type_name;
-            }
-            TypeBuilder tb = _module.DefineType($"{type_name}Wrapper",
+            string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
+            TypeBuilder tb = _module.DefineType(type_name,
                  TypeAttributes.Public | TypeAttributes.Sealed, base_type);
-            _types[intf_type.GUID] = tb;
+            _types[iid] = tb;
             HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
             var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
             _constructors[tb] = con;
@@ -332,7 +328,7 @@ public static class COMWrapperFactory
                 }
             }
 
-            fixup_queue.Enqueue(Tuple.Create(intf_type.GUID, tb));
+            fixup_queue.Enqueue(Tuple.Create(iid, tb));
         }
 
         if (created_queue)
@@ -344,7 +340,7 @@ public static class COMWrapperFactory
             }
         }
 
-        return _types[intf_type.GUID];
+        return _types[iid];
     }
 
     private static void AddCustomAttribute<T>(this TypeBuilder builder, params object[] args) where T : Attribute
@@ -447,10 +443,8 @@ public static class COMWrapperFactory
 
         return _public_types[intf_type.GUID];
     }
-    #endregion
 
-    #region Public Static Members
-    public static ICOMObjectWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
+    private static ICOMObjectWrapper Wrap(object obj, Guid iid, Type intf_type, COMRegistry registry)
     {
         if (obj is ICOMObjectWrapper obj_wrapper)
         {
@@ -472,7 +466,7 @@ public static class COMWrapperFactory
             throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
         }
 
-        Type type = CreateType(intf_type, null);
+        Type type = CreateType(intf_type, iid, null);
         if (typeof(BaseComRpcWrapper).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
         {
             type = typeof(IUnknownWrapper);
@@ -480,30 +474,36 @@ public static class COMWrapperFactory
 
         return (BaseComWrapper)Activator.CreateInstance(type, obj, registry);
     }
+    #endregion
 
-    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry registry = null)
+    #region Public Static Members
+    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry registry)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(iid, registry, true), registry);
+        return Wrap(obj, iid, COMTypeManager.GetInterfaceType(iid, registry, true), registry);
     }
 
     public static ICOMObjectWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(intf, true), intf.Database);
+        return Wrap(obj, intf.Iid, COMTypeManager.GetInterfaceType(intf, true), intf.Database);
     }
 
     public static ICOMObjectWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, true), intf.Database);
+        return Wrap(obj, intf.Iid, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, true), intf.Database);
     }
 
     public static ICOMObjectWrapper Wrap(object obj, COMIPIDEntry ipid)
     {
-        return Wrap(obj, COMTypeManager.GetInterfaceType(ipid, true), null);
+        return Wrap(obj, ipid.Iid, COMTypeManager.GetInterfaceType(ipid, true), ipid.Database);
     }
 
-    public static ICOMObjectWrapper Wrap(object obj, Type intf_type)
+    public static ICOMObjectWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
     {
-        return Wrap(obj, intf_type, null);
+        if (!IsComInterfaceType(intf_type))
+        {
+            throw new ArgumentException("Type must be a COM interface.");
+        }
+        return Wrap(obj, intf_type.GUID, intf_type, registry);
     }
 
     public static object Unwrap(object obj)
@@ -521,10 +521,20 @@ public static class COMWrapperFactory
         _builder.Save(_name.Name + ".dll");
     }
 
+    private static void FlushProxyIid(Guid iid)
+    {
+        if (_types.TryGetValue(iid, out Type type))
+        {
+            if (typeof(BaseComRpcWrapper).IsAssignableFrom(type))
+            {
+                _types.Remove(iid);
+            }
+        }
+    }
     public static void EnableScripting()
     {
         COMTypeManager.SetWrapObject(Wrap);
-        COMTypeManager.SetFlushIid(iid => _types.Remove(iid));
+        COMTypeManager.SetFlushIid(FlushProxyIid);
     }
     #endregion
 }

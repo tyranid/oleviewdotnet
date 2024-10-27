@@ -15,13 +15,35 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Interop;
+using System;
+using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
-public sealed class IUnknownWrapper : BaseComWrapper<IUnknown>
+public sealed class IEnumStringWrapper : BaseComWrapper<IEnumString>
 {
-    public IUnknownWrapper(object obj, COMRegistry registry) : base(obj, registry)
+    public IEnumStringWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
+    }
+
+    public int Next(int celt, string[] rgelt, IntPtr pceltFetched)
+    {
+        return _object.Next(celt, rgelt, pceltFetched);
+    }
+
+    public int Skip(int celt)
+    {
+        return _object.Skip(celt);
+    }
+
+    public void Reset()
+    {
+        _object.Reset();
+    }
+
+    public IEnumStringWrapper Clone()
+    {
+        _object.Clone(out IEnumString ppenum2);
+        return new IEnumStringWrapper(ppenum2, m_registry);
     }
 }

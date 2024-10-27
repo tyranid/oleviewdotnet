@@ -39,6 +39,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
     private readonly COMRegistry m_registry;
     private bool m_names_from_type;
+    private Type m_type;
+    private Type m_scripting_type;
 
     private sealed class EditableParameter : COMSourceCodeEditableObject
     {
@@ -161,6 +163,18 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             UpdateNames(type);
         }
+    }
+
+    public Type CreateClientType(ref Type type, RpcClientBuilderArguments args)
+    {
+        if(type is not null)
+        {
+            return type;
+        }
+
+        type = RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider(), ignore_cache: true)
+            .GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
+        return type;
     }
     #endregion
 
@@ -319,8 +333,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     public Type CreateClientType(bool scripting = false)
     {
-        var args = CreateBuilderArgs(scripting);
-        return RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider()).GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
+        RpcClientBuilderArguments args = CreateBuilderArgs(scripting);
+        return scripting ? CreateClientType(ref m_scripting_type, args) : CreateClientType(ref m_type, args);
     }
 
     public string BuildClientSource(bool scripting = false)
@@ -363,6 +377,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         if (updated)
         {
             COMTypeManager.FlushIidType(Iid);
+            m_type = null;
+            m_scripting_type = null;
         }
     }
 

@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace OleViewDotNet.Rpc.Transport;
 
-internal sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrTransportMarshaler
+public sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrTransportMarshaler
 {
     private readonly object m_object;
     private readonly COMRegistry m_registry;

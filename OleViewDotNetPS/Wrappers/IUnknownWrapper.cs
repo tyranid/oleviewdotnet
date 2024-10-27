@@ -15,37 +15,13 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using System;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
+using OleViewDotNet.Interop;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
-public class IEnumMonikerWrapper : BaseComWrapper<IEnumMoniker>
+public sealed class IUnknownWrapper : BaseComWrapper<IUnknown>
 {
-    public IEnumMonikerWrapper(object obj, COMRegistry registry) : base(obj, registry)
+    public IUnknownWrapper(object obj, COMRegistry registry) : base(obj, registry)
     {
-    }
-
-    public int Next(int celt, IMonikerWrapper[] rgelt, IntPtr pceltFetched)
-    {
-        var monikers = rgelt.Select(m => m.UnwrapTyped()).ToArray();
-        return _object.Next(celt, monikers, pceltFetched);
-    }
-
-    public int Skip(int celt)
-    {
-        return _object.Skip(celt);
-    }
-
-    public void Reset()
-    {
-        _object.Reset();
-    }
-
-    public IEnumMonikerWrapper Clone()
-    {
-        _object.Clone(out IEnumMoniker out_enum);
-        return new IEnumMonikerWrapper(out_enum, m_registry);
     }
 }

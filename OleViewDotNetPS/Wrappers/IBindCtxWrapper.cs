@@ -18,7 +18,7 @@ using OleViewDotNet.Database;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class IBindCtxWrapper : BaseComWrapper<IBindCtx>
 {

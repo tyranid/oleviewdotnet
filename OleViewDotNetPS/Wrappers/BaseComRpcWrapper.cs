@@ -16,10 +16,11 @@
 
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
+using OleViewDotNet.Rpc;
 using OleViewDotNet.Rpc.Transport;
 using System;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public abstract class BaseComRpcWrapper : BaseComWrapper
 {
@@ -45,11 +46,7 @@ public abstract class BaseComRpcWrapper<T> : BaseComRpcWrapper, IDisposable wher
 
     public override object Unwrap()
     {
-        if (_object.Transport is not RpcChannelBufferClientTransport transport)
-        {
-            return this;
-        }
-        return transport.GetObject();
+        return _object.Unwrap();
     }
 
     protected override void OnDispose()

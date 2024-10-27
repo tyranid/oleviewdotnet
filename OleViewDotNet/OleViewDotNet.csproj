@@ -143,8 +143,4 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Wrappers\" />
-    </ItemGroup>
 </Project>

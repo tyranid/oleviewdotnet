@@ -20,7 +20,7 @@ using OleViewDotNet.TypeManager;
 using System;
 using System.Runtime.InteropServices;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
 {

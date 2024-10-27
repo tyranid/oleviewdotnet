@@ -19,7 +19,7 @@ using OleViewDotNet.TypeManager;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OleViewDotNet.Wrappers;
+namespace OleViewDotNetPS.Wrappers;
 
 public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
 {
