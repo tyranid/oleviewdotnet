@@ -3804,8 +3804,6 @@ The proxy get the names for.
 Return the name information as an object.
 .PARAMETER Format
 Specify the output format of XML or JSON.
-.PARAMETER Path
-Write the name information to a file path.
 .INPUTS
 None
 .OUTPUTS
@@ -3828,8 +3826,6 @@ function Get-ComProxyName {
         [OleViewDotNet.Proxy.COMProxyInterface]$Proxy,
         [parameter(Mandatory, ParameterSetName = "AsObject")]
         [switch]$AsObject,
-        [parameter(Mandatory, ParameterSetName = "ToFile")]
-        [string]$Path,
         [parameter(ParameterSetName = "AsString")]
         [parameter(ParameterSetName = "ToFile")]
         [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameDataExportFormat]$Format = "Xml"
@@ -3841,9 +3837,6 @@ function Get-ComProxyName {
         }
         "AsObject" {
             $Proxy.GetNames()
-        }
-        "ToFile" {
-            $Proxy.GetNames().Export($Format) | Set-Content -Path $Path
         }
     }
 }
@@ -3857,8 +3850,6 @@ This cmdlet sets a COM proxy's names from an XML/JSON file or object so that you
 The proxy entry to set.
 .PARAMETER Name
 The proxy name information. Can be an object or an XML or JSON document string.
-.PARAMETER Path
-The proxy name information as an XML or JSON file.
 .INPUTS
 None
 .OUTPUTS
@@ -3869,9 +3860,6 @@ Set COM proxy names from XML.
 .EXAMPLE
 Set-ComProxyName $proxy $name
 Set COM proxy names from an object.
-.EXAMPLE
-Set-ComProxyName $proxy -Path file.xml
-Set COM proxy names from a file.
 #>
 function Set-ComProxyName {
     [CmdletBinding(DefaultParameterSetName="FromObject")]
@@ -3879,21 +3867,108 @@ function Set-ComProxyName {
         [parameter(Mandatory, Position=0)]
         [OleViewDotNet.Proxy.COMProxyInterface]$Proxy,
         [parameter(Mandatory, Position=1, ParameterSetName = "FromObject")]
-        [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameData]$Name,
-        [parameter(Mandatory, ParameterSetName = "FromPath")]
-        [string]$Path
+        [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameData]$Name
     )
 
     $n = switch($PSCmdlet.ParameterSetName) {
         "FromObject" {
             $Name
         }
-        "FromPath" {
-            Get-Content -Path $Path | Out-String
-        }
     }
 
     $Proxy.UpdateNames($n)
+}
+
+<#
+.SYNOPSIS
+Exports a COM proxy's name information.
+.DESCRIPTION
+This cmdlet exports a COM proxy's names as an XML or JSON file so that you then can be edited.
+.PARAMETER Proxy
+The proxy get the names for.
+.PARAMETER Path
+The path to write to.
+.PARAMETER Format
+The format of the exported file.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Export-ComProxyName $proxy -Path output.xml
+Export COM proxy names as XML.
+.EXAMPLE
+Export-ComProxyName $proxy -Format Json -Path output.json
+Export COM proxy names as JSON.
+#>
+function Export-ComProxyName {
+    [CmdletBinding(DefaultParameterSetName="ToFile")]
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [OleViewDotNet.Proxy.COMProxyInterface]$Proxy,
+        [parameter(ParameterSetName = "ToFile")]
+        [string]$Path,
+        [parameter(ParameterSetName = "ToFile")]
+        [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameDataExportFormat]$Format = "Xml",
+        [parameter(ParameterSetName = "ToCache")]
+        [switch]$ToCache
+    )
+
+    switch($PSCmdlet.ParameterSetName) {
+        "ToFile" {
+            $Proxy.GetNames().Export($Format) | Set-Content -Path $Path
+        }
+        "ToCache" {
+            $Proxy.GetNames().SaveToCache()
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+Imports a COM proxy's name information.
+.DESCRIPTION
+This cmdlet import a COM proxy's names as an XML or JSON file so that you then can be edited.
+.PARAMETER Path
+The path to read from.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+Import-ComProxyName -Proxy $proxy -Path output.xml
+Import COM proxy names from XML.
+.EXAMPLE
+Import-ComProxyName $proxy -FromCache
+Import COM proxy names from cache.
+#>
+function Import-ComProxyName {
+    [CmdletBinding(DefaultParameterSetName="FromFile")]
+    Param(
+        [parameter(Mandatory, Position=0)]
+        [OleViewDotNet.Proxy.COMProxyInterface]$Proxy,
+        [parameter(ParameterSetName = "FromFile")]
+        [string]$Path,
+        [parameter(Mandatory, ParameterSetName = "FromCache")]
+        [switch]$FromCache
+    )
+
+    try
+    {
+        $names = switch($PSCmdlet.ParameterSetName) {
+            "FromFile" {
+                Get-Content -Path $Path | Out-String
+            }
+            "FromCache" {
+                [OleViewDotNet.Proxy.Editor.COMProxyInterfaceNameData]::LoadFromCache($Proxy.Iid)
+            }
+        }
+        Set-ComProxyName -Proxy $proxy -Name $names
+    }
+    catch
+    {
+        Write-Error $_
+    }
 }
 
 <#

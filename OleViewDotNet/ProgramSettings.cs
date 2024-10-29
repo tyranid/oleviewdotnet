@@ -205,6 +205,11 @@ public static class ProgramSettings
         return Path.Combine(GetAppDataDirectory(), "typelib");
     }
 
+    public static string GetProxyDirectory()
+    {
+        return Path.Combine(GetAppDataDirectory(), "proxy");
+    }
+
     public static string GetDefaultDatabasePath(bool create_directory)
     {
         string app_data = GetAppDataDirectory();

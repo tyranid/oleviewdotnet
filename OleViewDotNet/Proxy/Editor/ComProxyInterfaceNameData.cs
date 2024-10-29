@@ -137,5 +137,32 @@ public sealed class COMProxyInterfaceNameData
             return (COMProxyInterfaceNameData)ser.ReadObject(reader);
         }
     }
+
+    private static string GetProxyCachePath(Guid iid)
+    {
+        return Path.Combine(ProgramSettings.GetProxyDirectory(), $"{iid}.txt");
+    }
+
+    public static COMProxyInterfaceNameData LoadFromCache(Guid iid)
+    {
+        string path = GetProxyCachePath(iid);
+        return Parse(File.ReadAllText(path));
+    }
+
+    public void SaveToCache()
+    {
+        Directory.CreateDirectory(ProgramSettings.GetProxyDirectory());
+        string path = GetProxyCachePath(Iid);
+        File.WriteAllText(path, Export(COMProxyInterfaceNameDataExportFormat.Json));
+    }
+
+    public static void DeleteCache(Guid iid)
+    {
+        string path = GetProxyCachePath(iid);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
 }
 

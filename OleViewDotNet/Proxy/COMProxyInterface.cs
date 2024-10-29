@@ -137,6 +137,19 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         }
     }
 
+    private void UpdateFromFile()
+    {
+        try
+        {
+            COMProxyInterfaceNameData names = COMProxyInterfaceNameData.LoadFromCache(Iid);
+            names.UpdateNames(this);
+            m_modified = false;
+        }
+        catch
+        {
+        }
+    }
+
     private void CheckNameUpdate(COMInterfaceEntry ent)
     {
         if (m_names_from_type)
@@ -148,6 +161,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         {
             UpdateNames(type);
         }
+        else
+        {
+            UpdateFromFile();
+        }
+        m_modified = false;
     }
 
     private Type CreateClientType(ref Type type, RpcClientBuilderArguments args)
@@ -161,6 +179,17 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         type = RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider(), ignore_cache: true)
             .GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
         return type;
+    }
+
+    private void SetModified()
+    {
+        if (!m_modified)
+        {
+            m_modified = true;
+            m_type = null;
+            m_scripting_type = null;
+            COMTypeManager.FlushIidType(Iid);
+        }
     }
     #endregion
 
@@ -214,13 +243,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     void ICOMSourceCodeEditable.Update()
     {
-        if (!m_modified)
-        {
-            m_modified = true;
-            m_type = null;
-            m_scripting_type = null;
-            COMTypeManager.FlushIidType(Iid);
-        }
+        SetModified();
     }
     #endregion
 
@@ -251,19 +274,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     internal string CheckName(string name, string new_name)
     {
-        if (string.IsNullOrEmpty(new_name))
+        if (string.IsNullOrEmpty(new_name) || (name == new_name))
         {
             return name;
         }
 
-        if (!m_modified && name != new_name)
-        {
-            m_modified = true;
-            m_type = null;
-            m_scripting_type = null;
-            COMTypeManager.FlushIidType(Iid);
-        }
-
+        SetModified();
         return new_name;
     }
     #endregion

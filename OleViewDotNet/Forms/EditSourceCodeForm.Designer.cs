@@ -48,12 +48,9 @@
             this.ClientSize = new System.Drawing.Size(1473, 826);
             this.Controls.Add(this.sourceCodeViewerControl);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "EditSourceCodeForm";
-            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Edit Proxy";
+            this.Text = "Edit Source Code";
             this.ResumeLayout(false);
 
         }
