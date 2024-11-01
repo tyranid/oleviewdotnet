@@ -67,17 +67,18 @@ function Wrap-ComObject {
         return $Object
     }
 
+    $db = Get-CurrentComDatabase $Database
+    if ($null -eq $db) {
+        Write-Error "No database specified and current database isn't set"
+        return
+    }
+
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
-            $db = Get-CurrentComDatabase $Database
-            if ($null -eq $db) {
-                Write-Error "No database specified and current database isn't set"
-                return
-            }
             [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
         }
         "FromType" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Type)
+            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Type, $db)
         }
         "FromInterface" {
             [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
