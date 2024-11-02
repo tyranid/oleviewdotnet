@@ -44,11 +44,6 @@ public class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
     {
     }
 
-    Guid INdrComObject.GetIid()
-    {
-        return Iid;
-    }
-
     INdrComObject INdrComObject.QueryInterface(Guid iid)
     {
         using var unk = SafeComObjectHandle.FromObject(_obj, iid);

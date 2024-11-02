@@ -40,11 +40,6 @@ public abstract class BaseComWrapper : INdrComObject, ICOMObjectWrapper
         return QueryInterface(iid);
     }
 
-    Guid INdrComObject.GetIid()
-    {
-        return Iid;
-    }
-
     void IDisposable.Dispose()
     {
         OnDispose();
