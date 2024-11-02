@@ -230,17 +230,13 @@ public static class COMWrapperFactory
         return COMTypeManager.IsComImport(intf_type) && intf_type.IsInterface && !intf_type.Assembly.ReflectionOnly;
     }
 
-    private static bool IsDefined(Type intf_type, MemberInfo member)
-    {
-        if (!typeof(RpcClientBase).IsAssignableFrom(intf_type))
-        {
-            return true;
-        }
-        return member.DeclaringType == intf_type;
-    }
-
     private static void CreateRpcClientType(Type base_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
+        if (base_type.IsSealed)
+        {
+            throw new ArgumentException("Can't derived from a sealed type.");
+        }
+
         string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
         TypeBuilder tb = _module.DefineType(type_name,
                 TypeAttributes.Public | TypeAttributes.Sealed, base_type);
@@ -290,10 +286,10 @@ public static class COMWrapperFactory
         fixup_queue.Enqueue(Tuple.Create(iid, tb));
     }
 
-    private static void CreateWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, bool is_rpc_client)
+    private static void CreateWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         HashSet<Type> structured_types = new();
-        Type base_type = is_rpc_client ? typeof(BaseComRpcWrapper<>).MakeGenericType(intf_type) : typeof(BaseComWrapper<>).MakeGenericType(intf_type);
+        Type base_type = typeof(BaseComWrapper<>).MakeGenericType(intf_type);
         string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
         TypeBuilder tb = _module.DefineType(type_name,
              TypeAttributes.Public | TypeAttributes.Sealed, base_type);
@@ -311,19 +307,11 @@ public static class COMWrapperFactory
         conil.Emit(OpCodes.Ret);
         foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
         {
-            if (!IsDefined(intf_type, mi))
-            {
-                continue;
-            }
             GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
         }
 
         foreach (var pi in intf_type.GetProperties())
         {
-            if (!IsDefined(intf_type, pi))
-            {
-                continue;
-            }
             string name = names.GenerateName(pi);
             var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
             if (pi.CanRead)
@@ -338,19 +326,16 @@ public static class COMWrapperFactory
             }
         }
 
-        if (!is_rpc_client)
+        foreach (var type in structured_types.Where(FilterStructuredTypes))
         {
-            foreach (var type in structured_types.Where(FilterStructuredTypes))
-            {
-                var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
-                        type, new Type[0]);
-                var ilgen = methbuilder.GetILGenerator();
-                var local = ilgen.DeclareLocal(type);
-                ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
-                ilgen.Emit(OpCodes.Initobj, type);
-                ilgen.Emit(OpCodes.Ldloc_0);
-                ilgen.Emit(OpCodes.Ret);
-            }
+            var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
+                    type, new Type[0]);
+            var ilgen = methbuilder.GetILGenerator();
+            var local = ilgen.DeclareLocal(type);
+            ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
+            ilgen.Emit(OpCodes.Initobj, type);
+            ilgen.Emit(OpCodes.Ldloc_0);
+            ilgen.Emit(OpCodes.Ret);
         }
 
         fixup_queue.Enqueue(Tuple.Create(iid, tb));
@@ -385,13 +370,13 @@ public static class COMWrapperFactory
 
         if (!_types.ContainsKey(iid))
         {
-            if (is_rpc_client && !intf_type.IsSealed)
+            if (is_rpc_client)
             {
                 CreateRpcClientType(intf_type, iid, fixup_queue);
             }
             else
             {
-                CreateWrapperType(intf_type, iid, fixup_queue, is_rpc_client);
+                CreateWrapperType(intf_type, iid, fixup_queue);
             }
         }
 
@@ -531,7 +516,7 @@ public static class COMWrapperFactory
         }
 
         Type type = CreateType(intf_type, iid, null);
-        if (typeof(BaseComRpcWrapper).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
+        if (typeof(RpcClientBase).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
         {
             type = typeof(IUnknownWrapper);
         }
@@ -589,7 +574,7 @@ public static class COMWrapperFactory
     {
         if (_types.TryGetValue(iid, out Type type))
         {
-            if (typeof(BaseComRpcWrapper).IsAssignableFrom(type))
+            if (typeof(RpcClientBase).IsAssignableFrom(type))
             {
                 _types.Remove(iid);
             }
