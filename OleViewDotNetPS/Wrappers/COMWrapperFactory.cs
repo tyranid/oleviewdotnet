@@ -54,6 +54,13 @@ public static class COMWrapperFactory
     private static readonly Dictionary<Guid, Type> _public_types = new();
     private static readonly MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
     private static readonly Dictionary<Type, ConstructorInfo> _constructors = new();
+    private static readonly MethodInfo _get_builder_method = typeof(BaseComReflectionWrapper).GetMethod("Get", BindingFlags.NonPublic | BindingFlags.Instance,
+        null, new[] { typeof(int) }, null);
+    private static readonly MethodInfo _get_method = typeof(MethodInfoWrapper).GetMethod("Get");
+    private static readonly MethodInfo _get_ret_method = typeof(MethodInfoWrapper).GetMethod("GetRet");
+    private static readonly MethodInfo _set_ref_method = typeof(MethodInfoWrapper).GetMethod("SetRef");
+    private static readonly MethodInfo _set_method = typeof(MethodInfoWrapper).GetMethod("Set");
+    private static readonly MethodInfo _invoke_method = typeof(MethodInfoWrapper).GetMethod("Invoke");
 
     private static bool FilterStructuredTypes(Type t)
     {
@@ -245,7 +252,8 @@ public static class COMWrapperFactory
 
         var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
         _constructors[tb] = con;
-        con.DefineParameter(1, ParameterAttributes.In, "obj");
+        con.DefineParameter(1, ParameterAttributes.None, "obj");
+        con.DefineParameter(2, ParameterAttributes.None, "registry");
         var conil = con.GetILGenerator();
         conil.Emit(OpCodes.Ldarg_0);
         conil.Emit(OpCodes.Call, base_type.GetConstructor(Type.EmptyTypes));
@@ -297,7 +305,8 @@ public static class COMWrapperFactory
         HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
         var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
         _constructors[tb] = con;
-        con.DefineParameter(1, ParameterAttributes.In, "obj");
+        con.DefineParameter(1, ParameterAttributes.None, "obj");
+        con.DefineParameter(2, ParameterAttributes.None, "registry");
         var conil = con.GetILGenerator();
         conil.Emit(OpCodes.Ldarg_0);
         conil.Emit(OpCodes.Ldarg_1);
@@ -341,6 +350,121 @@ public static class COMWrapperFactory
         fixup_queue.Enqueue(Tuple.Create(iid, tb));
     }
 
+    private static Type GetReflectionType(this Type type)
+    {
+        if (type.Deref().IsPublic)
+        {
+            return type;
+        }
+        
+        if (type.IsByRef)
+        {
+            return typeof(object).MakeByRefType();
+        }
+        return typeof(object);
+    }
+
+    private static MethodBuilder GenerateReflectionMethod(TypeBuilder tb, MethodInfo mi, int index, MethodAttributes attributes,
+        HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, Dictionary<MethodInfo, MethodBuilder> method_map)
+    {
+        string name = names.GenerateName(mi);
+        var param_info = mi.GetParameters();
+        var param_types = param_info.Select(p => p.ParameterType.GetReflectionType()).ToArray();
+
+        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes,
+            mi.ReturnType.GetReflectionType(), param_types);
+
+        method_map.Add(mi, methbuilder);
+
+        for (int i = 0; i < param_info.Length; ++i)
+        {
+            methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
+        }
+
+        var ilgen = methbuilder.GetILGenerator();
+        ilgen.Emit(OpCodes.Ldarg_0);
+        ilgen.Emit(OpCodes.Ldc_I4, index);
+        ilgen.Emit(OpCodes.Call, _get_builder_method);
+        for (int i = 0; i < param_info.Length; ++i)
+        {
+            if (!param_info[i].IsOut)
+            {
+                ilgen.Emit(OpCodes.Dup);
+                ilgen.Emit(OpCodes.Ldc_I4, i);
+                ilgen.Emit(OpCodes.Ldarg, i + 1);
+                MethodInfo set_method = param_types[i].IsByRef ? _set_ref_method : _set_method;
+                ilgen.Emit(OpCodes.Call, set_method.MakeGenericMethod(param_types[i].Deref()));
+            }
+        }
+        ilgen.Emit(OpCodes.Dup);
+        ilgen.Emit(OpCodes.Call, _invoke_method);
+        for (int i = 0; i < param_info.Length; ++i)
+        {
+            if (param_types[i].IsByRef)
+            {
+                ilgen.Emit(OpCodes.Dup);
+                ilgen.Emit(OpCodes.Ldc_I4, i);
+                ilgen.Emit(OpCodes.Ldarg, i + 1);
+                ilgen.Emit(OpCodes.Call, _get_method.MakeGenericMethod(param_types[i].Deref()));
+            }
+        }
+        if (methbuilder.ReturnType != typeof(void))
+        {
+            ilgen.Emit(OpCodes.Call, _get_ret_method.MakeGenericMethod(methbuilder.ReturnType));
+        }
+        else
+        {
+            ilgen.Emit(OpCodes.Pop);
+        }
+        ilgen.Emit(OpCodes.Ret);
+        return methbuilder;
+    }
+
+    private static void CreateReflectionWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    {
+        Type base_type = typeof(BaseComReflectionWrapper);
+        string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
+        TypeBuilder tb = _module.DefineType(type_name,
+             TypeAttributes.Public | TypeAttributes.Sealed, base_type);
+        _types[iid] = tb;
+
+        HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
+        Dictionary<MethodInfo, MethodBuilder> method_map = new();
+        var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
+        _constructors[tb] = con;
+        con.DefineParameter(1, ParameterAttributes.None, "obj");
+        con.DefineParameter(2, ParameterAttributes.None, "registry");
+        var conil = con.GetILGenerator();
+        conil.Emit(OpCodes.Ldarg_0);
+        conil.Emit(OpCodes.Ldarg_1);
+        conil.Emit(OpCodes.Ldstr, intf_type.AssemblyQualifiedName);
+        conil.Emit(OpCodes.Ldarg_2);
+        conil.Emit(OpCodes.Call,
+            base_type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(object), typeof(string), typeof(COMRegistry) }, null));
+        conil.Emit(OpCodes.Ret);
+        MethodInfo[] methods = intf_type.GetMethods();
+        for (int i = 0; i < methods.Length; ++i)
+        {
+            GenerateReflectionMethod(tb, methods[i], i, methods[i].Attributes & MethodAttributes.SpecialName, names, fixup_queue, method_map);
+        }
+
+        foreach (var pi in intf_type.GetProperties())
+        {
+            string name = names.GenerateName(pi);
+            var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
+            if (pi.CanRead)
+            {
+                pb.SetGetMethod(method_map[pi.GetMethod]);
+            }
+            if (pi.CanWrite)
+            {
+                pb.SetSetMethod(method_map[pi.SetMethod]);
+            }
+        }
+
+        fixup_queue.Enqueue(Tuple.Create(iid, tb));
+    }
+
     private static Type CreateType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         if (intf_type is null)
@@ -349,16 +473,9 @@ public static class COMWrapperFactory
         }
 
         bool is_rpc_client = typeof(RpcClientBase).IsAssignableFrom(intf_type);
-        if (!is_rpc_client)
+        if (!is_rpc_client && !IsComInterfaceType(intf_type))
         {
-            if (IsComInterfaceType(intf_type))
-            {
-                intf_type = CreatePublicInterface(intf_type, null);
-            }
-            else
-            {
-                throw new ArgumentException("Wrapper type must be a COM interface or an RPC client and not reflection only.", nameof(intf_type));
-            }
+            throw new ArgumentException("Wrapper type must be a COM interface or an RPC client and not reflection only.", nameof(intf_type));
         }
 
         bool created_queue = false;
@@ -373,6 +490,10 @@ public static class COMWrapperFactory
             if (is_rpc_client)
             {
                 CreateRpcClientType(intf_type, iid, fixup_queue);
+            }
+            else if (!intf_type.IsPublic)
+            {
+                CreateReflectionWrapperType(intf_type, iid, fixup_queue);
             }
             else
             {
@@ -396,101 +517,6 @@ public static class COMWrapperFactory
     {
         ConstructorInfo con = typeof(T).GetConstructor(args.Select(a => a.GetType()).ToArray());
         builder.SetCustomAttribute(new(con, args));
-    }
-
-    private static Type AddInterfaceType(this Queue<Tuple<Guid, TypeBuilder>> fixup_queue, Type type)
-    {
-        bool by_ref = type.IsByRef;
-        type = type.Deref();
-
-        if (IsComInterfaceType(type) && !type.IsPublic)
-        {
-            type = CreatePublicInterface(type, fixup_queue);
-        }
-        return by_ref ? type.MakeByRefType() : type;
-    }
-
-    public static Type CreatePublicInterface(Type intf_type, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
-    {
-        if (intf_type is null)
-        {
-            throw new ArgumentNullException("No interface type available", nameof(intf_type));
-        }
-
-        if (intf_type.IsPublic)
-        {
-            return intf_type;
-        }
-
-        HashSet<Type> structured_types = new();
-        bool created_queue = false;
-        if (fixup_queue is null)
-        {
-            fixup_queue = new();
-            created_queue = true;
-        }
-
-        if (!_public_types.ContainsKey(intf_type.GUID))
-        {
-            TypeBuilder tb = _module.DefineType($"{ASSEMBLY_NAME}.{intf_type.FullName}", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
-            _public_types[intf_type.GUID] = tb;
-            tb.AddCustomAttribute<ComImportAttribute>();
-            tb.AddCustomAttribute<GuidAttribute>(intf_type.GUID.ToString());
-            tb.AddCustomAttribute<InterfaceTypeAttribute>(ComInterfaceType.InterfaceIsIInspectable);
-            Dictionary<string, MethodBuilder> method_cache = new();
-            foreach (var member in intf_type.GetMembers())
-            {
-                if (member is MethodInfo method)
-                {
-                    var ps = method.GetParameters();
-                    MethodBuilder m_builder = tb.DefineMethod(method.Name, method.Attributes, fixup_queue.AddInterfaceType(method.ReturnType), ps.Select(m => fixup_queue.AddInterfaceType(m.ParameterType)).ToArray());
-                    for (int i = 0; i < ps.Length; ++i)
-                    {
-                        m_builder.DefineParameter(i + 1, ps[i].Attributes, ps[i].Name);
-                    }
-                    method_cache[method.Name] = m_builder;
-                }
-                else if (member is PropertyInfo property)
-                {
-                    var p_builder = tb.DefineProperty(property.Name, property.Attributes, fixup_queue.AddInterfaceType(property.PropertyType), 
-                        property.GetIndexParameters().Select(p => fixup_queue.AddInterfaceType(p.ParameterType)).ToArray());
-                    if (property.CanRead)
-                    {
-                        p_builder.SetGetMethod(method_cache[property.GetGetMethod().Name]);
-                    }
-                    if (property.CanWrite)
-                    {
-                        p_builder.SetSetMethod(method_cache[property.GetSetMethod().Name]);
-                    }
-                }
-                else if (member is EventInfo ev)
-                {
-                    var e_builder = tb.DefineEvent(ev.Name, ev.Attributes, fixup_queue.AddInterfaceType(ev.EventHandlerType));
-                    var ev_add = ev.GetAddMethod();
-                    if (ev_add is not null)
-                    {
-                        e_builder.SetAddOnMethod(method_cache[ev_add.Name]);
-                    }
-                    var ev_rem = ev.GetRemoveMethod();
-                    if (ev_rem is not null)
-                    {
-                        e_builder.SetRemoveOnMethod(method_cache[ev_rem.Name]);
-                    }
-                }
-            }
-
-            fixup_queue.Enqueue(Tuple.Create(intf_type.GUID, tb));
-            if (created_queue)
-            {
-                while (fixup_queue.Count > 0)
-                {
-                    var entry = fixup_queue.Dequeue();
-                    _public_types[entry.Item1] = entry.Item2.CreateType();
-                }
-            }
-        }
-
-        return _public_types[intf_type.GUID];
     }
 
     private static ICOMObjectWrapper Wrap(object obj, Guid iid, Type intf_type, COMRegistry registry)
