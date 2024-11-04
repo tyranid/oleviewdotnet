@@ -190,13 +190,14 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         Source = COMRegistryEntrySource.ActCtx;
     }
 
-    internal COMInterfaceEntry(COMRegistry registry, Type type)
-        : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + 6, "IInspectable", type.FullName)
+    internal COMInterfaceEntry(COMRegistry registry, Type type, bool winrt)
+        : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + (winrt ? 6 : 3), 
+              winrt ? "IInspectable" : "IUnknown", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
         RuntimeTypeName = type.AssemblyQualifiedName;
         Source = COMRegistryEntrySource.Metadata;
-        IsWinRTType = true;
+        IsWinRTType = winrt;
     }
 
     public COMInterfaceEntry(COMRegistry registry, Guid iid, RegistryKey rootKey)
@@ -280,18 +281,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
 
     public COMTypeLibEntry TypeLibEntry => Database.Typelibs.GetGuidEntry(TypeLib);
 
-    public COMTypeLibVersionEntry TypeLibVersionEntry
-    {
-        get
-        {
-            var typelib = TypeLibEntry;
-            if (typelib is not null)
-            {
-                return typelib.Versions.Where(v => v.Version == TypeLibVersion).FirstOrDefault();
-            }
-            return null;
-        }
-    }
+    public COMTypeLibVersionEntry TypeLibVersionEntry => TypeLibEntry?.Versions.Where(v => v.Version == TypeLibVersion).FirstOrDefault();
 
     public bool HasTypeLib => TypeLib != Guid.Empty;
 

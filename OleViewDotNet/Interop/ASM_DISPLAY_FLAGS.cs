@@ -14,16 +14,28 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
-using System.Runtime.InteropServices;
-using TYPEDESC = System.Runtime.InteropServices.ComTypes.TYPEDESC;
+using System;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential), DataStart("rgbounds")]
-internal struct ARRAYDESC
+[Flags]
+internal enum ASM_DISPLAY_FLAGS
 {
-    public TYPEDESC tdescElem;
-    public ushort cDims;
-    public SAFEARRAYBOUND rgbounds;
+    ASM_DISPLAYF_VERSION = 0x01,
+    ASM_DISPLAYF_CULTURE = 0x02,
+    ASM_DISPLAYF_PUBLIC_KEY_TOKEN = 0x04,
+    ASM_DISPLAYF_PUBLIC_KEY = 0x08,
+    ASM_DISPLAYF_CUSTOM = 0x10,
+    ASM_DISPLAYF_PROCESSORARCHITECTURE = 0x20,
+    ASM_DISPLAYF_LANGUAGEID = 0x40,
+    ASM_DISPLAYF_RETARGET = 0x80,
+    ASM_DISPLAYF_CONFIG_MASK = 0x100,
+    ASM_DISPLAYF_MVID = 0x200,
+    ASM_DISPLAYF_FULL =
+                      ASM_DISPLAYF_VERSION |
+                      ASM_DISPLAYF_CULTURE |
+                      ASM_DISPLAYF_PUBLIC_KEY_TOKEN |
+                      ASM_DISPLAYF_RETARGET |
+                      ASM_DISPLAYF_PROCESSORARCHITECTURE
+
 }

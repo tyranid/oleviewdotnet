@@ -1,5 +1,5 @@
 ﻿//    This file is part of OleViewDotNet.
-//    Copyright (C) James Forshaw 2014, 2016
+//    Copyright (C) James Forshaw 2018
 //
 //    OleViewDotNet is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,16 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
-using System.Runtime.InteropServices;
-using TYPEDESC = System.Runtime.InteropServices.ComTypes.TYPEDESC;
+using OleViewDotNet.Database;
+using OleViewDotNet.Interop;
+using System;
 
-namespace OleViewDotNet.Interop;
+namespace OleViewDotNetPS.Wrappers;
 
-[StructLayout(LayoutKind.Sequential), DataStart("rgbounds")]
-internal struct ARRAYDESC
+public sealed class RpcClientNoProxyWrapper : BaseComWrapper<IUnknown>
 {
-    public TYPEDESC tdescElem;
-    public ushort cDims;
-    public SAFEARRAYBOUND rgbounds;
+    public Type RpcClientType { get; }
+
+    internal RpcClientNoProxyWrapper(object obj, Guid iid, Type type, COMRegistry registry) 
+        : base(obj, iid, type.Name, registry)
+    {
+        RpcClientType = type;
+    }
 }

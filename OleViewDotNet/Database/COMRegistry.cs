@@ -362,7 +362,29 @@ public class COMRegistry
         m_progids = new SortedDictionary<string, COMProgIDEntry>(progids, StringComparer.OrdinalIgnoreCase);
     }
 
-    private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry, bool load_runtime_intfs)
+    private void AddInterfacesFromTypes(Dictionary<Guid, COMInterfaceEntry> interfaces, IReadOnlyDictionary<Guid, Type> intfs, bool winrt)
+    {
+        foreach (var pair in intfs)
+        {
+            if (!interfaces.ContainsKey(pair.Key))
+            {
+                interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value, winrt));
+            }
+            else
+            {
+                COMInterfaceEntry entry = interfaces[pair.Key];
+                entry.RuntimeTypeName = pair.Value.AssemblyQualifiedName;
+                if (winrt)
+                {
+                    entry.InternalName = pair.Value.FullName;
+                    m_iid_name_cache[pair.Key] = pair.Value.FullName;
+                    entry.IsWinRTType = true;
+                }
+            }
+        }
+    }
+
+    private void LoadInterfaces(RegistryKey rootKey, ActivationContext actctx, COMPackagedRegistry packagedRegistry, bool load_runtime_types)
     {
         Dictionary<Guid, COMInterfaceEntry> interfaces = new();
         foreach (COMKnownInterfaces known_infs in Enum.GetValues(typeof(COMKnownInterfaces)))
@@ -403,23 +425,10 @@ public class COMRegistry
             }
         }
 
-        if (load_runtime_intfs)
+        if (load_runtime_types)
         {
-            foreach (var pair in RuntimeMetadata.Interfaces)
-            {
-                if (!interfaces.ContainsKey(pair.Key))
-                {
-                    interfaces.Add(pair.Key, new COMInterfaceEntry(this, pair.Value));
-                }
-                else
-                {
-                    COMInterfaceEntry entry = interfaces[pair.Key];
-                    entry.InternalName = pair.Value.FullName;
-                    m_iid_name_cache[pair.Key] = pair.Value.FullName;
-                    entry.RuntimeTypeName = pair.Value.AssemblyQualifiedName;
-                    entry.IsWinRTType = true;
-                }
-            }
+            AddInterfacesFromTypes(interfaces, RuntimeMetadata.Interfaces, true);
+            AddInterfacesFromTypes(interfaces, GlobalAssemblyCache.Interfaces, false);
         }
 
         foreach (var pair in packagedRegistry.Packages)

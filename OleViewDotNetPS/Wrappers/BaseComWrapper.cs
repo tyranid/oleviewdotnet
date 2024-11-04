@@ -60,7 +60,12 @@ public abstract class BaseComWrapper<T> : BaseComWrapper where T : class
     protected readonly T _object;
 
     protected BaseComWrapper(object obj, COMRegistry registry)
-        : base(typeof(T).GUID, typeof(T).Name, registry)
+        : this(obj, typeof(T).GUID, typeof(T).Name, registry)
+    {
+    }
+
+    private protected BaseComWrapper(object obj, Guid iid, string name, COMRegistry registry) 
+        : base(iid, name, registry)
     {
         System.Diagnostics.Debug.Assert(typeof(T).IsInterface);
         _object = (T)obj;

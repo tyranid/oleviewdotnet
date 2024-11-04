@@ -544,7 +544,7 @@ public static class COMWrapperFactory
         Type type = CreateType(intf_type, iid, null);
         if (typeof(RpcClientBase).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
         {
-            type = typeof(IUnknownWrapper);
+            return new RpcClientNoProxyWrapper(obj, iid, intf_type, registry);
         }
 
         return (ICOMObjectWrapper)Activator.CreateInstance(type, obj, registry);

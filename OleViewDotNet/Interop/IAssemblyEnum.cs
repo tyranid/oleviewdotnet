@@ -14,16 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
+using System;
 using System.Runtime.InteropServices;
-using TYPEDESC = System.Runtime.InteropServices.ComTypes.TYPEDESC;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential), DataStart("rgbounds")]
-internal struct ARRAYDESC
+[ComImport, Guid("21b8916c-f28e-11d2-a473-00c04f8ef448"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAssemblyEnum
 {
-    public TYPEDESC tdescElem;
-    public ushort cDims;
-    public SAFEARRAYBOUND rgbounds;
+    [PreserveSig]
+    int GetNextAssembly(
+    IntPtr pvReserved,
+        out IAssemblyName ppName,
+        int dwFlags);
+    void Reset();
+    IAssemblyEnum Clone();
 }

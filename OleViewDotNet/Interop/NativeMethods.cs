@@ -298,4 +298,13 @@ internal static class NativeMethods
         SafeComObjectHandle This,
         ref MIDL_STUB_MESSAGE pStubMsg
     );
+
+    [DllImport("clr.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    internal static extern void CreateAssemblyEnum(
+        out IAssemblyEnum pEnum,
+        [MarshalAs(UnmanagedType.IUnknown)] object pUnkReserved,
+        IAssemblyName pName,
+        ASM_CACHE_FLAGS dwFlags,
+        IntPtr pvReserved
+    );
 }

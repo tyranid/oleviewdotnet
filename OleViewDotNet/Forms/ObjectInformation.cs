@@ -148,7 +148,7 @@ internal partial class ObjectInformation : UserControl
             ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
             if (factory is not null)
             {
-                item.SubItems.Add("Yes");
+                item.SubItems.Add("Yes (Builtin)");
             }
             else if (ent.HasTypeLib)
             {
@@ -156,7 +156,7 @@ internal partial class ObjectInformation : UserControl
             }
             else if (ent.HasRuntimeType)
             {
-                item.SubItems.Add("Yes (WinRT)");
+                item.SubItems.Add($"Yes ({(ent.IsWinRTType ? "WinRT" : ".NET")})");
             }
             else if (ent.HasProxy)
             {

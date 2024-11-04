@@ -14,16 +14,16 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
-using System.Runtime.InteropServices;
-using TYPEDESC = System.Runtime.InteropServices.ComTypes.TYPEDESC;
+using System;
 
 namespace OleViewDotNet.Interop;
 
-[StructLayout(LayoutKind.Sequential), DataStart("rgbounds")]
-internal struct ARRAYDESC
+[Flags]
+internal enum ASM_CACHE_FLAGS
 {
-    public TYPEDESC tdescElem;
-    public ushort cDims;
-    public SAFEARRAYBOUND rgbounds;
+    ASM_CACHE_ZAP = 0x01,
+    ASM_CACHE_GAC = 0x02,
+    ASM_CACHE_DOWNLOAD = 0x04,
+    ASM_CACHE_ROOT = 0x08,
+    ASM_CACHE_ROOT_EX = 0x80
 }
