@@ -58,13 +58,19 @@ public static class GlobalAssemblyCache
         Dictionary<Guid, Type> ret = new();
         foreach (var asm in m_assemblies.Value)
         {
-            foreach (var type in asm.GetExportedTypes())
+            try
             {
-                if (type.IsInterface && COMTypeManager.IsComImport(type) && 
-                    type.GetCustomAttribute<ObsoleteAttribute>() == null && !ret.ContainsKey(type.GUID))
+                foreach (var type in asm.GetExportedTypes())
                 {
-                    ret.Add(type.GUID, type);
+                    if (type.IsInterface && COMTypeManager.IsComImport(type) &&
+                        type.GetCustomAttribute<ObsoleteAttribute>() == null && !ret.ContainsKey(type.GUID))
+                    {
+                        ret.Add(type.GUID, type);
+                    }
                 }
+            }
+            catch
+            {
             }
         }
         return ret;
