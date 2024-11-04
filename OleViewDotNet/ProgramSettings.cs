@@ -55,6 +55,8 @@ public static class ProgramSettings
         public bool AlwaysShowSourceCode { get; set; }
         [DataMember]
         public bool EnableAutoParsing { get; set; }
+        [DataMember]
+        public bool SaveProxyNamesOnExit { get; set; }
 
         public static ConfigFile Load()
         {
@@ -187,6 +189,12 @@ public static class ProgramSettings
     {
         get => _config.Value.EnableAutoParsing;
         set => _config.Value.EnableAutoParsing = value;
+    }
+
+    public static bool SaveProxyNamesOnExit
+    {
+        get => _config.Value.SaveProxyNamesOnExit;
+        set => _config.Value.SaveProxyNamesOnExit = value;
     }
 
     public static void Save()

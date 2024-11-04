@@ -1114,6 +1114,20 @@ internal partial class MainForm : Form
             {
             }
         }
+        if (ProgramSettings.SaveProxyNamesOnExit)
+        {
+            foreach (var proxy in COMProxyInterface.GetModifiedProxies())
+            {
+                try
+                {
+                    var names = proxy.GetNames();
+                    names.SaveToCache();
+                }
+                catch
+                {
+                }
+            }
+        }
     }
 
     private void menuViewRuntimeInterfaces_Click(object sender, EventArgs e)
@@ -1135,6 +1149,7 @@ internal partial class MainForm : Form
     {
         menuViewAlwaysShowSourceCode.Checked = ProgramSettings.AlwaysShowSourceCode;
         menuViewEnableAutoParsing.Checked = ProgramSettings.EnableAutoParsing;
+        menuViewSaveProxyNamesOnExit.Checked = ProgramSettings.SaveProxyNamesOnExit;
     }
 
     private void menuViewAlwaysShowSourceCode_Click(object sender, EventArgs e)
@@ -1147,5 +1162,11 @@ internal partial class MainForm : Form
     {
         menuViewEnableAutoParsing.Checked = !menuViewEnableAutoParsing.Checked;
         ProgramSettings.EnableAutoParsing = menuViewEnableAutoParsing.Checked;
+    }
+
+    private void menuViewSaveProxyNamesOnExit_Click(object sender, EventArgs e)
+    {
+        menuViewSaveProxyNamesOnExit.Checked = !menuViewSaveProxyNamesOnExit.Checked;
+        ProgramSettings.SaveProxyNamesOnExit = menuViewSaveProxyNamesOnExit.Checked;
     }
 }

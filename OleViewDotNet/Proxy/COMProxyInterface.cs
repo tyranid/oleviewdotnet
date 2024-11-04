@@ -42,6 +42,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     private Type m_type;
     private Type m_scripting_type;
     private bool m_modified;
+    private bool m_has_been_modified;
 
     private static COMProxyInterface GetFromTypeLibrary(COMTypeLibParser type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
     {
@@ -186,6 +187,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         if (!m_modified)
         {
             m_modified = true;
+            m_has_been_modified = true;
             m_type = null;
             m_scripting_type = null;
             COMTypeManager.FlushIidType(Iid);
@@ -282,6 +284,8 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         SetModified();
         return new_name;
     }
+
+    internal static IEnumerable<COMProxyInterface> GetModifiedProxies() => m_proxies.Values.Where(p => p.m_has_been_modified);
     #endregion
 
     #region Public Static Methods

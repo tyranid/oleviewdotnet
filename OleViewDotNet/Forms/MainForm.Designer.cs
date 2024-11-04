@@ -127,6 +127,7 @@ partial class MainForm
             this.menuViewEnableAutoParsing = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
+            this.menuViewSaveProxyNamesOnExit = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -769,7 +770,8 @@ partial class MainForm
             this.menuViewRegistryViewOptions.Index = 1;
             this.menuViewRegistryViewOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuViewAlwaysShowSourceCode,
-            this.menuViewEnableAutoParsing});
+            this.menuViewEnableAutoParsing,
+            this.menuViewSaveProxyNamesOnExit});
             this.menuViewRegistryViewOptions.Text = "&Registry View Options";
             this.menuViewRegistryViewOptions.Popup += new System.EventHandler(this.menuViewRegistryViewOptions_Popup);
             // 
@@ -798,15 +800,21 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
+            // menuViewSaveProxyNamesOnExit
+            // 
+            this.menuViewSaveProxyNamesOnExit.Index = 2;
+            this.menuViewSaveProxyNamesOnExit.Text = "Save Proxy Names on Exit";
+            this.menuViewSaveProxyNamesOnExit.Click += new System.EventHandler(this.menuViewSaveProxyNamesOnExit_Click);
+            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1234, 690);
+            this.ClientSize = new System.Drawing.Size(1645, 862);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -917,5 +925,6 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuViewRegistryViewOptions;
     private System.Windows.Forms.MenuItem menuViewAlwaysShowSourceCode;
     private System.Windows.Forms.MenuItem menuViewEnableAutoParsing;
+    private System.Windows.Forms.MenuItem menuViewSaveProxyNamesOnExit;
 }
 
