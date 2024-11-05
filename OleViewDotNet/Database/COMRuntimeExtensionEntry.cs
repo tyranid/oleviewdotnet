@@ -53,7 +53,7 @@ public class COMRuntimeExtensionEntry : COMRegistryEntry, IXmlSerializable
     {
     }
 
-    internal COMRuntimeExtensionEntry(string package_id, string contract_id, string id, 
+    internal COMRuntimeExtensionEntry(string package_id, string contract_id, string id,
         RegistryKey key, COMRegistry registry) : this(registry)
     {
         PackageId = package_id;
@@ -144,7 +144,7 @@ public class COMRuntimeExtensionEntry : COMRegistryEntry, IXmlSerializable
     {
         get
         {
-            if (ContractId.Equals("windows.protocol", StringComparison.OrdinalIgnoreCase) 
+            if (ContractId.Equals("windows.protocol", StringComparison.OrdinalIgnoreCase)
                 && CustomProperties.ContainsKey("Name"))
             {
                 return CustomProperties["Name"];

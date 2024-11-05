@@ -31,10 +31,10 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
         data.Deserialize(out m_inner);
     }
 
-    public string ActivatableClassId 
-    { 
+    public string ActivatableClassId
+    {
         get => m_inner.winrtActivationPropertiesData.activatableClassId;
-        set => m_inner.winrtActivationPropertiesData.activatableClassId = string.IsNullOrEmpty(value) ? null : value; 
+        set => m_inner.winrtActivationPropertiesData.activatableClassId = string.IsNullOrEmpty(value) ? null : value;
     }
 
     public string PackageFullName
@@ -43,13 +43,13 @@ public sealed class ComWinRTActivationProperties : IActivationProperty
         set => m_inner.winrtActivationPropertiesData.packageFullName = string.IsNullOrEmpty(value) ? null : value;
     }
 
-    public ulong UserContext 
-    { 
-        get => m_inner.userContextPropertiesData.userContext; 
-        set => m_inner.userContextPropertiesData.userContext = value; 
+    public ulong UserContext
+    {
+        get => m_inner.userContextPropertiesData.userContext;
+        set => m_inner.userContextPropertiesData.userContext = value;
     }
 
-    public byte[] ProcessMitigationPolicy 
+    public byte[] ProcessMitigationPolicy
     {
         get => m_inner.rtbProcessMitigationPolcyBlob?.GetValue().pBlobData?.GetValue();
         set

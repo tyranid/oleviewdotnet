@@ -45,7 +45,7 @@ public sealed class COMSecurityDescriptor
         }
     }
 
-    public COMSecurityDescriptor(string sddl) 
+    public COMSecurityDescriptor(string sddl)
         : this(new SecurityDescriptor(sddl))
     {
     }

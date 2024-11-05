@@ -60,7 +60,7 @@ internal partial class WaitingDialog : Form
         SetProgress(string.Empty, 0);
     }
 
-    public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func) 
+    public WaitingDialog(Func<IProgress<Tuple<string, int>>, CancellationToken, object> worker_func)
         : this(worker_func, null)
     {
     }
@@ -89,7 +89,7 @@ internal partial class WaitingDialog : Form
     }
 
     private void LoadingDialog_Load(object sender, EventArgs e)
-    {                        
+    {
         m_worker.RunWorkerAsync();
     }
 

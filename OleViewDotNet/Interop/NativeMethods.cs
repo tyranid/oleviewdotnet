@@ -86,7 +86,7 @@ internal static class NativeMethods
 
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstanceEx(in Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
-    
+
     [DllImport("ole32.dll")]
     public static extern int CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid, out IntPtr ppv);
 

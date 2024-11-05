@@ -46,7 +46,7 @@ public sealed class COMProxyInterfaceNameData
         Iid = proxy.Iid;
         Name = proxy.Name;
         ComplexTypes = proxy.ComplexTypes.Select((s, i) => new COMProxyComplexTypeNameData(s, i)).ToList();
-        Procedures = proxy.Procedures.Select((p,i) => new COMProxyProcedureNameData(p, i)).ToList();
+        Procedures = proxy.Procedures.Select((p, i) => new COMProxyProcedureNameData(p, i)).ToList();
     }
 
     internal void UpdateNames(COMProxyInterface proxy)

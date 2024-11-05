@@ -29,7 +29,7 @@ interface IStandardActivator
     void StandardGetInstanceFromFile([In] COSERVERINFO pServerInfo, OptionalGuidClass pclsidOverride,
         IntPtr punkOuter, CLSCTX dwClsCtx, STGM grfMode, [MarshalAs(UnmanagedType.LPWStr)] string pwszName, int dwCount, [In, Out][MarshalAs(UnmanagedType.LPArray)] MULTI_QI[] pResults);
     void StandardGetInstanceFromIStorage([In] COSERVERINFO pServerInfo, OptionalGuidClass pclsidOverride,
-        IntPtr punkOuter, CLSCTX dwClsCtx, [MarshalAs(UnmanagedType.IUnknown)] IStorage pstg, int dwCount, 
+        IntPtr punkOuter, CLSCTX dwClsCtx, [MarshalAs(UnmanagedType.IUnknown)] IStorage pstg, int dwCount,
         [In, Out][MarshalAs(UnmanagedType.LPArray)] MULTI_QI[] pResults);
     void Reset();
 }

@@ -48,7 +48,7 @@ internal partial class CreateIStreamForm : Form
                 }
             }
         }
-        
+
         Close();
     }
 

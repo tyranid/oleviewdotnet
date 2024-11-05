@@ -194,8 +194,8 @@ public sealed class COMAccessCheck : IDisposable
                     true);
         }
 
-        return new COMAccessCheckResult(m_access_cache[access_str], 
-            check_launch ? m_launch_cache[launch_str] : 0, obj, 
+        return new COMAccessCheckResult(m_access_cache[access_str],
+            check_launch ? m_launch_cache[launch_str] : 0, obj,
             access_sd, launch_sd, check_launch);
     }
 

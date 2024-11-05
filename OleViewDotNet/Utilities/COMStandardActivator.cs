@@ -62,10 +62,10 @@ public sealed class COMStandardActivator
         return GetObject((s, m) => m_activator.StandardCreateInstance(clsid, IntPtr.Zero, clsctx, s, m.Length, m), iid, server, auth_info);
     }
 
-    public object GetInstanceFromFile(string name, STGM grf_mode, CLSCTX clsctx, Guid? iid = null, 
+    public object GetInstanceFromFile(string name, STGM grf_mode, CLSCTX clsctx, Guid? iid = null,
         Guid? clsid = null, string server = null, COMAuthInfo auth_info = null)
     {
-        return GetObject((s, m) => m_activator.StandardGetInstanceFromFile(s, clsid.ToOptional(), 
+        return GetObject((s, m) => m_activator.StandardGetInstanceFromFile(s, clsid.ToOptional(),
             IntPtr.Zero, clsctx, grf_mode, name, m.Length, m), iid, server, auth_info);
     }
 

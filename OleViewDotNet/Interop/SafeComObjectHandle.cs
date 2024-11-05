@@ -21,7 +21,7 @@ namespace OleViewDotNet.Interop;
 
 public class SafeComObjectHandle : SafeHandle
 {
-    internal SafeComObjectHandle(IntPtr handle) 
+    internal SafeComObjectHandle(IntPtr handle)
         : base(IntPtr.Zero, true)
     {
         SetHandle(handle);

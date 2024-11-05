@@ -26,7 +26,7 @@ namespace OleViewDotNet.Rpc.Clients;
 
 internal sealed class LocalResolverClientHandles
 {
-    private readonly static Lazy<LocalResolverClientHandles> m_instance = 
+    private readonly static Lazy<LocalResolverClientHandles> m_instance =
         new(() => new LocalResolverClientHandles());
 
     private static ISymbolResolver GetResolver()

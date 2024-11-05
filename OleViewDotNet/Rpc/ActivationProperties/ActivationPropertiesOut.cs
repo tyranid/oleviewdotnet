@@ -21,7 +21,7 @@ namespace OleViewDotNet.Rpc.ActivationProperties;
 
 public sealed class ActivationPropertiesOut : ActivationProperties
 {
-    internal ActivationPropertiesOut(COMObjRefCustom objref) 
+    internal ActivationPropertiesOut(COMObjRefCustom objref)
         : base(objref)
     {
     }

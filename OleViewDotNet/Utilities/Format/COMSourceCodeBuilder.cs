@@ -179,7 +179,7 @@ public sealed class COMSourceCodeBuilder : NdrStringBuilder
             {
                 throw new ArgumentException($"Object {obj} must be parsed before formatting.");
             }
-        
+
             parsable.ParseSourceCode();
         }
 

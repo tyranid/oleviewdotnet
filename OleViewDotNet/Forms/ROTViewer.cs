@@ -68,7 +68,7 @@ internal partial class ROTViewer : UserControl
                 Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
                 ListViewItem item = listViewROT.Items.Add(strDisplayName);
                 item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
-                
+
                 if (m_registry.Clsids.ContainsKey(clsid))
                 {
                     item.SubItems.Add(m_registry.Clsids[clsid].Name);
@@ -117,7 +117,7 @@ internal partial class ROTViewer : UserControl
                 IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
                 Guid unk = COMKnownGuids.IID_IUnknown;
                 info.moniker.BindToObject(bindCtx, null, ref unk, out object comObj);
-                ObjectInformation view = new(m_registry, null, info.strDisplayName, 
+                ObjectInformation view = new(m_registry, null, info.strDisplayName,
                     comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);
             }

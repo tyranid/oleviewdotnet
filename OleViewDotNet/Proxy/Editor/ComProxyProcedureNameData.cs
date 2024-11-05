@@ -44,7 +44,7 @@ public sealed class COMProxyProcedureNameData
     internal void UpdateNames(COMProxyInterfaceProcedure procedure)
     {
         procedure.Name = Name;
-        
+
         if (Parameters is not null)
         {
             var ps = procedure.Parameters;

@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace OleViewDotNet.Interop;
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct TypeInfoVtbl 
+internal struct TypeInfoVtbl
 {
     public int cRefs;
     public Guid iid;
@@ -61,7 +61,7 @@ internal struct MIDL_STUB_DESC
     public IntPtr pExprInfo;
 }
 
-    [StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential)]
 internal struct MIDL_SERVER_INFO
 {
     public IntPtr pStubDesc;

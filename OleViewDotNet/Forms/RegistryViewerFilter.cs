@@ -136,7 +136,7 @@ internal class RegistryViewerFilterEntry
     {
         return (RegistryViewerFilterEntry)MemberwiseClone();
     }
-    
+
     public bool IsMatch(object entry)
     {
         try
@@ -172,7 +172,7 @@ internal class RegistryViewerFilterEntry
                     return value.StartsWith(value_compare);
             }
         }
-        catch(ArgumentException)
+        catch (ArgumentException)
         {
             return false;
         }

@@ -53,7 +53,7 @@ internal partial class SettingsForm : Form
                 valid_dll = true;
             }
         }
-        catch(Win32Exception)
+        catch (Win32Exception)
         {
         }
 

@@ -66,14 +66,14 @@ public class COMCLSIDServerEntry : IXmlSerializable
 
         return Server == right.Server
             && CommandLine == right.CommandLine
-            && ServerType == right.ServerType 
+            && ServerType == right.ServerType
             && ThreadingModel == right.ThreadingModel
             && RawServer == right.RawServer;
     }
 
     public override int GetHashCode()
     {
-        return Server.GetHashCode() ^ CommandLine.GetHashCode() 
+        return Server.GetHashCode() ^ CommandLine.GetHashCode()
             ^ ServerType.GetHashCode() ^ ThreadingModel.GetHashCode()
             ^ RawServer.GetSafeHashCode();
     }
@@ -172,12 +172,12 @@ public class COMCLSIDServerEntry : IXmlSerializable
         CommandLine = commandLine;
     }
 
-    internal COMCLSIDServerEntry(COMServerType server_type, string server) 
+    internal COMCLSIDServerEntry(COMServerType server_type, string server)
         : this(server_type, server, COMThreadingModel.Apartment)
     {
     }
 
-    internal COMCLSIDServerEntry(COMServerType server_type) 
+    internal COMCLSIDServerEntry(COMServerType server_type)
         : this(server_type, string.Empty)
     {
     }
@@ -245,7 +245,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
         RawServer = reader.ReadString("rawserver");
         if (reader.ReadBool("dotnet"))
         {
-            IEnumerable<COMCLSIDServerDotNetEntry> service = 
+            IEnumerable<COMCLSIDServerDotNetEntry> service =
                 reader.ReadSerializableObjects("dotnet", () => new COMCLSIDServerDotNetEntry());
             DotNet = service.FirstOrDefault();
         }
@@ -261,7 +261,7 @@ public class COMCLSIDServerEntry : IXmlSerializable
         if (DotNet is not null)
         {
             writer.WriteBool("dotnet", true);
-            writer.WriteSerializableObjects("dotnet", 
+            writer.WriteSerializableObjects("dotnet",
                 new COMCLSIDServerDotNetEntry[] { DotNet });
         }
     }

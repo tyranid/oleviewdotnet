@@ -389,7 +389,7 @@ public static class COMUtilities
     {
         if (moniker_string == "new")
         {
-            using var handle = SafeComObjectHandle.CreateInstance(COMKnownGuids.CLSID_NewMoniker, 
+            using var handle = SafeComObjectHandle.CreateInstance(COMKnownGuids.CLSID_NewMoniker,
                 CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown);
             return (IMoniker)handle.ToObject();
         }

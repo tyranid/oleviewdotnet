@@ -191,7 +191,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     }
 
     internal COMInterfaceEntry(COMRegistry registry, Type type, bool winrt)
-        : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + (winrt ? 6 : 3), 
+        : this(registry, type.GUID, Guid.Empty, type.GetMethods().Length + (winrt ? 6 : 3),
               winrt ? "IInspectable" : "IUnknown", type.FullName)
     {
         Database.IidNameCache.TryAdd(Iid, InternalName);
@@ -311,7 +311,7 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
     #endregion
 
     #region ICOMSourceCodeFormattable Implementation
-    bool ICOMSourceCodeFormattable.IsFormattable => HasRuntimeType 
+    bool ICOMSourceCodeFormattable.IsFormattable => HasRuntimeType
                 || TypeLibVersionEntry is not null || ProxyClassEntry is not null;
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)

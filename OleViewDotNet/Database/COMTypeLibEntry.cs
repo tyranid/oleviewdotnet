@@ -121,7 +121,7 @@ public class COMTypeLibEntry : COMRegistryEntry, IComparable<COMTypeLibEntry>, I
         Name = Versions.Select(v => v.Name).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? TypelibId.FormatGuid();
     }
 
-    internal COMTypeLibEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection) 
+    internal COMTypeLibEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection)
         : this(registry)
     {
         TypelibId = typelib_redirection.TypeLibraryId;

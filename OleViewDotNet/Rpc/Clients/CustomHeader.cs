@@ -62,7 +62,7 @@ internal struct CustomHeader : INdrStructure
     {
         return new CustomHeader();
     }
-    public CustomHeader(int totalSize, int headerSize, int cOpaqueData, int destCtx, int cIfs, 
+    public CustomHeader(int totalSize, int headerSize, int cOpaqueData, int destCtx, int cIfs,
         Guid classInfoClsid, Guid[] pclsid, int[] pSizes, CustomOpaqueData[] opaqueData)
     {
         this.totalSize = totalSize;

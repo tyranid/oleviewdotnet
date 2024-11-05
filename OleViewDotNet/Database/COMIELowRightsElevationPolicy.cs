@@ -104,7 +104,7 @@ public class COMIELowRightsElevationPolicy : COMRegistryEntry, IComparable<COMIE
 
     public override int GetHashCode()
     {
-        return Name.GetSafeHashCode() ^ Uuid.GetHashCode() 
+        return Name.GetSafeHashCode() ^ Uuid.GetHashCode()
             ^ Clsid.GetHashCode() ^ AppPath.GetSafeHashCode() ^ Policy.GetHashCode()
             ^ Source.GetHashCode();
     }
@@ -117,7 +117,7 @@ public class COMIELowRightsElevationPolicy : COMRegistryEntry, IComparable<COMIE
 
 
     #region Constructors
-    public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key) 
+    public COMIELowRightsElevationPolicy(COMRegistry registry, Guid guid, COMRegistryEntrySource source, RegistryKey key)
         : this(registry)
     {
         Uuid = guid;

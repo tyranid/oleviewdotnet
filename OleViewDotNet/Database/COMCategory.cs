@@ -34,7 +34,7 @@ public class COMCategory : COMRegistryEntry, IXmlSerializable, ICOMGuid
     #endregion
 
     #region Constructors
-    internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids) 
+    internal COMCategory(COMRegistry registry, Guid catid, IEnumerable<Guid> clsids)
         : this(registry)
     {
         CategoryID = catid;

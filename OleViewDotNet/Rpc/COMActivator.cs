@@ -46,7 +46,7 @@ public sealed class COMActivator : IDisposable
             throw new Win32Exception(result);
         if (!act_out.HasValue)
             throw new InvalidOperationException("No properties returned from the activation call.");
-        objref = COMObjRef.FromArray(act_out.Value.abData) as COMObjRefCustom 
+        objref = COMObjRef.FromArray(act_out.Value.abData) as COMObjRefCustom
             ?? throw new InvalidOperationException("Output properties were not custom marshaled.");
         return new(objref);
     }
@@ -64,7 +64,7 @@ public sealed class COMActivator : IDisposable
             throw new Win32Exception(result);
         if (!act_out.HasValue)
             throw new InvalidOperationException("No properties returned from the activation call.");
-        objref = COMObjRef.FromArray(act_out.Value.abData) as COMObjRefCustom 
+        objref = COMObjRef.FromArray(act_out.Value.abData) as COMObjRefCustom
             ?? throw new InvalidOperationException("Output properties were not custom marshaled.");
         return new(objref);
     }

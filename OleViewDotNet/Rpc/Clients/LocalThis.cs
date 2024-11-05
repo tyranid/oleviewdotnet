@@ -50,7 +50,7 @@ internal struct LocalThis : INdrStructure
     {
         return new LocalThis();
     }
-    public LocalThis(int dwFlags, int dwClientThread, Guid passthroughTraceActivity, Guid callId, 
+    public LocalThis(int dwFlags, int dwClientThread, Guid passthroughTraceActivity, Guid callId,
         LocalThisAsyncRequestBlock asyncRequestBlock, TouchedAstaArray? pTouchedAstaArray, CONTAINERTHIS? containerPassthroughData)
     {
         this.dwFlags = dwFlags;

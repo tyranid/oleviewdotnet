@@ -30,7 +30,7 @@ public sealed class COMAccessToken : IDisposable
 {
     public NtToken Token { get; }
 
-    public COMAccessToken() 
+    public COMAccessToken()
         : this(NtToken.OpenProcessToken())
     {
     }
@@ -39,7 +39,7 @@ public sealed class COMAccessToken : IDisposable
     {
         using (token)
         {
-            Token = token.DuplicateToken(TokenType.Impersonation, 
+            Token = token.DuplicateToken(TokenType.Impersonation,
                 SecurityImpersonationLevel.Identification, TokenAccessRights.GenericAll);
         }
     }
@@ -65,8 +65,8 @@ public sealed class COMAccessToken : IDisposable
         return new COMAccessToken(NtToken.OpenProcessToken(pid, false, TokenAccessRights.Duplicate));
     }
 
-    public static COMAccessToken GetFiltered(COMAccessToken base_token, 
-        bool lua_token, bool disable_max_privs, bool write_restricted, 
+    public static COMAccessToken GetFiltered(COMAccessToken base_token,
+        bool lua_token, bool disable_max_privs, bool write_restricted,
         COMSid[] sids_to_disable, COMSid[] restricted_sids)
     {
         using NtToken token = base_token?.Token.Duplicate() ?? NtToken.OpenProcessToken();
@@ -79,7 +79,7 @@ public sealed class COMAccessToken : IDisposable
             flags |= FilterTokenFlags.LuaToken;
 
         return new COMAccessToken(token.Filter(flags,
-            sids_to_disable?.Select(s => s.Sid), Array.Empty<Luid>(), 
+            sids_to_disable?.Select(s => s.Sid), Array.Empty<Luid>(),
             restricted_sids?.Select(s => s.Sid)));
     }
 

@@ -69,12 +69,12 @@ internal partial class QueryInterfacesOptionsForm : Form
 
     public int ConcurrentQueries
     {
-        get; private set; 
+        get; private set;
     }
 
     public bool RefreshInterfaces
     {
         get; private set;
     }
-        
+
 }

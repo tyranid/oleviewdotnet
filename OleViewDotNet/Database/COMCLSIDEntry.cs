@@ -670,7 +670,7 @@ public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlS
 
         if (elevate)
         {
-            IEnumerable<COMCLSIDElevationEntry> elevation = 
+            IEnumerable<COMCLSIDElevationEntry> elevation =
                 reader.ReadSerializableObjects("elevation", () => new COMCLSIDElevationEntry());
             Elevation = elevation.FirstOrDefault();
         }

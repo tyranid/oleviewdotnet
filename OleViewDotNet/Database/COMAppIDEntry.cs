@@ -233,7 +233,7 @@ public class COMAppIDEntry : COMRegistryEntry, IComparable<COMAppIDEntry>, IXmlS
 
     public bool HasLowILLaunch => COMSecurity.GetILForSD(LaunchPermission) <= TokenIntegrityLevel.Low;
 
-    public bool HasACAccess =>  COMSecurity.SDHasAC(AccessPermission);
+    public bool HasACAccess => COMSecurity.SDHasAC(AccessPermission);
 
     public bool HasACLaunch => COMSecurity.SDHasAC(LaunchPermission);
 

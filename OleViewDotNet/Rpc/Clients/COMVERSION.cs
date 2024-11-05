@@ -43,7 +43,7 @@ internal struct COMVERSION : INdrStructure
         MinorVersion = minor;
     }
 
-    public COMVERSION(ushort major, ushort minor) 
+    public COMVERSION(ushort major, ushort minor)
         : this((short)major, (short)minor)
     {
     }

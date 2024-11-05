@@ -34,7 +34,7 @@ public class COMProgIDEntry : IComparable<COMProgIDEntry>, IXmlSerializable, ICO
     private readonly COMRegistry m_registry;
     private readonly Lazy<COMCLSIDEntry> m_clsid;
 
-    public COMProgIDEntry(COMRegistry registry, 
+    public COMProgIDEntry(COMRegistry registry,
         string progid, Guid clsid, RegistryKey rootKey) : this(registry)
     {
         Clsid = clsid;

@@ -74,13 +74,13 @@ internal class COMPackagedEntry
 
     private static Dictionary<Guid, COMPackagedClassEntry> ReadClasses(string packagePath, RegistryKey rootKey)
     {
-        return ReadGuidRegistryKeys(rootKey, "Class", packagePath, 
+        return ReadGuidRegistryKeys(rootKey, "Class", packagePath,
             (key, pp, reg) => new COMPackagedClassEntry(key, pp, reg));
     }
 
     private static Dictionary<Guid, COMPackagedInterfaceEntry> ReadInterfaces(string packagePath, RegistryKey rootKey)
     {
-        return ReadGuidRegistryKeys(rootKey, "Interface", packagePath, 
+        return ReadGuidRegistryKeys(rootKey, "Interface", packagePath,
             (key, pp, reg) => new COMPackagedInterfaceEntry(key, reg));
     }
 

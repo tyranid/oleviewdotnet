@@ -169,7 +169,7 @@ public static class EntryPoint
         string view_name = null;
         bool access_sd = false;
         COMRegistryMode mode = COMRegistryMode.Merged;
-        IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32, 
+        IEnumerable<COMServerType> server_types = new COMServerType[] { COMServerType.InProcHandler32,
             COMServerType.InProcServer32, COMServerType.LocalServer32 };
         NtToken enum_token = null;
         string enum_class = null;

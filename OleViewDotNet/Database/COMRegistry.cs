@@ -782,7 +782,7 @@ public class COMRegistry
 
     public IDictionary<string, List<COMCLSIDEntry>> ClsidsByServer
     {
-        get 
+        get
         {
             m_clsidbyserver ??= GetClsidsByString(e => !string.IsNullOrWhiteSpace(e.DefaultServer) && e.DefaultServerType != COMServerType.UnknownServer,
                     e => e.DefaultServer);
@@ -841,7 +841,7 @@ public class COMRegistry
     {
         get
         {
-            m_runtime_extensions_by_contract_id ??= 
+            m_runtime_extensions_by_contract_id ??=
                     m_runtime_extensions.GroupBy(m => m.ContractId, StringComparer.OrdinalIgnoreCase).ToSortedDictionary(p => p.Key, p => p.AsEnumerable(), StringComparer.OrdinalIgnoreCase);
             return m_runtime_extensions_by_contract_id;
         }
@@ -854,7 +854,7 @@ public class COMRegistry
 
     public string CreatedMachine
     {
-        get; private set; 
+        get; private set;
     }
 
     public COMRegistryMode LoadingMode
@@ -869,12 +869,12 @@ public class COMRegistry
 
     public bool SixtyFourBit
     {
-        get; private set; 
+        get; private set;
     }
 
     public string FilePath
     {
-        get; set; 
+        get; set;
     }
 
     public ProgramArchitecture Architecture
@@ -920,7 +920,7 @@ public class COMRegistry
     #region Public Methods
     public static COMRegistry Load(COMRegistryMode mode, COMSid user = null, IProgress<Tuple<string, int>> progress = null, string iid_to_name_cache_path = null)
     {
-        return new COMRegistry(mode, user ?? new COMSid(NtProcess.Current.User), 
+        return new COMRegistry(mode, user ?? new COMSid(NtProcess.Current.User),
             progress ?? new DummyProgress(), iid_to_name_cache_path);
     }
 
@@ -1200,7 +1200,7 @@ public class COMRegistry
         NativeMethods.GetClassFile(filename, out Guid clsid);
         return MapClsidToEntry(clsid);
     }
-    
+
     public IEnumerable<COMProgIDEntry> GetProgIdsForClsid(Guid clsid)
     {
         m_progidsbyclsid ??= m_progids.Values.GroupBy(p => p.Clsid).ToDictionary(g => g.Key, g => g.ToList());

@@ -46,11 +46,11 @@ public class COMRuntimeServerEntry : COMRegistryEntry, IComparable<COMRuntimeSer
     #region Constructors
     internal COMRuntimeServerEntry(COMRegistry registry) : base(registry)
     {
-        m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => Database.RuntimeClasses.Values.Where(c => 
+        m_get_classes = new Lazy<List<COMRuntimeClassEntry>>(() => Database.RuntimeClasses.Values.Where(c =>
             c.Server.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToList());
     }
 
-    public COMRuntimeServerEntry(COMRegistry registry, string package_id, 
+    public COMRuntimeServerEntry(COMRegistry registry, string package_id,
         string name, RegistryKey rootKey) : this(registry)
     {
         Name = name;

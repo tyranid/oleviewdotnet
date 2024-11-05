@@ -183,7 +183,7 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
     #endregion
 
     #region Constructors
-    internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name) 
+    internal COMRuntimeClassEntry(COMRegistry registry, string package_id, string name)
         : this(registry)
     {
         Name = name;
@@ -192,8 +192,8 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
         PackageId = package_id ?? string.Empty;
     }
 
-    public COMRuntimeClassEntry(COMRegistry registry, 
-        string package_id, string name, RegistryKey rootKey) 
+    public COMRuntimeClassEntry(COMRegistry registry,
+        string package_id, string name, RegistryKey rootKey)
         : this(registry, package_id, name)
     {
         LoadFromKey(rootKey);

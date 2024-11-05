@@ -24,7 +24,7 @@ namespace OleViewDotNet.TypeLib;
 public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase
 {
     #region Internal Members
-    internal COMTypeLibInterface(COMTypeDocumentation doc, TYPEATTR attr) 
+    internal COMTypeLibInterface(COMTypeDocumentation doc, TYPEATTR attr)
         : base(doc, attr)
     {
     }

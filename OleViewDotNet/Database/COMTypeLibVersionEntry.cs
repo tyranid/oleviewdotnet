@@ -94,7 +94,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
 
     bool ICOMSourceCodeFormattable.IsFormattable => true;
 
-    internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key) 
+    internal COMTypeLibVersionEntry(COMRegistry registry, string name, string version, Guid typelibid, int locale, RegistryKey key)
         : this(registry, typelibid)
     {
         Version = version;
@@ -137,7 +137,7 @@ public class COMTypeLibVersionEntry : IXmlSerializable, ICOMGuid, ICOMSourceCode
         TypelibId = typelibid;
     }
 
-    public COMTypeLibVersionEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection) 
+    public COMTypeLibVersionEntry(COMRegistry registry, ActCtxComTypeLibraryRedirection typelib_redirection)
         : this(registry, typelib_redirection.TypeLibraryId)
     {
         Name = TypelibId.FormatGuid();

@@ -608,7 +608,7 @@ public static class COMProcessParser
         return string.Empty;
     }
 
-    internal static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config, 
+    internal static COMProcessEntry ParseProcess(int pid, COMProcessParserConfig config,
         COMRegistry registry, IEnumerable<Guid> ipids, Func<bool, Dictionary<string, int>> get_resolved_cache)
     {
         try
@@ -740,7 +740,7 @@ public static class COMProcessParser
         };
 
         Dictionary<string, int> entries = new();
-        var proc = ParseProcess(Process.GetCurrentProcess().Id, config, 
+        var proc = ParseProcess(Process.GetCurrentProcess().Id, config,
             COMRegistry.Load(COMRegistryMode.UserOnly), Array.Empty<Guid>(), _ => entries);
 
         string dll_name = COMUtilities.GetCOMDllName();

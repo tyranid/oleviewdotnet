@@ -87,7 +87,7 @@ public sealed class RpcChannelBuffer : IDisposable
         if (status != 0)
             Marshal.ThrowExceptionForHR(status);
         byte[] ret = new byte[msg.BufferLength];
-        Marshal.Copy(msg.Buffer, ret, 0, msg.BufferLength); 
+        Marshal.Copy(msg.Buffer, ret, 0, msg.BufferLength);
         hr = m_free_buffer(m_buffer, ref msg);
         if (hr != 0)
             Marshal.ThrowExceptionForHR(hr);

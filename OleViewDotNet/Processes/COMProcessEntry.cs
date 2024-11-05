@@ -87,7 +87,7 @@ public class COMProcessEntry : ICOMAccessSecurity
     COMSecurityDescriptor ICOMAccessSecurity.DefaultLaunchPermission => null;
 
     internal COMProcessEntry(int pid, string path, List<COMIPIDEntry> ipids,
-        bool is64bit, Guid appid, COMSecurityDescriptor access_perm, COMSecurityDescriptor lrpc_perm, string rpc_endpoint, 
+        bool is64bit, Guid appid, COMSecurityDescriptor access_perm, COMSecurityDescriptor lrpc_perm, string rpc_endpoint,
         EOLE_AUTHENTICATION_CAPABILITIES capabilities,
         RPC_AUTHN_LEVEL authn_level, RPC_IMP_LEVEL imp_level, GLOBALOPT_UNMARSHALING_POLICY_VALUES unmarshal_policy,
         IntPtr access_control, IntPtr sta_main_hwnd, List<COMProcessClassRegistration> classes,

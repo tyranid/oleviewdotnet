@@ -22,7 +22,7 @@ namespace OleViewDotNet.Rpc.Clients;
 
 internal sealed class IActivationClient : RpcClientBase
 {
-    public IActivationClient() : 
+    public IActivationClient() :
             base("4d9f4ab8-7d1c-11cf-861e-0020af6e7c57", 0, 0)
     {
     }
@@ -32,24 +32,24 @@ internal sealed class IActivationClient : RpcClientBase
         return new(result.NdrBuffer, result.Handles, result.DataRepresentation);
     }
     public uint RemoteActivation(
-                ORPCTHIS ORPCthis, 
+                ORPCTHIS ORPCthis,
                 out ORPCTHAT ORPCthat,
-                Guid Clsid, 
-                string pwszObjectName, 
-                MInterfacePointer? pObjectStorage, 
-                int ClientImpLevel, 
-                int Mode, 
-                int Interfaces, 
-                Guid[] pIIDs, 
-                short cRequestedProtseqs, 
-                short[] aRequestedProtseqs, 
-                out long pOxid, 
-                out DUALSTRINGARRAY? ppdsaOxidBindings, 
-                out Guid pipidRemUnknown, 
-                out int pAuthnHint, 
-                out COMVERSION pServerVersion, 
-                out int phr, 
-                out MInterfacePointer?[] ppInterfaceData, 
+                Guid Clsid,
+                string pwszObjectName,
+                MInterfacePointer? pObjectStorage,
+                int ClientImpLevel,
+                int Mode,
+                int Interfaces,
+                Guid[] pIIDs,
+                short cRequestedProtseqs,
+                short[] aRequestedProtseqs,
+                out long pOxid,
+                out DUALSTRINGARRAY? ppdsaOxidBindings,
+                out Guid pipidRemUnknown,
+                out int pAuthnHint,
+                out COMVERSION pServerVersion,
+                out int phr,
+                out MInterfacePointer?[] ppInterfaceData,
                 out int[] pResults)
     {
         NdrMarshalBuffer m = new();

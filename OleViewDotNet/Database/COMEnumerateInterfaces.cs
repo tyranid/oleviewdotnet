@@ -230,7 +230,7 @@ public class COMEnumerateInterfaces
             };
 
             Dictionary<IntPtr, string> module_names = new();
-            
+
             var actctx = ActivationContext.FromProcess();
             if (actctx is not null)
             {
@@ -350,7 +350,7 @@ public class COMEnumerateInterfaces
     {
         using AnonymousPipeServerStream server = new(PipeDirection.In,
             HandleInheritability.Inheritable, 16 * 1024, null);
-;
+        ;
         List<string> args = new() { "-e", class_name };
         if (mta)
             args.Add("-mta");

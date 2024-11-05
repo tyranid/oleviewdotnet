@@ -58,7 +58,7 @@ internal sealed class COMPingSet : IDisposable
         if (add_set_count != 0 || del_set_count != 0)
         {
             if (m_client.ComplexPing(ref m_set_id, m_seq_num++, add_set_count, del_set_count,
-                    add_set_count > 0 ? add_to_set : null, 
+                    add_set_count > 0 ? add_to_set : null,
                     del_set_count > 0 ? del_from_set : null, out ushort _) != 0)
             {
                 m_timer.Change(Timeout.Infinite, Timeout.Infinite);

@@ -204,7 +204,7 @@ public static class ProgramSettings
 
     public static string GetAppDataDirectory()
     {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "OleViewDotNet", AppUtilities.CurrentArchitecture.ToString());
     }
 

@@ -44,7 +44,7 @@ internal partial class GetTypeForm : Form
         {
             m_currType = currType;
         }
-        
+
         m_data = data;
 
         InitializeComponent();
@@ -56,7 +56,7 @@ internal partial class GetTypeForm : Form
         {
             checkBoxSetNULL.Checked = true;
         }
-        
+
         if (m_currType == typeof(object))
         {
             comboBoxTypes.Items.Add(typeof(string));
@@ -105,7 +105,7 @@ internal partial class GetTypeForm : Form
                     if (ci is not null)
                     {
                         m_data = ci.Invoke(new object[] { comboBoxValue.Text });
-                    }                        
+                    }
                     else
                     {
                         /* Try default conversion */
@@ -114,7 +114,7 @@ internal partial class GetTypeForm : Form
 
                     if (!m_history.ContainsKey(t.GUID))
                     {
-                        m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];                            
+                        m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];
                     }
                     Array.Copy(m_history[t.GUID], 0, m_history[t.GUID], 1, MAX_HISTORY_ENTRIES - 1);
                     m_history[t.GUID][0] = comboBoxValue.Text;

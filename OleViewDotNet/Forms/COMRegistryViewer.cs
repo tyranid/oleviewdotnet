@@ -397,7 +397,7 @@ internal partial class COMRegistryViewer : UserControl
 
     private static TreeNode CreateInterfaceNode(COMRegistry registry, COMInterfaceEntry ent)
     {
-        return CreateNode($"{ent.Iid.FormatGuid()} - {ent.Name}", 
+        return CreateNode($"{ent.Iid.FormatGuid()} - {ent.Name}",
             InterfaceKey, ent, BuildInterfaceToolTip(ent, null));
     }
 
@@ -440,14 +440,14 @@ internal partial class COMRegistryViewer : UserControl
 
     private static IEnumerable<TreeNode> LoadProgIDs(COMRegistry registry)
     {
-        return registry.Progids.Values.Select(p => 
+        return registry.Progids.Values.Select(p =>
         CreateNode(p.ProgID, ClassKey, p, BuildProgIDToolTip(registry, p)));
     }
 
     private static IEnumerable<TreeNode> LoadCLSIDsByNames(COMRegistry registry)
     {
-        return registry.Clsids.Values.Select(ent 
-            => CreateNode(ent.Name, ClassKey, 
+        return registry.Clsids.Values.Select(ent
+            => CreateNode(ent.Name, ClassKey,
             ent, BuildCLSIDToolTip(registry, ent))).OrderBy(n => n.Text);
     }
 
@@ -674,7 +674,7 @@ internal partial class COMRegistryViewer : UserControl
         {
             return total_intfs.OrderBy(i => i.Name).Select(i => CreateInterfaceNameNode(registry, i, null));
         }
-        
+
         return total_intfs.Select(i => CreateInterfaceNode(registry, i));
     }
 
@@ -1521,8 +1521,8 @@ internal partial class COMRegistryViewer : UserControl
                 }
             }
 
-            if (m_filter_types.Contains(FilterType.CLSID) || 
-                m_filter_types.Contains(FilterType.RuntimeClass) || 
+            if (m_filter_types.Contains(FilterType.CLSID) ||
+                m_filter_types.Contains(FilterType.RuntimeClass) ||
                 m_filter_types.Contains(FilterType.ProgID))
             {
                 contextMenuStrip.Items.Add(queryAllInterfacesToolStripMenuItem);
@@ -2283,7 +2283,7 @@ internal partial class COMRegistryViewer : UserControl
                     EntryPoint.GetMainForm(m_registry).HostControl(new TypeLibControl(asm.GetName().Name,
                         asm, ent.Iid, false));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     EntryPoint.ShowError(this, ex);
                 }
@@ -2397,8 +2397,8 @@ internal partial class COMRegistryViewer : UserControl
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
-        TreeNode root_node, IEnumerable<FilterType> filter_types, 
-        string text, object visible_obj) 
+        TreeNode root_node, IEnumerable<FilterType> filter_types,
+        string text, object visible_obj)
         : this(reg, mode, Array.Empty<COMProcessEntry>(), new[] { root_node }, filter_types, text)
     {
         m_visible_node = FindVisibleNode(m_original_nodes, visible_obj);
@@ -2408,7 +2408,7 @@ internal partial class COMRegistryViewer : UserControl
     }
 
     private COMRegistryViewer(COMRegistry reg, COMRegistryDisplayMode mode,
-        IEnumerable<COMProcessEntry> processes, IEnumerable<TreeNode> nodes, 
+        IEnumerable<COMProcessEntry> processes, IEnumerable<TreeNode> nodes,
         IEnumerable<FilterType> filter_types, string text)
     {
         InitializeComponent();
@@ -2445,7 +2445,7 @@ internal partial class COMRegistryViewer : UserControl
     }
 
     public COMRegistryViewer(COMRegistry reg, COMTypeLib typelib, COMTypeLibTypeInfo visible_type)
-        : this(reg, COMRegistryDisplayMode.Typelibs, CreateTypeLibNodes(typelib), 
+        : this(reg, COMRegistryDisplayMode.Typelibs, CreateTypeLibNodes(typelib),
               new[] { FilterType.TypeLibTypeInfo }, typelib.ToString(), visible_type)
     {
     }

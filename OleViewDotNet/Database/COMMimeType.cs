@@ -51,7 +51,7 @@ public class COMMimeType : COMRegistryEntry, IXmlSerializable
             return false;
         }
 
-        return MimeType == right.MimeType && 
+        return MimeType == right.MimeType &&
             Clsid == right.Clsid && Extension == right.Extension;
     }
 

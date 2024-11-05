@@ -88,13 +88,13 @@ public class COMCLSIDElevationEntry : IXmlSerializable
             return false;
         }
 
-        return Enabled == right.Enabled && IconReference == right.IconReference 
+        return Enabled == right.Enabled && IconReference == right.IconReference
             && AutoApproval == right.AutoApproval && VirtualServerObjects.SequenceEqual(right.VirtualServerObjects);
     }
 
     public override int GetHashCode()
     {
-        return Enabled.GetHashCode() ^ IconReference.GetHashCode() 
+        return Enabled.GetHashCode() ^ IconReference.GetHashCode()
             ^ AutoApproval.GetHashCode() ^ VirtualServerObjects.GetEnumHashCode();
     }
 }

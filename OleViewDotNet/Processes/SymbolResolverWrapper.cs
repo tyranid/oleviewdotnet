@@ -91,7 +91,7 @@ internal class SymbolResolverWrapper : ISymbolResolver
         IntPtr ret = IntPtr.Zero;
         if (_machine_type == DllMachineType.ARM64 && _sym_enum != null)
         {
-            foreach(var sym in _sym_enum.EnumerateSymbols(IntPtr.Zero, symbol).OfType<DataSymbolInformation>())
+            foreach (var sym in _sym_enum.EnumerateSymbols(IntPtr.Zero, symbol).OfType<DataSymbolInformation>())
             {
                 if (sym.MachineType == DllMachineType.ARM64)
                 {

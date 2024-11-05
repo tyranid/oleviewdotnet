@@ -65,7 +65,7 @@ public interface ICOMClassEntry
     /// <summary>
     /// Indicates that the class' interface list has been loaded.
     /// </summary>
-    bool InterfacesLoaded {  get; }
+    bool InterfacesLoaded { get; }
 
     /// <summary>
     /// Get list of interfaces.

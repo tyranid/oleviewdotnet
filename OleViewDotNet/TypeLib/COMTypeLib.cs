@@ -67,7 +67,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
     #endregion
 
     #region Internal Members
-    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types, IEnumerable<COMTypeLibReference> ref_typelibs) 
+    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types, IEnumerable<COMTypeLibReference> ref_typelibs)
         : base(doc, attr)
     {
         Path = path ?? string.Empty;

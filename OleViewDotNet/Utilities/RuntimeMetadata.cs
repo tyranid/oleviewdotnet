@@ -34,7 +34,7 @@ public sealed class RuntimeMetadata
     private static readonly Dictionary<string, Assembly> _cached_reflection_assemblies = new();
     private static readonly Lazy<RuntimeMetadata> m_metadata = new(CreateMetadata);
 
-    private RuntimeMetadata() 
+    private RuntimeMetadata()
         : this(new(), new(), new())
     {
     }

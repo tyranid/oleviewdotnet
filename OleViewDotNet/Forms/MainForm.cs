@@ -37,7 +37,7 @@ namespace OleViewDotNet.Forms;
 
 internal partial class MainForm : Form
 {
-    private readonly DockPanel   m_dockPanel;
+    private readonly DockPanel m_dockPanel;
     private readonly COMRegistry m_registry;
     private PropertyGrid m_property_grid;
 
@@ -387,7 +387,7 @@ internal partial class MainForm : Form
         {
             AppUtilities.StartArchProcess(ProgramArchitecture.X86, string.Empty);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             EntryPoint.ShowError(this, ex);
         }
@@ -416,7 +416,7 @@ internal partial class MainForm : Form
             }
         }
     }
-    
+
     private async void menuObjectBindMoniker_Click(object sender, EventArgs e)
     {
         await ParseOrBindMoniker(true);
@@ -774,7 +774,7 @@ internal partial class MainForm : Form
     {
         try
         {
-            ProcessStartInfo start_info = new(Assembly.GetEntryAssembly().Location, 
+            ProcessStartInfo start_info = new(Assembly.GetEntryAssembly().Location,
                 $"--arch={AppUtilities.CurrentArchitecture}");
             start_info.UseShellExecute = true;
             start_info.Verb = "runas";
@@ -929,7 +929,7 @@ internal partial class MainForm : Form
 
     private void MainForm_KeyUp(object sender, KeyEventArgs e)
     {
-        if(e.Control&&(e.KeyCode == Keys.W))
+        if (e.Control && (e.KeyCode == Keys.W))
         {
             m_dockPanel.ActivePane.CloseActiveContent();
             return;

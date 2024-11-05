@@ -74,7 +74,7 @@ public class COMCLSIDServerDotNetEntry : IXmlSerializable
             return false;
         }
 
-        return AssemblyName.Equals(right.AssemblyName) && ClassName.Equals(right.ClassName) 
+        return AssemblyName.Equals(right.AssemblyName) && ClassName.Equals(right.ClassName)
             && CodeBase.Equals(right.CodeBase) && RuntimeVersion.Equals(right.RuntimeVersion);
     }
 

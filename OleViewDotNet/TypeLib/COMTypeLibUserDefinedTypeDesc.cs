@@ -22,7 +22,7 @@ public class COMTypeLibUserDefinedTypeDesc : COMTypeLibTypeDesc
 {
     public COMTypeLibTypeInfo TypeInfo { get; }
 
-    internal COMTypeLibUserDefinedTypeDesc(COMTypeLibTypeInfo type_info) 
+    internal COMTypeLibUserDefinedTypeDesc(COMTypeLibTypeInfo type_info)
         : base(VariantType.VT_USERDEFINED)
     {
         TypeInfo = type_info;
