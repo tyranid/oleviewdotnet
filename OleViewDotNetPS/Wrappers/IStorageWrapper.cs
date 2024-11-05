@@ -87,9 +87,10 @@ public sealed class IStorageWrapper : BaseComWrapper<IStorage>
     public byte[] ReadStream(string name)
     {
         using var stm = OpenStream(name, STGM.READ | STGM.SHARE_EXCLUSIVE);
-        long length = stm.Length;
-        byte[] ret = new byte[stm.Length];
-        stm.Read(ret, 0, ret.Length);
+        var netstm = stm.GetStream();
+        long length = netstm.Length;
+        byte[] ret = new byte[netstm.Length];
+        netstm.Read(ret, 0, ret.Length);
         return ret;
     }
 

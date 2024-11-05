@@ -33,8 +33,7 @@ internal sealed class StreamWrapper : Stream
 
     private ComTypes.STATSTG Stat()
     {
-        _stm.Stat(out ComTypes.STATSTG stat, 1);
-        return stat;
+        return _stm.Stat(1);
     }
 
     protected override void Dispose(bool disposing)
