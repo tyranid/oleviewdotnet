@@ -616,6 +616,11 @@ public class COMCLSIDEntry : COMRegistryEntry, IComparable<COMCLSIDEntry>, IXmlS
         return COMUtilities.CreateClassFactory(Clsid, COMKnownGuids.IID_IUnknown, dwContext, server, auth_info);
     }
 
+    public object CreateElevated(bool factory)
+    {
+        return COMUtilities.CreateFromElevationMoniker(Clsid, factory);
+    }
+
     public override string ToString()
     {
         return Name;

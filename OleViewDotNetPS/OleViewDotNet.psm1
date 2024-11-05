@@ -1770,12 +1770,15 @@ The name of a Windows Runtime class to create.
 Specify to create the runtime class in a broker.
 .PARAMETER PerUserBroker
 Specify to use a per-user broker.
+.PARAMETER Elevate
+Specify to elevate the class object.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass", ValueFromPipeline)]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromElevateClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromFactory", ValueFromPipeline)]
         [OleViewDotNetPS.Wrappers.IClassFactoryWrapper]$Factory,
@@ -1783,6 +1786,7 @@ function New-ComObject {
         [OleViewDotNetPS.Wrappers.IActivationFactoryWrapper]$ActivationFactory,
         [Parameter(Mandatory, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
+        [Parameter(Mandatory, ParameterSetName = "FromElevateClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
@@ -1800,6 +1804,9 @@ function New-ComObject {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
+        [Parameter(Mandatory, ParameterSetName = "FromElevateClass")]
+        [Parameter(Mandatory, ParameterSetName = "FromElevateClsid")]
+        [switch]$Elevate,
         [Parameter(Mandatory, ParameterSetName = "FromRuntimeClass")]
         [string]$RuntimeClass,
         [Parameter(ParameterSetName = "FromRuntimeClass")]
@@ -1845,6 +1852,12 @@ function New-ComObject {
             "FromSessionIdClsid" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Clsid, $SessionId, $false)
             }
+            "FromElevateClass" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromElevationMoniker($Class.Clsid, $false)
+            }
+            "FromElevateClsid" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromElevationMoniker($Clsid, $false)
+            }
             "FromRuntimeClass" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateRuntimeClass($RuntimeClass, $InBroker, $PerUserBroker)
             }
@@ -1887,15 +1900,19 @@ The name of a Windows Runtime class to create.
 Specify to create the runtime class in a broker.
 .PARAMETER PerUserBroker
 Specify to use a per-user broker.
+.PARAMETER Elevate
+Specify to elevate the class factory.
 #>
 function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
     Param(
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClass", ValueFromPipeline)]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClass")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromElevateClass")]
         [OleViewDotNet.Database.ICOMClassEntry]$Class,
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromClsid")]
         [Parameter(Mandatory, Position = 0, ParameterSetName = "FromSessionIdClsid")]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = "FromElevateClsid")]
         [Guid]$Clsid,
         [Parameter(ParameterSetName = "FromClsid")]
         [Parameter(ParameterSetName = "FromClass")]
@@ -1909,6 +1926,9 @@ function New-ComObjectFactory {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
+        [Parameter(Mandatory, ParameterSetName = "FromElevateClass")]
+        [Parameter(Mandatory, ParameterSetName = "FromElevateClsid")]
+        [switch]$Elevate,
         [Parameter(Mandatory, ParameterSetName = "FromRuntimeClass")]
         [string]$RuntimeClass,
         [Parameter(ParameterSetName = "FromRuntimeClass")]
@@ -1939,6 +1959,12 @@ function New-ComObjectFactory {
             "FromRuntimeClass" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateActivationFactory($RuntimeClass, "00000000-0000-0000-C000-000000000046", $InBroker, $PerUserBroker)
                 $runtime_class = $true
+            }
+            "FromElevateClass" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromElevationMoniker($Class.Clsid, $true)
+            }
+            "FromElevateClsid" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromElevationMoniker($Clsid, $true)
             }
         }
 

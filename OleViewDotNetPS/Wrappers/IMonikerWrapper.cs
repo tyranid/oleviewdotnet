@@ -16,6 +16,7 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.TypeManager;
+using OleViewDotNet.Utilities;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -107,7 +108,7 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
 
     public System.Runtime.InteropServices.ComTypes.FILETIME GetTimeOfLastChange(IBindCtxWrapper pbc, IMonikerWrapper pmkToLeft)
     {
-        _object.GetTimeOfLastChange(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), out System.Runtime.InteropServices.ComTypes.FILETIME pFileTime);
+        _object.GetTimeOfLastChange(pbc.UnwrapTyped(), pmkToLeft.UnwrapTyped(), out FILETIME pFileTime);
         return pFileTime;
     }
 
@@ -144,5 +145,10 @@ public sealed class IMonikerWrapper : BaseComWrapper<IMoniker>
     public int IsSystemMoniker(out int pdwMksys)
     {
         return _object.IsSystemMoniker(out pdwMksys);
+    }
+
+    public override string ToString()
+    {
+        return COMUtilities.GetMonikerDisplayName(this.UnwrapTyped());
     }
 }

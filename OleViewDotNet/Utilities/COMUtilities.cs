@@ -146,6 +146,11 @@ public static class COMUtilities
         return CreateFromMoniker($"session:{session_id}!{(factory ? "clsid" : "new")}:{clsid}", CLSCTX.LOCAL_SERVER);
     }
 
+    public static object CreateFromElevationMoniker(Guid clsid, bool factory)
+    {
+        return CreateFromMoniker($"Elevation:Administrator!{(factory ? "clsid" : "new")}:{clsid}", CLSCTX.LOCAL_SERVER);
+    }
+
     public static object UnmarshalObject(Stream stm, Guid iid)
     {
         return NativeMethods.CoUnmarshalInterface(new IStreamImpl(stm), iid);
