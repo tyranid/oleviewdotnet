@@ -19,6 +19,7 @@ using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.TypeLib.Instance;
+using OleViewDotNet.Utilities;
 using OleViewDotNet.Viewers;
 using System;
 using System.Collections.Concurrent;
@@ -135,6 +136,11 @@ public static class COMTypeManager
         if (!Marshal.IsComObject(obj))
         {
             throw new ArgumentException("Object must be a COM object.", nameof(obj));
+        }
+
+        if (!COMUtilities.SupportsInterface(obj, iid))
+        {
+            throw new ArgumentException($"Object doesn't support interface {iid}.", nameof(iid));
         }
 
         if (type is null)

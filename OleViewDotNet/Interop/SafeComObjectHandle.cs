@@ -90,9 +90,9 @@ public class SafeComObjectHandle : SafeHandle
         return new SafeComObjectHandle(unk);
     }
 
-    public static SafeComObjectHandle FromObject(object obj, Guid iid)
+    public static SafeComObjectHandle FromObject(object obj, Guid iid, bool throw_on_error = true)
     {
         using var ptr = FromObject(obj);
-        return ptr.QueryInterface(iid);
+        return ptr.QueryInterface(iid, throw_on_error);
     }
 }

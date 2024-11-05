@@ -539,4 +539,10 @@ public static class COMUtilities
             return (IRuntimeBroker)new RuntimeBrokerClass();
         }
     }
+
+    public static bool SupportsInterface(object obj, Guid iid)
+    {
+        using SafeComObjectHandle handle = SafeComObjectHandle.FromObject(obj, iid, false);
+        return handle != null;
+    }
 }
