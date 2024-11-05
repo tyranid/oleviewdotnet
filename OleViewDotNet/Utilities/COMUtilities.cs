@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using NtApiDotNet;
-using NtApiDotNet.Ndr.Marshal;
 using NtApiDotNet.Win32;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
@@ -28,10 +27,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 
 namespace OleViewDotNet.Utilities;
 
@@ -386,6 +383,31 @@ public static class COMUtilities
         return ret;
     }
 
+    public static object CreateRuntimeClass(string class_name, bool create_in_broker, bool per_user_broker)
+    {
+        if (create_in_broker)
+        {
+            IRuntimeBroker broker = CreateBroker(per_user_broker);
+            return broker.ActivateInstance(class_name);
+        }
+        return NativeMethods.RoActivateInstance(class_name);
+    }
+
+    public static object CreateActivationFactory(string class_name, Guid iid, bool create_in_broker, bool per_user_broker)
+    {
+        if (iid == Guid.Empty)
+        {
+            iid = COMKnownGuids.IID_IUnknown;
+        }
+
+        if (create_in_broker)
+        {
+            IRuntimeBroker broker = CreateBroker(per_user_broker);
+            return broker.GetActivationFactory(class_name, iid);
+        }
+        return NativeMethods.RoGetActivationFactory(class_name, iid);
+    }
+
     private static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
 
     private static IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string)
@@ -475,24 +497,24 @@ public static class COMUtilities
         return RPCOPT_SERVER_LOCALITY_VALUES.PROCESS_LOCAL;
     }
 
-    public static INdrComObject CreateStorage(string name, STGM mode, STGFMT format)
+    public static ICOMObjectWrapper CreateStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
         return COMTypeManager.Wrap(NativeMethods.StgCreateStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid), iid, null);
     }
 
-    public static INdrComObject CreateReadOnlyStorage(string name)
+    public static ICOMObjectWrapper CreateReadOnlyStorage(string name)
     {
         return CreateStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
     }
 
-    public static INdrComObject OpenStorage(string name, STGM mode, STGFMT format)
+    public static ICOMObjectWrapper OpenStorage(string name, STGM mode, STGFMT format)
     {
         Guid iid = typeof(IStorage).GUID;
         return COMTypeManager.Wrap(NativeMethods.StgOpenStorageEx(name, mode, format, 0, null, IntPtr.Zero, iid), iid, null);
     }
 
-    public static INdrComObject OpenReadOnlyStorage(string name)
+    public static ICOMObjectWrapper OpenReadOnlyStorage(string name)
     {
         return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ, STGFMT.Storage);
     }

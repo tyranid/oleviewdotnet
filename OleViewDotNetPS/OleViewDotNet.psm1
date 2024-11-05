@@ -1764,6 +1764,12 @@ Specify the interface to query for initially.
 Specify to indicate the database to get interface information from.
 .PARAMETER Ipid
 Create the object from an existing IPID.
+.PARAMETER RuntimeClass
+The name of a Windows Runtime class to create.
+.PARAMETER InBroker
+Specify to create the runtime class in a broker.
+.PARAMETER PerUserBroker
+Specify to use a per-user broker.
 #>
 function New-ComObject {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1794,6 +1800,12 @@ function New-ComObject {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
+        [Parameter(Mandatory, ParameterSetName = "FromRuntimeClass")]
+        [string]$RuntimeClass,
+        [Parameter(ParameterSetName = "FromRuntimeClass")]
+        [switch]$InBroker,
+        [Parameter(ParameterSetName = "FromRuntimeClass")]
+        [switch]$PerUserBroker,
         [switch]$NoWrapper,
         [Guid]$Iid = [guid]::Empty,
         [OleViewDotNet.Database.COMRegistry]$Database
@@ -1833,6 +1845,9 @@ function New-ComObject {
             "FromSessionIdClsid" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Clsid, $SessionId, $false)
             }
+            "FromRuntimeClass" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateRuntimeClass($RuntimeClass, $InBroker, $PerUserBroker)
+            }
         }
 
         if ($null -ne $obj) {
@@ -1866,6 +1881,12 @@ Specify the console session to create the factory in.
 Don't wrap factory object in a callable wrapper.
 .PARAMETER Iid
 The IID to wrap for if not wanting to use a default type.
+.PARAMETER RuntimeClass
+The name of a Windows Runtime class to create.
+.PARAMETER InBroker
+Specify to create the runtime class in a broker.
+.PARAMETER PerUserBroker
+Specify to use a per-user broker.
 #>
 function New-ComObjectFactory {
     [CmdletBinding(DefaultParameterSetName="FromClass")]
@@ -1888,12 +1909,19 @@ function New-ComObjectFactory {
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClass")]
         [Parameter(Mandatory, ParameterSetName = "FromSessionIdClsid")]
         [int]$SessionId,
+        [Parameter(Mandatory, ParameterSetName = "FromRuntimeClass")]
+        [string]$RuntimeClass,
+        [Parameter(ParameterSetName = "FromRuntimeClass")]
+        [switch]$InBroker,
+        [Parameter(ParameterSetName = "FromRuntimeClass")]
+        [switch]$PerUserBroker,
         [switch]$NoWrapper,
         [guid]$Iid = [guid]::Empty
     )
 
     PROCESS {
         $obj = $null
+        $runtime_class = $false
         switch($PSCmdlet.ParameterSetName) {
             "FromClass" {
                 $obj = $Class.CreateClassFactory($ClassContext, $RemoteServer, $AuthInfo)
@@ -1908,11 +1936,15 @@ function New-ComObjectFactory {
             "FromSessionIdClsid" {
                 $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateFromSessionMoniker($Clsid, $SessionId, $true)
             }
+            "FromRuntimeClass" {
+                $obj = [OleViewDotNet.Utilities.COMUtilities]::CreateActivationFactory($RuntimeClass, "00000000-0000-0000-C000-000000000046", $InBroker, $PerUserBroker)
+                $runtime_class = $true
+            }
         }
 
         if ($null -ne $obj) {
             if ($Iid -eq [guid]::Empty) {
-                $type = [OleViewDotNetPS.Utils.PowerShellUtils]::GetFactoryType($Class)
+                $type = [OleViewDotNetPS.Utils.PowerShellUtils]::GetFactoryType($Class, $runtime_class)
                 Wrap-ComObject $obj $type -NoWrapper:$NoWrapper
             } else {
                 Wrap-ComObject $obj -Iid $Iid -NoWrapper:$NoWrapper 
