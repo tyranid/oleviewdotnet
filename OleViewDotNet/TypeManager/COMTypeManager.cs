@@ -14,12 +14,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
-using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Viewers;
 using System;
@@ -34,17 +32,13 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeManager;
 
-public delegate ICOMObjectWrapper WrapObjectDelegate(object obj, Guid iid, COMRegistry database);
-public delegate void FlushIidDelegate(Guid iid);
-
 public static class COMTypeManager
 {
     #region Private Members
     private static readonly ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
     private static readonly ConcurrentDictionary<string, Assembly> m_typelibsname = new();
     private static readonly ConcurrentDictionary<Guid, Type> m_iidtypes = new();
-    private static FlushIidDelegate m_flush_iid;
-    private static WrapObjectDelegate m_wrap_obj;
+    private static ICOMObjectWrapperScriptingFactory m_factory;
 
     static COMTypeManager()
     {
@@ -60,6 +54,8 @@ public static class COMTypeManager
         }
         return null;
     }
+
+    private static bool ScriptingEnabled => m_factory is not null;
 
     private static bool LoadTypes()
     {
@@ -123,6 +119,41 @@ public static class COMTypeManager
             m_iidtypes.TryAdd(t.GUID, t);
         }
     }
+
+    private static ICOMObjectWrapper Wrap(object obj, Guid iid, Type type, COMRegistry registry)
+    {
+        if (obj is ICOMObjectWrapper obj_wrapper)
+        {
+            obj = obj_wrapper.Unwrap();
+        }
+
+        if (obj is null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        if (!Marshal.IsComObject(obj))
+        {
+            throw new ArgumentException("Object must be a COM object.", nameof(obj));
+        }
+
+        if (type is null)
+        {
+            return new COMObjectWrapper(obj, iid, null, null);
+        }
+        type = m_factory?.CreateType(type, iid) ?? type;
+        try
+        {
+            if (typeof(ICOMObjectWrapper).IsAssignableFrom(type))
+            {
+                return (ICOMObjectWrapper)Activator.CreateInstance(type, obj, registry);
+            }
+        }
+        catch
+        {
+        }
+        return new COMObjectWrapper(obj, iid, type, registry);
+    }
     #endregion
 
     #region Public Static Methods
@@ -132,11 +163,16 @@ public static class COMTypeManager
             t.GetCustomAttributes(typeof(InterfaceTypeAttribute), false).Length > 0;
     }
 
-    public static Type GetInterfaceType(Guid iid, COMRegistry registry, bool scripting = false)
+    public static bool IsComInterfaceType(Type t)
+    {
+        return IsComImport(t) && t.IsInterface && !t.Assembly.ReflectionOnly;
+    }
+
+    public static Type GetInterfaceType(Guid iid, COMRegistry registry)
     {
         if (registry is not null && registry.Interfaces.ContainsKey(iid))
         {
-            return GetInterfaceType(registry.Interfaces[iid], scripting);
+            return GetInterfaceType(registry.Interfaces[iid]);
         }
 
         return GetInterfaceType(iid);
@@ -152,7 +188,7 @@ public static class COMTypeManager
         return null;
     }
 
-    public static Type GetInterfaceType(COMInterfaceEntry intf, bool scripting = false)
+    public static Type GetInterfaceType(COMInterfaceEntry intf)
     {
         if (intf is null)
         {
@@ -183,10 +219,10 @@ public static class COMTypeManager
         }
 
         var proxy = COMProxyInterface.GetFromIID(intf, intf.HasTypeLib);
-        return m_iidtypes.GetOrAdd(intf.Iid, _ => proxy.CreateClientType(scripting));
+        return m_iidtypes.GetOrAdd(intf.Iid, _ => proxy.CreateClientType(ScriptingEnabled));
     }
 
-    public static Type GetInterfaceType(COMIPIDEntry ipid, bool scripting = false)
+    public static Type GetInterfaceType(COMIPIDEntry ipid)
     {
         if (ipid is null)
         {
@@ -205,7 +241,7 @@ public static class COMTypeManager
             return null;
         }
 
-        m_iidtypes.TryAdd(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType(scripting));
+        m_iidtypes.TryAdd(ipid.Iid, proxy.Entries.Where(e => e.Iid == ipid.Iid).First().CreateClientType(ScriptingEnabled));
         return GetInterfaceType(ipid.Iid);
     }
 
@@ -284,8 +320,7 @@ public static class COMTypeManager
         }
         else
         {
-            IDispatch disp = obj as IDispatch;
-            if (disp is null)
+            if (obj is not IDispatch disp)
             {
                 return null;
             }
@@ -299,23 +334,43 @@ public static class COMTypeManager
         }
     }
 
-    public static void SetWrapObject(WrapObjectDelegate wrap_obj)
+    public static void SetScriptingFactory(ICOMObjectWrapperScriptingFactory factory)
     {
-        m_wrap_obj = wrap_obj;
+        m_factory = factory;
     }
 
-    public static void SetFlushIid(FlushIidDelegate flush_iid)
+    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceEntry intf)
     {
-        m_flush_iid = flush_iid;
+        return Wrap(obj, intf.Iid, intf.Database);
     }
 
-    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry database)
+    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceInstance intf)
     {
-        if (m_wrap_obj is not null)
+        return Wrap(obj, intf.Iid, intf.Database);
+    }
+
+    public static ICOMObjectWrapper Wrap(object obj, COMIPIDEntry ipid)
+    {
+        return Wrap(obj, ipid.Iid, ipid.Database);
+    }
+
+    public static ICOMObjectWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
+    {
+        if (intf_type is null)
         {
-            return m_wrap_obj(obj, iid, database);
+            throw new ArgumentNullException(nameof(intf_type));
         }
-        return new COMObjectWrapper(obj, iid, database);
+
+        if (!IsComInterfaceType(intf_type))
+        {
+            throw new ArgumentException("Type must be a COM interface.");
+        }
+        return Wrap(obj, intf_type.GUID, intf_type, registry);
+    }
+
+    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry registry)
+    {
+        return Wrap(obj, iid, GetInterfaceType(iid, registry), registry);
     }
 
     public static object Unwrap(object obj)
@@ -328,10 +383,6 @@ public static class COMTypeManager
         {
             return wrapper.Unwrap();
         }
-        if (obj is RpcClientBase client)
-        {
-            return client.Unwrap();
-        }
         throw new ArgumentException("Unknown wrapped object.", nameof(obj));
     }
     #endregion
@@ -340,7 +391,6 @@ public static class COMTypeManager
     internal static void FlushIidType(Guid iid)
     {
         m_iidtypes?.TryRemove(iid, out _);
-        m_flush_iid?.Invoke(iid);
     }
     #endregion
 }

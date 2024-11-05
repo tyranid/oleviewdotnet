@@ -39,10 +39,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     private static readonly Dictionary<Guid, COMProxyInterface> m_proxies = new();
     private readonly COMRegistry m_registry;
     private bool m_names_from_type;
-    private Type m_type;
-    private Type m_scripting_type;
     private bool m_modified;
-    private bool m_has_been_modified;
 
     private static COMProxyInterface GetFromTypeLibrary(COMTypeLibParser type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
     {
@@ -89,21 +86,6 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     {
         using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
         return GetFromTypeLibrary(type_lib, intf.Iid, intf.ProxyClassEntry, true);
-    }
-
-    private RpcClientBuilderArguments CreateBuilderArgs(bool scripting)
-    {
-        RpcClientBuilderArguments args = new();
-        args.Flags = RpcClientBuilderFlags.UnsignedChar |
-            RpcClientBuilderFlags.NoNamespace | RpcClientBuilderFlags.ComObject;
-        args.ClientName = $"{Name.Replace('.', '_')}_RpcClient";
-        if (scripting)
-        {
-            args.Flags |= RpcClientBuilderFlags.GenerateConstructorProperties |
-                RpcClientBuilderFlags.StructureReturn |
-                RpcClientBuilderFlags.HideWrappedMethods;
-        }
-        return args;
     }
 
     private void UpdateNames(Type type)
@@ -169,29 +151,11 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         m_modified = false;
     }
 
-    private Type CreateClientType(ref Type type, RpcClientBuilderArguments args)
-    {
-        if(type is not null)
-        {
-            return type;
-        }
-
-        m_modified = false;
-        type = RpcClientBuilder.BuildAssembly(RpcProxy, args, provider: new CSharpCodeProvider(), ignore_cache: true)
-            .GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
-        return type;
-    }
-
     private void SetModified()
     {
-        if (!m_modified)
-        {
-            m_modified = true;
-            m_has_been_modified = true;
-            m_type = null;
-            m_scripting_type = null;
-            COMTypeManager.FlushIidType(Iid);
-        }
+        m_modified = true;
+        COMProxyInterfaceClientBuilder.FlushIidType(Iid);
+        COMTypeManager.FlushIidType(Iid);
     }
     #endregion
 
@@ -285,7 +249,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return new_name;
     }
 
-    internal static IEnumerable<COMProxyInterface> GetModifiedProxies() => m_proxies.Values.Where(p => p.m_has_been_modified);
+    internal static IEnumerable<COMProxyInterface> GetModifiedProxies() => m_proxies.Values.Where(p => p.m_modified);
     #endregion
 
     #region Public Static Methods
@@ -360,23 +324,14 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
         return (RpcClientBase)Activator.CreateInstance(type);
     }
 
-    public RpcClientBase ConnectClient(object obj, bool scripting = false)
+    public Type CreateClientType(bool scripting)
     {
-        RpcClientBase client = CreateClient(scripting);
-        client.Connect(new RpcChannelBufferClientTransport(obj, client.InterfaceId, m_registry));
-        return client;
-    }
-
-    public Type CreateClientType(bool scripting = false)
-    {
-        RpcClientBuilderArguments args = CreateBuilderArgs(scripting);
-        return scripting ? CreateClientType(ref m_scripting_type, args) : CreateClientType(ref m_type, args);
+        return COMProxyInterfaceClientBuilder.CreateClientType(this, scripting);
     }
 
     public string BuildClientSource(bool scripting = false)
     {
-        var args = CreateBuilderArgs(scripting);
-        return RpcClientBuilder.BuildSource(RpcProxy, args, provider: new CSharpCodeProvider());
+        return COMProxyInterfaceClientBuilder.BuildClientSource(this, scripting);
     }
 
     public string FormatText(ProxyFormatterFlags flags = ProxyFormatterFlags.None)

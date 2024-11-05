@@ -75,19 +75,19 @@ function Wrap-ComObject {
 
     switch($PSCmdlet.ParameterSetName) {
         "FromIid" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Iid, $db)
+            [OleViewDotNet.TypeManager.COMTypeManager]::Wrap($Object, $Iid, $db)
         }
         "FromType" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Type, $db)
+            [OleViewDotNet.TypeManager.COMTypeManager]::Wrap($Object, $Type, $db)
         }
         "FromInterface" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Interface)
+            [OleViewDotNet.TypeManager.COMTypeManager]::Wrap($Object, $Interface)
         }
         "FromInterfaceInstance" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $InterfaceInstance)
+            [OleViewDotNet.TypeManager.COMTypeManager]::Wrap($Object, $InterfaceInstance)
         }
         "FromIpid" {
-            [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Wrap($Object, $Ipid)
+            [OleViewDotNet.TypeManager.COMTypeManager]::Wrap($Object, $Ipid)
         }
     }
 }
@@ -99,7 +99,7 @@ function Unwrap-ComObject {
         [object]$Object
     )
 
-    [OleViewDotNetPS.Wrappers.COMWrapperFactory]::Unwrap($Object)
+    [OleViewDotNet.TypeManager.COMTypeManager]::Unwrap($Object)
 }
 
 <#

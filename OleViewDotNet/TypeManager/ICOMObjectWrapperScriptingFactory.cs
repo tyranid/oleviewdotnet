@@ -14,40 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Ndr.Marshal;
-using OleViewDotNet.Database;
 using System;
 
 namespace OleViewDotNet.TypeManager;
 
-public class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
+public interface ICOMObjectWrapperScriptingFactory
 {
-    private readonly object m_obj;
-    private readonly COMRegistry m_registry;
-
-    public COMObjectWrapper(object obj, Guid iid, Type type, COMRegistry registry)
-    {
-        m_obj = obj;
-        m_registry = registry;
-        Iid = iid;
-        Type = type;
-    }
-
-    public Guid Iid { get; }
-
-    public Type Type { get; }
-
-    public virtual object Unwrap()
-    {
-        return m_obj;
-    }
-
-    void IDisposable.Dispose()
-    {
-    }
-
-    INdrComObject INdrComObject.QueryInterface(Guid iid)
-    {
-        return COMTypeManager.Wrap(m_obj, iid, m_registry);
-    }
+    Type CreateType(Type intf_type, Guid iid);
 }

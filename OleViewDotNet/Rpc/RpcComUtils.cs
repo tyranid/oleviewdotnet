@@ -109,9 +109,7 @@ public static class RpcComUtils
 
     public static RpcClientBase CreateClient(Type type, object obj, COMRegistry database)
     {
-        RpcClientBase client = (RpcClientBase)Activator.CreateInstance(type);
-        ConnectClient(client, obj, database);
-        return client;
+        return (RpcClientBase)Activator.CreateInstance(type, obj, database);
     }
 
     public static void ConnectClient(RpcClientBase client, object obj, COMRegistry registry)

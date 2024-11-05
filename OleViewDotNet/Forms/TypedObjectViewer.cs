@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Utilities;
 using System;
@@ -41,7 +42,7 @@ internal partial class TypedObjectViewer : UserControl
             return true;
         }
 
-        return member.DeclaringType == m_dispType;
+        return member.DeclaringType.BaseType == typeof(RpcClientBase);
     }
 
     /// <summary>

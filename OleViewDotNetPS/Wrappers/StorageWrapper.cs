@@ -31,7 +31,7 @@ public sealed class StorageWrapper : COMObjectWrapper, IDisposable
     private readonly IStorage _stg;
 
     public StorageWrapper(IStorage stg) 
-        : base(stg, typeof(IStorage).GUID, null)
+        : base(stg, typeof(IStorage).GUID, typeof(IStorage), null)
     {
         _stg = stg;
     }

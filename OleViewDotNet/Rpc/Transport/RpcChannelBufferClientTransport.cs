@@ -99,22 +99,12 @@ public sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrT
 
     NdrInterfacePointer INdrTransportMarshaler.MarshalComObject(INdrComObject obj, Guid iid)
     {
-        object base_obj = null;
-        if (obj is ICOMObjectWrapper wrapper)
+        if (obj is not ICOMObjectWrapper wrapper)
         {
-            base_obj = wrapper.Unwrap();
-        }
-        else if (obj is RpcClientBase client)
-        {
-            base_obj = client.Unwrap();
+            throw new NotSupportedException("Only support wrapped objects on this transport.");
         }
 
-        if (base_obj is not null)
-        {
-            return new NdrInterfacePointer(COMUtilities.MarshalObject(base_obj, iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
-        }
-
-        throw new NotSupportedException("Only support wrapped objects on this transport.");
+        return new NdrInterfacePointer(COMUtilities.MarshalObject(wrapper.Unwrap(), iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
     }
 
     INdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)

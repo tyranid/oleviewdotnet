@@ -17,8 +17,6 @@
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
-using OleViewDotNet.Processes;
-using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using System;
@@ -233,65 +231,7 @@ public static class COMWrapperFactory
 
     private static bool IsComInterfaceType(Type intf_type)
     {
-        intf_type = intf_type.Deref();
-        return COMTypeManager.IsComImport(intf_type) && intf_type.IsInterface && !intf_type.Assembly.ReflectionOnly;
-    }
-
-    private static void CreateRpcClientType(Type base_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
-    {
-        if (base_type.IsSealed)
-        {
-            throw new ArgumentException("Can't derived from a sealed type.");
-        }
-
-        string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
-        TypeBuilder tb = _module.DefineType(type_name,
-                TypeAttributes.Public | TypeAttributes.Sealed, base_type);
-        Type wrapper_intf = typeof(ICOMObjectWrapper);
-        tb.AddInterfaceImplementation(wrapper_intf);
-
-        var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
-        _constructors[tb] = con;
-        con.DefineParameter(1, ParameterAttributes.None, "obj");
-        con.DefineParameter(2, ParameterAttributes.None, "registry");
-        var conil = con.GetILGenerator();
-        conil.Emit(OpCodes.Ldarg_0);
-        conil.Emit(OpCodes.Call, base_type.GetConstructor(Type.EmptyTypes));
-
-        var connect_mi = typeof(RpcComUtils).GetMethod(nameof(RpcComUtils.ConnectClient), BindingFlags.Static | BindingFlags.Public);
-        conil.Emit(OpCodes.Ldarg_0);
-        conil.Emit(OpCodes.Ldarg_1);
-        conil.Emit(OpCodes.Ldarg_2);
-        conil.Emit(OpCodes.Call, connect_mi);
-        conil.Emit(OpCodes.Ret);
-
-        MethodInfo unwrap_intf = wrapper_intf.GetMethod("Unwrap");
-        var unwrap = tb.DefineMethod($"{wrapper_intf.FullName}.{unwrap_intf.Name}", MethodAttributes.Private |
-            MethodAttributes.Final | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot, unwrap_intf.ReturnType, Type.EmptyTypes);
-        var unwrapil = unwrap.GetILGenerator();
-        var unwrap_mi = typeof(RpcComUtils).GetMethod(nameof(RpcComUtils.Unwrap), BindingFlags.Static | BindingFlags.Public);
-        unwrapil.Emit(OpCodes.Ldarg_0);
-        unwrapil.Emit(OpCodes.Call, unwrap_mi);
-        unwrapil.Emit(OpCodes.Ret);
-        tb.DefineMethodOverride(unwrap, unwrap_intf);
-
-        PropertyInfo iid_pi = wrapper_intf.GetProperty("Iid");
-        MethodInfo iid_mi = iid_pi.GetMethod;
-        MethodInfo intf_id_mi = base_type.GetProperty("InterfaceId").GetMethod;
-        var get_iid = tb.DefineMethod(iid_mi.Name, MethodAttributes.Private | MethodAttributes.Final | 
-            MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | 
-            MethodAttributes.SpecialName, iid_mi.ReturnType, Type.EmptyTypes);
-        var get_iidil = get_iid.GetILGenerator();
-        get_iidil.Emit(OpCodes.Ldarg_0);
-        get_iidil.Emit(OpCodes.Call, intf_id_mi);
-        get_iidil.Emit(OpCodes.Ret);
-        tb.DefineMethodOverride(get_iid, iid_mi);
-
-        var get_iid_prop = tb.DefineProperty($"{wrapper_intf.FullName}.{iid_pi.Name}", 0, iid_pi.PropertyType, Type.EmptyTypes);
-        get_iid_prop.SetGetMethod(get_iid);
-
-        _types[iid] = tb;
-        fixup_queue.Enqueue(Tuple.Create(iid, tb));
+        return COMTypeManager.IsComInterfaceType(intf_type.Deref());
     }
 
     private static void CreateWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
@@ -472,10 +412,9 @@ public static class COMWrapperFactory
             throw new ArgumentNullException("No interface type available", nameof(intf_type));
         }
 
-        bool is_rpc_client = typeof(RpcClientBase).IsAssignableFrom(intf_type);
-        if (!is_rpc_client && !IsComInterfaceType(intf_type))
+        if (!IsComInterfaceType(intf_type))
         {
-            throw new ArgumentException("Wrapper type must be a COM interface or an RPC client and not reflection only.", nameof(intf_type));
+            throw new ArgumentException("Wrapper type must be a COM interface and not reflection only.", nameof(intf_type));
         }
 
         bool created_queue = false;
@@ -487,11 +426,7 @@ public static class COMWrapperFactory
 
         if (!_types.ContainsKey(iid))
         {
-            if (is_rpc_client)
-            {
-                CreateRpcClientType(intf_type, iid, fixup_queue);
-            }
-            else if (!intf_type.IsPublic)
+            if (!intf_type.IsPublic)
             {
                 CreateReflectionWrapperType(intf_type, iid, fixup_queue);
             }
@@ -512,80 +447,9 @@ public static class COMWrapperFactory
 
         return _types[iid];
     }
-
-    private static void AddCustomAttribute<T>(this TypeBuilder builder, params object[] args) where T : Attribute
-    {
-        ConstructorInfo con = typeof(T).GetConstructor(args.Select(a => a.GetType()).ToArray());
-        builder.SetCustomAttribute(new(con, args));
-    }
-
-    private static ICOMObjectWrapper Wrap(object obj, Guid iid, Type intf_type, COMRegistry registry)
-    {
-        if (obj is ICOMObjectWrapper obj_wrapper)
-        {
-            obj = obj_wrapper.Unwrap();
-        }
-
-        if (obj is null)
-        {
-            throw new ArgumentNullException(nameof(obj));
-        }
-
-        if (intf_type is null)
-        {
-            throw new ArgumentNullException(nameof(intf_type), "No type available for wrapper.");
-        }
-
-        if (!Marshal.IsComObject(obj))
-        {
-            throw new ArgumentException("Object must be a COM object or assignable from interface type.", nameof(obj));
-        }
-
-        Type type = CreateType(intf_type, iid, null);
-        if (typeof(RpcClientBase).IsAssignableFrom(type) && !COMUtilities.IsProxy(obj))
-        {
-            return new RpcClientNoProxyWrapper(obj, iid, intf_type, registry);
-        }
-
-        return (ICOMObjectWrapper)Activator.CreateInstance(type, obj, registry);
-    }
     #endregion
 
     #region Public Static Members
-    public static ICOMObjectWrapper Wrap(object obj, Guid iid, COMRegistry registry)
-    {
-        return Wrap(obj, iid, COMTypeManager.GetInterfaceType(iid, registry, true), registry);
-    }
-
-    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceEntry intf)
-    {
-        return Wrap(obj, intf.Iid, COMTypeManager.GetInterfaceType(intf, true), intf.Database);
-    }
-
-    public static ICOMObjectWrapper Wrap(object obj, COMInterfaceInstance intf)
-    {
-        return Wrap(obj, intf.Iid, COMTypeManager.GetInterfaceType(intf.InterfaceEntry, true), intf.Database);
-    }
-
-    public static ICOMObjectWrapper Wrap(object obj, COMIPIDEntry ipid)
-    {
-        return Wrap(obj, ipid.Iid, COMTypeManager.GetInterfaceType(ipid, true), ipid.Database);
-    }
-
-    public static ICOMObjectWrapper Wrap(object obj, Type intf_type, COMRegistry registry)
-    {
-        if (!IsComInterfaceType(intf_type))
-        {
-            throw new ArgumentException("Type must be a COM interface.");
-        }
-        return Wrap(obj, intf_type.GUID, intf_type, registry);
-    }
-
-    public static object Unwrap(object obj)
-    {
-        return COMTypeManager.Unwrap(obj);
-    }
-
     public static T UnwrapTyped<T>(this BaseComWrapper<T> obj) where T : class
     {
         return (T)obj?.Unwrap();
@@ -596,20 +460,21 @@ public static class COMWrapperFactory
         _builder.Save(_name.Name + ".dll");
     }
 
-    private static void FlushProxyIid(Guid iid)
+    private class ScriptingFactory : ICOMObjectWrapperScriptingFactory
     {
-        if (_types.TryGetValue(iid, out Type type))
+        public Type CreateType(Type intf_type, Guid iid)
         {
-            if (typeof(RpcClientBase).IsAssignableFrom(type))
+            if (!intf_type.IsInterface)
             {
-                _types.Remove(iid);
+                return intf_type;
             }
+            return COMWrapperFactory.CreateType(intf_type, iid, null);
         }
     }
+
     public static void EnableScripting()
     {
-        COMTypeManager.SetWrapObject(Wrap);
-        COMTypeManager.SetFlushIid(FlushProxyIid);
+        COMTypeManager.SetScriptingFactory(new ScriptingFactory());
     }
     #endregion
 }
