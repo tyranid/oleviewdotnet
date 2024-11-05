@@ -64,7 +64,7 @@ internal partial class ObjectInformation : UserControl
         }
 
         m_registry = registry;
-        m_pEntry = ObjectCache.Add(objName, pObject, interfaces);
+        m_pEntry = new ObjectEntry(objName, pObject, interfaces);
         m_pObject = pObject;
         m_properties = properties;
         m_interfaces = interfaces.OrderBy(i => i.Name).ToArray();

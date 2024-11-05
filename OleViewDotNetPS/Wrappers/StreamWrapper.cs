@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
 using OleViewDotNet.Interop;
 using System;
 using System.IO;
@@ -23,11 +22,11 @@ using ComTypes = System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNetPS.Wrappers;
 
-public sealed class StreamWrapper : Stream
+internal sealed class StreamWrapper : Stream
 {
-    private readonly ComTypes.IStream _stm;
+    private readonly IStreamWrapper _stm;
 
-    public StreamWrapper(ComTypes.IStream stm)
+    public StreamWrapper(IStreamWrapper stm)
     {
         _stm = stm;
     }
@@ -61,16 +60,8 @@ public sealed class StreamWrapper : Stream
 
     public override long Position
     {
-        get
-        {
-            return Seek(0, SeekOrigin.Current);
-        }
-
-        set
-        {
-            // STREAM_SEEK_SET == 0
-            _stm.Seek(value, 0, IntPtr.Zero);
-        }
+        get => _stm.Seek(0, SeekOrigin.Current);
+        set => _stm.Seek(value, SeekOrigin.Begin);
     }
 
     public override void Flush()
@@ -80,28 +71,9 @@ public sealed class StreamWrapper : Stream
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        if (offset == 0)
-        {
-            using var len = new SafeStructureInOutBuffer<int>();
-            _stm.Read(buffer, count, len.DangerousGetHandle());
-            return len.Result;
-        }
-        else
-        {
-            using var len = new SafeStructureInOutBuffer<int>();
-            byte[] temp_buffer = new byte[count];
-            _stm.Read(temp_buffer, count, len.DangerousGetHandle());
-            int read_len = len.Result;
-            Buffer.BlockCopy(temp_buffer, 0, buffer, offset, count);
-            return read_len;
-        }
-    }
-
-    public override long Seek(long offset, SeekOrigin origin)
-    {
-        using var buffer = new SafeStructureInOutBuffer<long>();
-        _stm.Seek(0, (int)origin, buffer.DangerousGetHandle());
-        return buffer.Result;
+        byte[] buf = _stm.Read(count);
+        Buffer.BlockCopy(buf, 0, buffer, offset, buf.Length);
+        return buf.Length;
     }
 
     public override void SetLength(long value)
@@ -111,8 +83,13 @@ public sealed class StreamWrapper : Stream
 
     public override void Write(byte[] buffer, int offset, int count)
     {
-        _stm.Write(buffer, count, IntPtr.Zero);
+        byte[] buf = new byte[count];
+        Buffer.BlockCopy(buffer, offset, buf, 0, count);
+        _stm.Write(buf);
     }
 
-    public IStreamWrapper Object => new IStreamWrapper(_stm, null);
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        return _stm.Seek(offset, origin);
+    }
 }

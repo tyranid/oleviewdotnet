@@ -14,8 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
-using OleViewDotNet.TypeManager;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -26,58 +26,55 @@ namespace OleViewDotNetPS.Wrappers;
 /// <summary>
 /// A wrapper object for an IStorage.
 /// </summary>
-public sealed class StorageWrapper : COMObjectWrapper, IDisposable
+public sealed class IStorageWrapper : BaseComWrapper<IStorage>
 {
-    private readonly IStorage _stg;
-
-    public StorageWrapper(IStorage stg) 
-        : base(stg, typeof(IStorage).GUID, typeof(IStorage), null)
+    public IStorageWrapper(object obj, COMRegistry registry) 
+        : base(obj, typeof(IStorage).GUID, "IStorage", registry)
     {
-        _stg = stg;
     }
 
-    public StorageWrapper OpenReadOnlyStorage(string name)
+    public IStorageWrapper OpenReadOnlyStorage(string name)
     {
         return OpenStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READ);
     }
 
-    public StorageWrapper OpenStorage(string name, STGM mode)
+    public IStorageWrapper OpenStorage(string name, STGM mode)
     {
-        return new StorageWrapper(_stg.OpenStorage(name, IntPtr.Zero,
-            mode, IntPtr.Zero, 0));
+        return new IStorageWrapper(_object.OpenStorage(name, IntPtr.Zero,
+            mode, IntPtr.Zero, 0), m_registry);
     }
 
-    public StorageWrapper CreateStorage(string name, STGM mode)
+    public IStorageWrapper CreateStorage(string name, STGM mode)
     {
-        return new StorageWrapper(_stg.CreateStorage(name, mode, 0, 0));
+        return new IStorageWrapper(_object.CreateStorage(name, mode, 0, 0), m_registry);
     }
 
-    public StorageWrapper CreateStore(string name)
+    public IStorageWrapper CreateStore(string name)
     {
         return CreateStorage(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
     }
 
-    public StreamWrapper OpenStream(string name, STGM mode)
+    public IStreamWrapper OpenStream(string name, STGM mode)
     {
-        return new StreamWrapper(_stg.OpenStream(name, IntPtr.Zero, mode, 0));
+        return new IStreamWrapper(_object.OpenStream(name, IntPtr.Zero, mode, 0), m_registry);
     }
 
-    public StreamWrapper OpenReadOnlyStream(string name)
+    public IStreamWrapper OpenReadOnlyStream(string name)
     {
         return OpenStream(name, STGM.SHARE_EXCLUSIVE | STGM.READ);
     }
 
-    public StreamWrapper OpenReadWriteStream(string name)
+    public IStreamWrapper OpenReadWriteStream(string name)
     {
         return OpenStream(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
     }
 
-    public StreamWrapper CreateStream(string name, STGM mode)
+    public IStreamWrapper CreateStream(string name, STGM mode)
     {
-        return new StreamWrapper(_stg.CreateStream(name, mode, 0, 0));
+        return new IStreamWrapper(_object.CreateStream(name, mode, 0, 0), m_registry);
     }
 
-    public StreamWrapper CreateStream(string name)
+    public IStreamWrapper CreateStream(string name)
     {
         return CreateStream(name, STGM.SHARE_EXCLUSIVE | STGM.READWRITE);
     }
@@ -99,11 +96,11 @@ public sealed class StorageWrapper : COMObjectWrapper, IDisposable
     public IEnumerable<STATSTGWrapper> EnumElements(bool read_stream_data)
     {
         List<STATSTGWrapper> ret = new();
-        _stg.EnumElements(0, IntPtr.Zero, 0, out IEnumSTATSTG enum_stg);
+        _object.EnumElements(0, IntPtr.Zero, 0, out IEnumSTATSTG enum_object);
         try
         {
             ComTypes.STATSTG[] stat = new ComTypes.STATSTG[1];
-            while (enum_stg.Next(1, stat, out uint fetched) == 0)
+            while (enum_object.Next(1, stat, out uint fetched) == 0)
             {
                 STGTY type = (STGTY)stat[0].type;
                 byte[] bytes = new byte[0];
@@ -116,61 +113,44 @@ public sealed class StorageWrapper : COMObjectWrapper, IDisposable
         }
         finally
         {
-            Marshal.ReleaseComObject(enum_stg);
+            Marshal.ReleaseComObject(enum_object);
         }
         return ret;
-    }
-
-    public void Close()
-    {
-        Dispose();
-    }
-
-    public void Dispose()
-    {
-        Marshal.FinalReleaseComObject(_stg);
     }
 
     public STATSTGWrapper Stat
     {
         get
         {
-            ComTypes.STATSTG stg_stat = new();
-            _stg.Stat(out stg_stat, 0);
+            _object.Stat(out ComTypes.STATSTG stg_stat, 0);
             return new STATSTGWrapper(stg_stat.pwcsName, stg_stat, new byte[0]);
         }
     }
 
     public Guid Clsid
     {
-        get
-        {
-            return Stat.Clsid;
-        }
-        set
-        {
-            _stg.SetClass(value);
-        }
+        get => Stat.Clsid;
+        set => _object.SetClass(value);
     }
 
     public void RenameElement(string old_name, string new_name)
     {
-        _stg.RenameElement(old_name, new_name);
+        _object.RenameElement(old_name, new_name);
     }
 
     public void DestroyElement(string name)
     {
-        _stg.DestroyElement(name);
+        _object.DestroyElement(name);
     }
 
     public void Commit(STGC stgc)
     {
-        _stg.Commit((int)stgc);
+        _object.Commit((int)stgc);
     }
 
     public void Revert()
     {
-        _stg.Revert();
+        _object.Revert();
     }
 
     private static FILETIMEOptional DateTimeToFileTime(DateTime? dt)
@@ -184,7 +164,7 @@ public sealed class StorageWrapper : COMObjectWrapper, IDisposable
         DateTime? atime,
         DateTime? mtime)
     {
-        _stg.SetElementTimes(string.IsNullOrEmpty(name) ? null : name,
+        _object.SetElementTimes(string.IsNullOrEmpty(name) ? null : name,
             DateTimeToFileTime(ctime), DateTimeToFileTime(atime), DateTimeToFileTime(mtime));
     }
 }

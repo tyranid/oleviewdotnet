@@ -18,13 +18,11 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
-using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices.WindowsRuntime;
 
@@ -47,7 +45,8 @@ public static class COMWrapperFactory
         { typeof(IEnumString).GUID, typeof(IEnumStringWrapper) },
         { typeof(IRunningObjectTable).GUID, typeof(IRunningObjectTableWrapper) },
         { typeof(IStream).GUID, typeof(IStreamWrapper) },
-        { typeof(IInspectable).GUID, typeof(IInspectableWrapper) }
+        { typeof(IInspectable).GUID, typeof(IInspectableWrapper) },
+        { typeof(IStorage).GUID, typeof(IStorageWrapper) },
     };
     private static readonly Dictionary<Guid, Type> _public_types = new();
     private static readonly MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");

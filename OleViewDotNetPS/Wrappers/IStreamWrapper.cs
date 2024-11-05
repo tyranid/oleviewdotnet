@@ -14,11 +14,22 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using NtApiDotNet;
 using OleViewDotNet.Database;
 using System;
+using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNetPS.Wrappers;
+
+[Flags]
+public enum StreamLockType
+{
+    None = 0,
+    Write = 1,
+    Exclusive = 2,
+    OnlyOnce = 4
+}
 
 public class IStreamWrapper : BaseComWrapper<IStream>
 {
@@ -26,19 +37,27 @@ public class IStreamWrapper : BaseComWrapper<IStream>
     {
     }
 
-    public void Read(byte[] pv, int cb, IntPtr pcbRead)
+    public byte[] Read(int cb)
     {
-        _object.Read(pv, cb, pcbRead);
+        byte[] ret = new byte[cb];
+        using var buf = new SafeStructureInOutBuffer<int>();
+        _object.Read(ret, cb, buf.DangerousGetHandle());
+        Array.Resize(ref ret, buf.Result);
+        return ret;
     }
 
-    public void Write(byte[] pv, int cb, IntPtr pcbWritten)
+    public int Write(byte[] pv)
     {
-        _object.Write(pv, cb, pcbWritten);
+        using var buf = new SafeStructureInOutBuffer<int>();
+        _object.Write(pv, pv.Length, buf.DangerousGetHandle());
+        return buf.Result;
     }
 
-    public void Seek(long dlibMove, int dwOrigin, IntPtr plibNewPosition)
+    public long Seek(long dlibMove, SeekOrigin dwOrigin)
     {
-        _object.Seek(dlibMove, dwOrigin, plibNewPosition);
+        using var buf = new SafeStructureInOutBuffer<long>();
+        _object.Seek(dlibMove, (int)dwOrigin, buf.DangerousGetHandle());
+        return buf.Result;
     }
 
     public void SetSize(long libNewSize)
@@ -46,9 +65,14 @@ public class IStreamWrapper : BaseComWrapper<IStream>
         _object.SetSize(libNewSize);
     }
 
-    public void CopyTo(IStreamWrapper pstm, long cb, IntPtr pcbRead, IntPtr pcbWritten)
+    public void CopyTo(IStreamWrapper pstm, long cb, out int pcbRead, out int pcbWritten)
     {
-        _object.CopyTo(pstm.UnwrapTyped(), cb, pcbRead, pcbWritten);
+        using SafeStructureInOutBuffer<int> read_buf = new();
+        using SafeStructureInOutBuffer<int> write_buf = new();
+
+        _object.CopyTo(pstm.UnwrapTyped(), cb, read_buf.DangerousGetHandle(), write_buf.DangerousGetHandle());
+        pcbRead = read_buf.Result;
+        pcbWritten = write_buf.Result;
     }
 
     public void Commit(int grfCommitFlags)
@@ -61,24 +85,30 @@ public class IStreamWrapper : BaseComWrapper<IStream>
         _object.Revert();
     }
 
-    public void LockRegion(long libOffset, long cb, int dwLockType)
+    public void LockRegion(long libOffset, long cb, StreamLockType dwLockType)
     {
-        _object.LockRegion(libOffset, cb, dwLockType);
+        _object.LockRegion(libOffset, cb, (int)dwLockType);
     }
 
-    public void UnlockRegion(long libOffset, long cb, int dwLockType)
+    public void UnlockRegion(long libOffset, long cb, StreamLockType dwLockType)
     {
-        _object.UnlockRegion(libOffset, cb, dwLockType);
+        _object.UnlockRegion(libOffset, cb, (int)dwLockType);
     }
 
-    public void Stat(out System.Runtime.InteropServices.ComTypes.STATSTG pstatstg, int grfStatFlag)
+    public STATSTG Stat(int grfStatFlag)
     {
-        Stat(out pstatstg, grfStatFlag);
+        _object.Stat(out STATSTG pstatstg, grfStatFlag);
+        return pstatstg;
     }
 
     public IStreamWrapper Clone()
     {
         _object.Clone(out IStream stm);
         return new IStreamWrapper(stm, m_registry);
+    }
+
+    public Stream GetStream()
+    {
+        return new StreamWrapper(this);
     }
 }
