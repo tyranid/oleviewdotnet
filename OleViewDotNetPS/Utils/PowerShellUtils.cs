@@ -79,9 +79,9 @@ public static class PowerShellUtils
                 ignore_default);
     }
 
-    public static Type GetFactoryType(ICOMClassEntry cls)
+    public static Type GetFactoryType(ICOMClassEntry cls, bool runtime_class)
     {
-        if (cls is COMRuntimeClassEntry)
+        if (cls is COMRuntimeClassEntry || runtime_class)
         {
             return typeof(IActivationFactory);
         }

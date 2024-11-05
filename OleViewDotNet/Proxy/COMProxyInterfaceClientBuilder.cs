@@ -19,6 +19,7 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Rpc;
 using OleViewDotNet.TypeManager;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -29,10 +30,6 @@ namespace OleViewDotNet.Proxy;
 
 internal static class COMProxyInterfaceClientBuilder
 {
-    private const string ASSEMBLY_NAME = "ComProxyRpcTypes";
-    private static readonly AssemblyName _name = new(ASSEMBLY_NAME);
-    private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
-    private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
     private static readonly ConcurrentDictionary<Guid, Type> m_types = new();
     private static readonly ConcurrentDictionary<Guid, Type> m_scripting_types = new();
 
@@ -42,8 +39,7 @@ internal static class COMProxyInterfaceClientBuilder
         Type base_type = RpcClientBuilder.BuildAssembly(intf.RpcProxy, args, provider: new CSharpCodeProvider(), ignore_cache: true)
             .GetTypes().Where(t => typeof(RpcClientBase).IsAssignableFrom(t)).First();
 
-        string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
-        TypeBuilder tb = _module.DefineType(type_name,
+        TypeBuilder tb = DynamicTypeBuilder.DefineType(intf.Name,
                 TypeAttributes.Public | TypeAttributes.Sealed, base_type);
         Type wrapper_intf = typeof(ICOMObjectWrapper);
         tb.AddInterfaceImplementation(wrapper_intf);

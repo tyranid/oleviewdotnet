@@ -110,6 +110,14 @@ internal static class NativeMethods
         [MarshalAs(UnmanagedType.HString)] string activatableClassId,
         out IntPtr instance);
 
+    [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    [return: MarshalAs(UnmanagedType.IInspectable)]
+    public static extern object RoActivateInstance([MarshalAs(UnmanagedType.HString)] string activatableClassId);
+
+    [DllImport("combase.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    [return: MarshalAs(UnmanagedType.IUnknown)]
+    public static extern object RoGetActivationFactory([MarshalAs(UnmanagedType.HString)] string activatableClassId, in Guid iid);
+
     [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
     public static extern IStorage StgOpenStorageEx(
           string pwcsName,

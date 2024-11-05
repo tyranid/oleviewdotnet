@@ -18,6 +18,7 @@ using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
+using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,10 +32,6 @@ namespace OleViewDotNetPS.Wrappers;
 public static class COMWrapperFactory
 {
     #region Private Members
-    private const string ASSEMBLY_NAME = "ComWrapperTypes";
-    private static readonly AssemblyName _name = new(ASSEMBLY_NAME);
-    private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
-    private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");
     private static readonly Dictionary<Guid, Type> _types = new() {
         { typeof(IUnknown).GUID, typeof(IUnknownWrapper) },
         { typeof(IClassFactory).GUID, typeof(IClassFactoryWrapper) },
@@ -48,7 +45,7 @@ public static class COMWrapperFactory
         { typeof(IInspectable).GUID, typeof(IInspectableWrapper) },
         { typeof(IStorage).GUID, typeof(IStorageWrapper) },
     };
-    private static readonly Dictionary<Guid, Type> _public_types = new();
+    private static readonly HashSet<string> _type_names = new();
     private static readonly MethodInfo _unwrap_method = typeof(COMWrapperFactory).GetMethod("UnwrapTyped");
     private static readonly Dictionary<Type, ConstructorInfo> _constructors = new();
     private static readonly MethodInfo _get_builder_method = typeof(BaseComReflectionWrapper).GetMethod("Get", BindingFlags.NonPublic | BindingFlags.Instance,
@@ -58,26 +55,6 @@ public static class COMWrapperFactory
     private static readonly MethodInfo _set_ref_method = typeof(MethodInfoWrapper).GetMethod("SetRef");
     private static readonly MethodInfo _set_method = typeof(MethodInfoWrapper).GetMethod("Set");
     private static readonly MethodInfo _invoke_method = typeof(MethodInfoWrapper).GetMethod("Invoke");
-
-    private static bool FilterStructuredTypes(Type t)
-    {
-        if (!t.IsValueType || t.IsPrimitive || t == typeof(Guid) || t == typeof(void))
-        {
-            return false;
-        }
-
-        if (t.IsConstructedGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-        {
-            return false;
-        }
-
-        if (t.Assembly == typeof(RpcClientBase).Assembly)
-        {
-            return false;
-        }
-
-        return true;
-    }
 
     private static bool AddType(this HashSet<Type> types, Type t)
     {
@@ -237,9 +214,7 @@ public static class COMWrapperFactory
     {
         HashSet<Type> structured_types = new();
         Type base_type = typeof(BaseComWrapper<>).MakeGenericType(intf_type);
-        string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
-        TypeBuilder tb = _module.DefineType(type_name,
-             TypeAttributes.Public | TypeAttributes.Sealed, base_type);
+        TypeBuilder tb = DynamicTypeBuilder.DefineType(intf_type.FullName, TypeAttributes.Public | TypeAttributes.Sealed, base_type);
         _types[iid] = tb;
         HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
         var con = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { typeof(object), typeof(COMRegistry) });
@@ -272,18 +247,6 @@ public static class COMWrapperFactory
                 var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
                 pb.SetSetMethod(set_method);
             }
-        }
-
-        foreach (var type in structured_types.Where(FilterStructuredTypes))
-        {
-            var methbuilder = tb.DefineMethod($"New_{type.Name}", MethodAttributes.Public,
-                    type, new Type[0]);
-            var ilgen = methbuilder.GetILGenerator();
-            var local = ilgen.DeclareLocal(type);
-            ilgen.Emit(OpCodes.Ldloca_S, local.LocalIndex);
-            ilgen.Emit(OpCodes.Initobj, type);
-            ilgen.Emit(OpCodes.Ldloc_0);
-            ilgen.Emit(OpCodes.Ret);
         }
 
         fixup_queue.Enqueue(Tuple.Create(iid, tb));
@@ -362,9 +325,7 @@ public static class COMWrapperFactory
     private static void CreateReflectionWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         Type base_type = typeof(BaseComReflectionWrapper);
-        string type_name = $"{ASSEMBLY_NAME}.{Guid.NewGuid().ToString().Replace('-', '_')}";
-        TypeBuilder tb = _module.DefineType(type_name,
-             TypeAttributes.Public | TypeAttributes.Sealed, base_type);
+        TypeBuilder tb = DynamicTypeBuilder.DefineType(intf_type.FullName, TypeAttributes.Public | TypeAttributes.Sealed, base_type);
         _types[iid] = tb;
 
         HashSet<string> names = new(base_type.GetMembers().Select(m => m.Name));
@@ -452,11 +413,6 @@ public static class COMWrapperFactory
     public static T UnwrapTyped<T>(this BaseComWrapper<T> obj) where T : class
     {
         return (T)obj?.Unwrap();
-    }
-
-    public static void DumpAssembly()
-    {
-        _builder.Save(_name.Name + ".dll");
     }
 
     private class ScriptingFactory : ICOMObjectWrapperScriptingFactory

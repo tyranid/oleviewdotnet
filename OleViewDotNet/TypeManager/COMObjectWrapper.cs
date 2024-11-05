@@ -20,7 +20,7 @@ using System;
 
 namespace OleViewDotNet.TypeManager;
 
-public class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
+public sealed class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
 {
     private readonly object m_obj;
     private readonly COMRegistry m_registry;
@@ -37,7 +37,9 @@ public class COMObjectWrapper : ICOMObjectWrapper, INdrComObject
 
     public Type Type { get; }
 
-    public virtual object Unwrap()
+    public string Name => Type.Name;
+
+    public object Unwrap()
     {
         return m_obj;
     }
