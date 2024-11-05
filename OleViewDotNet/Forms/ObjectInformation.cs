@@ -229,7 +229,7 @@ internal partial class ObjectInformation : UserControl
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -316,7 +316,7 @@ internal partial class ObjectInformation : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 

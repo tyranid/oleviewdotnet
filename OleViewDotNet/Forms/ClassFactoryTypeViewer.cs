@@ -54,7 +54,7 @@ internal partial class ClassFactoryTypeViewer : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 }

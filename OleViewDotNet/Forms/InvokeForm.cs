@@ -270,7 +270,7 @@ internal partial class InvokeForm : Form
                 printEx = printEx.InnerException;
             }
 
-            MessageBox.Show(printEx.Message, "Invoke Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 

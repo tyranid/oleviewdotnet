@@ -25,7 +25,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 using ActivationContext = OleViewDotNet.Interop.SxS.ActivationContext;
@@ -1062,17 +1061,9 @@ public class COMRegistry
     /// </summary>
     /// <param name="pObject">The IUnknown pointer</param>
     /// <returns>List of interfaces supported</returns>
-    public IEnumerable<COMInterfaceEntry> GetInterfacesForIUnknown(IntPtr pObject)
+    public IEnumerable<COMInterfaceEntry> GetInterfacesForIUnknown(SafeComObjectHandle obj)
     {
-        Marshal.AddRef(pObject);
-        try
-        {
-            return Interfaces.Values.Where(i => i.TestInterface(pObject));
-        }
-        finally
-        {
-            Marshal.Release(pObject);
-        }
+        return Interfaces.Values.Where(i => obj.SupportsInterface(i.Iid));
     }
 
     /// <summary>
@@ -1106,15 +1097,8 @@ public class COMRegistry
         }
         else
         {
-            IntPtr pObject = Marshal.GetIUnknownForObject(obj);
-            try
-            {
-                return GetInterfacesForIUnknown(pObject);
-            }
-            finally
-            {
-                Marshal.Release(pObject);
-            }
+            using var handle = SafeComObjectHandle.FromObject(obj);
+            return GetInterfacesForIUnknown(handle);
         }
     }
 

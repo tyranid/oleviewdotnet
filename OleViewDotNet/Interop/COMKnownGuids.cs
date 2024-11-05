@@ -55,6 +55,8 @@ public static class COMKnownGuids
 
     public static Guid CLSID_PSDispatch = new("00020420-0000-0000-C000-000000000046");
 
+    public static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
+
     public static readonly Guid CATID_TrustedMarshaler = new("00000003-0000-0000-C000-000000000046");
 
     public static readonly Guid CATID_SafeForScripting = new("7DD95801-9882-11CF-9FA9-00AA006C42C4");

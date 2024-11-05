@@ -54,7 +54,6 @@ internal partial class CreateCLSIDForm : Form
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-
         if (GetClsid(textBoxCLSID.Text.Trim(), out Guid clsid) && (comboBoxClsCtx.SelectedItem is not null))
         {
             Clsid = clsid;

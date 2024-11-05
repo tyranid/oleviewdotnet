@@ -28,7 +28,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -241,35 +240,13 @@ internal partial class MainForm : Form
             }
             else
             {
-                IntPtr pObj;
-                int hr;
+                using var pObj = class_factory ? SafeComObjectHandle.GetClassObject(clsid, clsctx, COMKnownGuids.IID_IUnknown) :
+                    SafeComObjectHandle.CreateInstance(clsid, clsctx, COMKnownGuids.IID_IUnknown);
 
-                if (class_factory)
-                {
-                    hr = NativeMethods.CoGetClassObject(clsid, clsctx, null, COMKnownGuids.IID_IUnknown, out pObj);
-                }
-                else
-                {
-                    hr = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, clsctx,
-                                COMKnownGuids.IID_IUnknown, out pObj);
-                }
-
-                if (hr != 0)
-                {
-                    Marshal.ThrowExceptionForHR(hr);
-                }
-
-                try
-                {
-                    ints = m_registry.GetInterfacesForIUnknown(pObj).ToArray();
-                    comObj = Marshal.GetObjectForIUnknown(pObj);
-                    strObjName = clsid.FormatGuid();
-                    props.Add("CLSID", clsid.FormatGuid());
-                }
-                finally
-                {
-                    Marshal.Release(pObj);
-                }
+                ints = m_registry.GetInterfacesForIUnknown(pObj).ToArray();
+                comObj = pObj.ToObject();
+                strObjName = clsid.FormatGuid();
+                props.Add("CLSID", clsid.FormatGuid());
             }
 
             if (comObj is not null)
@@ -279,7 +256,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -327,7 +304,7 @@ internal partial class MainForm : Form
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -378,7 +355,7 @@ internal partial class MainForm : Form
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -412,7 +389,7 @@ internal partial class MainForm : Form
         }
         catch(Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -421,18 +398,13 @@ internal partial class MainForm : Form
     private async Task ParseOrBindMoniker(bool bind)
     {
         using BuildMonikerForm frm = new(_last_moniker);
+        frm.BindMoniker = bind;
         if (frm.ShowDialog(this) == DialogResult.OK)
         {
             try
             {
                 _last_moniker = frm.MonikerString;
-                object comObj = frm.Moniker;
-                if (bind)
-                {
-                    Guid iid = COMKnownGuids.IID_IUnknown;
-                    frm.Moniker.BindToObject(frm.BindContext, null, ref iid, out comObj);
-                }
-
+                object comObj = frm.Result;
                 if (comObj is not null)
                 {
                     await OpenObjectInformation(comObj, _last_moniker);
@@ -489,7 +461,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -556,7 +528,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -598,7 +570,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -631,7 +603,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -811,7 +783,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -991,7 +963,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -1003,7 +975,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -1021,7 +993,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -1037,7 +1009,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            EntryPoint.ShowError(this, ex);
         }
     }
 

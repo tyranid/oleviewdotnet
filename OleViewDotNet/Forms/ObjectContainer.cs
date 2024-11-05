@@ -66,7 +66,7 @@ internal partial class ObjectContainer : UserControl
         }
         catch (Exception e)
         {
-            MessageBox.Show(e.ToString());
+            EntryPoint.ShowError(null, e);
         }
     }
 }

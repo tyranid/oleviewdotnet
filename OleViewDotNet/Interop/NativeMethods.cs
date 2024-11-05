@@ -80,10 +80,19 @@ internal static class NativeMethods
 
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, CLSCTX dwClsContext, in Guid riid, out IntPtr ppv);
+
+    [DllImport("ole32.dll", PreserveSig = false)]
+    public static extern SafeComObjectHandle CoCreateInstance(in Guid rclsid, [MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter, CLSCTX dwClsContext, in Guid riid);
+
     [DllImport("ole32.dll")]
     public static extern int CoCreateInstanceEx(in Guid rclsid, IntPtr punkOuter, CLSCTX dwClsCtx, [In] COSERVERINFO pServerInfo, int dwCount, [In, Out] MULTI_QI[] pResults);
+    
     [DllImport("ole32.dll")]
     public static extern int CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid, out IntPtr ppv);
+
+    [DllImport("ole32.dll", PreserveSig = false)]
+    public static extern SafeComObjectHandle CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid);
+
     [DllImport("ole32.dll", PreserveSig = false)]
     [return: MarshalAs(UnmanagedType.IUnknown)]
     public static extern object CoUnmarshalInterface(IStream stm, in Guid riid);

@@ -44,7 +44,7 @@ internal partial class CreateIStreamForm : Form
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    EntryPoint.ShowError(this, ex);
                 }
             }
         }
@@ -68,7 +68,7 @@ internal partial class CreateIStreamForm : Form
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    EntryPoint.ShowError(this, ex);
                 }
             }
         }

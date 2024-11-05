@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace OleViewDotNet;
@@ -332,6 +333,11 @@ public static class EntryPoint
 
     public static void ShowError(IWin32Window window, Exception ex, bool stack_trace)
     {
+        if (ex is TargetInvocationException iex && iex.InnerException is not null)
+        {
+            ex = iex.InnerException;
+        }
+
         MessageBox.Show(window, stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 }

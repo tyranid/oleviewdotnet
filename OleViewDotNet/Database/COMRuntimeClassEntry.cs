@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
@@ -68,32 +67,13 @@ public class COMRuntimeClassEntry : COMRegistryEntry, IComparable<COMRuntimeClas
             throw new ArgumentException("Specifying a remote server is not valid for this class type.", "server");
         }
 
-        IntPtr pObject = IntPtr.Zero;
-        try
+        if (factory)
         {
-            int hr;
-
-            if (factory)
-            {
-                hr = NativeMethods.RoGetActivationFactory(Name, COMKnownGuids.IID_IUnknown, out pObject);
-            }
-            else
-            {
-                hr = NativeMethods.RoActivateInstance(Name, out pObject);
-            }
-            if (hr != 0)
-            {
-                throw new Win32Exception(hr);
-            }
-
-            return Marshal.GetObjectForIUnknown(pObject);
+            return NativeMethods.RoGetActivationFactory(Name, COMKnownGuids.IID_IUnknown);
         }
-        finally
+        else
         {
-            if (pObject != IntPtr.Zero)
-            {
-                Marshal.Release(pObject);
-            }
+            return NativeMethods.RoActivateInstance(Name);
         }
     }
     #endregion

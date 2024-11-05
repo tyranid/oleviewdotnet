@@ -14,13 +14,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.CSharp;
 using NtApiDotNet.Ndr;
 using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy.Editor;
-using OleViewDotNet.Rpc.Transport;
 using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.TypeManager;

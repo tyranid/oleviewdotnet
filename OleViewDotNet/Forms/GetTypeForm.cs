@@ -130,8 +130,8 @@ internal partial class GetTypeForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Type Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }            
+            EntryPoint.ShowError(this, ex);
+        }
     }
 
     private void comboBoxTypes_SelectedIndexChanged(object sender, EventArgs e)

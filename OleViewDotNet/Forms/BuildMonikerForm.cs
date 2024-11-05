@@ -14,9 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.Interop;
+using OleViewDotNet.Utilities;
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
@@ -24,70 +23,25 @@ namespace OleViewDotNet.Forms;
 
 internal partial class BuildMonikerForm : Form
 {
-    private static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
     public BuildMonikerForm(string last_moniker)
     {
         InitializeComponent();
         textBoxMoniker.Text = last_moniker;
     }
 
-    private IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string)
-    {
-        if (moniker_string == "new")
-        {
-            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero, CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown, out IntPtr unk);
-            if (hr != 0)
-            {
-                Marshal.ThrowExceptionForHR(hr);
-            }
-
-            try
-            {
-                return (IMoniker)Marshal.GetObjectForIUnknown(unk);
-            }
-            finally
-            {
-                Marshal.Release(unk);
-            }
-        }
-        else
-        {
-            if (moniker_string.StartsWith("file:", StringComparison.OrdinalIgnoreCase) ||
-                moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
-                moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
-            {
-                int hr = NativeMethods.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
-                if (hr != 0)
-                {
-                    Marshal.ThrowExceptionForHR(hr);
-                }
-                return moniker;
-            }
-
-            return NativeMethods.MkParseDisplayName(bind_context, moniker_string, out int eaten);
-        }
-    }
-
     private void btnOK_Click(object sender, EventArgs e)
     {
         try
         {
-            IBindCtx bind_context = NativeMethods.CreateBindCtx(0);
-            if (checkBoxParseComposite.Checked)
+            if (BindMoniker)
             {
-                foreach (string m in textBoxMoniker.Text.Split('!'))
-                {
-                    IMoniker moniker = ParseMoniker(bind_context, m);
-                    Moniker?.ComposeWith(moniker, false, out moniker);
-                    Moniker = moniker;
-                }
+                Result = COMUtilities.ParseAndBindMoniker(textBoxMoniker.Text, checkBoxParseComposite.Checked);
             }
             else
             {
-                Moniker = ParseMoniker(bind_context, textBoxMoniker.Text);
+                Result = COMUtilities.ParseMoniker(textBoxMoniker.Text, checkBoxParseComposite.Checked);
             }
             MonikerString = textBoxMoniker.Text;
-            BindContext = bind_context;
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -97,7 +51,7 @@ internal partial class BuildMonikerForm : Form
         }
     }
 
-    public IBindCtx BindContext { get; private set; }
-    public IMoniker Moniker { get; private set; }
+    public bool BindMoniker { get; set; }
+    public object Result { get; private set; }
     public string MonikerString { get; private set; }
 }

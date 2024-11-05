@@ -34,7 +34,7 @@ namespace OleViewDotNet.Utilities;
 
 public static class COMUtilities
 {
-    public static string GetCategoryName(Guid catid)
+    internal static string GetCategoryName(Guid catid)
     {
         Guid clsid = new("{0002E005-0000-0000-C000-000000000046}");
         Guid iid = typeof(ICatInformation).GUID;
@@ -95,7 +95,6 @@ public static class COMUtilities
     {
         IStreamImpl istm = new(stm);
 
-
         if (obj is IPersistStream ps)
         {
             ps.Load(istm);
@@ -113,9 +112,7 @@ public static class COMUtilities
     {
         using BinaryWriter writer = new(stm);
         Guid clsid = GetObjectClass(obj);
-
         writer.Write(clsid.ToByteArray());
-
         SaveObjectToStream(obj, stm);
     }
 
@@ -123,22 +120,9 @@ public static class COMUtilities
     {
         using BinaryReader reader = new(stm);
         clsid = new Guid(reader.ReadBytes(16));
-
-        object ret;
-
-        int iError = NativeMethods.CoCreateInstance(clsid, IntPtr.Zero, CLSCTX.SERVER,
-            COMKnownGuids.IID_IUnknown, out IntPtr pObj);
-
-        if (iError != 0)
-        {
-            Marshal.ThrowExceptionForHR(iError);
-        }
-
-        ret = Marshal.GetObjectForIUnknown(pObj);
-        Marshal.Release(pObj);
-
+        using var handle = SafeComObjectHandle.CreateInstance(clsid, CLSCTX.SERVER, COMKnownGuids.IID_IUnknown);
+        var ret = handle.ToObject();
         LoadObjectFromStream(ret, stm);
-
         return ret;
     }
 
@@ -276,7 +260,7 @@ public static class COMUtilities
         };
     }
 
-    public static ServerInformation? GetServerInformation(object obj, IEnumerable<COMInterfaceEntry> intfs)
+    internal static ServerInformation? GetServerInformation(object obj, IEnumerable<COMInterfaceEntry> intfs)
     {
         IntPtr intf = Marshal.GetIUnknownForObject(obj);
         IntPtr proxy = IntPtr.Zero;
@@ -371,16 +355,9 @@ public static class COMUtilities
         using var auth_info_buffer = auth_info?.ToBuffer(list);
         COSERVERINFO server_info = !string.IsNullOrWhiteSpace(server) ? new COSERVERINFO(server, auth_info_buffer) : null;
 
-        int hr = NativeMethods.CoGetClassObject(clsid, server_info is not null ? CLSCTX.REMOTE_SERVER
-            : context, server_info, iid, out IntPtr obj);
-        if (hr != 0)
-        {
-            Marshal.ThrowExceptionForHR(hr);
-        }
-
-        object ret = Marshal.GetObjectForIUnknown(obj);
-        Marshal.Release(obj);
-        return ret;
+        using var handle = SafeComObjectHandle.GetClassObject(clsid, server_info is not null ? CLSCTX.REMOTE_SERVER
+            : context, iid, server_info);
+        return handle.ToObject();
     }
 
     public static object CreateRuntimeClass(string class_name, bool create_in_broker, bool per_user_broker)
@@ -408,27 +385,13 @@ public static class COMUtilities
         return NativeMethods.RoGetActivationFactory(class_name, iid);
     }
 
-    private static Guid CLSID_NewMoniker = new("ecabafc6-7f19-11d2-978e-0000f8757e2a");
-
     private static IMoniker ParseMoniker(IBindCtx bind_context, string moniker_string)
     {
         if (moniker_string == "new")
         {
-            int hr = NativeMethods.CoCreateInstance(CLSID_NewMoniker, IntPtr.Zero,
-                CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown, out IntPtr unk);
-            if (hr != 0)
-            {
-                Marshal.ThrowExceptionForHR(hr);
-            }
-
-            try
-            {
-                return (IMoniker)Marshal.GetObjectForIUnknown(unk);
-            }
-            finally
-            {
-                Marshal.Release(unk);
-            }
+            using var handle = SafeComObjectHandle.CreateInstance(COMKnownGuids.CLSID_NewMoniker, 
+                CLSCTX.INPROC_SERVER, COMKnownGuids.IID_IUnknown);
+            return (IMoniker)handle.ToObject();
         }
         else
         {

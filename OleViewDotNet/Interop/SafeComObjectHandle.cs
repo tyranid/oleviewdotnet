@@ -54,7 +54,7 @@ public class SafeComObjectHandle : SafeHandle
         return new SafeComObjectHandle(ppv);
     }
 
-    public bool HasInterface(Guid iid)
+    public bool SupportsInterface(Guid iid)
     {
         using var obj = QueryInterface(iid, false);
         return obj != null;
@@ -62,7 +62,7 @@ public class SafeComObjectHandle : SafeHandle
 
     public bool IsProxy()
     {
-        return HasInterface(COMKnownGuids.IID_IProxyManager);
+        return SupportsInterface(COMKnownGuids.IID_IProxyManager);
     }
 
     public IntPtr ReadVTable()
@@ -77,6 +77,16 @@ public class SafeComObjectHandle : SafeHandle
     public SafeComObjectHandle Clone()
     {
         return FromIUnknown(handle);
+    }
+
+    public object ToObject()
+    {
+        return Marshal.GetObjectForIUnknown(handle);
+    }
+
+    public object ToObject<T>()
+    {
+        return (T)ToObject();
     }
 
     public static SafeComObjectHandle FromObject(object obj)
@@ -94,5 +104,15 @@ public class SafeComObjectHandle : SafeHandle
     {
         using var ptr = FromObject(obj);
         return ptr.QueryInterface(iid, throw_on_error);
+    }
+
+    public static SafeComObjectHandle GetClassObject(Guid clsid, CLSCTX clsctx, Guid iid, COSERVERINFO server_info = null)
+    {
+        return NativeMethods.CoGetClassObject(clsid, clsctx, server_info, iid);
+    }
+
+    public static SafeComObjectHandle CreateInstance(Guid clsid, CLSCTX clsctx, Guid iid, object unk_outer = null)
+    {
+        return NativeMethods.CoCreateInstance(clsid, unk_outer, clsctx, iid);
     }
 }

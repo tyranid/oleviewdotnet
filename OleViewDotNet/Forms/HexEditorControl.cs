@@ -81,7 +81,7 @@ internal partial class HexEditorControl : UserControl
             }
             catch (IOException ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
@@ -99,7 +99,7 @@ internal partial class HexEditorControl : UserControl
             }
             catch (IOException ex)
             {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EntryPoint.ShowError(this, ex);
             }
         }
     }
