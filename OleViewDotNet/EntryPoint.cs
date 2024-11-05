@@ -201,6 +201,7 @@ public static class EntryPoint
             { "pipe=", "Specify the pipe to send interface enumeration output.", v => enum_pipe = v },
             { "clsctx=", "Specify the CLSCTX to create the object for interface enumeration.", v => enum_clsctx = (CLSCTX)Enum.Parse(typeof(CLSCTX), v, true) },
             { "arch=", "Specify the architecture to run. Used only for admin elevation.", v => arch = (ProgramArchitecture)Enum.Parse(typeof(ProgramArchitecture), v, true) },
+            { "debug", "Specify to show additional debug information.", v => m_show_stack_trace = v is not null },
             { "h|help",  "Show this message and exit.", v => show_help = v is not null },
         };
 
@@ -326,18 +327,15 @@ public static class EntryPoint
         }
     }
 
-    public static void ShowError(IWin32Window window, Exception ex)
-    {
-        ShowError(window, ex, false);
-    }
+    private static bool m_show_stack_trace;
 
-    public static void ShowError(IWin32Window window, Exception ex, bool stack_trace)
+    public static void ShowError(IWin32Window window, Exception ex)
     {
         if (ex is TargetInvocationException iex && iex.InnerException is not null)
         {
             ex = iex.InnerException;
         }
 
-        MessageBox.Show(window, stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show(window, m_show_stack_trace ? ex.ToString() : ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 }

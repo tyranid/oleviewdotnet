@@ -850,7 +850,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            EntryPoint.ShowError(this, ex, true);
+            EntryPoint.ShowError(this, ex);
         }
     }
 
@@ -870,7 +870,7 @@ internal partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            EntryPoint.ShowError(this, ex, true);
+            EntryPoint.ShowError(this, ex);
         }
     }
 

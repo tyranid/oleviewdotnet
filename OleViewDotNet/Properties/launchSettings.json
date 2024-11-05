@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OleViewDotNet": {
+      "commandName": "Project",
+      "commandLineArgs": "--debug"
+    }
+  }
+}
