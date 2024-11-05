@@ -90,7 +90,7 @@ internal partial class InvokeForm : Form
 
         try
         {
-            if (t.GetElementType() is not null)
+            if (t.IsByRef)
             {
                 t = t.GetElementType();
             }
@@ -98,6 +98,10 @@ internal partial class InvokeForm : Form
             if (t == typeof(string))
             {
                 ret = string.Empty;
+            }
+            else if (t == typeof(byte[]))
+            {
+                ret = Array.Empty<byte>();
             }
             else if (t == typeof(IBindCtx))
             {
@@ -196,7 +200,7 @@ internal partial class InvokeForm : Form
         }
         Type baseType = data.pi.ParameterType;
 
-        if (baseType.GetElementType() is not null)
+        if (baseType.IsByRef)
         {
             baseType = baseType.GetElementType();
         }
@@ -207,6 +211,15 @@ internal partial class InvokeForm : Form
             if (frm.ShowDialog() == DialogResult.OK)
             {
                 data.data = frm.Stream;
+            }
+        }
+        else if (baseType == typeof(byte[]))
+        {
+            using HexEditorForm frm = new();
+            frm.Bytes = data.data as byte[];
+            if (frm.ShowDialog() == DialogResult.OK)
+            {
+                data.data = frm.Bytes;
             }
         }
         else

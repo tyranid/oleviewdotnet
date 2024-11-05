@@ -90,6 +90,20 @@ internal partial class GetTypeForm : Form
         comboBoxTypes.SelectedIndex = 0;
     }
 
+    private static object TryConstructor(Type type, string value)
+    {
+        Type[] types = new[] { typeof(string) };
+        object[] vals = new[] { value };
+        ConstructorInfo ci = type.GetConstructor(types);
+        if (ci is not null)
+        {
+            return ci.Invoke(vals);
+        }
+
+        MethodInfo mi = type.GetMethod("Parse", BindingFlags.Static | BindingFlags.Public, null, types, null);
+        return mi?.Invoke(null, vals);
+    }
+
     private void btnOK_Click(object sender, EventArgs e)
     {
         try
@@ -101,23 +115,29 @@ internal partial class GetTypeForm : Form
                 if (t is not null)
                 {
                     /* First check if this type has a constructor which takes a string */
-                    ConstructorInfo ci = t.GetConstructor(new Type[] { typeof(string) });
-                    if (ci is not null)
+                    m_data = TryConstructor(t, comboBoxValue.Text);
+                    if (m_data is null)
                     {
-                        m_data = ci.Invoke(new object[] { comboBoxValue.Text });
-                    }
-                    else
-                    {
-                        /* Try default conversion */
-                        m_data = Convert.ChangeType(comboBoxValue.Text, t);
+                        if (t.IsEnum)
+                        {
+                            m_data = Enum.Parse(t, comboBoxValue.Text);
+                        }
+                        else
+                        {
+                            /* Try default conversion */
+                            m_data = Convert.ChangeType(comboBoxValue.Text, t);
+                        }
                     }
 
-                    if (!m_history.ContainsKey(t.GUID))
+                    if (m_data is not null)
                     {
-                        m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];
+                        if (!m_history.ContainsKey(t.GUID))
+                        {
+                            m_history[t.GUID] = new string[MAX_HISTORY_ENTRIES];
+                        }
+                        Array.Copy(m_history[t.GUID], 0, m_history[t.GUID], 1, MAX_HISTORY_ENTRIES - 1);
+                        m_history[t.GUID][0] = comboBoxValue.Text;
                     }
-                    Array.Copy(m_history[t.GUID], 0, m_history[t.GUID], 1, MAX_HISTORY_ENTRIES - 1);
-                    m_history[t.GUID][0] = comboBoxValue.Text;
                 }
             }
             else
