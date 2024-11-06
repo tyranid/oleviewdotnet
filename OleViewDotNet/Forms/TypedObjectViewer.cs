@@ -55,7 +55,7 @@ internal partial class TypedObjectViewer : UserControl
     {
         m_pObject = pEntry.Instance;
         m_objName = strObjName;
-        m_dispType = dispType;
+        m_dispType = dispType.IsByRef ? dispType.GetElementType() : dispType;
         m_registry = registry;
         InitializeComponent();
 

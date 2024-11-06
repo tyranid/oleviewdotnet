@@ -158,6 +158,37 @@ function Get-ComObjectInterface {
 
 <#
 .SYNOPSIS
+Adds interface types from an assembly.
+.DESCRIPTION
+This cmdlet adds interface types from an assembly.
+.PARAMETER Assembly
+The assembly to load the types from.
+.PARAMETER Path
+The path to the assembly to load.
+.PARAMETER CopyToCache
+Copy the assembly to the cache so that it'll be loaded next time.
+#>
+function Add-ComObjectInterface {
+    [CmdletBinding(DefaultParameterSetName="FromPath")]
+    Param(
+        [Parameter(Mandatory, Position = 0, ParameterSetName="FromPath")]
+        [string]$Path,
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName="FromAssembly")]
+        [System.Reflection.Assembly]$Assembly,
+        [switch]$CopyToCache
+    )
+
+    PROCESS {
+        if ($PSCmdlet -eq "FromAssembly") {
+            [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Assembly)
+        } else {
+            [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Path)
+        }
+    }
+}
+
+<#
+.SYNOPSIS
 Gets the current COM database.
 .DESCRIPTION
 This cmdlet gets the current COM database.

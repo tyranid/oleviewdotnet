@@ -218,13 +218,10 @@ internal partial class ObjectInformation : UserControl
                     }
                 }
 
-                if (factory is not null)
+                Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, obj);
+                if ((frm is not null) && !frm.IsDisposed)
                 {
-                    Control frm = factory.CreateInstance(m_registry, m_entry, m_objName, obj);
-                    if ((frm is not null) && !frm.IsDisposed)
-                    {
-                        EntryPoint.GetMainForm(m_registry).HostControl(frm);
-                    }
+                    EntryPoint.GetMainForm(m_registry).HostControl(frm);
                 }
             }
             catch (Exception ex)

@@ -112,12 +112,4 @@ internal static class InterfaceViewers
             return null;
         }
     }
-
-    public static void AddFactory(ITypeViewerFactory factory)
-    {
-        if (!m_viewfactory.Value.ContainsKey(factory.Iid))
-        {
-            m_viewfactory.Value.Add(factory.Iid, factory);
-        }
-    }
 }
