@@ -55,6 +55,7 @@ public static class COMWrapperFactory
     private static readonly MethodInfo _set_ref_method = typeof(MethodInfoWrapper).GetMethod("SetRef");
     private static readonly MethodInfo _set_method = typeof(MethodInfoWrapper).GetMethod("Set");
     private static readonly MethodInfo _invoke_method = typeof(MethodInfoWrapper).GetMethod("Invoke");
+    private static readonly FieldInfo _registry_field = typeof(BaseComWrapper).GetField("m_registry", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private static bool AddType(this HashSet<Type> types, Type t)
     {
@@ -198,6 +199,8 @@ public static class COMWrapperFactory
             var con = GetConstructor(param_types[local.Item1]);
             ilgen.Emit(OpCodes.Ldarg, local.Item1 + 1);
             ilgen.Emit(OpCodes.Ldloc, local.Item2);
+            ilgen.Emit(OpCodes.Ldarg_0);
+            ilgen.Emit(OpCodes.Ldfld, _registry_field);
             ilgen.Emit(OpCodes.Newobj, con);
             ilgen.Emit(OpCodes.Stind_Ref);
         }

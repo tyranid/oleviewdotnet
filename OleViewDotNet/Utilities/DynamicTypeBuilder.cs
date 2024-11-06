@@ -23,7 +23,7 @@ namespace OleViewDotNet.Utilities;
 
 public static class DynamicTypeBuilder
 {
-    private const string ASSEMBLY_NAME = "OlewViewDynamicTypes";
+    private const string ASSEMBLY_NAME = "OleViewDynamicTypes";
     private static readonly AssemblyName _name = new(ASSEMBLY_NAME);
     private static readonly AssemblyBuilder _builder = AppDomain.CurrentDomain.DefineDynamicAssembly(_name, AssemblyBuilderAccess.RunAndSave);
     private static readonly ModuleBuilder _module = _builder.DefineDynamicModule(_name.Name, _name.Name + ".dll");

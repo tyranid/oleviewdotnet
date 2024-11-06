@@ -20,7 +20,6 @@ using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
-using OleViewDotNet.Viewers;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -36,16 +35,11 @@ namespace OleViewDotNet.TypeManager;
 public static class COMTypeManager
 {
     #region Private Members
+    private static readonly Lazy<bool> m_loadtypes = new(LoadTypes);
     private static readonly ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
     private static readonly ConcurrentDictionary<string, Assembly> m_typelibsname = new();
     private static readonly ConcurrentDictionary<Guid, Type> m_iidtypes = new();
     private static ICOMObjectWrapperScriptingFactory m_factory;
-
-    static COMTypeManager()
-    {
-        AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-        LoadTypes();
-    }
 
     private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
@@ -60,6 +54,8 @@ public static class COMTypeManager
 
     private static bool LoadTypes()
     {
+        AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
         try
         {
             string strTypeLibDir = ProgramSettings.GetTypeLibDirectory();
@@ -77,7 +73,7 @@ public static class COMTypeManager
                         m_typelibsname[a.FullName] = a;
                     }
 
-                    RegisterTypeInterfaces(a);
+                    LoadTypes(a);
                 }
                 catch (Exception e)
                 {
@@ -90,26 +86,12 @@ public static class COMTypeManager
             Debug.WriteLine(e.ToString());
         }
 
-        LoadBuiltinTypes(Assembly.GetExecutingAssembly());
-        LoadBuiltinTypes(typeof(int).Assembly);
+        LoadTypes(Assembly.GetExecutingAssembly());
+        LoadTypes(typeof(int).Assembly);
         return true;
     }
 
-    private static void RegisterTypeInterfaces(Assembly a)
-    {
-        Type[] types = a.GetTypes();
-
-        foreach (Type t in types)
-        {
-            if (t.IsInterface && t.IsPublic && t.GetCustomAttribute<CoClassAttribute>() is null)
-            {
-                InterfaceViewers.AddFactory(new InstanceTypeViewerFactory(t));
-                m_iidtypes.TryAdd(t.GUID, t);
-            }
-        }
-    }
-
-    private static void LoadBuiltinTypes(Assembly asm)
+    private static void LoadTypes(Assembly asm)
     {
         foreach (Type t in asm.GetTypes().Where(x => x.IsPublic && x.IsInterface && IsComImport(x)))
         {
@@ -186,7 +168,7 @@ public static class COMTypeManager
 
     public static Type GetInterfaceType(Guid iid)
     {
-        if (m_iidtypes.ContainsKey(iid))
+        if (m_loadtypes.Value && m_iidtypes.ContainsKey(iid))
         {
             return m_iidtypes[iid];
         }
@@ -251,13 +233,29 @@ public static class COMTypeManager
         return GetInterfaceType(ipid.Iid);
     }
 
-    public static void LoadTypesFromAssembly(Assembly assembly)
+    public static void LoadTypesFromAssembly(Assembly assembly, bool copy_to_cache = false)
     {
-        LoadBuiltinTypes(assembly);
+        LoadTypes(assembly);
+        if (copy_to_cache)
+        {
+            string asm_path = assembly.Location;
+            string path = Path.Combine(ProgramSettings.GetTypeLibDirectory(), Path.GetFileName(asm_path));
+            File.Copy(asm_path, path);
+        }
+    }
+
+    public static void LoadTypesFromAssembly(string path, bool copy_to_cache = false)
+    {
+        LoadTypesFromAssembly(Assembly.LoadFrom(path), copy_to_cache);
     }
 
     public static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
     {
+        if (!m_loadtypes.Value)
+        {
+            throw new InvalidOperationException("Couldn't initialize types.");
+        }
+
         if (m_typelibs.ContainsKey(Marshal.GetTypeLibGuid(typeLib)))
         {
             return m_typelibs[Marshal.GetTypeLibGuid(typeLib)];
@@ -278,7 +276,7 @@ public static class COMTypeManager
             {
                 m_typelibsname[a.FullName] = a;
             }
-            RegisterTypeInterfaces(a);
+            LoadTypes(a);
 
             return a;
         }
