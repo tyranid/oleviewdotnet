@@ -179,10 +179,14 @@ function Add-ComObjectInterface {
     )
 
     PROCESS {
-        if ($PSCmdlet -eq "FromAssembly") {
-            [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Assembly)
-        } else {
-            [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Path)
+        try {
+            if ($PSCmdlet -eq "FromAssembly") {
+                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Assembly, $CopyToCache)
+            } else {
+                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Path, $CopyToCache)
+            }
+        } catch {
+            Write-Error $_
         }
     }
 }
