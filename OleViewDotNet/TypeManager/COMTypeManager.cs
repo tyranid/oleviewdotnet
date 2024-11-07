@@ -379,10 +379,16 @@ public static class COMTypeManager
 
     public static object Unwrap(object obj)
     {
+        if (obj is null)
+        {
+            return null;
+        }
+
         if (Marshal.IsComObject(obj))
         {
             return obj;
         }
+
         if (obj is ICOMObjectWrapper wrapper)
         {
             return wrapper.Unwrap();

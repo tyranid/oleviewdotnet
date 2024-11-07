@@ -120,12 +120,22 @@ public static class COMWrapperFactory
         return ret;
     }
 
+    private static Type GetParameterTypeScripting(this ParameterInfo pi, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    {
+        Type ret = pi.ParameterType.Deref();
+        if (IsComInterfaceType(ret))
+        {
+            ret = CreateType(ret, ret.GUID, fixup_queue);
+        }
+        return ret;
+    }
+
     private static ConstructorInfo GetConstructor(Type type)
     {
         type = type.Deref();
         if (!_constructors.ContainsKey(type))
         {
-            _constructors[type] = type.GetConstructor(new[] { typeof(object) });
+            _constructors[type] = type.GetConstructor(new[] { typeof(object), typeof(COMRegistry) });
         }
         return _constructors[type];
     }
@@ -140,70 +150,153 @@ public static class COMWrapperFactory
         return type;
     }
 
-    private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
-        Type base_type, HashSet<Type> structured_types, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    private static bool IsWrapperType(this ParameterInfo pi)
     {
-        string name = names.GenerateName(mi);
-        var param_info = mi.GetParameters();
-        var param_types = param_info.Select(p => p.GetParameterType(fixup_queue)).ToArray();
-        foreach (var t in param_types)
-        {
-            structured_types.AddType(t);
-        }
-        structured_types.AddType(mi.ReturnType);
+        return pi.ParameterType.IsWrapperType();
+    }
 
-        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes,
-            mi.ReturnType, param_types);
+    private static bool IsWrapperType(this Type type)
+    {
+        return typeof(BaseComWrapper).IsAssignableFrom(type);
+    }
 
-        for (int i = 0; i < param_info.Length; ++i)
-        {
-            methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
-        }
+    private static bool IsByRef(this ParameterInfo pi)
+    {
+        return pi.ParameterType.IsByRef;
+    }
 
-        List<Tuple<int, int>> locals = new();
-        var ilgen = methbuilder.GetILGenerator();
-        ilgen.Emit(OpCodes.Ldarg_0);
-        ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
-        for (int i = 0; i < param_info.Length; ++i)
+    private static bool IsInParam(this ParameterInfo pi)
+    {
+        return pi.IsIn || !pi.IsOut;
+    }
+
+    private static bool IsOutParam(this ParameterInfo pi)
+    {
+        return !pi.IsIn || pi.IsOut;
+    }
+
+    private static Tuple<Type, ConstructorInfo> CreateReturnType(this TypeBuilder tb, string name, IReadOnlyList<ParameterInfo> out_params, 
+        IReadOnlyList<Type> out_types, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    {
+        var type = tb.DefineNestedType($"{name}_RetVal", TypeAttributes.NestedPublic, typeof(ValueType));
+
+        var field_values = new List<Tuple<string, Type>>();
+        for (int i = 0; i < out_params.Count; ++i)
         {
-            if (param_info[i].ParameterType.IsByRef && !param_types[i].IsByRef)
+            if (out_params[i].Position < 0)
             {
-                ilgen.Emit(OpCodes.Ldarga, i + 1);
+                field_values.Add(Tuple.Create("retval", out_types[i]));
             }
             else
             {
-                if (typeof(BaseComWrapper).IsAssignableFrom(param_types[i].Deref()))
+                field_values.Add(Tuple.Create(out_params[i].Name, out_types[i]));
+            }
+        }
+
+        var fields = field_values.Select(f => type.DefineField(f.Item1, f.Item2, FieldAttributes.InitOnly | FieldAttributes.Public)).ToArray();
+        var con = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, field_values.Select(f => f.Item2).ToArray());
+        var ilgen = con.GetILGenerator();
+        for (int i = 0; i < field_values.Count; ++i)
+        {
+            con.DefineParameter(i + 1, 0, field_values[i].Item1);
+            ilgen.Emit(OpCodes.Ldarg_0);
+            ilgen.Emit(OpCodes.Ldarg, i + 1);
+            ilgen.Emit(OpCodes.Stfld, fields[i]);
+        }
+        ilgen.Emit(OpCodes.Ret);
+        fixup_queue.Enqueue(Tuple.Create(Guid.NewGuid(), type));
+        return Tuple.Create<Type, ConstructorInfo>(type, con);
+    }
+
+    private static MethodBuilder GenerateForwardingScriptingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
+        Type base_type, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
+    {
+        string name = names.GenerateName(mi);
+        var param_info = mi.GetParameters();
+        var in_param = param_info.Where(p => p.IsInParam()).ToArray();
+        var out_params = param_info.Where(p => p.IsByRef() && p.IsOutParam()).ToList();
+        if (mi.ReturnType != typeof(void))
+        {
+            out_params.Insert(0, mi.ReturnParameter);
+        }
+        var out_types = out_params.Select(p => p.GetParameterTypeScripting(fixup_queue)).ToArray();
+        var return_param = mi.ReturnParameter.GetParameterTypeScripting(fixup_queue);
+        Tuple<Type, ConstructorInfo> ret_struct = null;
+
+        Type return_type = typeof(void);
+        if (out_types.Length > 0)
+        {
+            if (out_types.Length == 1)
+            {
+                return_type = out_types[0];
+            }
+            else
+            {
+                ret_struct = tb.CreateReturnType(name, out_params, out_types, fixup_queue);
+                return_type = ret_struct.Item1;
+            }
+        }
+
+        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes,
+            return_type, in_param.Select(p => p.GetParameterTypeScripting(fixup_queue)).ToArray());
+        for (int i = 0; i < in_param.Length; ++i)
+        {
+            methbuilder.DefineParameter(i + 1, 0, in_param[i].Name);
+        }
+
+        Dictionary<ParameterInfo, LocalBuilder> locals = new();
+        var ilgen = methbuilder.GetILGenerator();
+        ilgen.Emit(OpCodes.Ldarg_0);
+        ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
+        int param_index = 1;
+        foreach (var pi in param_info)
+        {
+            if (pi.IsByRef())
+            {
+                Type pi_type = pi.ParameterType.Deref();
+                LocalBuilder local = ilgen.DeclareLocal(pi_type);
+                if (pi.IsInParam())
                 {
-                    if (!param_info[i].IsOut)
+                    ilgen.Emit(OpCodes.Ldarg, param_index++);
+                    if (pi.IsWrapperType())
                     {
-                        ilgen.Emit(OpCodes.Ldarg, i + 1);
-                        ilgen.Emit(OpCodes.Call, _unwrap_method.MakeGenericMethod(param_info[i].ParameterType));
-                        ilgen.Emit(OpCodes.Castclass, param_info[i].ParameterType);
+                        ilgen.Emit(OpCodes.Call, _unwrap_method.MakeGenericMethod(pi_type));
                     }
-                    else
-                    {
-                        LocalBuilder local = ilgen.DeclareLocal(param_info[i].ParameterType.Deref());
-                        ilgen.Emit(OpCodes.Ldloca, local.LocalIndex);
-                        locals.Add(Tuple.Create(i, local.LocalIndex));
-                    }
+                    ilgen.Emit(OpCodes.Stloc, local.LocalIndex);
                 }
-                else
+                ilgen.Emit(OpCodes.Ldloca, local.LocalIndex);
+                locals.Add(pi, local);
+            }
+            else
+            {
+                ilgen.Emit(OpCodes.Ldarg, param_index++);
+                if (pi.IsWrapperType())
                 {
-                    ilgen.Emit(OpCodes.Ldarg, i + 1);
+                    ilgen.Emit(OpCodes.Call, _unwrap_method.MakeGenericMethod(pi.ParameterType));
                 }
             }
         }
         ilgen.Emit(OpCodes.Callvirt, mi);
-        foreach (var local in locals)
+        for (int i = 0; i < out_params.Count; ++i)
         {
-            var con = GetConstructor(param_types[local.Item1]);
-            ilgen.Emit(OpCodes.Ldarg, local.Item1 + 1);
-            ilgen.Emit(OpCodes.Ldloc, local.Item2);
-            ilgen.Emit(OpCodes.Ldarg_0);
-            ilgen.Emit(OpCodes.Ldfld, _registry_field);
-            ilgen.Emit(OpCodes.Newobj, con);
-            ilgen.Emit(OpCodes.Stind_Ref);
+            if (out_params[i].Position >= 0)
+            {
+                var local = locals[out_params[i]];
+                ilgen.Emit(OpCodes.Ldloc, local.LocalIndex);
+            }
+            if (out_types[i].IsWrapperType())
+            {
+                var con = GetConstructor(out_types[i]);
+                ilgen.Emit(OpCodes.Ldarg_0);
+                ilgen.Emit(OpCodes.Ldfld, _registry_field);
+                ilgen.Emit(OpCodes.Newobj, con);
+            }
         }
+        if (ret_struct is not null)
+        {
+            ilgen.Emit(OpCodes.Newobj, ret_struct.Item2);
+        }
+
         ilgen.Emit(OpCodes.Ret);
         return methbuilder;
     }
@@ -215,7 +308,6 @@ public static class COMWrapperFactory
 
     private static void CreateWrapperType(Type intf_type, Guid iid, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
-        HashSet<Type> structured_types = new();
         Type base_type = typeof(BaseComWrapper<>).MakeGenericType(intf_type);
         TypeBuilder tb = DynamicTypeBuilder.DefineType(intf_type.FullName, TypeAttributes.Public | TypeAttributes.Sealed, base_type);
         _types[iid] = tb;
@@ -233,7 +325,7 @@ public static class COMWrapperFactory
         conil.Emit(OpCodes.Ret);
         foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
         {
-            GenerateForwardingMethod(tb, mi, 0, base_type, structured_types, names, fixup_queue);
+            GenerateForwardingScriptingMethod(tb, mi, 0, base_type, names, fixup_queue);
         }
 
         foreach (var pi in intf_type.GetProperties())
@@ -242,12 +334,12 @@ public static class COMWrapperFactory
             var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
             if (pi.CanRead)
             {
-                var get_method = GenerateForwardingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                var get_method = GenerateForwardingScriptingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, names, fixup_queue);
                 pb.SetGetMethod(get_method);
             }
             if (pi.CanWrite)
             {
-                var set_method = GenerateForwardingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, structured_types, names, fixup_queue);
+                var set_method = GenerateForwardingScriptingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, names, fixup_queue);
                 pb.SetSetMethod(set_method);
             }
         }
@@ -413,6 +505,11 @@ public static class COMWrapperFactory
     #endregion
 
     #region Public Static Members
+    public static Type CreateType(Type intf_type)
+    {
+        return CreateType(intf_type, intf_type.GUID, null);
+    }
+
     public static T UnwrapTyped<T>(this BaseComWrapper<T> obj) where T : class
     {
         return (T)obj?.Unwrap();
