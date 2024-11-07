@@ -14,7 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet.Win32.Rpc;
 using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.TypeManager;
@@ -66,15 +65,21 @@ public static class COMWrapperFactory
         return types.Add(UnwrapType(t));
     }
 
-    private static string GenerateName(this HashSet<string> names, MemberInfo member)
+    private static string GenerateName(this HashSet<string> names, MemberInfo member, bool private_method = false)
     {
-        string ret = member.Name;
+        string name = member.Name;
+        if (private_method)
+        {
+            name = "_private_" + name;
+        }
+
+        string ret = name;
         if (!names.Add(ret))
         {
             int count = 1;
             while (count < 1024)
             {
-                ret = $"{member.Name}_{count++}";
+                ret = $"{name}_{count++}";
                 if (names.Add(ret))
                 {
                     break;
@@ -82,9 +87,10 @@ public static class COMWrapperFactory
             }
             if (count == 1024)
             {
-                throw new ArgumentException($"Can't generate a unique name for {member.Name}");
+                throw new ArgumentException($"Can't generate a unique name for {name}");
             }
         }
+
         return ret;
     }
 
@@ -208,7 +214,7 @@ public static class COMWrapperFactory
         return Tuple.Create<Type, ConstructorInfo>(type, con);
     }
 
-    private static MethodBuilder GenerateForwardingScriptingMethod(TypeBuilder tb, MethodInfo mi, MethodAttributes attributes,
+    private static MethodBuilder GenerateForwardingMethod(TypeBuilder tb, MethodInfo mi, MethodInfo priv_method, MethodAttributes attributes,
         Type base_type, HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue)
     {
         string name = names.GenerateName(mi);
@@ -247,7 +253,10 @@ public static class COMWrapperFactory
         Dictionary<ParameterInfo, LocalBuilder> locals = new();
         var ilgen = methbuilder.GetILGenerator();
         ilgen.Emit(OpCodes.Ldarg_0);
-        ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
+        if (priv_method is null)
+        {
+            ilgen.Emit(OpCodes.Ldfld, base_type.GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic));
+        }
         int param_index = 1;
         foreach (var pi in param_info)
         {
@@ -276,7 +285,7 @@ public static class COMWrapperFactory
                 }
             }
         }
-        ilgen.Emit(OpCodes.Callvirt, mi);
+        ilgen.Emit(OpCodes.Callvirt, priv_method ?? mi);
         for (int i = 0; i < out_params.Count; ++i)
         {
             if (out_params[i].Position >= 0)
@@ -325,7 +334,7 @@ public static class COMWrapperFactory
         conil.Emit(OpCodes.Ret);
         foreach (var mi in intf_type.GetMethods().Where(m => (m.Attributes & MethodAttributes.SpecialName) == 0))
         {
-            GenerateForwardingScriptingMethod(tb, mi, 0, base_type, names, fixup_queue);
+            GenerateForwardingMethod(tb, mi, null, 0, base_type, names, fixup_queue);
         }
 
         foreach (var pi in intf_type.GetProperties())
@@ -334,12 +343,12 @@ public static class COMWrapperFactory
             var pb = tb.DefineProperty(name, PropertyAttributes.None, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
             if (pi.CanRead)
             {
-                var get_method = GenerateForwardingScriptingMethod(tb, pi.GetMethod, MethodAttributes.SpecialName, base_type, names, fixup_queue);
+                var get_method = GenerateForwardingMethod(tb, pi.GetMethod, null, MethodAttributes.SpecialName, base_type, names, fixup_queue);
                 pb.SetGetMethod(get_method);
             }
             if (pi.CanWrite)
             {
-                var set_method = GenerateForwardingScriptingMethod(tb, pi.SetMethod, MethodAttributes.SpecialName, base_type, names, fixup_queue);
+                var set_method = GenerateForwardingMethod(tb, pi.SetMethod, null, MethodAttributes.SpecialName, base_type, names, fixup_queue);
                 pb.SetSetMethod(set_method);
             }
         }
@@ -361,18 +370,14 @@ public static class COMWrapperFactory
         return typeof(object);
     }
 
-    private static MethodBuilder GenerateReflectionMethod(TypeBuilder tb, MethodInfo mi, int index, MethodAttributes attributes,
-        HashSet<string> names, Queue<Tuple<Guid, TypeBuilder>> fixup_queue, Dictionary<MethodInfo, MethodBuilder> method_map)
+    private static MethodBuilder GenerateReflectionMethod(TypeBuilder tb, MethodInfo mi, int index, MethodAttributes attributes, HashSet<string> names)
     {
-        string name = names.GenerateName(mi);
+        string name = names.GenerateName(mi, true);
         var param_info = mi.GetParameters();
         var param_types = param_info.Select(p => p.ParameterType.GetReflectionType()).ToArray();
 
-        var methbuilder = tb.DefineMethod(name, MethodAttributes.Public | MethodAttributes.HideBySig | attributes,
+        var methbuilder = tb.DefineMethod(name, MethodAttributes.Private | MethodAttributes.HideBySig | attributes,
             mi.ReturnType.GetReflectionType(), param_types);
-
-        method_map.Add(mi, methbuilder);
-
         for (int i = 0; i < param_info.Length; ++i)
         {
             methbuilder.DefineParameter(i + 1, param_info[i].Attributes, param_info[i].Name);
@@ -440,7 +445,9 @@ public static class COMWrapperFactory
         MethodInfo[] methods = intf_type.GetMethods();
         for (int i = 0; i < methods.Length; ++i)
         {
-            GenerateReflectionMethod(tb, methods[i], i, methods[i].Attributes & MethodAttributes.SpecialName, names, fixup_queue, method_map);
+            var method = GenerateReflectionMethod(tb, methods[i], i, methods[i].Attributes & MethodAttributes.SpecialName, names);
+            var method2 = GenerateForwardingMethod(tb, methods[i], method, method.Attributes & MethodAttributes.SpecialName, base_type, names, fixup_queue);
+            method_map.Add(methods[i], method2);
         }
 
         foreach (var pi in intf_type.GetProperties())
