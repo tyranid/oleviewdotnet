@@ -248,6 +248,12 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     }
 
     internal static IEnumerable<COMProxyInterface> GetModifiedProxies() => m_proxies.Values.Where(p => p.m_modified);
+
+    internal RpcClientBase CreateClient(bool scripting = false)
+    {
+        Type type = CreateClientType(scripting);
+        return (RpcClientBase)Activator.CreateInstance(type.BaseType);
+    }
     #endregion
 
     #region Public Static Methods
@@ -316,12 +322,6 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     #endregion
 
     #region Public Methods
-    public RpcClientBase CreateClient(bool scripting = false)
-    {
-        Type type = CreateClientType(scripting);
-        return (RpcClientBase)Activator.CreateInstance(type);
-    }
-
     public Type CreateClientType(bool scripting)
     {
         return COMProxyInterfaceClientBuilder.CreateClientType(this, scripting);
