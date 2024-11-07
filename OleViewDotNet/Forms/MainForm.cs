@@ -21,6 +21,7 @@ using OleViewDotNet.Processes;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.Security;
 using OleViewDotNet.TypeLib;
+using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
@@ -1140,5 +1141,25 @@ internal partial class MainForm : Form
     {
         menuViewSaveProxyNamesOnExit.Checked = !menuViewSaveProxyNamesOnExit.Checked;
         ProgramSettings.SaveProxyNamesOnExit = menuViewSaveProxyNamesOnExit.Checked;
+    }
+
+    private void menuFileImportInteropAssembly_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            using OpenFileDialog dlg = new();
+            dlg.Filter = "Assembly Files (*.dll)|*.dll|All Files (*.*)|*.*";
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                Assembly asm = Assembly.LoadFrom(dlg.FileName);
+                bool copy_to_cache = MessageBox.Show(this, "Do you want to add this library to the pre-loaded cache?", 
+                    "Add to Cache?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                COMTypeManager.LoadTypesFromAssembly(asm, copy_to_cache);
+            }
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
     }
 }

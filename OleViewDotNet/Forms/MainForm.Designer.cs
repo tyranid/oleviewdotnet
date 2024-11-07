@@ -54,6 +54,7 @@ partial class MainForm
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuFileOpenTypeLib = new System.Windows.Forms.MenuItem();
             this.menuFileOpenProxyDll = new System.Windows.Forms.MenuItem();
+            this.menuFileImportInteropAssembly = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
             this.menuFileSettings = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
@@ -125,9 +126,9 @@ partial class MainForm
             this.menuViewRegistryViewOptions = new System.Windows.Forms.MenuItem();
             this.menuViewAlwaysShowSourceCode = new System.Windows.Forms.MenuItem();
             this.menuViewEnableAutoParsing = new System.Windows.Forms.MenuItem();
+            this.menuViewSaveProxyNamesOnExit = new System.Windows.Forms.MenuItem();
             this.menuHelp = new System.Windows.Forms.MenuItem();
             this.menuHelpAbout = new System.Windows.Forms.MenuItem();
-            this.menuViewSaveProxyNamesOnExit = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -168,6 +169,7 @@ partial class MainForm
             this.menuItem8,
             this.menuFileOpenTypeLib,
             this.menuFileOpenProxyDll,
+            this.menuFileImportInteropAssembly,
             this.menuItem12,
             this.menuFileSettings,
             this.menuItem2,
@@ -305,25 +307,31 @@ partial class MainForm
             this.menuFileOpenProxyDll.Text = "Open Proxy D&LL";
             this.menuFileOpenProxyDll.Click += new System.EventHandler(this.menuFileOpenProxyDll_Click);
             // 
+            // menuFileImportInteropAssembly
+            // 
+            this.menuFileImportInteropAssembly.Index = 22;
+            this.menuFileImportInteropAssembly.Text = "Import Interop Assembly";
+            this.menuFileImportInteropAssembly.Click += new System.EventHandler(this.menuFileImportInteropAssembly_Click);
+            // 
             // menuItem12
             // 
-            this.menuItem12.Index = 22;
+            this.menuItem12.Index = 23;
             this.menuItem12.Text = "-";
             // 
             // menuFileSettings
             // 
-            this.menuFileSettings.Index = 23;
+            this.menuFileSettings.Index = 24;
             this.menuFileSettings.Text = "Settin&gs";
             this.menuFileSettings.Click += new System.EventHandler(this.menuFileSettings_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 24;
+            this.menuItem2.Index = 25;
             this.menuItem2.Text = "-";
             // 
             // menuFileExit
             // 
-            this.menuFileExit.Index = 25;
+            this.menuFileExit.Index = 26;
             this.menuFileExit.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.menuFileExit.Text = "E&xit";
             this.menuFileExit.Click += new System.EventHandler(this.menuFileExit_Click);
@@ -787,6 +795,12 @@ partial class MainForm
             this.menuViewEnableAutoParsing.Text = "&Enable Auto Parsing";
             this.menuViewEnableAutoParsing.Click += new System.EventHandler(this.menuViewEnableAutoParsing_Click);
             // 
+            // menuViewSaveProxyNamesOnExit
+            // 
+            this.menuViewSaveProxyNamesOnExit.Index = 2;
+            this.menuViewSaveProxyNamesOnExit.Text = "Save Proxy Names on Exit";
+            this.menuViewSaveProxyNamesOnExit.Click += new System.EventHandler(this.menuViewSaveProxyNamesOnExit_Click);
+            // 
             // menuHelp
             // 
             this.menuHelp.Index = 7;
@@ -800,21 +814,15 @@ partial class MainForm
             this.menuHelpAbout.Text = "&About";
             this.menuHelpAbout.Click += new System.EventHandler(this.menuHelpAbout_Click);
             // 
-            // menuViewSaveProxyNamesOnExit
-            // 
-            this.menuViewSaveProxyNamesOnExit.Index = 2;
-            this.menuViewSaveProxyNamesOnExit.Text = "Save Proxy Names on Exit";
-            this.menuViewSaveProxyNamesOnExit.Click += new System.EventHandler(this.menuViewSaveProxyNamesOnExit_Click);
-            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1645, 862);
+            this.ClientSize = new System.Drawing.Size(1234, 690);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Menu = this.mainMenu;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -926,5 +934,6 @@ partial class MainForm
     private System.Windows.Forms.MenuItem menuViewAlwaysShowSourceCode;
     private System.Windows.Forms.MenuItem menuViewEnableAutoParsing;
     private System.Windows.Forms.MenuItem menuViewSaveProxyNamesOnExit;
+    private System.Windows.Forms.MenuItem menuFileImportInteropAssembly;
 }
 
