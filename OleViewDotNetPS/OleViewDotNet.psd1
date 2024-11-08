@@ -20,7 +20,7 @@
 RootModule = 'OleViewDotNet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.15'
+ModuleVersion = '1.16'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -92,10 +92,10 @@ PrivateData = @{
         ProjectUri = 'https://github.com/tyranid/oleviewdotnet'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v1.15
+        ReleaseNotes = 'v1.16
 ----
-* Better support for COM proxies including creating an RPC client for them.
-* Editing of COM proxy names.
+* Better support for scripting interfaces by returning an structure for output parameters.
+* Bug fixes.
 '
 
     } # End of PSData hashtable
