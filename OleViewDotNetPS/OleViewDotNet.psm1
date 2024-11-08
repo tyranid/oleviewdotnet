@@ -165,8 +165,8 @@ This cmdlet adds interface types from an assembly.
 The assembly to load the types from.
 .PARAMETER Path
 The path to the assembly to load.
-.PARAMETER CopyToCache
-Copy the assembly to the cache so that it'll be loaded next time.
+.PARAMETER AutoLoad
+Copy the assembly to the cache and automatically load it next time.
 #>
 function Add-ComObjectInterface {
     [CmdletBinding(DefaultParameterSetName="FromPath")]
@@ -175,15 +175,15 @@ function Add-ComObjectInterface {
         [string]$Path,
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName="FromAssembly")]
         [System.Reflection.Assembly]$Assembly,
-        [switch]$CopyToCache
+        [switch]$AutoLoad
     )
 
     PROCESS {
         try {
             if ($PSCmdlet -eq "FromAssembly") {
-                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Assembly, $CopyToCache)
+                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Assembly, $AutoLoad)
             } else {
-                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Path, $CopyToCache)
+                [OleViewDotNet.TypeManager.COMTypeManager]::LoadTypesFromAssembly($Path, $AutoLoad)
             }
         } catch {
             Write-Error $_
@@ -2502,15 +2502,8 @@ function Get-ComTypeLibAssembly {
     PROCESS {
         $callback = New-CallbackProgress -Activity "Converting TypeLib" -NoProgress:$NoProgress
         if ($PSCmdlet.ParameterSetName -eq "FromTypeLib") {
-            $Path = ""
-            if ([Environment]::Is64BitProcess) {
-                $Path = $TypeLib.Win64Path
-            }
-            if ($Path -eq "") {
-                $Path = $TypeLib.Win32Path
-            }
-        }
-        if ($Path -ne "") {
+            [OleViewDotNet.Utilities.COMTypeCache]::LoadTypeLib($TypeLib, $callback) | Write-Output
+        } else {
             [OleViewDotNet.Utilities.COMTypeCache]::LoadTypeLib($Path, $callback) | Write-Output
         }
     }

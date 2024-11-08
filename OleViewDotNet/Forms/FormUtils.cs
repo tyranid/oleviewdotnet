@@ -84,7 +84,7 @@ internal static class FormUtils
     {
         try
         {
-            using WaitingDialog dlg = new((progress, token) => COMTypeManager.LoadTypeLib(type_lib.NativePath, progress), s => s);
+            using WaitingDialog dlg = new((progress, token) => COMTypeManager.LoadTypeLib(type_lib, progress), s => s);
             dlg.Text = "Loading TypeLib";
             dlg.CancelEnabled = false;
             if (dlg.ShowDialog(parent) == DialogResult.OK)

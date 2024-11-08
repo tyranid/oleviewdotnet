@@ -1148,13 +1148,14 @@ internal partial class MainForm : Form
         try
         {
             using OpenFileDialog dlg = new();
-            dlg.Filter = "Assembly Files (*.dll)|*.dll|All Files (*.*)|*.*";
+            dlg.Filter = "Assembly Files (*.dll)|*.dll|Type Library Files (*.tlb)|*.tlb";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                Assembly asm = Assembly.LoadFrom(dlg.FileName);
-                bool copy_to_cache = MessageBox.Show(this, "Do you want to add this library to the pre-loaded cache?", 
-                    "Add to Cache?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-                COMTypeManager.LoadTypesFromAssembly(asm, copy_to_cache);
+                string path = dlg.FileName;
+                Assembly asm = Assembly.LoadFrom(path);
+                bool autoload = MessageBox.Show(this, "Do you want to automatically load this library next time?",
+                    "Auto Load?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                COMTypeManager.LoadTypesFromAssembly(asm, autoload);
             }
         }
         catch (Exception ex)
