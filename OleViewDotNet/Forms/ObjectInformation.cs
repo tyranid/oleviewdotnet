@@ -146,21 +146,9 @@ internal partial class ObjectInformation : UserControl
             item.SubItems.Add(ent.Iid.FormatGuid());
 
             ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
-            if (factory is not null)
+            if (factory is not null || ent.HasTypeLib || ent.HasRuntimeType || ent.HasProxy || COMTypeManager.HasInterfaceType(ent.Iid))
             {
-                item.SubItems.Add("Yes (Builtin)");
-            }
-            else if (ent.HasTypeLib)
-            {
-                item.SubItems.Add("Yes (TypeLib)");
-            }
-            else if (ent.HasRuntimeType)
-            {
-                item.SubItems.Add($"Yes ({(ent.IsWinRTType ? "WinRT" : ".NET")})");
-            }
-            else if (ent.HasProxy)
-            {
-                item.SubItems.Add("Yes (Proxy)");
+                item.SubItems.Add("Yes");
             }
             else
             {

@@ -156,6 +156,11 @@ public static class COMTypeManager
         return IsComImport(t) && t.IsInterface && !t.Assembly.ReflectionOnly;
     }
 
+    public static bool HasInterfaceType(Guid iid)
+    {
+        return GetInterfaceType(iid) is not null;
+    }
+
     public static Type GetInterfaceType(Guid iid, COMRegistry registry)
     {
         if (registry is not null && registry.Interfaces.ContainsKey(iid))
