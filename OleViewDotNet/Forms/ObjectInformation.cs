@@ -194,6 +194,17 @@ internal partial class ObjectInformation : UserControl
                 ITypeViewerFactory factory = InterfaceViewers.GetInterfaceViewer(ent);
                 if (factory is null)
                 {
+                    if (!COMTypeManager.HasInterfaceType(ent.Iid) && ent.HasTypeLib)
+                    {
+                        try
+                        {
+                            FormUtils.ConvertTypeLib(this, ent.TypeLibVersionEntry);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
                     Type type = COMTypeManager.GetInterfaceType(ent);
                     if (typeof(RpcClientBase).IsAssignableFrom(type))
                     {

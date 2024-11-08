@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -77,6 +78,28 @@ internal static class FormUtils
         }
 
         return ret;
+    }
+
+    internal static Assembly ConvertTypeLib(IWin32Window parent, COMTypeLibVersionEntry type_lib)
+    {
+        try
+        {
+            using WaitingDialog dlg = new((progress, token) => COMTypeManager.LoadTypeLib(type_lib.NativePath, progress), s => s);
+            dlg.Text = "Loading TypeLib";
+            dlg.CancelEnabled = false;
+            if (dlg.ShowDialog(parent) == DialogResult.OK)
+            {
+                return (Assembly)dlg.Result;
+            }
+            else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
+            {
+                EntryPoint.ShowError(parent, dlg.Error);
+            }
+        }
+        catch (Exception)
+        {
+        }
+        return null;
     }
 
     internal static COMRegistry LoadRegistry(IWin32Window window,
