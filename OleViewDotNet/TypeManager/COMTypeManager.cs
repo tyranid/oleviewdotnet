@@ -22,13 +22,13 @@ using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
 namespace OleViewDotNet.TypeManager;
 
@@ -36,7 +36,7 @@ public static class COMTypeManager
 {
     #region Private Members
     private static readonly Lazy<bool> m_loadtypes = new(LoadTypes);
-    private static readonly ConcurrentDictionary<Guid, Assembly> m_typelibs = new();
+    private static readonly ConcurrentDictionary<Tuple<Guid, short, short>, Assembly> m_typelibs = new();
     private static readonly ConcurrentDictionary<string, Assembly> m_typelibsname = new();
     private static readonly ConcurrentDictionary<Guid, Type> m_iidtypes = new();
     private static ICOMObjectWrapperScriptingFactory m_factory;
@@ -52,40 +52,23 @@ public static class COMTypeManager
 
     private static bool ScriptingEnabled => m_factory is not null;
 
+    internal static Tuple<Guid, short, short> GetLibKey(this ITypeLib type_lib)
+    {
+        type_lib.GetLibAttr(out IntPtr ppTLibAttr);
+        try
+        {
+            var attrs = Marshal.PtrToStructure<TYPELIBATTR>(ppTLibAttr);
+            return Tuple.Create(attrs.guid, attrs.wMajorVerNum, attrs.wMinorVerNum);
+        }
+        finally
+        {
+            type_lib.ReleaseTLibAttr(ppTLibAttr);
+        }
+    }
+
     private static bool LoadTypes()
     {
         AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
-        try
-        {
-            string strTypeLibDir = ProgramSettings.GetTypeLibDirectory();
-            Directory.CreateDirectory(strTypeLibDir);
-            string[] files = Directory.GetFiles(strTypeLibDir, "*.dll");
-
-            foreach (string f in files)
-            {
-                try
-                {
-                    Assembly a = Assembly.LoadFrom(f);
-                    Guid typelib_guid = Marshal.GetTypeLibGuidForAssembly(a);
-                    if (m_typelibs.TryAdd(typelib_guid, a))
-                    {
-                        m_typelibsname[a.FullName] = a;
-                    }
-
-                    LoadTypes(a);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e.ToString());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e.ToString());
-        }
-
         LoadTypes(Assembly.GetExecutingAssembly());
         LoadTypes(typeof(int).Assembly);
         return true;
@@ -261,26 +244,36 @@ public static class COMTypeManager
             throw new InvalidOperationException("Couldn't initialize types.");
         }
 
-        if (m_typelibs.ContainsKey(Marshal.GetTypeLibGuid(typeLib)))
+        var key = typeLib.GetLibKey();
+        if (m_typelibs.ContainsKey(key))
         {
-            return m_typelibs[Marshal.GetTypeLibGuid(typeLib)];
+            return m_typelibs[key];
         }
         else
         {
             string strAssemblyPath = ProgramSettings.GetTypeLibDirectory();
-            strAssemblyPath = Path.Combine(strAssemblyPath, Marshal.GetTypeLibGuid(typeLib).ToString() + ".dll");
+            if (!Directory.Exists(strAssemblyPath))
+            {
+                Directory.CreateDirectory(strAssemblyPath);
+            }
 
-            TypeLibConverter conv = new();
-            AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
-                                    new TypeLibCallback(progress), null, null, null, null);
-            asm.Save(Path.GetFileName(strAssemblyPath));
+            strAssemblyPath = Path.Combine(strAssemblyPath, $"{key.Item1}_{key.Item2}_{key.Item3}.dll");
+            if (!File.Exists(strAssemblyPath))
+            {
+                TypeLibConverter conv = new();
+                AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, strAssemblyPath, TypeLibImporterFlags.ReflectionOnlyLoading,
+                                        new TypeLibCallback(progress), null, null, null, null);
+                asm.Save(Path.GetFileName(strAssemblyPath));
+            }
+
             Assembly a = Assembly.LoadFile(strAssemblyPath);
-
-            m_typelibs[Marshal.GetTypeLibGuid(typeLib)] = a;
+            m_typelibs[key] = a;
             lock (m_typelibsname)
             {
                 m_typelibsname[a.FullName] = a;
             }
+
+            progress?.Report(Tuple.Create("Caching type information.", -1));
             LoadTypes(a);
 
             return a;
@@ -329,17 +322,20 @@ public static class COMTypeManager
         }
         else
         {
-            if (obj is not IDispatch disp)
+            if (obj is not IDispatch)
             {
                 return null;
             }
 
-            disp.GetTypeInfo(0, 0x409, out ITypeInfo ti);
-            ti.GetContainingTypeLib(out ITypeLib tl, out int iIndex);
-            Guid typelibGuid = Marshal.GetTypeLibGuid(tl);
-            Assembly asm = LoadTypeLib(tl, progress) ?? throw new InvalidOperationException("Couldn't convert the assembly.");
-            string name = Marshal.GetTypeInfoName(ti);
-            return asm.GetTypes().FirstOrDefault(t => t.Name == name);
+            using var type_info = COMTypeInfoInstance.FromObject(obj);
+            using var type_lib = type_info.GetContainingTypeLib();
+            Guid iid = type_info.TypeAttr.guid;
+            if (LoadTypeLib(type_lib.Instance, progress) is null)
+            {
+                throw new InvalidOperationException("Couldn't convert the assembly.");
+            }
+
+            return GetInterfaceType(iid);
         }
     }
 
