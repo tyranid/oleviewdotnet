@@ -1098,7 +1098,7 @@ public class COMRegistry
         else
         {
             using var handle = SafeComObjectHandle.FromObject(obj);
-            return GetInterfacesForIUnknown(handle);
+            return GetInterfacesForIUnknown(handle).ToArray();
         }
     }
 
