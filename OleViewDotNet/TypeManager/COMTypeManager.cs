@@ -164,15 +164,20 @@ public static class COMTypeManager
         else
         {
             string path = Path.Combine(GetTypeLibDirectory(), $"{key.Item1}_{key.Item2}_{key.Item3}.dll");
+            Assembly a;
             if (!File.Exists(path))
             {
                 TypeLibConverter conv = new();
-                AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, path, TypeLibImporterFlags.ReflectionOnlyLoading,
+                AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, path, TypeLibImporterFlags.None,
                                         new TypeLibCallback(progress), null, null, null, null);
                 asm.Save(Path.GetFileName(path));
+                a = asm;
+            }
+            else
+            {
+                a = Assembly.LoadFrom(path);
             }
 
-            Assembly a = Assembly.LoadFrom(path);
             m_typelibs[key] = a;
             lock (m_typelibsname)
             {

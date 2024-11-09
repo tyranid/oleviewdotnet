@@ -1148,7 +1148,7 @@ internal partial class MainForm : Form
         try
         {
             using OpenFileDialog dlg = new();
-            dlg.Filter = "Assembly Files (*.dll)|*.dll|Type Library Files (*.tlb)|*.tlb";
+            dlg.Filter = "Assembly Files (*.dll)|*.dll|All Files (*.*)|*.*";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 string path = dlg.FileName;
