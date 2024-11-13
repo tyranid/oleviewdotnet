@@ -93,6 +93,12 @@ internal static class NativeMethods
     [DllImport("ole32.dll", PreserveSig = false)]
     public static extern SafeComObjectHandle CoGetClassObject(in Guid rclsid, CLSCTX dwClsContext, [In] COSERVERINFO pServerInfo, in Guid riid);
 
+    [DllImport("ole32.dll")]
+    public static extern int CoGetPSClsid(
+      in Guid riid,
+      out Guid pClsid
+    );
+
     [DllImport("ole32.dll", PreserveSig = false)]
     [return: MarshalAs(UnmanagedType.IUnknown)]
     public static extern object CoUnmarshalInterface(IStream stm, in Guid riid);

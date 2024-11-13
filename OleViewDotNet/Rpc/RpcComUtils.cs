@@ -107,6 +107,12 @@ public static class RpcComUtils
         return p;
     }
 
+    internal static bool IsProxy(object obj)
+    {
+        using var handle = SafeComObjectHandle.FromObject(obj);
+        return handle.IsProxy();
+    }
+
     public static RpcClientBase CreateClient(Type type, object obj, COMRegistry database)
     {
         return (RpcClientBase)Activator.CreateInstance(type, obj, database);

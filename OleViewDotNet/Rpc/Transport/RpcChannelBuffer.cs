@@ -16,110 +16,37 @@
 
 using OleViewDotNet.Interop;
 using System;
-using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Rpc.Transport;
 
-public sealed class RpcChannelBuffer : IDisposable
+public abstract class RpcChannelBuffer : IDisposable
 {
-    // This is a manual wrapper for the IRpcChannelBuffer interface as the 
-    // COM implementation seems to have a broken IMarshal interface.
-
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fGetBuffer(SafeComObjectHandle This, ref RPC_MESSAGE pMessage, in Guid riid);
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fSendReceive(SafeComObjectHandle This, ref RPC_MESSAGE pMessage, out int pStatus);
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fFreeBuffer(SafeComObjectHandle This, ref RPC_MESSAGE pMessage);
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fGetDestCtx(SafeComObjectHandle This, out MSHCTX pdwDestContext, out IntPtr ppvDestContext);
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate int fIsConnected(SafeComObjectHandle This);
-
-    private readonly SafeComObjectHandle m_proxy;
-    private readonly SafeComObjectHandle m_buffer;
-    private readonly Guid m_iid;
-    private readonly fGetBuffer m_get_buffer;
-    private readonly fSendReceive m_send_recv;
-    private readonly fFreeBuffer m_free_buffer;
-    private readonly fGetDestCtx m_get_dest_ctx;
-    private readonly fIsConnected m_is_connected;
-
-    private T GetFunc<T>(int index)
-    {
-        IntPtr vtable = m_buffer.ReadVTable();
-        return Marshal.GetDelegateForFunctionPointer<T>(Marshal.ReadIntPtr(vtable + (IntPtr.Size * (index + 3))));
-    }
-
-    private RpcChannelBuffer(IntPtr buffer, Guid iid, SafeComObjectHandle proxy)
-    {
-        m_buffer = SafeComObjectHandle.FromIUnknown(buffer);
-        m_iid = iid;
-        m_proxy = proxy.Clone();
-        m_get_buffer = GetFunc<fGetBuffer>(0);
-        m_send_recv = GetFunc<fSendReceive>(1);
-        m_free_buffer = GetFunc<fFreeBuffer>(2);
-        m_get_dest_ctx = GetFunc<fGetDestCtx>(3);
-        m_is_connected = GetFunc<fIsConnected>(4);
-    }
+    protected abstract void OnDispose();
 
     public void Dispose()
     {
-        m_buffer?.Dispose();
-        m_proxy?.Dispose();
+        OnDispose();
     }
 
-    public byte[] SendReceive(byte[] ndr_data, int proc_num)
-    {
-        RPC_MESSAGE msg = new()
-        {
-            BufferLength = ndr_data.Length,
-            ProcNum = proc_num
-        };
-        int hr = m_get_buffer(m_buffer, ref msg, in m_iid);
-        if (hr != 0)
-            Marshal.ThrowExceptionForHR(hr);
+    public abstract byte[] SendReceive(byte[] ndr_data, int proc_num);
 
-        Marshal.Copy(ndr_data, 0, msg.Buffer, ndr_data.Length);
-        hr = m_send_recv(m_buffer, ref msg, out int status);
-        if (hr != 0)
-            Marshal.ThrowExceptionForHR(hr);
-        if (status != 0)
-            Marshal.ThrowExceptionForHR(status);
-        byte[] ret = new byte[msg.BufferLength];
-        Marshal.Copy(msg.Buffer, ret, 0, msg.BufferLength);
-        hr = m_free_buffer(m_buffer, ref msg);
-        if (hr != 0)
-            Marshal.ThrowExceptionForHR(hr);
-        return ret;
-    }
+    public abstract bool IsConnected { get; }
 
-    public bool IsConnected()
-    {
-        return m_is_connected(m_buffer) == 0;
-    }
-
-    public MSHCTX GetDestCtx()
-    {
-        int hr = m_get_dest_ctx(m_buffer, out MSHCTX dest_context, out IntPtr _);
-        if (hr != 0)
-            Marshal.ThrowExceptionForHR(hr);
-        return dest_context;
-    }
+    public abstract MSHCTX DestContext { get; }
 
     public static RpcChannelBuffer FromObject(object obj, Guid iid)
     {
         using SafeComObjectHandle proxy = SafeComObjectHandle.FromObject(obj, iid);
         if (!proxy.IsProxy())
         {
-            throw new ArgumentException("Object must be a proxy to get the channel buffer.");
+            return new RpcChannelBufferStub(obj, iid);
         }
 
         MIDL_STUB_MESSAGE stub_message = new();
         NativeMethods.NdrProxyInitialize(proxy, new(), ref stub_message, new(), 0);
         try
         {
-            return new RpcChannelBuffer(stub_message.pRpcChannelBuffer, iid, proxy);
+            return new RpcChannelBufferProxy(stub_message.pRpcChannelBuffer, iid, proxy);
         }
         finally
         {

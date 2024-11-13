@@ -43,7 +43,7 @@ public sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrT
         m_registry = registry;
     }
 
-    public bool Connected => m_buffer?.IsConnected() ?? false;
+    public bool Connected => m_buffer?.IsConnected ?? false;
 
     public string Endpoint => "DCOM";
 
@@ -104,7 +104,7 @@ public sealed class RpcChannelBufferClientTransport : IRpcClientTransport, INdrT
             throw new NotSupportedException("Only support wrapped objects on this transport.");
         }
 
-        return new NdrInterfacePointer(COMUtilities.MarshalObject(wrapper.Unwrap(), iid, m_buffer.GetDestCtx(), MSHLFLAGS.NORMAL));
+        return new NdrInterfacePointer(COMUtilities.MarshalObject(wrapper.Unwrap(), iid, m_buffer.DestContext, MSHLFLAGS.NORMAL));
     }
 
     INdrComObject INdrTransportMarshaler.UnmarshalComObject(NdrInterfacePointer intf)

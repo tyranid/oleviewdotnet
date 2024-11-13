@@ -14,31 +14,26 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using NtApiDotNet;
-using OleViewDotNet.Rpc.Transport;
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace OleViewDotNet.Interop;
 
-[ComImport, Guid("D5F569D0-593B-101A-B569-08002B2DBF7A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IPSFactoryBuffer
+[ComImport, Guid("D5F56AFC-593B-101A-B569-08002B2DBF7A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IRpcStubBuffer 
 {
     [PreserveSig]
-    int CreateProxy
-    (
-        [MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter,
-        in Guid riid,
-        out IntPtr ppProxy, // IRpcProxyBuffer** 
-        out IntPtr ppv // void** 
-    );
-
+    int Connect([MarshalAs(UnmanagedType.IUnknown)] object pUnkServer);
+    void Disconnect();
     [PreserveSig]
-    int CreateStub
-    (
-        in Guid riid,
-        [MarshalAs(UnmanagedType.IUnknown)] object pUnkServer,
-        out IRpcStubBuffer ppStub // IRpcStubBuffer**
-    );
+    int Invoke(ref RPCOLEMESSAGE prpcmsg,
+            [MarshalAs(UnmanagedType.Interface)] IRpcChannelBuffer pRpcChannelBuffer);
+    [PreserveSig]
+    IRpcStubBuffer IsIIDSupported(in Guid riid);
+    [PreserveSig]
+    int CountRefs();
+    [PreserveSig]
+    int DebugServerQueryInterface(out IntPtr ppv);
+    [PreserveSig]
+    void DebugServerRelease(IntPtr pv);
 }
