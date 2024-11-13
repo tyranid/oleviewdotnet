@@ -310,6 +310,12 @@ internal partial class InvokeForm : Form
         }
         else
         {
+            if (obj is COMObjectWrapper wrapper)
+            {
+                type = wrapper.Type;
+                obj = wrapper.Unwrap();
+            }
+
             c = new TypedObjectViewer(m_registry, m_objName, obj, type);
         }
         EntryPoint.GetMainForm(m_registry).HostControl(c);
