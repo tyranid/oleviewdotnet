@@ -404,11 +404,7 @@ public static class COMUtilities
                 moniker_string.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
                 moniker_string.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
             {
-                int hr = NativeMethods.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform);
-                if (hr != 0)
-                {
-                    Marshal.ThrowExceptionForHR(hr);
-                }
+                NativeMethods.CreateURLMonikerEx(null, moniker_string, out IMoniker moniker, CreateUrlMonikerFlags.Uniform).CheckHr();
                 return moniker;
             }
 
@@ -450,11 +446,6 @@ public static class COMUtilities
         return comObj;
     }
 
-    public static bool IsProxy(object obj)
-    {
-        return obj is IRpcOptions;
-    }
-
     public static RPCOPT_SERVER_LOCALITY_VALUES GetServerLocality(object obj)
     {
         if (obj is IRpcOptions opts)
@@ -489,11 +480,7 @@ public static class COMUtilities
 
     public static void RegisterActivationFilter(IActivationFilter filter)
     {
-        int hr = NativeMethods.CoRegisterActivationFilter(filter);
-        if (hr != 0)
-        {
-            throw new Win32Exception(hr);
-        }
+        NativeMethods.CoRegisterActivationFilter(filter).CheckHr();
     }
 
     public static IRuntimeBroker CreateBroker(bool per_user)
@@ -512,5 +499,13 @@ public static class COMUtilities
     {
         using SafeComObjectHandle handle = SafeComObjectHandle.FromObject(obj, iid, false);
         return handle != null;
+    }
+
+    internal static void CheckHr(this int hr)
+    {
+        if (hr != 0)
+        {
+            Marshal.ThrowExceptionForHR(hr);
+        }
     }
 }
