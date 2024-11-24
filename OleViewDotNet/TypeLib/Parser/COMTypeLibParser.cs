@@ -20,6 +20,7 @@ using OleViewDotNet.TypeLib.Instance;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib.Parser;
@@ -27,63 +28,55 @@ namespace OleViewDotNet.TypeLib.Parser;
 internal sealed class COMTypeLibParser : IDisposable
 {
     #region Private Members
-    private readonly ITypeLib _type_lib;
+    private readonly COMTypeLibInstance _type_lib;
     private readonly ConcurrentDictionary<Guid, COMTypeLibInterface> _parsed_intfs = new();
     private readonly ConcurrentDictionary<Guid, COMTypeLibDispatch> _parsed_disp = new();
     private readonly ConcurrentDictionary<Tuple<string, TYPEKIND>, COMTypeLibTypeInfo> _named_types = new();
     private readonly ConcurrentDictionary<TYPELIBATTR, COMTypeLibReference> _ref_type_libs = new();
     private readonly TYPELIBATTR _attr;
     private readonly string _path;
-
-    private static TYPELIBATTR GetAttributes(ITypeLib type_lib)
-    {
-        type_lib.GetLibAttr(out IntPtr ptr);
-        try
-        {
-            return ptr.GetStructure<TYPELIBATTR>();
-        }
-        finally
-        {
-            type_lib.ReleaseTLibAttr(ptr);
-        }
-    }
+    private readonly bool _owns_type_lib;
     #endregion
 
     #region Internal Members
-    internal COMTypeLibParser(ITypeLib type_lib)
+    internal COMTypeLibParser(COMTypeLibInstance type_lib, bool owns_type_lib = true)
     {
         _type_lib = type_lib;
-        _attr = GetAttributes(type_lib);
+        _attr = type_lib.LibAttr;
+        _owns_type_lib = owns_type_lib;
+    }
+
+    internal COMTypeLibParser(object obj) 
+        : this(COMTypeLibInstance.FromObject(obj))
+    {
     }
 
     internal COMTypeLibParser(string path)
-        : this(NativeMethods.LoadTypeLibEx(path, RegKind.None))
+        : this(COMTypeLibInstance.FromFile(path))
     {
         _path = path;
     }
 
     internal COMTypeLibParser(Guid type_lib_id,
         COMVersion version, int lcid)
-        : this(NativeMethods.LoadRegTypeLib(type_lib_id, version.Major, version.Minor, lcid))
+        : this(COMTypeLibInstance.FromRegistered(type_lib_id, version, lcid))
     {
     }
 
     internal TypeInfo GetTypeInfo(int index)
     {
-        _type_lib.GetTypeInfo(index, out ITypeInfo type_info);
-        return new TypeInfo(this, type_info);
+        return new TypeInfo(this, _type_lib.GetTypeInfo(index));
     }
 
     internal TypeInfo GetTypeInfoFromGuid(Guid guid)
     {
-        _type_lib.GetTypeInfoOfGuid(ref guid, out ITypeInfo type_info);
-        return new TypeInfo(this, type_info);
+        return new TypeInfo(this, _type_lib.GetTypeInfoOfGuid(guid));
     }
 
-    internal COMTypeLibReference GetTypeLibReference(ITypeLib type_lib)
+    internal COMTypeLibReference GetTypeLibReference(COMTypeLibInstance type_lib)
     {
-        return _ref_type_libs.GetOrAdd(GetAttributes(type_lib),
-            a => new COMTypeLibReference(new(type_lib), a));
+        return _ref_type_libs.GetOrAdd(type_lib.LibAttr,
+            a => new COMTypeLibReference(type_lib.Documentation, a));
     }
 
     internal COMTypeLib Parse()
@@ -96,19 +89,19 @@ internal sealed class COMTypeLibParser : IDisposable
             types.Add(type_info.Parse());
         }
 
-        return new COMTypeLib(_path, new(_type_lib), _attr, types, _ref_type_libs.Values);
+        return new COMTypeLib(_path, _type_lib.Documentation, _attr, types, _ref_type_libs.Values);
     }
 
     internal sealed class TypeInfo : IDisposable
     {
         private readonly COMTypeLibParser _type_lib;
-        private readonly ITypeInfo _type_info;
+        private readonly COMTypeInfoInstance _type_info;
         private readonly TYPEATTR _attr;
 
         internal COMTypeLibInterface ParseInterface()
         {
             var ret = _type_lib._parsed_intfs.GetOrAdd(_attr.guid,
-                new COMTypeLibInterface(new(_type_info), _attr));
+                new COMTypeLibInterface(_type_info.Documentation, _attr));
             ret.Parse(this);
             return ret;
         }
@@ -116,7 +109,7 @@ internal sealed class COMTypeLibParser : IDisposable
         internal COMTypeLibDispatch ParseDispatch()
         {
             var ret = _type_lib._parsed_disp.GetOrAdd(_attr.guid,
-                new COMTypeLibDispatch(new(_type_info), _attr));
+                new COMTypeLibDispatch(_type_info.Documentation, _attr));
             ret.Parse(this);
             return ret;
         }
@@ -155,43 +148,31 @@ internal sealed class COMTypeLibParser : IDisposable
             return ret;
         }
 
-        public COMFuncDesc GetFuncDesc(int index)
+        public COMTypeFunctionDescriptor GetFuncDesc(int index)
         {
-            _type_info.GetFuncDesc(index, out IntPtr ptr);
-            return new COMFuncDesc(_type_info, ptr);
+            return _type_info.GetFuncDesc(index);
         }
 
-        public COMVarDesc GetVarDesc(int index)
+        public COMTypeVariableDescriptor GetVarDesc(int index)
         {
-            _type_info.GetVarDesc(index, out IntPtr ptr);
-            return new COMVarDesc(_type_info, ptr);
+            return _type_info.GetVarDesc(index);
         }
 
-        public TypeInfo(COMTypeLibParser type_lib, ITypeInfo type_info)
+        public TypeInfo(COMTypeLibParser type_lib, COMTypeInfoInstance type_info)
         {
             _type_lib = type_lib;
             _type_info = type_info;
-            type_info.GetTypeAttr(out IntPtr ptr);
-            try
-            {
-                _attr = ptr.GetStructure<TYPEATTR>();
-            }
-            finally
-            {
-                type_info.ReleaseTypeAttr(ptr);
-            }
+            _attr = type_info.TypeAttr;
         }
 
         public TypeInfo GetRefTypeInfoOfImplType(int index)
         {
-            _type_info.GetRefTypeOfImplType(index, out int href);
-            return GetRefTypeInfo(href);
+            return GetRefTypeInfo(_type_info.GetRefTypeOfImplType(index));
         }
 
         public TypeInfo GetRefTypeInfo(int href)
         {
-            _type_info.GetRefTypeInfo(href, out ITypeInfo ref_type_info);
-            return new(_type_lib, ref_type_info);
+            return new(_type_lib, _type_info.GetRefTypeInfo(href));
         }
 
         public COMTypeLibInterface ParseRefInterface(int index)
@@ -205,13 +186,12 @@ internal sealed class COMTypeLibParser : IDisposable
             using var type_info = GetRefTypeInfoOfImplType(index);
             COMTypeLibInterfaceBase intf = type_info._attr.typekind == TYPEKIND.TKIND_DISPATCH
                 ? type_info.ParseDispatch() : type_info.ParseInterface();
-            _type_info.GetImplTypeFlags(index, out IMPLTYPEFLAGS flags);
-            return new(flags, intf);
+            return new(_type_info.GetImplTypeFlags(index), intf);
         }
 
         public COMTypeDocumentation GetDocumentation(int index = -1)
         {
-            return new COMTypeDocumentation(_type_info, index);
+            return _type_info.GetDocumentation(index);
         }
 
         public Tuple<string, string, int> GetDllEntry(int memid, INVOKEKIND kind)
@@ -239,35 +219,31 @@ internal sealed class COMTypeLibParser : IDisposable
 
         public COMTypeLibReference GetTypeLibReference()
         {
-            ITypeLib type_lib = null;
-            try
-            {
-                _type_info.GetContainingTypeLib(out type_lib, out int index);
-                return _type_lib.GetTypeLibReference(type_lib);
-            }
-            catch
-            {
-                return null;
-            }
-            finally
-            {
-                type_lib.ReleaseComObject();
-            }
+            using var type_lib = _type_info.GetContainingTypeLib();
+            return _type_lib.GetTypeLibReference(type_lib);
         }
 
         public bool IsDispatch => _attr.typekind == TYPEKIND.TKIND_DISPATCH;
 
-        public ITypeInfo Instance => _type_info;
+        public ITypeInfo Instance => _type_info.Instance;
+
+        public string[] GetNames(int memid, int max_names)
+        {
+            return _type_info.GetNames(memid, max_names).ToArray();
+        }
 
         void IDisposable.Dispose()
         {
-            _type_info.ReleaseComObject();
+            _type_info.Dispose();
         }
     }
 
     void IDisposable.Dispose()
     {
-        _type_lib.ReleaseComObject();
+        if (_owns_type_lib)
+        {
+            _type_lib?.Dispose();
+        }
     }
     #endregion
 }

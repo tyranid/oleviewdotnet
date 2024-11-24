@@ -87,7 +87,7 @@ public sealed class COMTypeLibVariable
     #region Internal Members
     internal COMTypeLibVariable(COMTypeLibParser.TypeInfo type_info, int index)
     {
-        using COMVarDesc desc = type_info.GetVarDesc(index);
+        COMTypeVariableDescriptor desc = type_info.GetVarDesc(index);
         _desc = desc.Descriptor;
         _doc = type_info.GetDocumentation(_desc.memid);
         if (_desc.varkind == VARKIND.VAR_CONST)

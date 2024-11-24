@@ -54,6 +54,15 @@ internal static class COMTypeLibUtils
         return attrs.Count > 0 ? $"[{string.Join(", ", attrs)}] " : string.Empty;
     }
 
+    public static string GetName(this IReadOnlyList<string> names, int index)
+    {
+        if (index < names.Count)
+        {
+            return names[index];
+        }
+        return $"p{index}";
+    }
+
     public static object ReadDefaultValue(IntPtr base_ptr)
     {
         if (base_ptr == IntPtr.Zero)

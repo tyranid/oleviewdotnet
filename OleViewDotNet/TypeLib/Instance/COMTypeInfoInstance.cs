@@ -286,7 +286,7 @@ public sealed class COMTypeInfoInstance : IDisposable
         }
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         foreach (var desc in m_var_desc.Values)
         {
@@ -299,7 +299,6 @@ public sealed class COMTypeInfoInstance : IDisposable
         }
         m_func_desc.Clear();
         m_type_info.ReleaseComObject();
-        m_type_info2?.ReleaseComObject();
     }
 }
 

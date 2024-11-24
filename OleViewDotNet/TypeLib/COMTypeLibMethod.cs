@@ -43,12 +43,12 @@ public class COMTypeLibMethod
     #region Internal Members
     internal COMTypeLibMethod(COMTypeLibParser.TypeInfo type_info, int index)
     {
-        using COMFuncDesc desc = type_info.GetFuncDesc(index);
+        COMTypeFunctionDescriptor desc = type_info.GetFuncDesc(index);
         _desc = desc.Descriptor;
-        _doc = type_info.GetDocumentation(desc.Descriptor.memid);
-        string[] names = desc.GetNames();
+        _doc = type_info.GetDocumentation(_desc.memid);
+        string[] names = type_info.GetNames(_desc.memid, _desc.cParams + 1);
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
-            .Select((d, i) => new COMTypeLibParameter(names[i + 1], d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
+            .Select((d, i) => new COMTypeLibParameter(names.GetName(i + 1), d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
         _flags = (FUNCFLAGS)_desc.wFuncFlags;
     }

@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -178,15 +179,20 @@ public sealed class COMTypeLibInstance : IDisposable
         NativeMethods.RegisterTypeLib(m_type_lib, m_path, help_path);
     }
 
+    public COMTypeLib Parse()
+    {
+        using COMTypeLibParser parser = new(this, false);
+        return parser.Parse();
+    }
+
     public override string ToString()
     {
         return Documentation.Name;
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         m_type_lib.ReleaseComObject();
-        m_type_lib2?.ReleaseComObject();
     }
 
     public static void RegisterTypeLib(string path, string help_path = null)
