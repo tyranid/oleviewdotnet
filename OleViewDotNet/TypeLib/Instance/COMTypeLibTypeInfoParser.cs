@@ -161,6 +161,30 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
         return _type_info.GetNames(memid, max_names);
     }
 
+    public IReadOnlyList<COMTypeCustomDataItem> GetAllFuncCustData(int index)
+    {
+        try
+        {
+            return _type_info.GetAllFuncCustData(index);
+        }
+        catch
+        {
+            return Array.Empty<COMTypeCustomDataItem>();
+        }
+    }
+
+    public IReadOnlyList<COMTypeCustomDataItem> GetAllVarCustData(int index)
+    {
+        try
+        {
+            return _type_info.GetAllVarCustData(index);
+        }
+        catch
+        {
+            return Array.Empty<COMTypeCustomDataItem>();
+        }
+    }
+
     void IDisposable.Dispose()
     {
         _type_info.Dispose();

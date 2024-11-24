@@ -81,6 +81,7 @@ public sealed class COMTypeLibVariable
     public string HelpFile => _doc.HelpFile ?? string.Empty;
     public object ConstValue { get; }
     public COMTypeLibTypeDesc Type { get; }
+    public IReadOnlyList<COMTypeCustomDataItem> CustomData { get; }
     #endregion
 
     #region Internal Members
@@ -94,6 +95,7 @@ public sealed class COMTypeLibVariable
             ConstValue = COMTypeLibUtils.GetVariant(_desc.desc.lpvarValue);
         }
         Type = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescVar.tdesc);
+        CustomData = type_info.GetAllVarCustData(index);
         _flags = (VARFLAGS)_desc.wVarFlags;
     }
 

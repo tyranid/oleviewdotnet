@@ -37,6 +37,7 @@ public class COMTypeLibMethod
     public IReadOnlyList<COMTypeLibParameter> Parameters { get; }
     public COMTypeLibTypeDesc ReturnValue { get; }
     public int VTableOffset => _desc.oVft;
+    public IReadOnlyList<COMTypeCustomDataItem> CustomData { get; }
     #endregion
 
     #region Internal Members
@@ -49,6 +50,7 @@ public class COMTypeLibMethod
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
             .Select((d, i) => new COMTypeLibParameter(names.GetName(i + 1), d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
+        CustomData = type_info.GetAllFuncCustData(index);
         _flags = (FUNCFLAGS)_desc.wFuncFlags;
     }
 
