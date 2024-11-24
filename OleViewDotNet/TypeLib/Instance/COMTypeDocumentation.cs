@@ -50,4 +50,9 @@ public readonly struct COMTypeDocumentation
             attrs.Add(COMTypeLibUtils.FormatAttr("helpfile", HelpFile));
         return attrs;
     }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }

@@ -30,4 +30,3 @@ public sealed class COMTypeCustomDataItem
         Value = item.varValue.ToObject();
     }
 }
-

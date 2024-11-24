@@ -178,6 +178,11 @@ public sealed class COMTypeLibInstance : IDisposable
         NativeMethods.RegisterTypeLib(m_type_lib, m_path, help_path);
     }
 
+    public override string ToString()
+    {
+        return Documentation.Name;
+    }
+
     void IDisposable.Dispose()
     {
         m_type_lib.ReleaseComObject();
@@ -186,18 +191,14 @@ public sealed class COMTypeLibInstance : IDisposable
 
     public static void RegisterTypeLib(string path, string help_path = null)
     {
-        using (var type_lib = FromFile(path))
-        {
-            type_lib.RegisterTypeLib(help_path);
-        }
+        using var type_lib = FromFile(path);
+        type_lib.RegisterTypeLib(help_path);
     }
 
     public static void RegisterTypeLibForUser(string path, string help_path = null)
     {
-        using (var type_lib = FromFile(path))
-        {
-            type_lib.RegisterTypeLibForUser(help_path);
-        }
+        using var type_lib = FromFile(path);
+        type_lib.RegisterTypeLibForUser(help_path);
     }
 
     public static void UnRegisterTypeLib(Guid lib_id,
