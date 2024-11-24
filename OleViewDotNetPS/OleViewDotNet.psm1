@@ -2629,6 +2629,7 @@ function Import-ComTypeLib {
                     }
                 }
                 "FromObject" {
+                    $Object = Unwrap-ComObject $Object
                     if ($AsObject) {
                         [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromObject($Object)
                     } else {
