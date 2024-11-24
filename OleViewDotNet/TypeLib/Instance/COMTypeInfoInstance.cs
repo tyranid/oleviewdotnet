@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
+using OleViewDotNet.TypeLib.Parser;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -35,6 +36,22 @@ public sealed class COMTypeInfoInstance : IDisposable
     private ITypeInfo2 GetTypeInfo2()
     {
         return m_type_info2 ?? throw new NotSupportedException("Method is not supported.");
+    }
+
+    private static IReadOnlyList<COMTypeCustomDataItem> GetAllCustData(Action<IntPtr> get_all_cust_data)
+    {
+        using var buffer = new SafeStructureInOutBuffer<CUSTDATA>();
+
+        get_all_cust_data(buffer.DangerousGetHandle());
+        try
+        {
+            var custdata = buffer.Result;
+            return custdata.prgCustData.ReadArray<CUSTDATAITEM>(custdata.cCustData).Select(i => new COMTypeCustomDataItem(i)).ToList().AsReadOnly();
+        }
+        finally
+        {
+            NativeMethods.ClearCustData(buffer.DangerousGetHandle());
+        }
     }
 
     internal COMTypeInfoInstance(ITypeInfo type_info)
@@ -270,20 +287,10 @@ public sealed class COMTypeInfoInstance : IDisposable
         return Marshal.GetTypeForITypeInfo(handle.DangerousGetHandle());
     }
 
-    private static IReadOnlyList<COMTypeCustomDataItem> GetAllCustData(Action<IntPtr> get_all_cust_data)
+    public COMTypeLibTypeInfo Parse()
     {
-        using var buffer = new SafeStructureInOutBuffer<CUSTDATA>();
-
-        get_all_cust_data(buffer.DangerousGetHandle());
-        try
-        {
-            var custdata = buffer.Result;
-            return custdata.prgCustData.ReadArray<CUSTDATAITEM>(custdata.cCustData).Select(i => new COMTypeCustomDataItem(i)).ToList().AsReadOnly();
-        }
-        finally
-        {
-            NativeMethods.ClearCustData(buffer.DangerousGetHandle());
-        }
+        using COMTypeLibParser parser = new(GetContainingTypeLib(), false);
+        return new COMTypeLibParser.TypeInfo(parser, this).Parse();
     }
 
     public void Dispose()
