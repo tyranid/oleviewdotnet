@@ -16,6 +16,7 @@
 
 using NtApiDotNet;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -156,9 +157,9 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
 
     public ITypeInfo Instance => _type_info.Instance;
 
-    public string[] GetNames(int memid, int max_names)
+    public IReadOnlyList<string> GetNames(int memid, int max_names)
     {
-        return _type_info.GetNames(memid, max_names).ToArray();
+        return _type_info.GetNames(memid, max_names);
     }
 
     void IDisposable.Dispose()

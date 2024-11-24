@@ -45,7 +45,7 @@ public class COMTypeLibMethod
         COMTypeFunctionDescriptor desc = type_info.GetFuncDesc(index);
         _desc = desc.Descriptor;
         _doc = type_info.GetDocumentation(_desc.memid);
-        string[] names = type_info.GetNames(_desc.memid, _desc.cParams + 1);
+        var names = type_info.GetNames(_desc.memid, _desc.cParams + 1);
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
             .Select((d, i) => new COMTypeLibParameter(names.GetName(i + 1), d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
