@@ -2601,6 +2601,9 @@ OleViewDotNet.TypeLib.Instance.COMTypeLibInstance
 .EXAMPLE
 Import-ComTypeLib -Path lib.tlb
 Import a type library.
+.EXAMPLE
+Import-ComTypeLib -Path lib.tlb -Parse
+Import a type library and parse it into an easier format.
 #>
 function Import-ComTypeLib {
     [CmdletBinding()]
@@ -2615,34 +2618,33 @@ function Import-ComTypeLib {
         [OleViewDotNet.Interop.COMVersion]$Version,
         [parameter(ParameterSetName = "FromRegistered")]
         [int]$LocaleId = 0,
-        [switch]$AsObject
+        [switch]$Parse
     )
 
     PROCESS {
         try {
-            switch($PSCmdlet.ParameterSetName) {
+            $type_lib = switch($PSCmdlet.ParameterSetName) {
                 "FromPath" {
-                    if ($AsObject) {
-                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromFile($Path)
-                    } else {
-                        [OleViewDotNet.TypeLib.COMTypeLib]::FromFile($Path)
-                    }
+                    [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromFile($Path)
                 }
                 "FromObject" {
                     $Object = Unwrap-ComObject $Object
-                    if ($AsObject) {
-                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromObject($Object)
-                    } else {
-                        [OleViewDotNet.TypeLib.COMTypeLib]::FromObject($Object)
-                    }
+                    [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromObject($Object)
                 }
                 "FromRegistered" {
-                    if ($AsObject) {
-                        [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromRegistered($TypeLibId, $Version, $LocaleId)
-                    } else {
-                        [OleViewDotNet.TypeLib.COMTypeLib]::FromRegistered($TypeLibId, $Version, $LocaleId)
-                    }
+                    [OleViewDotNet.TypeLib.Instance.COMTypeLibInstance]::FromRegistered($TypeLibId, $Version, $LocaleId)
                 }
+            }
+
+            if ($Parse) {
+                try {
+                    $type_lib.Parse()
+                } 
+                finally {
+                    $type_lib.Dispose()
+                }
+            } else {
+                $type_lib
             }
         } catch {
             Write-Error $_
