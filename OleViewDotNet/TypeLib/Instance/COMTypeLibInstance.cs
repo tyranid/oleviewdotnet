@@ -188,7 +188,13 @@ public sealed class COMTypeLibInstance : IDisposable
             using var type_info = new COMTypeLibTypeInfoParser(context, GetTypeInfo(i));
             types.Add(type_info.Parse());
         }
-        return new COMTypeLib(m_path, Documentation, LibAttr, types, context.RefTypeLibs.Values);
+
+        List<COMTypeCustomDataItem> custom_data = new();
+        if (m_type_lib2 is not null)
+        {
+            custom_data.AddRange(GetAllCustData());
+        }
+        return new COMTypeLib(m_path, Documentation, LibAttr, types, context.RefTypeLibs.Values, custom_data);
     }
 
     public override string ToString()

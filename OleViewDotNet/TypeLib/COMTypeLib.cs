@@ -66,7 +66,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
     #endregion
 
     #region Internal Members
-    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types, IEnumerable<COMTypeLibReference> ref_typelibs)
+    internal COMTypeLib(string path, COMTypeDocumentation doc, TYPELIBATTR attr, List<COMTypeLibTypeInfo> types, IEnumerable<COMTypeLibReference> ref_typelibs, IEnumerable<COMTypeCustomDataItem> custom_data)
         : base(doc, attr)
     {
         Path = path ?? string.Empty;
@@ -93,6 +93,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
         Classes = types.OfType<COMTypeLibCoClass>().ToList().AsReadOnly();
         ComplexTypes = types.OfType<COMTypeLibComplexType>().ToList().AsReadOnly();
         ReferencedTypeLibs = ref_typelibs.Where(t => !IsSameTypeLib(t)).ToList().AsReadOnly();
+        CustomData = custom_data.ToList().AsReadOnly();
     }
 
     void ICOMSourceCodeFormattable.Format(COMSourceCodeBuilder builder)
@@ -143,6 +144,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
     public IReadOnlyList<COMTypeLibComplexType> ComplexTypes { get; }
     public IReadOnlyDictionary<Guid, COMTypeLibInterface> InterfacesByIid => Interfaces.ToDictionary(i => i.Uuid);
     public IReadOnlyList<COMTypeLibReference> ReferencedTypeLibs { get; }
+    public IReadOnlyList<COMTypeCustomDataItem> CustomData { get; }
     Guid ICOMGuid.ComGuid => TypeLibId;
     bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion
