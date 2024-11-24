@@ -16,7 +16,6 @@
 
 using OleViewDotNet.Utilities;
 using System;
-using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;

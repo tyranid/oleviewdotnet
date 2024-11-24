@@ -16,7 +16,6 @@
 
 using OleViewDotNet.Database;
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -34,7 +33,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
     private readonly TYPEATTR _attr;
     private bool _parsed;
 
-    private protected virtual void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    private protected virtual void OnParse(COMTypeLibTypeInfoParser type_info, TYPEATTR attr)
     {
     }
 
@@ -82,7 +81,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
         _attr = attr;
     }
 
-    internal void Parse(COMTypeLibParser.TypeInfo type_info)
+    internal void Parse(COMTypeLibTypeInfoParser type_info)
     {
         if (_parsed)
         {

@@ -16,7 +16,6 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
-using OleViewDotNet.TypeLib.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -181,8 +180,15 @@ public sealed class COMTypeLibInstance : IDisposable
 
     public COMTypeLib Parse()
     {
-        using COMTypeLibParser parser = new(this, false);
-        return parser.Parse();
+        COMTypeLibParserContext context = new();
+        List<COMTypeLibTypeInfo> types = new();
+        int count = m_type_lib.GetTypeInfoCount();
+        for (int i = 0; i < count; ++i)
+        {
+            using var type_info = new COMTypeLibTypeInfoParser(context, GetTypeInfo(i));
+            types.Add(type_info.Parse());
+        }
+        return new COMTypeLib(m_path, Documentation, LibAttr, types, context.RefTypeLibs.Values);
     }
 
     public override string ToString()

@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -30,7 +29,7 @@ public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
     {
     }
 
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    private protected override void OnParse(COMTypeLibTypeInfoParser type_info, TYPEATTR attr)
     {
         AliasType = COMTypeLibTypeDesc.Parse(type_info, attr.tdescAlias);
     }

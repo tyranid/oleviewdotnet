@@ -16,7 +16,6 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
-using OleViewDotNet.TypeLib.Parser;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -289,8 +288,7 @@ public sealed class COMTypeInfoInstance : IDisposable
 
     public COMTypeLibTypeInfo Parse()
     {
-        using COMTypeLibParser parser = new(GetContainingTypeLib(), false);
-        return new COMTypeLibParser.TypeInfo(parser, this).Parse();
+        return new COMTypeLibTypeInfoParser(new(), this).Parse();
     }
 
     public void Dispose()

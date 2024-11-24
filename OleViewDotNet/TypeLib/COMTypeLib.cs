@@ -18,7 +18,6 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy;
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
@@ -110,21 +109,21 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
             throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
         }
 
-        using COMTypeLibParser parser = new(path);
-        return parser.Parse();
+        using COMTypeLibInstance type_lib = COMTypeLibInstance.FromFile(path);
+        return type_lib.Parse();
     }
 
     public static COMTypeLib FromObject(object obj)
     {
-        using COMTypeLibParser parser = new(obj);
-        return parser.Parse();
+        using COMTypeLibInstance type_lib = COMTypeLibInstance.FromObject(obj);
+        return type_lib.Parse();
     }
 
     public static COMTypeLib FromRegistered(Guid type_lib_id,
         COMVersion version, int lcid)
     {
-        using COMTypeLibParser parser = new(type_lib_id, version, lcid);
-        return parser.Parse();
+        using COMTypeLibInstance type_lib = COMTypeLibInstance.FromRegistered(type_lib_id, version, lcid);
+        return type_lib.Parse();
     }
 
     public static explicit operator COMTypeLib(COMTypeLibVersionEntry type_lib) => type_lib.Parse();

@@ -20,7 +20,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Proxy.Editor;
 using OleViewDotNet.TypeLib;
-using OleViewDotNet.TypeLib.Parser;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Utilities.Format;
@@ -39,9 +39,9 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
     private bool m_names_from_type;
     private bool m_modified;
 
-    private static COMProxyInterface GetFromTypeLibrary(COMTypeLibParser type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
+    private static COMProxyInterface GetFromTypeLibrary(COMTypeLibInstance type_lib, Guid iid, COMCLSIDEntry proxy_class, bool cache)
     {
-        using var info = type_lib.GetTypeInfoFromGuid(iid);
+        using var info = type_lib.GetTypeInfoOfGuid(iid);
 
         var parsed_intf = info.Parse() as COMTypeLibInterfaceBase;
 
@@ -82,7 +82,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
 
     private static COMProxyInterface GetFromTypeLibrary(COMInterfaceEntry intf)
     {
-        using COMTypeLibParser type_lib = new(intf.TypeLibVersionEntry.NativePath);
+        using COMTypeLibInstance type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
         return GetFromTypeLibrary(type_lib, intf.Iid, intf.ProxyClassEntry, true);
     }
 
@@ -315,7 +315,7 @@ public sealed class COMProxyInterface : COMProxyTypeInfo, IProxyFormatter, ICOMS
             throw new ArgumentNullException(nameof(registry));
         }
 
-        using COMTypeLibParser type_lib = new(path);
+        using COMTypeLibInstance type_lib = COMTypeLibInstance.FromFile(path);
         COMCLSIDEntry proxy_class = new(registry, COMKnownGuids.CLSID_PSAutomation, COMServerType.InProcServer32);
         return GetFromTypeLibrary(type_lib, iid, proxy_class, false);
     }

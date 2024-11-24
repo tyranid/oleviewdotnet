@@ -15,7 +15,6 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 using OleViewDotNet.Utilities.Format;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
@@ -29,7 +28,7 @@ public sealed class COMTypeLibCoClass : COMTypeLibTypeInfo
     {
     }
 
-    private protected override void OnParse(COMTypeLibParser.TypeInfo type_info, TYPEATTR attr)
+    private protected override void OnParse(COMTypeLibTypeInfoParser type_info, TYPEATTR attr)
     {
         List<COMTypeLibCoClassInterface> impl_intfs = new();
         for (int i = 0; i < attr.cImplTypes; ++i)

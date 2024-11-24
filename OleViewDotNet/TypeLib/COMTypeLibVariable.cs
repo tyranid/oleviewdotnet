@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 
 namespace OleViewDotNet.TypeLib;
 
@@ -85,7 +84,7 @@ public sealed class COMTypeLibVariable
     #endregion
 
     #region Internal Members
-    internal COMTypeLibVariable(COMTypeLibParser.TypeInfo type_info, int index)
+    internal COMTypeLibVariable(COMTypeLibTypeInfoParser type_info, int index)
     {
         COMTypeVariableDescriptor desc = type_info.GetVarDesc(index);
         _desc = desc.Descriptor;

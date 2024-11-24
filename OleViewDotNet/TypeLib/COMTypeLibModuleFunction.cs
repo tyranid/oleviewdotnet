@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
-using OleViewDotNet.TypeLib.Parser;
+using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities;
 using System.Collections.Generic;
 
@@ -45,7 +45,7 @@ public sealed class COMTypeLibModuleFunction : COMTypeLibMethod
     #endregion
 
     #region Internal Members
-    internal COMTypeLibModuleFunction(COMTypeLibParser.TypeInfo type_info, int index)
+    internal COMTypeLibModuleFunction(COMTypeLibTypeInfoParser type_info, int index)
         : base(type_info, index)
     {
         var dll_entry = type_info.GetDllEntry(_desc.memid, _desc.invkind);

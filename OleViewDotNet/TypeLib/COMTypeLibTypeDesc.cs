@@ -16,7 +16,7 @@
 
 using NtApiDotNet;
 using OleViewDotNet.Interop;
-using OleViewDotNet.TypeLib.Parser;
+using OleViewDotNet.TypeLib.Instance;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -25,7 +25,7 @@ public class COMTypeLibTypeDesc
 {
     public VariantType Type { get; }
 
-    internal static COMTypeLibTypeDesc Parse(COMTypeLibParser.TypeInfo type_info, TYPEDESC desc)
+    internal static COMTypeLibTypeDesc Parse(COMTypeLibTypeInfoParser type_info, TYPEDESC desc)
     {
         VariantType type = (VariantType)desc.vt;
         if (type == VariantType.VT_PTR)

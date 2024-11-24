@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using OleViewDotNet.TypeLib.Instance;
-using OleViewDotNet.TypeLib.Parser;
 
 namespace OleViewDotNet.TypeLib;
 
@@ -41,7 +40,7 @@ public class COMTypeLibMethod
     #endregion
 
     #region Internal Members
-    internal COMTypeLibMethod(COMTypeLibParser.TypeInfo type_info, int index)
+    internal COMTypeLibMethod(COMTypeLibTypeInfoParser type_info, int index)
     {
         COMTypeFunctionDescriptor desc = type_info.GetFuncDesc(index);
         _desc = desc.Descriptor;
