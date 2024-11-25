@@ -330,4 +330,11 @@ internal static class NativeMethods
         ASM_CACHE_FLAGS dwFlags,
         IntPtr pvReserved
     );
+
+    [DllImport("oleaut32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int LHashValOfNameSys(
+        SYSKIND syskind,
+        int lcid,
+        string szName
+    );
 }

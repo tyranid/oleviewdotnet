@@ -14,40 +14,42 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using System;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib.Instance;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 
-public sealed class COMTypeCompBindResult
+public class COMTypeCompBindResult : IDisposable
 {
     public COMTypeInfoInstance TypeInfo { get; }
-    public COMTypeCompInstance TypeComp { get; }
-    public FUNCDESC? FuncDesc { get; }
-    public VARDESC? VarDesc { get; }
+    public DESCKIND DescKind { get; }
 
-    internal COMTypeCompBindResult(ITypeInfo type_info, ITypeComp type_comp)
+    protected COMTypeCompBindResult(ITypeInfo type_info, DESCKIND desc_kind)
     {
-        TypeInfo = new COMTypeInfoInstance(type_info);
-        TypeComp = new COMTypeCompInstance(type_comp);
+        TypeInfo = type_info is not null ? new COMTypeInfoInstance(type_info) : null;
+        DescKind = desc_kind;
     }
 
-    internal COMTypeCompBindResult(ITypeInfo type_info, DESCKIND desc_kind, BINDPTR bind_ptr)
+    internal static COMTypeCompBindResult GetBindResult(ITypeInfo type_info, DESCKIND desc_kind, BINDPTR bind_ptr)
     {
-        TypeInfo = new(type_info);
-        switch (desc_kind)
+        return desc_kind switch
         {
-            case DESCKIND.DESCKIND_TYPECOMP:
-                TypeComp = new COMTypeCompInstance((ITypeComp)Marshal.GetObjectForIUnknown(bind_ptr.lptcomp));
-                break;
-            case DESCKIND.DESCKIND_VARDESC:
-                VarDesc = bind_ptr.lpvardesc.GetStructure<VARDESC>();
-                break;
-            case DESCKIND.DESCKIND_FUNCDESC:
-                FuncDesc = bind_ptr.lpfuncdesc.GetStructure<FUNCDESC>();
-                break;
-        }
+            DESCKIND.DESCKIND_TYPECOMP => new COMTypeCompBindResultType(type_info, (ITypeComp)Marshal.GetObjectForIUnknown(bind_ptr.lptcomp)),
+            DESCKIND.DESCKIND_VARDESC => new COMTypeCompBindResultVar(type_info, bind_ptr.lpvardesc),
+            DESCKIND.DESCKIND_FUNCDESC => new COMTypeCompBindResultFunc(type_info, bind_ptr.lpfuncdesc),
+            _ => new COMTypeCompBindResult(type_info, desc_kind),
+        };
+    }
+
+    protected virtual void OnDispose()
+    {
+        TypeInfo.Dispose();
+    }
+
+    public void Dispose()
+    {
+        OnDispose();
     }
 }
-

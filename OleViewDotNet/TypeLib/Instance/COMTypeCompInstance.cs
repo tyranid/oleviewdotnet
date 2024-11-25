@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.Interop;
 using System;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -23,24 +24,30 @@ public sealed class COMTypeCompInstance : IDisposable
 {
     private readonly ITypeComp m_type_comp;
 
+    private static int CalcHash(string name)
+    {
+        return NativeMethods.LHashValOfNameSys(Environment.Is64BitProcess ? SYSKIND.SYS_WIN64 : SYSKIND.SYS_WIN32,
+                0, name);
+    }
+
     internal COMTypeCompInstance(ITypeComp type_comp)
     {
         m_type_comp = type_comp;
     }
 
-    public COMTypeCompBindResult Bind(string szName, int lHashVal, short wFlags)
+    public COMTypeCompBindResult Bind(string name, int? hash_val = null, INVOKEKIND flags = 0)
     {
-        m_type_comp.Bind(szName, lHashVal, wFlags, out ITypeInfo ppTInfo, out DESCKIND pDescKind, out BINDPTR pBindPtr);
-        return new COMTypeCompBindResult(ppTInfo, pDescKind, pBindPtr);
+        m_type_comp.Bind(name, hash_val ?? CalcHash(name), (short)flags, out ITypeInfo ppTInfo, out DESCKIND pDescKind, out BINDPTR pBindPtr);
+        return COMTypeCompBindResult.GetBindResult(ppTInfo, pDescKind, pBindPtr);
     }
 
-    public COMTypeCompBindResult BindType(string szName, int lHashVal)
+    public COMTypeCompBindResult BindType(string name, int? hash_val = null)
     {
-        m_type_comp.BindType(szName, lHashVal, out ITypeInfo ppTInfo, out ITypeComp ppTComp);
-        return new COMTypeCompBindResult(ppTInfo, ppTComp);
+        m_type_comp.BindType(name, hash_val ?? CalcHash(name), out ITypeInfo ppTInfo, out ITypeComp ppTComp);
+        return new COMTypeCompBindResultType(ppTInfo, ppTComp);
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         m_type_comp.ReleaseComObject();
     }
