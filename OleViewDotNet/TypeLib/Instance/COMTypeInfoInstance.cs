@@ -172,6 +172,11 @@ public sealed class COMTypeInfoInstance : IDisposable
         return ppvObj;
     }
 
+    public object CreateInstance()
+    {
+        return CreateInstance(null, COMKnownGuids.IID_IUnknown);
+    }
+
     public string GetMops(int memid)
     {
         m_type_info.GetMops(memid, out string pBstrMops);
