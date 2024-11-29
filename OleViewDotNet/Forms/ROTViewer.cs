@@ -43,9 +43,9 @@ internal partial class ROTViewer : UserControl
                 ListViewItem item = listViewROT.Items.Add(entry.DisplayName);
                 item.Tag = entry;
 
-                if (m_registry.Clsids.ContainsKey(entry.Clsid))
+                if (m_registry.Clsids.TryGetValue(entry.Clsid, out COMCLSIDEntry class_entry))
                 {
-                    item.SubItems.Add(m_registry.Clsids[entry.Clsid].Name);
+                    item.SubItems.Add(class_entry.Name);
                 }
                 else
                 {
