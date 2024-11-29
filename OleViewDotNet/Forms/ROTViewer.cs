@@ -63,7 +63,6 @@ internal partial class ROTViewer : UserControl
             rot.EnumRunning(out IEnumMoniker enumMoniker);
             while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
             {
-
                 moniker[0].GetDisplayName(bindCtx, null, out string strDisplayName);
                 Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
                 ListViewItem item = listViewROT.Items.Add(strDisplayName);
@@ -100,7 +99,7 @@ internal partial class ROTViewer : UserControl
         LoadROT(checkBoxTrustedOnly.Checked);
     }
 
-    private void menuROTBindToObject_Click(object sender, EventArgs e)
+    private void getObjectToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (listViewROT.SelectedItems.Count != 0)
         {
@@ -115,8 +114,8 @@ internal partial class ROTViewer : UserControl
             try
             {
                 IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
-                Guid unk = COMKnownGuids.IID_IUnknown;
-                info.moniker.BindToObject(bindCtx, null, ref unk, out object comObj);
+                bindCtx.GetRunningObjectTable(out IRunningObjectTable rot);
+                rot.GetObject(info.moniker, out object comObj).CheckHr();
                 ObjectInformation view = new(m_registry, null, info.strDisplayName,
                     comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);
