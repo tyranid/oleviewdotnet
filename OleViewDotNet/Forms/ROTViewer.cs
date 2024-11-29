@@ -15,12 +15,10 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using OleViewDotNet.Database;
-using OleViewDotNet.Interop;
 using OleViewDotNet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
 namespace OleViewDotNet.Forms;
@@ -28,20 +26,6 @@ namespace OleViewDotNet.Forms;
 internal partial class ROTViewer : UserControl
 {
     private readonly COMRegistry m_registry;
-
-    private struct MonikerInfo
-    {
-        public string strDisplayName;
-        public Guid clsid;
-        public IMoniker moniker;
-
-        public MonikerInfo(string name, Guid guid, IMoniker mon)
-        {
-            strDisplayName = name;
-            clsid = guid;
-            moniker = mon;
-        }
-    }
 
     public ROTViewer(COMRegistry reg)
     {
@@ -51,30 +35,21 @@ internal partial class ROTViewer : UserControl
 
     private void LoadROT(bool trusted_only)
     {
-        IBindCtx bindCtx;
-
         listViewROT.Items.Clear();
         try
         {
-            bindCtx = NativeMethods.CreateBindCtx(trusted_only ? 1U : 0U);
-            IMoniker[] moniker = new IMoniker[1];
-
-            bindCtx.GetRunningObjectTable(out IRunningObjectTable rot);
-            rot.EnumRunning(out IEnumMoniker enumMoniker);
-            while (enumMoniker.Next(1, moniker, IntPtr.Zero) == 0)
+            foreach (var entry in COMRunningObjectTable.EnumRunning(trusted_only))
             {
-                moniker[0].GetDisplayName(bindCtx, null, out string strDisplayName);
-                Guid clsid = COMUtilities.GetObjectClass(moniker[0]);
-                ListViewItem item = listViewROT.Items.Add(strDisplayName);
-                item.Tag = new MonikerInfo(strDisplayName, clsid, moniker[0]);
+                ListViewItem item = listViewROT.Items.Add(entry.DisplayName);
+                item.Tag = entry;
 
-                if (m_registry.Clsids.ContainsKey(clsid))
+                if (m_registry.Clsids.ContainsKey(entry.Clsid))
                 {
-                    item.SubItems.Add(m_registry.Clsids[clsid].Name);
+                    item.SubItems.Add(m_registry.Clsids[entry.Clsid].Name);
                 }
                 else
                 {
-                    item.SubItems.Add(clsid.FormatGuid());
+                    item.SubItems.Add(entry.Clsid.FormatGuid());
                 }
             }
         }
@@ -103,21 +78,19 @@ internal partial class ROTViewer : UserControl
     {
         if (listViewROT.SelectedItems.Count != 0)
         {
-            MonikerInfo info = (MonikerInfo)listViewROT.SelectedItems[0].Tag;
+            COMRunningObjectTableEntry info = (COMRunningObjectTableEntry)listViewROT.SelectedItems[0].Tag;
 
             Dictionary<string, string> props = new()
             {
-                { "Display Name", info.strDisplayName },
-                { "CLSID", info.clsid.FormatGuid() }
+                { "Display Name", info.DisplayName },
+                { "CLSID", info.Clsid.FormatGuid() }
             };
 
             try
             {
-                IBindCtx bindCtx = NativeMethods.CreateBindCtx(0);
-                bindCtx.GetRunningObjectTable(out IRunningObjectTable rot);
-                rot.GetObject(info.moniker, out object comObj).CheckHr();
-                ObjectInformation view = new(m_registry, null, info.strDisplayName,
-                    comObj, props, m_registry.GetInterfacesForObject(comObj).ToArray());
+                object obj = info.GetObject();
+                ObjectInformation view = new(m_registry, null, info.DisplayName,
+                    obj, props, m_registry.GetInterfacesForObject(obj).ToArray());
                 EntryPoint.GetMainForm(m_registry).HostControl(view);
             }
             catch (Exception ex)

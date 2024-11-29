@@ -337,4 +337,10 @@ internal static class NativeMethods
         int lcid,
         string szName
     );
+
+    [DllImport("ole32.dll")]
+    internal static extern int GetRunningObjectTable(
+        int reserved,
+        out IRunningObjectTable pprot
+    );
 }

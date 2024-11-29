@@ -613,5 +613,28 @@
                 </TableRowEntries>
             </TableControl>
         </View>
+        <View>
+            <Name>COMRunningObjectTableEntry</Name>
+            <ViewSelectedBy>
+                <TypeName>OleViewDotNet.Utilities.COMRunningObjectTableEntry</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>DisplayName</Label>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>DisplayName</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
     </ViewDefinitions>
 </Configuration>

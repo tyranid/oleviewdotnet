@@ -4116,3 +4116,26 @@ function Edit-ComSourceCode {
     $frm.ShowDialog() | Out-Null
     $frm.Dispose()
 }
+
+<#
+.SYNOPSIS
+Get list of registered objects in the ROT.
+.DESCRIPTION
+This cmdlet gets the list of registered objects in the ROT.
+.PARAMETER TrustedOnly
+Only show trusted entries.
+.INPUTS
+None
+.OUTPUTS
+OleViewDotNet.Utilities.COMRunningObjectTableEntry[]
+.EXAMPLE
+Get-ComRunningObjectTable
+Get the list of registered objects in the ROT.
+#>
+function Get-ComRunningObjectTable {
+    Param(
+        [switch]$TrustedOnly
+    )
+
+    [OleViewDotNet.Utilities.COMRunningObjectTable]::EnumRunning($TrustedOnly) | Write-Output
+}
