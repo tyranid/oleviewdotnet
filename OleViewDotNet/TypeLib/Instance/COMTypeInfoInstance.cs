@@ -256,7 +256,6 @@ public sealed class COMTypeInfoInstance : IDisposable
 
     public void GetDocumentation2(int memid, out string pbstrHelpString, out int pdwHelpStringContext, out string pbstrHelpStringDll)
     {
-        // The definition of GetDocumentation2 seems to be wrong.
         GetTypeInfo2().GetDocumentation2(memid, out pbstrHelpString, out pdwHelpStringContext, out pbstrHelpStringDll);
     }
 

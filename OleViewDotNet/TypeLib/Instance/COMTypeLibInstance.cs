@@ -135,7 +135,6 @@ public sealed class COMTypeLibInstance : IDisposable
 
     public void GetDocumentation2(int index, out string pbstrHelpString, out int pdwHelpStringContext, out string pbstrHelpStringDll)
     {
-        // The definition of GetDocumentation2 seems to be wrong.
         GetTypeLib2().GetDocumentation2(index, out pbstrHelpString, out pdwHelpStringContext, out pbstrHelpStringDll);
     }
 
