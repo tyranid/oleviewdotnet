@@ -17,6 +17,7 @@
 using OleViewDotNet.Interop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.Utilities;
@@ -34,5 +35,19 @@ public static class COMRunningObjectTable
             entries.Add(new(rot, moniker[0]));
         }
         return entries.AsReadOnly();
+    }
+
+    public static object GetObject(string name, bool trusted_only)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException($"'{nameof(name)}' cannot be null or empty.", nameof(name));
+        }
+
+        var entry = EnumRunning(trusted_only).Where(e => e.DisplayName.
+            Equals(name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault() 
+            ?? throw new ArgumentException("Couldn't find running object name.");
+
+        return entry.GetObject();
     }
 }

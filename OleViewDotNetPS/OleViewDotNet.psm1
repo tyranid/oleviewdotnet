@@ -4065,7 +4065,7 @@ function Import-ComProxyName {
 .SYNOPSIS
 Get a COM runtime type from an interface or class.
 .DESCRIPTION
-This cmdlet gets a COM runtime type from an interface or clss.
+This cmdlet gets a COM runtime type from an interface or class.
 .PARAMETER InputObject
 The object to query.
 .INPUTS
@@ -4077,7 +4077,7 @@ Get-ComRuntimeType $intf
 Get the runtime type from an interface.
 #>
 function Get-ComRuntimeType {
-    [CmdletBinding(DefaultParameterSetName="FromObject")]
+    [CmdletBinding()]
     Param(
         [parameter(Mandatory, Position=0, ValueFromPipeline)]
         [OleViewDotNet.DataBase.ICOMRuntimeType]$InputObject
@@ -4138,4 +4138,53 @@ function Get-ComRunningObjectTable {
     )
 
     [OleViewDotNet.Utilities.COMRunningObjectTable]::EnumRunning($TrustedOnly) | Write-Output
+}
+
+<#
+.SYNOPSIS
+Get a COM running object.
+.DESCRIPTION
+This cmdlet gets a COM running object from a display name or entry.
+.PARAMETER Entry
+The entry to get the object from.
+.PARAMETER Name
+The name of the object.
+.PARAMETER TrustedOnly
+Only get from trusted list.
+.PARAMETER Iid
+Specify the wrapping IID.
+.PARAMETER NoWrapper
+Specify to return an unwrapped object.
+.INPUTS
+None
+.OUTPUTS
+object
+.EXAMPLE
+Get-ComRunnigObject -Name "clsid:ABC"
+Get the running object for a name.
+#>
+function Get-ComRunningObject {
+    [CmdletBinding(DefaultParameterSetName="FromName")]
+    Param(
+        [parameter(Mandatory, Position=0, ParameterSetName="FromName")]
+        [string]$Name,
+        [parameter(ParameterSetName="FromName")]
+        [switch]$TrustedOnly,
+        [parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName="FromEntry")]
+        [OleViewDotNet.Utilities.COMRunningObjectTableEntry]$Entry,
+        [Guid]$Iid = "00000000-0000-0000-C000-000000000046",
+        [switch]$NoWrapper
+    )
+
+    PROCESS {
+        $obj = switch($PSCmdlet.ParameterSetName) {
+            "FromName" {
+                [OleViewDotNet.Utilities.COMRunningObjectTable]::GetObject($Name, $TrustedOnly)
+            }
+            "FromEntry" {
+                $Entry.GetObject()
+            }
+        }
+        Wrap-ComObject -Object $obj -Iid $Iid -NoWrapper:$NoWrapper
+    }
 }
