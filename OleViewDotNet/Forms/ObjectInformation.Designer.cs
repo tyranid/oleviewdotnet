@@ -45,6 +45,7 @@ partial class ObjectInformation
             this.viewInterfaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewServerProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewTypeLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -147,6 +148,7 @@ partial class ObjectInformation
             this.toolStripDropDownButtonOperations.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripDropDownButtonOperations.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openDispatchToolStripMenuItem,
+            this.viewTypeLibraryToolStripMenuItem,
             this.openOLEToolStripMenuItem,
             this.createToolStripMenuItem,
             this.marshalToolStripMenuItem,
@@ -224,6 +226,13 @@ partial class ObjectInformation
             this.saveStreamToolStripMenuItem.Text = "Save Stream";
             this.saveStreamToolStripMenuItem.Click += new System.EventHandler(this.btnSaveStream_Click);
             // 
+            // viewTypeLibraryToolStripMenuItem
+            // 
+            this.viewTypeLibraryToolStripMenuItem.Name = "viewTypeLibraryToolStripMenuItem";
+            this.viewTypeLibraryToolStripMenuItem.Size = new System.Drawing.Size(275, 34);
+            this.viewTypeLibraryToolStripMenuItem.Text = "View Type Library";
+            this.viewTypeLibraryToolStripMenuItem.Click += new System.EventHandler(this.viewTypeLibraryToolStripMenuItem_Click);
+            // 
             // ObjectInformation
             // 
             this.Controls.Add(tableLayoutPanel);
@@ -253,4 +262,5 @@ partial class ObjectInformation
     private System.Windows.Forms.ToolStripMenuItem viewPropertiesToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem viewInterfaceToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem viewServerProcessToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem viewTypeLibraryToolStripMenuItem;
 }

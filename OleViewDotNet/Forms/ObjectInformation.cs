@@ -19,6 +19,7 @@ using OleViewDotNet.Database;
 using OleViewDotNet.Interop;
 using OleViewDotNet.Marshaling;
 using OleViewDotNet.Rpc;
+using OleViewDotNet.TypeLib;
 using OleViewDotNet.TypeManager;
 using OleViewDotNet.Utilities;
 using OleViewDotNet.Viewers;
@@ -174,6 +175,7 @@ internal partial class ObjectInformation : UserControl
         }
 
         openDispatchToolStripMenuItem.Visible = has_dispatch;
+        viewTypeLibraryToolStripMenuItem.Visible = has_dispatch;
         openOLEToolStripMenuItem.Visible = has_olecontrol;
         saveStreamToolStripMenuItem.Visible = has_persiststream;
         createToolStripMenuItem.Visible = has_classfactory;
@@ -353,6 +355,20 @@ internal partial class ObjectInformation : UserControl
             }
 
             EntryPoint.GetMainForm(m_registry).LoadProcessByProcessId(objref.ProcessId);
+        }
+        catch (Exception ex)
+        {
+            EntryPoint.ShowError(this, ex);
+        }
+    }
+
+    private void viewTypeLibraryToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            var parsed_typelib = COMTypeLib.FromObject(m_pObject);
+            COMRegistryViewer viewer = new(m_registry, parsed_typelib, null);
+            EntryPoint.GetMainForm(m_registry).HostControl(viewer);
         }
         catch (Exception ex)
         {
