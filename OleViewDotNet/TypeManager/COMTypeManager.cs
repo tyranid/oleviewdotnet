@@ -244,9 +244,15 @@ public static class COMTypeManager
 
         if (intf.HasTypeLib)
         {
-            using var type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
-            using var type_info = type_lib.GetTypeInfoOfGuid(intf.Iid);
-            return m_iidtypes.GetOrAdd(intf.Iid, _ => type_info.ToType());
+            try
+            {
+                using var type_lib = COMTypeLibInstance.FromFile(intf.TypeLibVersionEntry.NativePath);
+                using var type_info = type_lib.GetTypeInfoOfGuid(intf.Iid);
+                return m_iidtypes.GetOrAdd(intf.Iid, _ => type_info.ToType());
+            }
+            catch
+            {
+            }
         }
 
         if (intf.HasRuntimeType && intf.TryGetRuntimeType(out Type runtime_type))
@@ -403,7 +409,9 @@ public static class COMTypeManager
         {
             return wrapper.Unwrap();
         }
-        throw new ArgumentException("Unknown wrapped object.", nameof(obj));
+
+        // If it's not a COM object or a wrapper then it's a managed object, just return as is.
+        return obj;
     }
     #endregion
 

@@ -196,13 +196,7 @@ internal partial class ObjectInformation : UserControl
                 {
                     if (!COMTypeManager.HasInterfaceType(ent.Iid) && ent.HasTypeLib)
                     {
-                        try
-                        {
-                            FormUtils.ConvertTypeLib(this, ent.TypeLibVersionEntry);
-                        }
-                        catch
-                        {
-                        }
+                        FormUtils.ConvertTypeLib(this, ent.TypeLibVersionEntry, false);
                     }
 
                     Type type = COMTypeManager.GetInterfaceType(ent);

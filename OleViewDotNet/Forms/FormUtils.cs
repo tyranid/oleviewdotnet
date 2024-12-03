@@ -80,7 +80,7 @@ internal static class FormUtils
         return ret;
     }
 
-    internal static Assembly ConvertTypeLib(IWin32Window parent, COMTypeLibVersionEntry type_lib)
+    internal static Assembly ConvertTypeLib(IWin32Window parent, COMTypeLibVersionEntry type_lib, bool show_error)
     {
         try
         {
@@ -91,12 +91,12 @@ internal static class FormUtils
             {
                 return (Assembly)dlg.Result;
             }
-            else if (dlg.Error is not null && dlg.Error is not OperationCanceledException)
+            else if (dlg.Error is not null && dlg.Error is not OperationCanceledException && show_error)
             {
                 EntryPoint.ShowError(parent, dlg.Error);
             }
         }
-        catch (Exception)
+        catch
         {
         }
         return null;

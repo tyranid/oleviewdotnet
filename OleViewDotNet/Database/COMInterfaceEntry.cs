@@ -330,17 +330,25 @@ public class COMInterfaceEntry : COMRegistryEntry, IComparable<COMInterfaceEntry
         // If the runtime interface exists, that's already populated in CheckForParsed.
         if (TypeLibVersionEntry is not null)
         {
-            var typelib = TypeLibVersionEntry.Parse();
-            if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
+            try
             {
-                m_formattable = intf;
+                var typelib = TypeLibVersionEntry.Parse();
+                if (typelib.InterfacesByIid.TryGetValue(Iid, out COMTypeLibInterface intf))
+                {
+                    m_formattable = intf;
+                }
+                else
+                {
+                    m_formattable = new SourceCodeFormattableText("ERROR: Can't find type library for IID.");
+                }
+                return;
             }
-            else
+            catch
             {
-                m_formattable = new SourceCodeFormattableText("ERROR: Can't find type library for IID.");
             }
         }
-        else if (HasProxy)
+
+        if (HasProxy)
         {
             m_formattable = COMProxyInterface.GetFromIID(this);
         }
