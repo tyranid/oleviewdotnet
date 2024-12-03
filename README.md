@@ -22,7 +22,7 @@ If you don't want to build the tools you can also get the latest published relea
 PowerShell Gallery, [here](https://www.powershellgallery.com/packages/OleViewDotNet). Or by
 running the PowerShell command:
 
-`Import-Module OleViewDotNet`
+`Install-Module OleViewDotNet`
 
 The PowerShell module also includes the UI executable, which you can run directly or by using the `Show-ComDatabase` command in PowerShell.
 
