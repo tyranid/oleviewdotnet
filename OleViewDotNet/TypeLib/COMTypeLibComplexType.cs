@@ -22,8 +22,8 @@ namespace OleViewDotNet.TypeLib;
 
 public abstract class COMTypeLibComplexType : COMTypeLibTypeInfo
 {
-    internal COMTypeLibComplexType(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibComplexType(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 

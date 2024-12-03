@@ -47,8 +47,8 @@ public sealed class COMTypeLibDispatch : COMTypeLibInterfaceBase
     #endregion
 
     #region Internal Members
-    internal COMTypeLibDispatch(COMTypeDocumentation doc, TYPEATTR attr)
-        : base(doc, attr)
+    internal COMTypeLibDispatch(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+        : base(doc, attr, custom_data)
     {
     }
 

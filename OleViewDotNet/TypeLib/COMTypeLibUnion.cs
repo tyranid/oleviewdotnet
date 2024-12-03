@@ -16,14 +16,15 @@
 
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibUnion : COMTypeLibComplexType
 {
-    internal COMTypeLibUnion(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibUnion(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 

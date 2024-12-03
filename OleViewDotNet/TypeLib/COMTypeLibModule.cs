@@ -28,8 +28,8 @@ public sealed class COMTypeLibModule : COMTypeLibTypeInfo
     public IReadOnlyList<COMTypeLibModuleFunction> Functions { get; private set; }
     public IReadOnlyList<COMTypeLibVariable> Constants { get; private set; }
 
-    internal COMTypeLibModule(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibModule(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 

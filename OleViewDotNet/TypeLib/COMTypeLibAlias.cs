@@ -16,6 +16,7 @@
 
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -24,8 +25,8 @@ public sealed class COMTypeLibAlias : COMTypeLibTypeInfo
 {
     public COMTypeLibTypeDesc AliasType { get; private set; }
 
-    internal COMTypeLibAlias(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibAlias(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 

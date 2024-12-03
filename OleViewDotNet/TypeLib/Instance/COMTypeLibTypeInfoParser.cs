@@ -30,7 +30,7 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
     internal COMTypeLibInterface ParseInterface()
     {
         var ret = _context.ParsedIntfs.GetOrAdd(_attr.guid,
-            new COMTypeLibInterface(_type_info.Documentation, _attr));
+            new COMTypeLibInterface(_type_info.Documentation, _attr, GetAllCustData()));
         ret.Parse(this);
         return ret;
     }
@@ -38,7 +38,7 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
     internal COMTypeLibDispatch ParseDispatch()
     {
         var ret = _context.ParsedDisp.GetOrAdd(_attr.guid,
-            new COMTypeLibDispatch(_type_info.Documentation, _attr));
+            new COMTypeLibDispatch(_type_info.Documentation, _attr, GetAllCustData()));
         ret.Parse(this);
         return ret;
     }
@@ -54,16 +54,17 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
     internal COMTypeLibTypeInfo Parse()
     {
         var doc = GetDocumentation();
+        var custom_data = GetAllCustData();
         return _attr.typekind switch
         {
             TYPEKIND.TKIND_INTERFACE => ParseInterface(),
             TYPEKIND.TKIND_DISPATCH => ParseDispatch(),
-            TYPEKIND.TKIND_ALIAS => ParseType(new COMTypeLibAlias(doc, _attr)),
-            TYPEKIND.TKIND_ENUM => ParseType(new COMTypeLibEnum(doc, _attr)),
-            TYPEKIND.TKIND_RECORD => ParseType(new COMTypeLibRecord(doc, _attr)),
-            TYPEKIND.TKIND_COCLASS => ParseType(new COMTypeLibCoClass(doc, _attr)),
-            TYPEKIND.TKIND_UNION => ParseType(new COMTypeLibUnion(doc, _attr)),
-            TYPEKIND.TKIND_MODULE => ParseType(new COMTypeLibModule(doc, _attr)),
+            TYPEKIND.TKIND_ALIAS => ParseType(new COMTypeLibAlias(doc, _attr, custom_data)),
+            TYPEKIND.TKIND_ENUM => ParseType(new COMTypeLibEnum(doc, _attr, custom_data)),
+            TYPEKIND.TKIND_RECORD => ParseType(new COMTypeLibRecord(doc, _attr, custom_data)),
+            TYPEKIND.TKIND_COCLASS => ParseType(new COMTypeLibCoClass(doc, _attr, custom_data)),
+            TYPEKIND.TKIND_UNION => ParseType(new COMTypeLibUnion(doc, _attr, custom_data)),
+            TYPEKIND.TKIND_MODULE => ParseType(new COMTypeLibModule(doc, _attr, custom_data)),
             _ => GetDefault(),
         };
     }
@@ -72,7 +73,7 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
     {
         var doc = GetDocumentation();
         var key = Tuple.Create(doc.Name, _attr.typekind);
-        var ret = _context.NamedTypes.GetOrAdd(key, new COMTypeLibTypeInfo(doc, _attr));
+        var ret = _context.NamedTypes.GetOrAdd(key, new COMTypeLibTypeInfo(doc, _attr, GetAllCustData()));
         ret.Parse(this);
         return ret;
     }
@@ -161,6 +162,18 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
         return _type_info.GetNames(memid, max_names);
     }
 
+    public IReadOnlyList<COMTypeCustomDataItem> GetAllCustData()
+    {
+        try
+        {
+            return _type_info.GetAllCustData();
+        }
+        catch
+        {
+            return Array.Empty<COMTypeCustomDataItem>();
+        }
+    }
+
     public IReadOnlyList<COMTypeCustomDataItem> GetAllFuncCustData(int index)
     {
         try
@@ -185,7 +198,19 @@ internal sealed class COMTypeLibTypeInfoParser : IDisposable
         }
     }
 
-    void IDisposable.Dispose()
+    public IReadOnlyList<COMTypeCustomDataItem> GetAllParamCustData(int index, int index_param)
+    {
+        try
+        {
+            return _type_info.GetAllParamCustData(index, index_param);
+        }
+        catch
+        {
+            return Array.Empty<COMTypeCustomDataItem>();
+        }
+    }
+
+        void IDisposable.Dispose()
     {
         _type_info.Dispose();
     }

@@ -19,6 +19,7 @@ using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities.Format;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -70,15 +71,18 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
         if (HasTypeFlag(TYPEFLAGS.TYPEFLAG_FPROXY))
             attrs.Add("proxy");
 
+        attrs.AddRange(CustomData.Select(d => d.FormatAttribute()));
+
         return attrs;
     }
     #endregion
 
     #region Internal Members
-    internal COMTypeLibTypeInfo(COMTypeDocumentation doc, TYPEATTR attr)
+    internal COMTypeLibTypeInfo(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
     {
         _doc = doc;
         _attr = attr;
+        CustomData = custom_data.ToList().AsReadOnly();
     }
 
     internal void Parse(COMTypeLibTypeInfoParser type_info)
@@ -112,6 +116,7 @@ public class COMTypeLibTypeInfo : ICOMGuid, ICOMSourceCodeFormattable
     public TYPEKIND Kind => _attr.typekind;
     public TYPEFLAGS Flags => _attr.wTypeFlags;
     public COMTypeLibReference TypeLib { get; internal set; }
+    public IReadOnlyList<COMTypeCustomDataItem> CustomData { get; }
     Guid ICOMGuid.ComGuid => Uuid;
     bool ICOMSourceCodeFormattable.IsFormattable => true;
     #endregion

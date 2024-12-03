@@ -15,6 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using OleViewDotNet.TypeLib.Instance;
 
@@ -69,6 +70,7 @@ public sealed class COMTypeLibVariable
             attrs.Add("replaceable");
         if (_flags.HasFlag(VARFLAGS.VARFLAG_FREADONLY))
             attrs.Add("readonly");
+        attrs.AddRange(CustomData.Select(d => d.FormatAttribute()));
         return attrs;
     }
 

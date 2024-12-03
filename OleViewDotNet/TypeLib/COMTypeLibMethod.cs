@@ -48,7 +48,8 @@ public class COMTypeLibMethod
         _doc = type_info.GetDocumentation(_desc.memid);
         var names = type_info.GetNames(_desc.memid, _desc.cParams + 1);
         Parameters = _desc.lprgelemdescParam.ReadArray<ELEMDESC>(_desc.cParams)
-            .Select((d, i) => new COMTypeLibParameter(names.GetName(i + 1), d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), i)).ToList().AsReadOnly();
+            .Select((d, i) => new COMTypeLibParameter(names.GetName(i + 1), d, COMTypeLibTypeDesc.Parse(type_info, d.tdesc), 
+            i, type_info.GetAllParamCustData(index, i))).ToList().AsReadOnly();
         ReturnValue = COMTypeLibTypeDesc.Parse(type_info, _desc.elemdescFunc.tdesc);
         CustomData = type_info.GetAllFuncCustData(index);
         _flags = (FUNCFLAGS)_desc.wFuncFlags;
@@ -107,6 +108,8 @@ public class COMTypeLibMethod
             attrs.Add("usesgetlasterror");
         if (_flags.HasFlag(FUNCFLAGS.FUNCFLAG_FREPLACEABLE))
             attrs.Add("replaceable");
+
+        attrs.AddRange(CustomData.Select(d => d.FormatAttribute()));
 
         return attrs;
     }

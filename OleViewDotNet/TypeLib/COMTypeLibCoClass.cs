@@ -23,8 +23,8 @@ namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibCoClass : COMTypeLibTypeInfo
 {
-    internal COMTypeLibCoClass(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibCoClass(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 

@@ -14,7 +14,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
+using OleViewDotNet.TypeLib.Instance;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace OleViewDotNet.TypeLib;
@@ -37,6 +39,7 @@ public class COMTypeLibParameter
     public bool IsLcid => HasFlag(PARAMFLAG.PARAMFLAG_FLCID);
     public bool HasDefault => HasFlag(PARAMFLAG.PARAMFLAG_FHASDEFAULT);
     public object DefaultValue { get; }
+    public IReadOnlyList<COMTypeCustomDataItem> CustomData { get; }
 
     internal string FormatParameter()
     {
@@ -62,11 +65,12 @@ public class COMTypeLibParameter
                 attrs.Add($"defaultvalue({DefaultValue})");
             }
         }
+        attrs.AddRange(CustomData.Select(d => d.FormatAttribute()));
 
         return $"{attrs.FormatAttrs()}{Type.FormatType()} {Name}{Type.FormatPostName()}";
     }
 
-    internal COMTypeLibParameter(string name, ELEMDESC desc, COMTypeLibTypeDesc type, int index)
+    internal COMTypeLibParameter(string name, ELEMDESC desc, COMTypeLibTypeDesc type, int index, IEnumerable<COMTypeCustomDataItem> custom_data)
     {
         Name = name ?? $"p{index}";
         _desc = desc;
@@ -75,5 +79,6 @@ public class COMTypeLibParameter
         {
             DefaultValue = COMTypeLibUtils.ReadDefaultValue(_desc.desc.paramdesc.lpVarValue);
         }
+        CustomData = custom_data.ToList().AsReadOnly();
     }
 }

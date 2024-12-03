@@ -47,8 +47,8 @@ public abstract class COMTypeLibInterfaceBase : COMTypeLibTypeInfo
     #endregion
 
     #region Internal Members
-    internal COMTypeLibInterfaceBase(COMTypeDocumentation doc, TYPEATTR attr)
-        : base(doc, attr)
+    internal COMTypeLibInterfaceBase(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+        : base(doc, attr, custom_data)
     {
     }
     #endregion

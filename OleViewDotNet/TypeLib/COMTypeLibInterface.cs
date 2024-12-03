@@ -16,6 +16,7 @@
 
 using OleViewDotNet.TypeLib.Instance;
 using OleViewDotNet.Utilities.Format;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -24,8 +25,8 @@ namespace OleViewDotNet.TypeLib;
 public sealed class COMTypeLibInterface : COMTypeLibInterfaceBase
 {
     #region Internal Members
-    internal COMTypeLibInterface(COMTypeDocumentation doc, TYPEATTR attr)
-        : base(doc, attr)
+    internal COMTypeLibInterface(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+        : base(doc, attr, custom_data)
     {
     }
 

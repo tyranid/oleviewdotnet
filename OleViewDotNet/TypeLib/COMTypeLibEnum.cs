@@ -25,8 +25,8 @@ namespace OleViewDotNet.TypeLib;
 
 public sealed class COMTypeLibEnum : COMTypeLibTypeInfo
 {
-    internal COMTypeLibEnum(COMTypeDocumentation doc, TYPEATTR attr)
-       : base(doc, attr)
+    internal COMTypeLibEnum(COMTypeDocumentation doc, TYPEATTR attr, IEnumerable<COMTypeCustomDataItem> custom_data)
+       : base(doc, attr, custom_data)
     {
     }
 
