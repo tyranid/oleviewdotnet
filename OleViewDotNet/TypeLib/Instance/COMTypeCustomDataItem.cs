@@ -37,6 +37,6 @@ public sealed class COMTypeCustomDataItem
             string s => "\"" + s.Replace(@"\", @"\\").Replace("\"", "\\\"") + "\"",
             _ => Value?.ToString() ?? string.Empty,
         };
-        return $"custom({Guid:B}, {val})";
+        return $"custom({Guid}, {val})";
     }
 }
