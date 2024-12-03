@@ -29,4 +29,14 @@ public sealed class COMTypeCustomDataItem
         Guid = item.guid;
         Value = item.varValue.ToObject();
     }
+
+    internal string FormatAttribute()
+    {
+        string val = Value?.ToString() ?? string.Empty;
+        if (val is string s)
+        {
+            val = "\"" + val.Replace(@"\", @"\\").Replace("\"", "\\\"") + "\"";
+        }
+        return $"custom({Guid:B}, {val})";
+    }
 }

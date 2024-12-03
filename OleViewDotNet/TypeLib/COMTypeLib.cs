@@ -40,6 +40,7 @@ public sealed class COMTypeLib : COMTypeLibReference, ICOMGuid, ICOMSourceCodeFo
             $"version({Version})"
         };
         attrs.AddRange(_doc.GetAttrs());
+        attrs.AddRange(CustomData.Select(d => d.FormatAttribute()));
         builder.AppendAttributes(attrs);
         builder.AppendLine($"library {Name} {{");
         using (builder.PushIndent(4))
