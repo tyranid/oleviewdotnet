@@ -27,8 +27,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
 namespace OleViewDotNet.TypeManager;
 
@@ -63,17 +61,21 @@ public static class COMTypeManager
 
     private static bool ScriptingEnabled => m_factory is not null;
 
-    internal static Tuple<Guid, short, short> GetLibKey(this ITypeLib type_lib)
+    internal static Tuple<Guid, short, short> GetLibKey(this COMTypeLibInstance type_lib)
     {
-        type_lib.GetLibAttr(out IntPtr ppTLibAttr);
+        var attrs = type_lib.LibAttr;
+        return Tuple.Create(attrs.guid, attrs.wMajorVerNum, attrs.wMinorVerNum);
+    }
+
+    internal static string GetTypeLibAssemblyName(this COMTypeLibInstance type_lib)
+    {
         try
         {
-            var attrs = Marshal.PtrToStructure<TYPELIBATTR>(ppTLibAttr);
-            return Tuple.Create(attrs.guid, attrs.wMajorVerNum, attrs.wMinorVerNum);
+            return type_lib.GetCustData(COMKnownGuids.GUID_ExportedFromComPlus) as string;
         }
-        finally
+        catch
         {
-            type_lib.ReleaseTLibAttr(ppTLibAttr);
+            return null;
         }
     }
 
@@ -149,33 +151,41 @@ public static class COMTypeManager
     #endregion
 
     #region Internal Members
-    internal static Assembly ConvertTypeLibToAssembly(ITypeLib typeLib, IProgress<Tuple<string, int>> progress)
+    internal static Assembly ConvertTypeLibToAssembly(COMTypeLibInstance type_lib, IProgress<Tuple<string, int>> progress)
     {
         if (!m_loadtypes.Value)
         {
             throw new InvalidOperationException("Couldn't initialize types.");
         }
 
-        var key = typeLib.GetLibKey();
+        var key = type_lib.GetLibKey();
         if (m_typelibs.ContainsKey(key))
         {
             return m_typelibs[key];
         }
         else
         {
-            string path = Path.Combine(GetTypeLibDirectory(), $"{key.Item1}_{key.Item2}_{key.Item3}.dll");
             Assembly a;
-            if (!File.Exists(path))
+            string name = type_lib.GetTypeLibAssemblyName();
+            if (name is not null)
             {
-                TypeLibConverter conv = new();
-                AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(typeLib, path, TypeLibImporterFlags.None,
-                                        new TypeLibCallback(progress), null, null, null, null);
-                asm.Save(Path.GetFileName(path));
-                a = asm;
+                a = Assembly.Load(name);
             }
             else
             {
-                a = Assembly.LoadFrom(path);
+                string path = Path.Combine(GetTypeLibDirectory(), $"{key.Item1}_{key.Item2}_{key.Item3}.dll");
+                if (!File.Exists(path))
+                {
+                    TypeLibConverter conv = new();
+                    AssemblyBuilder asm = conv.ConvertTypeLibToAssembly(type_lib.Instance, path, TypeLibImporterFlags.None,
+                                            new TypeLibCallback(progress), null, null, null, null);
+                    asm.Save(Path.GetFileName(path));
+                    a = asm;
+                }
+                else
+                {
+                    a = Assembly.LoadFrom(path);
+                }
             }
 
             m_typelibs[key] = a;
@@ -310,21 +320,8 @@ public static class COMTypeManager
 
     public static Assembly LoadTypeLib(string path, IProgress<Tuple<string, int>> progress)
     {
-        ITypeLib typeLib = null;
-
-        try
-        {
-            typeLib = NativeMethods.LoadTypeLibEx(path, RegKind.None);
-
-            return ConvertTypeLibToAssembly(typeLib, progress);
-        }
-        finally
-        {
-            if (typeLib is not null)
-            {
-                Marshal.ReleaseComObject(typeLib);
-            }
-        }
+        using var type_lib = COMTypeLibInstance.FromFile(path);
+        return ConvertTypeLibToAssembly(type_lib, progress);
     }
 
     public static Assembly LoadTypeLib(COMTypeLibVersionEntry type_lib, IProgress<Tuple<string, int>> progress)
@@ -349,7 +346,7 @@ public static class COMTypeManager
             using var type_info = COMTypeInfoInstance.FromObject(obj);
             using var type_lib = type_info.GetContainingTypeLib();
             Guid iid = type_info.TypeAttr.guid;
-            ConvertTypeLibToAssembly(type_lib.Instance, progress);
+            ConvertTypeLibToAssembly(type_lib, progress);
             return GetInterfaceType(iid);
         }
     }

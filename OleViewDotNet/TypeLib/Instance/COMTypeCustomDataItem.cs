@@ -32,11 +32,11 @@ public sealed class COMTypeCustomDataItem
 
     internal string FormatAttribute()
     {
-        string val = Value?.ToString() ?? string.Empty;
-        if (val is string s)
+        string val = Value switch
         {
-            val = "\"" + val.Replace(@"\", @"\\").Replace("\"", "\\\"") + "\"";
-        }
+            string s => "\"" + s.Replace(@"\", @"\\").Replace("\"", "\\\"") + "\"",
+            _ => Value?.ToString() ?? string.Empty,
+        };
         return $"custom({Guid:B}, {val})";
     }
 }

@@ -70,4 +70,8 @@ public static class COMKnownGuids
     public static readonly Guid CATID_Document = new("{40fc6ed8-2438-11cf-a3db-080036f12502}");
 
     public static readonly Guid IID_IProxyManager = new("{00000008-0000-0000-C000-000000000046}");
+
+    public static readonly Guid GUID_ExportedFromComPlus = new(0x90883f05, 0x3d28, 0x11d2, 0x8f, 0x17, 0x00, 0xa0, 0xc9, 0xa6, 0x18, 0x6d);
+    public static readonly Guid GUID_ManagedName = new(0xf21f359, 0xab84, 0x41e8, 0x9a, 0x78, 0x36, 0xd1, 0x10, 0xe6, 0xd2, 0xf9);
+    public static readonly Guid GUID_Function2Getter = new(0x54fc8f55, 0x38de, 0x4703, 0x9c, 0x4e, 0x25, 0x3, 0x51, 0x30, 0x2b, 0x1c);
 }
