@@ -20,7 +20,7 @@ using System.Text;
 
 namespace OleViewDotNet.Marshaling;
 
-internal static class MarshallingUtilities
+internal static class MarshalingUtilities
 {
     internal static byte[] ReadAll(this BinaryReader reader, int length)
     {

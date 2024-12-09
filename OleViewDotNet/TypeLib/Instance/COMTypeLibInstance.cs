@@ -104,7 +104,7 @@ public sealed class COMTypeLibInstance : IDisposable
 
     public COMTypeDocumentation Documentation => GetDocumentation(-1);
 
-    internal ITypeLib Instance => m_type_lib;
+    public ITypeLib Instance => m_type_lib;
 
     public COMTypeCompInstance GetTypeComp()
     {
