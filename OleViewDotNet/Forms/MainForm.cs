@@ -34,6 +34,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
+/* Added */
+using System.Runtime.InteropServices;
+/* Added */
+
 namespace OleViewDotNet.Forms;
 
 internal partial class MainForm : Form
@@ -67,6 +71,7 @@ internal partial class MainForm : Form
         {
             Text += $" - {m_registry.FilePath}";
         }
+        Text += $" - MSRC Gasan";
     }
 
     public MainForm(COMRegistry registry)
@@ -1066,6 +1071,48 @@ internal partial class MainForm : Form
     {
         ProgramSettings.ParseActivationContext = !ProgramSettings.ParseActivationContext;
     }
+
+    /* Added */
+
+    private void menuResolveMethodNamesFromIDA_Click(object sender, EventArgs e)
+    {
+        ProgramSettings.ResolveMethodNamesFromIDA = !ProgramSettings.ResolveMethodNamesFromIDA;
+    }
+
+    private void menuResolveMethodNamesFromIDAHard_Click(object sender, EventArgs e)
+    {
+        if (ProgramSettings.ResolveMethodDllFix)
+            ProgramSettings.ResolveMethodDllFix = !ProgramSettings.ResolveMethodDllFix;
+        ProgramSettings.ResolveMethodNamesFromIDAHard = !ProgramSettings.ResolveMethodNamesFromIDAHard;
+    }
+
+    private void menuGetSequence_Click(object sender, EventArgs e)
+    {
+        if (!Directory.Exists("interfaces\\sequence")) Directory.CreateDirectory("interfaces\\sequence");
+        CallSequenceForm callSequenceForm = new CallSequenceForm();
+        callSequenceForm.Show();
+    }
+
+    private void menuResolveMethodDllFix_Click(object sender, EventArgs e)
+    {
+        if (ProgramSettings.ResolveMethodNamesFromIDAHard)
+            ProgramSettings.ResolveMethodNamesFromIDAHard = !ProgramSettings.ResolveMethodNamesFromIDAHard;
+        ProgramSettings.ResolveMethodDllFix = !ProgramSettings.ResolveMethodDllFix;
+        if (ProgramSettings.ResolveMethodDllFix)
+        {
+            DllFixForm dllFixForm = new DllFixForm();
+            dllFixForm.ShowDialog();
+        }
+    }
+
+    private void menuProcesses_Popup(object sender, EventArgs e)
+    {
+        menuResolveMethodNamesFromIDA.Checked = ProgramSettings.ResolveMethodNamesFromIDA;
+        menuResolveMethodNamesFromIDAHard.Checked = ProgramSettings.ResolveMethodNamesFromIDAHard;
+        menuResolveMethodDllFix.Checked = ProgramSettings.ResolveMethodDllFix;
+    }
+
+    /* Added */
 
     private void menuProcessesOptions_Popup(object sender, EventArgs e)
     {

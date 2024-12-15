@@ -177,6 +177,15 @@
 
         }
 
+        /* Added */
+        public void ChangeToCpp()
+        {
+            this.toolStripMenuItemIDLOutputType.Checked = false;
+            this.toolStripMenuItemCppOutputType.Checked = true;
+            this.toolStripMenuItemGenericOutputType.Checked = false;
+        }
+        /* Added */
+
         #endregion
 
         private ICSharpCode.TextEditor.TextEditorControl textEditor;
