@@ -25,7 +25,7 @@ namespace OleViewDotNet.Forms
             List<String> fileList = new List<String>();
             foreach (String fileName in fileNames)
             {
-                if (fileName.EndsWith(".dll") || fileName.EndsWith(".exe"))
+                if (fileName.ToLower().EndsWith(".dll") || fileName.ToLower().EndsWith(".exe"))
                 {
                     fileList.Add(fileName);
                 }

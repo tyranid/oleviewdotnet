@@ -265,6 +265,7 @@ internal partial class SourceCodeViewerControl : UserControl
     // Finds method name with ResolveMethod, changes method name from Proc{n} to real method name and returns it.
     internal String Resolve(String idl, List<String> binaryPath)
     {
+        if (binaryPath.Count == 0) return null;
         resolvingForm = new ResolvingForm(binaryPath);
         Thread uiThread = new Thread(StartResolvingForm);
         uiThread.Start();
@@ -425,10 +426,10 @@ internal partial class SourceCodeViewerControl : UserControl
     internal int GetServicePid(String serviceName)
     {
 
-        string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}%'";
-        using (var searcher = new System.Management.ManagementObjectSearcher(query))
+        string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}!_%'";
+        using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
         {
-            foreach (var obj in searcher.Get())
+            foreach (var obj in searcher1.Get())
             {
                 try
                 {
@@ -440,17 +441,44 @@ internal partial class SourceCodeViewerControl : UserControl
                         service.WaitForStatus(ServiceControllerStatus.Running);
                     }
                 }
-                catch (InvalidOperationException ex)
+                catch (Exception ex)
                 {
                     continue;
+                }
+            }
+            using (var searcher2 = new System.Management.ManagementObjectSearcher(query)) {
+                foreach (var obj in searcher2.Get())
+                {
+                    return Convert.ToInt32(obj["ProcessId"]);
+                }
+            }
+        }
+        query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name='{serviceName}'";
+        using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
+        {
+            foreach (var obj in searcher1.Get())
+            {
+                try
+                {
+                    ServiceController service = new ServiceController((String)obj["Name"]);
+
+                    if (service.Status == ServiceControllerStatus.Stopped)
+                    {
+                        service.Start();
+                        service.WaitForStatus(ServiceControllerStatus.Running);
+                    }
                 }
                 catch (Exception ex)
                 {
                     continue;
                 }
-                if (searcher.Get().Count == 1) return Convert.ToInt32(obj["ProcessId"]);
-                if ((String)(obj["Name"]) == serviceName) continue;
-                return Convert.ToInt32(obj["ProcessId"]);
+            }
+            using (var searcher2 = new System.Management.ManagementObjectSearcher(query))
+            {
+                foreach (var obj in searcher2.Get())
+                {
+                    return Convert.ToInt32(obj["ProcessId"]);
+                }
             }
         }
         return -1;
