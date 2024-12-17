@@ -227,7 +227,6 @@ internal partial class SourceCodeViewerControl : UserControl
                 Process process = Process.GetProcessById(pid);
                 if (process == null)
                 {
-                    MessageBox.Show("process is null?");
                     return builder.ToString();
                 }
                 try
@@ -271,6 +270,7 @@ internal partial class SourceCodeViewerControl : UserControl
     // Finds method name with ResolveMethod, changes method name from Proc{n} to real method name and returns it.
     internal String Resolve(String idl, List<String> binaryPath)
     {
+        if (ProgramSettings.IDAPath == null || !File.Exists(ProgramSettings.IDAPath)) ProgramSettings.IDAPath = ResolveMethod.GetIDAT();
         if (binaryPath.Count == 0) return null;
         resolvingForm = new ResolvingForm(binaryPath);
         Thread uiThread = new Thread(StartResolvingForm);
@@ -296,7 +296,7 @@ internal partial class SourceCodeViewerControl : UserControl
 
             if (resolvingForm.resolveDone)
             {
-                String[] files = Directory.GetFiles("DLLs", binaryPath[i] + "*");
+                String[] files = Directory.GetFiles("DLLs", Path.GetFileName(binaryPath[i]) + "*");
 
                 foreach (String file in files)
                 {
@@ -442,7 +442,6 @@ internal partial class SourceCodeViewerControl : UserControl
     // Find pid of service.
     internal int GetServicePid(String serviceName)
     {
-
         string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}%'";
         using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
         {
@@ -467,7 +466,6 @@ internal partial class SourceCodeViewerControl : UserControl
             using (var searcher2 = new System.Management.ManagementObjectSearcher(query)) {
                 foreach (var obj in searcher2.Get())
                 {
-                    MessageBox.Show($"Name2: {obj["Name"]}, PID1: {obj["ProcessId"]} ");
                     return Convert.ToInt32(obj["ProcessId"]);
                 }
             }
@@ -496,7 +494,6 @@ internal partial class SourceCodeViewerControl : UserControl
             {
                 foreach (var obj in searcher2.Get())
                 {
-                    MessageBox.Show($"Name2: {obj["Name"]}, PID2: {obj["ProcessId"]} ");
                     return Convert.ToInt32(obj["ProcessId"]);
                 }
             }

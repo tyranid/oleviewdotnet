@@ -40,10 +40,18 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="System.Management" />
+      <Reference Include="System.ServiceProcess" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Update="interfaces.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="OleViewDotNet.psd1">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="BanList.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="symbol_cache\01D1C2614764A607E4A5511B269541C7.sym">

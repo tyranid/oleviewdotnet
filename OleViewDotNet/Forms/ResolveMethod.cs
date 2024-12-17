@@ -15,22 +15,12 @@ namespace OleViewDotNet.Forms
 {
     internal class ResolveMethod
     {
-        public static String IDAPath = null;
         public static List<String> banList = null;
 
         // Find IDA path from Registry(Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache).
         // If failed to find, create IDAPathForm to get IDA Path.
         public static String GetIDAT()
         {
-
-            if (File.Exists("IDAPath"))
-            {
-                using (StreamReader reader = new StreamReader("IDAPath"))
-                {
-                    IDAPath = reader.ReadToEnd();
-                }
-                return IDAPath;
-            }
 
             string regKey = "Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache";
             try
@@ -48,7 +38,7 @@ namespace OleViewDotNet.Forms
                                 String fileName = String.Join("\\", parts, 0, parts.Length - 1) + "\\idat64.exe";
                                 if (File.Exists(fileName))
                                 {
-                                    IDAPath = fileName;
+                                    ProgramSettings.IDAPath = fileName;
                                 }
                             }
                         }
@@ -59,20 +49,14 @@ namespace OleViewDotNet.Forms
             {
             }
 
-            if (IDAPath == null)
+            if (ProgramSettings.IDAPath == null)
             {
-                MessageBox.Show("Failed to find idat64.exe.");
 
                 IDAPathForm iDAPathForm = new IDAPathForm();
                 iDAPathForm.ShowDialog();
             }
 
-            using (StreamWriter writer = new StreamWriter("IDAPath"))
-            {
-                writer.Write(IDAPath);
-            }
-
-            return IDAPath;
+            return ProgramSettings.IDAPath;
         }
 
         // Find service DLL/EXE from Registry.
@@ -159,11 +143,11 @@ namespace OleViewDotNet.Forms
         public static bool GenerateAsmFile(String binaryPath)
         {
             String binaryName = Path.GetFileName(binaryPath);
-            if (File.Exists($"DLLs\\{binaryName}" + ".asm")) return true;
+            if (File.Exists($"DLLs\\{binaryName}.asm")) return true;
             CopyDLL(binaryPath);
             Process process = new Process();
-            if (IDAPath == null) process.StartInfo.FileName = GetIDAT();
-            process.StartInfo.FileName = IDAPath;
+            if (ProgramSettings.IDAPath == null || !File.Exists(ProgramSettings.IDAPath)) GetIDAT();
+            process.StartInfo.FileName = ProgramSettings.IDAPath;
             process.StartInfo.Arguments = $"-A -B DLLs\\{binaryName}";
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -177,9 +161,14 @@ namespace OleViewDotNet.Forms
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to resolve interfaces.");
+                process.Dispose();
+                File.Delete($"DLLs\\{binaryName}");
+                File.Delete($"DLLs\\{binaryName}.i64");
+                return false;
             }
             process.Dispose();
-            File.Delete(binaryName);
+            File.Delete($"DLLs\\{binaryName}");
+            File.Delete($"DLLs\\{binaryName}.i64");
             return true;
         }
 
@@ -269,7 +258,7 @@ namespace OleViewDotNet.Forms
 
                 if (!asm.Contains("QueryInterface") && !banList.Contains(binaryPath))
                 {
-                    using (StreamWriter writer = new StreamWriter("BanList", true))
+                    using (StreamWriter writer = new StreamWriter("BanList.txt", true))
                     {
                         writer.WriteLine(binaryPath);
                     }
@@ -566,17 +555,8 @@ namespace OleViewDotNet.Forms
         // Initialize banList. BanList is a DLL/EXE list that will not be parsed.
         public static void BanListInit()
         {
-            if (!File.Exists("BanList"))
-            {
-                String template = "C:\\WINDOWS\\SYSTEM32\\MSASN1.dll\r\nC:\\WINDOWS\\SYSTEM32\\dxcore.dll\r\nC:\\WINDOWS\\SYSTEM32\\twinapi.appcore.dll\r\nC:\\WINDOWS\\SYSTEM32\\wevtapi.dll\r\nC:\\WINDOWS\\SYSTEM32\\winsta.dll\r\nC:\\WINDOWS\\System32\\WINSTA.dll\r\nC:\\WINDOWS\\System32\\profapi.dll\r\nC:\\WINDOWS\\system32\\MSASN1.dll\r\nC:\\WINDOWS\\system32\\ncryptprov.dll\r\nC:\\Windows\\System32\\Microsoft.Bluetooth.Proxy.dll\r\nC:\\Windows\\System32\\SspiCli.dll\r\nC:\\Windows\\System32\\Windows.Security.Authentication.OnlineId.dll\r\nC:\\Windows\\System32\\XmlLite.dll\r\nC:\\Windows\\System32\\msxml6.dll\r\nC:\\Windows\\System32\\vaultcli.dll\r\nc:\\windows\\system32\\BrokerLib.dll\r\nc:\\windows\\system32\\PROPSYS.dll\r\nc:\\windows\\system32\\WMICLNT.dll\r\nc:\\windows\\system32\\fwbase.dll\r\nc:\\windows\\system32\\wlanapi.dll\r\nC:\\WINDOWS\\SYSTEM32\\IPHLPAPI.DLL\r\nC:\\WINDOWS\\SYSTEM32\\bi.dll\r\nC:\\WINDOWS\\SYSTEM32\\capauthz.dll\r\nC:\\WINDOWS\\System32\\CRYPTBASE.DLL\r\nC:\\WINDOWS\\System32\\NTASN1.dll\r\nC:\\WINDOWS\\System32\\SETUPAPI.dll\r\nC:\\WINDOWS\\System32\\SHLWAPI.dll\r\nC:\\WINDOWS\\System32\\SspiCli.dll\r\nC:\\WINDOWS\\System32\\fwpuclnt.dll\r\nC:\\WINDOWS\\System32\\ncrypt.dll\r\nC:\\WINDOWS\\System32\\netutils.dll\r\nC:\\WINDOWS\\System32\\sspicli.dll\r\nC:\\WINDOWS\\System32\\wkscli.dll\r\nC:\\Windows\\System32\\AppXDeploymentClient.dll\r\nc:\\windows\\system32\\WppRecorderUM.dll\r\nc:\\windows\\system32\\netutils.dll\r\nC:\\WINDOWS\\SYSTEM32\\netjoin.dll\r\nC:\\WINDOWS\\SYSTEM32\\netutils.dll\r\nC:\\WINDOWS\\System32\\CRYPTBASE.dll\r\nC:\\WINDOWS\\System32\\DPAPI.DLL\r\nC:\\WINDOWS\\System32\\SHCORE.dll\r\nC:\\WINDOWS\\System32\\SHELL32.dll\r\nC:\\WINDOWS\\System32\\netprofm.dll\r\nC:\\WINDOWS\\system32\\execmodelproxy.dll\r\nC:\\Windows\\System32\\Windows.Networking.Connectivity.dll\r\nC:\\Windows\\System32\\Windows.Web.dll\r\nC:\\Windows\\System32\\iertutil.dll\r\nC:\\Windows\\System32\\msvcp110_win.dll\r\nC:\\Windows\\System32\\netutils.dll\r\nC:\\Windows\\System32\\srvcli.dll\r\nC:\\Windows\\System32\\usermgrproxy.dll\r\nc:\\windows\\system32\\DNSAPI.dll\r\nc:\\windows\\system32\\DSROLE.dll\r\nc:\\windows\\system32\\MobileNetworking.dll\r\nc:\\windows\\system32\\SYSNTFY.dll\r\nc:\\windows\\system32\\WINSTA.dll\r\nc:\\windows\\system32\\WTSAPI32.dll\r\nc:\\windows\\system32\\fwpuclnt.dll\r\nc:\\windows\\system32\\AUTHZ.dll\r\nc:\\windows\\system32\\NTASN1.dll\r\nc:\\windows\\system32\\ncrypt.dll\r\nC:\\WINDOWS\\SYSTEM32\\wlanapi.dll\r\nC:\\WINDOWS\\System32\\DEVOBJ.dll\r\nC:\\WINDOWS\\system32\\ncryptsslp.dll\r\nC:\\WINDOWS\\system32\\schannel.DLL\r\nC:\\WINDOWS\\system32\\sspicli.dll\r\nC:\\Windows\\System32\\taskschd.dll\r\nc:\\windows\\system32\\WINNSI.DLL\r\nC:\\WINDOWS\\SYSTEM32\\SspiCli.dll\r\nC:\\WINDOWS\\SYSTEM32\\profapi.dll\r\nC:\\WINDOWS\\System32\\IMM32.DLL\r\nC:\\WINDOWS\\System32\\coml2.dll\r\nC:\\Windows\\System32\\CapabilityAccessManagerClient.dll\r\nC:\\Windows\\System32\\Windows.StateRepositoryPS.dll\r\nC:\\WINDOWS\\SYSTEM32\\windows.staterepositoryclient.dll\r\nC:\\WINDOWS\\System32\\WINTRUST.dll\r\nC:\\WINDOWS\\system32\\CRYPTBASE.dll\r\nC:\\Windows\\System32\\WinTypes.dll\r\nc:\\windows\\system32\\webio.dll\r\nC:\\WINDOWS\\SYSTEM32\\MobileNetworking.dll\r\nC:\\WINDOWS\\System32\\ADVAPI32.dll\r\nC:\\Windows\\System32\\twinapi.appcore.dll\r\nc:\\windows\\system32\\UMPDC.dll\r\nC:\\WINDOWS\\SYSTEM32\\cryptsp.dll\r\nC:\\Windows\\System32\\OneCoreCommonProxyStub.dll\r\nc:\\windows\\system32\\WINHTTP.dll\r\nc:\\windows\\system32\\profapi.dll\r\nC:\\WINDOWS\\System32\\npmproxy.dll\r\nc:\\windows\\system32\\SspiCli.dll\r\nc:\\windows\\system32\\msvcp110_win.dll\r\nC:\\WINDOWS\\System32\\MSASN1.dll\r\nc:\\windows\\system32\\DEVOBJ.dll\r\nC:\\WINDOWS\\SYSTEM32\\WINSTA.dll\r\nC:\\Windows\\System32\\OneCoreUAPCommonProxyStub.dll\r\nC:\\Windows\\System32\\rasadhlp.dll\r\nC:\\WINDOWS\\SYSTEM32\\windows.staterepositorycore.dll\r\nC:\\WINDOWS\\System32\\shlwapi.dll\r\nC:\\WINDOWS\\system32\\rsaenh.dll\r\nc:\\windows\\system32\\USERENV.dll\r\nC:\\WINDOWS\\SYSTEM32\\DNSAPI.dll\r\nC:\\WINDOWS\\SYSTEM32\\WINNSI.DLL\r\nC:\\WINDOWS\\SYSTEM32\\policymanager.dll\r\nC:\\WINDOWS\\SYSTEM32\\rmclient.dll\r\nC:\\WINDOWS\\SYSTEM32\\windows.storage.dll\r\nC:\\WINDOWS\\SYSTEM32\\dhcpcsvc.DLL\r\nC:\\WINDOWS\\SYSTEM32\\dhcpcsvc6.DLL\r\nC:\\WINDOWS\\SYSTEM32\\gpapi.dll\r\nC:\\WINDOWS\\SYSTEM32\\usermgrcli.dll\r\nC:\\WINDOWS\\SYSTEM32\\wtsapi32.dll\r\nC:\\WINDOWS\\SYSTEM32\\wintypes.dll\r\nC:\\WINDOWS\\System32\\ole32.dll\r\nc:\\windows\\system32\\IPHLPAPI.DLL\r\nC:\\WINDOWS\\SYSTEM32\\UMPDC.dll\r\nC:\\WINDOWS\\SYSTEM32\\ntmarta.dll\r\nC:\\WINDOWS\\system32\\mswsock.dll\r\nC:\\WINDOWS\\System32\\svchost.exe\r\nC:\\WINDOWS\\System32\\CRYPT32.dll\r\nC:\\WINDOWS\\SYSTEM32\\powrprof.dll\r\nC:\\WINDOWS\\System32\\NSI.dll\r\nC:\\WINDOWS\\SYSTEM32\\cfgmgr32.dll\r\nC:\\WINDOWS\\System32\\WS2_32.dll\r\nC:\\WINDOWS\\System32\\shcore.dll\r\nC:\\WINDOWS\\System32\\advapi32.dll\r\nC:\\WINDOWS\\system32\\svchost.exe\r\nC:\\WINDOWS\\System32\\OLEAUT32.dll\r\nC:\\WINDOWS\\System32\\clbcatq.dll\r\nC:\\WINDOWS\\System32\\user32.dll\r\nC:\\WINDOWS\\System32\\GDI32.dll\r\nC:\\WINDOWS\\System32\\gdi32full.dll\r\nC:\\WINDOWS\\System32\\win32u.dll\r\nC:\\WINDOWS\\SYSTEM32\\kernel.appcore.dll\r\nC:\\WINDOWS\\System32\\bcryptPrimitives.dll\r\nC:\\WINDOWS\\SYSTEM32\\ntdll.dll\r\nC:\\WINDOWS\\System32\\KERNEL32.DLL\r\nC:\\WINDOWS\\System32\\KERNELBASE.dll\r\nC:\\WINDOWS\\System32\\RPCRT4.dll\r\nC:\\WINDOWS\\System32\\bcrypt.dll\r\nC:\\WINDOWS\\System32\\combase.dll\r\nC:\\WINDOWS\\System32\\msvcp_win.dll\r\nC:\\WINDOWS\\System32\\msvcrt.dll\r\nC:\\WINDOWS\\System32\\sechost.dll\r\nC:\\WINDOWS\\System32\\ucrtbase.dll\r\nC:\\WINDOWS\\System32\\d3d11.dll\r\nC:\\WINDOWS\\System32\\d2d1.dll\r\nc:\\windows\\system32\\CLIPC.dll\r\nC:\\Windows\\System32\\wuapi.dll\r\nC:\\WINDOWS\\uus\\AMD64\\uusbrain.dll\r\nC:\\Windows\\System32\\wups.dll\r\nC:\\WINDOWS\\SYSTEM32\\gamestreamingext.dll\r\nc:\\windows\\system32\\VERSION.dll\r\nC:\\WINDOWS\\SYSTEM32\\wiatrace.dll\r\nC:\\WINDOWS\\system32\\msv1_0.DLL\r\nC:\\WINDOWS\\system32\\NtlmShared.dll\r\nC:\\WINDOWS\\SYSTEM32\\deviceassociation.dll\r\nC:\\WINDOWS\\SYSTEM32\\webservices.dll\r\nC:\\WINDOWS\\SYSTEM32\\HTTPAPI.dll\r\nC:\\WINDOWS\\System32\\verifier.dll\r\nc:\\windows\\system32\\logoncli.dll\r\nc:\\windows\\system32\\NETAPI32.dll\r\nC:\\WINDOWS\\SYSTEM32\\PeerDist.dll\r\nc:\\windows\\system32\\VirtDisk.dll\r\nc:\\windows\\system32\\SXSHARED.dll\r\nC:\\WINDOWS\\system32\\defragproxy.dll\r\nC:\\WINDOWS\\system32\\ESENT.dll\r\nC:\\Windows\\System32\\TieringEngineProxy.dll\r\nc:\\windows\\system32\\profsvc.dll\r\nC:\\WINDOWS\\System32\\SAMLIB.dll\r\nC:\\WINDOWS\\SYSTEM32\\profext.dll\r\nC:\\WINDOWS\\SYSTEM32\\AcLayers.DLL\r\nC:\\WINDOWS\\SYSTEM32\\HID.DLL\r\nC:\\WINDOWS\\SYSTEM32\\directxdatabasehelper.dll\r\nC:\\Windows\\System32\\PerceptionSimulation\\SixDofControllerManager.ProxyStubs.dll\r\nC:\\Windows\\System32\\PerceptionSimulation\\VirtualDisplayManager.ProxyStubs.dll\r\nC:\\WINDOWS\\system32\\sxproxy.dll\r\nC:\\WINDOWS\\System32\\bcd.dll\r\nC:\\WINDOWS\\System32\\VssTrace.DLL\r\nc:\\windows\\system32\\securityhealthservice.exe\r\nc:\\windows\\system32\\ESENT.dll\r\nc:\\windows\\system32\\dsclient.dll\r\nC:\\Windows\\System32\\WalletProxy.dll\r\nc:\\windows\\system32\\OneX.DLL\r\nc:\\windows\\system32\\eappprxy.dll\r\nc:\\windows\\system32\\WLANSEC.dll\r\nc:\\windows\\system32\\WMI.dll\r\nC:\\WINDOWS\\System32\\wlansvcpal.dll\r\nC:\\WINDOWS\\System32\\TetheringIeProvider.dll\r\nC:\\WINDOWS\\SYSTEM32\\wlgpclnt.dll\r\nC:\\WINDOWS\\system32\\kerberos.DLL\r\nC:\\WINDOWS\\system32\\Kerb3961.dll\r\nC:\\WINDOWS\\SYSTEM32\\SystemEventsBrokerClient.dll\r\nc:\\windows\\system32\\nvagent.dll\r\nc:\\windows\\system32\\NetSetupApi.dll\r\nC:\\WINDOWS\\System32\\vmsifproxystub.dll\r\nc:\\windows\\system32\\lfsvc.dll\r\nC:\\Windows\\System32\\LocationFrameworkPS.dll\r\nC:\\WINDOWS\\system32\\mi.dll\r\nC:\\WINDOWS\\system32\\fveapi.dll\r\nC:\\WINDOWS\\system32\\cscapi.dll\r\nC:\\WINDOWS\\SYSTEM32\\samcli.dll\r\nC:\\WINDOWS\\SYSTEM32\\NCObjAPI.DLL\r\nC:\\WINDOWS\\System32\\EventAggregation.dll\r\nC:\\WINDOWS\\system32\\keepaliveprovider.dll\r\nC:\\WINDOWS\\System32\\winsqlite3.dll\r\nC:\\WINDOWS\\System32\\LINKINFO.dll\r\nC:\\WINDOWS\\system32\\SFC.DLL\r\nC:\\WINDOWS\\system32\\sfc_os.DLL\r\nc:\\windows\\system32\\dsclient.dllc:\\windows\\system32\\wpnuserservice.dll\r\nC:\\Windows\\System32\\StateRepository.Core.dll\r\nc:\\windows\\system32\\wpnuserservice.dll\r\nC:\\WINDOWS\\SYSTEM32\\edputil.dll\r\nC:\\WINDOWS\\system32\\Secur32.dll\r\nC:\\WINDOWS\\SYSTEM32\\bcp47mrm.dll\r\nC:\\WINDOWS\\System32\\TimeBrokerClient.dll\r\nC:\\Windows\\System32\\ShellCommonCommonProxyStub.dll";
-                using (StreamWriter writer = new StreamWriter("BanList"))
-                {
-                    writer.Write(template);
-                    writer.Flush();
-                }
-            }
             banList = new List<string>();
-            using (StreamReader reader = new StreamReader("BanList"))
+            using (StreamReader reader = new StreamReader("BanList.txt"))
             {
                 while (true)
                 {

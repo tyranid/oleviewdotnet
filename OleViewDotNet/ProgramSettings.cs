@@ -67,6 +67,8 @@ public static class ProgramSettings
         public bool ResolveMethodDllFix { get; set; }
         [DataMember]
         public String FixedDll { get; set; }
+        [DataMember]
+        public String IDAPath { get; set; }
         /* Added */
 
         public static ConfigFile Load()
@@ -218,6 +220,12 @@ public static class ProgramSettings
     {
         get => _config.Value.FixedDll;
         set => _config.Value.FixedDll = value;
+    }
+
+    public static String IDAPath
+    {
+        get => _config.Value.IDAPath;
+        set => _config.Value.IDAPath = value;
     }
     /* Added */
 

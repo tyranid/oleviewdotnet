@@ -68,27 +68,19 @@ namespace OleViewDotNet.Forms
                         String line = lines[i].Trim();
                         if (line.StartsWith("HRESULT"))
                         {
-                            List<String> parameters = GetParameters(line);
-                            for (int j = 1; j < parameters.Count; j++)
+                            List<String> parameters = GetParameters(line.Substring(line.IndexOf('(') + 1));
+                            for (int j = 0; j < parameters.Count; j++)
                             {
                                 String[] param = parameters[j].Trim().Split(' ');
-                                if (param[0].Contains("out") && !param[param.Length - 2].StartsWith("int") &&
-                                    !param[param.Length - 2].StartsWith("HSTRING") && !param[param.Length - 2].StartsWith("wchar") &&
-                                    !param[param.Length - 2].StartsWith("GUID") && !param[param.Length - 2].StartsWith("byte") &&
-                                    !param[param.Length - 2].StartsWith("__int") && !param[param.Length - 2].StartsWith("uint") &&
-                                    !param[param.Length - 2].StartsWith("Struct") && !param[param.Length - 2].ToLower().StartsWith("handle") &&
-                                    !param[param.Length - 2].StartsWith("float") && !param[param.Length - 2].StartsWith("double") &&
-                                    !param[param.Length - 2].StartsWith("char") && !param[param.Length - 2].StartsWith("HWND") &&
-                                    !param[param.Length - 2].StartsWith("handle") && !param[param.Length - 2].StartsWith("BSTR") &&
-                                    !param[param.Length - 2].StartsWith("short") && !param[param.Length - 2].StartsWith("VARIANT"))
+                                if (!param[0].StartsWith("[out") || !param[1].Contains("**")) continue;
+                                if (param[1].Contains("wchar")) continue;
+                                param[1] = param[1].Replace("*", "");
+                                param[1] = param[1].Replace("<COMMA>", ",").Replace("<SPACE>", " ");
+                                if (!interfaces.Keys.Contains(param[1]))
                                 {
-                                    param[param.Length - 2] = param[param.Length - 2].Replace("*", "");
-                                    if (!interfaces.Keys.Contains(param[param.Length - 2]))
-                                    {
-                                        interfaces[param[param.Length - 2]] = new List<string>();
-                                    }
-                                    interfaces[interfaceName].Add(param[param.Length - 2]);
+                                    interfaces[param[1]] = new List<string>();
                                 }
+                                interfaces[interfaceName].Add(param[1]);
                             }
                         }
                     }
@@ -96,7 +88,55 @@ namespace OleViewDotNet.Forms
                 stringList.Sort();
                 comboBox1.DataSource = stringList;
             }
+            this.Show();
 
+        }
+
+        static string ReplaceCommasInBrackets(string text)
+        {
+            Stack<int> stack = new Stack<int>();
+            StringBuilder result = new StringBuilder();
+            StringBuilder temp = new StringBuilder();
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char ch = text[i];
+
+                if (ch == '[')
+                {
+                    if (stack.Count > 0)
+                    {
+                        temp.Append(ch);
+                    }
+                    stack.Push(i);
+                }
+                else if (ch == ']')
+                {
+                    if (stack.Count > 1)
+                    {
+                        temp.Append(ch);
+                    }
+                    stack.Pop();
+
+                    if (stack.Count == 0)
+                    {
+                        result.Append("[");
+                        result.Append(temp.ToString().Replace(",", "<COMMA>").Replace(" ","<SPACE>"));
+                        result.Append("]");
+                        temp.Clear();
+                    }
+                }
+                else if (stack.Count > 0)
+                {
+                    temp.Append(ch);
+                }
+                else
+                {
+                    result.Append(ch);
+                }
+            }
+
+            return result.ToString();
         }
 
         // Get parameters from idl methods.
@@ -104,23 +144,9 @@ namespace OleViewDotNet.Forms
         {
             if (functionDeclaration.Trim().EndsWith("(void)"))
                 return new List<string>();
-            string functionDefinition = Regex.Replace(functionDeclaration, @"<.*?>", "");
-            Match match = Regex.Match(functionDefinition, @"([\w:~]+|`.*?')\s*\((.*?)\)\s*(?:const)?(?:override)?;?$");
-            if (!match.Success)
-                return new List<string>();
 
-            string functionName = match.Groups[1].Value;
-            string parameters = match.Groups[2].Value;
-
-            if (string.IsNullOrWhiteSpace(parameters))
-                return new List<string>();
-            parameters = Regex.Replace(parameters, @"\[([^\]]*)\]", m => m.Groups[0].Value.Replace(",", "<COMMA>"));
-
-            parameters = Regex.Replace(parameters, @"<([^>]*)>", m => m.Groups[0].Value.Replace(",", "<COMMA>"));
-
-            var paramList = parameters.Split(',').Select(p => p.Replace("<COMMA>", ",")).ToList();
-            paramList.Insert(0, functionName);
-            return paramList;
+            String functionDefinition = ReplaceCommasInBrackets(functionDeclaration);
+            return functionDefinition.Split(',').ToList();
         }
         
         // Find sequence by Search method and store with Dictionary structure.

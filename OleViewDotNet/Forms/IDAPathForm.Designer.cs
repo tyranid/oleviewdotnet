@@ -96,7 +96,7 @@ namespace OleViewDotNet.Forms
             String path = textBox1.Text;
             if (path.EndsWith("idat64.exe") && File.Exists(path))
             {
-                ResolveMethod.IDAPath = path;
+                ProgramSettings.IDAPath = path;
                 this.Close();
             }
             else

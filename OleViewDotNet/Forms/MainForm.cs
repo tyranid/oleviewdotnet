@@ -1090,7 +1090,6 @@ internal partial class MainForm : Form
     {
         if (!Directory.Exists("interfaces\\sequence")) Directory.CreateDirectory("interfaces\\sequence");
         CallSequenceForm callSequenceForm = new CallSequenceForm();
-        callSequenceForm.Show();
     }
 
     private void menuResolveMethodDllFix_Click(object sender, EventArgs e)

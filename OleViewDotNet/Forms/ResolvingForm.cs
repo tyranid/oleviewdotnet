@@ -36,7 +36,7 @@ namespace OleViewDotNet.Forms
             resolveDone = true;
             try
             {
-                Process[] processes = Process.GetProcessesByName("idat64.exe");
+                Process[] processes = Process.GetProcessesByName("idat64");
                 if (processes.Length == 0) return;
                 foreach (Process process in processes)
                 {
