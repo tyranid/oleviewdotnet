@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using System.Diagnostics;
 
 namespace OleViewDotNet.Forms
 {
@@ -33,6 +34,21 @@ namespace OleViewDotNet.Forms
         private void MainFormClosed(object sender, FormClosedEventArgs e)
         {
             resolveDone = true;
+            try
+            {
+                Process[] processes = Process.GetProcessesByName("idat64.exe");
+                if (processes.Length == 0) return;
+                foreach (Process process in processes)
+                {
+                    try
+                    {
+                        process.Kill();
+                        process.WaitForExit();
+                    }
+                    catch { }
+                }
+            }
+            catch { }
         }
 
         public void Update(String label1, String label2)

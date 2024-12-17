@@ -175,6 +175,12 @@ internal partial class SourceCodeViewerControl : UserControl
 
         if (ProgramSettings.ResolveMethodDllFix)
         {
+            if (!File.Exists(ProgramSettings.FixedDll))
+            {
+                ProgramSettings.ResolveMethodDllFix = false;
+                SetText(builder.ToString(), builder.Tags);
+                return builder.ToString();
+            }
             binaryPath.Add(ProgramSettings.FixedDll);
         }
         else
@@ -286,6 +292,17 @@ internal partial class SourceCodeViewerControl : UserControl
                 resolvingForm.Update(null, null);
                 Application.DoEvents();
                 continue;
+            }
+
+            if (resolvingForm.resolveDone)
+            {
+                String[] files = Directory.GetFiles("DLLs", binaryPath[i] + "*");
+
+                foreach (String file in files)
+                {
+                    File.Delete(file);
+                }
+                return null;
             }
 
             resolvingForm.Update(null, $"Searching VTables...");
@@ -426,11 +443,12 @@ internal partial class SourceCodeViewerControl : UserControl
     internal int GetServicePid(String serviceName)
     {
 
-        string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}!_%'";
+        string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}%'";
         using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
         {
             foreach (var obj in searcher1.Get())
             {
+                
                 try
                 {
                     ServiceController service = new ServiceController((String)obj["Name"]);
@@ -449,6 +467,7 @@ internal partial class SourceCodeViewerControl : UserControl
             using (var searcher2 = new System.Management.ManagementObjectSearcher(query)) {
                 foreach (var obj in searcher2.Get())
                 {
+                    MessageBox.Show($"Name2: {obj["Name"]}, PID1: {obj["ProcessId"]} ");
                     return Convert.ToInt32(obj["ProcessId"]);
                 }
             }
@@ -477,6 +496,7 @@ internal partial class SourceCodeViewerControl : UserControl
             {
                 foreach (var obj in searcher2.Get())
                 {
+                    MessageBox.Show($"Name2: {obj["Name"]}, PID2: {obj["ProcessId"]} ");
                     return Convert.ToInt32(obj["ProcessId"]);
                 }
             }

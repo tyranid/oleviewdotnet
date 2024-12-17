@@ -179,6 +179,7 @@ namespace OleViewDotNet.Forms
                 MessageBox.Show("Failed to resolve interfaces.");
             }
             process.Dispose();
+            File.Delete(binaryName);
             return true;
         }
 
