@@ -34,6 +34,15 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+/* ADDED */
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
+using System.Security.Claims;
+/* ADDED */
+
 namespace OleViewDotNet.Forms;
 
 /// <summary>
@@ -405,6 +414,21 @@ internal partial class COMRegistryViewer : UserControl
     {
         return CreateNode(ent.Name, InterfaceKey, ent, BuildInterfaceToolTip(ent, instance));
     }
+
+    /* ADDED */
+    private TreeNode CreateInterfaceNameNode(COMRegistry registry, COMInterfaceEntry ent, COMInterfaceInstance instance, String clsid)
+    {
+        if (!Directory.Exists("interfaces\\iids")) Directory.CreateDirectory("interfaces\\iids");
+        String path = "interfaces\\iids\\" + ent.Iid.ToString() + ".txt";
+        TreeNode treeNode = CreateNode(ent.Name, InterfaceKey, ent, BuildInterfaceToolTip(ent, instance));
+        sourceCodeViewerControl.AutoParse = true;
+        using (StreamWriter writer = new StreamWriter(path))
+        {
+            writer.Write(clsid);
+        }
+        return treeNode;
+    }
+    /* ADDED */
 
     private static IEnumerable<TreeNode> LoadCLSIDs(COMRegistry registry)
     {
@@ -996,8 +1020,18 @@ internal partial class COMRegistryViewer : UserControl
         node.Nodes.AddRange(intfs.Select(i => CreateInterfaceNameNode(m_registry, m_registry.MapIidToInterface(i.Iid), i)).OrderBy(n => n.Text).ToArray());
     }
 
+    /* Added */
+    private void AddInterfaceNodes(TreeNode node, IEnumerable<COMInterfaceInstance> intfs, String clsid)
+    {
+        node.Nodes.AddRange(intfs.Select(i => CreateInterfaceNameNode(m_registry, m_registry.MapIidToInterface(i.Iid), i, clsid)).OrderBy(n => n.Text).ToArray());
+    }
+    /* Added */
+
     private async Task SetupCLSIDNodeTree(ICOMClassEntry clsid, TreeNode node, bool bRefresh)
     {
+        /* Added */
+        bool success = true;
+        /* Added */
         node.Nodes.Clear();
         TreeNode wait_node = CreateNode("Please Wait, Populating Interfaces", InterfaceKey, null);
         node.Nodes.Add(wait_node);
@@ -1009,18 +1043,19 @@ internal partial class COMRegistryViewer : UserControl
             if (interface_count == 0 && factory_count == 0)
             {
                 wait_node.Text = "Error querying COM interfaces - Timeout";
+                success = false;
             }
             else
             {
                 treeComRegistry.SuspendLayout();
                 if (interface_count > 0)
                 {
-                    node.Nodes.Remove(wait_node);
-                    AddInterfaceNodes(node, clsid.Interfaces);
+                    AddInterfaceNodes(node, clsid.Interfaces, clsid.Clsid.ToString());
                 }
                 else
                 {
                     wait_node.Text = "Error querying COM interfaces - No Instance Interfaces";
+                    success = false;
                 }
 
                 if (factory_count > 0)
@@ -1052,8 +1087,163 @@ internal partial class COMRegistryViewer : UserControl
         catch (Win32Exception ex)
         {
             wait_node.Text = $"Error querying COM interfaces - {ex.Message}";
+            success = false;
         }
+
+        /* Added */
+        // If oleviewdotnet failed to extract interfaces from class,
+        // will create FindInterfaceForm and runs FindInterface.exe, FindInterfaceInproc.exe to find interface.
+        // FindInterface.exe will call CoCreateInstance(CLSCTX_LOCAL_SERVER) with iids registered in HKEY_CLASSES_ROOT\Interface.
+        // FindInterfaceInproc.exe will call CoCreateInstance(CLSCTX_INPROC_SERVER) with iids registered in HKEY_CLASSES_ROOT\Interface.
+
+        if (success == false || clsid.Interfaces.Count() < 2)
+        {
+            this.findInterfaceForm = new FindInterfaceForm();
+            Thread uiThread = new Thread(StartFindInterfaceForm);
+            uiThread.Start();
+
+            findInterfaceForm.UpdateLabel1($"Finding Interface for CLSID {clsid.Clsid.ToString()}");
+            findInterfaceForm.UpdateLabel5("Waiting");
+            findInterfaceForm.UpdateLabel6("Waiting");
+            Application.DoEvents();
+
+            Thread inProcThread = new Thread(RunFindInterface);
+            Thread localThread = new Thread(RunFindInterface);
+
+            inProcThread.Start((true, clsid));
+            localThread.Start((false, clsid));
+
+            inProcThread.Join();
+            localThread.Join();
+
+            if (findInterfaceForm.inProcRetval != 0 && findInterfaceForm.localRetval != 0)
+            {
+                wait_node.Text = $"Failed to find interfaces.";
+                if (File.Exists("now.local")) File.Delete("now.local");
+                if (File.Exists("now.inproc")) File.Delete("now.inproc");
+                Thread.Sleep(1000);
+                findInterfaceForm.Close();
+                return;
+            }
+            node.Nodes.Clear();
+            if (findInterfaceForm.inProcRetval == 0)
+            {
+                using (StreamReader reader = new StreamReader("now.inproc"))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) break;
+                        Guid guid = new Guid(line);
+                        COMInterfaceInstance comInterfaceInstance = new COMInterfaceInstance(guid, m_registry);
+                        node.Nodes.Add(CreateInterfaceNameNode(m_registry, m_registry.MapIidToInterface(comInterfaceInstance.Iid), comInterfaceInstance));
+                        using (StreamWriter writer = new StreamWriter($"interfaces\\iids\\{comInterfaceInstance.Iid}.txt"))
+                        {
+                            writer.Write(clsid.Clsid.ToString());
+                        }
+                    }
+                }
+            }
+            else if (findInterfaceForm.localRetval == 0)
+            {
+                using (StreamReader reader = new StreamReader("now.local"))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) break;
+                        Guid guid = new Guid(line);
+                        COMInterfaceInstance comInterfaceInstance = new COMInterfaceInstance(guid, m_registry);
+                        node.Nodes.Add(CreateInterfaceNameNode(m_registry, m_registry.MapIidToInterface(comInterfaceInstance.Iid), comInterfaceInstance));
+                        using (StreamWriter writer = new StreamWriter($"interfaces\\iids\\{comInterfaceInstance.Iid}.txt"))
+                        {
+                            writer.Write(clsid.Clsid.ToString());
+                        }
+                    }
+                }
+            }
+            if (File.Exists("now.local")) File.Delete("now.local");
+            if (File.Exists("now.inproc")) File.Delete("now.inproc");
+            Thread.Sleep(1000);
+            findInterfaceForm.Close();
+        }
+        else node.Nodes.Remove(wait_node);
+        /* Added */
     }
+
+    /* Add */
+    // UI Thread for FindInterface Form.
+    public void RunFindInterface(object obj)
+    {
+        var data = ((bool isInproc, ICOMClassEntry clsid))obj;
+        bool isInproc = data.isInproc;
+        ICOMClassEntry clsid = data.clsid;
+
+        Thread repeatThread = new Thread(findInterfaceForm.RepeatUpdateLabel);
+        repeatThread.Start(isInproc);
+        Process process = new Process();
+        if (isInproc) process.StartInfo.FileName = "FindInterfaceInproc.exe";
+        else process.StartInfo.FileName = "FindInterface.exe";
+        process.StartInfo.Arguments = $"{{{clsid.Clsid.ToString()}}}";
+        process.StartInfo.CreateNoWindow = true;
+        process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+        try
+        {
+            process.Start();
+            process.WaitForExit();
+        }
+        catch
+        {
+        }
+        int exitCode = process.ExitCode;
+        process.Close();
+        process.Dispose();
+
+        Thread.Sleep(100);
+        repeatThread.Abort();
+
+        if (exitCode == 0)
+        {
+            if (isInproc) findInterfaceForm.UpdateLabel6("Success");
+            else findInterfaceForm.UpdateLabel5("Success");
+        }
+        else if (exitCode == -1)
+        {
+            if (isInproc) findInterfaceForm.UpdateLabel6("Error: TIMEOUT");
+            else findInterfaceForm.UpdateLabel5("Error: TIMEOUT");
+        }
+        else if (exitCode == -286331154)
+        {
+            if (isInproc) findInterfaceForm.UpdateLabel6("Error: UNKNOWN");
+            else findInterfaceForm.UpdateLabel5("Error: UNKNOWN");
+        }
+        else if (exitCode == -2147467262)
+        {
+            if (isInproc) findInterfaceForm.UpdateLabel6("Error: No matching interface.");
+            else findInterfaceForm.UpdateLabel5("Error: No matching interface.");
+        }
+        else if (exitCode > 0)
+        {
+            if (isInproc) findInterfaceForm.UpdateLabel6($"Error: LastErrorValue {exitCode}");
+            findInterfaceForm.UpdateLabel5($"Error: LastErrorValue {exitCode}");
+        }
+        Application.DoEvents();
+        if (isInproc) findInterfaceForm.inProcRetval = exitCode;
+        else findInterfaceForm.localRetval = exitCode;
+    }
+
+    public FindInterfaceForm findInterfaceForm;
+
+    void StartFindInterfaceForm()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+
+        Application.Run(findInterfaceForm);
+    }
+
+    /* Add */
 
     private static void AddTypeLibNodes(TreeNode node, IEnumerable<COMTypeLibTypeInfo> types, string category, string image_key)
     {
@@ -2454,6 +2644,71 @@ internal partial class COMRegistryViewer : UserControl
     : this(reg, COMRegistryDisplayMode.ProxyCLSIDs, CreateProxyNodes(proxy),
           new[] { FilterType.TypeLibTypeInfo }, proxy.Path, visible_type)
     {
+        /* Added */
+        // When we open class folder in Local Service tab or something,
+        // this will create <iid>.txt and write clsid in "iids\" directory to use ResolveMethod.
+        // And also, when we use "View Proxy Library", this will create <iid>.txt and write idl in "sequence\now" directory to use CallSequence.
+
+        String fileName = Path.GetFileName(proxy.Path);
+        String path = $"interfaces\\{fileName}.txt";
+        if (File.Exists(path)) File.Delete(path);
+        sourceCodeViewerControl.ChangeToCpp();
+        var tempNode = CreateNode("temp", ClassKey, proxy.ComplexTypes.Where(t => !t.IsUnion));
+        tempNode = CreateNode("temp", FolderKey, proxy.Entries);
+        tempNode.Nodes.AddRange(proxy.Entries.Select(type=>CreateNode(type.Name, "temp", type)).ToArray());
+        if (!Directory.Exists("interfaces\\sequence")) Directory.CreateDirectory("interfaces\\sequence");
+        using (StreamWriter writer = new StreamWriter(path, append: true))
+        {
+            writer.WriteLine(proxy.Path);
+            String clsid = null;
+            sourceCodeViewerControl.m_isReally = false;
+            foreach (TreeNode nowNode in tempNode.Nodes)
+            {
+                sourceCodeViewerControl.SelectedObject = nowNode?.Tag;
+
+                if (File.Exists($"interfaces\\iids\\{sourceCodeViewerControl.GetIid()}.txt"))
+                {
+                    using (StreamReader reader = new StreamReader($"interfaces\\iids\\{sourceCodeViewerControl.GetIid()}.txt"))
+                    {
+                        clsid = reader.ReadToEnd();
+                        break;
+                    }
+                }
+            }
+            String[] fileNames = Directory.GetFiles("interfaces\\sequence");
+
+            foreach (String file in fileNames)
+            {
+                File.Delete(file);
+            }
+            using (StreamWriter tempwriter = new StreamWriter($"interfaces\\sequence\\now"))
+            {
+                tempwriter.Write(proxy.Path);
+            }
+            foreach (TreeNode nowNode in tempNode.Nodes)
+            {
+                sourceCodeViewerControl.SelectedObject = nowNode?.Tag;
+                using (StreamWriter tempwriter = new StreamWriter($"interfaces\\sequence\\{sourceCodeViewerControl.GetIid()}.txt"))
+                {
+                    tempwriter.Write(sourceCodeViewerControl.Format());
+                }
+            }
+            if (clsid != null)
+            {
+                foreach (TreeNode nowNode in tempNode.Nodes)
+                {
+                    sourceCodeViewerControl.SelectedObject = nowNode?.Tag;
+                    if (File.Exists($"interfaces\\iids\\{sourceCodeViewerControl.GetIid()}.txt")) File.Delete($"interfaces\\iids\\{sourceCodeViewerControl.GetIid()}.txt");
+                    using (StreamWriter tempwriter = new StreamWriter($"interfaces\\iids\\{sourceCodeViewerControl.GetIid()}.txt"))
+                    {
+                        tempwriter.Write(clsid);
+                    }
+                }
+            }
+            sourceCodeViewerControl.m_isReally = true;
+        }
+
+        /* Added */
     }
     #endregion
 }

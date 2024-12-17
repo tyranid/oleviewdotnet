@@ -58,6 +58,19 @@ public static class ProgramSettings
         [DataMember]
         public bool SaveProxyNamesOnExit { get; set; }
 
+        /* Added */
+        [DataMember]
+        public bool ResolveMethodNamesFromIDA { get; set; }
+        [DataMember]
+        public bool ResolveMethodNamesFromIDAHard { get; set; }
+        [DataMember]
+        public bool ResolveMethodDllFix { get; set; }
+        [DataMember]
+        public String FixedDll { get; set; }
+        [DataMember]
+        public String IDAPath { get; set; }
+        /* Added */
+
         public static ConfigFile Load()
         {
             try
@@ -178,6 +191,43 @@ public static class ProgramSettings
         get => _config.Value.ParseActivationContext;
         set => _config.Value.ParseActivationContext = value;
     }
+
+    /* Added */
+    // This setting is for ResolveMethod.
+    public static bool ResolveMethodNamesFromIDA
+    {
+        get => _config.Value.ResolveMethodNamesFromIDA;
+        set => _config.Value.ResolveMethodNamesFromIDA = value;
+    }
+
+    // This setting is for ResolveMethod(Hard).
+    // If this setting is enabled, oleviewdotnet will get imported DLL/EXE list from service process and analyze all.
+    public static bool ResolveMethodNamesFromIDAHard
+    {
+        get => _config.Value.ResolveMethodNamesFromIDAHard;
+        set => _config.Value.ResolveMethodNamesFromIDAHard = value;
+    }
+
+    // This setting is for ResolveMethod(Fixed).
+    // If this setting is enabled, oleviewdotnet will analyze fixed DLL/EXE only.
+    public static bool ResolveMethodDllFix
+    {
+        get => _config.Value.ResolveMethodDllFix;
+        set => _config.Value.ResolveMethodDllFix = value;
+    }
+
+    public static String FixedDll
+    {
+        get => _config.Value.FixedDll;
+        set => _config.Value.FixedDll = value;
+    }
+
+    public static String IDAPath
+    {
+        get => _config.Value.IDAPath;
+        set => _config.Value.IDAPath = value;
+    }
+    /* Added */
 
     public static bool AlwaysShowSourceCode
     {

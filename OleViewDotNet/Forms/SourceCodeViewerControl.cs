@@ -24,6 +24,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
+/* Added */
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.ServiceProcess;
+using System.Threading;
+using System.Threading.Tasks;
+/* Added */
+
 namespace OleViewDotNet.Forms;
 
 internal partial class SourceCodeViewerControl : UserControl
@@ -35,6 +44,10 @@ internal partial class SourceCodeViewerControl : UserControl
     private bool m_hide_comments;
     private bool m_interfaces_only;
     private bool m_hide_parsing_options;
+
+    /* Added */
+    public bool m_isReally = true;
+    /* Added */
 
     private class NdrTextMarker : TextMarker
     {
@@ -71,6 +84,15 @@ internal partial class SourceCodeViewerControl : UserControl
         textEditor.Refresh();
     }
 
+    /* Added */
+    // This is for SetText without texteditor's tag. (from oleviewdotnet v1.14)
+    private void SetText(string text)
+    {
+        textEditor.Text = text.TrimEnd();
+        textEditor.Refresh();
+    }
+    /* Added */
+
     internal void SetRegistry(COMRegistry registry)
     {
         m_registry = registry;
@@ -97,7 +119,14 @@ internal partial class SourceCodeViewerControl : UserControl
         }
     }
 
-    internal void Format()
+    /* Added */
+    ResolvingForm resolvingForm = null;
+
+    /* Added */
+
+
+    //internal void Format()
+    internal String Format()
     {
         COMSourceCodeBuilder builder = new(m_registry)
         {
@@ -115,9 +144,364 @@ internal partial class SourceCodeViewerControl : UserControl
             builder.AppendLine(m_selected_obj is null ?
                 "No formattable object selected"
                 : $"'{m_selected_obj}' is not formattable.");
+            SetText(builder.ToString(), builder.Tags);
+            return builder.ToString();
         }
-        SetText(builder.ToString(), builder.Tags);
+        /* Added */
+
+        // below code is for ResolveMethod.
+        if (ResolveMethod.banList == null) ResolveMethod.BanListInit();
+
+        if (builder.ToString().StartsWith("ERROR:") ||
+            builder.ToString().Split('\n')[0].StartsWith("struct") || builder.ToString().Split('\n')[1].StartsWith("struct") ||
+            builder.ToString().Split('\n')[0].StartsWith("union") || builder.ToString().Split('\n')[1].StartsWith("union") ||
+            builder.ToString().Split('\n')[0].StartsWith("[switch_type") || builder.ToString().Split('\n')[1].StartsWith("[switch_type") ||
+            builder.ToString().Split('\n')[0].Contains("needs to be parsed"))
+        {
+            SetText(builder.ToString(), builder.Tags);
+            return builder.ToString();
+        }
+
+        if (!m_isReally || (!ProgramSettings.ResolveMethodNamesFromIDA && !ProgramSettings.ResolveMethodNamesFromIDAHard) ||
+            GetIid() == "00000001-0000-0000-C000-000000000046")
+        {
+            SetText(builder.ToString(), builder.Tags);
+            return builder.ToString();
+        }
+
+        String resultIDL = "";
+
+        List<String> binaryPath = new List<string>();
+
+        if (ProgramSettings.ResolveMethodDllFix)
+        {
+            if (!File.Exists(ProgramSettings.FixedDll))
+            {
+                ProgramSettings.ResolveMethodDllFix = false;
+                SetText(builder.ToString(), builder.Tags);
+                return builder.ToString();
+            }
+            binaryPath.Add(ProgramSettings.FixedDll);
+        }
+        else
+        {
+            String serviceName = GetServiceName();
+            if (serviceName == null)
+            {
+                resultIDL = "// Resolve Failed. Failed to get service name.\n" + builder.ToString();
+                SetText(resultIDL);
+                return resultIDL;
+            }
+            String binary = ResolveMethod.GetBinaryPath(serviceName);
+            if (binary == null)
+            {
+                resultIDL = "// Resolve Failed. Failed to get binary path.\n" + builder.ToString();
+                SetText(resultIDL);
+                return resultIDL;
+            }
+            binaryPath.Add(binary);
+        }
+        resultIDL = Resolve(builder.ToString(), binaryPath);
+
+        if (resultIDL == null)
+        {
+            binaryPath.Clear();
+            if (ProgramSettings.ResolveMethodNamesFromIDAHard)
+            {
+
+                String serviceName = GetServiceName();
+                if (serviceName == null)
+                {
+                    resultIDL = "// Resolve Failed. Failed to get service name.\n" + builder.ToString();
+                    SetText(resultIDL);
+                    return resultIDL;
+                }
+                int pid = GetServicePid(serviceName);
+                if (pid == -1)
+                {
+                    resultIDL = "// Resolve Hard Failed. Failed to find service pid.\n" + builder.ToString();
+                    SetText(resultIDL);
+                    return resultIDL;
+                }
+
+                Process process = Process.GetProcessById(pid);
+                if (process == null)
+                {
+                    return builder.ToString();
+                }
+                try
+                {
+                    for (int i = 0; i < process.Modules.Count; i++)
+                    {
+                        bool flag = true;
+                        for (int j = 0; j < ResolveMethod.banList.Count; j++)
+                        {
+                            if (Path.GetFileName(ResolveMethod.banList[j]).ToLower()
+                                == Path.GetFileName(process.Modules[i].FileName).ToLower())
+                            {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag) binaryPath.Add(process.Modules[i].FileName);
+                    }
+                }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                    resultIDL = "// Resolve Hard Failed. Access Denied.\n" + builder.ToString();
+                    SetText(resultIDL);
+                    return resultIDL;
+                }
+                resultIDL = Resolve(builder.ToString(), binaryPath);
+            }
+        }
+
+        if (resultIDL == null)
+        {
+            resultIDL = $"// Resolve Failed.\n";
+            resultIDL += builder.ToString();
+        }
+
+        SetText(resultIDL);
+        return resultIDL;
     }
+
+    /* Added */
+    // Finds method name with ResolveMethod, changes method name from Proc{n} to real method name and returns it.
+    internal String Resolve(String idl, List<String> binaryPath)
+    {
+        if (ProgramSettings.IDAPath == null || !File.Exists(ProgramSettings.IDAPath)) ProgramSettings.IDAPath = ResolveMethod.GetIDAT();
+        if (binaryPath.Count == 0) return null;
+        resolvingForm = new ResolvingForm(binaryPath);
+        Thread uiThread = new Thread(StartResolvingForm);
+        uiThread.Start();
+        
+        List<List<List<String>>> candidates = new List<List<List<String>>>();
+        String resultIDL = "";
+
+        for (int i = 0; i < binaryPath.Count; i++)
+        {
+            if (i < binaryPath.Count && resolvingForm.resolveDone)
+            {
+                return null;
+            }
+            resolvingForm.Update($"Trying to resolve from {Path.GetFileName(binaryPath[i])} ({i+1}/{binaryPath.Count})", $"Generating ASM File...");
+            if (!ResolveMethod.GenerateAsmFile(binaryPath[i]))
+            {
+                resolvingForm.Update(null, null);
+                resolvingForm.Update(null, null);
+                Application.DoEvents();
+                continue;
+            }
+
+            if (resolvingForm.resolveDone)
+            {
+                String[] files = Directory.GetFiles("DLLs", Path.GetFileName(binaryPath[i]) + "*");
+
+                foreach (String file in files)
+                {
+                    File.Delete(file);
+                }
+                return null;
+            }
+
+            resolvingForm.Update(null, $"Searching VTables...");
+            Application.DoEvents();
+
+            List<List<String>> methods = ResolveMethod.GetMethodsFromIDA(binaryPath[i], idl);
+            List<List<String>> methods2 = ResolveMethod.GetMethodsFromCandidates(binaryPath[i], idl);
+            foreach (List<String> method in methods2) methods.Add(method);
+
+            resolvingForm.Update(null, $"Converting Method Names...");
+            Application.DoEvents();
+
+            if (methods.Count > 0)
+            {
+                candidates.Add(methods);
+                resultIDL += $"// {binaryPath[i]}\n";
+                for (int j = 0; j < methods.Count; j++)
+                {
+                    resultIDL += $"// Candidates {j + 1}\n";
+                    resultIDL += ResolveMethod.ConvertMethodName(idl, methods[j]);
+                }
+            }
+            
+        }
+        resolvingForm.Close();
+
+        if (candidates.Count == 0)
+        {
+            resultIDL = null;
+        }
+        return resultIDL;
+    }
+
+    // For UI thread.
+    internal void StartResolvingForm()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+
+        Application.Run(resolvingForm);
+    }
+
+    // Get iid from interface idl.
+    internal String GetIid()
+    {
+        COMSourceCodeBuilder builder = new(m_registry)
+        {
+            InterfacesOnly = m_interfaces_only,
+            HideComments = m_hide_comments,
+            OutputType = m_output_type
+        };
+
+        if (m_formattable_obj?.IsFormattable == true)
+        {
+            Format(builder, m_formattable_obj);
+        }
+        else
+        {
+            return null;
+        }
+
+        String now = builder.ToString();
+        if (now[0] == '[')
+        {
+            String[] nows = now.Split('\n');
+            for (int i = 0; i < nows.Length; i++)
+            {
+                if (nows[i].Contains("uuid"))
+                {
+                    return nows[i].Split('(')[1].Split(')')[0];
+                }
+            }
+        }
+        else
+        {
+            return now.Split('\"')[1];
+        }
+        return null;
+    }
+
+    // Get iid by GetIid method and get service name from Registry.(HKEY_CLASSES_ROOT\CLSID)
+    internal String GetServiceName()
+    {
+        string clsid = null;
+        try
+        {
+            using (StreamReader reader = new StreamReader($"interfaces\\iids\\{this.GetIid()}.txt"))
+            {
+                clsid = reader.ReadToEnd();
+            }
+        }
+        catch (Exception e) { return null; }
+        string regKey = $"CLSID\\{{{clsid}}}";
+        String appId = null;
+        try
+        {
+            using (RegistryKey key = Registry.ClassesRoot.OpenSubKey(regKey))
+            {
+                if (key != null)
+                {
+                    object appIdValue = key.GetValue("AppID");
+                    if (appIdValue != null)
+                    {
+                        appId = appIdValue.ToString();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+
+        if (appId == null) return null;
+        regKey = $"AppID\\{appId}";
+        try
+        {
+            using (RegistryKey key = Registry.ClassesRoot.OpenSubKey(regKey))
+            {
+                if (key != null)
+                {
+                    object serviceName = key.GetValue("LocalService");
+                    if (serviceName != null)
+                    {
+                        return serviceName.ToString();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+        return null;
+    }
+
+    // Find pid of service.
+    internal int GetServicePid(String serviceName)
+    {
+        string query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name LIKE '{serviceName}%'";
+        using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
+        {
+            foreach (var obj in searcher1.Get())
+            {
+                
+                try
+                {
+                    ServiceController service = new ServiceController((String)obj["Name"]);
+
+                    if (service.Status == ServiceControllerStatus.Stopped)
+                    {
+                        service.Start();
+                        service.WaitForStatus(ServiceControllerStatus.Running);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }
+            using (var searcher2 = new System.Management.ManagementObjectSearcher(query)) {
+                foreach (var obj in searcher2.Get())
+                {
+                    return Convert.ToInt32(obj["ProcessId"]);
+                }
+            }
+        }
+        query = $"SELECT Name,ProcessId FROM Win32_Service WHERE Name='{serviceName}'";
+        using (var searcher1 = new System.Management.ManagementObjectSearcher(query))
+        {
+            foreach (var obj in searcher1.Get())
+            {
+                try
+                {
+                    ServiceController service = new ServiceController((String)obj["Name"]);
+
+                    if (service.Status == ServiceControllerStatus.Stopped)
+                    {
+                        service.Start();
+                        service.WaitForStatus(ServiceControllerStatus.Running);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }
+            using (var searcher2 = new System.Management.ManagementObjectSearcher(query))
+            {
+                foreach (var obj in searcher2.Get())
+                {
+                    return Convert.ToInt32(obj["ProcessId"]);
+                }
+            }
+        }
+        return -1;
+    }
+
+    /* Added */
 
     internal object SelectedObject
     {
