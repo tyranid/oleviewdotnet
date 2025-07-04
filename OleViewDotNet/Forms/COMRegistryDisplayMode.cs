@@ -27,6 +27,7 @@ internal enum COMRegistryDisplayMode
     CLSIDsByServer,
     CLSIDsByLocalServer,
     CLSIDsWithSurrogate,
+    CLSIDsAsInteractiveUser,
     Interfaces,
     InterfacesByName,
     ImplementedCategories,
