@@ -381,6 +381,10 @@ internal partial class MainForm : Form
     {
         OpenView(COMRegistryDisplayMode.CLSIDsWithSurrogate);
     }
+    private void menuViewCLSIDsAsInteractiveUser_Click(object sender, EventArgs e)
+    {
+        OpenView(COMRegistryDisplayMode.CLSIDsAsInteractiveUser);
+    }
 
     private void menuFileOpen32BitViewer_Click(object sender, EventArgs e)
     {

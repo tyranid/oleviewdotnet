@@ -98,6 +98,7 @@ internal partial class COMRegistryViewer : UserControl
             COMRegistryDisplayMode.CLSIDsByServer => "CLSIDs by Server",
             COMRegistryDisplayMode.CLSIDsByLocalServer => "CLSIDs by Local Server",
             COMRegistryDisplayMode.CLSIDsWithSurrogate => "CLSIDs with Surrogate",
+            COMRegistryDisplayMode.CLSIDsAsInteractiveUser => "CLSIDs as Interactive User",
             COMRegistryDisplayMode.Interfaces => "Interfaces",
             COMRegistryDisplayMode.InterfacesByName => "Interfaces by Name",
             COMRegistryDisplayMode.ImplementedCategories => "Implemented Categories",
@@ -135,6 +136,7 @@ internal partial class COMRegistryViewer : UserControl
             case COMRegistryDisplayMode.CLSIDsByServer:
             case COMRegistryDisplayMode.CLSIDsByLocalServer:
             case COMRegistryDisplayMode.CLSIDsWithSurrogate:
+            case COMRegistryDisplayMode.CLSIDsAsInteractiveUser:
             case COMRegistryDisplayMode.ProxyCLSIDs:
                 filter_types.Add(FilterType.CLSID);
                 filter_types.Add(FilterType.Server);
@@ -244,6 +246,8 @@ internal partial class COMRegistryViewer : UserControl
                     return LoadCLSIDByServer(registry, ServerType.Local);
                 case COMRegistryDisplayMode.CLSIDsWithSurrogate:
                     return LoadCLSIDByServer(registry, ServerType.Surrogate);
+                case COMRegistryDisplayMode.CLSIDsAsInteractiveUser:
+                    return LoadCLSIDByServer(registry, ServerType.InteractiveUser);
                 case COMRegistryDisplayMode.Interfaces:
                     return LoadInterfaces(registry, false, false);
                 case COMRegistryDisplayMode.InterfacesByName:
@@ -566,6 +570,7 @@ internal partial class COMRegistryViewer : UserControl
         None,
         Local,
         Surrogate,
+        InteractiveUser,
         Proxies,
     }
 
@@ -611,7 +616,10 @@ internal partial class COMRegistryViewer : UserControl
             {
                 clsids = clsids.Where(c => IsProxyClsid(registry, c));
             }
-
+            else if (serverType == ServerType.InteractiveUser)
+            {
+                clsids = clsids.Where(c => c.IsInteractiveUser);
+            }
             foreach (COMCLSIDEntry entry in clsids)
             {
                 foreach (COMCLSIDServerEntry server in entry.Servers.Values)
