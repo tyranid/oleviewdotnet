@@ -23,5 +23,7 @@ namespace OleViewDotNet.Interop;
 struct PARAMDESCEX
 {
     public int cBytes;
-    public IntPtr varDefaultValue;
+    // PARAMDESCEX embeds a VARIANT, not a pointer to one. Its 8-byte
+    // alignment is required even in a 32-bit process.
+    public VARIANTARG varDefaultValue;
 }
